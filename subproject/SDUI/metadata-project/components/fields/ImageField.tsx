@@ -20,8 +20,10 @@ const ImageField = memo(({ meta, pageData, ...rest }: any) => {
 
     // 3. 이미지 경로 및 파일명 처리
     const label = meta?.label_text || meta?.labelText || "";
-    // URL 인코딩 처리 (공백 등 특수문자 처리)
-    const encodedLabel = label ? encodeURIComponent(label) : "";
+    // 슬래시는 경로 구분자이므로 각 세그먼트만 인코딩
+    const encodedLabel = label
+        ? label.split('/').map((seg: string) => encodeURIComponent(seg)).join('/')
+        : "";
     const imagePath = encodedLabel ? `/img/${encodedLabel}` : "/img/default.png";
 
     // 이미지 크기 설정 (ui_metadata의 inline_style에서 width/height 추출 가능)

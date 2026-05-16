@@ -291,3 +291,26 @@
 .header-ai-btn.en { background: #d1fae5; color: #065f46; }
 .header-ai-btn.en:hover, .header-ai-btn.en.active { background: #a7f3d0; }
 .header-ai-btn.en .ai-badge { background: #065f46; color: white; }
+
+/* ==========================================
+   KRIDE 전체화면 모드 (온보딩 + 지도 화면)
+   ========================================== */
+.kride-fullscreen {
+    background: #000;
+}
+.kride-fullscreen .main-contents-area {
+    width: 100%;
+}
+.kride-fullscreen .page-view-container {
+    padding: 0;
+    margin: 0;
+}
+.kride-fullscreen .engine-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+}
+.kride-fullscreen .content-area {
+    min-height: 100vh;
+}

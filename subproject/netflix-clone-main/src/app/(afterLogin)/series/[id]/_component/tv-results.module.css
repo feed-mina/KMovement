@@ -1,8 +1,0 @@
-.results {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-evenly;
-}
-.results a {
-  padding: 5px;
-}

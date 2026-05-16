@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 280" fill="none">
+  <!-- 배경 그라디언트 -->
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#1a0a2e"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <radialGradient id="spotGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff2d55" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ff2d55" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="planeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e0d0ff"/>
+    </linearGradient>
+    <linearGradient id="stageGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff2d55"/>
+      <stop offset="100%" stop-color="#c0005a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="360" height="280" fill="url(#bgGlow)"/>
+  <ellipse cx="180" cy="140" rx="140" ry="100" fill="url(#spotGlow)"/>
+
+  <!-- 별 / 파티클 -->
+  <circle cx="40"  cy="30"  r="1.5" fill="white" opacity="0.7"/>
+  <circle cx="90"  cy="15"  r="1"   fill="white" opacity="0.5"/>
+  <circle cx="150" cy="22"  r="1.5" fill="white" opacity="0.8"/>
+  <circle cx="220" cy="10"  r="1"   fill="white" opacity="0.6"/>
+  <circle cx="290" cy="25"  r="1.5" fill="white" opacity="0.7"/>
+  <circle cx="330" cy="50"  r="1"   fill="#ff2d55" opacity="0.8"/>
+  <circle cx="320" cy="14"  r="1.5" fill="white" opacity="0.5"/>
+  <circle cx="60"  cy="60"  r="1"   fill="#a78bfa" opacity="0.7"/>
+  <circle cx="18"  cy="90"  r="1.5" fill="white" opacity="0.4"/>
+  <circle cx="340" cy="90"  r="1"   fill="white" opacity="0.6"/>
+  <circle cx="250" cy="50"  r="1.5" fill="#fbbf24" opacity="0.6"/>
+
+  <!-- 비행기 (오른쪽 위) -->
+  <g transform="translate(268, 38) rotate(-25)">
+    <path d="M0 0 L22 -5 L22 5 Z" fill="url(#planeGrad)" opacity="0.9"/>
+    <path d="M8 -5 L14 -13 L18 -5 Z" fill="white" opacity="0.7"/>
+    <path d="M8 5 L14 13 L18 5 Z" fill="white" opacity="0.7"/>
+    <path d="M0 -1 L-8 -4 L-6 0 L-8 4 L0 1 Z" fill="white" opacity="0.6"/>
+    <!-- 비행운 -->
+    <line x1="-8" y1="0" x2="-40" y2="0" stroke="white" stroke-width="1.5" stroke-opacity="0.3" stroke-dasharray="4 3"/>
+  </g>
+
+  <!-- 무대 / 공연 조명 -->
+  <ellipse cx="180" cy="215" rx="120" ry="12" fill="#ff2d55" opacity="0.15"/>
+
+  <!-- 조명 빔 왼쪽 -->
+  <polygon points="130,215 90,130 110,130" fill="#fbbf24" opacity="0.08"/>
+  <!-- 조명 빔 오른쪽 -->
+  <polygon points="230,215 250,130 270,130" fill="#a78bfa" opacity="0.08"/>
+  <!-- 조명 빔 중앙 -->
+  <polygon points="165,215 155,100 205,100 195,215" fill="#ff2d55" opacity="0.07"/>
+
+  <!-- 무대 플랫폼 -->
+  <rect x="60" y="208" width="240" height="10" rx="5" fill="url(#stageGrad)" opacity="0.7"/>
+  <rect x="80" y="218" width="200" height="4" rx="2" fill="#c0005a" opacity="0.5"/>
+
+  <!-- 인물 실루엣 3명 -->
+  <!-- 왼쪽 -->
+  <g transform="translate(120, 155)" opacity="0.9">
+    <circle cx="0" cy="-40" r="9" fill="#1a0a2e" stroke="#ff2d55" stroke-width="1.5"/>
+    <path d="M-10 0 Q0 -28 10 0" fill="#1a0a2e" stroke="#ff2d55" stroke-width="1.5"/>
+    <line x1="-14" y1="-18" x2="-22" y2="-6" stroke="#ff2d55" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="14" y1="-18" x2="20" y2="-32" stroke="#ff2d55" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="-5" y1="0" x2="-8" y2="16" stroke="#ff2d55" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="5" y1="0" x2="8" y2="16" stroke="#ff2d55" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+  <!-- 중앙 (조금 앞으로, 더 크게) -->
+  <g transform="translate(180, 148)" opacity="1">
+    <circle cx="0" cy="-44" r="11" fill="#1a0a2e" stroke="#ffffff" stroke-width="2"/>
+    <path d="M-12 0 Q0 -32 12 0" fill="#1a0a2e" stroke="#ffffff" stroke-width="2"/>
+    <line x1="-16" y1="-20" x2="-26" y2="-36" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <line x1="16" y1="-20" x2="26" y2="-8" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-6" y1="0" x2="-9" y2="18" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <line x1="6" y1="0" x2="9" y2="18" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <!-- 마이크 -->
+    <circle cx="27" cy="-7" r="4" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+    <line x1="27" y1="-3" x2="27" y2="4" stroke="#fbbf24" stroke-width="1.5"/>
+  </g>
+  <!-- 오른쪽 -->
+  <g transform="translate(240, 155)" opacity="0.9">
+    <circle cx="0" cy="-40" r="9" fill="#1a0a2e" stroke="#a78bfa" stroke-width="1.5"/>
+    <path d="M-10 0 Q0 -28 10 0" fill="#1a0a2e" stroke="#a78bfa" stroke-width="1.5"/>
+    <line x1="-14" y1="-18" x2="-20" y2="-32" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="14" y1="-18" x2="22" y2="-6" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="-5" y1="0" x2="-8" y2="16" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="5" y1="0" x2="8" y2="16" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- 음표들 -->
+  <g fill="#fbbf24" opacity="0.7">
+    <text x="48" y="145" font-size="18" font-family="serif">♪</text>
+    <text x="295" y="130" font-size="14" font-family="serif">♫</text>
+    <text x="75" y="110" font-size="12" font-family="serif">♩</text>
+  </g>
+
+  <!-- 지도 핀 (여행 아이콘) -->
+  <g transform="translate(310, 155)">
+    <path d="M0 0 C-12 -12 -12 -30 0 -30 C12 -30 12 -12 0 0Z" fill="#ff2d55" opacity="0.85"/>
+    <circle cx="0" cy="-20" r="5" fill="white" opacity="0.9"/>
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#ff2d55" stroke-width="1.5" opacity="0.5"/>
+  </g>
+
+  <!-- 반짝임 -->
+  <g fill="#fbbf24" opacity="0.8">
+    <path d="M55 170 L57 165 L59 170 L64 172 L59 174 L57 179 L55 174 L50 172 Z"/>
+    <path d="M295 70 L296.5 66 L298 70 L302 71.5 L298 73 L296.5 77 L295 73 L291 71.5 Z" opacity="0.6"/>
+  </g>
+  <g fill="white" opacity="0.5">
+    <path d="M28 140 L29 137 L30 140 L33 141 L30 142 L29 145 L28 142 L25 141 Z"/>
+  </g>
+</svg>

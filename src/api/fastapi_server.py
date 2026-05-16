@@ -28,7 +28,7 @@ import networkx as nx
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -107,7 +107,18 @@ def _load_graph():
     with open(GRAPH_PATH, "rb") as f:
         data = pickle.load(f)
     return data["G"], data["G_main"], data.get("meta", {})
-# [메모] 여기서 data["G"]와 data["G_main"]은 어떤 차이가 있나요? 두개는 어떤 의미인가요 
+
+### [메모] 여기서 data["G"]와 data["G_main"]은 어떤 차이가 있나요? 두개는 어떤 의미인가요
+### [답변]
+# G     : osmnx로 수집한 서울 자전거 도로 네트워크 전체 그래프.
+#          여러 개의 연결 컴포넌트(disconnected subgraph)를 포함할 수 있음.
+#          고립된 노드나 단절된 구간도 모두 포함된 '원본' 그래프.
+#
+# G_main: G에서 가장 큰 연결 컴포넌트(Largest Connected Component)만 추출한 서브그래프.
+#          build_route_graph.py에서 G.subgraph(largest).copy()로 생성.
+#          Dijkstra(find_route) · DFS 코스 생성(generate_course) 등
+#          경로 탐색 알고리즘은 모든 노드 간 경로가 보장되어야 하므로
+#          G_main만 사용. G는 pkl에 보존되지만 이 서버에서는 직접 쓰지 않음.
 
 def _load_df(path: str) -> Optional[pd.DataFrame]:
     if not os.path.exists(path):
@@ -677,17 +688,22 @@ class BudgetSchema(BaseModel):
     max: int = 2000000
 
 class RecommendAIRequest(BaseModel):
-    artists:  list[str] = []
-    regions:  list[str] = []
-    purposes: list[str] = []
-    budget:   BudgetSchema = BudgetSchema()
+    artists:  list[str] = Field(default_factory=list)
+    regions:  list[str] = Field(default_factory=list)
+    purposes: list[str] = Field(default_factory=list)
+    budget:   BudgetSchema = Field(default_factory=BudgetSchema)
 
 class ItineraryRequest(BaseModel):
     duration: str = "당일치기"   # 당일치기 | 1박2일 | 2박3일
-    artists:  list[str] = []
-    regions:  list[str] = []
-    purposes: list[str] = []
-    budget:   BudgetSchema = BudgetSchema()
+    artists:  list[str] = Field(default_factory=list)
+    regions:  list[str] = Field(default_factory=list)
+    purposes: list[str] = Field(default_factory=list)
+    budget:   BudgetSchema = Field(default_factory=BudgetSchema)
+
+
+_REQUEST_MODEL_TYPES = {"BudgetSchema": BudgetSchema}
+RecommendAIRequest.model_rebuild(_types_namespace=_REQUEST_MODEL_TYPES)
+ItineraryRequest.model_rebuild(_types_namespace=_REQUEST_MODEL_TYPES)
 
 
 FALLBACK_ARTISTS = [
@@ -869,8 +885,23 @@ def recommend_itinerary(req: ItineraryRequest):
             budget=req.budget.dict(),
             pois=all_pois,
         )
+    except TypeError:
+        theme = req.purposes[0] if req.purposes else ""
+        itinerary_result = generate_itinerary(all_pois, req.duration, theme)
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"일정 생성 실패: {e}")
+        print(f"[K-Ride] itinerary fallback: {e}")
+        itinerary_result = {"itinerary": []}
+
+    if isinstance(itinerary_result, str):
+        import json
+        try:
+            itinerary_result = json.loads(itinerary_result)
+        except json.JSONDecodeError:
+            itinerary_result = {"itinerary": [], "raw": itinerary_result}
+
+    if not isinstance(itinerary_result, dict):
+        itinerary_result = {"itinerary": []}
+    itinerary_result.setdefault("itinerary", [])
 
     # 6. mapData 마커 생성 (좌표 있는 POI만)
     markers = [

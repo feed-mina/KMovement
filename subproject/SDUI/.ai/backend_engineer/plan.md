@@ -558,3 +558,31 @@ testImplementation 'it.ozimov:embedded-redis:0.7.3'
 | 사용자 인증 상태 | ✅ | ⏸️ |
 
 **총 테스트 케이스**: 13개 작성 완료
+
+---
+
+## KRIDE 인트로 화면 레이아웃 수정 — V46 마이그레이션 — 2026-05-17
+
+### 배경
+- V44/V45 적용 후 스크린샷(.ai/memo/0517log) 피드백 반영
+- DB 스키마 변경 없음 — `ui_metadata` css_class / component_type UPDATE만
+
+### 파일
+**`db/migration/V46__intro_layout_fixes.sql`** — 신규
+
+### 변경 내용
+
+| screen_id | component_id | 변경 컬럼 | 변경 내용 |
+|-----------|-------------|---------|---------|
+| KRIDE_INTRO1 | `intro1_title` | `component_type`, `css_class` | `TYPEWRITER_TEXT`으로 변경, `leading-snug` |
+| KRIDE_INTRO1 | `intro1_sub` | `css_class` | `mb-4` 추가 |
+| KRIDE_INTRO1 | `intro1_buttons` | `css_class` | `mt-auto` → `mt-6` |
+| KRIDE_INTRO2 | `intro2_root` | `css_class` | `py-10` → `pt-4 pb-10` |
+| KRIDE_INTRO2 | `intro2_title` | `css_class` | sticky 헤더 (`sticky top-0 bg-black z-10 py-3`) |
+| KRIDE_INTRO2 | `artist_grid` | `css_class` | `place-items-center` 제거 |
+| KRIDE_INTRO3 | `intro3_root` | `css_class` | `py-10` → `pt-4 pb-10` |
+| KRIDE_INTRO3 | `intro3_title` | `css_class` | sticky 헤더 (`sticky top-0 bg-black z-10 py-3`) |
+| KRIDE_INTRO3 | `region_grid` | `css_class` | `flex flex-wrap` → `grid grid-cols-4 gap-3 pb-28` |
+
+### 승인 상태
+- [x] 구현 완료 (날짜: 2026-05-17)

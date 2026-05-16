@@ -42,7 +42,7 @@ except NameError:
     if not os.path.exists(BASE_DIR):
         BASE_DIR = os.getcwd()
 
-MODELS_DIR  = os.path.join(BASE_DIR, "models")
+MODELS_DIR  = os.path.join(BASE_DIR, "dataset", "models")
 FIGURES_DIR = os.path.join(BASE_DIR, "report", "figures")
 os.makedirs(FIGURES_DIR, exist_ok=True)
 

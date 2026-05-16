@@ -3,26 +3,30 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test": "jest"
+    "unitTest": "nyc jest test/",
+    "test": "nyc jest tests/"
   },
   "dependencies": {
     "@stomp/stompjs": "^7.3.0",
     "@tanstack/react-query": "^5.66.0",
+    "@types/leaflet": "^1.9.21",
     "@vercel/analytics": "^2.0.1",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.36.0",
+    "leaflet": "^1.9.4",
     "next": "16.1.3",
     "next-pwa": "^5.6.0",
     "react": "19.2.3",
     "react-datepicker": "^8.0.0",
     "react-daum-postcode": "^3.2.0",
     "react-dom": "19.2.3",
+    "react-leaflet": "^5.0.0",
     "swiper": "^11.2.4"
   },
   "devDependencies": {
@@ -53,5 +57,20 @@
   "overrides": {
     "react": "19.2.3",
     "react-dom": "19.2.3"
+  },
+  "nyc": {
+    "all": true,
+    "include": [
+      "src/**/*.js",
+      "src/**/*.jsx"
+    ],
+    "exclude": [
+      "src/**/*.test.js",
+      "node_modules/**"
+    ],
+    "reporter": [
+      "text",
+      "html"
+    ]
   }
 }

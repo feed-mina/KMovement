@@ -12,7 +12,7 @@ VALUES
 ('KRIDE_INTRO1', 'intro1_buttons', 'GROUP',           '',       4, 'intro1_buttons', 'intro1_root',    'COLUMN', 'flex flex-col gap-4 w-full max-w-xs', NULL, true),
 ('KRIDE_INTRO1', 'btn_day',        'DURATION_BUTTON', '당일치기',  5, NULL,             'intro1_buttons', NULL,     NULL, 'SET_DURATION', true),
 ('KRIDE_INTRO1', 'btn_1n2d',       'DURATION_BUTTON', '1박 2일',  6, NULL,             'intro1_buttons', NULL,     NULL, 'SET_DURATION', true),
-('KRIDE_INTRO1', 'btn_2n3d',       'DURATION_BUTTON', '2박 3일',  7, NULL,             'intro1_buttons', NULL,     NULL, 'SET_DURATION', true);
+('KRIDE_INTRO1', '![1778847076436](image/V40__kride_screens/1778847076436.png)',       'DURATION_BUTTON', '2박 3일',  7, NULL,             'intro1_buttons', NULL,     NULL, 'SET_DURATION', true);
 
 -- =============================================
 -- KRIDE_INTRO2: 아티스트 선택 (Repeater 패턴)

@@ -1,3 +1,6 @@
+@import "tailwindcss";
+@source "../../SDUI-server/src/main/resources/db/migration/*.sql";
+
 @import "./common.css";
 @import "./layout.css";
 @import "./components.css";

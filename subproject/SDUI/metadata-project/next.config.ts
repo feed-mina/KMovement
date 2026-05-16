@@ -51,7 +51,7 @@ const nextConfig: NextConfig = {
                         key: 'Content-Security-Policy',
                         value: [
                             "default-src 'self'",
-                            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://t1.daumcdn.net https://t1.daumcdn.net https://t1.kakaocdn.net https://k.kakaocdn.net https://vercel.live https://*.vercel.app",  // Next.js + Daum/Kakao API + Vercel Live
+                            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://t1.daumcdn.net https://t1.daumcdn.net https://t1.kakaocdn.net https://k.kakaocdn.net https://vercel.live https://*.vercel.app https://va.vercel-scripts.com",  // Next.js + Daum/Kakao API + Vercel Live + Vercel Analytics
                             "style-src 'self' 'unsafe-inline'",                  // Tailwind 인라인 스타일 허용
                             "img-src 'self' data: data: blob: https: http://k.kakaocdn.net",                 // 외부 이미지 허용
                             "connect-src 'self' http://localhost:8080 http://43.201.237.68:8081 https://yerin.duckdns.org https://kauth.kakao.com https://kapi.kakao.com https://vercel.live https://*.vercel.app wss://ws-us3.pusher.com", // API 서버 + Vercel Live

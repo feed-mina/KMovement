@@ -35,9 +35,11 @@ export function MetadataProvider({ children, screenId: propScreenId }: MetadataP
         //  * 경로가 /view/[screenId]/[index] 또는 /view/admin/[screenId]/[index] 인 경우
         if (viewIndex !== -1 && pathSegments[viewIndex + 1]) {
             if (pathSegments[viewIndex + 1] === 'admin') {
-                return pathSegments[viewIndex + 2] || DEFAULT_SCREEN_ID;
+                const rawId = pathSegments[viewIndex + 2] || DEFAULT_SCREEN_ID;
+                return SCREEN_MAP[`/${rawId}`] || rawId;
             }
-            return pathSegments[viewIndex + 1];
+            const rawId = pathSegments[viewIndex + 1];
+            return SCREEN_MAP[`/${rawId}`] || rawId;
         }
         // * 경로가 meta.screen_id로 URL 또는 MAIN_PAGE
         return SCREEN_MAP[pathname] || DEFAULT_SCREEN_ID;
@@ -87,10 +89,10 @@ export function MetadataProvider({ children, screenId: propScreenId }: MetadataP
         return {
             menuTree: data || [],
             isLoading,
-            screenId: screenIdFromUrl,
+            screenId: finalScreenId,
             refId: refIdFromUrl
         };
-    }, [data,  isLoading, slug, pathname]);
+    }, [data, isLoading, slug, pathname, finalScreenId]);
 
     return (
         <MetadataContext.Provider value={contextValue}>

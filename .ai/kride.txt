@@ -1041,7 +1041,7 @@ focus 페이지에는
 │ recommend/itinerary)                                          │
 │                                                               │
 │ 8. 실행 순서 및 테스트                                        │
-│                                                               │
+│                                  qawsedrf12!@                             │
 │ # 1. 패키지 설치                                              │
 │ pip install neo4j chromadb sentence-transformers groq         │
 │ supabase                                                      │
@@ -1049,9 +1049,12 @@ focus 페이지에는
 │ # 2. .env에 Neo4j + Supabase 환경변수 추가                    │
 │                                                               │
 │ # 3. FastAPI 서버 실행                                        │
-│ uvicorn src.api.fastapi_server:app --reload --port 8000       │
-│                                                               │
-│ # 4. 엔드포인트 테스트 (Swagger UI)                           │
+│ uvicorn src.api.fastapi_server:app --reload --port 8000       
+│ uvicorn src.api.fastapi_server:app --reload --port 8000       
+│ uvicorn src.api.fastapi_server:app --reload --port 8000       
+│ uvicorn src.api.fastapi_server:app --reload --port 8000       
+│                                                                
+│ # 4. 엔드포인트 테스트 (Swagger UI)                            
 │ http://localhost:8000/docs                                    │
 │                                                               │
 │ # 5. SDUI 프론트엔드 연동 확인                                │
@@ -1403,4 +1406,10 @@ Snapshots:   0 total
 Time:        16.428 s
 Ran all test suites matching /src\\__tests__\\components\\SelectionCard.test.tsx/i.
 
+
+DagsHub 
+
+38f7d29868029e20351b794ec89f41540bfedee7
+38f7d29868029e20351b794ec89f41540bfedee7
+38f7d29868029e20351b794ec89f41540bfedee7
 

@@ -51,7 +51,7 @@ except NameError:
         BASE_DIR = os.getcwd()
 
 RAW_ML_DIR = os.path.join(BASE_DIR, "data", "raw_ml")
-MODELS_DIR = os.path.join(BASE_DIR, "models")
+MODELS_DIR = os.path.join(BASE_DIR, "dataset", "models")
 CHART_DIR  = os.path.join(BASE_DIR, "report", "charts")
 AIHUB_DIR  = os.path.join(BASE_DIR, "data", "ai-hub",
                           "국내 여행로그 수도권_2023", "02.라벨링데이터")
@@ -776,8 +776,8 @@ def main():
     meta = load_meta()
     if meta is None:
         print("\n  ❌ build_attraction_model.py를 먼저 실행하세요!")
-        print("  실행 명령: python kride-project/build_attraction_model.py")
-        print("  (데이터 없으면): python kride-project/build_attraction_model.py --use_dummy")
+        print("  실행 명령: python src/dl/build_attraction_model.py")
+        print("  (데이터 없으면): python src/dl/build_attraction_model.py --use_dummy")
         sys.exit(1)
 
     print(f"  모델 메타 로드 완료:")

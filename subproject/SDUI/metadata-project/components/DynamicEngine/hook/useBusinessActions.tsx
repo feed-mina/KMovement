@@ -114,6 +114,21 @@ export const useBusinessActions = (screenId: string, metadata: any[] = [], initi
                 }
                 break;
             }
+            case "SET_DURATION":
+                router.push("/view/INTRO2");
+                break;
+            case "GOTO_MY_LIST":
+                router.push("/view/MY_LIST");
+                break;
+            case "GOTO_FOCUS":
+                router.push("/view/FOCUS");
+                break;
+            case "TOGGLE_ARTIST":
+            case "TOGGLE_REGION":
+            case "SET_PURPOSES":
+            case "SET_BUDGET":
+                // 상태는 각 컴포넌트에서 onChange로 직접 관리
+                break;
             default:
                 break;
         }

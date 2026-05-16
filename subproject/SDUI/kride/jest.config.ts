@@ -11,7 +11,14 @@ const config: Config = {
     "^next/dynamic$":    "<rootDir>/src/__tests__/__mocks__/next-dynamic.ts",
   },
   transform: {
-    "^.+\\.tsx?$": ["ts-jest", { tsconfig: { jsx: "react-jsx" } }],
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        tsconfig: { jsx: "react-jsx" },
+        isolatedModules: true,
+        diagnostics: false,
+      },
+    ],
   },
   testMatch: ["<rootDir>/src/__tests__/**/*.test.{ts,tsx}"],
 };

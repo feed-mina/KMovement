@@ -58,9 +58,12 @@ const DynamicEngine: React.FC<DynamicEngineProps> = (props) => {
                     classList.push(cid);
                 }
 
-                // * 그룹일 경우 group-direction에 row 나 col값으로 flex 로 flex-direction 을 명시
-                const directionClass = node.groupDirection === "ROW" ? "flex-row-layout" : "flex-col-layout";
-                classList.push(directionClass);
+                // css_class에 이미 grid/flex 레이아웃이 명시된 경우 direction 클래스를 추가하면 충돌 발생
+                const hasCustomLayout = customClass && /\b(grid|flex)\b/.test(customClass);
+                if (!hasCustomLayout) {
+                    const directionClass = node.groupDirection === "ROW" ? "flex-row-layout" : "flex-col-layout";
+                    classList.push(directionClass);
+                }
 
 
                 const combinedClassName = Array.from(new Set(classList))
@@ -80,7 +83,30 @@ const DynamicEngine: React.FC<DynamicEngineProps> = (props) => {
                         // console.warn(`[DynamicEngine] ${refId} 데이터가 배열이 아닙니다.`, list);
                         return null;
                     }
-                    // * map은 각 개별 요소로 적용을 할 수 있게 한다.
+
+                    // css_class에 grid 키워드가 있으면 wrapper div로 묶어 grid container로 동작
+                    const isGridLayout = customClass && /\bgrid\b/.test(customClass);
+
+                    if (isGridLayout) {
+                        return (
+                            <div key={uId} className={combinedClassName}>
+                                {list.map((item: any, idx: number) => {
+                                    const handleClick = hasAction ? () => onAction(node, item) : undefined;
+                                    return (
+                                        <div
+                                            key={`${uId}-${idx}`}
+                                            style={{ cursor: hasAction ? 'pointer' : 'default' }}
+                                            onClick={handleClick}
+                                        >
+                                            {renderNodes(node.children, item)}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    }
+
+                    // * 기존 동작 유지 (grid 아닌 REPEATER)
                     return list.map((item: any, idx: number) => {
                         // 3. 리피터 내의 개별 아이템 클릭 핸들러
                         const handleClick = hasAction ? () => onAction(node, item) : undefined;
@@ -121,13 +147,15 @@ const DynamicEngine: React.FC<DynamicEngineProps> = (props) => {
 
             const finalData = getComponentData(node, rowData);
 
-            // ADDRESS_SEARCH_GROUP은 setFormData 필요, 다른 컴포넌트는 불필요
+            // ADDRESS_SEARCH_GROUP은 setFormData 필요, kride 컴포넌트는 formData 필요
+            const KRIDE_NEEDS_FORM = new Set(["SELECTION_CARD", "PURPOSE_CARD", "DUAL_RANGE_SLIDER", "KRIDE_NEXT_BTN"]);
             const componentProps: any = {
                 id: uId,
                 meta: node,
                 data: finalData,
                 onChange,
                 onAction,
+                ...(KRIDE_NEEDS_FORM.has(typeKey) && { formData }),
                 ...rest
             };
 

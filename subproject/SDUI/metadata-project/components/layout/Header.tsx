@@ -27,6 +27,10 @@ export default function Header() {
 
     if (!isMobile) return null;
 
+    const KRIDE_PATHS = ['/INTRO1', '/INTRO2', '/INTRO3', '/INTRO4', '/INTRO5', '/MY_LIST', '/FOCUS'];
+    const isKrideScreen = KRIDE_PATHS.some(p => pathname?.includes(p));
+    if (isKrideScreen) return null;
+
     if (metaLoading) return <div className="header-loading"><Skeleton/></div>;
 
 

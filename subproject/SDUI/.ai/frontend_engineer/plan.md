@@ -318,4 +318,38 @@ async headers() {
 2. DevTools > Application > Cookies → `accessToken` HttpOnly 쿠키 존재
 3. DevTools > Network > Request Headers → `Cookie` 헤더에 토큰 포함
 4. 새로고침 후 로그인 유지 여부 확인
-- 
+
+---
+
+## KRIDE 인트로 화면 레이아웃 수정 — 2026-05-17
+
+### 배경
+- V44/V45 적용 후 스크린샷(.ai/memo/0517log) 피드백 반영
+- DB 변경: V46 마이그레이션 (backend_engineer plan.md 참고)
+
+### 변경된 파일
+
+| 파일 | 변경 종류 | 변경 내용 |
+|------|---------|---------|
+| `components/fields/kride/TypewriterText.tsx` | 신규 | 타이핑 효과 컴포넌트 (80ms/자) |
+| `components/constants/componentMap.tsx` | 수정 | `TYPEWRITER_TEXT` 타입 등록 |
+| `components/fields/kride/SelectionCard.tsx` | 수정 | chip 모드에 `w-full flex items-center justify-center` 추가 |
+
+### 수정 내용 상세
+
+#### INTRO1
+- `intro1_title`: `component_type` → `TYPEWRITER_TEXT` (한 글자씩 나타나는 효과)
+- `intro1_sub`: `mb-4` 추가 (버튼과의 여백)
+- `intro1_buttons`: `mt-auto` → `mt-6` (화면 수직 중앙 배치)
+
+#### INTRO2
+- `intro2_title`: `sticky top-0 bg-black z-10 py-3` (스크롤 시 상단 고정 헤더)
+- `artist_grid`: `place-items-center` 제거 → 3열 정렬 안정화
+
+#### INTRO3
+- `intro3_title`: `sticky top-0 bg-black z-10 py-3` (스크롤 시 상단 고정 헤더)
+- `region_grid`: `flex flex-wrap` → `grid grid-cols-4` (12개 지역 4×3 배치)
+- SelectionCard chip 모드 `w-full`로 각 그리드 셀 채움
+
+### 승인 상태
+- [x] 구현 완료 (날짜: 2026-05-17)

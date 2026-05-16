@@ -334,3 +334,45 @@
 터미널 창을 하나 더 열어 uvicorn src.api.fastapi_server:app --port 8000 (또는 해당 프로젝트의 FastAPI 실행 명령)을 실행하여 FastAPI 서버를 켜주세요.
 Spring Boot가 바라보는 DB에 UI 메타데이터(INTRO2 등)를 채워 넣어주세요.
 그 후 다시 pytest 명령어를 실행하면 모든 테스트가 PASSED 되는 것을 확인하실 수 있습니다!
+
+ 
+J
+
+의존성 문제를 해결하기 위한 라이브러리 재설치 코드
+작성해줘
+
+---
+
+## metadata-project 페이지 경로 구조 (2026-05-15 조회)
+
+**위치:** `subproject/SDUI/metadata-project/app/`
+
+```
+app/
+├── api/
+│   ├── auth/
+│   │   └── update-profile/      # 프로필 업데이트 API Route
+│   └── kakao/
+│       └── callback/            # Kakao OAuth 콜백 처리
+├── view/
+│   └── [...slug]/               # 모든 화면의 단일 진입점 (CommonPage)
+│       └── page.tsx
+├── styles/                      # CSS 파일
+├── type/                        # TypeScript 타입 정의
+├── layout.tsx                   # Root 레이아웃
+└── globals.css
+```
+
+**라우팅 전략:**
+- 모든 화면은 `/view/[screenId]` 단일 경로를 통해 진입
+- `next.config.ts`에서 `/` → `/view/MAIN_PAGE` redirect 설정
+- `screenId`를 기반으로 Spring Boot `/api/ui/{screenId}` 호출 → DB에서 메타데이터 조회
+- `DynamicEngine`이 메타데이터를 해석해 화면을 동적 렌더링
+
+**주요 screen_id 목록 (SDUI-server 테스트 기준):**
+- `MAIN_PAGE` — 메인 화면
+- `LOGIN_PAGE` — 로그인
+- `INTRO2` — 온보딩: 아티스트 선택
+- `INTRO3` — 온보딩: 지역 선택
+- `FOCUS` — 온보딩: 일정 생성
+
