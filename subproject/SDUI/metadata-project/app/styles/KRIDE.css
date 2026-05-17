@@ -1,0 +1,50 @@
+/* ───────────────────────────────────────────────────────────
+   KRIDE.css — KRIDE 화면 전용 정적 레이아웃
+   Tailwind 동적 클래스 의존 없이 flex-wrap 으로 다열 구현
+
+   작동 원리:
+     - DB css_class 에 'flex-wrap' 키워드 포함 → DynamicEngine wrapper 방식 활성화
+     - .kride-*-grid 가 실제 flex 레이아웃 담당 (cascade 충돌 없음)
+     - > div 선택자로 item wrapper div 폭 제어 (DynamicEngine 코드 수정 최소화)
+   ─────────────────────────────────────────────────────────── */
+
+/* ── 아티스트 그리드 (3열, KRIDE_INTRO2) ── */
+.kride-artist-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;          /* gap-6 상당 */
+    width: 100%;
+    padding-bottom: 6rem; /* pb-24 상당 */
+}
+
+.kride-artist-grid > div {
+    width: calc((100% - 3rem) / 3); /* (100% - gap×2) / 3열 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ── 다음 버튼 — 우하단 고정 ── */
+.kride-next-btn-br {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 50;
+    min-width: 6rem;
+}
+
+/* ── 지역 그리드 (4열, KRIDE_INTRO3) ── */
+.kride-region-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;         /* gap-3 상당 */
+    width: 100%;
+    padding-bottom: 7rem; /* pb-28 상당 */
+}
+
+.kride-region-grid > div {
+    width: calc((100% - 2.25rem) / 4); /* (100% - gap×3) / 4열 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

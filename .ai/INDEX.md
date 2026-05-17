@@ -1,6 +1,6 @@
 # K-Ride .ai 문서 마스터 인덱스
 
-> 최종 수정: 2026-05-16
+> 최종 수정: 2026-05-17
 > kride-project 루트 `.ai` 폴더의 모든 문서 위치와 역할을 안내합니다.
 > 기존 파일은 편집 없이 유지됩니다. 역할 기반 구조는 신규 생성된 하위 폴더를 참조하세요.
 
@@ -63,6 +63,8 @@
 | 파일 | 내용 | 줄수 |
 |------|------|------|
 | [kride_sdui_screen.md](kride_sdui_screen.md) | SDUI 화면 구현 현황 (Phase 1~4, FastAPI 연동 현황) | 232 |
+| [V48__kride_consolidated.sql](V48__kride_consolidated.sql) | V40~V47 통합 멱등 마이그레이션 (pgAdmin 직접 실행) | — |
+| [V49__kride_flex_layout.sql](V49__kride_flex_layout.sql) | artist_grid·region_grid flex-wrap 전환 (pgAdmin 직접 실행) | — |
 | [kride2.md](kride2.md) | KRIDE 온보딩 화면 UI 구현 현황 (초기 기록) | 378 |
 | [sdui_kride.md](sdui_kride.md) | K-Ride PWA 프론트엔드 구현 계획 (SDUI MSA 통합) | 442 |
 | [ai-foamy-sparkle.md](ai-foamy-sparkle.md) | K-Ride PWA 구현 계획 (SDUI 통합) | 347 |

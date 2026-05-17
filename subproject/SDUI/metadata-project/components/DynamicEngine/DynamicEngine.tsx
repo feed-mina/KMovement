@@ -84,8 +84,8 @@ const DynamicEngine: React.FC<DynamicEngineProps> = (props) => {
                         return null;
                     }
 
-                    // css_class에 grid 키워드가 있으면 wrapper div로 묶어 grid container로 동작
-                    const isGridLayout = customClass && /\bgrid\b/.test(customClass);
+                    // css_class에 grid 또는 flex-wrap 키워드가 있으면 wrapper div로 묶어 container로 동작
+                    const isGridLayout = customClass && /\bgrid\b|\bflex-wrap\b/.test(customClass);
 
                     if (isGridLayout) {
                         return (

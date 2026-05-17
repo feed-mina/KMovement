@@ -1,85 +1,43 @@
-.venv/*
-node_modules/*
-.vscode/*
-.idea/*
-__pycache__/*
+# ─────────────────────────────────────────
+# K-Ride 프로젝트 .gitignore
+# ─────────────────────────────────────────
+
+# ── IDE ──
+.idea/
+.vscode/
+*.iml
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── 환경변수 / 시크릿 ──
+.env
+.env.*
+*.env
+application-local.yml
+subproject/SDUI/SDUI-server/src/main/resources/application-local.yml
+assets/*.json
+subproject/SDUI/pronounce-api/*.json
+
+# ── Python / FastAPI ──
+__pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
 *.pyd
-venv/*
-.env
-.vscode
-venv
-.claude
-
-# SDUI-server
-# Gradle build output
-subproject/SDUI/SDUI-server/bin/
-subproject/SDUI/SDUI-server/build/
-subproject/SDUI/SDUI-server/src/main/resources/ application-local.yml 
-subproject/SDUI/SDUI-server/docs/authcontroller_example.java
-# Build results
-subproject/SDUI/SDUI-server/target/
-
-# pronounce-api
-pronounce-api/.env
-pronounce-api/venv311
-# 구글 서비스 계정 비밀키
-subproject/SDUI/pronounce-api/*.json
-subproject/SDUI/pronounce-api/static/* 
-subproject/SDUI/pronounce-api/app/__pycache__/*
-
-# Python/FastAPI
-**/__pycache__/
-*. рус
-** /venv/
-*/.venv/
-. env
-.pytest_cache/
-. coverage
-# Python/FastAPI
-**/__pycache__/
-__pycache__/**
-*.pyc
-venv/*
+.venv/
+venv/
 **/venv/
-*/.venv/
-.env
+**/.venv/
 .pytest_cache/
 .coverage
- 
-#meta-project
+*.egg-info/
 
-
-# 환경 설정
-.env
-.env.*
-.env*
-*.env.*
-
-# 로그
-*.log
-log.txt
-
-# IDE
-.idea/
-*.iml
-dist/*
-
-# Playwright test results
-test-results/
-trace.zip
-video.webm
-*.png
-!metadata-project/public/icons/*.png
-!metadata-project/public/screenshots/*.png
-.last-run.json
-
-# Build artifacts
-target/
-subproject/SDUI/metadata-project/node_modules/
-dist/
-gradle/
+# ── Spring Boot / Gradle ──
+subproject/SDUI/SDUI-server/bin/
+subproject/SDUI/SDUI-server/build/
+subproject/SDUI/SDUI-server/target/
 build/
 .gradle/
 out/
@@ -88,25 +46,43 @@ out/
 *.war
 *.ear
 
-# 기타
-*.pem
+# ── Next.js / Node ──
+node_modules/
+subproject/SDUI/metadata-project/node_modules/
+subproject/SDUI/metadata-project/.next/
+subproject/SDUI/metadata-project/dist/
+.next/
+dist/
+
+# ── 로그 ──
+*.log
+log.txt
+logs/
+
+# ── Playwright ──
+test-results/
+playwright-report/
+trace.zip
+video.webm
+.last-run.json
+
+# ── 이미지 (public 아이콘 제외) ──
+*.png
+!subproject/SDUI/metadata-project/public/**/*.png
+
+# ── 기타 빌드 / 임시 파일 ──
 *.tmp
 *.bak
+*.old
 *.zip
 *.tar.gz
+*.pem
+*.key
+*.keystore
 *.exe
 *.dll
 *.so
-*.key
-*.keystore
-*.bak
-*.old
-*.vscode/
-*.idea/
-# fix_content_list_key_mismatch.sql
-# fix_sdui_issues.sql
-# diagnose_content_list.sql
-subproject/SDUI/metadata-project/node_modules/
-subproject/SDUI/metadata-project/.next/
+gradle/
 
-
+# ── Claude Code ──
+.claude

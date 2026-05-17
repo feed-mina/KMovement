@@ -1,6 +1,6 @@
 # K-Ride MSA 아키텍처 분석
 
-> 분석일: 2026-05-16
+> 분석일: 2026-05-16 | 최종 업데이트: 2026-05-17 (V49 flex-wrap 레이아웃 / DynamicEngine 개선)
 > 원본 참조: `.ai/sdui_kride.md`, `.ai/new_research.md`, `.ai/kride_sdui_screen.md`
 
 ---
@@ -23,7 +23,7 @@
           ▼                               ▼
 ┌──────────────────────┐     ┌──────────────────────────┐
 │ SDUI Spring Boot     │     │ K-Ride FastAPI           │
-│ EC2, port 8080       │     │ 로컬/배포, port 8000      │
+│ 로컬 dev / EC2 prod  │     │ 로컬 port 8001           │
 │ 경로: SDUI-server/   │     │ 경로: src/api/           │
 │                      │     │ fastapi_server.py        │
 │ GET /api/ui/{screenId}│     │                          │
@@ -32,30 +32,54 @@
 │ Flyway 마이그레이션  │     │   itinerary              │
 └──────────┬───────────┘     └────────────┬─────────────┘
            │                              │
-           ▼                              ▼
-┌──────────────────────┐     ┌──────────────────────────┐
-│ PostgreSQL (SDUI DB) │     │ Neo4j AuraDB             │
-│ docker port 5433     │     │ 아티스트 촬영지 지식그래프 │
-│                      │     │                          │
-│ ui_metadata          │     │ ChromaDB (로컬)           │
-│ query_master         │     │ 목적 벡터검색             │
-│ user, role, auth     │     │                          │
-│ + K-Ride 화면 추가   │     │ PG16 (로컬, port 5434)   │
-└──────────────────────┘     │ POI 960,000건+           │
-                             │ 날씨, 안전, 맛집, 문화    │
-                             └──────────────────────────┘
+     ┌─────┴──────┐               ┌───────┴────────────────┐
+     ▼(local)  ▼(EC2)             ▼                        ▼
+┌──────────┐ ┌────────┐    ┌─────────────┐      ┌──────────────────┐
+│ PG 18    │ │ PG 15  │    │ PG 16       │      │ Neo4j AuraDB     │
+│ 노트북   │ │ Docker │    │ 노트북      │      │ cloud            │
+│ :5432    │ │ :5434  │    │ (별도 포트) │      │ 아티스트 촬영지   │
+│ SDUI_TD  │ │SDUI_TD │    │ kride DB    │      │ 지식그래프        │
+└──────────┘ └────────┘    │ poi,        │      └──────────────────┘
+                           │ artist_poi  │      ┌──────────────────┐
+                           │ 960,000건+  │      │ Supabase (cloud) │
+                           └─────────────┘      │ (용도 확인 필요)  │
+                                                └──────────────────┘
+                                                ┌──────────────────┐
+                                                │ ChromaDB (로컬)  │
+                                                │ 목적 벡터 검색   │
+                                                └──────────────────┘
 ```
 
 ---
 
 ## 2. DB 역할 구분 (혼동 금지)
 
-| DB | 포트 | 내용 | 담당 레이어 |
-|----|------|------|------------|
-| PostgreSQL (Docker) | 5433 | SDUI 메타데이터 (`ui_metadata`, `query_master`), 사용자 인증 | SDUI Spring Boot |
-| PostgreSQL 16 (로컬) | 5434 | K-Ride ML DB — POI 960,000건, 날씨, 안전, 자전거도로 | FastAPI / ML |
-| Neo4j AuraDB | cloud | 아티스트-촬영지 지식 그래프 | FastAPI |
-| ChromaDB | 로컬 | 목적(purpose) 벡터 임베딩 검색 | FastAPI |
+### 로컬 개발 환경
+
+| DB | 버전 | 포트 | DB명 | user / pw | 내용 | 담당 |
+|----|------|------|------|-----------|------|------|
+| PostgreSQL | **18** (노트북 직접 설치) | **5432** | `SDUI_TD` | postgres / 1234 | ui_metadata, query_master, users, content 등 SDUI 전체 | Spring Boot (local 프로파일) |
+| PostgreSQL | **16** (노트북 직접 설치) | 별도 (미확인) | kride DB | 미확인 | poi, artist_poi 등 K-Ride ML 데이터 960,000건+ | FastAPI |
+| Neo4j AuraDB | cloud | — | — | — | 아티스트-촬영지 지식 그래프 | FastAPI |
+| Supabase | cloud | — | — | — | 용도 미확인 | FastAPI (추정) |
+| ChromaDB | 로컬 | — | — | — | 목적(purpose) 벡터 임베딩 검색 | FastAPI |
+
+### EC2 프로덕션 환경 (정보 불완전 — 확인 필요)
+
+| DB | 버전 | 포트 | 내용 | 비고 |
+|----|------|------|------|------|
+| PostgreSQL | 15 (Docker) | 5434 | SDUI_TD — 테스트용 / DB명: SDUI_TD, user: mina / pw: password | docker-compose.yml 기준 |
+| PostgreSQL | 미확인 | 미확인 | 실제 운영 DB | EC2에 2개 DB 존재, 상세 정보 확인 필요 |
+
+**application.yml 프로파일 분기:**
+
+| 프로파일 | 연결 대상 | 비고 |
+|---------|----------|------|
+| `local` | localhost:5432 / SDUI_TD / postgres / 1234 | 노트북 PG18 직접 연결 |
+| `prod` | 환경변수 `${SPRING_DATASOURCE_*}` | EC2 배포 시 주입 |
+| base(`application.yml`) | localhost:5432 / testdb / postgres / 1234 | 기본값 (실사용 X) |
+
+> ⚠️ **pgAdmin에서 V49 SQL 실행 시 → localhost:5432 / SDUI_TD 에 연결할 것**
 
 ---
 
@@ -133,8 +157,35 @@ ChromaDB (목적 벡터검색)      ┘       ↑
 - `component_type` → `componentMap` → React 컴포넌트 렌더링
 - `group_id` / `parent_group_id`로 트리 구조 구성
 - `css_class`에 `grid`/`flex` 키워드가 있으면 DynamicEngine이 direction 클래스를 추가하지 않음 (CSS cascade 충돌 방지)
-- REPEATER(`ref_data_id` 있는 GROUP)에서 `css_class`에 `grid` 키워드가 있으면 외부 wrapper div로 묶어 grid container로 동작 — 2026-05-17 추가
-- Flyway: V40(초기 화면) → V41(data source) → V42(next 버튼) → V43(레이아웃) → V44(SVG 수정) → V45(단일선택 문구) → V46(레이아웃 개선) → V47(INTRO3/4 UX 수정) — 모두 배포 완료
+- REPEATER(`ref_data_id` 있는 GROUP)에서 `css_class`에 `grid` **또는 `flex-wrap`** 키워드가 있으면 외부 wrapper div 하나로 묶어 container로 동작 — 2026-05-17 수정
+  - `grid` 단독 → Tailwind `display:grid` 기반 (정적 CSS 파일에 정의된 경우)
+  - `flex-wrap` → KRIDE.css `display:flex; flex-wrap:wrap` 기반 (동적 다열 아이템용)
+  - **Tailwind v4 주의:** DB에서 런타임 주입되는 `grid-cols-*` 같은 Tailwind 유틸리티 클래스는 소스 스캔에서 누락되어 CSS 규칙 미생성 → 정적 CSS 파일로 대체할 것
+- `group_direction: ROW` → `flex-row-layout` / `COLUMN` → `flex-col-layout` (direction 클래스)
+- Flyway: V40→V41→V42→V43→V44→V45→V46→V47 배포 완료 / V48·V49는 pgAdmin 직접 적용 (로컬 개발)
+
+---
+
+## 6-2. KRIDE 다열 레이아웃 설계 결정 — 2026-05-17 [변경]
+
+**문제:** INTRO2(아티스트 3열), INTRO3(지역 4열) → Tailwind `grid-cols-*` 동적 클래스로 구현 시도했으나 CSS 미생성으로 1열 고착
+
+**최종 결정:** 정적 CSS(`app/styles/KRIDE.css`) + `flex-wrap` 키워드 신호 방식
+
+```
+DB css_class          DynamicEngine             KRIDE.css
+──────────────        ─────────────────         ─────────────────────────
+'kride-artist-grid    flex-wrap 감지             .kride-artist-grid {
+ flex-wrap'      →    → wrapper div 생성    →      display: flex;
+                      → 아이템 N개 내부            flex-wrap: wrap;
+                                                   gap: 1.5rem;
+                                                 }
+                                                 .kride-artist-grid > div {
+                                                   width: calc((100% - 3rem)/3);
+                                                 }
+```
+
+**기존 화면 영향 없음:** MAIN_PAGE 등은 정적 CSS 파일(`MAIN_PAGE.css`)에서 grid 정의 → Tailwind 스캔 무관
 
 ---
 
