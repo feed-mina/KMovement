@@ -133,7 +133,8 @@ ChromaDB (목적 벡터검색)      ┘       ↑
 - `component_type` → `componentMap` → React 컴포넌트 렌더링
 - `group_id` / `parent_group_id`로 트리 구조 구성
 - `css_class`에 `grid`/`flex` 키워드가 있으면 DynamicEngine이 direction 클래스를 추가하지 않음 (CSS cascade 충돌 방지)
-- Flyway: V40(초기 화면) → V41(data source) → V42(next 버튼) → V43(레이아웃) → V44/V45(버그 픽스, 미배포)
+- REPEATER(`ref_data_id` 있는 GROUP)에서 `css_class`에 `grid` 키워드가 있으면 외부 wrapper div로 묶어 grid container로 동작 — 2026-05-17 추가
+- Flyway: V40(초기 화면) → V41(data source) → V42(next 버튼) → V43(레이아웃) → V44(SVG 수정) → V45(단일선택 문구) → V46(레이아웃 개선) → V47(INTRO3/4 UX 수정) — 모두 배포 완료
 
 ---
 

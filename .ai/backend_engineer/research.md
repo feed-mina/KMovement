@@ -78,8 +78,10 @@
 | V41 | query_master + DATA_SOURCE 3개 (artistList, regionList, purposeList) | ✅ 배포 |
 | V42 | KRIDE_NEXT_BTN 조건부 버튼 | ✅ 배포 |
 | V43 | 레이아웃 업데이트 (artist_grid 3열, region_grid chip) | ✅ 배포 |
-| V44 | intro1_hero.png → .svg 수정 | ⏳ 미배포 (.ai/ 폴더에 있음) |
-| V45 | INTRO4 서브타이틀 단일선택 문구 | ⏳ 미배포 (.ai/ 폴더에 있음) |
+| V44 | intro1_hero.png → .svg 수정 | ✅ 배포 |
+| V45 | INTRO4 서브타이틀 단일선택 문구 | ✅ 배포 |
+| V46 | INTRO1/2/3 레이아웃 개선 (sticky 헤더, region_grid → grid-cols-4, TYPEWRITER_TEXT) | ✅ 배포 |
+| V47 | INTRO3 title TEXT 복원, INTRO4 sticky/z-50 수정 | ✅ 배포 |
 
 ---
 
@@ -97,4 +99,3 @@
 |------|------|------|
 | FOCUS 화면 데이터 비어있음 | `GOTO_FOCUS` 액션에서 FastAPI 미호출 | ⏳ 미해결 |
 | FastAPI 로컬에서만 동작 | EC2 미배포 | ⏳ 미해결 |
-| V44/V45 미배포 | migration 폴더 이동 필요 | ⏳ 사용자 직접 실행 필요 |

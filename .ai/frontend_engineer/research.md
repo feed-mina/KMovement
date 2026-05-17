@@ -1,6 +1,6 @@
 # K-Ride SDUI 화면 분석
 
-> 분석일: 2026-05-16
+> 분석일: 2026-05-16 | 최종 업데이트: 2026-05-17 (V48 통합 마이그레이션)
 > 원본 참조: `.ai/kride_sdui_screen.md`, `.ai/kride2.md`, `subproject/SDUI/.ai/frontend_engineer/`
 
 ---
@@ -36,19 +36,21 @@ INTRO1 (여행 기간)  →  INTRO2 (아티스트)  →  INTRO3 (지역)
 - V44 배포 필요: DB `label_text='kride/intro1_hero.png'` → `.svg` 변경
 
 ### INTRO2 [완료]
-- 아티스트 3열 grid (`grid grid-cols-3 gap-6 place-items-center`)
+- 아티스트 3열 grid (`grid grid-cols-3 gap-6 pb-24 w-full`) — V46에서 `place-items-center` 제거
 - 최대 5개 선택, 초과 시 경고 토스트
 - 1개 이상 선택 시 KRIDE_NEXT_BTN 표시
+- 이미지 없을 때 이름 이니셜 원형 폴백 — CardImage.tsx 수정 (2026-05-17)
 
 ### INTRO3 [완료]
-- 지역 chip 태그 flex-wrap (`flex flex-wrap gap-3 justify-center`)
+- 지역 chip 4열 grid (`grid grid-cols-4 gap-3 pb-28`) — V46에서 `flex flex-wrap`에서 변경
 - 최대 2개 선택, 초과 시 경고 토스트
 - 1개 이상 선택 시 KRIDE_NEXT_BTN 표시
 
 ### INTRO4 [완료]
 - 목적 카드 6개 (맛집탐방/K-컬처/자연힐링/역사문화/쇼핑/휴식)
 - **단일 선택** (다른 것 클릭 시 이전 선택 해제)
-- V45 배포 필요: 서브타이틀 "복수 선택 가능해요" → "1개만 선택할 수 있어요"
+- V45 배포: 서브타이틀 "1개만 선택할 수 있어요"
+- V47 배포: `intro4_title` sticky + `intro4_next_wrap` z-50 ('여' 겹침 + 버튼 가려짐 해결)
 
 ### INTRO5 [구현됨, 검증 필요]
 - 예산 DualRangeSlider
@@ -68,6 +70,7 @@ INTRO1 (여행 기간)  →  INTRO2 (아티스트)  →  INTRO3 (지역)
 
 ### DynamicEngine.tsx 주요 로직
 - GROUP 노드: `css_class`에 `grid`/`flex` 키워드 있으면 direction 클래스(`flex-row-layout`/`flex-col-layout`) 추가하지 않음
+- REPEATER(`ref_data_id` 있는 GROUP): `css_class`에 `grid` 키워드 있으면 wrapper div로 묶어 grid container로 동작, 아이템은 클래스 없이 내부에 배치 — 2026-05-17 수정
 - `KRIDE_NEEDS_FORM` Set: `SELECTION_CARD, PURPOSE_CARD, DUAL_RANGE_SLIDER, KRIDE_NEXT_BTN`
 
 ### SelectionCard.tsx 동작
@@ -90,18 +93,21 @@ INTRO1 (여행 기간)  →  INTRO2 (아티스트)  →  INTRO3 (지역)
 
 ---
 
-## 4. CSS Cascade 문제 (해결됨)
+## 4. CSS Cascade 문제 (1차 해결됨) + REPEATER wrapper 누락 (2차 근본 원인, 해결됨)
 
-**증상:** INTRO2 아티스트 카드가 3열 grid 대신 1열로 나열, INTRO3 chip 레이아웃 깨짐
-
+### 1차 문제: CSS Cascade (V46 이전)
 **원인:**
 ```
 pages.css: .flex-row-layout { display: flex; } (0-1-0 specificity, 나중에 선언)
 Tailwind: .grid { display: grid; } (0-1-0 specificity, 먼저 선언)
 → 동일 specificity에서 cascade 순서상 flex가 grid를 덮어씀
 ```
-
 **해결:** DynamicEngine.tsx에서 `customClass`에 `grid`/`flex` 키워드 있으면 direction 클래스 추가 안 함
+
+### 2차 문제: REPEATER wrapper 누락 (V46~V47 이후에도 grid 1열 지속된 진짜 원인)
+**원인:** REPEATER(`ref_data_id` 있는 GROUP)는 `list.map()`으로 각 아이템 div를 생성하는데, 각 아이템 div에 `grid grid-cols-3` 클래스가 적용되어 각자 독립적인 grid container가 되어버림 → 부모 관계 없이 block 배치 → 세로 1열
+
+**해결 (2026-05-17):** `css_class`에 `grid` 키워드 있는 REPEATER에 한해 외부 wrapper div 하나로 묶어 grid container로, 각 아이템은 클래스 없는 div로 배치
 
 ---
 
@@ -200,29 +206,46 @@ REPEATER(`ref_data_id` 있는 GROUP)를 사용하는 모든 화면에 영향:
 
 수정 후 기존 화면 회귀 테스트 필수 (MAIN_PAGE, LOGIN_PAGE, DIARY_LIST 등).
 
-### 해결 방법
+### 해결 방법 (실제 구현 — 2026-05-17)
 
-`DynamicEngine.tsx` REPEATER 블록에 외부 wrapper div 추가:
+`DynamicEngine.tsx` REPEATER 블록에 grid 키워드 조건부 wrapper 추가:
 ```tsx
 if (isRepeater) {
-    return (
-        <div key={uId} className={combinedClassName}>
-            {list.map((item, idx) => {
-                const handleClick = hasAction ? () => onAction(node, item) : undefined;
-                return (
-                    <div
-                        key={`${uId}-${idx}`}
-                        style={{ cursor: hasAction ? 'pointer' : 'default' }}
-                        onClick={handleClick}
-                    >
-                        {renderNodes(node.children, item)}
-                    </div>
-                );
-            })}
-        </div>
-    );
+    const isGridLayout = customClass && /\bgrid\b/.test(customClass);
+
+    if (isGridLayout) {
+        // grid REPEATER: 외부 wrapper가 grid container, 아이템은 클래스 없음
+        return (
+            <div key={uId} className={combinedClassName}>
+                {list.map((item, idx) => {
+                    const handleClick = hasAction ? () => onAction(node, item) : undefined;
+                    return (
+                        <div key={`${uId}-${idx}`} style={{ cursor: hasAction ? 'pointer' : 'default' }} onClick={handleClick}>
+                            {renderNodes(node.children, item)}
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    }
+
+    // 기존 방식 유지 (flex/direction 기반 REPEATER — 기존 화면 회귀 방지)
+    return list.map((item, idx) => {
+        const handleClick = hasAction ? () => onAction(node, item) : undefined;
+        return (
+            <div key={`${uId}-${idx}`} className={combinedClassName} style={{ cursor: hasAction ? 'pointer' : 'default' }} onClick={handleClick}>
+                {renderNodes(node.children, item)}
+            </div>
+        );
+    });
 }
 ```
+
+**영향 범위:**
+- `artist_grid` (grid-cols-3) → wrapper 방식 ✓
+- `region_grid` (grid-cols-4) → wrapper 방식 ✓
+- `purpose_grid` (w-full, grid 없음) → 기존 방식 ✓
+- 기존 화면 REPEATER → 기존 방식 ✓
 
 ---
 
@@ -243,3 +266,78 @@ if (isRepeater) {
 // 80ms 간격으로 text를 한 글자씩 표시
 ```
 componentMap.tsx에 `TYPEWRITER_TEXT` 등록 완료.
+
+---
+
+## 9. Tailwind CSS v4 동적 클래스 누락 문제 — 2026-05-17 [변경: V48 적용]
+
+### 근본 원인
+
+DynamicEngine 코드 ✅, DB 값 ✅, 서버 재시작 ✅ → 그래도 grid 안 됨.
+
+**Tailwind CSS v4는 소스 파일을 정적 스캔해서 CSS를 생성.** DB에서 런타임으로 주입되는 클래스는 소스 파일에 없으면 CSS 규칙 자체가 생성되지 않음.
+
+| 클래스 | V48 이전 | V48 이후 |
+|--------|----------|----------|
+| `grid-cols-3` | ❌ CSS 규칙 없음 (3열 불가) | ✅ safelist 포함 |
+| `grid-cols-4` | ❌ CSS 규칙 없음 (4열 불가) | ✅ safelist 포함 |
+| `gap-6`, `pb-24`, `pb-28` | ❌ 없음 | ✅ safelist 포함 |
+| `z-10`, `z-50`, `sticky` | ❌ 없음 | ✅ safelist 포함 |
+| `grid` | ✅ (기본 유틸리티) | ✅ 유지 |
+
+→ DOM에 `class="grid grid-cols-3 ..."` 는 붙지만 `grid-cols-3` 에 해당하는 `grid-template-columns` CSS 규칙이 없어 1열로 보이던 현상.
+
+### 해결 [변경: 2026-05-17]
+
+**파일:** `subproject/SDUI/metadata-project/app/globals.css`
+
+`@import "tailwindcss"` 바로 다음에 추가:
+
+```css
+/* SDUI 동적 클래스 safelist — DB에서 런타임으로 주입되는 클래스 */
+@source inline("grid-cols-1 grid-cols-2 grid-cols-3 grid-cols-4 grid-cols-5 grid-cols-6 gap-1 gap-2 gap-3 gap-4 gap-5 gap-6 gap-8 pb-4 pb-6 pb-8 pb-10 pb-12 pb-24 pb-28 pt-4 pt-6 pt-8 pt-10 pt-12 place-items-center sticky top-0 z-10 z-50 aspect-square object-cover object-contain");
+```
+
+이 한 줄로 INTRO2 3열, INTRO3 4열 즉시 해결 예상. `npm run dev` 재시작 필요.
+
+---
+
+## 10. V48 통합 SQL 마이그레이션 — 2026-05-17 [신규]
+
+### 목적
+
+V40~V47 각 버전에 걸쳐 분산된 KRIDE 데이터를 단일 파일로 통합. 멱등 실행 (DELETE → INSERT).
+
+**파일 위치:** `.ai/V48__kride_consolidated.sql`
+
+### 수정 사항 요약
+
+| 컴포넌트 | 변경 내용 | 적용 버전 |
+|---------|----------|----------|
+| `btn_2n3d` | component_id 마크다운 이미지 문법 오염 수정 (`![...]` → `btn_2n3d`) | V48 신규 수정 |
+| `region_grid` | `flex flex-wrap` → `grid grid-cols-4 gap-3 pb-28` | V46 → V48 통합 |
+| `region_card` | `square` → `chip` | V43 → V48 통합 |
+| `intro4_next_wrap` | `z-50` 추가 (버튼 가려짐 해결) | V47 → V48 통합 |
+| `purpose_grid` | `flex flex-col gap-3 pb-24` → `w-full` | V47 → V48 통합 |
+| `intro4_root` | `pb-28 gap-3` 컴팩트화 | V47 → V48 통합 |
+| `intro1_title` | `TEXT` → `TYPEWRITER_TEXT` | V46 → V48 통합 |
+| `intro3_sub` | '최대 5곳' → '최대 2곳' | 정합성 수정 |
+
+### 적용 절차
+
+```
+1. globals.css @source inline 추가 → npm run dev 재시작
+2. /view/KRIDE_INTRO2 확인 (3열 grid)
+3. INTRO3 여전히 깨지면: pgAdmin에서 V48 SQL 실행 → Spring Boot 재시작
+4. /view/KRIDE_INTRO3 확인 (4열 grid)
+```
+
+### 검증 체크리스트
+
+| 항목 | 기대 결과 | 상태 |
+|------|----------|------|
+| `/view/KRIDE_INTRO2` | 아티스트 3열 grid, 이니셜 원형 아이콘 | 확인 필요 |
+| `/view/KRIDE_INTRO3` | 지역 chip 4열 grid | 확인 필요 |
+| `/view/KRIDE_INTRO4` | 목적 카드 1열 + 하단 버튼 즉시 표시 | 확인 필요 |
+| `/view/KRIDE_INTRO1` | 타이핑 효과 타이틀 | 확인 필요 |
+| 기존 화면 | MAIN_PAGE, LOGIN_PAGE 회귀 없음 | 확인 필요 |

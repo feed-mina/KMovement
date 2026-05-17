@@ -8,7 +8,8 @@
       "PowerShell(cd d:\\\\kride-project; $result = & .\\\\venv\\\\Scripts\\\\pip.exe install chromadb 2>&1; $result; Write-Host \"Exit: $LASTEXITCODE\")",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:github.com)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(xargs grep:*)"
     ]
   }
 }

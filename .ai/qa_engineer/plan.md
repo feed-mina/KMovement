@@ -20,7 +20,11 @@
 - [ ] 아티스트 클릭 시 선택 상태 표시 (체크 아이콘)
 - [ ] 1개 이상 선택 시 KRIDE_NEXT_BTN 표시
 - [ ] 5개 초과 클릭 시 **토스트** 경고 "5개 이상은 클릭이 어렵습니다" (인라인 텍스트 아님)
-### [메모] PWQ앱에서 localStorage 사용 괜찮을까? → [답변] qa_engineer/research.md 2-1 항목 참조
+### [답변] PWA앱에서 localStorage 사용 괜찮을까? — [완료] 2026-05-17
+> **결론: 안전하게 사용 가능.** localStorage는 표준 Web Storage API, 주요 모바일 브라우저 모두 지원.
+> - iOS Safari 개인정보 보호 모드: `QuotaExceededError` 가능 → `try/catch` 권장
+> - Service Worker에서 localStorage 직접 접근 불가하나 K-Ride 설계상 문제 없음
+> - `kride_form` (localStorage, 앱 재시작 후 유지) / `kride_focus_data` (sessionStorage, 세션 중 일회성) 분리 적합
 - [ ] `kride_form.selectedArtists` localStorage 저장 확인
 
 ### INTRO3 검증
