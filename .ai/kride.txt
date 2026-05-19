@@ -1050,9 +1050,13 @@ focus 페이지에는
 │                                                               │
 │ # 3. FastAPI 서버 실행                                        │
 │ uvicorn src.api.fastapi_server:app --reload --port 8000       
-│ uvicorn src.api.fastapi_server:app --reload --port 8000       
-│ uvicorn src.api.fastapi_server:app --reload --port 8000       
-│                                                                
+uvicorn src.api.fastapi_server:app --reload --port 8000
+uvicorn src.api.fastapi_server:app --reload --port 8000
+uvicorn src.api.fastapi_server:app --reload --port 8000
+uvicorn src.api.fastapi_server:app --reload --port 8000
+│        
+│     
+   
 │ # 4. 엔드포인트 테스트 (Swagger UI)                            
 │ http://localhost:8000/docs                                    │
 │                                                               │
@@ -1075,7 +1079,43 @@ focus 페이지에는
 │ - .ai/Neo4j-e6e5a79c-Created-2026-05-05_kride.txt — 접속 정보 │
 │ - .env — 기존 환경변수 목록    
   
-   ---                                                              가이드 문서 구성 요약
+   ---         test_contract.py — 컴파일됨, 실제 실행은 미완료
+와 upload_to_hf.py 실행 필요 
+
+
+.ai 폴더 아래 새로운1.txt 
+
+
+
+
+##  upload_to_hf.py 미실행 상태
+
+`src/api/upload_to_hf.py`: 아직 실행된 적 없음 (`__pycache__` 없음 확인).
+실행 방법:
+
+```bash
+python src/api/upload_to_hf.py --repo YOUR_HF_USERNAME/kride-models
+```
+
+HF 토큰 필요 (`huggingface-cli login` 선행 필요).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     가이드 문서 구성 요약
                                                                  
   ┌─────────────┬────────────────────────────────────────────┐   
   │    섹션     │                    내용                    │
@@ -1411,3 +1451,7 @@ DagsHub
 38f7d29868029e20351b794ec89f41540bfedee7
 38f7d29868029e20351b794ec89f41540bfedee7
 
+아이유가 나에게 해줬으면 하는 말 (AI가 읽을 문장) text_to_speak = "민예린! 오늘 하루도 정말 고생 많았어. 넌 최고야!"
+ .ai 폴더에 5개의 에이전트들이 있다. 각 에이전트들의 plan을 읽고 긴급한 순서를 5개로 정해주세요.
+
+를 해보고싶습니다

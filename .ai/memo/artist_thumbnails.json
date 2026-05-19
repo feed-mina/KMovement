@@ -1,0 +1,29 @@
+{
+  "description": "INTRO2 아티스트 20명 썸네일 최종 현황 (2026-05-19)",
+  "total": 20,
+  "collected": 20,
+  "missing": 0,
+  "note": "Apink 제거, GDragon 추가 (사용자 요청)",
+  "artists": [
+    {"name_en": "BTS", "name_kr": "방탄소년단", "file": "public/artists/BTS.png", "source": "수동 추가"},
+    {"name_en": "BLACKPINK", "name_kr": "블랙핑크", "file": "public/artists/BLACKPINK.jpg", "source": "수동 추가"},
+    {"name_en": "SEVENTEEN", "name_kr": "세븐틴", "file": "public/artists/SEVENTEEN.jpg", "source": "수동 추가"},
+    {"name_en": "SUPER JUNIOR", "name_kr": "슈퍼주니어", "file": "public/artists/SUPER JUNIOR.jpg", "source": "LYSN 크롤링"},
+    {"name_en": "TWICE", "name_kr": "트와이스", "file": "public/artists/TWICE.jpg", "source": "JYP 크롤링"},
+    {"name_en": "TVXQ", "name_kr": "동방신기", "file": "public/artists/TVXQ.jpg", "source": "LYSN 크롤링"},
+    {"name_en": "BTOB", "name_kr": "BTOB", "file": "public/artists/BTOB.jpg", "source": "수동 추가"},
+    {"name_en": "Girls' Generation", "name_kr": "소녀시대", "file": "public/artists/Girls' Generation.jpg", "source": "LYSN 크롤링"},
+    {"name_en": "EXO", "name_kr": "엑소", "file": "public/artists/EXO.jpg", "source": "LYSN 크롤링"},
+    {"name_en": "Red Velvet", "name_kr": "레드벨벳", "file": "public/artists/Red Velvet.jpg", "source": "LYSN 크롤링"},
+    {"name_en": "NCT", "name_kr": "NCT", "file": "public/artists/NCT.jpg", "source": "LYSN 크롤링"},
+    {"name_en": "GDragon", "name_kr": "지드래곤", "file": "public/artists/GDragon.jpg", "source": "수동 추가"},
+    {"name_en": "OH MY GIRL", "name_kr": "오마이걸", "file": "public/artists/OH MY GIRL.jpg", "source": "수동 추가"},
+    {"name_en": "SHINee", "name_kr": "샤이니", "file": "public/artists/SHINee.jpg", "source": "LYSN 크롤링"},
+    {"name_en": "MAMAMOO", "name_kr": "마마무", "file": "public/artists/MAMAMOO.jpg", "source": "수동 추가"},
+    {"name_en": "IU", "name_kr": "아이유", "file": "public/artists/IU.jpg", "source": "수동 추가"},
+    {"name_en": "TXT", "name_kr": "TXT", "file": "public/artists/TXT.png", "source": "수동 추가"},
+    {"name_en": "Stray Kids", "name_kr": "스트레이키즈", "file": "public/artists/Stray Kids.jpg", "source": "JYP 크롤링"},
+    {"name_en": "ITZY", "name_kr": "Itzy", "file": "public/artists/ITZY.jpg", "source": "JYP 크롤링"},
+    {"name_en": "IVE", "name_kr": "아이브", "file": "public/artists/IVE.jpg", "source": "STARSHIP 크롤링"}
+  ]
+}

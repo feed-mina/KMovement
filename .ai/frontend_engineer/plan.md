@@ -6,47 +6,115 @@
 
 ## 즉시 필요한 작업
 
-### [P1] V44/V45 배포 (사용자 직접 실행)
+### [P1] DB + CSS grid 레이아웃 — [완료] 2026-05-17
 
-```bash
-cp .ai/V44__fix_intro1_hero_svg.sql    subproject/SDUI/SDUI-server/src/main/resources/db/migration/
-cp .ai/V45__intro4_single_select.sql   subproject/SDUI/SDUI-server/src/main/resources/db/migration/
-# Spring Boot 재시작
-# npm run dev
-```
-### [메모] 실행 -> 아직 화면에 grid 정렬이 안됨 → [완료] V46 마이그레이션으로 해결 (2026-05-17)
+**해결 경로:** V48(통합 SQL) → V49(flex-wrap 전략) → globals.css 인라인 CSS
 
-### [P2] 프론트엔드 재시작 (사용자 직접 실행)
-DynamicEngine.tsx(grid/flex 충돌 수정) + PurposeCard.tsx(단일 선택) 코드 변경 반영:
-```bash
-cd subproject/SDUI/metadata-project
-npm run dev
+**pgAdmin에서 실행한 최종 쿼리:**
+```sql
+UPDATE ui_metadata SET css_class = 'kride-artist-grid flex-wrap'
+WHERE screen_id = 'KRIDE_INTRO2' AND component_id = 'artist_grid';
+
+UPDATE ui_metadata SET css_class = 'kride-region-grid flex-wrap'
+WHERE screen_id = 'KRIDE_INTRO3' AND component_id = 'region_grid';
 ```
+
+**핵심 발견:**
+- Flyway migration 대신 pgAdmin 직접 DML 사용 (사용자 정책)
+- pgAdmin DML 후 Spring Boot 재시작 필수 (Redis 1시간 캐시)
+- `@import` in globals.css — `@source inline` 이후 @import는 CSS 파서 무시 → KRIDE CSS를 globals.css에 직접 인라인으로 해결
+
+### [P2] DynamicEngine REPEATER wrapper + CSS — [완료] 2026-05-17
+
+- DynamicEngine.tsx: `flex-wrap` 키워드 감지 시 wrapper div 방식 (line 88)
+- globals.css 맨 아래 `.kride-artist-grid`, `.kride-region-grid` 직접 작성
 
 ---
 
 ## 다음 작업
 
-### [P3] FOCUS 화면 FastAPI 연동
+### [P3] FOCUS 화면 FastAPI 연동 — [완료] 2026-05-19
 
-FOCUS 화면에서 FastAPI 추천 결과가 표시되도록:
-1. `useBusinessActions.tsx` GOTO_FOCUS 케이스에서 FastAPI 호출
+**구현 방식 변경:** sessionStorage 대신 `useKrideItinerary` 전용 훅으로 구현.
+
+| 파일 | 변경 |
+|------|------|
+| `useKrideItinerary.ts` | KRIDE_FOCUS 진입 시 FastAPI 호출 + duration 포맷 매핑 |
+| `page.tsx` | combineData에 krideItinerary.data 합치기 + 로딩/에러 UI |
+| `next.config.ts` | `/kride-api/:path*` → `localhost:8000` 프록시 |
+| `fastapi_server.py` | async 변환 + Nominatim 지오코딩 fallback (마커 빈 경우) |
 
 ### [메모] PWA 앱으로 모바일에서 사용할때 localStorage와 sessionStorage 사용 괜찮을지 → [답변] frontend_engineer/research.md 6번 항목 참조
 
-2. 응답 (`itinerary`, `mapData`)을 `sessionStorage['kride_focus_data']`에 저장
-3. FOCUS 화면 진입 시 sessionStorage 데이터를 읽어 `pageData`로 주입
+### [P3.1] 지오코딩 마커 테스트 — [완료] 2026-05-19
+- 첫 요청 3개, 이후 0개 → 디버그 로그 추가 완료
+- 4개 장소 기준 약 5초 소요 (Nominatim rate limit)
 
-4. `MAP_VIEW` 컴포넌트: `pageData.mapData.markers` 배열로 지도 마커 렌더링
-5. `ITINERARY_PANEL` 컴포넌트: `pageData.itinerary` 배열로 일정 카드 렌더링
+### [P3.2] Neo4j/ChromaDB 적재 후 통합 테스트 — [문제발견→디버깅중] 2026-05-19
 
-구현 위치:
-- `components/DynamicEngine/hook/useBusinessActions.tsx` (GOTO_FOCUS 케이스)
-- `next.config.ts` (FastAPI 프록시 규칙 추가)
+> DB 불일치 수정, K-pop 적재, Delta 마이그레이션, 인코딩 수정 모두 완료
+> **현재 문제: source_pois=[] — Neo4j/ChromaDB에서 데이터 조회 실패**
+> 디버그 로그 추가 완료 → FastAPI 재시작 후 로그로 원인 파악 필요
+> 상세: backend_engineer/plan.md "FOCUS 일정 생성 실패 디버깅" 참조
+
+
+**테스트 결과:**
+
+| 엔드포인트 | 결과 |
+|------------|------|
+| `GET /api/health` | OK (graph_nodes=0, 자전거 그래프 미적재) |
+| `GET /api/artists` | Fallback 반환 (Supabase 연결 실패 or 데이터 없음) |
+| `GET /api/regions` | Neo4j 연결 OK, 17개 Region 반환, **한글 인코딩 깨짐** |
+| `POST /api/recommend/itinerary` | 일정 생성 OK, **source_pois 빈 배열** |
+
+**핵심 문제: Neo4j 한글 인코딩 깨짐**
+- "서울" → `\udcec\uaf4c...` (surrogate escape 인코딩)
+- 원인: Neo4j에 데이터 적재 시 인코딩 미지정 or CSV import 문자셋 불일치
+- 영향: 지역명 매칭 실패 → `get_region_pois("서울")` 결과 0건 → source_pois 빈 배열
+- LLM이 POI 목록 없이 자체 생성 → 주소도 인코딩 깨짐
+
+**Groq LLM 일정 생성:** 성공하나 한글 깨짐 전파됨 (context에 깨진 텍스트가 들어가므로)
+
+**지오코딩 fallback:** 마커 2/3 생성 (주소가 깨졌지만 Nominatim이 부분 매칭)
+
+**해결 필요:**
+1. Neo4j 데이터 재적재 (UTF-8 인코딩 명시)
+2. Supabase artist 테이블 확인 (현재 fallback 사용 중)
+3. ChromaDB 컬렉션 데이터 확인
 
 ---
 
 ## 나중 작업
+
+### [P3.3] 모바일 반응형 점검 — [분석완료→수정완료] 2026-05-19
+
+> PWA/미디어쿼리/반응형 분석 수행. 심각한 문제 4건 발견 → 3건 수정 완료.
+> 상세 내용: frontend_engineer/research.md §19 참조
+
+**심각 → 수정 완료:**
+1. ~~`MapViewInner.tsx` — `minHeight: 400px` 고정~~ → `minHeight: 50vh, maxHeight: 60vh` [수정완료]
+2. ~~INTRO3 region 4열 → 320px 터치 불가~~ → `@media (max-width: 375px)` 3열 전환 [수정완료]
+3. ~~미디어쿼리 부재~~ → `common.css`에 375px 브레이크포인트 추가 [수정완료]
+4. ~~time-card 버튼 40px~~ → 48px (WCAG 준수) [수정완료]
+
+**수정 파일:**
+
+| 파일 | 변경 |
+|------|------|
+| `components/fields/kride/MapViewInner.tsx` | [편집] minHeight 400px → 50vh, maxHeight 60vh |
+| `app/styles/common.css` | [편집] @media (max-width: 375px) 추가 — region 3열, artist 3열, FAB 마진 축소 |
+| `app/styles/pages.css` | [편집] time-card 버튼 height 40px → 48px |
+
+**중간 (미수정):**
+5. `SelectionCard` 고정 96px (w-24 h-24)
+6. FAB 버튼 마진 24px → 375px에서 빡빡 → common.css 375px 미디어쿼리로 부분 해결
+7. 브레이크포인트 불일치 (768/999/1000/1024px 혼용)
+
+**양호:**
+- KRIDE fullscreen 모드 (max-width:100%, padding:0)
+- 아티스트 3열 grid (375px → 117px 카드 OK)
+- DurationButton, KrideNextButton (w-full, py-4)
+- PWA manifest 설정 완비 (standalone, portrait, 아이콘)
 
 ### [P4] 재온보딩 다이얼로그
 - 로그인 사용자가 INTRO1 재진입 시 기존 `kride_form` 감지

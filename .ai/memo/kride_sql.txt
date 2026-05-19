@@ -1,0 +1,121 @@
+ 
+
+SELECT json_agg(row_to_json(result_table))
+FROM (
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'ui_metadata'
+) result_table;
+
+
+SELECT json_agg(DISTINCT action_type) AS action_type
+FROM ui_metadata
+WHERE action_type IS NOT NULL;
+ 
+SELECT json_agg(row_to_json(result_table))
+FROM (SELECT * FROM ui_metadata WHERE screen_id = 'SET_TIME_PAGE') result_table;
+ 
+SELECT json_agg(row_to_json(result_table))
+FROM (
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'ui_metadata'
+) result_table;
+
+
+
+
+쿼리
+SELECT json_agg(row_to_json(result_table))
+FROM (
+ SELECT screen_id, component_id, css_class
+  FROM ui_metadata
+  WHERE component_id IN ('artist_grid', 'region_grid')
+) result_table;
+
+
+결과
+[{"screen_id":"KRIDE_INTRO2","component_id":"artist_grid","css_class":"kride-artist-grid flex-wrap"}, {"screen_id":"KRIDE_INTRO3","component_id":"region_grid","css_class":"kride-region-grid flex-wrap"}]
+
+
+쿼리
+SELECT json_agg(row_to_json(result_table))
+FROM (
+SELECT screen_id, component_id, action_type, action_url
+  FROM ui_metadata
+  WHERE screen_id IN ('KRIDE_INTRO4', 'KRIDE_INTRO5', 'KRIDE_MY_LIST')
+    AND action_type IN ('ROUTE', 'GOTO_MY_LIST', 'GOTO_FOCUS')
+  ORDER BY screen_id, sort_order
+) result_table;
+
+
+결과
+[{"screen_id":"KRIDE_INTRO4","component_id":"intro4_next_btn","action_type":"ROUTE","action_url":"/view/INTRO5"}, {"screen_id":"KRIDE_INTRO5","component_id":"intro5_next_btn","action_type":"GOTO_MY_LIST","action_url":"/view/MY_LIST"}, {"screen_id":"KRIDE_MY_LIST","component_id":"ai_banner_btn","action_type":"GOTO_FOCUS","action_url":"/focus"}]
+
+
+쿼리 
+SELECT json_agg(row_to_json(result_table))
+FROM (
+ SELECT component_id, action_type, action_url, css_class
+ FROM ui_metadata
+ WHERE screen_id = 'KRIDE_INTRO4'
+   AND component_id IN ('intro4_next_wrap', 'intro4_next_btn')
+) result_table;
+
+결과
+[{"component_id":"intro4_next_btn","action_type":"ROUTE","action_url":"/view/INTRO5","css_class":"w-full py-4 rounded-full bg-red-600 text-white font-bold text-lg"}, {"component_id":"intro4_next_wrap","action_type":null,"action_url":null,"css_class":"fixed bottom-0 left-0 right-0 px-6 pb-6 pt-10 bg-gradient-to-t from-black to-transparent z-50"}]
+
+쿼리
+SELECT json_agg(row_to_json(result_table))
+FROM (
+ SELECT component_id, component_type, css_class, is_readonly,
+  action_type, action_url, ref_data_id, parent_group_id, sort_order
+  FROM ui_metadata
+  WHERE screen_id = 'KRIDE_MY_LIST'
+  ORDER BY sort_order
+) result_table;
+
+
+결과
+
+[{"component_id":"mylist_root","component_type":"GROUP","css_class":"min-h-screen bg-black text-white px-6 py-10 flex flex-col gap-8 max-w-2xl mx-auto","is_readonly":true,"action_type":null,"action_url":null,"ref_data_id":null,"parent_group_id":null,"sort_order":1}, {"component_id":"mylist_title","component_type":"TEXT","css_class":"text-3xl font-bold","is_readonly":true,"action_type":null,"action_url":null,"ref_data_id":null,"parent_group_id":"mylist_root","sort_order":2}, {"component_id":"ai_banner_btn","component_type":"BUTTON","css_class":"w-full py-6 rounded-2xl bg-gradient-to-r from-red-700 to-red-500 text-2xl font-bold","is_readonly":false,"action_type":"GOTO_FOCUS","action_url":"/focus","ref_data_id":null,"parent_group_id":"mylist_root","sort_order":3}]
+
+
+로그인을 하지 않은 상태에서 어떻게 보여야 하는지 
+
+
+http://localhost:3000/view/FOCUS
+
+일정이 없습니다
+
+
+
+
+쿼리 
+
+결과 
+
+쿼리 
+
+결과 
+"D:\kride-project\.ai\architect\supabase_neo4l_sql_example.txt"
+쿼리 
+
+결과 
+
+쿼리 
+
+결과 
+
+쿼리 
+
+결과 
+
+쿼리 
+
+결과 
+
+쿼리 
+
+결과 
+
+쿼리 
+
+결과 
+

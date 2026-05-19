@@ -1,0 +1,39 @@
+
+*지도 범위를 마크가 있다면 마크 중심으로
+나중에 카카오나 네이버 지도로바꿀예정
+
+1. dearu 페이지 
+https://store.dearu.com/STARS/home?lang=ko&currency=KRW
+
+
+<div class="thumbnail"><img src="https://ba-store-cn.dear-u.co/public/img/product/PRO1776326968iJWcJ/STWcJ1776326968733.jpg" alt=""></div> 
+
+
+2. LYSN 페이지 
+https://webstore.lysn.com/LYSN/home?lang=ko&currency=KRW  
+
+<div class="thumbnail"><img src="https://store-cn.lysn.com/public/img/product/PRO1744863859y8yHe/STyHe1744863859887.jpg" alt=""></div>
+
+
+3.  JYP
+
+<div class="thumbnail"><img src="https://ba-store-cn.dear-u.co/public/img/product/PRO1618997731yukOw/STkOw1750810499663.jpg" alt=""></div>  
+
+
+4. ACTORS https://store.dearu.com/ACTORS/home?lang=ko&currency=KRW
+
+5. CUBE 
+https://store.dearu.com/CUBE/home?lang=ko&currency=KRW
+
+6. STARSHIP
+https://store.dearu.com/STARSHIP/home?lang=ko&currency=KRW
+
+
+
+weeverse
+<span class="avatar-_-image_wrap avatar-_--outline avatar-_--round_square avatar-_--icon_xxlarge"><span class="avatar-_-image_area"><img src="https://phinf.wevpstatic.net/MjAyNTExMjdfMTE4/MDAxNzY0MjM0ODI3MjU1.lH3zQhdtQCBiBHIj_GFrYZO2ExPvl79xqeoBEg9huAcg.31TSlFfdwsiCMXytMjxxKv5Z64dViKXzFm9I3UrZpwAg.JPEG/4f565328-52db-41a4-84b1-4edabf788f91.jpg?type=s156_webp" loading="lazy" decoding="async" width="72" height="72" class="avatar-_-image" alt=""></span></span> 
+class가 avatar-_-image_wrap avatar-_--outline avatar-_--round_square avatar-_--icon_xxlarge 인거 191개 
+
+여기서 span > span > img src 에 weeverse의 kpop 아이돌 사진 구할수있다. 
+
+

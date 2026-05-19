@@ -1,0 +1,358 @@
+supabase 상태입니다.
+
+보기 좋게 json으로 정리했습니다. 
+[
+  {
+    "name": "edges",
+    "columns": 5,
+    "rows_estimated": 175,
+    "size_estimated": "104 kB",
+    "realtime": "Disabled",
+    "action": "View columns"
+  },
+  {
+    "name": "nodes",
+    "columns": 5,
+    "rows_estimated": 39110,
+    "size_estimated": "17 MB",
+    "realtime": "Disabled",
+    "action": "View columns"
+  }
+]
+[
+  {
+    "name": "id",
+    "type": "int8",
+    "constraints": [
+      "Primary",
+      "Identity",
+      "Non-nullable"
+    ]
+  },
+  {
+    "name": "source_id",
+    "type": "text",
+    "constraints": [
+      "Foreign key",
+      "Nullable"
+    ]
+  },
+  {
+    "name": "target_id",
+    "type": "text",
+    "constraints": [
+      "Foreign key",
+      "Nullable"
+    ]
+  },
+  {
+    "name": "relation_type",
+    "type": "text",
+    "constraints": [
+      "Nullable"
+    ]
+  },
+  {
+    "name": "weight",
+    "type": "float8",
+    "constraints": [
+      "Nullable"
+    ]
+  }
+]
+[
+  {
+    "name": "id",
+    "type": "text",
+    "constraints": [
+      "Primary",
+      "Non-nullable"
+    ]
+  },
+  {
+    "name": "name",
+    "type": "text",
+    "constraints": [
+      "Non-nullable"
+    ]
+  },
+  {
+    "name": "category",
+    "type": "text",
+    "constraints": [
+      "Nullable"
+    ]
+  },
+  {
+    "name": "community_id",
+    "type": "int4",
+    "constraints": [
+      "Nullable"
+    ]
+  },
+  {
+    "name": "metadata",
+    "type": "jsonb",
+    "constraints": [
+      "Nullable"
+    ]
+  }
+]
+
+
+쿼리 
+SELECT DISTINCT category FROM nodes;
+
+결과
+[
+  {
+    "category": "kculture"
+  },
+  {
+    "category": "tourism"
+  },
+  {
+    "category": "drama"
+  }
+]
+
+
+쿼리
+SELECT id, name, category, community_id, metadata 
+FROM nodes 
+LIMIT 5;
+결과 
+[
+  {
+    "id": "poi_842240",
+    "name": "송림헌",
+    "category": "kculture",
+    "community_id": 26,
+    "metadata": {
+      "id": "poi_842240",
+      "lat": 37.7144828,
+      "lon": 126.4043754,
+      "name": "송림헌",
+      "type": "POI",
+      "address": "인천광역시 강화군 내가면 고비고개로743번길 109",
+      "category": "kculture",
+      "community": 26,
+      "sub_category": "hanok"
+    }
+  },
+  {
+    "id": "poi_842241",
+    "name": "담담각",
+    "category": "kculture",
+    "community_id": 27,
+    "metadata": {
+      "id": "poi_842241",
+      "lat": 37.7598846,
+      "lon": 126.4159903,
+      "name": "담담각",
+      "type": "POI",
+      "address": "인천광역시 강화군 하점면 고려산로285번길 14-29",
+      "category": "kculture",
+      "community": 27,
+      "sub_category": "hanok"
+    }
+  },
+  {
+    "id": "poi_842242",
+    "name": "영섭재",
+    "category": "kculture",
+    "community_id": 28,
+    "metadata": {
+      "id": "poi_842242",
+      "lat": 37.7635297,
+      "lon": 126.4658839,
+      "name": "영섭재",
+      "type": "POI",
+      "address": "인천광역시 강화군 송해면 강화대로674번길 23-4",
+      "category": "kculture",
+      "community": 28,
+      "sub_category": "hanok"
+    }
+  },
+  {
+    "id": "poi_842243",
+    "name": "교동마님댁",
+    "category": "kculture",
+    "community_id": 29,
+    "metadata": {
+      "id": "poi_842243",
+      "lat": 37.8151314,
+      "lon": 126.2642136,
+      "name": "교동마님댁",
+      "type": "POI",
+      "address": "nan",
+      "category": "kculture",
+      "community": 29,
+      "sub_category": "hanok"
+    }
+  },
+  {
+    "id": "poi_842244",
+    "name": "옛날에 금잔디",
+    "category": "kculture",
+    "community_id": 30,
+    "metadata": {
+      "id": "poi_842244",
+      "lat": 37.7164361,
+      "lon": 126.3887689,
+      "name": "옛날에 금잔디",
+      "type": "POI",
+      "address": "인천광역시 강화군 내가면 강화서로225번길 18-1",
+      "category": "kculture",
+      "community": 30,
+      "sub_category": "hanok"
+    }
+  }
+]
+
+쿼리  
+SELECT DISTINCT relation_type FROM edges;
+
+결과 
+[
+  {
+    "relation_type": "FILMING_AT"
+  }
+]
+
+
+쿼리 
+SELECT COUNT(DISTINCT (source_id, target_id)) FROM edges;
+
+결과 
+[
+  {
+    "count": 175
+  }
+]
+
+쿼리 
+SELECT DISTINCT * FROM edges limit 10;
+
+결과 
+[
+  {
+    "id": 1,
+    "source_id": "poi_874192",
+    "target_id": "artist_1",
+    "relation_type": "FILMING_AT",
+    "weight": 1
+  },
+  {
+    "id": 2,
+    "source_id": "poi_874193",
+    "target_id": "artist_1",
+    "relation_type": "FILMING_AT",
+    "weight": 1
+  },
+  {
+    "id": 3,
+    "source_id": "poi_874194",
+    "target_id": "artist_1",
+    "relation_type": "FILMING_AT",
+    "weight": 1
+  },
+  {
+    "id": 4,
+    "source_id": "poi_874195",
+    "target_id": "artist_1",
+    "relation_type": "FILMING_AT",
+    "weight": 1
+  },
+  {
+    "id": 5,
+    "source_id": "poi_874196",
+    "target_id": "artist_1",
+    "relation_type": "FILMING_AT",
+    "weight": 1
+  },
+  {
+    "id": 6,
+    "source_id": "poi_874197",
+    "target_id": "artist_1",
+    "relation_type": "FILMING_AT",
+    "weight": 1
+  },
+  {
+    "id": 7,
+    "source_id": "poi_874198",
+    "target_id": "artist_1",
+    "relation_type": "FILMING_AT",
+    "weight": 1
+  },
+  {
+    "id": 8,
+    "source_id": "poi_874199",
+    "target_id": "artist_1",
+    "relation_type": "FILMING_AT",
+    "weight": 1
+  },
+  {
+    "id": 9,
+    "source_id": "poi_874200",
+    "target_id": "artist_1",
+    "relation_type": "FILMING_AT",
+    "weight": 1
+  },
+  {
+    "id": 10,
+    "source_id": "poi_874201",
+    "target_id": "artist_2",
+    "relation_type": "FILMING_AT",
+    "weight": 1
+  }
+]
+
+
+-----------------------------------------
+Neo4;
+
+
+쿼리 
+MATCH (n) 
+RETURN DISTINCT labels(n)
+
+결과 
+labels(n)
+[POI]
+[Artist]
+
+
+쿼리 
+MATCH (n) 
+WHERE n.category IS NOT NULL
+RETURN DISTINCT n.category
+
+결과 
+n.category
+kculture
+tourism
+drama
+
+쿼리 
+MATCH ()-[r]->() 
+RETURN DISTINCT type(r)
+
+결과 
+type(r)
+NEAR_BY
+FILMING_AT
+
+
+쿼리 
+MATCH (start)-[r]->(end)
+RETURN DISTINCT start.name, type(r), end.name 
+LIMIT 5
+
+결과 
+start.name,type(r),end.name
+한옥스테이 초,NEAR_BY,한옥스테이 초
+편안집,NEAR_BY,편안집
+편안집,NEAR_BY,주식회사 어플
+편안집,NEAR_BY,국자와 주걱
+윤스테이,NEAR_BY,윤스테이
