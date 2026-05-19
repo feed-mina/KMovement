@@ -17,3 +17,54 @@
     max-width: 450px; /* 기존 common.css와 components.css 중복 통합 */
 }
 
+/* ── KRIDE 레이아웃 (DB 동적 클래스 대응 정적 CSS) ── */
+.kride-artist-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    width: 100%;
+    padding-bottom: 6rem;
+}
+.kride-artist-grid > div {
+    width: calc((100% - 3rem) / 3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.kride-region-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    width: 100%;
+    padding-bottom: 7rem;
+}
+.kride-region-grid > div {
+    width: calc((100% - 2.25rem) / 4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 소형 모바일 (375px 이하): region 4열 → 3열 */
+@media (max-width: 375px) {
+    .kride-region-grid > div {
+        width: calc((100% - 1.5rem) / 3);
+    }
+    .kride-artist-grid > div {
+        width: calc((100% - 2rem) / 3);
+    }
+    .kride-next-btn-br {
+        right: 1rem;
+        bottom: 1rem;
+    }
+}
+
+.kride-next-btn-br {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 50;
+    min-width: 6rem;
+}
+

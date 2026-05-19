@@ -118,7 +118,7 @@ export const useBusinessActions = (screenId: string, metadata: any[] = [], initi
                 router.push("/view/INTRO2");
                 break;
             case "GOTO_MY_LIST":
-                router.push("/view/MY_LIST");
+                router.push("/view/FOCUS");
                 break;
             case "GOTO_FOCUS":
                 router.push("/view/FOCUS");

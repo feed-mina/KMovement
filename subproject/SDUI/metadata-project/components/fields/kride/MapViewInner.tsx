@@ -1,12 +1,26 @@
 'use client';
-// react-leaflet, leaflet 패키지 설치 필요: npm install react-leaflet leaflet @types/leaflet
-// 설치 전에는 아래 placeholder가 표시됩니다.
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Leaflet 기본 마커 아이콘 수정 (webpack 번들링 이슈 해결)
+const defaultIcon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+L.Marker.prototype.options.icon = defaultIcon;
 
 export interface RouteMarker {
   lat: number;
-  lng: number;
+  lng?: number;
+  lon?: number;
   name: string;
-  index: number;
+  index?: number;
 }
 
 interface Props {
@@ -15,17 +29,27 @@ interface Props {
   zoom?: number;
 }
 
-export default function MapViewInner({ center, markers = [] }: Props) {
+export default function MapViewInner({ center = [37.5665, 126.978], markers = [], zoom = 13 }: Props) {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-gray-400 gap-2 text-sm">
-      <span>🗺️</span>
-      <span>지도를 표시하려면 react-leaflet 패키지를 설치하세요</span>
-      <code className="text-xs text-gray-600">npm install react-leaflet leaflet @types/leaflet</code>
-      {center && (
-        <span className="text-xs text-gray-600">
-          중심: {center[0].toFixed(4)}, {center[1].toFixed(4)} | 마커 {markers.length}개
-        </span>
-      )}
-    </div>
+    <MapContainer
+      center={center}
+      zoom={zoom}
+      scrollWheelZoom={true}
+      style={{ width: '100%', height: '100%', minHeight: '50vh', maxHeight: '60vh' }}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      {markers.map((m, i) => {
+        const lng = m.lng ?? m.lon;
+        if (m.lat == null || lng == null) return null;
+        return (
+          <Marker key={`${m.name}-${i}`} position={[m.lat, lng]}>
+            <Popup>{m.index != null ? `${m.index}. ` : ''}{m.name}</Popup>
+          </Marker>
+        );
+      })}
+    </MapContainer>
   );
 }

@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import {useRouter, useSearchParams} from "next/navigation";
 import {componentMap} from "@/components/constants/componentMap";
 import {usePageHook} from "@/components/DynamicEngine/hook/usePageHook";
+import {useKrideItinerary} from "@/components/DynamicEngine/hook/useKrideItinerary";
 import {useMetadata} from "@/components/providers/MetadataProvider";
 import axios from "@/services/axios";
 
@@ -42,6 +43,7 @@ export default function CommonPage({params: paramsPromise}: { params: Promise<{ 
         refId
     );
     const {formData, setFormData, handleChange, handleAction, showPassword, pwType, activeModal, closeModal} = usePageHook(screenId, metadata, pageData);
+    const krideItinerary = useKrideItinerary(screenId, formData);
 
     // 구글 캘린더 OAuth 콜백 처리
     useEffect(() => {
@@ -80,8 +82,9 @@ export default function CommonPage({params: paramsPromise}: { params: Promise<{ 
 
     const combineData = useMemo(() => ({
         ...pageData,
+        ...krideItinerary.data,
         ...formData
-    }), [pageData, formData]);
+    }), [pageData, krideItinerary.data, formData]);
 
     const handleToggleMine = () => {
         setIsOnlyMine(prev => !prev);
@@ -98,6 +101,32 @@ export default function CommonPage({params: paramsPromise}: { params: Promise<{ 
     // @@@@ 2026-02-04 스켈레톤 UI로 바꿈
     if (isLoading || (PROTECTED_SCREENS.includes(screenId) && !isLoggedIn) ) {
         return <Skeleton/>
+    }
+
+    // KRIDE FOCUS 로딩/에러 표시
+    if (screenId === "KRIDE_FOCUS" && krideItinerary.isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white gap-4">
+                <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-lg font-medium">AI가 여행 일정을 만들고 있어요...</p>
+                <p className="text-sm text-gray-400">잠시만 기다려주세요</p>
+            </div>
+        );
+    }
+
+    if (screenId === "KRIDE_FOCUS" && krideItinerary.error) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white gap-4">
+                <p className="text-lg font-medium">일정 생성에 실패했어요</p>
+                <p className="text-sm text-gray-400">{krideItinerary.error}</p>
+                <button
+                    className="mt-4 px-6 py-3 bg-red-600 rounded-full text-white font-bold"
+                    onClick={() => window.location.reload()}
+                >
+                    다시 시도
+                </button>
+            </div>
+        );
     }
 
     return (

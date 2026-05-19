@@ -14,13 +14,16 @@ interface DayPlan {
 }
 
 const DURATION_TO_DAYS: Record<string, number> = {
+  "당일치기": 1,
+  "1박2일": 2,
+  "2박3일": 3,
   day: 1,
   onenight: 2,
   twonight: 3,
 };
 
 export default function ItineraryPanel({ id, data }: any) {
-  const duration: string = data?.duration ?? "day";
+  const duration: string = data?.duration ?? "당일치기";
   const itinerary: DayPlan[] = data?.itinerary ?? [];
   const dayCount = DURATION_TO_DAYS[duration] ?? 1;
 

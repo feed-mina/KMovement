@@ -24,6 +24,17 @@ export default function CardImage({ id, meta, data }: Props) {
     );
   }
 
+  // 로컬 이미지(/artists/...)는 <img>로 직접 렌더링 (파일명 공백/특수문자 호환)
+  const isLocal = src.startsWith("/");
+  if (isLocal) {
+    return (
+      <div className={`card-image-wrapper ${shapeClass} relative w-full aspect-square`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={encodeURI(src)} alt={alt} className="absolute inset-0 w-full h-full object-cover" />
+      </div>
+    );
+  }
+
   return (
     <div className={`card-image-wrapper ${shapeClass} relative w-full aspect-square`}>
       <Image src={src} alt={alt} fill className="object-cover" sizes="150px" />
