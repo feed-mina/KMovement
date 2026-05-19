@@ -25,8 +25,8 @@ def close_driver():
 def get_artist_pois(artist_ids: list[str], limit: int = 20) -> list[dict]:
     """선택 아티스트의 FILMING_AT POI 조회"""
     query = """
-    MATCH (a:Artist)-[:FILMING_AT]->(p:POI)
-    WHERE a.id IN $artist_ids
+    MATCH (p:POI)-[:FILMING_AT]->(a:Artist)
+    WHERE a.name IN $artist_ids
     RETURN DISTINCT
         p.id        AS poi_id,
         p.name      AS name,
@@ -39,17 +39,17 @@ def get_artist_pois(artist_ids: list[str], limit: int = 20) -> list[dict]:
         collect(a.name) AS artists
     LIMIT $limit
     """
-    db = os.environ.get("NEO4J_DATABASE", "neo4j")
+    db = os.environ.get("NEO4J_DATABASE", "") or None
     with get_driver().session(database=db) as session:
         result = session.run(query, artist_ids=artist_ids, limit=limit)
         return [dict(r) for r in result]
 
 
 def get_region_pois(region_names: list[str], limit: int = 20) -> list[dict]:
-    """선택 지역의 POI 조회 (IN_REGION 관계)"""
+    """선택 지역의 POI 조회 (address CONTAINS 매칭 — Region 노드 없음)"""
     query = """
-    MATCH (r:Region)<-[:IN_REGION]-(p:POI)
-    WHERE r.name IN $region_names
+    MATCH (p:POI)
+    WHERE ANY(r IN $region_names WHERE p.address CONTAINS r)
     RETURN DISTINCT
         p.id        AS poi_id,
         p.name      AS name,
@@ -59,10 +59,10 @@ def get_region_pois(region_names: list[str], limit: int = 20) -> list[dict]:
         p.sido      AS sido,
         p.address   AS address,
         p.image_url AS image_url,
-        r.name      AS region
+        [r IN $region_names WHERE p.address CONTAINS r][0] AS region
     LIMIT $limit
     """
-    db = os.environ.get("NEO4J_DATABASE", "neo4j")
+    db = os.environ.get("NEO4J_DATABASE", "") or None
     with get_driver().session(database=db) as session:
         result = session.run(query, region_names=region_names, limit=limit)
         return [dict(r) for r in result]
@@ -77,7 +77,7 @@ def get_regions(limit: int = 20) -> list[dict]:
     ORDER BY r.safety_score DESC
     LIMIT $limit
     """
-    db = os.environ.get("NEO4J_DATABASE", "neo4j")
+    db = os.environ.get("NEO4J_DATABASE", "") or None
     with get_driver().session(database=db) as session:
         result = session.run(query, limit=limit)
         return [dict(r) for r in result]
@@ -95,7 +95,7 @@ def get_region_profile(region_name: str) -> dict:
            s.avg_spend    AS avg_spend,
            s.budget_tier  AS budget_tier
     """
-    db = os.environ.get("NEO4J_DATABASE", "neo4j")
+    db = os.environ.get("NEO4J_DATABASE", "") or None
     with get_driver().session(database=db) as session:
         result = session.run(query, region_name=region_name)
         record = result.single()

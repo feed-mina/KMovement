@@ -23,6 +23,7 @@ import math
 import os
 import pickle
 from typing import Optional
+import httpx
 
 import networkx as nx
 import pandas as pd
@@ -48,6 +49,14 @@ except ImportError as _e:
     generate_recommendation_text = lambda purpose, pois: ""
     generate_itinerary = lambda pois, duration, theme: ""
     get_poi_details = lambda poi_id: None
+
+# 앙상블 랭커 (모델 파일 없어도 서버 기동 가능)
+try:
+    from src.api.ensemble_client import rank_pois as ensemble_rank_pois
+    HAS_ENSEMBLE = True
+except ImportError:
+    HAS_ENSEMBLE = False
+    ensemble_rank_pois = None
 # 날씨 모듈 (KMA API 키 없어도 서버 기동 가능)
 try:
     from weather_kma import get_weather_weight, weather_to_safety_penalty
@@ -157,6 +166,42 @@ def nearest_node(graph: nx.Graph, lat: float, lon: float) -> tuple:
     """그래프에서 입력 좌표에 가장 가까운 노드 반환"""
     target = (lat, lon)
     return min(graph.nodes, key=lambda n: haversine(n, target))
+
+
+async def geocode_address(address: str) -> dict | None:
+    """Nominatim으로 한국 주소 → lat/lon 변환 (무료, rate limit 1req/s)"""
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {"q": address, "format": "json", "limit": 1, "countrycodes": "kr"}
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(url, params=params, headers={"User-Agent": "KRide/1.0"})
+            data = resp.json()
+            if data:
+                return {"lat": float(data[0]["lat"]), "lon": float(data[0]["lon"])}
+    except Exception:
+        pass
+    return None
+
+
+async def geocode_itinerary_places(itinerary: list) -> list[dict]:
+    """일정에서 장소 주소를 추출하여 좌표 변환 → 마커 리스트 반환"""
+    import asyncio
+    places = []
+    for day in itinerary:
+        for slot in ["morning", "afternoon"]:
+            for place in day.get(slot, {}).get("places", []):
+                if place.get("name") and place.get("address"):
+                    places.append(place)
+
+    markers = []
+    for place in places:
+        coord = await geocode_address(place["address"])
+        if coord:
+            markers.append({"name": place["name"], "lat": coord["lat"], "lon": coord["lon"]})
+        else:
+            print(f"[K-Ride] 지오코딩 실패 주소: '{place['address']}' (장소: {place['name']})")
+        await asyncio.sleep(1.1)  # Nominatim rate limit: 1 req/s
+    return markers
 
 
 def get_nearby_facilities(path_coords: list, radius_m: float = 500) -> list:
@@ -707,11 +752,36 @@ ItineraryRequest.model_rebuild(_types_namespace=_REQUEST_MODEL_TYPES)
 
 
 FALLBACK_ARTISTS = [
-    {"id": "bts", "name": "BTS", "imageUrl": None},
-    {"id": "blackpink", "name": "BLACKPINK", "imageUrl": None},
-    {"id": "newjeans", "name": "NewJeans", "imageUrl": None},
-    {"id": "ive", "name": "IVE", "imageUrl": None},
-    {"id": "seventeen", "name": "SEVENTEEN", "imageUrl": None},
+    {"id": "bts",              "name": "BTS",              "name_ko": "방탄소년단",  "imageUrl": "/artists/BTS.png"},
+    {"id": "blackpink",        "name": "BLACKPINK",        "name_ko": "블랙핑크",    "imageUrl": "/artists/BLACKPINK.jpg"},
+    {"id": "superjunior",      "name": "SUPER JUNIOR",     "name_ko": "슈퍼주니어",  "imageUrl": "/artists/SUPER JUNIOR.jpg"},
+    {"id": "seventeen",        "name": "SEVENTEEN",        "name_ko": "세븐틴",      "imageUrl": "/artists/SEVENTEEN.jpg"},
+    {"id": "twice",            "name": "TWICE",            "name_ko": "트와이스",    "imageUrl": "/artists/TWICE.jpg"},
+    {"id": "tvxq",             "name": "TVXQ",             "name_ko": "동방신기",    "imageUrl": "/artists/TVXQ.jpg"},
+    {"id": "btob",             "name": "BTOB",             "name_ko": "BTOB",        "imageUrl": "/artists/BTOB.jpg"},
+    {"id": "girlsgeneration",  "name": "Girls' Generation","name_ko": "소녀시대",    "imageUrl": "/artists/Girls' Generation.jpg"},
+    {"id": "exo",              "name": "EXO",              "name_ko": "엑소",        "imageUrl": "/artists/EXO.jpg"},
+    {"id": "redvelvet",        "name": "Red Velvet",       "name_ko": "레드벨벳",    "imageUrl": "/artists/Red Velvet.jpg"},
+    {"id": "nct",              "name": "NCT",              "name_ko": "NCT",          "imageUrl": "/artists/NCT.jpg"},
+    {"id": "infinite",         "name": "INFINITE",         "name_ko": "인피니트",    "imageUrl": "/artists/INFINITE.jpg"},
+    {"id": "ohmygirl",         "name": "OH MY GIRL",       "name_ko": "오마이걸",    "imageUrl": "/artists/OH MY GIRL.jpg"},
+    {"id": "apink",            "name": "Apink",            "name_ko": "에이핑크",    "imageUrl": "/artists/Apink.jpg"},
+    {"id": "shinee",           "name": "SHINee",           "name_ko": "샤이니",      "imageUrl": "/artists/SHINee.jpg"},
+    {"id": "mamamoo",          "name": "MAMAMOO",          "name_ko": "마마무",      "imageUrl": "/artists/MAMAMOO.jpg"},
+    {"id": "iu",               "name": "IU",               "name_ko": "아이유",      "imageUrl": "/artists/IU.jpg"},
+    {"id": "txt",              "name": "TXT",              "name_ko": "TXT",          "imageUrl": "/artists/TXT.png"},
+    {"id": "victon",           "name": "VICTON",           "name_ko": "빅톤",        "imageUrl": "/artists/VICTON.jpg"},
+    {"id": "gdragon",          "name": "G-Dragon",         "name_ko": "지드래곤",    "imageUrl": "/artists/GDragon.jpg"},
+    {"id": "fromis9",          "name": "fromis_9",         "name_ko": "프로미스나인", "imageUrl": "/artists/fromis_9.jpg"},
+    {"id": "chungha",          "name": "CHUNGHA",          "name_ko": "청하",        "imageUrl": "/artists/CHUNGHA.jpg"},
+    {"id": "blockb",           "name": "Block B",          "name_ko": "블락비",      "imageUrl": "/artists/Block B.jpg"},
+    {"id": "girlsday",         "name": "Girl's Day",       "name_ko": "걸스데이",    "imageUrl": "/artists/Girl's Day.jpg"},
+    {"id": "got7",             "name": "GOT7",             "name_ko": "GOT7",         "imageUrl": "/artists/GOT7.jpg"},
+    {"id": "highlight",        "name": "Highlight",        "name_ko": "하이라이트",  "imageUrl": "/artists/Highlight.jpg"},
+    {"id": "rain",             "name": "Rain",             "name_ko": "비",          "imageUrl": "/artists/Rain.jpg"},
+    {"id": "nuest",            "name": "NU'EST",           "name_ko": "뉴이스트",    "imageUrl": "/artists/NU'EST.jpg"},
+    {"id": "kangdaniel",       "name": "Kang Daniel",      "name_ko": "강다니엘",    "imageUrl": "/artists/Kang Daniel.jpg"},
+    {"id": "straykids",        "name": "Stray Kids",       "name_ko": "스트레이키즈", "imageUrl": "/artists/Stray Kids.jpg"},
 ]
 
 FALLBACK_REGIONS = [
@@ -833,7 +903,7 @@ def recommend_ai(req: RecommendAIRequest):
 # POST /api/recommend/itinerary
 # ─────────────────────────────────────────────
 @app.post("/api/recommend/itinerary")
-def recommend_itinerary(req: ItineraryRequest):
+async def recommend_itinerary(req: ItineraryRequest):
     """
     AI 일정 생성
     파이프라인: Neo4j(아티스트+지역 POI) → ChromaDB(목적 유사 POI) → Groq(일정 JSON)
@@ -846,16 +916,18 @@ def recommend_itinerary(req: ItineraryRequest):
     if req.artists:
         try:
             artist_pois = get_artist_pois(req.artists, limit=10)
-        except Exception:
-            pass
+            print(f"[K-Ride] artist_pois: {len(artist_pois)}건 (artists={req.artists})")
+        except Exception as e:
+            print(f"[K-Ride] ❌ Neo4j artist_pois 실패: {e}")
 
     # 2. Neo4j — 지역 POI
     region_pois = []
     if req.regions:
         try:
             region_pois = get_region_pois(req.regions, limit=10)
-        except Exception:
-            pass
+            print(f"[K-Ride] region_pois: {len(region_pois)}건 (regions={req.regions})")
+        except Exception as e:
+            print(f"[K-Ride] ❌ Neo4j region_pois 실패: {e}")
 
     # 3. ChromaDB — 목적 기반 POI
     chroma_pois = []
@@ -863,17 +935,40 @@ def recommend_itinerary(req: ItineraryRequest):
         query_text = " ".join(req.purposes + req.regions)
         try:
             chroma_pois = search_pois_by_purpose(req.purposes, query_text, top_k=5)
-        except Exception:
-            pass
+            print(f"[K-Ride] chroma_pois: {len(chroma_pois)}건 (purposes={req.purposes})")
+        except Exception as e:
+            print(f"[K-Ride] ❌ ChromaDB 실패: {e}")
 
-    # 4. 합산 + 중복 제거
-    merged: dict[str, dict] = {}
-    for p in artist_pois + region_pois + chroma_pois:
-        key = p.get("poi_id") or p.get("name", "")
-        if key not in merged:
-            merged[key] = p
-
-    all_pois = list(merged.values())
+    # 4. 앙상블 랭킹 또는 단순 합산
+    neo4j_pois = artist_pois + region_pois
+    if HAS_ENSEMBLE and ensemble_rank_pois:
+        try:
+            all_pois = ensemble_rank_pois(
+                neo4j_pois=neo4j_pois,
+                chroma_pois=chroma_pois,
+                artists=req.artists,
+                regions=req.regions,
+                purposes=req.purposes,
+                budget=req.budget.dict(),
+                top_k=15,
+            )
+            print(f"[K-Ride] 앙상블 랭킹: {len(all_pois)}건 (neo4j={len(neo4j_pois)} + chroma={len(chroma_pois)})")
+        except Exception as e:
+            print(f"[K-Ride] 앙상블 fallback → union: {e}")
+            merged: dict[str, dict] = {}
+            for p in neo4j_pois + chroma_pois:
+                key = p.get("poi_id") or p.get("name", "")
+                if key not in merged:
+                    merged[key] = p
+            all_pois = list(merged.values())
+    else:
+        merged: dict[str, dict] = {}
+        for p in neo4j_pois + chroma_pois:
+            key = p.get("poi_id") or p.get("name", "")
+            if key not in merged:
+                merged[key] = p
+        all_pois = list(merged.values())
+        print(f"[K-Ride] 총 POI: {len(all_pois)}건 (artist={len(artist_pois)} + region={len(region_pois)} + chroma={len(chroma_pois)})")
 
     # 5. Groq — 일정 생성
     try:
@@ -909,6 +1004,14 @@ def recommend_itinerary(req: ItineraryRequest):
         for p in all_pois
         if p.get("lat") and p.get("lon")
     ]
+
+    # 7. POI 마커가 없으면 LLM 일정의 주소로 지오코딩 fallback
+    if not markers and itinerary_result.get("itinerary"):
+        try:
+            markers = await geocode_itinerary_places(itinerary_result["itinerary"])
+            print(f"[K-Ride] 지오코딩 마커 {len(markers)}개 생성")
+        except Exception as e:
+            print(f"[K-Ride] 지오코딩 실패: {e}")
 
     return {
         **itinerary_result,

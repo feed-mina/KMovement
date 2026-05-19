@@ -26,7 +26,7 @@ def build_graph():
         SELECT id, name, category, sub_category, address, 
                ST_Y(geom::geometry) as lat, ST_X(geom::geometry) as lon
         FROM poi
-        WHERE category IN ('tourism', 'kculture')
+        WHERE category IN ('tourism', 'kculture', 'kpop')
     """, conn)
     
     # None 값을 빈 문자열로 변환 (GraphML 에러 방지)
