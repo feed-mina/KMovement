@@ -1201,10 +1201,14 @@ http://localhost:8080/swagger-ui/index.html
 - WeatherLSTM / EventNER (GPU 절약)
 - 경로 그래프 (route_graph.pkl, CSV 파일들)
 
-**Phase 3 — TTS / Animation (Kaggle에서 별도 개발 중):**
-- GPT-SoVITS TTS, CogVideoX/AnimatedDrawings 등 → 사용자가 Kaggle 노트북에서 직접 구축 중
-- 완성 후 `kaggle_server.py`에 `/api/tts`, `/api/video` 엔드포인트 추가하여 연동 예정
-- GCP 이전 시 TorchServe MAR로 패키징 + Celery media 큐로 비동기 처리
+**미디어 파이프라인 (Kaggle 노트북 B에서 구현 완료):**
+- **TTS**: GPT-SoVITS V3 (한국어 고품질, localhost:9880 서브프로세스)
+- **영상 (인물)**: CogVideoX 1.5 Image-to-Video (10~15분, CPU offload)
+- **영상 (풍경)**: 3D Photo Inpainting (Depth Anything V2 + Ken Burns, ~30초)
+- **BGM**: MusicGen (최대 30초)
+- **합성**: FFmpeg (영상 + TTS + BGM 믹싱)
+- **추후 확장**: Animated Drawings — 손그림 캐릭터 오버레이 (`/api/media/animate-drawing`)
+- 모델 경로: `/kaggle/input/` Dataset 기반 (세션 종료 후에도 유지)
 
 ### 파일 구조
 
@@ -1238,21 +1242,22 @@ SUPABASE_KEY=sb_secret_...
 |------|------|
 | `kaggle/kaggle_server.py` | 노트북 A — Slim FastAPI (추천/챗봇, CPU/가벼운 GPU) |
 | `kaggle/kride_kaggle.ipynb` | 노트북 A — zrok URL-A |
-| `kaggle/media_server.py` | 노트북 B — Media FastAPI (TTS/MusicGen/3D Photo/LivePortrait/FFmpeg) |
+| `kaggle/media_server.py` | 노트북 B — Media FastAPI (GPT-SoVITS/MusicGen/CogVideoX/3D Photo/FFmpeg) |
 | `kaggle/kride_media_kaggle.ipynb` | 노트북 B — zrok URL-B (GPU T4 전용) |
 
 ### 노트북 B: Media Server 엔드포인트
 
 | 엔드포인트 | 기능 | VRAM | 시간 |
 |-----------|------|------|------|
-| `POST /api/media/tts` | 한국어 TTS (XTTS-v2) | ~2-3GB | ~5초 |
+| `POST /api/media/tts` | 한국어 TTS (GPT-SoVITS V3, localhost:9880 프록시) | ~4GB | ~10초 |
 | `POST /api/media/musicgen` | BGM 생성 (MusicGen) | ~2-6GB | ~15초 |
-| `POST /api/media/inpaint3d` | 풍경 → 카메라 무빙 (Depth Anything + Ken Burns) | ~2-4GB | ~30초 |
-| `POST /api/media/animate` | 인물 → 모션 영상 (LivePortrait) | ~6GB | 3~10분 |
+| `POST /api/media/inpaint3d` | 풍경 → 카메라 무빙 (Depth Anything V2 + Ken Burns) | ~2-4GB | ~30초 |
+| `POST /api/media/animate` | 인물/복잡 사진 → 영상 (CogVideoX 1.5, CPU offload) | ~12-16GB | 10~15분 |
 | `POST /api/media/render` | FFmpeg 합성 (영상 + TTS + BGM) | CPU | ~10초 |
+| `POST /api/media/animate-drawing` | **[추후]** 손그림 캐릭터 → 모션 (Animated Drawings) | ~2GB | ~1분 |
 | `GET /api/media/status/{id}` | 작업 상태 폴링 | — | — |
 | `GET /api/media/download/{id}` | 결과 파일 다운로드 | — | — |
-| `POST /api/media/unload/{name}` | GPU 메모리 해제 (tts/musicgen) | — | — |
+| `POST /api/media/unload/{name}` | GPU 메모리 해제 (sovits/musicgen/cogvideox) | — | — |
 
 ### 비동기 폴링 패턴 (미디어 생성은 시간이 오래 걸림)
 
@@ -1268,8 +1273,8 @@ SUPABASE_KEY=sb_secret_...
 ```
 1. POST /api/media/tts      → job_tts (한국어 대본 음성)
 2. POST /api/media/musicgen  → job_bgm (배경음악)
-3. POST /api/media/animate   → job_video (인물 모션) 또는
-   POST /api/media/inpaint3d → job_video (풍경 카메라 무빙)
+3. POST /api/media/animate   → job_video (인물/복잡 사진 → CogVideoX) 또는
+   POST /api/media/inpaint3d → job_video (풍경 → 3D Photo Ken Burns)
 4. POST /api/media/render    → job_final (합성)
    {video_job_id: job_video, tts_job_id: job_tts, bgm_job_id: job_bgm}
 5. GET /api/media/download/{job_final} → 최종 mp4
