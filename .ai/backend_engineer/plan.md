@@ -489,15 +489,19 @@ python src/db/download_artist_thumbnails.py
 
 ---
 
-## V50 query_master 업데이트 — 2026-05-19
+## V50 query_master 업데이트 — 2026-05-19 [완료 → V50 30명 확장]
 
-### INTRO2 아티스트 (10명 → 20명)
+### INTRO2 아티스트 (10명 → 20명 → **30명**)
 
-**기존:** BTS, BLACKPINK, IVE, aespa, NewJeans, TWICE, EXO, STRAY KIDS, SEVENTEEN, LE SSERAFIM
-**변경:** BTS, BLACKPINK, SEVENTEEN, SUPER JUNIOR, TWICE, TVXQ, BTOB, Girls' Generation, EXO, Red Velvet, NCT, GDragon, OH MY GIRL, SHINee, MAMAMOO, IU, TXT, Stray Kids, ITZY, IVE
+**기존 (V41):** BTS, BLACKPINK, IVE, aespa, NewJeans, TWICE, EXO, STRAY KIDS, SEVENTEEN, LE SSERAFIM
+**V50 (20명):** BTS, BLACKPINK, SEVENTEEN, SUPER JUNIOR, TWICE, TVXQ, BTOB, Girls' Generation, EXO, Red Velvet, NCT, GDragon, OH MY GIRL, SHINee, MAMAMOO, IU, TXT, Stray Kids, ITZY, IVE
+**V50 확장 (30명):** kcisa_media_locations_2023.csv POI 수 상위 30 기준으로 확장. `name_ko` 컬럼 추가.
 
-- Apink 제거, GDragon 추가 (사용자 요청)
-- imageUrl 경로 포함 (`/artists/{name}.jpg|png`)
+추가된 10명: INFINITE(인피니트), Apink(에이핑크), VICTON(빅톤), fromis_9(프로미스나인), CHUNGHA(청하), Block B(블락비), Girl's Day(걸스데이), GOT7, Highlight(하이라이트), Rain(비), NU'EST(뉴이스트), Kang Daniel(강다니엘)
+
+- FALLBACK_ARTISTS도 30명으로 확장 (`fastapi_server.py`)
+- `supabase_client.py`: `get_all_artists()` name 빈 행 skip 추가
+- 이미지: 기존 20명 존재, 신규 10명 미수집 (CardImage 이니셜 fallback으로 동작)
 
 ### INTRO3 지역 (12 → 13)
 
@@ -581,3 +585,342 @@ Next.js `rewrites()` 프록시가 30초 타임아웃으로 연결 끊김 (socket
 2. 로그에서 어느 데이터 소스가 실패하는지 파악
 3. Neo4j 연결 테스트: `curl http://localhost:8000/api/regions`
 4. 필요 시 Neo4j Browser에서 직접 Cypher 실행하여 데이터 확인
+
+---
+
+## K-Ride 확장: 앙상블 비교 + 챗봇(멀티쿼리+리랭커) + PDF 지식베이스 — 2026-05-19 [구현완료]
+
+### 개요
+
+기존 추천 파이프라인(Neo4j + ChromaDB → union → Groq LLM)에 3가지 확장:
+1. **앙상블 모델 비교** (LightGBM vs XGBoost Ranker) + MLflow/DagsHub 기록
+2. **챗봇** (멀티쿼리 + 리랭커) — `subproject/NLP/chatbot/`에 별도 서비스 (:8001)
+3. **PDF 지식베이스** — 18개 관광 PDF → ChromaDB 인덱싱 → 챗봇 RAG 소스
+
+### Phase A: FALLBACK_ARTISTS 30명 + Supabase 검증 [완료]
+
+| 파일 | 변경 |
+|------|------|
+| `src/api/fastapi_server.py` | FALLBACK_ARTISTS 5명 → 30명 (CSV POI수 상위 30, `name_ko` 포함) |
+| `src/api/supabase_client.py` | `get_all_artists()` — name 빈 행 skip |
+| `.ai/V50__kride_artist_region_update.sql` | 20명 → 30명 + `name_ko` 컬럼 |
+
+### Phase B: PDF 인덱싱 [완료]
+
+| 파일 | 역할 |
+|------|------|
+| `subproject/NLP/chatbot/__init__.py` | 패키지 |
+| `subproject/NLP/chatbot/config.py` | 공통 설정 (모델명, 경로, 컬렉션명) |
+| `subproject/NLP/chatbot/pdf_ingest.py` | PyPDFLoader → 청크 → ChromaDB 인덱싱 |
+
+**실행 결과:**
+- 18개 PDF → **4636 chunks** 인덱싱 완료 (2건 SKIP — 깨진 폰트 메타데이터)
+- 컬렉션: `kride_pdf_knowledge` (ChromaDB, 기존 4개 POI 컬렉션과 분리)
+- 임베딩: `intfloat/multilingual-e5-small` (384-dim, 기존과 동일)
+
+### Phase C: 리랭커 비교 [완료]
+
+| 파일 | 역할 |
+|------|------|
+| `subproject/NLP/chatbot/reranker.py` | CrossEncoder 래퍼 클래스 |
+| `subproject/NLP/chatbot/reranker_comparison.py` | MiniLM vs BGE 벤치마크 (20개 한국어 관광 쿼리) |
+
+**비교 결과 (`.ai/memo/reranker_comparison.md`):**
+
+| 메트릭 | MiniLM (22M) | BGE-M3 (560M) |
+|--------|-------------|---------------|
+| 평균 Latency | **3.5초** | 96초 (CPU에서 27배 느림) |
+| Top-5 Jaccard Overlap | 0.24 (두 모델 결과 76% 다름) |
+
+**결론: MiniLM 채택** — CPU 환경에서 BGE-M3는 쿼리당 ~96초로 실용 불가. GPU 서버 배포 시 BGE로 전환 가능.
+`config.py`의 `RERANKER_MODEL`을 `cross-encoder/ms-marco-MiniLM-L-6-v2`로 변경 완료.
+
+> 참고: LLM-as-judge 한국어 관련도 점수가 둘 다 0.00 — Groq 응답 파싱 이슈 (평가 도구 문제, 리랭커 성능 무관)
+
+### Phase D: 챗봇 서비스 [완료 — 코드 작성, 서버 미실행]
+
+| 파일 | 역할 |
+|------|------|
+| `subproject/NLP/chatbot/multi_query.py` | Groq LLM으로 쿼리 3개 변형 생성 |
+| `subproject/NLP/chatbot/chatbot_chain.py` | 핵심 RAG 파이프라인 오케스트레이션 |
+| `subproject/NLP/chatbot/chatbot_server.py` | FastAPI 서버 (:8001) |
+| `subproject/NLP/chatbot/requirements.txt` | 의존성 목록 |
+
+**챗봇 파이프라인:**
+```
+사용자 메시지
+  → [1] Multi-Query (Groq → 원본 + 3 변형 = 4 쿼리)
+  → [2] Multi-Source Retrieval (PDF 컬렉션 + POI 4개 컬렉션)
+  → [3] 중복 제거 (chunk ID / POI name)
+  → [4] Rerank (MiniLM CrossEncoder → 상위 10개)
+  → [5] Context 조립
+  → [6] Groq LLM 응답 생성
+  → 응답 (reply + sources + pois)
+```
+
+**엔드포인트:**
+
+| 엔드포인트 | 설명 |
+|-----------|------|
+| `POST /chat` | `{message, session_id, user_id}` → `{reply, sources, pois, timestamp, session_started_at}` |
+| `POST /chat/reset` | 세션 초기화 + 종료 시각 기록 |
+| `GET /health` | 서버 상태 + active_sessions 수 |
+
+**추가 기능 (사용자 요청):**
+- `user_id`: 로그인 유저 식별
+- `timestamp`: 응답 시각 (KST)
+- `session_started_at` / `session_ended_at`: 세션 시작/종료 시각 추적
+
+### Phase E: 앙상블 모델 비교 [완료]
+
+| 파일 | 역할 |
+|------|------|
+| `src/ml/feature_engineering.py` | 8-feature 벡터 추출 |
+| `src/ml/build_ensemble_ranker.py` | LightGBM vs XGBoost 학습 + MLflow 기록 |
+| `src/api/ensemble_client.py` | 추론 래퍼 (`rank_pois()`) |
+
+**8-Feature Vector:**
+
+| Feature | 소스 | 범위 |
+|---------|------|------|
+| `neo4j_hit` | Neo4j `get_artist_pois()` | 0/1 |
+| `neo4j_artist_count` | 연결된 아티스트 수 | 0~N |
+| `chroma_similarity` | ChromaDB 코사인 유사도 | 0~1 |
+| `jaccard_score` | `poi_cooccurrence_v2.pkl` | 0~1 |
+| `category_match` | 목적-카테고리 일치 | 0/1 |
+| `region_match` | 지역-주소 일치 | 0/1 |
+| `distance_km` | Haversine 거리 | 0~∞ |
+| `budget_fit` | 예산 범위 내 | 0/1 |
+
+**학습 결과 (`.ai/memo/ensemble_comparison.md`):**
+
+| 메트릭 | LightGBM | XGBoost |
+|--------|----------|---------|
+| NDCG@5 | 1.0000 | 1.0000 |
+| NDCG@10 | 1.0000 | 1.0000 |
+| MAP@5 | 1.0000 | 1.0000 |
+| Recall@5 | 0.8842 | 0.8842 |
+| Recall@10 | 1.0000 | 1.0000 |
+
+- 데이터: 3,873 샘플 (200 쿼리), ChromaDB POI 로드 실패 → 더미 데이터 사용
+- **우승 모델: LightGBM** → `models/ensemble_ranker.pkl` 저장 완료
+- 실제 데이터로 재학습 시 차이 발생 예상 (더미 데이터라 양 모델 동점)
+
+### Phase F: FastAPI 앙상블 통합 [완료]
+
+| 파일 | 변경 |
+|------|------|
+| `src/api/fastapi_server.py` | `ensemble_client.rank_pois()` import + itinerary 엔드포인트 통합 |
+| `src/api/ensemble_client.py` | 신규 — 모델 로드 + `rank_pois()` 추론 |
+
+**파이프라인 변경:**
+```
+[Before]
+Neo4j → ─┐
+ChromaDB → ─── union(중복제거) ─── Groq LLM ─── itinerary
+          ┘
+
+[After]
+Neo4j → ──────┐
+ChromaDB → ───── ensemble_client.rank_pois() ─── top-K ─── Groq LLM ─── itinerary
+Co-occ → ─────┘   (LightGBM predict)
+```
+
+모델 파일 없으면 기존 union 방식으로 자동 fallback.
+
+### .env 추가
+
+```
+DAGSHUB_REPO_OWNER=    # 사용자 계정 입력 필요
+DAGSHUB_REPO_NAME=kride-project
+DAGSHUB_TOKEN=         # DagsHub 토큰 입력 필요
+```
+
+### 남은 작업
+
+| 작업 | 상태 |
+|------|------|
+| 챗봇 서버 실행 테스트 (`python -m chatbot.chatbot_server`) | ⏳ 미실행 |
+| 신규 아티스트 10명 이미지 수집 (`public/artists/`) | ⏳ 건너뜀 (이니셜 fallback 동작) |
+| V50 SQL pgAdmin 실행 (30명 아티스트) | ⏳ 사용자 실행 필요 |
+| DagsHub 토큰 설정 + 앙상블 재학습 (실제 데이터) | ⏳ 선택 |
+| 앙상블 학습 시 ChromaDB POI 연결 (경로 수정) | ⏳ 더미 데이터 → 실제 데이터 전환 필요 |
+| **단위 테스트 작성 + 전체 통과** | ✅ 완료 (103 passed) |
+
+---
+
+## 단위 테스트 작성 — 2026-05-20 [완료]
+
+### 테스트 결과
+
+```
+pytest tests/ -v
+103 passed, 0 failed, 16 warnings in 26.78s
+```
+
+### 생성/수정 파일
+
+| 파일 | 테스트 수 | 커버 대상 |
+|------|----------|----------|
+| `tests/test_chatbot_server.py` (신규) | 25 | Reranker, MultiQuery, ChatbotChain, ChatbotServer 엔드포인트 |
+| `tests/test_ensemble.py` (신규) | 28 | haversine, compute_features, rank_pois, 메트릭 함수, PURPOSE_CATEGORY_MAP |
+| `tests/test_pdf_ingest.py` (신규) | 14 | build_chunk_id, load_pdfs, chunk_documents, ingest 파이프라인 |
+| `tests/test_fastapi.py` (수정) | 36 | 기존 FastAPI + 앙상블 통합 경로 (HAS_ENSEMBLE=True/False, fallback, markers) |
+
+### 수정 사항 (기존 test_fastapi.py)
+
+서버 코드가 fallback 패턴으로 변경되어 기존 테스트 6개를 서버 동작에 맞게 수정:
+
+| 기존 기대 | 수정 후 기대 | 이유 |
+|----------|------------|------|
+| `HAS_AI=False` → 503 | `HAS_AI=False` → 200 + FALLBACK | artists/regions는 fallback 반환 |
+| 예외 시 502 | 예외 시 200 + FALLBACK | try/except → fallback 패턴 적용 |
+| Groq 실패 → 502 | Groq 실패 → 200 + 빈 일정 | `{"itinerary": []}` fallback |
+
+### 앙상블 통합 테스트 (신규 추가)
+
+| 테스트 | 검증 내용 |
+|--------|----------|
+| `test_ensemble_ranking_applied` | HAS_ENSEMBLE=True → ensemble_rank_pois 호출 |
+| `test_ensemble_fallback_on_exception` | 앙상블 예외 시 union 방식 fallback |
+| `test_no_ensemble_uses_union` | HAS_ENSEMBLE=False → 기존 방식 |
+| `test_ensemble_markers_have_coords` | 좌표 있는 POI만 markers에 포함 |
+
+---
+
+## 테스트 개념 Q&A — 2026-05-20
+
+### Q1. TestClient는 ASGI 앱을 직접 호출한다?
+
+```
+브라우저 → HTTP → 네트워크 → 서버(uvicorn) → FastAPI 앱
+TestClient →         (네트워크 없이)         → FastAPI 앱 직접
+```
+
+- FastAPI는 ASGI(Asynchronous Server Gateway Interface) 프레임워크
+- `TestClient`는 실제 HTTP 서버를 띄우지 않고 **메모리 안에서** 앱 함수를 직접 호출
+- 장점: 포트 바인딩 불필요, 빠르고, CI/CD에서도 실행 가능
+
+### Q2. MagicMock이란?
+
+```python
+mock_groq = MagicMock()
+mock_groq.chat.completions.create.return_value = fake_response
+```
+
+- `unittest.mock.MagicMock`: **가짜 객체**를 자동 생성
+- 어떤 속성/메서드를 호출해도 에러 없이 동작 (체이닝 가능)
+- `return_value`로 반환값 지정, `side_effect`로 예외 발생 가능
+- 용도: 외부 API(Groq, Neo4j 등)를 **실제 호출하지 않고** 테스트
+
+### Q3. stub 설정이란?
+
+```python
+sys.modules["neo4j"] = types.ModuleType("neo4j")  # 빈 모듈 등록
+```
+
+- **Stub**: 설치되지 않은 패키지를 빈 껍데기로 대체
+- `neo4j`, `chromadb` 등이 설치 안 돼도 `import` 에러 없이 테스트 실행 가능
+- Mock과 차이: stub은 "존재하게 만드는 것", mock은 "동작을 제어하는 것"
+
+### Q4. avg_cost란?
+
+- POI(관광지)의 **평균 지출 비용** (원 단위)
+- 예산 필터링에 사용: 유저 예산 범위 내의 POI만 추천
+- `avg_cost`가 없는 POI → 비용 정보 미확인 → 필터에서 제외하지 않음 (통과)
+
+### Q5. 앙상블이 실패할 수 있는 경우?
+
+| 상황 | 원인 |
+|------|------|
+| 모델 파일 없음 | `models/ensemble_ranker.pkl` 삭제/미생성 |
+| 모델 버전 불일치 | Python/LightGBM 버전 업데이트 후 pickle 로드 실패 |
+| feature 수 불일치 | 모델 학습 시 8개 → 코드 수정으로 feature 추가/삭제 |
+| 메모리 부족 | 후보 POI가 너무 많을 때 numpy 배열 생성 실패 |
+| co-occurrence pkl 손상 | `poi_cooccurrence_v2.pkl` 파일 깨짐 |
+
+→ 실패 시 **기존 union 방식으로 자동 fallback** (서비스 중단 없음)
+
+### Q6. upsert에서 short chunk를 skip하는 이유?
+
+```python
+if not text or len(text) < 10:
+    continue  # skip
+```
+
+- 10자 미만 = 의미 있는 정보 없음 (페이지 번호, 빈 줄 등)
+- 임베딩해봐야 의미 없는 벡터 → 검색 노이즈 증가
+- ChromaDB 저장 공간 낭비 방지
+
+### Q7. Haversine 거리 계산이란?
+
+- 지구를 구(球)로 가정하고 **두 위경도 좌표 간의 최단 거리(km)**를 계산하는 공식
+- 예: 서울(37.57, 126.98) ↔ 부산(35.18, 129.08) ≈ 325km
+- 용도: "유저 현재 위치에서 POI까지 얼마나 먼가?" → 가까운 POI 우선 추천
+
+### Q8. chroma_similarity 테스트란?
+
+```python
+chroma_similarities={"p1": 0.85} → feats[2] == 0.85
+```
+
+- **ChromaDB 코사인 유사도** (0~1): 유저 검색어와 POI 설명문 유사도
+- 0.85 = "유저가 찾는 것과 이 POI 설명이 85% 유사"
+- 앙상블 모델의 3번째 feature → 유사할수록 높은 랭킹
+
+### Q9. distance가 0이면 유저에게 어떻게 표시?
+
+`distance_km = 0` = 유저 위치 정보 없음 (GPS 미제공)
+
+| 상황 | 표시 |
+|------|------|
+| 유저 위치 있음 | "현재 위치에서 2.3km" |
+| 유저 위치 없음 | 거리 표시 안 함 (또는 "위치 허용 시 거리 표시") |
+
+서버: `user_lat=None` → distance=0 → 앙상블이 거리를 랭킹에 반영하지 않음 (다른 7개 feature로만 점수 산정)
+
+### Q10. budget_fit이 1인데 avg_cost가 없으면?
+
+| 레이어 | 처리 |
+|--------|------|
+| **서버** | `avg_cost` 없는 POI도 추천 목록에 포함 (필터 통과) |
+| **프론트엔드** | `avg_cost` 있으면 "예상 비용: ₩50,000" / 없으면 "비용 정보 미확인" 또는 비용란 숨김 |
+
+이유: 비용 정보가 없다고 좋은 POI를 제외하면 추천 품질 하락
+
+### Q11. `ec._model_data = {...}` 코드 설명
+
+```python
+ec._model_data = {
+    "model": mock_model,      # 학습된 LightGBM 모델 (mock)
+    "type": "lgbm",           # 모델 종류 식별자
+    "features": FEATURE_NAMES  # 모델이 기대하는 8개 feature 이름
+}
+```
+
+- 실제로는 `models/ensemble_ranker.pkl`에서 pickle로 로드되는 딕셔너리
+- 테스트에서는 파일 로드 없이 직접 주입하여 모델 동작 검증
+- `model.predict(X)` → 각 POI의 랭킹 점수 반환
+
+### Q12. NDCG@k, Recall@k, MAP@k란?
+
+정보 검색/추천 시스템의 **랭킹 품질** 측정 메트릭:
+
+| 메트릭 | 의미 | 비유 |
+|--------|------|------|
+| **NDCG@k** | 상위 k개의 **순서 품질** | "좋은 것이 위에 있는가?" |
+| **Recall@k** | 상위 k개에 **정답이 얼마나 포함**됐는가 | "빠뜨린 건 없는가?" |
+| **MAP@k** | 상위 k개에서 정답이 **얼마나 일찍** 나오는가 | "첫 페이지에 원하는 게 있는가?" |
+
+예시 (맛집 추천):
+```
+실제 맛집: [경복궁떡볶이, 광장시장, 을지로골목]
+추천 결과: [광장시장✅, 카페A❌, 경복궁떡볶이✅, 카페B❌, 을지로골목✅]
+
+NDCG@5 = 0.89 (좋은 순서)
+Recall@5 = 3/3 = 1.0 (5개 안에 3개 모두 포함)
+MAP@5 = 높음 (정답이 1,3,5위 → 비교적 빠름)
+```
+
+유저는 첫 3~5개만 봄 → 상위에 좋은 추천이 있어야 함.
+LightGBM vs XGBoost 중 "상위 K개 품질"이 더 좋은 모델을 선택하는 기준.

@@ -175,3 +175,107 @@ artist_1~20: 선재 업고 튀어, 눈물의 여왕, 도깨비, 이태원 클라
 
 787건 중 일부(292건)는 기존 `kculture`/`tourism` POI와 이름이 같아 `load_kcisa_kpop_data.py`에서 기존 POI ID를 재사용.
 → 그래프 빌더가 기존 노드로 이미 포함 → Delta에서 제외 (정상 동작)
+
+---
+
+## 8. 확장 모듈 파일 맵 — 2026-05-19
+
+### 챗봇 서비스 (`subproject/NLP/chatbot/`)
+
+| 파일 | 역할 | 핵심 클래스/함수 |
+|------|------|----------------|
+| `config.py` | 공통 설정 | `CHROMA_PATH`, `PDF_COLLECTION`, `RERANKER_MODEL`, `GROQ_MODEL` |
+| `pdf_ingest.py` | PDF → ChromaDB 인덱싱 | `ingest()` — PyPDFLoader → 청크 → 임베딩 → upsert |
+| `reranker.py` | CrossEncoder 래퍼 | `Reranker.rerank(query, passages)` |
+| `reranker_comparison.py` | MiniLM vs BGE 벤치마크 | `run_comparison()` → `.ai/memo/reranker_comparison.md` |
+| `multi_query.py` | Groq 쿼리 변형 | `generate_query_variants(query)` → [원본, 변형1, 변형2, 변형3] |
+| `chatbot_chain.py` | RAG 파이프라인 | `chat(message, session_id)` → {reply, sources, pois} |
+| `chatbot_server.py` | FastAPI :8001 | `/chat`, `/chat/reset`, `/health` |
+
+### ML 모듈 (`src/ml/`)
+
+| 파일 | 역할 | 핵심 함수 |
+|------|------|----------|
+| `feature_engineering.py` | 8-feature 벡터 | `compute_features(poi, ...)` → np.ndarray(8,) |
+| `build_ensemble_ranker.py` | 학습 + 비교 | `main()` → LightGBM vs XGBoost → `models/ensemble_ranker.pkl` |
+
+### 추론 래퍼 (`src/api/`)
+
+| 파일 | 역할 | 핵심 함수 |
+|------|------|----------|
+| `ensemble_client.py` | 앙상블 랭킹 | `rank_pois(neo4j_pois, chroma_pois, ...)` → top-K POI |
+
+### ChromaDB 컬렉션 현황
+
+| 컬렉션 | 용도 | 데이터 수 |
+|--------|------|----------|
+| `kride_poi_kculture` | K-Culture POI | 기존 |
+| `kride_poi_food` | 음식 POI | 기존 |
+| `kride_poi_nature` | 자연 POI | 기존 |
+| `kride_poi_history` | 역사 POI | 기존 |
+| **`kride_pdf_knowledge`** | **관광 PDF 지식** | **4,636 chunks (신규)** |
+
+### 리랭커 비교 결과 요약
+
+- **MiniLM** (`cross-encoder/ms-marco-MiniLM-L-6-v2`): 22M params, 평균 3.5초/쿼리 (CPU)
+- **BGE-M3** (`BAAI/bge-reranker-v2-m3`): 560M params, 평균 96초/쿼리 (CPU, 27배 느림)
+- **채택: MiniLM** — CPU 환경 기준. GPU 서버 배포 시 BGE-M3 전환 고려.
+
+### 앙상블 학습 결과 요약
+
+- 데이터: 3,873 샘플 (200 쿼리) — 더미 데이터 (ChromaDB POI 경로 불일치)
+- **LightGBM 우승** → `models/ensemble_ranker.pkl`
+- NDCG@5/10 = 1.0, MAP@5 = 1.0, Recall@5 = 0.88 (더미 데이터라 양 모델 동점)
+- 실제 데이터 재학습 시 유의미한 차이 예상
+
+---
+
+## 9. 단위 테스트 현황 — 2026-05-20
+
+### 테스트 파일 맵
+
+| 파일 | 테스트 수 | 커버 대상 |
+|------|----------|----------|
+| `tests/test_fastapi.py` | 36 | FastAPI 엔드포인트 (health, artists, regions, recommend, itinerary, weather) + 앙상블 통합 |
+| `tests/test_chatbot_server.py` | 25 | Reranker, MultiQuery, ChatbotChain, ChatbotServer (:8001) |
+| `tests/test_ensemble.py` | 28 | haversine, compute_features(8-feature), rank_pois, NDCG/Recall/MAP 메트릭 |
+| `tests/test_pdf_ingest.py` | 14 | build_chunk_id, load_pdfs, chunk_documents, ingest 파이프라인 |
+| `src/api/test_fastapi.py` | 23 | FastAPI 서버 (stub 기반, 독립) |
+| `src/api/test_contract.py` | 14 | FastAPI ↔ Spring Boot 계약 테스트 (서버 필요) |
+
+**총 103개 단위 테스트, 전체 통과 (2026-05-20)**
+
+### 테스트 실행 방법
+
+```bash
+# 전체 (서버 없이 실행 가능)
+pytest tests/ -v
+
+# 개별
+pytest tests/test_chatbot_server.py -v
+pytest tests/test_ensemble.py -v
+pytest tests/test_pdf_ingest.py -v
+
+# 계약 테스트 (FastAPI:8000 + Spring Boot:8080 실행 필요)
+pytest src/api/test_contract.py -v -m contract
+```
+
+### 테스트 기법 요약
+
+| 기법 | 설명 | 사용처 |
+|------|------|--------|
+| **TestClient (ASGI 직접 호출)** | HTTP 서버 없이 메모리 내 앱 함수 직접 호출 | test_fastapi, test_chatbot_server |
+| **MagicMock** | 외부 API(Groq, Neo4j 등) 가짜 객체로 대체 | 전체 |
+| **Stub** | 미설치 패키지를 빈 모듈로 등록 (import 에러 방지) | chromadb, neo4j, sentence_transformers |
+| **patch()** | 특정 함수/변수를 테스트 중 임시 교체 | HAS_AI, HAS_ENSEMBLE 등 |
+| **fixture** | 테스트 전후 상태 초기화 (autouse) | ensemble_client._model_data 리셋 |
+
+### 서버 코드 Fallback 패턴 (테스트에서 확인된 동작)
+
+| 엔드포인트 | 실패 시 동작 |
+|-----------|------------|
+| `GET /api/artists` | `HAS_AI=False` 또는 예외 → FALLBACK_ARTISTS(30명) 반환 |
+| `GET /api/regions` | `HAS_AI=False` 또는 예외 → FALLBACK_REGIONS(17개) 반환 |
+| `POST /api/recommend/itinerary` | Groq 실패 → `{"itinerary": []}` 빈 일정 반환 |
+| `POST /api/recommend/itinerary` | 앙상블 실패 → union 방식 fallback |
+| `POST /api/recommend/ai` | Neo4j/ChromaDB 개별 실패 → 나머지 소스로 결과 반환 |
