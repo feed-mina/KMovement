@@ -14,7 +14,7 @@ import os
 import sys
 
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import chromadb
 from sentence_transformers import SentenceTransformer
 
@@ -27,7 +27,9 @@ from chatbot.config import (
     CHUNK_OVERLAP,
 )
 
-
+#  langchain의 community에서document_loaders 의 pyPDFLoader (PDF 를 로더) -> 
+# langchain_Text_splitter의 RecursiveCharacterTextSplitter( 청크 분할) 
+# SentenceTransformer 임베딩 모델
 def load_pdfs(pdf_dir: str) -> list:
     """PDF_DIR 내 모든 .pdf 파일을 LangChain Document로 로드"""
     pdf_paths = sorted(glob.glob(os.path.join(pdf_dir, "*.pdf")))
@@ -120,11 +122,15 @@ def ingest(batch_size: int = 100):
         chunk_idx = page_chunk_counter[key]
 
         chunk_id = build_chunk_id(source_pdf, page, chunk_idx)
-        text = chunk.page_content.strip()
-        if not text:
+        text = str(chunk.page_content or "").strip()
+        if not text or len(text) < 10:
             continue
 
-        embedding = embedder.encode(text, normalize_embeddings=True).tolist()
+        try:
+            embedding = embedder.encode(text, normalize_embeddings=True).tolist()
+        except Exception as e:
+            print(f"  [SKIP] 임베딩 실패 (chunk {chunk_id}): {e}")
+            continue
 
         ids_batch.append(chunk_id)
         docs_batch.append(text)

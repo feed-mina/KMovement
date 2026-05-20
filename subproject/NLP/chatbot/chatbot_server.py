@@ -13,6 +13,7 @@ chatbot_server.py — K-Ride 챗봇 FastAPI 서버 (포트 8001)
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -34,10 +35,18 @@ app.add_middleware(
 )
 
 
+# ── KST 타임존 ────────────────────────────────────────────────────────────────
+KST = timezone(timedelta(hours=9))
+
+# ── 세션 메타 (유저별 시작/종료 시간 추적) ─────────────────────────────────────
+_session_meta: dict[str, dict] = {}
+
+
 # ── 스키마 ────────────────────────────────────────────────────────────────────
 class ChatRequest(BaseModel):
     message: str
     session_id: str = "default"
+    user_id: str = "anonymous"
     context: dict | None = None
 
 
@@ -45,34 +54,72 @@ class ChatResponse(BaseModel):
     reply: str
     sources: list[str] = Field(default_factory=list)
     pois: list[dict] = Field(default_factory=list)
+    user_id: str = "anonymous"
+    timestamp: str = ""                # 응답 시각 (KST)
+    session_started_at: str = ""       # 세션 시작 시각
+    session_ended_at: str | None = None  # 세션 종료 시각 (reset 시 기록)
 
 
 class ResetRequest(BaseModel):
     session_id: str = "default"
+    user_id: str = "anonymous"
 
 
 # ── 엔드포인트 ────────────────────────────────────────────────────────────────
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "kride-chatbot"}
+    return {"status": "ok", "service": "kride-chatbot", "active_sessions": len(_session_meta)}
 
 
 @app.post("/chat", response_model=ChatResponse)
 def chat_endpoint(req: ChatRequest):
     """챗봇 대화"""
+    now = datetime.now(KST).isoformat(timespec="seconds")
+
+    # 세션 시작 시각 기록
+    if req.session_id not in _session_meta:
+        _session_meta[req.session_id] = {
+            "user_id": req.user_id,
+            "started_at": now,
+            "ended_at": None,
+        }
+
     result = chat(
         message=req.message,
         session_id=req.session_id,
         context=req.context,
     )
-    return ChatResponse(**result)
+    return ChatResponse(
+        **result,
+        user_id=req.user_id,
+        timestamp=now,
+        session_started_at=_session_meta[req.session_id]["started_at"],
+        session_ended_at=_session_meta[req.session_id]["ended_at"],
+    )
 
 
 @app.post("/chat/reset")
 def reset_endpoint(req: ResetRequest):
-    """세션 초기화"""
+    """세션 초기화 + 종료 시각 기록"""
+    now = datetime.now(KST).isoformat(timespec="seconds")
+    ended_at = None
+
+    if req.session_id in _session_meta:
+        _session_meta[req.session_id]["ended_at"] = now
+        ended_at = now
+        started_at = _session_meta[req.session_id]["started_at"]
+    else:
+        started_at = now
+
     reset_session(req.session_id)
-    return {"status": "ok", "session_id": req.session_id}
+
+    return {
+        "status": "ok",
+        "session_id": req.session_id,
+        "user_id": req.user_id,
+        "session_started_at": started_at,
+        "session_ended_at": ended_at,
+    }
 
 
 if __name__ == "__main__":

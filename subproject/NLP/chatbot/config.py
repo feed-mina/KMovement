@@ -25,7 +25,7 @@ EMBED_MODEL = "intfloat/multilingual-e5-small"                 # 384-dim, 기존
 GROQ_MODEL = "openai/gpt-oss-120b"
 
 # ── 리랭커 ────────────────────────────────────────────────────────────────────
-RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"                     # 다국어, 한국어 우위
+RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"        # CPU 환경 채택 (3.5s vs BGE 96s)
 
 # ── 청크 설정 ─────────────────────────────────────────────────────────────────
 CHUNK_SIZE = 800
