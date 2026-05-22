@@ -1,0 +1,42 @@
+# ── FastAPI Docker 경량 의존성 ──────────────────────────────────────────────
+# torch는 Dockerfile에서 CPU-only로 별도 설치하므로 여기 포함하지 않음
+
+# --- Core Web ---
+fastapi==0.136.0
+uvicorn==0.45.0
+httpx==0.28.1
+python-dotenv==1.2.2
+python-multipart==0.0.27
+pydantic==2.13.3
+pydantic-settings==2.14.0
+starlette==1.0.0
+
+# --- Data / ML ---
+pandas==2.3.3
+numpy==2.2.6
+networkx==3.4.2
+scikit-learn==1.7.2
+scipy==1.15.3
+sentence-transformers==5.4.1
+transformers==5.7.0
+tokenizers>=0.21.0
+safetensors==0.7.0
+
+# --- External DB / API ---
+neo4j==6.2.0
+chromadb==1.5.8
+groq==1.2.0
+supabase==2.30.0
+psycopg2-binary==2.9.12
+
+# --- Celery ---
+celery[redis]
+
+# --- Utilities ---
+orjson==3.11.8
+requests==2.33.1
+tqdm==4.67.3
+joblib==1.5.3
+PyYAML==6.0.3
+pillow==12.2.0
+regex==2026.4.4

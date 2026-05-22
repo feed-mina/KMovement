@@ -29,6 +29,7 @@ import ItineraryPanel from "@/components/fields/kride/ItineraryPanel";
 import KrideNextButton from "@/components/fields/kride/KrideNextButton";
 import KrideWarningToast from "@/components/fields/kride/KrideWarningToast";
 import TypewriterText from "@/components/fields/kride/TypewriterText";
+import KrideChatComponent from "@/components/fields/kride/chat/KrideChatComponent";
 
 const GroupComponent: React.FC<any> = ({ children }) => <>{children}</>;
 
@@ -65,4 +66,5 @@ export const componentMap: Record<string, React.FC<any>> = {
     KRIDE_NEXT_BTN: withRenderTrack(KrideNextButton, "KrideNextButton"),
     KRIDE_WARNING: withRenderTrack(KrideWarningToast, "KrideWarningToast"),
     TYPEWRITER_TEXT: withRenderTrack(TypewriterText, "TypewriterText"),
+    KRIDE_CHAT: withRenderTrack(KrideChatComponent, "KrideChatComponent"),
 };

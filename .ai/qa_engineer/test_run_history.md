@@ -178,3 +178,196 @@ java.net.SocketException: Permission denied: getsockopt
 ## Pydantic v2 경고 처리 (FastAPI)
 
 `fastapi_server.py`에서 `req.budget.dict()` → `req.budget.model_dump()` 교체 필요.
+
+---
+
+## 2026-05-20 SDUI K-Ride 유닛/통합 테스트 추가 및 실행
+
+### 대상
+- `subproject/SDUI/metadata-project`
+- `subproject/SDUI/SDUI-server`
+
+### 신규 테스트 파일
+- Frontend unit: `subproject/SDUI/metadata-project/tests/components/KrideNextButton.test.tsx`
+- Frontend integration: `subproject/SDUI/metadata-project/tests/integration/kride-recommend-api.test.ts`
+- Backend unit: `subproject/SDUI/SDUI-server/src/test/java/com/domain/demo_backend/domain/ui/service/UiServiceKrideTest.java`
+- Backend integration: `subproject/SDUI/SDUI-server/src/test/java/com/domain/demo_backend/domain/ui/controller/UiControllerKrideIntegrationTest.java`
+
+### 검증 범위
+- `KrideNextButton`: `formData` 조건부 렌더링, snake_case metadata 지원, `onAction(meta, {})` 호출 검증
+- Next API Route `POST /api/kride/recommend/itinerary`: FastAPI `/api/recommend/itinerary` 프록시 성공/오류 응답 검증
+- `UiService`: K-Ride UI metadata 트리 구성, `component_props` JSON 파싱, ROLE 기반 metadata 필터링 검증
+- `UiController`: `/api/ui/KRIDE_INTRO4`, `/api/ui/KRIDE_INTRO5` 응답 구조, 인증 principal 기반 ROLE 전달 및 guest 기본값 검증
+
+### 실행 결과
+
+#### Frontend Jest
+```powershell
+.\node_modules\.bin\jest.cmd --runTestsByPath tests\components\KrideNextButton.test.tsx tests\integration\kride-recommend-api.test.ts --runInBand --cacheDirectory .jest-cache --watchman=false
+```
+
+최종 결과:
+```text
+PASS tests/integration/kride-recommend-api.test.ts
+PASS tests/components/KrideNextButton.test.tsx
+
+Test Suites: 2 passed, 2 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        3.157 s
+```
+
+비고:
+- 초기 실행에서 Next 16 `NextResponse.json`과 Jest `whatwg-fetch` 폴리필 간 차이로 통합 테스트가 실패했다.
+- 테스트 대상 라우트 로직 검증에 집중하도록 `next/server`의 `NextResponse.json`만 테스트 더블로 고정한 뒤 통과했다.
+- 실행 중 Node `punycode` deprecation warning이 출력되었으나 실패 요인은 아니다.
+
+#### Backend Gradle
+```powershell
+.\gradlew.bat test --tests "com.domain.demo_backend.domain.ui.service.UiServiceKrideTest" --tests "com.domain.demo_backend.domain.ui.controller.UiControllerKrideIntegrationTest"
+```
+
+최종 결과:
+```text
+BUILD SUCCESSFUL in 1m 3s
+5 actionable tasks: 2 executed, 3 up-to-date
+```
+
+JUnit XML 확인:
+```text
+UiServiceKrideTest: tests=2, failures=0, errors=0, skipped=0
+UiControllerKrideIntegrationTest: tests=2, failures=0, errors=0, skipped=0
+```
+
+비고:
+- 첫 백엔드 실행은 신규 테스트의 AssertJ `Map<?, ?>.containsEntry(...)` 제네릭 타입 추론 문제로 `compileTestJava`에서 실패했고, 명시적인 `props.get(...)` 비교로 수정했다.
+- 샌드박스 내부 실행은 Gradle distribution 다운로드에서 `Permission denied: getsockopt`로 실패했으며, 승인된 외부 실행에서 정상 통과했다.
+- Spring Boot 테스트 종료 로그에 Redis 미기동 및 H2에서 Postgres listener unwrap 관련 로그가 출력되었지만, JUnit suite는 failures/errors 0으로 성공했다.
+
+---
+
+## 2026-05-20 SDUI Community 프론트/백엔드 유닛·통합 테스트 추가 및 실행
+
+### 대상
+- `subproject/SDUI/metadata-project`
+- `subproject/SDUI/SDUI-server`
+
+### 신규 테스트 파일
+- Frontend unit: `subproject/SDUI/metadata-project/tests/services/communityServiceFormData.test.ts`
+- Frontend integration: `subproject/SDUI/metadata-project/tests/integration/communityService.integration.test.ts`
+- Backend unit: `subproject/SDUI/SDUI-server/src/test/java/com/domain/demo_backend/domain/community/service/PostReportServiceTest.java`
+- Backend integration: `subproject/SDUI/SDUI-server/src/test/java/com/domain/demo_backend/domain/community/controller/CommunityControllerIntegrationTest.java`
+
+### 검증 범위
+- `communityService` FormData: 게시글 생성/수정 시 `post` JSON part와 이미지 파일 part 직렬화 검증
+- `communityService` integration: 공통 axios 인스턴스를 통한 게시글 목록 조회, 신고 요청 URL/params/body, `withCredentials`, ApiResponse unwrap 검증
+- `PostReportService`: 중복 신고 차단, 신고 저장, 게시글 `reportCount` 증가 검증
+- Community controllers: 게시글 목록 조회, multipart 게시글 작성, 좋아요, 신고, 팔로우 API의 `ApiResponse` 구조와 인증 사용자 식별값 전달 검증
+
+### 실행 결과
+
+#### Frontend Jest
+```powershell
+.\node_modules\.bin\jest.cmd --runTestsByPath tests\services\communityService.test.ts tests\services\communityServiceFormData.test.ts tests\integration\communityService.integration.test.ts --runInBand --cacheDirectory .jest-cache --watchman=false
+```
+
+최종 결과:
+```text
+PASS tests/services/communityService.test.ts
+PASS tests/integration/communityService.integration.test.ts
+PASS tests/services/communityServiceFormData.test.ts
+
+Test Suites: 3 passed, 3 total
+Tests:       13 passed, 13 total
+Snapshots:   0 total
+Time:        8.367 s
+```
+
+비고:
+- MSW + jsdom XHR 조합에서 응답 body가 빈 문자열로 들어와 통합 테스트가 불안정했다.
+- 최종 통합 테스트는 실제 `api` axios 인스턴스의 adapter 경계에서 URL/params/body/withCredentials와 응답 unwrap을 검증하는 방식으로 고정했다.
+- 실행 중 Node `punycode` deprecation warning이 출력되었으나 실패 요인은 아니다.
+
+#### Backend Gradle
+```powershell
+.\gradlew.bat test --tests "com.domain.demo_backend.domain.community.service.*" --tests "com.domain.demo_backend.domain.community.controller.CommunityControllerIntegrationTest"
+```
+
+최종 결과:
+```text
+BUILD SUCCESSFUL in 51s
+5 actionable tasks: 1 executed, 4 up-to-date
+```
+
+JUnit XML 확인:
+```text
+CommunityPostServiceTest: tests=9, failures=0, errors=0, skipped=0
+PostLikeServiceTest: tests=3, failures=0, errors=0, skipped=0
+PostReportServiceTest: tests=2, failures=0, errors=0, skipped=0
+UserFollowServiceTest: tests=4, failures=0, errors=0, skipped=0
+CommunityControllerIntegrationTest: tests=5, failures=0, errors=0, skipped=0
+```
+
+비고:
+- Spring Boot 통합 테스트 중 Redis 미기동 및 H2에서 Postgres listener unwrap 관련 로그가 출력되었지만, 모든 JUnit suite는 failures/errors 0으로 성공했다.
+
+---
+
+## 2026-05-20 SDUI-server Spring Boot - FastAPI API 통합 테스트 추가 및 실행
+
+### 대상
+- `subproject/SDUI/SDUI-server`
+- `src/api/fastapi_server.py`
+
+### 신규/수정 파일
+- Spring Boot integration: `subproject/SDUI/SDUI-server/src/test/java/com/domain/demo_backend/domain/kridechat/service/FastApiChatClientIntegrationTest.java`
+- FastAPI contract/integration: `tests/test_sdui_fastapi_contract.py`
+- FastAPI compatibility: `src/api/fastapi_server.py`
+
+### 검증 API
+- Spring `FastApiChatClient` -> FastAPI `POST /api/recommend/ai`
+- Spring `FastApiChatClient` -> FastAPI `POST /api/recommend/itinerary`
+- Spring `FastApiChatClient` -> FastAPI `POST /api/chat/stream`
+- FastAPI `GET /api/artists`
+- FastAPI `GET /api/regions`
+- FastAPI `POST /api/recommend/ai`
+- FastAPI `POST /api/recommend/itinerary`
+- FastAPI `POST /api/chat/stream`
+
+### 반영 내용
+- Spring Boot 쪽은 로컬 HTTP fake FastAPI 서버를 띄워 `WebClient`가 실제 POST 요청을 보내고 응답을 역직렬화하는지 검증했다.
+- FastAPI 쪽은 `TestClient`로 SDUI가 소비하는 API 응답 shape을 검증했다.
+- Spring Boot가 호출하는 `/api/chat/stream` 엔드포인트가 FastAPI에 없어 plain text streaming 호환 엔드포인트를 추가했다.
+- Spring Boot가 `duration`을 숫자로 보내는 케이스를 FastAPI가 받을 수 있도록 `ItineraryRequest.duration`을 `str | int`로 조정했다.
+
+### 실행 결과
+
+#### Spring Boot Gradle
+```powershell
+.\gradlew.bat test --tests "com.domain.demo_backend.domain.kridechat.service.FastApiChatClientIntegrationTest"
+```
+
+최종 결과:
+```text
+BUILD SUCCESSFUL in 1m 5s
+5 actionable tasks: 2 executed, 3 up-to-date
+```
+
+JUnit XML 확인:
+```text
+FastApiChatClientIntegrationTest: tests=3, failures=0, errors=0, skipped=0
+```
+
+#### FastAPI Pytest
+```powershell
+C:\Users\Samsung\AppData\Local\Programs\Python\Python310\python.exe -m pytest tests\test_sdui_fastapi_contract.py -q
+```
+
+최종 결과:
+```text
+5 passed, 1 warning in 3.99s
+```
+
+비고:
+- 첫 FastAPI 실행에서 `/api/recommend/itinerary`가 Spring의 numeric duration payload를 422로 거부하는 문제가 확인되어 코드 호환성을 수정한 뒤 재실행했다.
+- Pytest 실행 중 Pydantic v2 `dict()` deprecation warning이 1건 출력되었으나 실패 요인은 아니며 전체 테스트는 통과했다.

@@ -7,6 +7,12 @@ export interface PostCreateRequest {
     content: string;
 }
 
+export interface PostUpdateRequest {
+    title?: string;
+    content?: string;
+    retainedImages?: string[];
+}
+
 export interface PostResponse {
     postId: number;
     title: string;
@@ -67,7 +73,7 @@ export const communityService = {
         return res.data.data as PostResponse;
     },
 
-    async updatePost(postId: number, data: Partial<PostCreateRequest>, newImages?: File[]) {
+    async updatePost(postId: number, data: PostUpdateRequest, newImages?: File[]) {
         const formData = new FormData();
         formData.append('post', new Blob([JSON.stringify(data)], { type: 'application/json' }));
         if (newImages) {

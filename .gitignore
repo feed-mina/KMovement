@@ -97,3 +97,6 @@ gradle/
 teamdataset/pdf/KTO_K-Local_Food_Trip_33.pdf
 dataset/pdf/[종합보고서]2025 빅데이터와 함께하는 똑똑한
   컨설팅.pdf
+
+team/
+team/*

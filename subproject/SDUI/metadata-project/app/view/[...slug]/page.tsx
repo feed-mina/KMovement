@@ -1,7 +1,7 @@
 // app/view/[screenId]/page.tsx
 'use client'; // 상태 관리와 이벤트를 위해 클라이언트 컴포넌트로 설정합니다.
 
-import React, {use, useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import DynamicEngine from "@/components/DynamicEngine";
 import Pagination from "@/components/fields/Pagination";
 import FilterToggle from "@/components/utils/FilterToggle";
@@ -10,23 +10,32 @@ import {usePageMetadata} from "@/components/DynamicEngine/hook/usePageMetadata";
 import Skeleton from "@/components/utils/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import {useRouter, useSearchParams} from "next/navigation";
-import {componentMap} from "@/components/constants/componentMap";
 import {usePageHook} from "@/components/DynamicEngine/hook/usePageHook";
 import {useKrideItinerary} from "@/components/DynamicEngine/hook/useKrideItinerary";
 import {useMetadata} from "@/components/providers/MetadataProvider";
 import axios from "@/services/axios";
+import CommunityPage from "@/components/community/CommunityPage";
 
 
 
 //  보호가 필요한 스크린 ID 목록 정의
-const PROTECTED_SCREENS = ["MY_PAGE", "CONTENT_LIST", "CONTENT_WRITE", "CONTENT_DETAIL", "CONTENT_MODIFY", "USER_LIST", "AI_ENGLISH_CHAT_PAGE", "AI_KOREAN_CHAT_PAGE"];
+const PROTECTED_SCREENS = ["MY_PAGE", "CONTENT_LIST", "CONTENT_WRITE", "CONTENT_DETAIL", "CONTENT_MODIFY", "USER_LIST", "AI_ENGLISH_CHAT_PAGE", "AI_KOREAN_CHAT_PAGE", "KRIDE_INTRO1", "KRIDE_INTRO2", "KRIDE_INTRO3", "KRIDE_INTRO4", "KRIDE_INTRO5", "KRIDE_MY_LIST", "KRIDE_FOCUS", "KRIDE_CHAT"];
 
 
 // CommonPage 역할 : 전체 화면의 구성, 메타데이터와 데이터를 가져와 엔진에 전달
-export default function CommonPage({params: paramsPromise}: { params: Promise<{ slug: string[] }> }) {
+export default function CommonPage() {
 
     // 이제 params를 직접 파싱하지 않고 컨텍스트에서 꺼내 쓴다
     const { screenId, refId } = useMetadata();
+
+    if (screenId.startsWith("COMMUNITY_")) {
+        return <CommunityPage screenId={screenId} refId={refId} />;
+    }
+
+    return <SduiPage screenId={screenId} refId={refId} />;
+}
+
+function SduiPage({ screenId, refId }: { screenId: string; refId: string | number | null }) {
 
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -71,7 +80,9 @@ export default function CommonPage({params: paramsPromise}: { params: Promise<{ 
         if (!isLoading) {
             const isProtected = PROTECTED_SCREENS.includes(screenId);
             if (isProtected && !isLoggedIn) {
-                // 권한이 없으면 로그인 페이지로 이동
+                if (screenId.startsWith("KRIDE_")) {
+                    alert("로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.");
+                }
                 router.replace("/view/LOGIN_PAGE");
             }
         }

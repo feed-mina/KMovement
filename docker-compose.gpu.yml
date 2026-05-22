@@ -1,9 +1,51 @@
-version: '3.8'
+# ── GCP GPU VM 배포용 (n1-standard-4 + T4) ────────────────────────────────────
+# 사용법:
+#   docker compose -f docker-compose.gpu.yml build
+#   docker compose -f docker-compose.gpu.yml up -d
+#   docker compose -f docker-compose.gpu.yml logs -f fastapi
+#   docker compose -f docker-compose.gpu.yml down
 
 services:
-  # ── TorchServe (GPU) ─────────────────────────────────────────────────────
+  # ── FastAPI (K-Ride AI) ──────────────────────────────────────────────────
+  fastapi:
+    build:
+      context: .
+      dockerfile: src/api/Dockerfile
+    container_name: kride_fastapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      chromadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      torchserve:
+        condition: service_healthy
+    environment:
+      - TORCHSERVE_URL=http://torchserve:8085
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      # 클라우드 DB — .env 파일에서 주입
+      - NEO4J_URI=${NEO4J_URI:-}
+      - NEO4J_USERNAME=${NEO4J_USERNAME:-}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-}
+      - NEO4J_DATABASE=${NEO4J_DATABASE:-}
+      - SUPABASE_URL=${SUPABASE_URL:-}
+      - SUPABASE_KEY=${SUPABASE_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── TorchServe (GPU) ───────────────────────────────────────────────────
   torchserve:
     build: ./torchserve
+    container_name: kride_torchserve
     ports:
       - "8085:8085"   # inference
       - "8086:8086"   # management
@@ -12,21 +54,25 @@ services:
       resources:
         reservations:
           devices:
-            - capabilities: [gpu]
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     volumes:
-      - ./models:/home/model-store/models
+      - hf_cache:/root/.cache/huggingface
     environment:
       - TS_CONFIG_FILE=/home/model-store/config.properties
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8085/ping"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 60s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
 
-  # ── ChromaDB (서버 모드) ─────────────────────────────────────────────────
+  # ── ChromaDB ────────────────────────────────────────────────────────────
   chromadb:
     image: chromadb/chroma:latest
+    container_name: kride_chromadb
     ports:
       - "8100:8000"
     volumes:
@@ -39,10 +85,12 @@ services:
       interval: 15s
       timeout: 5s
       retries: 3
+    restart: unless-stopped
 
-  # ── Redis (Celery 브로커/백엔드) ─────────────────────────────────────────
+  # ── Redis ───────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
+    container_name: kride_redis
     ports:
       - "6379:6379"
     volumes:
@@ -52,12 +100,14 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+    restart: unless-stopped
 
-  # ── Celery Worker ────────────────────────────────────────────────────────
+  # ── Celery Worker ───────────────────────────────────────────────────────
   celery-worker:
     build:
       context: .
       dockerfile: Dockerfile.worker
+    container_name: kride_celery
     command: celery -A src.api.celery_app worker -l info -c 2 -Q ml,media
     depends_on:
       redis:
@@ -69,7 +119,15 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CHROMA_HOST=chromadb
       - CHROMA_PORT=8000
+      - NEO4J_URI=${NEO4J_URI:-}
+      - NEO4J_USERNAME=${NEO4J_USERNAME:-}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-}
+      - NEO4J_DATABASE=${NEO4J_DATABASE:-}
+      - SUPABASE_URL=${SUPABASE_URL:-}
+      - SUPABASE_KEY=${SUPABASE_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
     restart: unless-stopped
 
 volumes:
   redis_data:
+  hf_cache:

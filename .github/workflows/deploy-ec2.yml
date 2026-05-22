@@ -1,0 +1,137 @@
+name: Deploy SDUI-server to EC2
+
+on:
+  push:
+    branches: ["main", "refactor/krider_backup"]
+    paths:
+      - "subproject/SDUI/SDUI-server/**"
+      - ".github/workflows/deploy-ec2.yml"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: gradle
+
+      - name: Check directory structure
+        run: |
+          pwd
+          ls -al subproject/SDUI/SDUI-server || echo "SDUI-server folder not found"
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        working-directory: ./subproject/SDUI/SDUI-server
+
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+        working-directory: ./subproject/SDUI/SDUI-server
+
+      - name: Validate Flyway Migrations
+        run: ./gradlew flywayInfo || echo "Flyway check skipped"
+        working-directory: ./subproject/SDUI/SDUI-server
+        continue-on-error: true
+
+      - name: Set Environment Variables
+        run: |
+          CLEAN_BRANCH=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+          echo "BRANCH_TAG=$CLEAN_BRANCH" >> $GITHUB_ENV
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            echo "TARGET_PORT=8080" >> $GITHUB_ENV
+            echo "CONTAINER_NAME=sdui-backend" >> $GITHUB_ENV
+            echo "DB_NAME=SDUI_TD" >> $GITHUB_ENV
+          else
+            echo "TARGET_PORT=8081" >> $GITHUB_ENV
+            echo "CONTAINER_NAME=sdui-backend-lab" >> $GITHUB_ENV
+            echo "DB_NAME=SDUI_LAB" >> $GITHUB_ENV
+          fi
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Docker build and push
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/sdui-app:${{ env.BRANCH_TAG }} ./subproject/SDUI/SDUI-server
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/sdui-app:latest ./subproject/SDUI/SDUI-server
+          docker push ${{ secrets.DOCKER_USERNAME }}/sdui-app:${{ env.BRANCH_TAG }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/sdui-app:latest
+
+      - name: Deploy to AWS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_KEY }}
+          script: |
+            set -e
+
+            # 네트워크 생성
+            docker network inspect sdui-network >/dev/null 2>&1 || docker network create sdui-network
+
+            # 최신 이미지 pull
+            docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-app:${{ env.BRANCH_TAG }}
+
+            # 오래된 이미지 정리
+            docker image prune -af --filter "until=24h" || true
+
+            # GCP 자격증명 파일 생성
+            echo "${{ secrets.GCP_CREDENTIALS_JSON }}" | base64 -d > /home/ubuntu/gcp-credentials.json
+
+            # 기존 컨테이너 중지 및 제거
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm ${{ env.CONTAINER_NAME }} || true
+
+            # 새 컨테이너 실행
+            docker run -d --name ${{ env.CONTAINER_NAME }} \
+              -p ${{ env.TARGET_PORT }}:8080 \
+              --network sdui-network \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e SPRING_DATASOURCE_URL=jdbc:postgresql://sdui-db:5432/${{ env.DB_NAME }} \
+              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
+              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e SPRING_DATA_REDIS_HOST=sdui-redis \
+              -e SPRING_MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
+              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+              -e KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
+              -e KAKAO_REDIRECT_URI=https://sdui-delta.vercel.app/api/kakao/callback \
+              -e WEB_URL=https://sdui-delta.vercel.app \
+              -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
+              -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
+              -e FASTAPI_URL=http://sdui-fastapi:8001 \
+              -e GCP_PROJECT_ID=kdeliver \
+              -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
+              -e GCP_CREDENTIALS_PATH=/app/gcp-credentials.json \
+              -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
+              -e SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }} \
+              -e SLACK_CHANNEL_ID=${{ secrets.SLACK_CHANNEL_ID }} \
+              -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+              -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
+              -e GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }} \
+              -v /home/ubuntu/gcp-credentials.json:/app/gcp-credentials.json:ro \
+              -v /home/ubuntu/study-materials:/app/assets/study:ro \
+              ${{ secrets.DOCKER_USERNAME }}/sdui-app:${{ env.BRANCH_TAG }}
+
+            # 헬스 체크 (30초 대기)
+            echo "Waiting for application to start..."
+            sleep 30
+
+            # 로그 확인
+            docker logs --tail 50 ${{ env.CONTAINER_NAME }}
+
+            # Flyway 마이그레이션 상태 확인
+            echo "Checking Flyway migration status..."
+            docker exec ${{ env.CONTAINER_NAME }} sh -c "echo 'SELECT version, description, installed_on FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 5;' | psql -h sdui-db -U \$SPRING_DATASOURCE_USERNAME -d ${{ env.DB_NAME }}" || echo "Flyway check skipped"
+
+            # Redis 캐시 무효화
+            echo "Clearing Redis cache..."
+            docker exec sdui-redis redis-cli FLUSHDB || echo "Redis flush skipped"
+
+            echo "Deployment successful: ${{ env.CONTAINER_NAME }} on port ${{ env.TARGET_PORT }} (DB: ${{ env.DB_NAME }})"

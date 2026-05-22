@@ -1,0 +1,83 @@
+name: CI - Build Verification
+
+on:
+  push:
+    branches: ["main", "refactor/krider_backup"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  # ── SDUI-server (Spring Boot) ──────────────────────────────────────────────
+  sdui-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        working-directory: ./subproject/SDUI/SDUI-server
+
+      - name: Build with Gradle (skip tests)
+        run: ./gradlew clean build -x test
+        working-directory: ./subproject/SDUI/SDUI-server
+
+  # ── Next.js (metadata-project) ─────────────────────────────────────────────
+  nextjs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: subproject/SDUI/metadata-project/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./subproject/SDUI/metadata-project
+
+      - name: Build Next.js
+        run: npm run build
+        working-directory: ./subproject/SDUI/metadata-project
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8080
+
+  # ── FastAPI (K-Ride AI) ────────────────────────────────────────────────────
+  fastapi:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: src/api/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/api/requirements.txt
+        # requirements.txt에 torch 등 큰 패키지가 포함되어 CI에서는
+        # 테스트에 필요한 최소 패키지만 설치하도록 향후 requirements-ci.txt 분리 권장
+
+      - name: Run tests
+        run: python -m pytest src/api/ -v --tb=short
+        env:
+          TORCHSERVE_URL: http://localhost:8085
+          CELERY_BROKER_URL: redis://localhost:6379/1
+          CHROMA_HOST: localhost
+          CHROMA_PORT: 8100

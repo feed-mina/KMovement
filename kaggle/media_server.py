@@ -1,13 +1,13 @@
 """
 media_server.py — K-Ride 미디어 생성 FastAPI (Kaggle GPU 전용)
 ================================================================
-노트북 B 전용: TTS, MusicGen, 3D Photo Inpainting, 인물 모션, FFmpeg 합성
+노트북 B 전용: TTS, MusicGen, 3D Photo Inpainting, 인물 영상, FFmpeg 합성
 
 [아키텍처]
-  POST /api/media/tts         → 한국어 TTS (XTTS-v2, ~2-3GB VRAM)
+  POST /api/media/tts         → 한국어 TTS (GPT-SoVITS V3 프록시, localhost:9880)
   POST /api/media/musicgen    → BGM 생성 (MusicGen, ~3-6GB VRAM)
-  POST /api/media/inpaint3d   → 풍경 사진 → 카메라 무빙 영상
-  POST /api/media/animate     → 인물 사진 → 모션 영상 (LivePortrait, ~6GB VRAM)
+  POST /api/media/inpaint3d   → 풍경 사진 → 카메라 무빙 영상 (Depth Anything V2 + Ken Burns)
+  POST /api/media/animate     → 인물/복잡 사진 → 영상 (CogVideoX 1.5, ~12-16GB VRAM)
   POST /api/media/render      → TTS + BGM + 영상 → FFmpeg 합성
   GET  /api/media/status/{id} → 작업 상태 폴링
   GET  /api/media/download/{id} → 완성 파일 다운로드
@@ -18,6 +18,7 @@ media_server.py — K-Ride 미디어 생성 FastAPI (Kaggle GPU 전용)
 """
 from __future__ import annotations
 
+import gc
 import os
 import time
 import uuid
@@ -29,6 +30,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
+import requests as http_requests
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -46,6 +48,15 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 # 동시 작업 제한 (T4 16GB 보호)
 MAX_WORKERS = 1
 executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
+
+# ── GPT-SoVITS V3 설정 ──────────────────────────────────────────────────────
+SOVITS_API_URL = os.environ.get("SOVITS_API_URL", "http://127.0.0.1:9880")
+SOVITS_DIR = os.environ.get("SOVITS_DIR", "/kaggle/input/kride-media-data/GPT-SoVITS")
+SOVITS_REF_WAV = os.environ.get("SOVITS_REF_WAV", "/kaggle/input/kride-media-data/ref.wav")
+
+# ── CogVideoX 설정 ──────────────────────────────────────────────────────────
+COGVIDEOX_MODEL_PATH = os.environ.get("COGVIDEOX_MODEL_PATH", "/kaggle/input/kride-cogvideox")
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 작업 상태 관리 (인메모리)
@@ -97,23 +108,70 @@ def _create_job(job_type: str) -> Job:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# GPT-SoVITS V3 서버 관리
+# ══════════════════════════════════════════════════════════════════════════════
+_sovits_proc: subprocess.Popen | None = None
+
+
+def _start_sovits_server():
+    """GPT-SoVITS V3 API 서버를 서브프로세스로 시작"""
+    global _sovits_proc
+
+    # 이미 실행 중이면 health check
+    if _sovits_proc is not None and _sovits_proc.poll() is None:
+        if _sovits_health_check():
+            return
+        # 프로세스 살아있지만 응답 없으면 재시작
+        _sovits_proc.terminate()
+        _sovits_proc.wait(timeout=10)
+
+    api_py = os.path.join(SOVITS_DIR, "api.py")
+    if not os.path.exists(api_py):
+        raise FileNotFoundError(
+            f"GPT-SoVITS api.py 없음: {api_py}. "
+            f"SOVITS_DIR={SOVITS_DIR} 경로에 GPT-SoVITS를 배치하세요."
+        )
+
+    cmd = [
+        "python", api_py,
+        "-a", "127.0.0.1", "-p", "9880",
+        "-c", os.path.join(SOVITS_DIR, "GPT_SoVITS", "configs", "tts_infer.yaml"),
+        "-g", os.path.join(SOVITS_DIR, "GPT_SoVITS", "pretrained_models", "s1v3.ckpt"),
+        "-s", os.path.join(SOVITS_DIR, "GPT_SoVITS", "pretrained_models", "s2Gv3.pth"),
+    ]
+
+    print(f"[Media] GPT-SoVITS V3 서버 시작: {' '.join(cmd)}")
+    _sovits_proc = subprocess.Popen(
+        cmd, cwd=SOVITS_DIR,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+
+    # 서버 준비 대기 (최대 60초)
+    for i in range(60):
+        time.sleep(1)
+        if _sovits_health_check():
+            print(f"[Media] GPT-SoVITS V3 서버 준비 완료 ({i+1}초)")
+            return
+        if _sovits_proc.poll() is not None:
+            stderr = _sovits_proc.stderr.read().decode(errors="replace")[:500]
+            raise RuntimeError(f"GPT-SoVITS 서버 비정상 종료: {stderr}")
+
+    raise RuntimeError("GPT-SoVITS 서버 시작 타임아웃 (60초)")
+
+
+def _sovits_health_check() -> bool:
+    """GPT-SoVITS 서버 응답 확인"""
+    try:
+        resp = http_requests.get(SOVITS_API_URL, timeout=2)
+        return resp.status_code < 500
+    except Exception:
+        return False
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # 모델 싱글턴 (lazy loading — 사용 시점에 로드)
 # ══════════════════════════════════════════════════════════════════════════════
-_tts_model = None
 _musicgen_model = None
-
-
-def _get_tts():
-    """XTTS-v2 한국어 TTS 모델 로드"""
-    global _tts_model
-    if _tts_model is None:
-        import torch
-        from TTS.api import TTS
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        print("[Media] XTTS-v2 로딩 중... (~1.9GB 다운로드)")
-        _tts_model = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(device)
-        print(f"[Media] XTTS-v2 로딩 완료 (device={device})")
-    return _tts_model
 
 
 def _get_musicgen():
@@ -131,14 +189,22 @@ def _get_musicgen():
 def _unload_model(name: str):
     """GPU 메모리 해제 (모델 교체 시)"""
     import torch
-    global _tts_model, _musicgen_model
-    if name == "tts" and _tts_model is not None:
-        del _tts_model
-        _tts_model = None
-    elif name == "musicgen" and _musicgen_model is not None:
+    global _musicgen_model, _sovits_proc
+
+    if name == "musicgen" and _musicgen_model is not None:
         del _musicgen_model
         _musicgen_model = None
+    elif name == "sovits":
+        if _sovits_proc is not None and _sovits_proc.poll() is None:
+            _sovits_proc.terminate()
+            _sovits_proc.wait(timeout=10)
+            _sovits_proc = None
+            print("[Media] GPT-SoVITS 서버 종료")
+    elif name == "cogvideox":
+        pass  # CogVideoX는 _run_animate 내에서 매번 해제됨
+
     torch.cuda.empty_cache()
+    gc.collect()
     print(f"[Media] {name} 모델 언로드 + GPU 캐시 해제")
 
 
@@ -146,32 +212,43 @@ def _unload_model(name: str):
 # 작업 실행 함수들
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _run_tts(job: Job, text: str, language: str, speaker_wav: str | None):
-    """TTS 작업 실행"""
+def _run_tts(job: Job, text: str, text_language: str,
+             refer_wav_path: str | None, prompt_text: str | None,
+             prompt_language: str):
+    """TTS 작업 실행 — GPT-SoVITS V3 API 프록시"""
     try:
         job.status = JobStatus.RUNNING
         job.started_at = time.time()
-        job.progress = "TTS 모델 로딩 중"
+        job.progress = "GPT-SoVITS 서버 확인 중"
 
-        tts = _get_tts()
+        _start_sovits_server()
 
         out_path = str(OUTPUT_DIR / f"{job.job_id}_tts.wav")
         job.progress = "음성 생성 중"
 
-        kwargs = {
+        payload = {
             "text": text,
-            "language": language,
-            "file_path": out_path,
+            "text_language": text_language,
         }
-        if speaker_wav and os.path.exists(speaker_wav):
-            kwargs["speaker_wav"] = speaker_wav
-        else:
-            # 기본 화자 사용
-            speakers = tts.speakers
-            if speakers:
-                kwargs["speaker"] = speakers[0]
 
-        tts.tts_to_file(**kwargs)
+        # 기준 화자 음성 설정
+        ref_wav = refer_wav_path or SOVITS_REF_WAV
+        if ref_wav and os.path.exists(ref_wav):
+            payload["refer_wav_path"] = ref_wav
+            if prompt_text:
+                payload["prompt_text"] = prompt_text
+                payload["prompt_language"] = prompt_language
+
+        resp = http_requests.post(SOVITS_API_URL, json=payload, timeout=120)
+
+        if resp.status_code != 200:
+            raise RuntimeError(
+                f"GPT-SoVITS API 오류 {resp.status_code}: {resp.text[:300]}"
+            )
+
+        # 응답 바디 = WAV 바이너리
+        with open(out_path, "wb") as f:
+            f.write(resp.content)
 
         job.result_path = out_path
         job.status = JobStatus.COMPLETED
@@ -312,52 +389,58 @@ def _run_inpaint3d(job: Job, image_path: str):
         traceback.print_exc()
 
 
-def _run_animate(job: Job, image_path: str, driving_video_path: str | None):
-    """인물 사진 → 모션 영상 (LivePortrait)"""
+def _run_animate(job: Job, image_path: str, prompt: str,
+                 num_inference_steps: int, guidance_scale: float):
+    """인물/복잡 사진 → 영상 (CogVideoX 1.5 Image-to-Video)"""
     try:
         job.status = JobStatus.RUNNING
         job.started_at = time.time()
-        job.progress = "LivePortrait 준비 중"
+        job.progress = "CogVideoX 파이프라인 로딩 중"
 
-        lp_dir = os.environ.get("LIVEPORTRAIT_DIR", "/kaggle/working/LivePortrait")
-        out_dir = str(OUTPUT_DIR / job.job_id)
-        os.makedirs(out_dir, exist_ok=True)
+        import torch
+        from PIL import Image
 
-        # driving video가 없으면 기본 제공
-        if not driving_video_path or not os.path.exists(driving_video_path):
-            driving_video_path = os.path.join(lp_dir, "assets", "examples", "driving", "d0.mp4")
-
-        if not os.path.exists(driving_video_path):
+        if not os.path.exists(COGVIDEOX_MODEL_PATH):
             raise FileNotFoundError(
-                f"Driving video 없음: {driving_video_path}. "
-                "LivePortrait 설치 후 assets/examples/driving/ 에 기본 영상을 배치하세요."
+                f"CogVideoX 모델 없음: {COGVIDEOX_MODEL_PATH}. "
+                "Kaggle Dataset에 kride-cogvideox를 추가하세요."
             )
 
-        job.progress = "LivePortrait 추론 중 (3~10분 소요)"
+        from diffusers import CogVideoXImageToVideoPipeline
+        from diffusers.utils import export_to_video
 
-        # LivePortrait CLI 호출
-        cmd = [
-            "python", os.path.join(lp_dir, "inference.py"),
-            "--source", image_path,
-            "--driving", driving_video_path,
-            "--output-dir", out_dir,
-        ]
-
-        result = subprocess.run(
-            cmd, capture_output=True, text=True,
-            timeout=900,  # 15분 타임아웃
-            cwd=lp_dir,
+        pipe = CogVideoXImageToVideoPipeline.from_pretrained(
+            COGVIDEOX_MODEL_PATH,
+            torch_dtype=torch.float16,
+            local_files_only=True,
         )
+        pipe.enable_sequential_cpu_offload()
+        pipe.vae.enable_slicing()
+        pipe.vae.enable_tiling()
 
-        if result.returncode != 0:
-            raise RuntimeError(f"LivePortrait 실패: {result.stderr[:500]}")
+        job.progress = "이미지 로딩 중"
+        image = Image.open(image_path).convert("RGB")
+        # CogVideoX 권장 해상도로 리사이즈
+        image = image.resize((720, 480), Image.LANCZOS)
 
-        # 출력 파일 찾기
-        out_files = list(Path(out_dir).glob("*.mp4"))
-        if not out_files:
-            raise FileNotFoundError(f"LivePortrait 출력 파일 없음: {out_dir}")
+        job.progress = f"영상 생성 중 (steps={num_inference_steps}, ~10-15분 소요)"
 
-        job.result_path = str(out_files[0])
+        video_frames = pipe(
+            image=image,
+            prompt=prompt,
+            num_inference_steps=num_inference_steps,
+            guidance_scale=guidance_scale,
+        ).frames[0]
+
+        out_path = str(OUTPUT_DIR / f"{job.job_id}_animate.mp4")
+        export_to_video(video_frames, out_path, fps=8)
+
+        # VRAM 즉시 해제
+        del pipe
+        gc.collect()
+        torch.cuda.empty_cache()
+
+        job.result_path = out_path
         job.status = JobStatus.COMPLETED
         job.progress = "완료"
         job.completed_at = time.time()
@@ -365,6 +448,13 @@ def _run_animate(job: Job, image_path: str, driving_video_path: str | None):
         job.status = JobStatus.FAILED
         job.error = str(e)
         job.completed_at = time.time()
+        # VRAM 해제 시도
+        gc.collect()
+        try:
+            import torch
+            torch.cuda.empty_cache()
+        except Exception:
+            pass
         traceback.print_exc()
 
 
@@ -382,25 +472,17 @@ def _run_render(job: Job, video_path: str, tts_path: str | None,
             raise FileNotFoundError(f"영상 파일 없음: {video_path}")
 
         inputs = ["-i", video_path]
-        filter_parts = []
-        audio_inputs = []
         input_idx = 1  # 0 = video
 
         # TTS 오디오
         if tts_path and os.path.exists(tts_path):
             inputs += ["-i", tts_path]
-            audio_inputs.append(f"[{input_idx}:a]volume=1.0[tts]")
             input_idx += 1
-        else:
-            audio_inputs.append(f"anullsrc=r=44100:cl=stereo[tts]")
 
         # BGM 오디오
         if bgm_path and os.path.exists(bgm_path):
             inputs += ["-i", bgm_path]
-            audio_inputs.append(f"[{input_idx}:a]volume={bgm_volume}[bgm]")
             input_idx += 1
-        else:
-            audio_inputs.append(f"anullsrc=r=44100:cl=stereo[bgm]")
 
         job.progress = "오디오 믹싱 중"
 
@@ -466,13 +548,29 @@ def _save_upload(upload: UploadFile, prefix: str) -> str:
     return file_path
 
 
+def _download_image(url: str) -> str:
+    """URL에서 이미지 다운로드 → 로컬 경로 반환"""
+    resp = http_requests.get(url, timeout=30)
+    resp.raise_for_status()
+    ext = ".jpg"
+    ct = resp.headers.get("content-type", "")
+    if "png" in ct:
+        ext = ".png"
+    elif "webp" in ct:
+        ext = ".webp"
+    file_path = str(UPLOAD_DIR / f"dl_{uuid.uuid4().hex[:6]}{ext}")
+    with open(file_path, "wb") as f:
+        f.write(resp.content)
+    return file_path
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # FastAPI 앱
 # ══════════════════════════════════════════════════════════════════════════════
 app = FastAPI(
     title="K-Ride Media API (Kaggle GPU)",
-    version="1.0.0-kaggle",
-    description="TTS · MusicGen · 3D Photo Inpainting · LivePortrait · FFmpeg 합성",
+    version="2.0.0-kaggle",
+    description="GPT-SoVITS V3 TTS · MusicGen · 3D Photo Inpainting · CogVideoX 1.5 · FFmpeg 합성",
 )
 
 app.add_middleware(
@@ -512,6 +610,7 @@ def health():
         "active_jobs": active_jobs,
         "total_jobs": len(_jobs),
         "max_workers": MAX_WORKERS,
+        "sovits_server": _sovits_health_check(),
     }
 
 
@@ -549,41 +648,29 @@ def download_result(job_id: str):
     )
 
 
-# ── TTS ──────────────────────────────────────────────────────────────────────
+# ── TTS (GPT-SoVITS V3) ─────────────────────────────────────────────────────
 
 class TTSRequest(BaseModel):
     text: str
-    language: str = "ko"
-    speaker_wav_path: Optional[str] = None  # 참조 화자 음성 경로 (Kaggle 내)
+    text_language: str = "ko"
+    refer_wav_path: Optional[str] = None    # 기준 화자 음성 경로
+    prompt_text: Optional[str] = None       # 기준 음성 대본
+    prompt_language: str = "ko"
 
 
 @app.post("/api/media/tts")
 def create_tts(req: TTSRequest):
-    """한국어 TTS 음성 생성 (XTTS-v2)"""
+    """한국어 TTS 음성 생성 (GPT-SoVITS V3)"""
     if not req.text.strip():
         raise HTTPException(status_code=400, detail="text가 비어있습니다")
 
     job = _create_job("tts")
-    executor.submit(_run_tts, job, req.text, req.language, req.speaker_wav_path)
+    executor.submit(
+        _run_tts, job, req.text, req.text_language,
+        req.refer_wav_path, req.prompt_text, req.prompt_language,
+    )
 
     return {"job_id": job.job_id, "status": job.status.value, "message": "TTS 작업이 시작되었습니다."}
-
-
-@app.post("/api/media/tts/upload")
-async def create_tts_with_upload(
-    text: str = Form(...),
-    language: str = Form("ko"),
-    speaker_wav: Optional[UploadFile] = File(None),
-):
-    """TTS + 참조 화자 음성 파일 업로드"""
-    speaker_path = None
-    if speaker_wav:
-        speaker_path = _save_upload(speaker_wav, "speaker")
-
-    job = _create_job("tts")
-    executor.submit(_run_tts, job, text, language, speaker_path)
-
-    return {"job_id": job.job_id, "status": job.status.value}
 
 
 # ── MusicGen ─────────────────────────────────────────────────────────────────
@@ -617,23 +704,61 @@ async def create_inpaint3d(image: UploadFile = File(...)):
     return {"job_id": job.job_id, "status": job.status.value, "message": "3D 카메라 무빙 생성 시작"}
 
 
-# ── Animate (LivePortrait) ───────────────────────────────────────────────────
+# ── Animate (CogVideoX 1.5 Image-to-Video) ──────────────────────────────────
+
+class AnimateRequest(BaseModel):
+    prompt: str = "A person gently moving, cinematic Korean travel scene"
+    image_url: str                                # 이미지 URL (Supabase 등)
+    num_inference_steps: int = 15
+    guidance_scale: float = 6.0
+
 
 @app.post("/api/media/animate")
-async def create_animate(
-    source_image: UploadFile = File(...),
-    driving_video: Optional[UploadFile] = File(None),
-):
-    """인물 사진 → 모션 영상 (LivePortrait, 3~10분)"""
-    image_path = _save_upload(source_image, "person")
-    driving_path = None
-    if driving_video:
-        driving_path = _save_upload(driving_video, "driving")
+def create_animate(req: AnimateRequest):
+    """인물/복잡 사진 → 영상 (CogVideoX 1.5, 10~15분 소요)"""
+    if not req.image_url.strip():
+        raise HTTPException(status_code=400, detail="image_url이 비어있습니다")
+
+    # 이미지 다운로드
+    try:
+        image_path = _download_image(req.image_url)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"이미지 다운로드 실패: {e}")
 
     job = _create_job("animate")
-    executor.submit(_run_animate, job, image_path, driving_path)
+    executor.submit(
+        _run_animate, job, image_path, req.prompt,
+        req.num_inference_steps, req.guidance_scale,
+    )
 
-    return {"job_id": job.job_id, "status": job.status.value, "message": "인물 모션 생성 시작 (3~10분 소요)"}
+    return {
+        "job_id": job.job_id,
+        "status": job.status.value,
+        "message": "CogVideoX 영상 생성 시작 (10~15분 소요)",
+    }
+
+
+@app.post("/api/media/animate/upload")
+async def create_animate_upload(
+    prompt: str = Form("A person gently moving, cinematic scene"),
+    source_image: UploadFile = File(...),
+    num_inference_steps: int = Form(15),
+    guidance_scale: float = Form(6.0),
+):
+    """인물 사진 직접 업로드 → CogVideoX 영상"""
+    image_path = _save_upload(source_image, "person")
+
+    job = _create_job("animate")
+    executor.submit(
+        _run_animate, job, image_path, prompt,
+        num_inference_steps, guidance_scale,
+    )
+
+    return {
+        "job_id": job.job_id,
+        "status": job.status.value,
+        "message": "CogVideoX 영상 생성 시작 (10~15분 소요)",
+    }
 
 
 # ── Render (FFmpeg 합성) ─────────────────────────────────────────────────────
@@ -675,9 +800,9 @@ def create_render(req: RenderRequest):
 
 @app.post("/api/media/unload/{model_name}")
 def unload_model(model_name: str):
-    """GPU 메모리 해제 (tts | musicgen)"""
-    if model_name not in ("tts", "musicgen"):
-        raise HTTPException(status_code=400, detail="model_name: tts 또는 musicgen")
+    """GPU 메모리 해제 (musicgen | sovits | cogvideox)"""
+    if model_name not in ("musicgen", "sovits", "cogvideox"):
+        raise HTTPException(status_code=400, detail="model_name: musicgen, sovits, cogvideox")
     _unload_model(model_name)
     return {"status": "ok", "unloaded": model_name}
 

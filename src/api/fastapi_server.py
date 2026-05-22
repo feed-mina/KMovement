@@ -29,6 +29,7 @@ import networkx as nx
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 load_dotenv()
@@ -748,11 +749,14 @@ class RecommendAIRequest(BaseModel):
     budget:   BudgetSchema = Field(default_factory=BudgetSchema)
 
 class ItineraryRequest(BaseModel):
-    duration: str = "당일치기"   # 당일치기 | 1박2일 | 2박3일
+    duration: str | int = "당일치기"   # 당일치기 | 1박2일 | 2박3일
     artists:  list[str] = Field(default_factory=list)
     regions:  list[str] = Field(default_factory=list)
     purposes: list[str] = Field(default_factory=list)
     budget:   BudgetSchema = Field(default_factory=BudgetSchema)
+
+class ChatStreamRequest(BaseModel):
+    message: str = ""
 
 
 _REQUEST_MODEL_TYPES = {"BudgetSchema": BudgetSchema}
@@ -1097,3 +1101,16 @@ async def recommend_itinerary(req: ItineraryRequest):
         "mapData": {"markers": markers},
         "source_pois": all_pois[:15],
     }
+
+
+@app.post("/api/chat/stream")
+def chat_stream(req: ChatStreamRequest):
+    message = (req.message or "").strip()
+    reply = "K-Ride assistant is ready."
+    if message:
+        reply = f"K-Ride assistant received: {message}"
+
+    def _chunks():
+        yield reply
+
+    return StreamingResponse(_chunks(), media_type="text/plain; charset=utf-8")

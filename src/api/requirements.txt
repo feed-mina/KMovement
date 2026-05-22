@@ -160,7 +160,7 @@ protobuf==6.33.6
 psutil==7.2.2
 psycopg==3.3.3
 psycopg-binary==3.3.3
-psycopg2==2.9.12
+psycopg2-binary==2.9.12
 pure_eval==0.2.3
 pyarrow==23.0.1
 pyasn1==0.6.3
@@ -177,7 +177,7 @@ PyJWT==2.12.1
 pyparsing==3.3.2
 PyPika==0.51.1
 pyproject_hooks==1.2.0
-pyreadline3==3.5.4
+pyreadline3==3.5.4; sys_platform == "win32"
 pyroaring==1.1.0
 PySocks==1.7.1
 pytest==9.0.3
@@ -186,8 +186,8 @@ python-dotenv==1.2.2
 python-json-logger==4.1.0
 python-multipart==0.0.27
 pytz==2026.1.post1
-pywin32==311
-pywinpty==3.0.3
+pywin32==311; sys_platform == "win32"
+pywinpty==3.0.3; sys_platform == "win32"
 PyYAML==6.0.3
 pyzmq==27.1.0
 realtime==2.30.0
@@ -229,7 +229,7 @@ tenacity==9.1.4
 terminado==0.18.1
 threadpoolctl==3.6.0
 tinycss2==1.4.0
-tokenizers==0.22.2
+tokenizers>=0.21.0
 toml==0.10.2
 tomli==2.4.1
 torch==2.11.0

@@ -1,0 +1,88 @@
+# ── 로컬 테스트용 (GPU 없음 — TorchServe 제외) ──────────────────────────────
+# 사용법:
+#   docker compose -f docker-compose.local.yml build
+#   docker compose -f docker-compose.local.yml up -d
+#   docker compose -f docker-compose.local.yml logs -f fastapi
+#   docker compose -f docker-compose.local.yml down
+
+services:
+  # ── FastAPI (K-Ride AI) ──────────────────────────────────────────────────
+  fastapi:
+    build:
+      context: .
+      dockerfile: src/api/Dockerfile
+    container_name: kride_fastapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      chromadb:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - TORCHSERVE_URL=http://host.docker.internal:8085
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - HF_HOME=/tmp/hf_cache
+      - TRANSFORMERS_CACHE=/tmp/hf_cache/hub
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  # ── ChromaDB ─────────────────────────────────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: kride_chromadb
+    ports:
+      - "8100:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+
+  # ── Redis ────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: kride_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ── Celery Worker (CPU only) ─────────────────────────────────────────────
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: kride_celery
+    command: celery -A src.api.celery_app worker -l info -c 2 -Q ml,media
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - TORCHSERVE_URL=http://host.docker.internal:8085
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - HF_HOME=/tmp/hf_cache
+      - TRANSFORMERS_CACHE=/tmp/hf_cache/hub
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  chroma_data:

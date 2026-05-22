@@ -1,0 +1,236 @@
+name: Deploy AI Services to GCP
+
+on:
+  push:
+    branches: ["main", "refactor/krider_backup"]
+    paths:
+      - "src/api/**"
+      - "torchserve/**"
+      - "Dockerfile.worker"
+      - "docker-compose.gpu.yml"
+      - ".github/workflows/deploy-gcp.yml"
+
+env:
+  GAR_REGION: asia-northeast3
+  GAR_REPO: kride-ai
+  FASTAPI_IMAGE: fastapi-server
+  TORCHSERVE_IMAGE: torchserve-gpu
+  WORKER_IMAGE: celery-worker
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GAR_REGION }}-docker.pkg.dev --quiet
+
+      - name: Set image tags
+        run: |
+          REGISTRY="${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.GAR_REPO }}"
+          echo "REGISTRY=$REGISTRY" >> $GITHUB_ENV
+          echo "TAG=${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Build and push FastAPI image
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.FASTAPI_IMAGE }}:${{ env.TAG }} \
+                        -t ${{ env.REGISTRY }}/${{ env.FASTAPI_IMAGE }}:latest \
+                        -f src/api/Dockerfile .
+          docker push ${{ env.REGISTRY }}/${{ env.FASTAPI_IMAGE }}:${{ env.TAG }}
+          docker push ${{ env.REGISTRY }}/${{ env.FASTAPI_IMAGE }}:latest
+
+      - name: Build and push Celery Worker image
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.WORKER_IMAGE }}:${{ env.TAG }} \
+                        -t ${{ env.REGISTRY }}/${{ env.WORKER_IMAGE }}:latest \
+                        -f Dockerfile.worker .
+          docker push ${{ env.REGISTRY }}/${{ env.WORKER_IMAGE }}:${{ env.TAG }}
+          docker push ${{ env.REGISTRY }}/${{ env.WORKER_IMAGE }}:latest
+
+      # TorchServe 이미지는 GPU 의존성이 크고 변경 빈도가 낮으므로
+      # torchserve/ 디렉토리 변경 시에만 빌드
+      - name: Check TorchServe changes
+        id: ts_changes
+        run: |
+          if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q "^torchserve/"; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push TorchServe image
+        if: steps.ts_changes.outputs.changed == 'true'
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.TORCHSERVE_IMAGE }}:${{ env.TAG }} \
+                        -t ${{ env.REGISTRY }}/${{ env.TORCHSERVE_IMAGE }}:latest \
+                        -f torchserve/Dockerfile ./torchserve
+          docker push ${{ env.REGISTRY }}/${{ env.TORCHSERVE_IMAGE }}:${{ env.TAG }}
+          docker push ${{ env.REGISTRY }}/${{ env.TORCHSERVE_IMAGE }}:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to GCP VM via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.GCP_VM_HOST }}
+          username: ${{ secrets.GCP_VM_USER }}
+          key: ${{ secrets.GCP_VM_SSH_KEY }}
+          script: |
+            set -e
+
+            REGISTRY="${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.GAR_REPO }}"
+
+            # Artifact Registry 인증
+            gcloud auth configure-docker ${{ env.GAR_REGION }}-docker.pkg.dev --quiet
+
+            # 프로젝트 디렉토리 이동 (없으면 생성)
+            mkdir -p ~/kride && cd ~/kride
+
+            # docker-compose.prod.yml 생성
+            cat > docker-compose.prod.yml << 'COMPOSE_EOF'
+            version: '3.8'
+
+            services:
+              torchserve:
+                image: REGISTRY_PLACEHOLDER/torchserve-gpu:latest
+                ports:
+                  - "8085:8085"
+                  - "8086:8086"
+                  - "7070:7070"
+                deploy:
+                  resources:
+                    reservations:
+                      devices:
+                        - capabilities: [gpu]
+                volumes:
+                  - ./models:/home/model-store/models
+                environment:
+                  - TS_CONFIG_FILE=/home/model-store/config.properties
+                healthcheck:
+                  test: ["CMD", "curl", "-f", "http://localhost:8085/ping"]
+                  interval: 30s
+                  timeout: 10s
+                  retries: 3
+                  start_period: 60s
+                restart: unless-stopped
+
+              fastapi:
+                image: REGISTRY_PLACEHOLDER/fastapi-server:latest
+                ports:
+                  - "8000:8000"
+                depends_on:
+                  torchserve:
+                    condition: service_healthy
+                  chromadb:
+                    condition: service_healthy
+                  redis:
+                    condition: service_healthy
+                environment:
+                  - TORCHSERVE_URL=http://torchserve:8085
+                  - CELERY_BROKER_URL=redis://redis:6379/1
+                  - CHROMA_HOST=chromadb
+                  - CHROMA_PORT=8000
+                  - NEO4J_URI=${NEO4J_URI}
+                  - NEO4J_USERNAME=${NEO4J_USERNAME}
+                  - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+                  - NEO4J_DATABASE=${NEO4J_DATABASE}
+                  - SUPABASE_URL=${SUPABASE_URL}
+                  - SUPABASE_KEY=${SUPABASE_KEY}
+                  - GROQ_API_KEY=${GROQ_API_KEY}
+                restart: unless-stopped
+
+              chromadb:
+                image: chromadb/chroma:latest
+                ports:
+                  - "8100:8000"
+                volumes:
+                  - ./chroma_db:/chroma/chroma
+                environment:
+                  - IS_PERSISTENT=TRUE
+                  - ANONYMIZED_TELEMETRY=FALSE
+                healthcheck:
+                  test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+                  interval: 15s
+                  timeout: 5s
+                  retries: 3
+                restart: unless-stopped
+
+              redis:
+                image: redis:7-alpine
+                ports:
+                  - "6379:6379"
+                volumes:
+                  - redis_data:/data
+                healthcheck:
+                  test: ["CMD", "redis-cli", "ping"]
+                  interval: 10s
+                  timeout: 3s
+                  retries: 3
+                restart: unless-stopped
+
+              celery-worker:
+                image: REGISTRY_PLACEHOLDER/celery-worker:latest
+                command: celery -A src.api.celery_app worker -l info -c 2 -Q ml,media
+                depends_on:
+                  redis:
+                    condition: service_healthy
+                  torchserve:
+                    condition: service_healthy
+                environment:
+                  - TORCHSERVE_URL=http://torchserve:8085
+                  - CELERY_BROKER_URL=redis://redis:6379/1
+                  - CHROMA_HOST=chromadb
+                  - CHROMA_PORT=8000
+                restart: unless-stopped
+
+            volumes:
+              redis_data:
+            COMPOSE_EOF
+
+            # 레지스트리 플레이스홀더를 실제 값으로 치환
+            sed -i "s|REGISTRY_PLACEHOLDER|${REGISTRY}|g" docker-compose.prod.yml
+
+            # .env 파일 생성 (secrets)
+            cat > .env << ENV_EOF
+            NEO4J_URI=${{ secrets.NEO4J_URI }}
+            NEO4J_USERNAME=${{ secrets.NEO4J_USERNAME }}
+            NEO4J_PASSWORD=${{ secrets.NEO4J_PASSWORD }}
+            NEO4J_DATABASE=${{ secrets.NEO4J_DATABASE }}
+            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+            GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
+            ENV_EOF
+
+            # 최신 이미지 pull & 재시작
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
+
+            # 오래된 이미지 정리
+            docker image prune -af --filter "until=24h" || true
+
+            # 헬스 체크 (60초 대기 — TorchServe 모델 로딩에 시간 소요)
+            echo "Waiting for services to start..."
+            sleep 60
+
+            echo "=== Service Status ==="
+            docker compose -f docker-compose.prod.yml ps
+
+            echo "=== FastAPI Logs ==="
+            docker compose -f docker-compose.prod.yml logs --tail 20 fastapi
+
+            echo "Deployment successful!"
