@@ -1,0 +1,122 @@
+/* ───────────────────────────────────────────────────────────
+   MAIN_PAGE — KRIDE entry card 스타일
+   
+   적용 방법:
+     metadata-project/app/styles/pages.css 의 ".bento-card-dark" 정의 직후 (line ~2030)
+     아래 블록을 추가.
+   
+   기존 .bento-card / .bento-card-dark / .col-span-3 규칙은 그대로 활용
+   (.bento-card-kride 는 위에 stacking 만).
+   ─────────────────────────────────────────────────────────── */
+
+/* ── KRIDE 진입 카드 (시네마틱 다크 + 레드 그라데이션) ── */
+.bento-card-kride {
+    background:
+        radial-gradient(120% 100% at 100% 50%, rgba(229, 9, 20, 0.45), transparent 55%),
+        linear-gradient(135deg, #0A0A0A 0%, #1a0a0c 60%, #2a0a0c 100%);
+    color: #ffffff;
+    border-radius: 16px;
+    padding: 28px;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        0 8px 28px rgba(229, 9, 20, 0.18),
+        0 1px 0 rgba(255, 255, 255, 0.04) inset;
+    transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.bento-card-kride:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 12px 36px rgba(229, 9, 20, 0.28),
+        0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+/* film grain 오버레이 */
+.bento-card-kride::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.16;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    pointer-events: none;
+}
+
+/* ── 자식 요소들 ── */
+.bento-card-kride__kicker {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    color: #E50914;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+}
+
+.bento-card-kride__title {
+    font-family: 'Anton', 'Helvetica Neue', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+    margin: 4px 0 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.bento-card-kride__desc {
+    font-size: 13.5px;
+    line-height: 1.55;
+    opacity: 0.72;
+    max-width: 480px;
+    word-break: keep-all;
+    position: relative;
+    z-index: 1;
+}
+
+.bento-card-kride__cta {
+    align-self: flex-start;
+    margin-top: 16px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: #E50914;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 6px 16px rgba(229, 9, 20, 0.4);
+    transition: transform 160ms ease, box-shadow 160ms ease;
+    position: relative;
+    z-index: 1;
+}
+
+.bento-card-kride__cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(229, 9, 20, 0.55);
+}
+
+/* ── 모바일 (기존 main-bento media query 와 동일 breakpoint 사용) ── */
+@media (max-width: 768px) {
+    .bento-card-kride {
+        padding: 20px;
+        min-height: 140px;
+    }
+    .bento-card-kride__title {
+        font-size: 28px;
+    }
+    .bento-card-kride__desc {
+        font-size: 12.5px;
+    }
+}

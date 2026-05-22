@@ -1,0 +1,253 @@
+/* ───────────────────────────────────────────────────────────
+   KRIDE_CHAT.css — 챗봇 화면 전용 스타일
+   
+   적용 방법:
+     1. 이 파일을 metadata-project/app/styles/KRIDE_CHAT.css 로 복사
+     2. metadata-project/app/globals.css 에 한 줄 추가:
+          @import "./styles/KRIDE_CHAT.css";
+   
+   기존 KRIDE.css / KRIDE_INTRO 클래스와 충돌 없음 (.kride-chat-* prefix).
+   ─────────────────────────────────────────────────────────── */
+
+:root {
+  --kc-red: #E50914;
+  --kc-bg: #0A0A0A;
+  --kc-fg: #FFFFFF;
+  --kc-dim: rgba(255, 255, 255, 0.62);
+  --kc-dim2: rgba(255, 255, 255, 0.42);
+  --kc-line: rgba(255, 255, 255, 0.08);
+  --kc-surface: rgba(255, 255, 255, 0.05);
+  --kc-surface-2: rgba(255, 255, 255, 0.08);
+}
+
+/* ── 컨테이너 ── */
+.kride-chat-container {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--kc-bg);
+  color: var(--kc-fg);
+  font-family: 'Pretendard', 'Noto Sans KR', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ── 헤더 ── */
+.kride-chat-header {
+  flex: 0 0 auto;
+  padding: 52px 20px 14px;
+  border-bottom: 1px solid var(--kc-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--kc-bg);
+}
+.kride-chat-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.kride-chat-header__logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--kc-red), #8B0610);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Anton', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+}
+.kride-chat-header__title {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.1;
+}
+.kride-chat-header__status {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  margin-top: 3px;
+  color: var(--kc-dim2);
+}
+.kride-chat-header__status--streaming { color: var(--kc-red); }
+.kride-chat-header__close {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--kc-line);
+  background: transparent;
+  color: var(--kc-dim);
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* ── 스레드 ── */
+.kride-chat-thread {
+  flex: 1;
+  overflow: auto;
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+/* ── 버블 ── */
+.kride-chat-bubble {
+  display: flex;
+  gap: 8px;
+  animation: kcFadeUp 280ms cubic-bezier(.2, .7, .2, 1);
+}
+.kride-chat-bubble--user { justify-content: flex-end; }
+.kride-chat-bubble__avatar {
+  width: 28px; height: 28px; border-radius: 8px;
+  flex: 0 0 28px;
+  background: linear-gradient(135deg, var(--kc-red), #8B0610);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Anton', sans-serif; font-size: 12px; font-weight: 800;
+  margin-top: 2px;
+}
+.kride-chat-bubble__text {
+  max-width: 78%;
+  font-size: 14.5px; line-height: 1.55;
+  padding: 11px 14px;
+  word-break: keep-all;
+}
+.kride-chat-bubble--user .kride-chat-bubble__text {
+  background: #FFFFFF; color: #0A0A0A;
+  border-radius: 16px 16px 4px 16px;
+}
+.kride-chat-bubble--assistant .kride-chat-bubble__text {
+  background: var(--kc-surface-2); color: var(--kc-fg);
+  border: 1px solid var(--kc-line);
+  border-radius: 4px 16px 16px 16px;
+}
+
+/* ── 타이핑 점 ── */
+.kride-chat-typing { display: inline-flex; gap: 3px; margin-left: 6px; vertical-align: middle; }
+.kride-chat-typing i {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--kc-red);
+  animation: kcBlink 1.2s infinite ease-in-out;
+}
+.kride-chat-typing i:nth-child(2) { animation-delay: 0.15s; }
+.kride-chat-typing i:nth-child(3) { animation-delay: 0.3s; }
+
+/* ── POI 카드 ── */
+.kride-chat-poi {
+  background: var(--kc-surface);
+  border: 1px solid var(--kc-line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.kride-chat-poi__image {
+  height: 96px;
+  background: repeating-linear-gradient(135deg, #1c1c1c 0 14px, #232323 14px 28px);
+  position: relative;
+}
+.kride-chat-poi__tag {
+  position: absolute; top: 8px; left: 10px;
+  padding: 3px 7px; border-radius: 6px;
+  background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(8px);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.kride-chat-poi__body { padding: 10px 12px 12px; }
+.kride-chat-poi__name { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+.kride-chat-poi__address {
+  font-size: 11.5px; color: var(--kc-dim);
+  margin-bottom: 10px; word-break: keep-all;
+}
+.kride-chat-poi__actions { display: flex; gap: 6px; }
+.kride-chat-poi__btn {
+  flex: 1; padding: 8px 0; border-radius: 8px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.kride-chat-poi__btn--ghost {
+  background: transparent; color: var(--kc-fg);
+  border: 1px solid var(--kc-line);
+}
+.kride-chat-poi__btn--primary {
+  background: var(--kc-red); color: #fff; border: none; font-weight: 700;
+}
+
+/* ── 일정 카드 ── */
+.kride-chat-itinerary {
+  background: var(--kc-surface);
+  border: 1px solid var(--kc-line);
+  border-radius: 14px; overflow: hidden;
+}
+.kride-chat-itinerary__head {
+  padding: 10px 14px; border-bottom: 1px solid var(--kc-line);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.kride-chat-itinerary__kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px; letter-spacing: 0.16em;
+  color: var(--kc-red); text-transform: uppercase;
+}
+.kride-chat-itinerary__title { font-weight: 700; font-size: 14px; margin-top: 2px; }
+.kride-chat-itinerary__apply {
+  width: 100%; padding: 11px 0; border-radius: 10px;
+  background: var(--kc-red); color: #fff; border: none;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 8px 20px rgba(229, 9, 20, 0.25);
+  margin: 0 12px 12px; width: calc(100% - 24px);
+}
+
+/* ── Suggestion chips ── */
+.kride-chat-suggestions {
+  display: flex; flex-wrap: wrap; gap: 7px;
+  padding: 0 16px 12px;
+}
+.kride-chat-suggestion {
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--kc-surface);
+  border: 1px solid var(--kc-line);
+  color: var(--kc-fg);
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; white-space: nowrap;
+}
+
+/* ── Composer ── */
+.kride-chat-composer {
+  flex: 0 0 auto;
+  padding: 10px 14px 18px;
+  border-top: 1px solid var(--kc-line);
+  background: var(--kc-bg);
+  display: flex; align-items: flex-end; gap: 8px;
+}
+.kride-chat-composer__input-wrap {
+  flex: 1; display: flex; align-items: center; gap: 6px;
+  background: var(--kc-surface);
+  border: 1px solid var(--kc-line);
+  border-radius: 22px;
+  padding: 4px 4px 4px 14px;
+}
+.kride-chat-composer__input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--kc-fg); font-size: 14px; padding: 6px 0;
+}
+.kride-chat-composer__input::placeholder { color: rgba(255, 255, 255, 0.38); }
+.kride-chat-composer__send {
+  width: 44px; height: 44px; border-radius: 50%; border: none;
+  background: var(--kc-red); color: #fff; font-size: 18px; font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(229, 9, 20, 0.33);
+  transition: all 160ms ease;
+}
+.kride-chat-composer__send:disabled {
+  background: var(--kc-surface); cursor: not-allowed; box-shadow: none;
+}
+
+@keyframes kcFadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes kcBlink {
+  0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
+  40%           { opacity: 1;    transform: scale(1); }
+}
