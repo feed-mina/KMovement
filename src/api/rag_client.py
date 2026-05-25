@@ -7,10 +7,12 @@ from groq import Groq
 from src.api.torchserve_client import embed_texts_sync
 
 GROQ_MODEL  = "openai/gpt-oss-120b"
+CHROMA_MODE = os.environ.get("CHROMA_MODE", "http").strip().lower()
 
 # ChromaDB — HttpClient 모드 (서버 분리)
 CHROMA_HOST = os.environ.get("CHROMA_HOST", "localhost")
 CHROMA_PORT = int(os.environ.get("CHROMA_PORT", "8100"))
+CHROMA_PATH = os.environ.get("CHROMA_PATH", "chroma_db")
 
 # ── 싱글턴 초기화 ──────────────────────────────────────────────────────────
 _chroma: chromadb.ClientAPI | None = None
@@ -20,7 +22,10 @@ _groq: Groq | None = None
 def get_chroma() -> chromadb.ClientAPI:
     global _chroma
     if _chroma is None:
-        _chroma = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
+        if CHROMA_MODE in {"persistent", "local"}:
+            _chroma = chromadb.PersistentClient(path=CHROMA_PATH)
+        else:
+            _chroma = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
     return _chroma
 
 
@@ -41,6 +46,90 @@ COLLECTION_MAP = {
     "shopping":  "kride_poi_kculture",   # fallback
     "rest":      "kride_poi_nature",     # fallback
 }
+
+
+def _collection_names_for_chat() -> list[str]:
+    names = list(dict.fromkeys(COLLECTION_MAP.values()))
+    names.insert(0, "kride_pdf_knowledge")
+    return names
+
+
+def _query_collection(collection_name: str, query_vec: list[float], top_k: int) -> list[dict]:
+    try:
+        col = get_chroma().get_collection(collection_name)
+    except Exception:
+        return []
+
+    try:
+        res = col.query(
+            query_embeddings=[query_vec],
+            n_results=top_k,
+            include=["documents", "metadatas", "distances"],
+        )
+    except Exception:
+        return []
+
+    documents = (res.get("documents") or [[]])[0]
+    metadatas = (res.get("metadatas") or [[]])[0]
+    distances = (res.get("distances") or [[]])[0]
+
+    rows: list[dict] = []
+    for doc, meta, dist in zip(documents, metadatas, distances):
+        rows.append({
+            "text": doc,
+            "metadata": meta or {},
+            "distance": float(dist),
+            "collection": collection_name,
+        })
+    return rows
+
+
+def search_chat_context(message: str, top_k: int = 4) -> list[dict]:
+    query_vec = embed_texts_sync([message])[0]
+    passages: list[dict] = []
+    seen: set[str] = set()
+
+    for collection_name in _collection_names_for_chat():
+        for row in _query_collection(collection_name, query_vec, top_k):
+            meta = row.get("metadata", {})
+            key = str(meta.get("id") or meta.get("name") or row.get("text", "")[:80])
+            if key in seen:
+                continue
+            seen.add(key)
+            passages.append(row)
+
+    return sorted(passages, key=lambda row: row.get("distance", 1.0))[:top_k * 2]
+
+
+def generate_chat_answer(message: str) -> str:
+    passages = search_chat_context(message, top_k=3)
+    context = "\n".join(
+        f"- {p.get('text', '')[:500]}"
+        for p in passages[:8]
+        if p.get("text")
+    )
+    if not context:
+        context = "No retrieved context was available."
+
+    prompt = f"""Answer the user's K-Ride travel question in Korean.
+Use only the retrieved context when it is relevant. If the context is thin, say what is missing and give a careful general answer.
+
+[Retrieved context]
+{context}
+
+[User question]
+{message}
+"""
+    resp = get_groq().chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[
+            {"role": "system", "content": "You are K-Ride Guide, a concise Korean travel assistant."},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.5,
+        max_tokens=700,
+    )
+    return resp.choices[0].message.content
 
 
 def search_pois_by_purpose(

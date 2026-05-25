@@ -36,7 +36,12 @@ load_dotenv()
 
 try:
     from src.api.neo4j_client import get_artist_pois, get_region_pois, get_regions
-    from src.api.rag_client import search_pois_by_purpose, generate_recommendation_text, generate_itinerary
+    from src.api.rag_client import (
+        generate_chat_answer,
+        generate_itinerary,
+        generate_recommendation_text,
+        search_pois_by_purpose,
+    )
     from src.api.supabase_client import get_all_artists, get_poi_details
     HAS_AI = True
 except ImportError as _e:
@@ -49,6 +54,7 @@ except ImportError as _e:
     search_pois_by_purpose = lambda purpose, lat, lon, radius: []
     generate_recommendation_text = lambda purpose, pois: ""
     generate_itinerary = lambda pois, duration, theme: ""
+    generate_chat_answer = lambda message: "K-Ride assistant is ready."
     get_poi_details = lambda poi_id: None
 
 # 앙상블 랭커 (모델 파일 없어도 서버 기동 가능)
@@ -83,9 +89,10 @@ except ImportError:
 HAS_LSTM_WEATHER = True
 
 # ── 경로 설정 ──────────────────────────────────────────────────────────────────
-BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
-MODELS_DIR = os.path.join(BASE_DIR, "models")
-RAW_DIR    = os.path.join(BASE_DIR, "data", "raw_ml")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+MODELS_DIR = os.environ.get("KRIDE_MODELS_DIR", os.path.join(PROJECT_ROOT, "dataset", "models"))
+RAW_DIR = os.environ.get("KRIDE_RAW_DATA_DIR", os.path.join(PROJECT_ROOT, "dataset", "data", "raw_ml"))
 
 GRAPH_PATH    = os.path.join(MODELS_DIR, "route_graph.pkl")
 SCORED_PATH   = os.path.join(RAW_DIR,    "road_scored.csv")
@@ -117,9 +124,13 @@ app.add_middleware(
 def _load_graph():
     if not os.path.exists(GRAPH_PATH):
         return None, None, {}
-    with open(GRAPH_PATH, "rb") as f:
-        data = pickle.load(f)
-    return data["G"], data["G_main"], data.get("meta", {})
+    try:
+        with open(GRAPH_PATH, "rb") as f:
+            data = pickle.load(f)
+        return data["G"], data["G_main"], data.get("meta", {})
+    except Exception as exc:
+        print(f"[K-Ride] route graph load failed: {exc}")
+        return None, None, {}
 
 ### [메모] 여기서 data["G"]와 data["G_main"]은 어떤 차이가 있나요? 두개는 어떤 의미인가요
 ### [답변]
@@ -137,9 +148,13 @@ def _load_df(path: str) -> Optional[pd.DataFrame]:
     if not os.path.exists(path):
         return None
     try:
-        return pd.read_csv(path, encoding="utf-8-sig")
-    except Exception:
-        return pd.read_csv(path, encoding="cp949")
+        try:
+            return pd.read_csv(path, encoding="utf-8-sig")
+        except Exception:
+            return pd.read_csv(path, encoding="cp949")
+    except Exception as exc:
+        print(f"[K-Ride] csv load failed ({path}): {exc}")
+        return None
 
 
 G, G_main, graph_meta = _load_graph()
@@ -1106,9 +1121,14 @@ async def recommend_itinerary(req: ItineraryRequest):
 @app.post("/api/chat/stream")
 def chat_stream(req: ChatStreamRequest):
     message = (req.message or "").strip()
-    reply = "K-Ride assistant is ready."
-    if message:
-        reply = f"K-Ride assistant received: {message}"
+    if not message:
+        reply = "K-Ride assistant is ready."
+    else:
+        try:
+            reply = generate_chat_answer(message)
+        except Exception as exc:
+            print(f"[K-Ride] chat fallback: {exc}")
+            reply = "K-Ride assistant is ready. Please try again with a travel question."
 
     def _chunks():
         yield reply

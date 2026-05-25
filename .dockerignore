@@ -7,9 +7,16 @@ venv
 __pycache__
 *.pyc
 node_modules
-chroma_db
 outputs
 report
+dataset/**
+!dataset/data/
+!dataset/data/raw_ml/
+!dataset/data/raw_ml/road_scored.csv
+!dataset/data/raw_ml/facility_clean.csv
+!dataset/data/raw_ml/tour_poi.csv
+!dataset/models/
+!dataset/models/route_graph.pkl
 *.backup
 *.pdf
 *.pptx

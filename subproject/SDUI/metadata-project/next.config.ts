@@ -9,8 +9,25 @@ import type { NextConfig } from "next";
 
 const isProd = process.env.NODE_ENV === 'production';
 const BACKEND_URL = isProd
-    ? 'https://yerin.duckdns.org' // 실제 AWS 백엔드 도메인 입력 (lab 환경)
+    ? (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://yerin.duckdns.org')
     : 'http://localhost:8080';
+const FASTAPI_URL = process.env.FASTAPI_URL || (isProd ? 'http://yerin.duckdns.org:8000' : 'http://localhost:8000');
+
+const connectSrc = [
+    "'self'",
+    'http://localhost:8080',
+    'http://localhost:8000',
+    'http://43.201.237.68:8081',
+    'https://yerin.duckdns.org',
+    'http://yerin.duckdns.org:8000',
+    BACKEND_URL,
+    FASTAPI_URL,
+    'https://kauth.kakao.com',
+    'https://kapi.kakao.com',
+    'https://vercel.live',
+    'https://*.vercel.app',
+    'wss://ws-us3.pusher.com',
+];
 
 const nextConfig: NextConfig = {
     async redirects() {
@@ -26,7 +43,7 @@ const nextConfig: NextConfig = {
         return [
             {
                 source: '/kride-api/:path*',
-                destination: 'http://localhost:8000/api/:path*',
+                destination: `${FASTAPI_URL}/api/:path*`,
             },
             {
                 source: '/api/:path*',
@@ -55,16 +72,16 @@ const nextConfig: NextConfig = {
                         key: 'Content-Security-Policy',
                         value: [
                             "default-src 'self'",
-                            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://t1.daumcdn.net https://t1.daumcdn.net https://t1.kakaocdn.net https://k.kakaocdn.net https://vercel.live https://*.vercel.app https://va.vercel-scripts.com",  // Next.js + Daum/Kakao API + Vercel Live + Vercel Analytics
-                            "style-src 'self' 'unsafe-inline'",                  // Tailwind 인라인 스타일 허용
-                            "img-src 'self' data: data: blob: https: http://k.kakaocdn.net",                 // 외부 이미지 허용
-                            "connect-src 'self' http://localhost:8080 http://localhost:8000 http://43.201.237.68:8081 https://yerin.duckdns.org https://kauth.kakao.com https://kapi.kakao.com https://vercel.live https://*.vercel.app wss://ws-us3.pusher.com", // API 서버 + Vercel Live
+                            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://t1.daumcdn.net https://t1.daumcdn.net https://t1.kakaocdn.net https://k.kakaocdn.net https://vercel.live https://*.vercel.app https://va.vercel-scripts.com",
+                            "style-src 'self' 'unsafe-inline'",
+                            "img-src 'self' data: blob: https: http://k.kakaocdn.net",
+                            `connect-src ${Array.from(new Set(connectSrc)).join(' ')}`,
                             "font-src 'self' data:",
-                            "media-src 'self' blob:;",
-                            "frame-src http://postcode.map.daum.net https://postcode.map.daum.net http://postcode.map.kakao.com https://postcode.map.kakao.com",  // Daum/Kakao 우편번호 iframe (도메인 변경 2026-03-10)
+                            "media-src 'self' blob:",
+                            "frame-src http://postcode.map.daum.net https://postcode.map.daum.net http://postcode.map.kakao.com https://postcode.map.kakao.com",
                             "object-src 'none'",
                             "frame-ancestors 'none'",
-                            "worker-src 'self'",  // PWA 서비스 워커
+                            "worker-src 'self'",
                         ].join('; '),
                     },
                 ],

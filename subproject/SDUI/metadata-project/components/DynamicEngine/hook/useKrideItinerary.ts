@@ -62,7 +62,7 @@ export function useKrideItinerary(
                 const controller = new AbortController();
                 const timer = setTimeout(() => controller.abort(), 120_000); // 2분 타임아웃
 
-                const res = await fetch("http://localhost:8000/api/recommend/itinerary", {
+                const res = await fetch("/api/kride/recommend/itinerary", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(body),
