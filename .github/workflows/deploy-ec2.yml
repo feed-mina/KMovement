@@ -7,6 +7,7 @@ on:
       - "subproject/SDUI/SDUI-server/**"
       - ".dockerignore"
       - ".github/workflows/deploy-ec2.yml"
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -53,66 +54,109 @@ jobs:
           docker push $SDUI_IMAGE:${{ env.BRANCH_TAG }}
           docker push $SDUI_IMAGE:latest
 
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.AWS_HOST }}
-          username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.AWS_KEY }}
-          script: |
-            set -e
+        env:
+          SSH_HOST: ${{ secrets.AWS_HOST }}
+          SSH_USER: ${{ secrets.AWS_USERNAME }}
+          SDUI_IMAGE: ${{ env.SDUI_IMAGE }}
+          BRANCH_TAG: ${{ env.BRANCH_TAG }}
+          CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
+          TARGET_PORT: ${{ env.TARGET_PORT }}
+          DB_NAME: ${{ env.DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+          KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
+          WEB_URL: ${{ secrets.WEB_URL }}
+          S3_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          GCP_FASTAPI_URL: ${{ secrets.GCP_FASTAPI_URL }}
+          FASTAPI_INTERNAL_API_KEY: ${{ secrets.FASTAPI_INTERNAL_API_KEY }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS_JSON }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} \
+            "SDUI_IMAGE='${SDUI_IMAGE}' BRANCH_TAG='${BRANCH_TAG}' CONTAINER_NAME='${CONTAINER_NAME}' \
+             TARGET_PORT='${TARGET_PORT}' DB_NAME='${DB_NAME}' DB_USERNAME='${DB_USERNAME}' \
+             DB_PASSWORD='${DB_PASSWORD}' MAIL_PASSWORD='${MAIL_PASSWORD}' \
+             JWT_SECRET_KEY='${JWT_SECRET_KEY}' OPENAI_API_KEY='${OPENAI_API_KEY}' \
+             KAKAO_CLIENT_ID='${KAKAO_CLIENT_ID}' KAKAO_REDIRECT_URI='${KAKAO_REDIRECT_URI}' \
+             WEB_URL='${WEB_URL}' S3_ACCESS_KEY='${S3_ACCESS_KEY}' S3_SECRET_KEY='${S3_SECRET_KEY}' \
+             GCP_FASTAPI_URL='${GCP_FASTAPI_URL}' FASTAPI_INTERNAL_API_KEY='${FASTAPI_INTERNAL_API_KEY}' \
+             GCP_PROJECT_ID='${GCP_PROJECT_ID}' GCP_CREDENTIALS_JSON='${GCP_CREDENTIALS_JSON}' \
+             SLACK_WEBHOOK_URL='${SLACK_WEBHOOK_URL}' SLACK_BOT_TOKEN='${SLACK_BOT_TOKEN}' \
+             SLACK_CHANNEL_ID='${SLACK_CHANNEL_ID}' GOOGLE_CLIENT_ID='${GOOGLE_CLIENT_ID}' \
+             GOOGLE_CLIENT_SECRET='${GOOGLE_CLIENT_SECRET}' GOOGLE_REDIRECT_URI='${GOOGLE_REDIRECT_URI}' \
+             bash -s" << 'DEPLOY_EOF'
+          set -e
 
-            docker network inspect sdui-network >/dev/null 2>&1 || docker network create sdui-network
+          docker network inspect sdui-network >/dev/null 2>&1 || docker network create sdui-network
 
-            docker pull ${{ env.SDUI_IMAGE }}:${{ env.BRANCH_TAG }}
+          docker pull ${SDUI_IMAGE}:${BRANCH_TAG}
 
-            docker image prune -af --filter "until=24h" || true
+          docker image prune -af --filter "until=24h" || true
 
-            if [ -n "${{ secrets.GCP_CREDENTIALS_JSON }}" ]; then
-              echo "${{ secrets.GCP_CREDENTIALS_JSON }}" | base64 -d > /home/ubuntu/gcp-credentials.json
-            else
-              echo "{}" > /home/ubuntu/gcp-credentials.json
-            fi
+          if [ -n "${GCP_CREDENTIALS_JSON}" ]; then
+            echo "${GCP_CREDENTIALS_JSON}" | base64 -d > /home/ubuntu/gcp-credentials.json
+          else
+            echo "{}" > /home/ubuntu/gcp-credentials.json
+          fi
 
-            docker inspect sdui-redis >/dev/null 2>&1 || docker run -d --name sdui-redis --network sdui-network redis:7-alpine
+          docker inspect sdui-redis >/dev/null 2>&1 || docker run -d --name sdui-redis --network sdui-network redis:7-alpine
 
-            docker stop ${{ env.CONTAINER_NAME }} || true
-            docker rm ${{ env.CONTAINER_NAME }} || true
-            docker run -d --name ${{ env.CONTAINER_NAME }} \
-              -p ${{ env.TARGET_PORT }}:8080 \
-              --network sdui-network \
-              -e SPRING_PROFILES_ACTIVE=prod \
-              -e SPRING_DATASOURCE_URL=jdbc:postgresql://sdui-db:5432/${{ env.DB_NAME }} \
-              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
-              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e SPRING_DATA_REDIS_HOST=sdui-redis \
-              -e SPRING_MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
-              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
-              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-              -e KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
-              -e KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }} \
-              -e WEB_URL=${{ secrets.WEB_URL }} \
-              -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
-              -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
-              -e FASTAPI_URL=${{ secrets.GCP_FASTAPI_URL }} \
-              -e KRIDE_FASTAPI_URL=${{ secrets.GCP_FASTAPI_URL }} \
-              -e FASTAPI_INTERNAL_API_KEY=${{ secrets.FASTAPI_INTERNAL_API_KEY }} \
-              -e GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }} \
-              -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
-              -e GCP_CREDENTIALS_PATH=/app/gcp-credentials.json \
-              -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
-              -e SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }} \
-              -e SLACK_CHANNEL_ID=${{ secrets.SLACK_CHANNEL_ID }} \
-              -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
-              -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
-              -e GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }} \
-              -v /home/ubuntu/gcp-credentials.json:/app/gcp-credentials.json:ro \
-              -v /home/ubuntu/study-materials:/app/assets/study:ro \
-              ${{ env.SDUI_IMAGE }}:${{ env.BRANCH_TAG }}
+          docker stop ${CONTAINER_NAME} || true
+          docker rm ${CONTAINER_NAME} || true
+          docker run -d --name ${CONTAINER_NAME} \
+            -p ${TARGET_PORT}:8080 \
+            --network sdui-network \
+            -e SPRING_PROFILES_ACTIVE=prod \
+            -e SPRING_DATASOURCE_URL=jdbc:postgresql://sdui-db:5432/${DB_NAME} \
+            -e SPRING_DATASOURCE_USERNAME=${DB_USERNAME} \
+            -e SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD} \
+            -e SPRING_DATA_REDIS_HOST=sdui-redis \
+            -e SPRING_MAIL_PASSWORD=${MAIL_PASSWORD} \
+            -e JWT_SECRET_KEY=${JWT_SECRET_KEY} \
+            -e OPENAI_API_KEY=${OPENAI_API_KEY} \
+            -e KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID} \
+            -e KAKAO_REDIRECT_URI=${KAKAO_REDIRECT_URI} \
+            -e WEB_URL=${WEB_URL} \
+            -e AWS_ACCESS_KEY=${S3_ACCESS_KEY} \
+            -e AWS_SECRET_KEY=${S3_SECRET_KEY} \
+            -e FASTAPI_URL=${GCP_FASTAPI_URL} \
+            -e KRIDE_FASTAPI_URL=${GCP_FASTAPI_URL} \
+            -e FASTAPI_INTERNAL_API_KEY=${FASTAPI_INTERNAL_API_KEY} \
+            -e GCP_PROJECT_ID=${GCP_PROJECT_ID} \
+            -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
+            -e GCP_CREDENTIALS_PATH=/app/gcp-credentials.json \
+            -e SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL} \
+            -e SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN} \
+            -e SLACK_CHANNEL_ID=${SLACK_CHANNEL_ID} \
+            -e GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID} \
+            -e GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET} \
+            -e GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI} \
+            -v /home/ubuntu/gcp-credentials.json:/app/gcp-credentials.json:ro \
+            -v /home/ubuntu/study-materials:/app/assets/study:ro \
+            ${SDUI_IMAGE}:${BRANCH_TAG}
 
-            echo "Waiting for Spring Boot..."
-            sleep 40
-            docker logs --tail 80 ${{ env.CONTAINER_NAME }}
-            docker exec sdui-redis redis-cli FLUSHDB || true
+          echo "Waiting for Spring Boot..."
+          sleep 40
+          docker logs --tail 80 ${CONTAINER_NAME}
+          docker exec sdui-redis redis-cli FLUSHDB || true
 
-            echo "Deployment successful: ${{ env.CONTAINER_NAME }}:${{ env.TARGET_PORT }} (FastAPI → GCP)"
+          echo "Deployment successful: ${CONTAINER_NAME}:${TARGET_PORT} (FastAPI -> GCP)"
+          DEPLOY_EOF

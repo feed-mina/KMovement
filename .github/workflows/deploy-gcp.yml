@@ -9,6 +9,7 @@ on:
       - "Dockerfile.worker"
       - "docker-compose.gpu.yml"
       - ".github/workflows/deploy-gcp.yml"
+  workflow_dispatch:
 
 env:
   GAR_REGION: asia-northeast3
@@ -81,156 +82,182 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.GCP_VM_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
 
-      - name: Deploy to GCP VM via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.GCP_VM_HOST }}
-          username: ${{ secrets.GCP_VM_USER }}
-          key: ${{ secrets.GCP_VM_SSH_KEY }}
-          script: |
-            set -e
+      - name: Create deploy script
+        env:
+          REGISTRY: ${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.GAR_REPO }}
+          GAR_REGION: ${{ env.GAR_REGION }}
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USERNAME: ${{ secrets.NEO4J_USERNAME }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          NEO4J_DATABASE: ${{ secrets.NEO4J_DATABASE }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          cat > /tmp/deploy.sh << 'SCRIPT_EOF'
+          set -e
 
-            REGISTRY="${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.GAR_REPO }}"
+          REGISTRY="__REGISTRY__"
+          GAR_REGION="__GAR_REGION__"
 
-            # Artifact Registry 인증
-            gcloud auth configure-docker ${{ env.GAR_REGION }}-docker.pkg.dev --quiet
+          gcloud auth configure-docker ${GAR_REGION}-docker.pkg.dev --quiet
 
-            # 프로젝트 디렉토리 이동 (없으면 생성)
-            mkdir -p ~/kride && cd ~/kride
+          mkdir -p ~/kride && cd ~/kride
 
-            # docker-compose.prod.yml 생성
-            cat > docker-compose.prod.yml << 'COMPOSE_EOF'
-            version: '3.8'
+          cat > docker-compose.prod.yml << 'COMPOSE_EOF'
+          version: '3.8'
 
-            services:
-              torchserve:
-                image: REGISTRY_PLACEHOLDER/torchserve-gpu:latest
-                ports:
-                  - "8085:8085"
-                  - "8086:8086"
-                  - "7070:7070"
-                deploy:
-                  resources:
-                    reservations:
-                      devices:
-                        - capabilities: [gpu]
-                volumes:
-                  - ./models:/home/model-store/models
-                environment:
-                  - TS_CONFIG_FILE=/home/model-store/config.properties
-                healthcheck:
-                  test: ["CMD", "curl", "-f", "http://localhost:8085/ping"]
-                  interval: 30s
-                  timeout: 10s
-                  retries: 3
-                  start_period: 60s
-                restart: unless-stopped
+          services:
+            torchserve:
+              image: REGISTRY_PLACEHOLDER/torchserve-gpu:latest
+              ports:
+                - "8085:8085"
+                - "8086:8086"
+                - "7070:7070"
+              deploy:
+                resources:
+                  reservations:
+                    devices:
+                      - capabilities: [gpu]
+              volumes:
+                - ./models:/home/model-store/models
+              environment:
+                - TS_CONFIG_FILE=/home/model-store/config.properties
+              healthcheck:
+                test: ["CMD", "curl", "-f", "http://localhost:8085/ping"]
+                interval: 30s
+                timeout: 10s
+                retries: 3
+                start_period: 60s
+              restart: unless-stopped
 
-              fastapi:
-                image: REGISTRY_PLACEHOLDER/fastapi-server:latest
-                ports:
-                  - "8000:8000"
-                depends_on:
-                  torchserve:
-                    condition: service_healthy
-                  chromadb:
-                    condition: service_healthy
-                  redis:
-                    condition: service_healthy
-                environment:
-                  - TORCHSERVE_URL=http://torchserve:8085
-                  - CELERY_BROKER_URL=redis://redis:6379/1
-                  - CHROMA_HOST=chromadb
-                  - CHROMA_PORT=8000
-                  - NEO4J_URI=${NEO4J_URI}
-                  - NEO4J_USERNAME=${NEO4J_USERNAME}
-                  - NEO4J_PASSWORD=${NEO4J_PASSWORD}
-                  - NEO4J_DATABASE=${NEO4J_DATABASE}
-                  - SUPABASE_URL=${SUPABASE_URL}
-                  - SUPABASE_KEY=${SUPABASE_KEY}
-                  - GROQ_API_KEY=${GROQ_API_KEY}
-                restart: unless-stopped
+            fastapi:
+              image: REGISTRY_PLACEHOLDER/fastapi-server:latest
+              ports:
+                - "8000:8000"
+              depends_on:
+                torchserve:
+                  condition: service_healthy
+                chromadb:
+                  condition: service_healthy
+                redis:
+                  condition: service_healthy
+              environment:
+                - TORCHSERVE_URL=http://torchserve:8085
+                - TORCHSERVE_ENABLED=true
+                - TORCHSERVE_FALLBACK=false
+                - CELERY_BROKER_URL=redis://redis:6379/1
+                - CHROMA_MODE=client
+                - CHROMA_HOST=chromadb
+                - CHROMA_PORT=8000
+                - KRIDE_MODELS_DIR=/app/dataset/models
+                - KRIDE_RAW_DATA_DIR=/app/dataset/data/raw_ml
+                - HF_HOME=/tmp/hf_cache
+                - TRANSFORMERS_CACHE=/tmp/hf_cache/hub
+                - NEO4J_URI=${NEO4J_URI}
+                - NEO4J_USERNAME=${NEO4J_USERNAME}
+                - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+                - NEO4J_DATABASE=${NEO4J_DATABASE}
+                - SUPABASE_URL=${SUPABASE_URL}
+                - SUPABASE_KEY=${SUPABASE_KEY}
+                - GROQ_API_KEY=${GROQ_API_KEY}
+              restart: unless-stopped
 
-              chromadb:
-                image: chromadb/chroma:latest
-                ports:
-                  - "8100:8000"
-                volumes:
-                  - ./chroma_db:/chroma/chroma
-                environment:
-                  - IS_PERSISTENT=TRUE
-                  - ANONYMIZED_TELEMETRY=FALSE
-                healthcheck:
-                  test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
-                  interval: 15s
-                  timeout: 5s
-                  retries: 3
-                restart: unless-stopped
+            chromadb:
+              image: chromadb/chroma:latest
+              ports:
+                - "8100:8000"
+              volumes:
+                - ./chroma_db:/chroma/chroma
+              environment:
+                - IS_PERSISTENT=TRUE
+                - ANONYMIZED_TELEMETRY=FALSE
+              healthcheck:
+                test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+                interval: 15s
+                timeout: 5s
+                retries: 3
+              restart: unless-stopped
 
-              redis:
-                image: redis:7-alpine
-                ports:
-                  - "6379:6379"
-                volumes:
-                  - redis_data:/data
-                healthcheck:
-                  test: ["CMD", "redis-cli", "ping"]
-                  interval: 10s
-                  timeout: 3s
-                  retries: 3
-                restart: unless-stopped
+            redis:
+              image: redis:7-alpine
+              ports:
+                - "6379:6379"
+              volumes:
+                - redis_data:/data
+              healthcheck:
+                test: ["CMD", "redis-cli", "ping"]
+                interval: 10s
+                timeout: 3s
+                retries: 3
+              restart: unless-stopped
 
-              celery-worker:
-                image: REGISTRY_PLACEHOLDER/celery-worker:latest
-                command: celery -A src.api.celery_app worker -l info -c 2 -Q ml,media
-                depends_on:
-                  redis:
-                    condition: service_healthy
-                  torchserve:
-                    condition: service_healthy
-                environment:
-                  - TORCHSERVE_URL=http://torchserve:8085
-                  - CELERY_BROKER_URL=redis://redis:6379/1
-                  - CHROMA_HOST=chromadb
-                  - CHROMA_PORT=8000
-                restart: unless-stopped
+            celery-worker:
+              image: REGISTRY_PLACEHOLDER/celery-worker:latest
+              command: celery -A src.api.celery_app worker -l info -c 2 -Q ml,media
+              depends_on:
+                redis:
+                  condition: service_healthy
+                torchserve:
+                  condition: service_healthy
+              environment:
+                - TORCHSERVE_URL=http://torchserve:8085
+                - CELERY_BROKER_URL=redis://redis:6379/1
+                - CHROMA_HOST=chromadb
+                - CHROMA_PORT=8000
+              restart: unless-stopped
 
-            volumes:
-              redis_data:
-            COMPOSE_EOF
+          volumes:
+            redis_data:
+          COMPOSE_EOF
 
-            # 레지스트리 플레이스홀더를 실제 값으로 치환
-            sed -i "s|REGISTRY_PLACEHOLDER|${REGISTRY}|g" docker-compose.prod.yml
+          sed -i "s|REGISTRY_PLACEHOLDER|${REGISTRY}|g" docker-compose.prod.yml
 
-            # .env 파일 생성 (secrets)
-            cat > .env << ENV_EOF
-            NEO4J_URI=${{ secrets.NEO4J_URI }}
-            NEO4J_USERNAME=${{ secrets.NEO4J_USERNAME }}
-            NEO4J_PASSWORD=${{ secrets.NEO4J_PASSWORD }}
-            NEO4J_DATABASE=${{ secrets.NEO4J_DATABASE }}
-            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-            SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
-            GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
-            ENV_EOF
+          cat > .env << ENV_EOF
+          NEO4J_URI=__NEO4J_URI__
+          NEO4J_USERNAME=__NEO4J_USERNAME__
+          NEO4J_PASSWORD=__NEO4J_PASSWORD__
+          NEO4J_DATABASE=__NEO4J_DATABASE__
+          SUPABASE_URL=__SUPABASE_URL__
+          SUPABASE_KEY=__SUPABASE_KEY__
+          GROQ_API_KEY=__GROQ_API_KEY__
+          ENV_EOF
 
-            # 최신 이미지 pull & 재시작
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d
+          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml up -d
 
-            # 오래된 이미지 정리
-            docker image prune -af --filter "until=24h" || true
+          docker image prune -af --filter "until=24h" || true
 
-            # 헬스 체크 (60초 대기 — TorchServe 모델 로딩에 시간 소요)
-            echo "Waiting for services to start..."
-            sleep 60
+          echo "Waiting for services to start..."
+          sleep 60
 
-            echo "=== Service Status ==="
-            docker compose -f docker-compose.prod.yml ps
+          echo "=== Service Status ==="
+          docker compose -f docker-compose.prod.yml ps
 
-            echo "=== FastAPI Logs ==="
-            docker compose -f docker-compose.prod.yml logs --tail 20 fastapi
+          echo "=== FastAPI Logs ==="
+          docker compose -f docker-compose.prod.yml logs --tail 20 fastapi
 
-            echo "Deployment successful!"
+          echo "Deployment successful!"
+          SCRIPT_EOF
+
+          # Replace placeholders with actual values
+          sed -i "s|__REGISTRY__|${REGISTRY}|g" /tmp/deploy.sh
+          sed -i "s|__GAR_REGION__|${GAR_REGION}|g" /tmp/deploy.sh
+          sed -i "s|__NEO4J_URI__|${NEO4J_URI}|g" /tmp/deploy.sh
+          sed -i "s|__NEO4J_USERNAME__|${NEO4J_USERNAME}|g" /tmp/deploy.sh
+          sed -i "s|__NEO4J_PASSWORD__|${NEO4J_PASSWORD}|g" /tmp/deploy.sh
+          sed -i "s|__NEO4J_DATABASE__|${NEO4J_DATABASE}|g" /tmp/deploy.sh
+          sed -i "s|__SUPABASE_URL__|${SUPABASE_URL}|g" /tmp/deploy.sh
+          sed -i "s|__SUPABASE_KEY__|${SUPABASE_KEY}|g" /tmp/deploy.sh
+          sed -i "s|__GROQ_API_KEY__|${GROQ_API_KEY}|g" /tmp/deploy.sh
+
+      - name: Deploy to GCP VM
+        run: |
+          cat /tmp/deploy.sh | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_HOST }} bash
