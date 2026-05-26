@@ -5,12 +5,6 @@ on:
     branches: ["main", "refactor/krider_backup"]
     paths:
       - "subproject/SDUI/SDUI-server/**"
-      - "src/api/**"
-      - "dataset/data/raw_ml/road_scored.csv"
-      - "dataset/data/raw_ml/facility_clean.csv"
-      - "dataset/data/raw_ml/tour_poi.csv"
-      - "dataset/models/route_graph.pkl"
-      - "chroma_db/**"
       - ".dockerignore"
       - ".github/workflows/deploy-ec2.yml"
 
@@ -20,18 +14,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - name: Pull LFS model assets
-        run: git lfs pull --include="dataset/models/route_graph.pkl" || true
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: "17"
           distribution: "temurin"
-          cache: gradle
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -46,7 +34,6 @@ jobs:
           CLEAN_BRANCH=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
           echo "BRANCH_TAG=$CLEAN_BRANCH" >> $GITHUB_ENV
           echo "SDUI_IMAGE=${{ secrets.DOCKER_USERNAME }}/sdui-app" >> $GITHUB_ENV
-          echo "FASTAPI_IMAGE=${{ secrets.DOCKER_USERNAME }}/kride-fastapi" >> $GITHUB_ENV
           if [ "${{ github.ref_name }}" = "main" ]; then
             echo "TARGET_PORT=8080" >> $GITHUB_ENV
             echo "CONTAINER_NAME=sdui-backend" >> $GITHUB_ENV
@@ -66,12 +53,6 @@ jobs:
           docker push $SDUI_IMAGE:${{ env.BRANCH_TAG }}
           docker push $SDUI_IMAGE:latest
 
-      - name: Build and push FastAPI image
-        run: |
-          docker build -t $FASTAPI_IMAGE:${{ env.BRANCH_TAG }} -t $FASTAPI_IMAGE:latest -f src/api/Dockerfile .
-          docker push $FASTAPI_IMAGE:${{ env.BRANCH_TAG }}
-          docker push $FASTAPI_IMAGE:latest
-
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
@@ -84,7 +65,6 @@ jobs:
             docker network inspect sdui-network >/dev/null 2>&1 || docker network create sdui-network
 
             docker pull ${{ env.SDUI_IMAGE }}:${{ env.BRANCH_TAG }}
-            docker pull ${{ env.FASTAPI_IMAGE }}:${{ env.BRANCH_TAG }}
 
             docker image prune -af --filter "until=24h" || true
 
@@ -95,33 +75,6 @@ jobs:
             fi
 
             docker inspect sdui-redis >/dev/null 2>&1 || docker run -d --name sdui-redis --network sdui-network redis:7-alpine
-
-            docker stop kride-fastapi || true
-            docker rm kride-fastapi || true
-            docker run -d --name kride-fastapi \
-              -p 8000:8000 \
-              --network sdui-network \
-              -e TORCHSERVE_ENABLED=false \
-              -e TORCHSERVE_FALLBACK=true \
-              -e CHROMA_MODE=persistent \
-              -e CHROMA_PATH=/app/chroma_db \
-              -e KRIDE_MODELS_DIR=/app/dataset/models \
-              -e KRIDE_RAW_DATA_DIR=/app/dataset/data/raw_ml \
-              -e HF_HOME=/tmp/hf_cache \
-              -e TRANSFORMERS_CACHE=/tmp/hf_cache/hub \
-              -e NEO4J_URI=${{ secrets.NEO4J_URI }} \
-              -e NEO4J_USERNAME=${{ secrets.NEO4J_USERNAME }} \
-              -e NEO4J_PASSWORD=${{ secrets.NEO4J_PASSWORD }} \
-              -e NEO4J_DATABASE=${{ secrets.NEO4J_DATABASE }} \
-              -e SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-              -e SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
-              -e GROQ_API_KEY=${{ secrets.GROQ_API_KEY }} \
-              ${{ env.FASTAPI_IMAGE }}:${{ env.BRANCH_TAG }}
-
-            echo "Waiting for FastAPI..."
-            sleep 30
-            docker logs --tail 80 kride-fastapi
-            docker exec kride-fastapi curl -fsS http://localhost:8000/api/health
 
             docker stop ${{ env.CONTAINER_NAME }} || true
             docker rm ${{ env.CONTAINER_NAME }} || true
@@ -141,8 +94,8 @@ jobs:
               -e WEB_URL=${{ secrets.WEB_URL }} \
               -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
               -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
-              -e FASTAPI_URL=http://kride-fastapi:8000 \
-              -e KRIDE_FASTAPI_URL=http://kride-fastapi:8000 \
+              -e FASTAPI_URL=${{ secrets.GCP_FASTAPI_URL }} \
+              -e KRIDE_FASTAPI_URL=${{ secrets.GCP_FASTAPI_URL }} \
               -e FASTAPI_INTERNAL_API_KEY=${{ secrets.FASTAPI_INTERNAL_API_KEY }} \
               -e GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }} \
               -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
@@ -162,4 +115,4 @@ jobs:
             docker logs --tail 80 ${{ env.CONTAINER_NAME }}
             docker exec sdui-redis redis-cli FLUSHDB || true
 
-            echo "Deployment successful: ${{ env.CONTAINER_NAME }}:${{ env.TARGET_PORT }} + kride-fastapi:8000"
+            echo "Deployment successful: ${{ env.CONTAINER_NAME }}:${{ env.TARGET_PORT }} (FastAPI → GCP)"
