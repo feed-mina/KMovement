@@ -100,4 +100,13 @@ dataset/pdf/*.pdf
 .claude
 
 team/
-team/*
+team/*kaggle.json
+.kaggle/
+
+# Local credentials
+kaggle.json
+access_token
+*.token
+tools/zrok/
+deploy/*.pid
+deploy/run_media_preview.cmd

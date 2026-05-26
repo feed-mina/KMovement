@@ -11,7 +11,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const BACKEND_URL = isProd
     ? (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://yerin.duckdns.org')
     : 'http://localhost:8080';
-const FASTAPI_URL = process.env.FASTAPI_URL || (isProd ? 'http://yerin.duckdns.org:8000' : 'http://localhost:8000');
+const FASTAPI_URL = process.env.FASTAPI_URL || (isProd ? process.env.GCP_FASTAPI_URL || 'http://yerin.duckdns.org:8000' : 'http://localhost:8000');
 
 const connectSrc = [
     "'self'",

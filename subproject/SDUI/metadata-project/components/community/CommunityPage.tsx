@@ -1,6 +1,15 @@
 'use client';
 
-import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+    ChangeEvent,
+    FormEvent,
+    PointerEvent as ReactPointerEvent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -17,7 +26,17 @@ type CommunityPageProps = {
 
 type CommunityMode = 'list' | 'write' | 'detail' | 'modify';
 
+type SketchHandoff = {
+    kind: 'community-sketch' | 'community-image';
+    filename?: string;
+    dataUrl?: string;
+    sourceUrl?: string;
+    originalName?: string;
+    createdAt: string;
+};
+
 const PAGE_SIZE = 5;
+const SKETCH_HANDOFF_KEY = 'kride:doodle-source';
 
 function getMode(screenId: string): CommunityMode {
     if (screenId.includes('WRITE')) return 'write';
@@ -56,6 +75,22 @@ function normalizePage(data: any): {
 
 function imageKey(image: PostImageDto) {
     return image.storedName || image.storageUrl || String(image.postImageId);
+}
+
+function rememberDoodleSource(payload: SketchHandoff) {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(SKETCH_HANDOFF_KEY, JSON.stringify(payload));
+}
+
+function dataUrlToFile(dataUrl: string, filename: string) {
+    const [header, encoded] = dataUrl.split(',');
+    const mime = header.match(/data:(.*);base64/)?.[1] || 'image/png';
+    const bytes = window.atob(encoded);
+    const buffer = new Uint8Array(bytes.length);
+    for (let index = 0; index < bytes.length; index += 1) {
+        buffer[index] = bytes.charCodeAt(index);
+    }
+    return new File([buffer], filename, { type: mime });
 }
 
 function EmptyState({ message }: { message: string }) {
@@ -114,7 +149,7 @@ function CommunityList() {
                         <p className="community-count">전체 {totalElements}개</p>
                     </div>
                     <button className="community-primary-btn" type="button" onClick={goWrite}>
-                        새 글 쓰기
+                        글쓰기
                     </button>
                 </div>
 
@@ -178,14 +213,192 @@ function CommunityList() {
     );
 }
 
+function SketchPad({
+    onSave,
+    onClose,
+}: {
+    onSave: (file: File, dataUrl: string) => void;
+    onClose: () => void;
+}) {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const drawingRef = useRef(false);
+    const historyRef = useRef<string[]>([]);
+    const [brushColor, setBrushColor] = useState('#111827');
+    const [brushSize, setBrushSize] = useState(10);
+    const [isErasing, setIsErasing] = useState(false);
+
+    const prepareCanvas = useCallback(() => {
+        const canvas = canvasRef.current;
+        const context = canvas?.getContext('2d');
+        if (!canvas || !context) return;
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+    }, []);
+
+    useEffect(() => {
+        prepareCanvas();
+    }, [prepareCanvas]);
+
+    const getPoint = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return { x: 0, y: 0 };
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: (event.clientX - rect.left) * (canvas.width / rect.width),
+            y: (event.clientY - rect.top) * (canvas.height / rect.height),
+        };
+    };
+
+    const pushHistory = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        historyRef.current = [...historyRef.current.slice(-12), canvas.toDataURL('image/png')];
+    };
+
+    const startDrawing = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        const context = canvas?.getContext('2d');
+        if (!canvas || !context) return;
+        pushHistory();
+        drawingRef.current = true;
+        canvas.setPointerCapture(event.pointerId);
+        const point = getPoint(event);
+        context.beginPath();
+        context.moveTo(point.x, point.y);
+    };
+
+    const draw = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+        if (!drawingRef.current) return;
+        const canvas = canvasRef.current;
+        const context = canvas?.getContext('2d');
+        if (!context) return;
+        const point = getPoint(event);
+        context.globalCompositeOperation = isErasing ? 'destination-out' : 'source-over';
+        context.strokeStyle = brushColor;
+        context.lineWidth = brushSize;
+        context.lineTo(point.x, point.y);
+        context.stroke();
+    };
+
+    const stopDrawing = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+        if (!drawingRef.current) return;
+        drawingRef.current = false;
+        event.currentTarget.releasePointerCapture(event.pointerId);
+    };
+
+    const clearCanvas = () => {
+        pushHistory();
+        prepareCanvas();
+    };
+
+    const undo = () => {
+        const canvas = canvasRef.current;
+        const context = canvas?.getContext('2d');
+        const previous = historyRef.current.pop();
+        if (!canvas || !context || !previous) return;
+        const image = new Image();
+        image.onload = () => {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        };
+        image.src = previous;
+    };
+
+    const saveSketch = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const dataUrl = canvas.toDataURL('image/png');
+        const filename = `kride-doodle-sketch-${Date.now()}.png`;
+        onSave(dataUrlToFile(dataUrl, filename), dataUrl);
+    };
+
+    return (
+        <div className="community-sketch-backdrop" role="dialog" aria-modal="true" aria-label="스케치 도구">
+            <div className="community-sketch-panel">
+                <div className="community-sketch-header">
+                    <div>
+                        <h2>스케치</h2>
+                        <p>그린 이미지는 글의 첨부 이미지와 낙서 입력으로 저장됩니다.</p>
+                    </div>
+                    <button className="community-secondary-btn" type="button" onClick={onClose}>
+                        닫기
+                    </button>
+                </div>
+
+                <canvas
+                    ref={canvasRef}
+                    className="community-sketch-canvas"
+                    width={640}
+                    height={480}
+                    onPointerDown={startDrawing}
+                    onPointerMove={draw}
+                    onPointerUp={stopDrawing}
+                    onPointerCancel={stopDrawing}
+                    onPointerLeave={(event) => {
+                        if (drawingRef.current) stopDrawing(event);
+                    }}
+                />
+
+                <div className="community-sketch-tools">
+                    <div className="community-sketch-swatches" aria-label="펜 색상">
+                        {['#111827', '#2563eb', '#dc2626', '#16a34a'].map((color) => (
+                            <button
+                                key={color}
+                                type="button"
+                                aria-label={`${color} 색상`}
+                                className={brushColor === color && !isErasing ? 'active' : ''}
+                                style={{ backgroundColor: color }}
+                                onClick={() => {
+                                    setBrushColor(color);
+                                    setIsErasing(false);
+                                }}
+                            />
+                        ))}
+                    </div>
+                    <label className="community-sketch-size">
+                        굵기
+                        <input
+                            type="range"
+                            min={3}
+                            max={28}
+                            value={brushSize}
+                            onChange={(event) => setBrushSize(Number(event.target.value))}
+                        />
+                    </label>
+                    <button
+                        className={isErasing ? 'community-primary-btn' : 'community-secondary-btn'}
+                        type="button"
+                        onClick={() => setIsErasing((value) => !value)}
+                    >
+                        지우개
+                    </button>
+                    <button className="community-secondary-btn" type="button" onClick={undo}>
+                        되돌리기
+                    </button>
+                    <button className="community-danger-btn" type="button" onClick={clearCanvas}>
+                        비우기
+                    </button>
+                    <button className="community-primary-btn" type="button" onClick={saveSketch}>
+                        저장
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function ImagePicker({
     files,
     onChange,
     onRemove,
+    onOpenSketch,
 }: {
     files: File[];
     onChange: (files: File[]) => void;
     onRemove: (index: number) => void;
+    onOpenSketch: () => void;
 }) {
     const previews = useMemo(
         () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
@@ -207,7 +420,12 @@ function ImagePicker({
 
     return (
         <div className="community-image-field">
-            <label className="community-label" htmlFor="community-images">이미지 첨부</label>
+            <div className="community-field-head">
+                <label className="community-label" htmlFor="community-images">이미지 첨부</label>
+                <button className="community-secondary-btn" type="button" onClick={onOpenSketch}>
+                    스케치하기
+                </button>
+            </div>
             <input
                 id="community-images"
                 className="community-file-input"
@@ -221,7 +439,7 @@ function ImagePicker({
                     {previews.map((preview, index) => (
                         <div className="community-image-tile" key={`${preview.file.name}-${index}`}>
                             <img src={preview.url} alt={`${preview.file.name} 미리보기`} />
-                            <button type="button" onClick={() => onRemove(index)}>삭제</button>
+                            <button type="button" onClick={() => onRemove(index)}>제거</button>
                         </div>
                     ))}
                 </div>
@@ -267,11 +485,25 @@ function CommunityForm({
     const [newImages, setNewImages] = useState<File[]>([]);
     const [retainedImages, setRetainedImages] = useState<PostImageDto[]>(initialPost?.images || []);
     const [submitting, setSubmitting] = useState(false);
+    const [sketchOpen, setSketchOpen] = useState(false);
+    const [sketchNotice, setSketchNotice] = useState('');
 
     const isModify = mode === 'modify';
 
     const addImages = (files: File[]) => {
         setNewImages((prev) => [...prev, ...files]);
+    };
+
+    const addSketchImage = (file: File, dataUrl: string) => {
+        setNewImages((prev) => [...prev, file]);
+        rememberDoodleSource({
+            kind: 'community-sketch',
+            filename: file.name,
+            dataUrl,
+            createdAt: new Date().toISOString(),
+        });
+        setSketchNotice('스케치가 첨부 이미지에 추가되고 낙서 입력으로 저장되었습니다.');
+        setSketchOpen(false);
     };
 
     const removeNewImage = (index: number) => {
@@ -363,7 +595,17 @@ function CommunityForm({
                     {isModify && (
                         <ExistingImageEditor images={retainedImages} onRemove={removeRetainedImage} />
                     )}
-                    <ImagePicker files={newImages} onChange={addImages} onRemove={removeNewImage} />
+                    <ImagePicker
+                        files={newImages}
+                        onChange={addImages}
+                        onRemove={removeNewImage}
+                        onOpenSketch={() => setSketchOpen(true)}
+                    />
+                    {sketchNotice && (
+                        <p className="community-sketch-notice" role="status">
+                            {sketchNotice}
+                        </p>
+                    )}
 
                     <div className="community-form-actions">
                         <button className="community-primary-btn" type="submit" disabled={submitting}>
@@ -372,6 +614,13 @@ function CommunityForm({
                     </div>
                 </form>
             </div>
+
+            {sketchOpen && (
+                <SketchPad
+                    onSave={addSketchImage}
+                    onClose={() => setSketchOpen(false)}
+                />
+            )}
         </div>
     );
 }
@@ -383,6 +632,7 @@ function CommunityDetail({ postId }: { postId: number }) {
     const [liked, setLiked] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [doodleNotice, setDoodleNotice] = useState('');
     const isOwner = Boolean(user?.userSqno && post?.authorSqno && user.userSqno === post.authorSqno);
 
     const loadPost = useCallback(async () => {
@@ -464,6 +714,17 @@ function CommunityDetail({ postId }: { postId: number }) {
         }
     };
 
+    const sendImageToDoodle = (image: PostImageDto) => {
+        rememberDoodleSource({
+            kind: 'community-image',
+            sourceUrl: image.storageUrl,
+            originalName: image.originalName,
+            createdAt: new Date().toISOString(),
+        });
+        setDoodleNotice('선택한 이미지가 낙서 입력으로 저장되었습니다.');
+        alert('이 이미지를 낙서 입력으로 보낼 준비가 완료되었습니다.');
+    };
+
     if (loading) {
         return (
             <div className="community-page">
@@ -515,18 +776,32 @@ function CommunityDetail({ postId }: { postId: number }) {
                     </div>
                 </header>
 
+                {doodleNotice && (
+                    <p className="community-sketch-notice" role="status">
+                        {doodleNotice}
+                    </p>
+                )}
+
                 {post.images?.length > 0 && (
                     <div className="community-detail-images">
                         {post.images.map((image) => (
-                            <a
-                                href={image.storageUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="community-detail-image"
-                                key={imageKey(image)}
-                            >
-                                <img src={image.storageUrl} alt={image.originalName || '커뮤니티 이미지'} />
-                            </a>
+                            <div className="community-detail-image-wrap" key={imageKey(image)}>
+                                <a
+                                    href={image.storageUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="community-detail-image"
+                                >
+                                    <img src={image.storageUrl} alt={image.originalName || '커뮤니티 이미지'} />
+                                </a>
+                                <button
+                                    className="community-image-doodle-btn"
+                                    type="button"
+                                    onClick={() => sendImageToDoodle(image)}
+                                >
+                                    낙서로 보내기
+                                </button>
+                            </div>
                         ))}
                     </div>
                 )}

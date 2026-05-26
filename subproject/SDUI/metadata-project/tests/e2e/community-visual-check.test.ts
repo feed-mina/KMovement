@@ -56,6 +56,10 @@ test('community write and modify forms show image upload controls', async ({ pag
 
     await page.goto('/view/COMMUNITY_WRITE', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#community-title')).toBeVisible({ timeout: 45_000 });
+    await page.getByRole('button', { name: '스케치하기' }).click();
+    await expect(page.getByRole('dialog', { name: '스케치 도구' })).toBeVisible();
+    await expect(page.locator('.community-sketch-canvas')).toBeVisible();
+    await page.getByRole('button', { name: '닫기' }).click();
     await page.fill('#community-title', 'Visual upload test');
     await page.fill('#community-content', 'Preview image before sending to image-to-video AI.');
     await page.setInputFiles('#community-images', {
