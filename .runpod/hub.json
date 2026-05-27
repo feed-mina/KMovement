@@ -1,0 +1,16 @@
+{
+  "type": "serverless",
+  "category": "image",
+  "iconUrl": "https://example.com/icon.png",
+  "config": {
+    "runsOn": "GPU",
+    "containerDiskInGb": 20,
+    "volumeDiskInGb": 0,
+    "gpuIds": "AMPERE_16",
+    "minWorkers": 0,
+    "maxWorkers": 1,
+    "idleTimeout": 5,
+    "executionTimeout": 600,
+    "dockerArgs": ""
+  }
+}
