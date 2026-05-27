@@ -5,6 +5,7 @@ on:
     branches: ["main", "refactor/krider_backup"]
     paths:
       - "subproject/SDUI/SDUI-server/**"
+      - "subproject/SDUI/metadata-project/**"
       - ".dockerignore"
       - ".github/workflows/deploy-ec2.yml"
   workflow_dispatch:
@@ -16,25 +17,55 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # ── Detect what changed ──
+      - name: Detect changed paths
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "backend=true"  >> $GITHUB_OUTPUT
+            echo "frontend=true" >> $GITHUB_OUTPUT
+          else
+            CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} || echo "")
+            echo "backend=false"  >> $GITHUB_OUTPUT
+            echo "frontend=false" >> $GITHUB_OUTPUT
+            echo "$CHANGED" | grep -q '^subproject/SDUI/SDUI-server/' && echo "backend=true" >> $GITHUB_OUTPUT || true
+            echo "$CHANGED" | grep -q '^subproject/SDUI/metadata-project/' && echo "frontend=true" >> $GITHUB_OUTPUT || true
+            # Also rebuild both if workflow file itself changed
+            echo "$CHANGED" | grep -q '^\.github/workflows/deploy-ec2\.yml' && { echo "backend=true" >> $GITHUB_OUTPUT; echo "frontend=true" >> $GITHUB_OUTPUT; } || true
+          fi
+
+      # ── Backend build ──
       - name: Set up JDK 17
+        if: steps.changes.outputs.backend == 'true'
         uses: actions/setup-java@v4
         with:
           java-version: "17"
           distribution: "temurin"
 
       - name: Grant execute permission for gradlew
+        if: steps.changes.outputs.backend == 'true'
         run: chmod +x gradlew
         working-directory: ./subproject/SDUI/SDUI-server
 
       - name: Build Spring Boot
+        if: steps.changes.outputs.backend == 'true'
         run: ./gradlew clean build -x test
         working-directory: ./subproject/SDUI/SDUI-server
 
+      # ── Frontend build ──
+      - name: Set up Node.js 20
+        if: steps.changes.outputs.frontend == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # ── Image tags ──
       - name: Set image tags
         run: |
           CLEAN_BRANCH=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
           echo "BRANCH_TAG=$CLEAN_BRANCH" >> $GITHUB_ENV
           echo "SDUI_IMAGE=${{ secrets.DOCKER_USERNAME }}/sdui-app" >> $GITHUB_ENV
+          echo "FRONTEND_IMAGE=${{ secrets.DOCKER_USERNAME }}/sdui-frontend" >> $GITHUB_ENV
           if [ "${{ github.ref_name }}" = "main" ]; then
             echo "TARGET_PORT=8080" >> $GITHUB_ENV
             echo "CONTAINER_NAME=sdui-backend" >> $GITHUB_ENV
@@ -48,12 +79,27 @@ jobs:
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+      # ── Build & push backend image ──
       - name: Build and push Spring Boot image
+        if: steps.changes.outputs.backend == 'true'
         run: |
           docker build -t $SDUI_IMAGE:${{ env.BRANCH_TAG }} -t $SDUI_IMAGE:latest ./subproject/SDUI/SDUI-server
           docker push $SDUI_IMAGE:${{ env.BRANCH_TAG }}
           docker push $SDUI_IMAGE:latest
 
+      # ── Build & push frontend image ──
+      - name: Build and push Next.js image
+        if: steps.changes.outputs.frontend == 'true'
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_BACKEND_URL=http://sdui-backend:8080 \
+            -t $FRONTEND_IMAGE:${{ env.BRANCH_TAG }} \
+            -t $FRONTEND_IMAGE:latest \
+            ./subproject/SDUI/metadata-project
+          docker push $FRONTEND_IMAGE:${{ env.BRANCH_TAG }}
+          docker push $FRONTEND_IMAGE:latest
+
+      # ── SSH setup ──
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
@@ -70,6 +116,55 @@ jobs:
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
             /tmp/gcp-credentials.json ${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }}:/home/ubuntu/gcp-credentials.json
 
+      # ── Create Nginx config ──
+      - name: Upload Nginx config to EC2
+        run: |
+          cat > /tmp/nginx.conf << 'NGINX_EOF'
+          server {
+              listen 80;
+              server_name _;
+              client_max_body_size 20M;
+
+              # Backend API
+              location /api/ {
+                  proxy_pass http://sdui-backend:8080;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+                  proxy_read_timeout 120s;
+              }
+
+              # GCP FastAPI proxy
+              location /kride-api/ {
+                  proxy_pass http://34.64.221.240:8000/api/;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+                  proxy_read_timeout 120s;
+                  # SSE support
+                  proxy_buffering off;
+                  proxy_cache off;
+              }
+
+              # Frontend (default)
+              location / {
+                  proxy_pass http://sdui-frontend:3000;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection "upgrade";
+              }
+          }
+          NGINX_EOF
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            /tmp/nginx.conf ${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }}:/home/ubuntu/nginx.conf
+
+      # ── Deploy script ──
       - name: Create deploy script
         run: |
           cat > /tmp/deploy.sh << 'DEPLOY_EOF'
@@ -77,55 +172,94 @@ jobs:
 
           docker network inspect sdui-network >/dev/null 2>&1 || docker network create sdui-network
 
-          docker pull __SDUI_IMAGE__:__BRANCH_TAG__
+          # ── Pull images ──
+          if [ "__DEPLOY_BACKEND__" = "true" ]; then
+            docker pull __SDUI_IMAGE__:__BRANCH_TAG__
+          fi
+          if [ "__DEPLOY_FRONTEND__" = "true" ]; then
+            docker pull __FRONTEND_IMAGE__:__BRANCH_TAG__
+          fi
 
           docker image prune -af --filter "until=24h" || true
 
+          # ── Redis ──
           docker inspect sdui-redis >/dev/null 2>&1 || docker run -d --name sdui-redis --network sdui-network redis:7-alpine
 
-          docker stop __CONTAINER_NAME__ || true
-          docker rm __CONTAINER_NAME__ || true
-          docker run -d --name __CONTAINER_NAME__ \
-            -p __TARGET_PORT__:8080 \
+          # ── Backend ──
+          if [ "__DEPLOY_BACKEND__" = "true" ]; then
+            docker stop __CONTAINER_NAME__ || true
+            docker rm __CONTAINER_NAME__ || true
+            docker run -d --name __CONTAINER_NAME__ \
+              -p __TARGET_PORT__:8080 \
+              --network sdui-network \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e SPRING_DATASOURCE_URL=jdbc:postgresql://sdui-db:5432/__DB_NAME__ \
+              -e SPRING_DATASOURCE_USERNAME=__DB_USERNAME__ \
+              -e SPRING_DATASOURCE_PASSWORD=__DB_PASSWORD__ \
+              -e SPRING_DATA_REDIS_HOST=sdui-redis \
+              -e SPRING_MAIL_PASSWORD=__MAIL_PASSWORD__ \
+              -e JWT_SECRET_KEY=__JWT_SECRET_KEY__ \
+              -e OPENAI_API_KEY=__OPENAI_API_KEY__ \
+              -e KAKAO_CLIENT_ID=__KAKAO_CLIENT_ID__ \
+              -e KAKAO_REDIRECT_URI=__KAKAO_REDIRECT_URI__ \
+              -e WEB_URL=__WEB_URL__ \
+              -e AWS_ACCESS_KEY=__S3_ACCESS_KEY__ \
+              -e AWS_SECRET_KEY=__S3_SECRET_KEY__ \
+              -e FASTAPI_URL=__GCP_FASTAPI_URL__ \
+              -e KRIDE_FASTAPI_URL=__GCP_FASTAPI_URL__ \
+              -e FASTAPI_INTERNAL_API_KEY=__FASTAPI_INTERNAL_API_KEY__ \
+              -e GCP_PROJECT_ID=__GCP_PROJECT_ID__ \
+              -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
+              -e GCP_CREDENTIALS_PATH=/app/gcp-credentials.json \
+              -e SLACK_WEBHOOK_URL=__SLACK_WEBHOOK_URL__ \
+              -e SLACK_BOT_TOKEN=__SLACK_BOT_TOKEN__ \
+              -e SLACK_CHANNEL_ID=__SLACK_CHANNEL_ID__ \
+              -e GOOGLE_CLIENT_ID=__GOOGLE_CLIENT_ID__ \
+              -e GOOGLE_CLIENT_SECRET=__GOOGLE_CLIENT_SECRET__ \
+              -e GOOGLE_REDIRECT_URI=__GOOGLE_REDIRECT_URI__ \
+              -v /home/ubuntu/gcp-credentials.json:/app/gcp-credentials.json:ro \
+              -v /home/ubuntu/study-materials:/app/assets/study:ro \
+              __SDUI_IMAGE__:__BRANCH_TAG__
+
+            echo "Waiting for Spring Boot..."
+            sleep 40
+            docker logs --tail 80 __CONTAINER_NAME__
+            docker exec sdui-redis redis-cli FLUSHDB || true
+          fi
+
+          # ── Frontend ──
+          if [ "__DEPLOY_FRONTEND__" = "true" ]; then
+            docker stop sdui-frontend || true
+            docker rm sdui-frontend || true
+            docker run -d --name sdui-frontend \
+              --network sdui-network \
+              -e HOSTNAME=0.0.0.0 \
+              __FRONTEND_IMAGE__:__BRANCH_TAG__
+
+            echo "Waiting for Next.js..."
+            sleep 10
+            docker logs --tail 20 sdui-frontend
+          fi
+
+          # ── Nginx reverse proxy ──
+          docker stop sdui-nginx || true
+          docker rm sdui-nginx || true
+          docker run -d --name sdui-nginx \
             --network sdui-network \
-            -e SPRING_PROFILES_ACTIVE=prod \
-            -e SPRING_DATASOURCE_URL=jdbc:postgresql://sdui-db:5432/__DB_NAME__ \
-            -e SPRING_DATASOURCE_USERNAME=__DB_USERNAME__ \
-            -e SPRING_DATASOURCE_PASSWORD=__DB_PASSWORD__ \
-            -e SPRING_DATA_REDIS_HOST=sdui-redis \
-            -e SPRING_MAIL_PASSWORD=__MAIL_PASSWORD__ \
-            -e JWT_SECRET_KEY=__JWT_SECRET_KEY__ \
-            -e OPENAI_API_KEY=__OPENAI_API_KEY__ \
-            -e KAKAO_CLIENT_ID=__KAKAO_CLIENT_ID__ \
-            -e KAKAO_REDIRECT_URI=__KAKAO_REDIRECT_URI__ \
-            -e WEB_URL=__WEB_URL__ \
-            -e AWS_ACCESS_KEY=__S3_ACCESS_KEY__ \
-            -e AWS_SECRET_KEY=__S3_SECRET_KEY__ \
-            -e FASTAPI_URL=__GCP_FASTAPI_URL__ \
-            -e KRIDE_FASTAPI_URL=__GCP_FASTAPI_URL__ \
-            -e FASTAPI_INTERNAL_API_KEY=__FASTAPI_INTERNAL_API_KEY__ \
-            -e GCP_PROJECT_ID=__GCP_PROJECT_ID__ \
-            -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
-            -e GCP_CREDENTIALS_PATH=/app/gcp-credentials.json \
-            -e SLACK_WEBHOOK_URL=__SLACK_WEBHOOK_URL__ \
-            -e SLACK_BOT_TOKEN=__SLACK_BOT_TOKEN__ \
-            -e SLACK_CHANNEL_ID=__SLACK_CHANNEL_ID__ \
-            -e GOOGLE_CLIENT_ID=__GOOGLE_CLIENT_ID__ \
-            -e GOOGLE_CLIENT_SECRET=__GOOGLE_CLIENT_SECRET__ \
-            -e GOOGLE_REDIRECT_URI=__GOOGLE_REDIRECT_URI__ \
-            -v /home/ubuntu/gcp-credentials.json:/app/gcp-credentials.json:ro \
-            -v /home/ubuntu/study-materials:/app/assets/study:ro \
-            __SDUI_IMAGE__:__BRANCH_TAG__
+            -p 80:80 \
+            -v /home/ubuntu/nginx.conf:/etc/nginx/conf.d/default.conf:ro \
+            nginx:alpine
 
-          echo "Waiting for Spring Boot..."
-          sleep 40
-          docker logs --tail 80 __CONTAINER_NAME__
-          docker exec sdui-redis redis-cli FLUSHDB || true
+          echo "Waiting for Nginx..."
+          sleep 5
+          docker logs --tail 10 sdui-nginx
 
-          echo "Deployment successful: __CONTAINER_NAME__:__TARGET_PORT__ (FastAPI -> GCP)"
+          echo "=== Deployment complete ==="
+          docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
           DEPLOY_EOF
 
           sed -i "s|__SDUI_IMAGE__|${{ env.SDUI_IMAGE }}|g" /tmp/deploy.sh
+          sed -i "s|__FRONTEND_IMAGE__|${{ env.FRONTEND_IMAGE }}|g" /tmp/deploy.sh
           sed -i "s|__BRANCH_TAG__|${{ env.BRANCH_TAG }}|g" /tmp/deploy.sh
           sed -i "s|__CONTAINER_NAME__|${{ env.CONTAINER_NAME }}|g" /tmp/deploy.sh
           sed -i "s|__TARGET_PORT__|${{ env.TARGET_PORT }}|g" /tmp/deploy.sh
@@ -149,6 +283,8 @@ jobs:
           sed -i "s|__GOOGLE_CLIENT_ID__|${{ secrets.GOOGLE_CLIENT_ID }}|g" /tmp/deploy.sh
           sed -i "s|__GOOGLE_CLIENT_SECRET__|${{ secrets.GOOGLE_CLIENT_SECRET }}|g" /tmp/deploy.sh
           sed -i "s|__GOOGLE_REDIRECT_URI__|${{ secrets.GOOGLE_REDIRECT_URI }}|g" /tmp/deploy.sh
+          sed -i "s|__DEPLOY_BACKEND__|${{ steps.changes.outputs.backend }}|g" /tmp/deploy.sh
+          sed -i "s|__DEPLOY_FRONTEND__|${{ steps.changes.outputs.frontend }}|g" /tmp/deploy.sh
 
       - name: Deploy to EC2
         run: |

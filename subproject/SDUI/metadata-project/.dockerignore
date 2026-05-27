@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+*.md
+tests
+coverage
+.env*
+playwright.config.ts
+playwright-report
