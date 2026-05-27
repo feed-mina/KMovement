@@ -74,55 +74,96 @@ def _encode_artifacts(result_dict: dict) -> dict:
             artifact["data_base64"] = base64.b64encode(fpath.read_bytes()).decode()
         else:
             artifact["data_base64"] = None
+    # RunPod treats non-empty "error" as FAILED — clear it for fallback_used
+    if result_dict.get("status") == "fallback_used":
+        result_dict["fallback_reason"] = result_dict.pop("error", "")
     return result_dict
 
 
 def _run_musicgen(job_input: dict, work_dir: Path) -> dict:
-    """Run MusicGen BGM generation."""
-    import torch
-    from audiocraft.models import MusicGen
-
-    model_name = os.environ.get("MUSICGEN_MODEL", "facebook/musicgen-small")
+    """Run MusicGen BGM generation, with sine-wave fallback if audiocraft is unavailable."""
     description = job_input.get("musicgen_description", "calm Korean ambient music")
     duration = min(job_input.get("musicgen_duration", 15), 30)
     case_id = job_input.get("case_id", "bgm")
+    allow_fallback = job_input.get("allow_fallback", True)
 
-    model = MusicGen.get_pretrained(model_name)
-    model.set_generation_params(duration=duration, use_sampling=True, top_k=250)
+    try:
+        import torch
+        from audiocraft.models import MusicGen
 
-    wav = model.generate([description])
+        model_name = os.environ.get("MUSICGEN_MODEL", "facebook/musicgen-small")
+        model = MusicGen.get_pretrained(model_name)
+        model.set_generation_params(duration=duration, use_sampling=True, top_k=250)
 
-    import soundfile as sf
+        wav = model.generate([description])
 
-    output_path = work_dir / f"{case_id}_musicgen.wav"
-    audio_data = wav[0].cpu().numpy()
-    if audio_data.ndim > 1:
-        audio_data = audio_data.squeeze()
-    sf.write(str(output_path), audio_data, samplerate=32000)
+        import soundfile as sf
 
-    del model
-    torch.cuda.empty_cache()
+        output_path = work_dir / f"{case_id}_musicgen.wav"
+        audio_data = wav[0].cpu().numpy()
+        if audio_data.ndim > 1:
+            audio_data = audio_data.squeeze()
+        sf.write(str(output_path), audio_data, samplerate=32000)
 
-    return {
-        "route": "musicgen",
-        "status": "success",
-        "case_id": case_id,
-        "artifacts": [
-            {
-                "kind": "bgm",
-                "path": str(output_path),
-                "exists": True,
-                "size_mb": round(output_path.stat().st_size / 1024 / 1024, 3),
-                "data_base64": base64.b64encode(output_path.read_bytes()).decode(),
-            }
-        ],
-        "metadata": {
-            "model": model_name,
-            "description": description,
-            "duration": duration,
-        },
-        "error": "",
-    }
+        del model
+        torch.cuda.empty_cache()
+
+        return {
+            "route": "musicgen",
+            "status": "success",
+            "case_id": case_id,
+            "artifacts": [
+                {
+                    "kind": "bgm",
+                    "path": str(output_path),
+                    "exists": True,
+                    "size_mb": round(output_path.stat().st_size / 1024 / 1024, 3),
+                    "data_base64": base64.b64encode(output_path.read_bytes()).decode(),
+                }
+            ],
+            "metadata": {
+                "model": model_name,
+                "description": description,
+                "duration": duration,
+            },
+        }
+    except (ImportError, RuntimeError, Exception) as exc:
+        if not allow_fallback:
+            raise
+
+        from .bgm import ensure_fallback_bgm
+
+        bgm_key = "bright_travel"
+        if "cinematic" in description.lower() or "dramatic" in description.lower():
+            bgm_key = "cinematic_memory"
+        elif "cute" in description.lower() or "character" in description.lower():
+            bgm_key = "cute_character"
+        elif "city" in description.lower() or "urban" in description.lower():
+            bgm_key = "city_walk"
+
+        output_path = ensure_fallback_bgm(work_dir / "bgm", bgm_key, duration=duration)
+
+        return {
+            "route": "musicgen",
+            "status": "fallback_used",
+            "case_id": case_id,
+            "artifacts": [
+                {
+                    "kind": "bgm",
+                    "path": str(output_path),
+                    "exists": output_path.exists(),
+                    "size_mb": round(output_path.stat().st_size / 1024 / 1024, 3) if output_path.exists() else 0,
+                    "data_base64": base64.b64encode(output_path.read_bytes()).decode() if output_path.exists() else None,
+                }
+            ],
+            "metadata": {
+                "description": description,
+                "duration": duration,
+                "fallback_type": "sine_wave_bgm",
+                "bgm_key": bgm_key,
+            },
+            "fallback_reason": str(exc)[:500],
+        }
 
 
 def handler(job: dict) -> dict:

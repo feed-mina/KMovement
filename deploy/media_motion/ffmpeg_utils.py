@@ -1,12 +1,27 @@
 from __future__ import annotations
 
+import shutil
 import subprocess
 from pathlib import Path
 
 
+def _find_ffmpeg() -> str:
+    """Find ffmpeg binary: system PATH first, then imageio-ffmpeg bundle."""
+    system = shutil.which("ffmpeg")
+    if system:
+        return system
+    try:
+        import imageio_ffmpeg
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except (ImportError, RuntimeError):
+        pass
+    return "ffmpeg"
+
+
 def run_ffmpeg(args: list[str], *, quiet: bool = True) -> None:
     """Run ffmpeg and raise a readable error on failure."""
-    command = ["ffmpeg", "-y", *args]
+    ffmpeg_bin = _find_ffmpeg()
+    command = [ffmpeg_bin, "-y", *args]
     if quiet:
         command.extend(["-loglevel", "quiet"])
 

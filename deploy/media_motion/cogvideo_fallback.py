@@ -4,7 +4,7 @@ import json
 import subprocess
 from pathlib import Path
 
-from .ffmpeg_utils import mix_video_tts_bgm
+from .ffmpeg_utils import _find_ffmpeg, mix_video_tts_bgm
 from .schemas import Artifact, GenerationResult, TravelCase
 from .tts import synthesize_gtts
 
@@ -58,7 +58,7 @@ def create_cogvideo_photo_fallback(case: TravelCase, output_dir: Path) -> Path:
 
     vf = build_cogvideo_fallback_filter(case.case_id)
     command = [
-        "ffmpeg",
+        _find_ffmpeg(),
         "-y",
         "-loop",
         "1",
