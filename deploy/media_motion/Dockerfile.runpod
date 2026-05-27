@@ -1,0 +1,50 @@
+# RunPod Serverless GPU Image for K-Ride Media Motion
+# Models: CogVideoX, MusicGen, gTTS, FFmpeg fallbacks
+#
+# Build:
+#   docker build -f deploy/media_motion/Dockerfile.runpod -t kride-media-gpu .
+#
+# Local test:
+#   docker run --gpus all -p 8000:8000 kride-media-gpu
+
+FROM runpod/pytorch:2.4.0-py3.10-cuda12.1.0-devel-ubuntu22.04
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    KRIDE_MEDIA_DIR=/app/media \
+    KRIDE_WORKER_OUTPUT_DIR=/tmp/kride_outputs \
+    KRIDE_WORKER_ALLOW_FALLBACK=true \
+    KRIDE_COGVIDEOX_CPU_OFFLOAD=true \
+    MUSICGEN_MODEL=facebook/musicgen-small
+
+WORKDIR /app
+
+# System dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
+
+# Python dependencies — base
+COPY deploy/media_motion/requirements.txt /tmp/req-base.txt
+RUN pip install --no-cache-dir -r /tmp/req-base.txt
+
+# Python dependencies — GPU models (CogVideoX)
+COPY deploy/media_motion/requirements-cogvideox.txt /tmp/req-cogvideox.txt
+RUN pip install --no-cache-dir -r /tmp/req-cogvideox.txt
+
+# Python dependencies — MusicGen
+RUN pip install --no-cache-dir audiocraft>=1.3,<2
+
+# RunPod SDK
+RUN pip install --no-cache-dir runpod>=1.7,<2
+
+# Copy application code
+COPY deploy /app/deploy
+
+RUN mkdir -p /tmp/kride_outputs /app/media
+
+# Pre-download models (optional — uncomment to bake into image for faster cold start)
+# RUN python -c "from diffusers import CogVideoXImageToVideoPipeline; CogVideoXImageToVideoPipeline.from_pretrained('THUDM/CogVideoX-2b')"
+# RUN python -c "from audiocraft.models import MusicGen; MusicGen.get_pretrained('facebook/musicgen-small')"
+
+CMD ["python", "-m", "deploy.media_motion.runpod_handler"]

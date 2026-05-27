@@ -3,6 +3,7 @@ import { useState } from "react";
 import CollapseHeader from "./atoms/CollapseHeader";
 import CollapseBody from "./atoms/CollapseBody";
 import RouteNode from "./atoms/RouteNode";
+import { ROUTE_MARKER_SELECT_EVENT } from "./maps/mapTypes";
 
 interface TimeSlot {
   places: { name: string; description?: string }[];
@@ -32,6 +33,19 @@ export default function ItineraryPanel({ id, data }: any) {
   const toggle = (key: string) =>
     setOpenSlots((prev) => ({ ...prev, [key]: !prev[key] }));
 
+  const selectPlace = (place: any, day: number, slot: string, index: number) => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(new CustomEvent(ROUTE_MARKER_SELECT_EVENT, {
+      detail: {
+        id: place?.id ?? place?.placeId ?? place?.place_id,
+        name: place?.name ?? place?.placeName ?? place?.place_name,
+        day,
+        slot,
+        index,
+      },
+    }));
+  };
+
   return (
     <div id={id} className="itinerary-panel flex flex-col gap-4 overflow-y-auto h-full">
       {Array.from({ length: dayCount }, (_, dayIdx) => {
@@ -56,7 +70,14 @@ export default function ItineraryPanel({ id, data }: any) {
                 <p className="text-gray-500 text-xs py-2">일정이 없습니다</p>
               ) : (
                 plan.morning.places.map((place, i) => (
-                  <RouteNode key={i} id={`${morningKey}-${i}`} meta={{}} data={place} index={i} />
+                  <RouteNode
+                    key={i}
+                    id={`${morningKey}-${i}`}
+                    meta={{}}
+                    data={place}
+                    index={i}
+                    onSelect={() => selectPlace(place, dayIdx + 1, "morning", i)}
+                  />
                 ))
               )}
             </CollapseBody>
@@ -67,7 +88,14 @@ export default function ItineraryPanel({ id, data }: any) {
                 <p className="text-gray-500 text-xs py-2">일정이 없습니다</p>
               ) : (
                 plan.afternoon.places.map((place, i) => (
-                  <RouteNode key={i} id={`${afternoonKey}-${i}`} meta={{}} data={place} index={i} />
+                  <RouteNode
+                    key={i}
+                    id={`${afternoonKey}-${i}`}
+                    meta={{}}
+                    data={place}
+                    index={i}
+                    onSelect={() => selectPlace(place, dayIdx + 1, "afternoon", i)}
+                  />
                 ))
               )}
             </CollapseBody>

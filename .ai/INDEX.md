@@ -1,6 +1,6 @@
 # K-Ride .ai 문서 마스터 인덱스
 
-> 최종 수정: 2026-05-20
+> 최종 수정: 2026-05-27
 > kride-project 루트 `.ai` 폴더의 모든 문서 위치와 역할을 안내합니다.
 > 기존 파일은 편집 없이 유지됩니다. 역할 기반 구조는 신규 생성된 하위 폴더를 참조하세요.
 
@@ -73,19 +73,46 @@
 | 파일 | 내용 | 줄수 |
 |------|------|------|
 | [architecture_expand_0520.md](architecture_expand_0520.md) | TorchServe + Celery 아키텍처 설명 (비동기 큐, GPU 서빙, GCP 배포 전략) | 115 |
+| [animated_drawings_deployment_runbook.md](animated_drawings_deployment_runbook.md) | AnimatedDrawings 배포 가이드 (Joint 검증, OOM 방지, Fallback 매트릭스) | — |
+| [0520_expand_gcp_deploy.md](0520_expand_gcp_deploy.md) | GCP VM 확장 배포 계획 | — |
+
+### EC2 배포 (2026-05-27 추가)
+| 파일 | 내용 |
+|------|------|
+| `.github/workflows/deploy-ec2.yml` | Spring Boot + Next.js + Nginx 배포 (변경 감지, Docker Hub) |
+| `.github/workflows/ec2-diagnose.yml` | EC2 진단 및 컨테이너 복구 (workflow_dispatch) |
+| `subproject/SDUI/metadata-project/Dockerfile` | Next.js multi-stage standalone 빌드 |
+
+### AI 모델 워커 (`deploy/media_motion/`)
+| 파일 | 모델 | 상태 |
+|------|------|------|
+| `animated_drawings_worker.py` | AnimatedDrawings | Ready |
+| `gpt_sovits_worker.py` | GPT-SoVITS TTS | Ready (의존성 핀닝 필수) |
+| `cogvideox_real.py` | CogVideoX Image-to-Video | Partial (GPU 필요) |
+| `three_d_photo_real.py` | 3D Photo Inpainting | Partial (외부 명령 필요) |
+| `cogvideo_fallback.py` | CogVideoX Fallback | Ready (FFmpeg) |
+| `three_d_photo_light.py` | 3D Photo Light | Ready (FFmpeg) |
+| `tts.py` | gTTS Fallback | Ready |
 
 ### Kaggle 배포
 | 파일 | 내용 |
 |------|------|
 | `kaggle/kaggle_server.py` | 노트북 A — Slim FastAPI (추천/챗봇, 모델 직접 로딩, ChromaDB PersistentClient) |
 | `kaggle/kride_kaggle.ipynb` | 노트북 A — 의존성 설치, zrok 터널, 서버 실행, API 테스트 |
-| `kaggle/media_server.py` | 노트북 B — Media FastAPI (TTS XTTS-v2, MusicGen, 3D Photo Inpainting, LivePortrait, FFmpeg 합성) |
+| `kaggle/media_server.py` | 노트북 B — Media FastAPI (TTS, MusicGen, 3D Photo Inpainting, FFmpeg 합성) |
 | `kaggle/kride_media_kaggle.ipynb` | 노트북 B — GPU 전용, zrok 터널, 미디어 파이프라인 테스트 |
 
-### 테스트 결과
+### 미디어 프리뷰 서버 (`deploy/cloud_gateway/`)
+| 파일 | 내용 |
+|------|------|
+| `app.py` | Read-only FastAPI (미디어 에셋 서빙, /manifest.json, /media/{id}) |
+| `Dockerfile` | python:3.11-slim, 포트 7860 |
+
+### 테스트 & 리뷰 결과
 | 파일 | 내용 | 줄수 |
 |------|------|------|
 | [test_results_community_chatbot.md](test_results_community_chatbot.md) | 커뮤니티 + 챗봇 통합 테스트 결과 (Spring Boot 19 + Jest 9 + pytest 9 = 37 ALL PASSED) | 272 |
+| [code_review_0527.md](code_review_0527.md) | 프론트+백엔드+AI 모델 전체 코드 리뷰 (CRITICAL 4 + HIGH 7 + 모델 배포 상태) | — |
 
 ### 환경/설정 문서
 | 파일 | 내용 | 줄수 |

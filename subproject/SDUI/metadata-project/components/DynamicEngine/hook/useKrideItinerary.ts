@@ -7,7 +7,7 @@ const DURATION_TO_KOREAN: Record<string, string> = {
 };
 
 interface KrideItineraryResult {
-    data: { itinerary: any[]; mapData: { markers: any[] } } | null;
+    data: { itinerary: any[]; mapData: { markers: any[]; itinerary?: any[] } } | null;
     isLoading: boolean;
     error: string | null;
 }
@@ -76,10 +76,11 @@ export function useKrideItinerary(
 
                 const json = await res.json();
                 console.log("[useKrideItinerary] 응답:", json);
+                const itinerary = json.itinerary ?? [];
                 const markers = json.mapData?.markers ?? [];
                 setData({
-                    itinerary: json.itinerary ?? [],
-                    mapData: { markers },
+                    itinerary,
+                    mapData: { markers, itinerary },
                     markers, // MapView가 data.markers로 직접 접근할 수 있도록
                 } as any);
             } catch (err: any) {
