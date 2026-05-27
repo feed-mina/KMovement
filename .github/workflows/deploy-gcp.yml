@@ -111,47 +111,20 @@ jobs:
           mkdir -p ~/kride && cd ~/kride
 
           cat > docker-compose.prod.yml << 'COMPOSE_EOF'
-          version: '3.8'
-
           services:
-            torchserve:
-              image: REGISTRY_PLACEHOLDER/torchserve-gpu:latest
-              ports:
-                - "8085:8085"
-                - "8086:8086"
-                - "7070:7070"
-              deploy:
-                resources:
-                  reservations:
-                    devices:
-                      - capabilities: [gpu]
-              volumes:
-                - ./models:/home/model-store/models
-              environment:
-                - TS_CONFIG_FILE=/home/model-store/config.properties
-              healthcheck:
-                test: ["CMD", "curl", "-f", "http://localhost:8085/ping"]
-                interval: 30s
-                timeout: 10s
-                retries: 3
-                start_period: 60s
-              restart: unless-stopped
-
             fastapi:
               image: REGISTRY_PLACEHOLDER/fastapi-server:latest
               ports:
                 - "8000:8000"
               depends_on:
-                torchserve:
-                  condition: service_healthy
                 chromadb:
                   condition: service_healthy
                 redis:
                   condition: service_healthy
               environment:
                 - TORCHSERVE_URL=http://torchserve:8085
-                - TORCHSERVE_ENABLED=true
-                - TORCHSERVE_FALLBACK=false
+                - TORCHSERVE_ENABLED=false
+                - TORCHSERVE_FALLBACK=true
                 - CELERY_BROKER_URL=redis://redis:6379/1
                 - CHROMA_MODE=client
                 - CHROMA_HOST=chromadb
@@ -204,10 +177,8 @@ jobs:
               depends_on:
                 redis:
                   condition: service_healthy
-                torchserve:
-                  condition: service_healthy
               environment:
-                - TORCHSERVE_URL=http://torchserve:8085
+                - TORCHSERVE_ENABLED=false
                 - CELERY_BROKER_URL=redis://redis:6379/1
                 - CHROMA_HOST=chromadb
                 - CHROMA_PORT=8000
