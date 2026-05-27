@@ -59,6 +59,16 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.AWS_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+          echo "=== Key Info ==="
+          wc -c ~/.ssh/deploy_key
+          head -1 ~/.ssh/deploy_key
+          tail -1 ~/.ssh/deploy_key
+          ssh-keygen -l -f ~/.ssh/deploy_key || echo "Key fingerprint failed"
+
+      - name: Debug SSH connection
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -vvv \
+            ${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }} "echo SSH_OK" 2>&1 | tail -30 || true
 
       - name: Deploy to EC2
         env:
