@@ -121,6 +121,8 @@ jobs:
       - name: Upload Nginx config to EC2
         run: |
           cat > /tmp/nginx.conf << 'NGINX_EOF'
+          resolver 127.0.0.11 valid=10s ipv6=off;
+
           server {
               listen 80;
               server_name _;
@@ -128,7 +130,8 @@ jobs:
 
               # Backend API
               location /api/ {
-                  proxy_pass http://sdui-backend:8080;
+                  set $backend http://sdui-backend:8080;
+                  proxy_pass $backend;
                   proxy_set_header Host $host;
                   proxy_set_header X-Real-IP $remote_addr;
                   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -151,7 +154,8 @@ jobs:
 
               # Frontend (default)
               location / {
-                  proxy_pass http://sdui-frontend:3000;
+                  set $frontend http://sdui-frontend:3000;
+                  proxy_pass $frontend;
                   proxy_set_header Host $host;
                   proxy_set_header X-Real-IP $remote_addr;
                   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
