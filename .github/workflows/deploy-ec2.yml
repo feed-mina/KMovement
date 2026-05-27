@@ -21,18 +21,19 @@ jobs:
       - name: Detect changed paths
         id: changes
         run: |
+          DEPLOY_BACKEND="false"
+          DEPLOY_FRONTEND="false"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "backend=true"  >> $GITHUB_OUTPUT
-            echo "frontend=true" >> $GITHUB_OUTPUT
+            DEPLOY_BACKEND="true"
+            DEPLOY_FRONTEND="true"
           else
             CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} || echo "")
-            echo "backend=false"  >> $GITHUB_OUTPUT
-            echo "frontend=false" >> $GITHUB_OUTPUT
-            echo "$CHANGED" | grep -q '^subproject/SDUI/SDUI-server/' && echo "backend=true" >> $GITHUB_OUTPUT || true
-            echo "$CHANGED" | grep -q '^subproject/SDUI/metadata-project/' && echo "frontend=true" >> $GITHUB_OUTPUT || true
-            # Also rebuild both if workflow file itself changed
-            echo "$CHANGED" | grep -q '^\.github/workflows/deploy-ec2\.yml' && { echo "backend=true" >> $GITHUB_OUTPUT; echo "frontend=true" >> $GITHUB_OUTPUT; } || true
+            echo "$CHANGED" | grep -q '^subproject/SDUI/SDUI-server/' && DEPLOY_BACKEND="true"
+            echo "$CHANGED" | grep -q '^subproject/SDUI/metadata-project/' && DEPLOY_FRONTEND="true"
+            echo "$CHANGED" | grep -q '^\.github/workflows/deploy-ec2\.yml' && { DEPLOY_BACKEND="true"; DEPLOY_FRONTEND="true"; }
           fi
+          echo "backend=$DEPLOY_BACKEND"  >> $GITHUB_OUTPUT
+          echo "frontend=$DEPLOY_FRONTEND" >> $GITHUB_OUTPUT
 
       # ── Backend build ──
       - name: Set up JDK 17
@@ -244,6 +245,14 @@ jobs:
           # ── Nginx reverse proxy ──
           docker stop sdui-nginx || true
           docker rm sdui-nginx || true
+          # Free port 80 if occupied by another container
+          PORT80_CONTAINER=$(docker ps --filter "publish=80" --format "{{.Names}}" | head -1)
+          if [ -n "$PORT80_CONTAINER" ] && [ "$PORT80_CONTAINER" != "sdui-nginx" ]; then
+            echo "Stopping container occupying port 80: $PORT80_CONTAINER"
+            docker stop "$PORT80_CONTAINER" || true
+          fi
+          # Free port 80 if occupied by host process (e.g. apache2)
+          sudo fuser -k 80/tcp || true
           docker run -d --name sdui-nginx \
             --network sdui-network \
             -p 80:80 \
