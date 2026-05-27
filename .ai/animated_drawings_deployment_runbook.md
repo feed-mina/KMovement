@@ -703,6 +703,156 @@ Before clicking `Save Version`:
 - render uses `/kaggle/working/miniconda/envs/ad_env/bin/python` when using TorchServe/OSMesa
 - partial failures do not abort the whole batch
 
+## CI/CD 배포 기록 (2026-05-27)
+
+### 배포 대상
+- **AWS EC2**: SDUI Spring Boot 백엔드 (GitHub Actions → Docker Hub → SSH)
+- **GCP VM**: FastAPI + Celery + ChromaDB + Redis (GitHub Actions → Artifact Registry → SSH → docker-compose)
+- **Media Preview**: 모델 없이 사전 생성된 MP4/WAV 서빙 (deploy/ 폴더)
+
+### 최종 상태
+
+| 대상 | 상태 | 비고 |
+|------|------|------|
+| AWS EC2 (SDUI) | ✅ 성공 | `sdui-backend:8080` 정상 가동 |
+| GCP VM (AI Services) | 🔧 진행 중 | ChromaDB 헬스체크 수정 후 재배포 필요 |
+
+---
+
+### AWS EC2 인프라 정보
+- Elastic IP: `43.201.237.68`
+- 사용자: `ubuntu`
+- 컨테이너: `sdui-backend` (포트 8080)
+- 이미지: Docker Hub (`sdui-app:main`)
+- 네트워크: `sdui-network` (Redis, PostgreSQL 연동)
+
+### GCP VM 인프라 정보
+- Instance: `instance-20260524-023146` (asia-northeast3-a)
+- IP: `34.64.221.240`
+- GPU: NVIDIA L4 (24GB), CUDA 12.4, Driver 550.54.15
+- Docker 29.5.2, Compose v5.1.4
+- 디스크: 30GB (10GB에서 확장)
+- 사용자: `Samsung`
+- Artifact Registry: `asia-northeast3-docker.pkg.dev`
+
+---
+
+### 해결된 이슈 (전체 트러블슈팅 로그)
+
+#### 1. GCP VM SSH 접속 실패 — `insufficient authentication scopes`
+- **증상**: `gcloud compute ssh` 실행 시 인증 스코프 에러
+- **원인**: 로컬 gcloud 인증이 만료/부족
+- **수정**: `gcloud auth login` 재인증
+
+#### 2. Gradle wrapper jar 누락 — `Unable to access jarfile gradle-wrapper.jar`
+- **증상**: GitHub Actions에서 `./gradlew clean build` 실패
+- **원인**: 루트 `.gitignore`에 `*.jar` 패턴 → `gradle-wrapper.jar`가 git에서 제외
+- **수정**: `git add -f subproject/SDUI/SDUI-server/gradle/wrapper/gradle-wrapper.jar`
+
+#### 3. Gradle wrapper properties 누락 — `gradle-wrapper.properties does not exist`
+- **증상**: wrapper jar 추가 후에도 Gradle 빌드 실패
+- **원인**: `subproject/SDUI/.gitignore:66`에 `gradle/` 디렉토리 ignore 규칙
+- **수정**: `git add -f subproject/SDUI/SDUI-server/gradle/wrapper/gradle-wrapper.properties`
+
+#### 4. Git LFS fetch 실패 — `Object does not exist on the server` (404)
+- **증상**: `actions/checkout`에서 LFS 파일 다운로드 실패
+- **원인**: `route_graph.pkl` 등 LFS 객체 누락 (용량 초과 또는 미업로드)
+- **수정**: `lfs: true` 및 `git lfs pull` 단계 제거 (SDUI Spring Boot 빌드에 LFS 불필요)
+
+#### 5. `actions/setup-java@v4` 다운로드 실패 (404)
+- **증상**: JDK 17 설정 단계에서 캐시 관련 오류
+- **원인**: `cache: gradle` 옵션이 GitHub Actions SHA 캐시 불일치 유발
+- **수정**: `cache: gradle` 옵션 제거
+
+#### 6. `appleboy/ssh-action` SSH 키 파싱 실패 — `ssh: no key found`
+- **증상**: EC2/GCP 배포 단계에서 SSH 인증 실패
+- **원인**: ed25519 OPENSSH 형식 키를 appleboy가 파싱 못함
+- **수정 시도**: RSA 4096 PEM 키 생성 → 여전히 불안정
+- **최종 수정**: `appleboy/ssh-action` 제거, 직접 `ssh -i ~/.ssh/deploy_key` 방식으로 교체 (EC2, GCP 모두)
+
+#### 7. EC2 SSH `Permission denied (publickey)` — 다중 원인
+- **증상**: GitHub Actions에서 EC2 SSH 접속 시 인증 실패
+- **원인 1**: `AWS_HOST` 시크릿에 잘못된 IP 저장 (프라이빗 IP 사용) → Elastic IP `43.201.237.68`로 수정
+- **원인 2**: `AWS_USERNAME` 시크릿 값 오류 → `ubuntu`로 수정
+- **원인 3**: EC2 `authorized_keys`에 공개키가 줄바꿈으로 깨져 등록됨 → 단일 행으로 재등록
+- **원인 4**: `NEW_PUBLIC_KEY_HERE` 리터럴 텍스트가 authorized_keys에 남아있음 → 정리
+
+#### 8. GCP Credentials base64 디코딩 실패 — `base64: invalid input`
+- **증상**: EC2 배포 중 GCP credentials JSON 디코딩 에러
+- **원인**: `GCP_CREDENTIALS_JSON`을 SSH env로 전달 시 base64 데이터 깨짐
+- **수정**: SSH env 전달 대신 `scp`로 파일 직접 전송 후 volume mount
+
+#### 9. GCP Artifact Registry push 실패 — `Permission denied uploadArtifacts`
+- **증상**: Docker push 시 Artifact Registry 권한 부족
+- **원인**: `GCP_SA_KEY` 시크릿에 저장된 서비스 계정 키 만료/무효
+- **수정**: `github-actions-sa` 서비스 계정의 새 키 생성 후 `GCP_SA_KEY` 시크릿 재설정
+
+#### 10. GCP Deploy SSH 타임아웃 — `Connection timed out`
+- **증상**: Artifact Registry push 성공 후 VM 배포 단계에서 SSH 타임아웃
+- **원인**: `GCP_VM_HOST` 시크릿에 잘못된 IP 저장 (5/24 설정 이후 미갱신)
+- **수정**: `GCP_VM_HOST`를 `34.64.221.240`으로, `GCP_VM_USER`를 `Samsung`으로 재설정
+
+#### 11. TorchServe 이미지 not found — `torchserve-gpu:latest: not found`
+- **증상**: `docker compose pull`에서 TorchServe 이미지 다운로드 실패
+- **원인**: TorchServe 이미지는 `torchserve/` 변경 시에만 빌드되므로, Artifact Registry에 한 번도 push된 적 없음
+- **수정**: docker-compose에서 TorchServe 서비스 제거, FastAPI/Celery의 TorchServe 의존성 해제 (`TORCHSERVE_ENABLED=false`)
+
+#### 12. GCP VM 디스크 공간 부족 — `no space left on device`
+- **증상**: Docker 이미지 pull 중 파일시스템 쓰기 실패
+- **원인**: 기본 디스크 10GB, scipy/torch 등 대용량 라이브러리 포함 이미지
+- **수정**: `gcloud compute disks resize` → 30GB 확장 + `growpart` + `resize2fs` (growpart는 `apt install cloud-guest-utils` 필요)
+
+#### 13. ChromaDB 헬스체크 실패 — `curl: executable file not found`
+- **증상**: ChromaDB 컨테이너가 `unhealthy` 상태 → FastAPI 시작 차단
+- **원인**: `chromadb/chroma:latest` 이미지에 `curl` 미설치
+- **수정 1차**: 헬스체크를 `curl` → `python3 -c "import urllib.request; ..."` 로 변경
+- **수정 2차**: `CMD` → `CMD-SHELL` 방식 변경 (셸 해석 필요), `timeout: 5s→10s`, `start_period: 10s→30s` 확대 (ChromaDB 초기 로딩 시간 확보)
+
+---
+
+### 워크플로우 파일 변경 이력
+
+**deploy-ec2.yml:**
+- `lfs: true` 제거
+- `Pull LFS model assets` 단계 제거
+- `cache: gradle` 제거
+- `appleboy/ssh-action` → 직접 SSH (`ssh -i ~/.ssh/deploy_key`) 교체
+- `workflow_dispatch` 트리거 추가
+- GCP credentials 전달: SSH env → `scp` 파일 전송 방식
+- deploy script: sed placeholder 치환 방식
+
+**deploy-gcp.yml:**
+- `workflow_dispatch` 트리거 추가
+- `appleboy/ssh-action` → 직접 SSH 교체
+- deploy script: sed placeholder 치환 방식
+- TorchServe 서비스 제거 (docker-compose)
+- FastAPI: `TORCHSERVE_ENABLED=false`, `TORCHSERVE_FALLBACK=true`
+- ChromaDB 헬스체크: `curl` → `python3 urllib`
+- `version: '3.8'` 제거 (Docker Compose 경고 방지)
+
+### GitHub Secrets 등록 현황 (2026-05-27 기준)
+
+| Secret | 용도 | 최종 업데이트 |
+|--------|------|---------------|
+| `AWS_KEY` | EC2 SSH 프라이빗 키 (RSA PEM) | 05-26 |
+| `AWS_HOST` | EC2 Elastic IP (`43.201.237.68`) | 05-27 |
+| `AWS_USERNAME` | EC2 SSH 사용자 (`ubuntu`) | 05-27 |
+| `GCP_SA_KEY` | GCP 서비스 계정 키 (Artifact Registry push) | 05-27 |
+| `GCP_VM_SSH_KEY` | GCP VM SSH 프라이빗 키 (`google_compute_engine`) | 05-26 |
+| `GCP_VM_HOST` | GCP VM IP (`34.64.221.240`) | 05-27 |
+| `GCP_VM_USER` | GCP VM 사용자 (`Samsung`) | 05-27 |
+| 기타 | DB, API keys, OAuth 등 | 05-24 |
+
+### 잔여 작업
+
+| # | 작업 | 상태 |
+|---|------|------|
+| 1 | ChromaDB 헬스체크 수정 커밋 & 푸시 → GCP 재배포 | 대기 중 |
+| 2 | TorchServe 이미지 첫 빌드 & 푸시 (Phase 2) | 미시작 |
+| 3 | TorchServe 모델 파일 (`*.mar`) VM 배치 | 미시작 |
+| 4 | EC2 PostgreSQL (`sdui-db`) 컨테이너 상태 확인 | 미확인 |
+| 5 | 보안: 채팅에 노출된 SSH 키, SA 키, HF 토큰 로테이션 | 권장 |
+
 ## Preferred Next Implementation
 
 Add a small compatibility layer around rendering:
