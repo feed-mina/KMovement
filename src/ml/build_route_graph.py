@@ -41,8 +41,9 @@ except NameError:
     if not os.path.exists(BASE_DIR):
         BASE_DIR = os.getcwd()
 
-RAW_DIR       = os.path.join(BASE_DIR, "data", "raw_ml")
-MODELS_DIR    = os.path.join(BASE_DIR, "models")
+PROJECT_ROOT  = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+RAW_DIR       = os.path.join(PROJECT_ROOT, "dataset", "data", "raw_ml")
+MODELS_DIR    = os.path.join(PROJECT_ROOT, "dataset", "models")
 SCORED_V2     = os.path.join(RAW_DIR,    "road_scored_v2.csv")
 SCORED_V1     = os.path.join(RAW_DIR,    "road_scored.csv")
 SCORED_PATH   = SCORED_V2 if os.path.exists(SCORED_V2) else SCORED_V1
@@ -103,7 +104,7 @@ print("  첫 실행 시 수 분 소요됩니다. 이후 실행은 캐시를 사�
 ox.settings.use_cache = False
 ox.settings.log_console = True
 ox.settings.max_query_area_size = 5000000000  # 5000 sq km (prevent 168 requests)
-ox.settings.overpass_url = "https://overpass.kumi.systems/api/interpreter"  # 대체 서버 (overpass-api.de 과부하 회피)
+ox.settings.overpass_url = "https://overpass-api.de/api/interpreter"
 
 os.makedirs(MODELS_DIR, exist_ok=True)
 
