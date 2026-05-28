@@ -38,8 +38,7 @@ jobs:
             echo "=== Deploying Frontend ==="
             docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
 
-            docker stop sdui-frontend 2>/dev/null || true
-            docker rm sdui-frontend 2>/dev/null || true
+            docker rm -f sdui-frontend 2>/dev/null || true
 
             docker run -d --name sdui-frontend \
               -p 3000:3000 \
@@ -55,8 +54,7 @@ jobs:
             echo "=== Redeploying Backend with updated env ==="
             docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-app:main || docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-app:latest
 
-            docker stop sdui-backend 2>/dev/null || true
-            docker rm sdui-backend 2>/dev/null || true
+            docker rm -f sdui-backend 2>/dev/null || true
 
             docker run -d --name sdui-backend \
               -p 8080:8080 \

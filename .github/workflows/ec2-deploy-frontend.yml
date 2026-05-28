@@ -44,8 +44,7 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
 
             # Stop and remove old frontend container
-            docker stop sdui-frontend 2>/dev/null || true
-            docker rm sdui-frontend 2>/dev/null || true
+            docker rm -f sdui-frontend 2>/dev/null || true
 
             # Run frontend with port 3000 exposed to host
             docker run -d --name sdui-frontend \
