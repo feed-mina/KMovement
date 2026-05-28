@@ -80,4 +80,23 @@ jobs:
           echo ""
           echo "=== iptables port 80 check ==="
           sudo iptables -L -n | grep -E "80|http" || echo "No iptables rules for port 80"
+
+          echo ""
+          echo "=== Port 443 check ==="
+          sudo lsof -i :443 2>/dev/null || echo "Nothing on port 443"
+
+          echo ""
+          echo "=== Certbot / SSL check ==="
+          which certbot 2>/dev/null && echo "certbot installed" || echo "certbot NOT installed"
+          ls -la /etc/letsencrypt/live/ 2>/dev/null || echo "No letsencrypt certs"
+          ls -la /etc/nginx/sites-enabled/ 2>/dev/null || echo "No nginx sites-enabled (host)"
+          cat /etc/nginx/sites-enabled/yerin.duckdns.org 2>/dev/null || echo "No duckdns nginx config on host"
+
+          echo ""
+          echo "=== Host Nginx status ==="
+          sudo systemctl status nginx 2>/dev/null | head -10 || echo "No host nginx service"
+
+          echo ""
+          echo "=== Current nginx.conf in container ==="
+          docker exec sdui-nginx cat /etc/nginx/conf.d/default.conf 2>/dev/null | head -40 || echo "Cannot read container nginx config"
           EOF
