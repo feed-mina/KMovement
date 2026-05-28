@@ -29,8 +29,6 @@ jobs:
           key: ${{ secrets.AWS_KEY }}
           envs: DOCKER_USERNAME,DB_USERNAME,DB_PASSWORD,MAIL_PASSWORD,JWT_SECRET_KEY,OPENAI_API_KEY,KAKAO_CLIENT_ID,AWS_ACCESS_KEY_VAL,AWS_SECRET_KEY_VAL,SLACK_WEBHOOK_URL,SLACK_BOT_TOKEN,SLACK_CHANNEL_ID,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REDIRECT_URI,GCP_CREDENTIALS_JSON
           script: |
-            set -e
-
             # ── Network ──
             docker network inspect sdui-network >/dev/null 2>&1 || docker network create sdui-network
 
@@ -38,7 +36,10 @@ jobs:
             echo "=== Deploying Frontend ==="
             docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
 
-            docker rm -f sdui-frontend 2>/dev/null || true
+            echo "Removing old frontend container..."
+            docker stop sdui-frontend || true
+            docker rm sdui-frontend || true
+            echo "Old frontend container removed."
 
             docker run -d --name sdui-frontend \
               -p 3000:3000 \
@@ -54,7 +55,13 @@ jobs:
             echo "=== Redeploying Backend with updated env ==="
             docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-app:main || docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-app:latest
 
-            docker rm -f sdui-backend 2>/dev/null || true
+            echo "Removing old backend container..."
+            docker stop sdui-backend || true
+            docker rm sdui-backend || true
+            echo "Old backend container removed."
+
+            BACKEND_IMAGE=${{ secrets.DOCKER_USERNAME }}/sdui-app:main
+            docker image inspect $BACKEND_IMAGE >/dev/null 2>&1 || BACKEND_IMAGE=${{ secrets.DOCKER_USERNAME }}/sdui-app:latest
 
             docker run -d --name sdui-backend \
               -p 8080:8080 \
@@ -85,42 +92,13 @@ jobs:
               -v /home/ubuntu/gcp-credentials.json:/app/gcp-credentials.json:ro \
               -v /home/ubuntu/study-materials:/app/assets/study:ro \
               --restart unless-stopped \
-              ${{ secrets.DOCKER_USERNAME }}/sdui-app:main || \
-            docker run -d --name sdui-backend \
-              -p 8080:8080 \
-              --network sdui-network \
-              -e SPRING_PROFILES_ACTIVE=prod \
-              -e SPRING_DATASOURCE_URL=jdbc:postgresql://sdui-db:5432/SDUI_TD \
-              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
-              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e SPRING_DATA_REDIS_HOST=sdui-redis \
-              -e SPRING_MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
-              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
-              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-              -e KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
-              -e KAKAO_REDIRECT_URI=https://yerin.duckdns.org/api/kakao/callback \
-              -e WEB_URL=https://yerin.duckdns.org \
-              -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
-              -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
-              -e FASTAPI_URL=http://sdui-fastapi:8001 \
-              -e GCP_PROJECT_ID=kdeliver \
-              -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
-              -e GCP_CREDENTIALS_PATH=/app/gcp-credentials.json \
-              -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
-              -e SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }} \
-              -e SLACK_CHANNEL_ID=${{ secrets.SLACK_CHANNEL_ID }} \
-              -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
-              -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
-              -e GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }} \
-              -v /home/ubuntu/gcp-credentials.json:/app/gcp-credentials.json:ro \
-              -v /home/ubuntu/study-materials:/app/assets/study:ro \
-              --restart unless-stopped \
-              ${{ secrets.DOCKER_USERNAME }}/sdui-app:latest
+              $BACKEND_IMAGE
 
             # ── 3. Remove Docker Nginx (conflicts with Host Nginx on port 80) ──
             echo ""
             echo "=== Removing Docker Nginx (port 80 conflict) ==="
-            docker rm -f sdui-nginx 2>/dev/null || true
+            docker stop sdui-nginx || true
+            docker rm sdui-nginx || true
             sleep 2
 
             # ── 4. Start Host Nginx (SSL termination on 80+443) ──
