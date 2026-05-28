@@ -1,0 +1,152 @@
+name: EC2 Fix Frontend + Backend Env
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Frontend image
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_BACKEND_URL=https://yerin.duckdns.org \
+            -t ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest \
+            ./subproject/SDUI/metadata-project
+          docker push ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_KEY }}
+          envs: DOCKER_USERNAME,DB_USERNAME,DB_PASSWORD,MAIL_PASSWORD,JWT_SECRET_KEY,OPENAI_API_KEY,KAKAO_CLIENT_ID,AWS_ACCESS_KEY_VAL,AWS_SECRET_KEY_VAL,SLACK_WEBHOOK_URL,SLACK_BOT_TOKEN,SLACK_CHANNEL_ID,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REDIRECT_URI,GCP_CREDENTIALS_JSON
+          script: |
+            set -e
+
+            # ── Network ──
+            docker network inspect sdui-network >/dev/null 2>&1 || docker network create sdui-network
+
+            # ── 1. Frontend: rebuild with port 3000 exposed ──
+            echo "=== Deploying Frontend ==="
+            docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
+
+            docker stop sdui-frontend 2>/dev/null || true
+            docker rm sdui-frontend 2>/dev/null || true
+
+            docker run -d --name sdui-frontend \
+              -p 3000:3000 \
+              --network sdui-network \
+              -e NODE_ENV=production \
+              -e BACKEND_URL=http://sdui-backend:8080 \
+              -e FASTAPI_URL=http://34.64.221.240:8000 \
+              --restart unless-stopped \
+              ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
+
+            # ── 2. Backend: recreate with updated env vars ──
+            echo ""
+            echo "=== Redeploying Backend with updated env ==="
+            docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-app:main || docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-app:latest
+
+            docker stop sdui-backend 2>/dev/null || true
+            docker rm sdui-backend 2>/dev/null || true
+
+            docker run -d --name sdui-backend \
+              -p 8080:8080 \
+              --network sdui-network \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e SPRING_DATASOURCE_URL=jdbc:postgresql://sdui-db:5432/SDUI_TD \
+              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
+              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e SPRING_DATA_REDIS_HOST=sdui-redis \
+              -e SPRING_MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
+              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+              -e KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
+              -e KAKAO_REDIRECT_URI=https://yerin.duckdns.org/api/kakao/callback \
+              -e WEB_URL=https://yerin.duckdns.org \
+              -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
+              -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
+              -e FASTAPI_URL=http://sdui-fastapi:8001 \
+              -e GCP_PROJECT_ID=kdeliver \
+              -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
+              -e GCP_CREDENTIALS_PATH=/app/gcp-credentials.json \
+              -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
+              -e SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }} \
+              -e SLACK_CHANNEL_ID=${{ secrets.SLACK_CHANNEL_ID }} \
+              -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+              -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
+              -e GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }} \
+              -v /home/ubuntu/gcp-credentials.json:/app/gcp-credentials.json:ro \
+              -v /home/ubuntu/study-materials:/app/assets/study:ro \
+              --restart unless-stopped \
+              ${{ secrets.DOCKER_USERNAME }}/sdui-app:main || \
+            docker run -d --name sdui-backend \
+              -p 8080:8080 \
+              --network sdui-network \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e SPRING_DATASOURCE_URL=jdbc:postgresql://sdui-db:5432/SDUI_TD \
+              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
+              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e SPRING_DATA_REDIS_HOST=sdui-redis \
+              -e SPRING_MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
+              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+              -e KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
+              -e KAKAO_REDIRECT_URI=https://yerin.duckdns.org/api/kakao/callback \
+              -e WEB_URL=https://yerin.duckdns.org \
+              -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
+              -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
+              -e FASTAPI_URL=http://sdui-fastapi:8001 \
+              -e GCP_PROJECT_ID=kdeliver \
+              -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
+              -e GCP_CREDENTIALS_PATH=/app/gcp-credentials.json \
+              -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
+              -e SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }} \
+              -e SLACK_CHANNEL_ID=${{ secrets.SLACK_CHANNEL_ID }} \
+              -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+              -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
+              -e GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }} \
+              -v /home/ubuntu/gcp-credentials.json:/app/gcp-credentials.json:ro \
+              -v /home/ubuntu/study-materials:/app/assets/study:ro \
+              --restart unless-stopped \
+              ${{ secrets.DOCKER_USERNAME }}/sdui-app:latest
+
+            # ── 3. Wait and verify ──
+            echo ""
+            echo "Waiting for services to start (40s)..."
+            sleep 40
+
+            echo ""
+            echo "=== Container Status ==="
+            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "sdui|NAMES"
+
+            echo ""
+            echo "=== Frontend Logs ==="
+            docker logs --tail 15 sdui-frontend 2>&1
+
+            echo ""
+            echo "=== Backend Logs ==="
+            docker logs --tail 15 sdui-backend 2>&1
+
+            echo ""
+            echo "=== Curl Tests ==="
+            curl -sS -o /dev/null -w "Frontend (3000): HTTP %{http_code}\n" http://localhost:3000/ 2>&1 || echo "Frontend not ready"
+            curl -sS -o /dev/null -w "Backend (8080): HTTP %{http_code}\n" http://localhost:8080/api/ui/MAIN_PAGE 2>&1 || echo "Backend not ready"
+            curl -sSk -o /dev/null -w "Nginx HTTPS (443): HTTP %{http_code}\n" https://localhost/ 2>&1 || echo "Nginx HTTPS not ready"
+
+            # Redis cache clear
+            docker exec sdui-redis redis-cli FLUSHDB || true
+
+            echo ""
+            echo "=== Deployment Complete ==="
+            echo "Test: https://yerin.duckdns.org"
+            echo "Test: https://yerin.duckdns.org/view/MAIN_PAGE"
+            echo "Test: https://yerin.duckdns.org/view/INTRO1"

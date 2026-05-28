@@ -17,6 +17,18 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## KRIDE Focus Maps
+
+The Focus route map can render with Kakao Maps or Google Maps. Add these values to `.env.local` when testing the native providers:
+
+```env
+NEXT_PUBLIC_KAKAO_MAP_APP_KEY=
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+NEXT_PUBLIC_KRIDE_MAP_DEFAULT_PROVIDER=kakao
+```
+
+If the provider key is missing, the Focus map falls back to the existing Leaflet/OpenStreetMap renderer so the page remains usable locally.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically
