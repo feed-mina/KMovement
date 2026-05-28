@@ -32,11 +32,11 @@ RUN pip install --no-cache-dir -r /tmp/req-base.txt
 COPY deploy/media_motion/requirements-cogvideox.txt /tmp/req-cogvideox.txt
 RUN pip install --no-cache-dir -r /tmp/req-cogvideox.txt
 
-# Python dependencies — MusicGen
-RUN pip install --no-cache-dir audiocraft>=1.3,<2
+# Python dependencies — MusicGen (optional: falls back to sine-wave BGM)
+RUN pip install --no-cache-dir "audiocraft>=1.3,<2" || echo "WARN: audiocraft install failed — sine-wave BGM fallback will be used"
 
 # RunPod SDK
-RUN pip install --no-cache-dir runpod>=1.7,<2
+RUN pip install --no-cache-dir "runpod>=1.7,<2"
 
 # Copy application code
 COPY deploy /app/deploy
