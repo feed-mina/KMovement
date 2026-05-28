@@ -1,0 +1,28 @@
+{
+  "animation": "/content/drive/MyDrive/kride-track-b/combined_sequential.mp4",
+  "tts_outputs": [
+    "/content/drive/MyDrive/kride-track-b/tts_01_intro_excited.wav",
+    "/content/drive/MyDrive/kride-track-b/tts_01_opening.wav",
+    "/content/drive/MyDrive/kride-track-b/tts_02_character_wave.wav",
+    "/content/drive/MyDrive/kride-track-b/tts_02_food.wav",
+    "/content/drive/MyDrive/kride-track-b/tts_03_food_fun.wav",
+    "/content/drive/MyDrive/kride-track-b/tts_03_photo.wav",
+    "/content/drive/MyDrive/kride-track-b/tts_04_photo_spot.wav",
+    "/content/drive/MyDrive/kride-track-b/tts_04_walk.wav",
+    "/content/drive/MyDrive/kride-track-b/tts_05_action_dance.wav",
+    "/content/drive/MyDrive/kride-track-b/tts_05_outro.wav",
+    "/content/drive/MyDrive/kride-track-b/tts_06_outro_warm.wav"
+  ],
+  "bgm_outputs": [
+    "/content/drive/MyDrive/kride-track-b/bgm_bright_travel.wav",
+    "/content/drive/MyDrive/kride-track-b/bgm_cinematic_memory.wav",
+    "/content/drive/MyDrive/kride-track-b/bgm_city_walk.wav",
+    "/content/drive/MyDrive/kride-track-b/bgm_cute_character.wav"
+  ],
+  "final_outputs": [
+    "/content/drive/MyDrive/kride-track-b/final_segment_synced_bright_travel.mp4",
+    "/content/drive/MyDrive/kride-track-b/final_segment_synced_cute_character.mp4",
+    "/content/drive/MyDrive/kride-track-b/final_segment_synced_city_walk.mp4",
+    "/content/drive/MyDrive/kride-track-b/final_segment_synced_cinematic_memory.mp4"
+  ]
+}

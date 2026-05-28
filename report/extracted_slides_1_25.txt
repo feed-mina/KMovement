@@ -1,0 +1,100 @@
+
+=== SLIDE 1 ===
+TEXT: PROJECT PRESENTATION | 01 | K-Ride 2.0 | GraphRAG 추천 엔진을 AI 여행로그 생성 플랫폼으로 확장한 2개월 기록 | K-Ride 2.0 | GraphRAG 추천 엔진 + AI 여행로그 생성 | 2 mo | build archive | 6+ | model tracks | 82 → 50 | deduped draft | GraphRAG | SDUI | TorchServe | Celery | Media AI
+NOTES: 첫 장에서는 기능 목록을 말하지 말고, 이 프로젝트가 추천, 데이터, 모델 서빙, 미디어 생성까지 묶은 통합 실험이었다고 소개합니다. 2개월 동안 밤새며 만든 흔적을 기술 스택보다 의사결정의 흐름으로 보여주는 발표라고 말하면 좋습니다.
+
+=== SLIDE 2 ===
+TEXT: SYMBOL BOARD 1 | 49 | 기술 스택 대표 심볼을 한 장으로 모았습니다. | Frontend, backend, database, runtime stack
+NOTES: 이 장은 공식 로고 모음이 아니라 발표용 대표 심볼 보드입니다. 화면, 서버, 데이터베이스, 실행 환경에 사용한 기술을 시각적으로 한 번에 보여주는 용도입니다.
+
+=== SLIDE 3 ===
+TEXT: SYMBOL BOARD 2 | 50 | AI 모델링과 MLOps 도구도 대표 심볼로 정리했습니다. | AI modeling, serving, tracking, collaboration, media assembly
+NOTES: 이 장은 AI 모델링과 MLOps, 협업 도구를 묶은 대표 심볼 보드입니다. PyTorch, scikit-learn, TabNet, MLflow, TorchServe, DagsHub, Git/GitHub, BLIP-2, GPT-SoVITS, FFmpeg의 역할을 짧게 설명하면 됩니다.
+
+=== SLIDE 4 ===
+TEXT: MOTIVATION | 02 | 출발점은 기능 추가가 아니라, 여행 경험을 설명 가능한 AI 흐름으로 바꾸는 일이었습니다. | 추천 이유, 안전성, 날씨, 미디어 생성까지 하나의 사용자 여정으로 연결 | 추천 → 설명 → 생성 → 검증 | 이 흐름이 이번 발표의 한 줄 요약입니다.
+NOTES: 동기는 세 가지로 말합니다. 첫째 기존 K-Ride는 경로와 추천 중심이었고, 둘째 사용자는 왜 이 장소가 추천되는지 알고 싶어하며, 셋째 생성형 AI를 붙이려면 모델을 호출하는 화면이 아니라 데이터와 비동기 운영 구조가 필요했습니다.
+
+=== SLIDE 5 ===
+TEXT: TWO-MONTH BUILD | 03 | 2개월의 작업은 네 개의 레이어로 쌓였습니다. | 데이터 수집 → 추천/모델링 → 서버/서빙 → 화면/검증 | Data | POI, 날씨, 안전, 소비, K-culture 데이터 정리 | Model | WeatherLSTM, TabNet, RandomForest, GraphRAG | Serving | Spring, FastAPI, TorchServe, Celery, MLflow | Screen | SDUI, 커뮤니티 이미지 업로드, 캡처 검증
+NOTES: 이 슬라이드는 전체 구조의 지도입니다. 뒤에서 나오는 모든 내용은 이 네 레이어 중 하나에 들어간다고 안내하면 청중이 길을 잃지 않습니다.
+
+=== SLIDE 6 ===
+TEXT: AGENT WORKFLOW | 04 | 에이전트는 문서화와 코드 변경을 연결하는 작업 파트너로 사용했습니다. | 설계 정리, 코드 탐색, 테스트, 캡처, 발표자료 작성까지 반복 | 탐색 | report, dataset_report, torchserve, SDUI 코드를 읽고 근거를 찾음 | 구현 | 커뮤니티 CRUD에 이미지 업로드와 read 표시 흐름을 추가 | 검증 | 로컬 서버와 프론트를 실행하고 Playwright 캡처로 확인 | 정리 | 모델링 산출물과 트러블슈팅을 발표 구조로 재배치
+NOTES: 에이전트를 썼다는 사실만 말하지 말고, 단순 자동생성이 아니라 탐색, 구현, 검증, 문서화의 반복 루프를 줄이는 데 썼다고 설명합니다.
+
+=== SLIDE 7 ===
+TEXT: CHAPTER 01 | 05 | Data / DB | 추천 품질은 모델보다 먼저 데이터 구조에서 결정됐습니다. | 추천 품질은 모델보다 먼저 데이터 구조에서 결정됐습니다.
+NOTES: 챕터 전환 슬라이드입니다. 발표에서는 데이터가 왜 중요한지 한 문장만 말하고 바로 다음 증거로 넘어갑니다.
+
+=== SLIDE 8 ===
+TEXT: DATASET | 06 | 핵심 데이터는 POI, 도로, 날씨, 소비, K-culture로 나뉘었습니다. | 서로 다른 출처를 추천과 생성 파이프라인의 입력으로 맞춤 | 874K | POI 후보 | 25,893 | 소비 예측 행 | 20,262 | 자전거 도로 | 14 days | Weather sequence | evidence | report/dataset_report
+NOTES: 눈에 보이는 숫자만 읽지 말고, 데이터마다 역할이 달랐다고 말합니다. POI는 후보군, 날씨는 안전 보정, 소비는 예산 현실성, K-culture는 취향 그래프를 맡았습니다.
+
+=== SLIDE 9 ===
+TEXT: INGESTION | 07 | 적재 흐름은 파일 수집보다 모델 입력 형태로 바꾸는 과정이었습니다. | 정제된 테이블과 벡터, 그래프, 모델 피처가 각각 다른 저장소로 이동 | Raw | 공공데이터, AI Hub, TourAPI, 캡처/문서 | Clean | 결측치, 좌표, 범주형, 시간 순서 정리 | Feature | safety, tourism, weather, consume score | Store | PostgreSQL, ChromaDB, Neo4j, file assets | Serve | Spring/FastAPI/TorchServe API
+NOTES: 적재라는 단어를 DB insert로 좁히지 말고, 모델이 먹을 수 있는 형태로 바꾸는 전처리라고 설명합니다.
+
+=== SLIDE 10 ===
+TEXT: DB TOOLS | 08 | DB는 하나가 아니라, 질문의 종류에 따라 나눠 썼습니다. | 관계형, 벡터, 그래프, 산출물 저장소의 역할 분리 | PostgreSQL | 회원, 콘텐츠, POI, 추천 결과 등 운영 데이터의 기준점 | ChromaDB | 문장과 POI를 벡터로 검색하는 RAG 검색 계층 | Neo4j | K-culture, 지역, 취향 관계를 그래프로 확장하는 후보 | File/R2/S3 | 이미지, 영상, 모델 산출물을 API와 분리해 보관
+NOTES: 이 장에서는 DB 도구를 기술 나열로 말하지 않습니다. 관계형은 정합성, 벡터는 의미 검색, 그래프는 관계, 파일 저장소는 대용량 미디어라는 식으로 역할 중심으로 설명합니다.
+
+=== SLIDE 11 ===
+TEXT: RAG EVIDENCE | 09 | 추천은 GraphRAG와 K-culture 데이터로 설명 가능성을 붙였습니다. | 장소 추천 결과뿐 아니라 왜 추천됐는지를 함께 돌려주는 구조 | K-culture 지역 분포 | POI co-occurrence heatmap | dataset_report/figures
+NOTES: 여기서는 추천 품질보다 설명 가능성을 강조합니다. 사용자가 BTS, 전통시장, 일본어 질의를 넣어도 다국어 임베딩과 후보 검색이 연결되도록 설계했다는 점을 말합니다.
+
+=== SLIDE 12 ===
+TEXT: CHAPTER 02 | 10 | Architecture | 화면, 서버, 모델 서빙을 분리해야 AI 기능을 운영할 수 있었습니다. | 화면, 서버, 모델 서빙을 분리해야 AI 기능을 운영할 수 있었습니다.
+NOTES: 아키텍처 파트는 구현 자랑보다 책임 분리가 주제입니다. 프론트는 화면, Spring은 운영 API, FastAPI는 AI 오케스트레이션, TorchServe는 모델 추론으로 나뉩니다.
+
+=== SLIDE 13 ===
+TEXT: K-RIDE ARCHITECTURE | 11 | K-Ride는 화면과 모델을 직접 붙이지 않고, 서비스 경계를 나눴습니다. | Next/SDUI → Spring Boot → FastAPI/Celery → TorchServe/MLflow | Frontend | Next.js, SDUI, PWA, community CRUD | Backend | Spring Boot, auth, content, DB transaction | AI API | FastAPI, GraphRAG, media job orchestration | Model Ops | TorchServe, MLflow, Docker, registry
+NOTES: 이 슬라이드는 전체 시스템 그림입니다. AI 모델을 프론트에서 바로 부르는 것이 아니라, 서버 계층이 요청을 받고 비동기 작업과 모델 서빙을 분리했다고 설명합니다.
+
+=== SLIDE 14 ===
+TEXT: SDUI | 12 | SDUI는 화면을 코드가 아니라 메타데이터로 바꾸는 역할이었습니다. | DB 변경이 UI 구조로 이어지는 흐름을 데모 GIF에서 확인 | demo-db-to-ui.gif 대표 장면 | demo-role-switch.gif 대표 장면 | subproject/SDUI/assets/docs
+NOTES: GIF 자체는 발표 안정성을 위해 대표 프레임으로 넣었습니다. 노트에서 원본 GIF 경로를 말할 수 있습니다. SDUI는 화면 배포 속도를 높이기 위한 구조였다고 설명합니다.
+
+=== SLIDE 15 ===
+TEXT: COMMUNITY | 14 | 커뮤니티 CRUD에는 이미지 업로드가 붙어 AI 영상 원천 데이터가 됩니다. | 목록, 작성, 상세에서 이미지가 이어지는지 확인 | 목록 | 작성/미리보기 | 상세/read | report/capture/community-*.png
+NOTES: 이 기능은 단순 게시판 기능이 아니라, 나중에 이미지에서 영상을 만드는 AI 모델의 입력 데이터가 됩니다. 작성 화면에서 업로드하고, read 화면에서 다시 볼 수 있어야 한다는 요구를 충족했습니다.
+
+=== SLIDE 16 ===
+TEXT: SERVER | 15 | 서버는 CRUD와 AI 작업을 같은 방식으로 처리하지 않도록 나눴습니다. | 짧은 요청과 긴 GPU 작업의 운영 방식 분리 | Spring Boot | 회원, 콘텐츠, 커뮤니티 CRUD, DB 트랜잭션 | FastAPI | GraphRAG, BLIP-2, TTS, 영상 생성 job 접수 | Celery/Redis | 5~15분 걸리는 영상 생성 작업을 비동기 큐로 분리 | Docker Compose | 로컬 개발/검증 기준을 서비스 단위로 묶음
+NOTES: 커뮤니티 CRUD는 빠른 요청이고, 영상 생성은 오래 걸리는 작업입니다. 그래서 하나의 API 요청 안에서 모두 처리하지 않고 job_id와 큐 구조로 분리해야 한다고 설명합니다.
+
+=== SLIDE 17 ===
+TEXT: MODEL SERVING | 16 | TorchServe는 모델을 API 서버에서 떼어내는 배포 레이어입니다. | handler, MAR package, model store, inference endpoint로 운영 단위를 분리 | Handler | preprocess, inference, postprocess | MAR | 모델 파일과 handler를 패키징 | Model Store | embedder, reranker, weather, event NER | Endpoint | FastAPI/Spring에서 추론 호출
+NOTES: TorchServe는 모델 배포 예시로 간략히만 말합니다. 핵심은 API 서버가 모델 파일을 직접 들고 있지 않고, 모델 서빙 프로세스로 분리했다는 점입니다.
+
+=== SLIDE 18 ===
+TEXT: DEPLOYMENT | 17 | 배포 파이프라인은 빌드보다 재현 가능한 실행을 목표로 잡았습니다. | Docker Compose, MLflow, 모델 패키징, 캡처 검증이 한 흐름으로 연결 | Build | docker compose build --no-cache 기준 | Run | Spring, Next, AI API, DB 실행 | Track | MLflow run과 artifact 기록 | Serve | TorchServe endpoint 분리 | Verify | Playwright와 화면 캡처 저장
+NOTES: 사용자가 말한 docker compose build --no-cache 실행 방식도 이 흐름 안에 넣었습니다. 발표에서는 배포가 아직 완성 운영이 아니라 재현 가능한 개발/검증 파이프라인이라는 점을 정확히 말합니다.
+
+=== SLIDE 19 ===
+TEXT: CHAPTER 03 | 18 | Modeling | 각 모델은 하나의 점수가 아니라 서비스 의사결정으로 연결됐습니다. | 각 모델은 하나의 점수가 아니라 서비스 의사결정으로 연결됐습니다.
+NOTES: 모델링 파트에서는 성능표보다 산출물이 어디에 쓰였는지를 중심으로 말합니다.
+
+=== SLIDE 20 ===
+TEXT: MODEL PORTFOLIO | 19 | 모델링 산출물은 추천 점수, 설명, 음성, 영상으로 나뉩니다. | 각 모델의 출력이 화면과 API에서 쓰이는 방식 | WeatherLSTM | 날씨 3분류 → safety penalty | Safety RF | 도로 위험도 → 안전 보정 점수 | POI TabNet | 방문지 매력도 → tourism score | Consume TabNet | 예산 현실성 → 비용 조건 | GraphRAG | 질의 → 추천 이유/장소 | Media AI | 이미지/텍스트 → TTS/영상
+NOTES: 여기서는 모델 이름을 한 번에 보여줍니다. 다음 슬라이드부터는 각 모델을 입력, 오픈소스 근거, 산출물, 서비스 연결 순서로 짧게 설명합니다.
+
+=== SLIDE 21 ===
+TEXT: WEATHER LSTM | 20 | WeatherLSTM은 날씨를 안전 점수 보정값으로 바꾸기 위해 만들었습니다. | 14일 sequence, 8개 feature, 3-class weather label | 82.16% | test accuracy | 14 days | sequence length | 8 | input features | evidence | report_step1_weather_lstm.md
+NOTES: WeatherLSTM은 날씨 예측 자체가 목적이 아니라, 비나 흐림을 경로 추천의 안전 보정값으로 연결하기 위한 모델입니다. 맑음, 흐림, 비/눈 세 클래스로 나눠 safety penalty를 주는 구조라고 말합니다.
+
+=== SLIDE 22 ===
+TEXT: WEATHER RESULT | 21 | 좋았던 지표와 약했던 지표를 함께 기록했습니다. | 발표에서는 성능 자랑보다 개선 과제를 드러내는 편이 신뢰를 줍니다. | Confusion matrix | Per-class metrics | weather_lstm_classification_report.csv
+NOTES: 날씨 모델은 맑음은 잘 맞지만 흐림 클래스가 약했습니다. 이 약점을 숨기지 않고 데이터 불균형과 클래스별 보완 필요성을 트러블슈팅 흐름으로 연결합니다.
+
+=== SLIDE 23 ===
+TEXT: SAFETY MODEL | 22 | Safety 모델은 도로 단위 위험도를 만들기 위한 핵심 보정 모델입니다. | 도로 속성과 지역 위험도를 결합해 경로 안전 점수로 연결 | 89.1% | mapping rate | 0.9987 | classifier acc/F1 | RF | scikit-learn basis | evidence | safety_performance_summary.json
+NOTES: Safety 모델은 RandomForest 기반입니다. 성능이 높게 나온 만큼 과적합 가능성도 함께 말하고, 그래서 실제 서비스에서는 사고 데이터와 최신 도로 데이터를 계속 보강해야 한다고 설명합니다.
+
+=== SLIDE 24 ===
+TEXT: POI TABNET | 23 | POI TabNet은 방문지 매력도를 경로 추천 점수로 바꾸는 모델입니다. | AI Hub 여행로그에서 추천 의향과 방문지 특징을 학습 | 21,384 | AI Hub rows | 23 | columns | TabNet | pytorch-tabnet | evidence | report_step2_poi_tabnet.md
+NOTES: POI TabNet은 거리만 보는 추천의 한계를 줄이기 위해 만들었습니다. 방문 순서, 위치, 체류, 재방문 의향 등의 데이터를 사용해 tourism score로 연결했습니다.
+
+=== SLIDE 25 ===
+TEXT: POI RESULT | 24 | POI 추천은 공동방문 패턴과 카테고리 보정으로 출발했습니다. | 모델 점수와 실제 POI 분포를 함께 보며 추천 편향을 확인 | POI recall | co-occurrence heatmap | dataset_report/figures
+NOTES: 이 슬라이드에서는 추천이 단순히 가까운 장소를 나열하는 것이 아니라, 함께 방문되는 패턴과 카테고리 선호를 반영하려 했다고 설명합니다.

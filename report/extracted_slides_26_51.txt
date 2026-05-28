@@ -1,0 +1,104 @@
+
+=== SLIDE 26 ===
+TEXT: CONSUME TABNET | 25 | 소비 예측은 추천 결과가 실제 예산 안에 들어오도록 돕습니다. | 국민여행조사 기반으로 여행 비용 현실성을 보정 | 25,893 | survey rows | 0.5939 | R2 score | 42,764 | MAE | evidence | consume_v3_summary.md
+NOTES: 소비 예측은 비용을 정확히 맞히는 것보다 추천 조건에 예산 현실성을 넣기 위한 모델입니다. R2와 MAE를 그대로 보여주되, 지역 오차를 함께 본 점을 말합니다.
+
+=== SLIDE 27 ===
+TEXT: CONSUME RESULT | 26 | 소비 모델도 분포, 중요도, 지역별 오차를 산출물로 남겼습니다. | 점수 하나가 아니라 설명 가능한 비용 보정 자료로 사용 | 시도별 MAE | prediction scatter | dataset_report/figures, charts
+NOTES: 지역별 오차가 있다는 점은 발표에서 중요한 트러블슈팅 포인트입니다. 전국 데이터를 넣으면서 현실성은 올라갔지만 지역 편차를 보정해야 한다고 말합니다.
+
+=== SLIDE 28 ===
+TEXT: GRAPHRAG | 27 | GraphRAG는 추천 결과에 이유를 붙이기 위한 모델링 축입니다. | 다국어 임베딩, ChromaDB 검색, LLM 응답 생성 | 874K | POI index target | 0.79s | Groq response | 384 | embedding dim | evidence | report_step4_rag_pipeline.md
+NOTES: GraphRAG는 추천의 설명 가능성을 맡습니다. qwen2.5 로컬 시도와 Groq API 전환을 비교하면서 속도 개선도 이야기할 수 있습니다.
+
+=== SLIDE 29 ===
+TEXT: SCORE INTEGRATION | 28 | 개별 모델은 최종적으로 하나의 경로 weight로 통합됩니다. | Safety, weather penalty, tourism, consume 조건을 함께 계산 | Safety | 도로 위험도와 지역 위험 보정 | Weather | 비/흐림 penalty로 경로 조정 | Tourism | POI 매력도와 취향 점수 | Budget | 예산 현실성 보정 | Explain | GraphRAG 추천 이유 생성
+NOTES: 이 슬라이드는 모델링 파트의 결론입니다. 각 모델이 따로 끝나는 것이 아니라 최종 경로 추천의 weight와 설명으로 합쳐진다고 말합니다.
+
+=== SLIDE 30 ===
+TEXT: CHAPTER 04 | 29 | Image / TTS / Video | 여행로그 생성은 이미지 하나에서 영상까지 이어지는 파이프라인입니다. | 여행로그 생성은 이미지 하나에서 영상까지 이어지는 파이프라인입니다.
+NOTES: 미디어 파트에서는 모델을 나열하지 말고 이미지가 어떻게 텍스트, 음성, 영상으로 확장되는지 순서대로 말합니다.
+
+=== SLIDE 31 ===
+TEXT: MEDIA PIPELINE | 30 | AI 여행로그 생성은 5단계 파이프라인으로 설계했습니다. | 이미지 → 설명/프롬프트 → 음성 → 영상 → 합성 | Image | 커뮤니티/여행 사진 업로드 | Caption | BLIP-2로 장면 설명 추출 | Narration | LLM이 영상 스크립트 정리 | Media | TTS와 영상 생성 병렬 실행 | FFmpeg | 영상, 음성, 자막 최종 합성
+NOTES: 여기서는 커뮤니티 이미지 업로드가 왜 중요했는지를 다시 연결합니다. 게시판 이미지는 단순 첨부파일이 아니라 여행로그 생성 AI의 원천 데이터입니다.
+
+=== SLIDE 32 ===
+TEXT: IMAGE TO TEXT | 31 | 이미지 → 텍스트는 BLIP-2를 중심으로 설계했습니다. | 사진을 영상 프롬프트로 바꾸기 위한 중간 표현 | Frozen image encoder | 사진의 시각 특징을 추출 | Q-Former | 이미지 특징을 언어 모델이 읽을 수 있게 질의 | Frozen LLM | 캡션과 video prompt로 변환 | Output | narration, ko/en prompt, scene shot list
+NOTES: BLIP-2는 영상을 직접 만드는 모델이 아닙니다. 사진을 설명 가능한 텍스트와 영상 프롬프트로 바꾸는 중간 단계라고 말합니다.
+
+=== SLIDE 33 ===
+TEXT: TEXT TO TTS | 32 | 텍스트 → TTS는 GPT-SoVITS와 gTTS를 함께 고려한 하이브리드였습니다. | 고품질 음성 목표와 안정적 fallback을 함께 설계 | GPT-SoVITS | 한국어 음성 품질과 커스텀 음색을 목표로 실험 | gTTS fallback | 빠르게 동작하는 안정적 대체 경로 | Language code | WebUI와 API의 ko/Korean 차이를 정리 | Output | narration.wav 또는 mp3를 영상 합성으로 전달
+NOTES: TTS는 트러블슈팅이 많았던 부분입니다. 발표에서는 GPT-SoVITS를 목표로 잡았지만, 실제 운영은 fallback을 함께 설계해야 한다고 말합니다.
+
+=== SLIDE 34 ===
+TEXT: IMAGE TO VIDEO | 33 | 이미지/낙서 → 영상은 무거운 생성 모델과 가벼운 모션을 분리했습니다. | CogVideoX와 3D Photo Inpainting을 용도별 후보로 둠 | CogVideoX | 텍스트/이미지 기반 고품질 생성 후보 | 3D Photo Inpainting | 사진에 깊이감을 주는 가벼운 Ken Burns 방식 | Sketch input | 낙서나 간단한 입력은 prompt와 reference로 변환 | Decision | GPU 비용과 대기시간에 따라 모델 선택
+NOTES: 무조건 큰 모델을 쓰는 것이 아니라, 비용과 대기시간에 따라 3D Photo Inpainting 같은 가벼운 방식도 함께 고려했다고 말합니다.
+
+=== SLIDE 35 ===
+TEXT: VIDEO + TTS | 34 | 영상에 TTS를 입히는 마지막 단계는 FFmpeg 합성입니다. | audio mix, subtitle burn-in, final mp4 packaging | video.mp4 | 생성 영상 또는 모션 이미지 | voice.wav | TTS narration | subtitle.srt | 장면 설명/자막 | mix | BGM -18dB, narration 우선 | final.mp4 | 사용자에게 반환할 결과물
+NOTES: FFmpeg는 마지막 합성 단계입니다. 영상 생성 모델 자체보다 결과물을 서비스에서 재생 가능한 하나의 파일로 만드는 과정이 중요하다고 설명합니다.
+
+=== SLIDE 36 ===
+TEXT: OUTPUT EVIDENCE | 35 | 화면 캡처와 모델 차트는 산출물이 실제로 남았다는 증거입니다. | 커뮤니티 이미지, 프론트 화면, 모델 성능 이미지를 함께 보관 | image upload | front capture | model comparison | report/capture, dataset_report/data
+NOTES: 시안 발표에서는 완성도를 과장하지 않고, 남아 있는 산출물을 증거로 보여주는 태도가 좋습니다. 캡처와 차트가 실제 작업 기록입니다.
+
+=== SLIDE 37 ===
+TEXT: CHAPTER 05 | 36 | Troubleshooting | 트러블슈팅은 실패 목록이 아니라 설계가 바뀐 이유입니다. | 트러블슈팅은 실패 목록이 아니라 설계가 바뀐 이유입니다.
+NOTES: 트러블슈팅 파트는 길게 변명하지 말고, 문제와 바꾼 구조를 한 번에 보여줍니다.
+
+=== SLIDE 38 ===
+TEXT: TTS TROUBLE | 37 | TTS 문제는 언어 코드와 실행 환경 차이에서 시작됐습니다. | WebUI와 API가 기대하는 값이 달라 같은 모델도 다르게 실패 | Before | - WebUI는 Korean/한국어 형태를 기대 | - API는 ko 값을 요구 | - Mecab dictionary와 C++ engine 누락으로 crash | After | - API 서버 기준 언어 코드를 정리 | - fallback TTS 경로를 준비 | - 모델 파일과 의존성 체크리스트 작성 | →
+NOTES: TTS 트러블슈팅은 발표에서 좋은 포인트입니다. 단순 오류가 아니라, 연구용 WebUI와 서비스용 API의 입력 규칙이 다르다는 사실을 찾아낸 과정이라고 설명합니다.
+
+=== SLIDE 39 ===
+TEXT: GPU TROUBLE | 38 | 영상 모델은 GPU 메모리와 대기시간 때문에 운영 구조가 바뀌었습니다. | 동기 API 호출이 아니라 비동기 job 구조가 필요 | Before | - CogVideoX 5B 계열은 VRAM 부담이 큼 | - 무료/로컬 GPU에서 OOM 가능 | - 한 요청이 5~15분 걸릴 수 있음 | After | - Celery queue로 작업 분리 | - 상태 조회와 progress 이벤트 설계 | - 가벼운 3D Photo Inpainting 후보 병행 | →
+NOTES: 영상 생성은 멋있는 모델보다 운영 구조가 중요했습니다. 그래서 FastAPI가 즉시 job_id를 돌려주고 Celery가 뒤에서 처리하는 구조로 설계했습니다.
+
+=== SLIDE 40 ===
+TEXT: DATA TROUBLE | 39 | 데이터와 모델 문제는 성능보다 신뢰성 검증으로 이어졌습니다. | 결측, 불균형, 지역 편차, 과적합 가능성을 산출물에 기록 | Before | - 날씨 흐림 클래스 recall 약함 | - 소비 모델 지역별 오차 존재 | - Safety 모델은 지표가 높아 과적합 검토 필요 | After | - class metrics를 별도 저장 | - 시도별 MAE 차트를 생성 | - feature importance와 confusion matrix로 설명 | →
+NOTES: 모델링 트러블슈팅은 실패를 숨기는 게 아니라, 어떤 지표가 약했고 어떤 그림으로 검증했는지를 보여주는 부분입니다.
+
+=== SLIDE 41 ===
+TEXT: SCREEN TROUBLE | 40 | 화면 문제는 캡처 테스트와 커뮤니티 기능 검증으로 정리했습니다. | 레이아웃 문제와 기능 연결을 사진으로 남김 | Before | - 인트로 화면 레이아웃 문제 | - 커뮤니티 read 화면 이미지 표시 필요 | - Next 실행 환경과 빌드 옵션 차이 | After | - Playwright 캡처 저장 | - 작성/목록/상세 이미지 표시 검증 | - webpack 기준 로컬 검증 흐름 정리 | →
+NOTES: 여기서는 기존 캡처 이미지가 왜 남아 있는지 설명합니다. 완벽한 홍보 이미지가 아니라, 실제로 문제를 찾고 고친 근거입니다.
+
+=== SLIDE 42 ===
+TEXT: CHAPTER 06 | 41 | Tools / Evidence | 현재 쓰는 도구와 캡처 기록이 다음 단계의 기반입니다. | 현재 쓰는 도구와 캡처 기록이 다음 단계의 기반입니다.
+NOTES: 마무리 파트입니다. 현재 사용하는 도구와 남아 있는 증거를 보여주며 프로젝트가 계속 이어질 수 있음을 말합니다.
+
+=== SLIDE 43 ===
+TEXT: CURRENT TOOLS | 42 | 현재 사용하는 도구들은 개발, 데이터, 모델, 운영으로 나뉩니다. | 각 도구는 한 역할만 명확히 맡도록 정리 | Frontend | Next.js, React, Playwright, SDUI metadata | Backend | Spring Boot, FastAPI, PostgreSQL, Redis | AI/Data | PyTorch, TabNet, scikit-learn, BLIP-2, GPT-SoVITS | Ops | Docker Compose, TorchServe, MLflow, FFmpeg
+NOTES: 도구 나열은 짧게 갑니다. 중요한 건 도구를 많이 쓴 것이 아니라, 각 도구가 어떤 책임을 맡았는지입니다.
+
+=== SLIDE 44 ===
+TEXT: COMMUNITY CAPTURES | 43 | 기존 커뮤니티 캡처 이미지는 그대로 증거 슬라이드에 남겼습니다. | 목록, 작성, 상세, 수정, 빈 상태까지 기능 흐름 확인 | 기존 캡처 이미지를 원본 그대로 사용 | report/capture/community-*.png
+NOTES: 사용자가 요청한 대로 기존 커뮤니티 캡처 이미지를 삭제하지 않고 보존했습니다. 발표에서는 이 슬라이드를 빠르게 넘기며 기능 검증 아카이브라고 말하면 됩니다.
+
+=== SLIDE 45 ===
+TEXT: FRONT CAPTURES A | 44 | 초기 화면 캡처도 문제 해결 기록으로 유지했습니다. | 화면이 바뀐 과정과 테스트 흔적을 발표 자료 안에 보관 | 기존 캡처 이미지를 원본 그대로 사용 | report/capture/아침3_*.png
+NOTES: 한글 파일명 캡처도 최종 덱에 그대로 들어갑니다. 발표에서는 모든 캡처를 하나씩 설명하지 말고, 실제 화면 검증과 레이아웃 수정 기록이라고 말합니다.
+
+=== SLIDE 46 ===
+TEXT: FRONT CAPTURES B | 45 | 남은 화면 캡처도 반복 없이 한 번씩만 배치했습니다. | 대표 슬라이드에서 사용한 캡처는 제외하고, 나머지만 아카이브로 정리 | 기존 캡처 이미지를 원본 그대로 사용 | report/capture/아침3_*.png
+NOTES: 캡처 이미지는 겹치지 않게 배치했습니다. 앞 슬라이드에서 이미 사용한 대표 캡처는 이 아카이브에서 제외했고, 각 캡처가 한 번씩만 나오도록 구성했습니다.
+
+=== SLIDE 47 ===
+TEXT: DATASET EVIDENCE | 46 | 모델링 산출물은 차트와 표로 재현 가능하게 남겼습니다. | 보고서 내용은 슬라이드 노트에, 화면에는 핵심 증거 이미지만 배치 | TabNet learning curve | Consume v3 sido MAE | dataset_report/charts, figures
+NOTES: 이 슬라이드에서는 보고서가 단순 설명문이 아니라 실험 결과를 재현 가능하게 남긴 아카이브라고 말합니다.
+
+=== SLIDE 48 ===
+TEXT: FINAL | 47 | 최종 메시지는 기능보다 구조입니다. | K-Ride는 추천 결과를 보여주는 앱에서, 추천 근거와 AI 미디어까지 운영 가능한 시스템으로 확장됐습니다. | 기능의 개수가 아니라, 연결된 구조가 결과물입니다. | Data | 추천과 생성의 원천 | Model | 점수와 설명 산출 | Server | 비동기와 서빙 분리 | Screen | 사용자 경험으로 연결
+NOTES: 마지막에서는 모든 기능을 다시 요약하지 않습니다. 2개월 동안 만든 핵심은 개별 기능이 아니라 데이터, 모델, 서버, 화면, 배포를 연결한 구조였다고 마무리합니다.
+
+=== SLIDE 49 ===
+TEXT: PROJECT STACK | 48 | 프로젝트 기술 스택과 사용 툴을 마지막에 정리했습니다. | 기술은 서비스 레이어별로, 툴은 협업/실험/배포 흐름별로 나눠서 보면 됩니다. | PROJECT TECHNOLOGY | Frontend | Next.js, React, TypeScript, SDUI metadata, Playwright | Backend | Spring Boot, FastAPI, REST API, JWT/auth, Gradle | Data/DB | PostgreSQL, ChromaDB, Neo4j 후보, Redis, file/object storage | AI/ML | PyTorch, pytorch-tabnet, scikit-learn, WeatherLSTM, RandomForest | Media AI | BLIP-2, GPT-SoVITS, gTTS fallback, CogVideoX 후보, 3D Photo Inpainting, FFmpeg | Serving/Ops | Docker Compose, TorchServe, Celery worker, MLflow model/artifact tracking | TOOLS / WORKFLOW | Git / GitHub | 버전관리, 브랜치, 코드 변경 이력 관리 | DagsHub | 데이터/모델 실험 산출물과 MLflow 연동 후보 | MLflow | 모델 실험 run, metric, artifact 추적 | Docker Compose | 로컬 서비스 묶음 실행과 재현 가능한 개발 환경 | Playwright | 커뮤니티/SDUI 화면 테스트와 캡처 생성 | Jupyter / Colab | ipynb 기반 모델링 실험과 GPU 실험 | FFmpeg | 영상, TTS, BGM, 자막 합성 | Codex / VS Code | 코드 탐색, 수정, 발표자료 정리 보조
+NOTES: 마지막 장에서는 프로젝트 기술을 한 번에 정리합니다. Git/GitHub는 코드 버전관리, DagsHub와 MLflow는 데이터/모델 실험 관리, Docker Compose는 로컬 서비스 실행, Playwright는 화면 검증, TorchServe와 Celery는 모델 배포와 긴 작업 분리에 사용했다고 말하면 됩니다.
+
+=== SLIDE 50 ===
+TEXT: FINAL | 47 | 최종 메시지는 기능보다 구조입니다. | K-Ride는 추천 결과를 보여주는 앱에서, 추천 근거와 AI 미디어까지 운영 가능한 시스템으로 확장됐습니다. | 기능의 개수가 아니라, 연결된 구조가 결과물입니다. | Data | 추천과 생성의 원천 | Model | 점수와 설명 산출 | Server | 비동기와 서빙 분리 | Screen
+NOTES: 마지막에서는 모든 기능을 다시 요약하지 않습니다. 2개월 동안 만든 핵심은 개별 기능이 아니라 데이터, 모델, 서버, 화면, 배포를 연결한 구조였다고 마무리합니다.
+
+=== SLIDE 51 ===
+TEXT: MOTIVATION | 02 | 민예린 카카오톡  | myeliln12 | 010-4641-2537 | 작은 씨앗을 뿌려봅니다 | .
+NOTES: 동기는 세 가지로 말합니다. 첫째 기존 K-Ride는 경로와 추천 중심이었고, 둘째 사용자는 왜 이 장소가 추천되는지 알고 싶어하며, 셋째 생성형 AI를 붙이려면 모델을 호출하는 화면이 아니라 데이터와 비동기 운영 구조가 필요했습니다.
