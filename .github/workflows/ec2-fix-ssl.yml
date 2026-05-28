@@ -1,0 +1,152 @@
+name: EC2 Fix SSL (DuckDNS + Certbot)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix-ssl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Fix SSL on EC2
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }} << 'EOF'
+          set -e
+
+          echo "=== Step 1: Stop Docker nginx (free port 80 for certbot) ==="
+          docker stop sdui-nginx 2>/dev/null || true
+          sleep 2
+
+          echo ""
+          echo "=== Step 2: Stop host nginx if running ==="
+          sudo systemctl stop nginx 2>/dev/null || true
+          sleep 2
+
+          echo ""
+          echo "=== Step 3: Verify port 80 is free ==="
+          sudo lsof -i :80 2>/dev/null && echo "WARNING: port 80 still in use" || echo "Port 80 is free"
+
+          echo ""
+          echo "=== Step 4: Run certbot standalone to get SSL cert ==="
+          sudo certbot certonly \
+            --standalone \
+            --non-interactive \
+            --agree-tos \
+            --email admin@yerin.duckdns.org \
+            -d yerin.duckdns.org \
+            --force-renewal \
+            2>&1 || { echo "CERTBOT FAILED"; exit 1; }
+
+          echo ""
+          echo "=== Step 5: Verify certs created ==="
+          ls -la /etc/letsencrypt/live/yerin.duckdns.org/ || { echo "NO CERTS FOUND"; exit 1; }
+
+          echo ""
+          echo "=== Step 6: Check host nginx config ==="
+          cat /etc/nginx/sites-enabled/yerin.duckdns.org 2>/dev/null || echo "No existing config"
+
+          echo ""
+          echo "=== Step 7: Write host nginx config ==="
+          sudo tee /etc/nginx/sites-available/yerin.duckdns.org > /dev/null << 'NGINX_CONF'
+          # HTTP -> HTTPS redirect
+          server {
+              listen 80;
+              server_name yerin.duckdns.org;
+              return 301 https://$host$request_uri;
+          }
+
+          # HTTPS server
+          server {
+              listen 443 ssl;
+              server_name yerin.duckdns.org;
+
+              ssl_certificate /etc/letsencrypt/live/yerin.duckdns.org/fullchain.pem;
+              ssl_certificate_key /etc/letsencrypt/live/yerin.duckdns.org/privkey.pem;
+              include /etc/letsencrypt/options-ssl-nginx.conf;
+              ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+              # Frontend (Next.js via Docker)
+              location / {
+                  proxy_pass http://localhost:3000;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection "upgrade";
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+              }
+
+              # Spring Boot backend
+              location /api/ {
+                  proxy_pass http://localhost:8080;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+              }
+
+              # FastAPI proxy (GCP)
+              location /kride-api/ {
+                  proxy_pass http://34.64.221.240:8000/api/;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+              }
+          }
+          NGINX_CONF
+
+          sudo ln -sf /etc/nginx/sites-available/yerin.duckdns.org /etc/nginx/sites-enabled/yerin.duckdns.org
+          sudo rm -f /etc/nginx/sites-enabled/default
+
+          echo ""
+          echo "=== Step 8: Test nginx config ==="
+          sudo nginx -t || { echo "NGINX CONFIG INVALID"; exit 1; }
+
+          echo ""
+          echo "=== Step 9: Start host nginx ==="
+          sudo systemctl start nginx
+          sudo systemctl enable nginx
+          sleep 3
+
+          echo ""
+          echo "=== Step 10: Restart Docker containers (no Docker nginx needed) ==="
+          docker rm sdui-nginx 2>/dev/null || true
+          docker restart sdui-frontend sdui-backend sdui-redis 2>/dev/null || true
+          sleep 10
+
+          echo ""
+          echo "=== Verification ==="
+          echo "--- Host nginx status ---"
+          sudo systemctl status nginx --no-pager | head -5
+
+          echo ""
+          echo "--- Port 80 ---"
+          sudo lsof -i :80 2>/dev/null | head -5 || echo "Nothing on port 80"
+
+          echo ""
+          echo "--- Port 443 ---"
+          sudo lsof -i :443 2>/dev/null | head -5 || echo "Nothing on port 443"
+
+          echo ""
+          echo "--- Docker containers ---"
+          docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+          echo ""
+          echo "--- Curl tests ---"
+          curl -sS -o /dev/null -w "Frontend (3000 direct): HTTP %{http_code}\n" http://localhost:3000/ 2>&1 || echo "Frontend unreachable"
+          curl -sS -o /dev/null -w "Backend (8080 direct): HTTP %{http_code}\n" http://localhost:8080/api/ui/MAIN_PAGE 2>&1 || echo "Backend unreachable"
+          curl -sS -o /dev/null -w "Host Nginx HTTP (80): HTTP %{http_code}\n" http://localhost:80/ 2>&1 || echo "Nginx HTTP unreachable"
+          curl -sSk -o /dev/null -w "Host Nginx HTTPS (443): HTTP %{http_code}\n" https://localhost:443/ 2>&1 || echo "Nginx HTTPS unreachable"
+
+          echo ""
+          echo "=== SSL Fix Complete ==="
+          echo "Test: https://yerin.duckdns.org"
+          EOF
