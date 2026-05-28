@@ -56,7 +56,10 @@ jobs:
               --restart unless-stopped \
               ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
 
-            # Restart Host Nginx (ensures SSL proxy works)
+            # Remove Docker Nginx if exists (conflicts with Host Nginx on port 80)
+            docker rm -f sdui-nginx 2>/dev/null || true
+            sleep 2
+            # Restart Host Nginx (SSL termination on 80+443)
             sudo systemctl restart nginx || true
 
             # Wait for startup

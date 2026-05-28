@@ -117,30 +117,18 @@ jobs:
               --restart unless-stopped \
               ${{ secrets.DOCKER_USERNAME }}/sdui-app:latest
 
-            # ── 3. Restart Host Nginx (SSL termination) ──
+            # ── 3. Remove Docker Nginx (conflicts with Host Nginx on port 80) ──
             echo ""
-            echo "=== Checking Nginx config ==="
-            sudo nginx -t 2>&1 || true
+            echo "=== Removing Docker Nginx (port 80 conflict) ==="
+            docker rm -f sdui-nginx 2>/dev/null || true
+            sleep 2
 
+            # ── 4. Start Host Nginx (SSL termination on 80+443) ──
             echo ""
-            echo "=== Checking port conflicts ==="
-            sudo lsof -i :80 2>/dev/null | head -5 || echo "Port 80 free"
-            sudo lsof -i :443 2>/dev/null | head -5 || echo "Port 443 free"
-
-            echo ""
-            echo "=== Checking nginx config files ==="
-            ls -la /etc/nginx/sites-enabled/ 2>/dev/null || true
-            ls -la /etc/letsencrypt/options-ssl-nginx.conf 2>/dev/null || echo "options-ssl-nginx.conf MISSING"
-            ls -la /etc/letsencrypt/ssl-dhparams.pem 2>/dev/null || echo "ssl-dhparams.pem MISSING"
-
-            echo ""
-            echo "=== Nginx error log ==="
-            sudo journalctl -xeu nginx.service --no-pager | tail -20 || true
-
-            echo ""
-            echo "=== Starting Nginx ==="
-            sudo systemctl start nginx 2>&1 || true
-            sudo systemctl status nginx --no-pager | head -5 || true
+            echo "=== Starting Host Nginx ==="
+            sudo nginx -t 2>&1
+            sudo systemctl start nginx
+            sudo systemctl status nginx --no-pager | head -5
 
             # ── 4. Wait and verify ──
             echo ""
