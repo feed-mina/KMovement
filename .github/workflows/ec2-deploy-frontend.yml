@@ -56,6 +56,9 @@ jobs:
               --restart unless-stopped \
               ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
 
+            # Restart Host Nginx (ensures SSL proxy works)
+            sudo systemctl restart nginx || true
+
             # Wait for startup
             echo "Waiting for frontend to start..."
             sleep 15

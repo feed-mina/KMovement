@@ -117,7 +117,13 @@ jobs:
               --restart unless-stopped \
               ${{ secrets.DOCKER_USERNAME }}/sdui-app:latest
 
-            # ── 3. Wait and verify ──
+            # ── 3. Restart Host Nginx (SSL termination) ──
+            echo ""
+            echo "=== Restarting Host Nginx ==="
+            sudo systemctl restart nginx
+            sudo systemctl status nginx --no-pager | head -3
+
+            # ── 4. Wait and verify ──
             echo ""
             echo "Waiting for services to start (40s)..."
             sleep 40
