@@ -1,0 +1,49 @@
+name: EC2 Apply DB Migration
+
+on:
+  workflow_dispatch:
+
+jobs:
+  apply-sql:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Apply V53 migration
+        run: |
+          cat subproject/SDUI/SDUI-server/src/main/resources/db/migration/V53__kride_intro_focus_screens.sql | \
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }} \
+            'docker exec -i sdui-db psql -U ${{ secrets.DB_USERNAME }} -d SDUI_TD'
+
+      - name: Verify and flush cache
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_KEY }}
+          script: |
+            echo "=== Flushing Redis cache ==="
+            docker exec sdui-redis redis-cli FLUSHDB
+
+            echo ""
+            echo "=== Verifying KRIDE screens ==="
+            for screen in KRIDE_INTRO1 KRIDE_INTRO2 KRIDE_INTRO3 KRIDE_INTRO4 KRIDE_INTRO5 KRIDE_FOCUS; do
+              count=$(docker exec sdui-db psql -U ${{ secrets.DB_USERNAME }} -d SDUI_TD -t -c "SELECT COUNT(*) FROM ui_metadata WHERE screen_id = '$screen';")
+              echo "$screen: $count components"
+            done
+
+            echo ""
+            echo "=== Verifying query_master ==="
+            docker exec sdui-db psql -U ${{ secrets.DB_USERNAME }} -d SDUI_TD -t -c "SELECT sql_key FROM query_master WHERE sql_key LIKE 'kride_%';"
+
+            echo ""
+            echo "=== API test ==="
+            curl -sS http://localhost:8080/api/ui/KRIDE_INTRO1 2>&1 | head -100
