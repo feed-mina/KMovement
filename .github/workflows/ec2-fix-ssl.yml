@@ -45,7 +45,7 @@ jobs:
 
           echo ""
           echo "=== Step 5: Verify certs created ==="
-          ls -la /etc/letsencrypt/live/yerin.duckdns.org/ || { echo "NO CERTS FOUND"; exit 1; }
+          sudo ls -la /etc/letsencrypt/live/yerin.duckdns.org/ || { echo "NO CERTS FOUND"; exit 1; }
 
           echo ""
           echo "=== Step 6: Check host nginx config ==="
