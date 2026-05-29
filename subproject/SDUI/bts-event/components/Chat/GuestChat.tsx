@@ -20,9 +20,9 @@ import { getGuestChatCount, incrementGuestChatCount, hasGuestChatRemaining } fro
 import { guestChat } from "@/lib/api";
 
 const SDUI_URLS = {
-  en: "https://sdui-delta.vercel.app/view/AI_ENGLISH_CHAT_PAGE",
-  ja: "https://sdui-delta.vercel.app/view/AI_JAPANESE_CHAT_PAGE",
-  ko: "https://sdui-delta.vercel.app/view/AI_KOREAN_CHAT_PAGE",
+  en: "https://yerin.duckdns.org/view/AI_ENGLISH_CHAT_PAGE",
+  ja: "https://yerin.duckdns.org/view/AI_JAPANESE_CHAT_PAGE",
+  ko: "https://yerin.duckdns.org/view/AI_KOREAN_CHAT_PAGE",
 };
 
 interface Message {

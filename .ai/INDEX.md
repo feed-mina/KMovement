@@ -108,11 +108,18 @@
 | `app.py` | Read-only FastAPI (미디어 에셋 서빙, /manifest.json, /media/{id}) |
 | `Dockerfile` | python:3.11-slim, 포트 7860 |
 
+### 커뮤니티 ↔ 모델 연동 + TorchServe (2026-05-29)
+| 파일 | 내용 |
+|------|------|
+| [0529_TorchServer&community.md](0529_TorchServer&community.md) | 커뮤니티 스케치→애니메이션 연동 + TorchServe GPU 배포 계획 |
+| [research.md](research.md) | 메모 조사 결과 (CPU fallback, user-animation 조인 등) |
+
 ### 테스트 & 리뷰 결과
 | 파일 | 내용 | 줄수 |
 |------|------|------|
 | [test_results_community_chatbot.md](test_results_community_chatbot.md) | 커뮤니티 + 챗봇 통합 테스트 결과 (Spring Boot 19 + Jest 9 + pytest 9 = 37 ALL PASSED) | 272 |
 | [code_review_0527.md](code_review_0527.md) | 프론트+백엔드+AI 모델 전체 코드 리뷰 — K1~K6, F1~F7, B1~B7 **[전체 수정 완료 2026-05-29]** | — |
+| [issues_0529.md](issues_0529.md) | 미해결 이슈 — 구글 캘린더 OAuth + BTS 광화문 점검 (G1~G6) | — |
 
 ### 환경/설정 문서
 | 파일 | 내용 | 줄수 |

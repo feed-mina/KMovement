@@ -73,7 +73,7 @@ docker stats --no-stream | grep sdui
 - **AWS EC2 Public IP**: 43.201.237.68
 - **프로덕션 백엔드**: http://43.201.237.68:8080
 - **테스트 백엔드**: http://43.201.237.68:8081
-- **프론트엔드 (Vercel)**: https://sdui-delta.vercel.app
+- **프론트엔드 (Vercel)**: https://yerin.duckdns.org
 
 ### 포트 매핑
 

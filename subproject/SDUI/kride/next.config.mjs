@@ -20,7 +20,13 @@ const nextConfig = {
   async rewrites() {
     const apiBase =
       process.env.NEXT_PUBLIC_SDUI_API_BASE || "http://localhost:8080";
+    const krideApiBase =
+      process.env.NEXT_PUBLIC_KRIDE_API_BASE || "http://localhost:8000";
     return [
+      {
+        source: "/kride-api/:path*",
+        destination: `${krideApiBase}/api/:path*`,
+      },
       {
         source: "/api/:path*",
         destination: `${apiBase}/api/:path*`,

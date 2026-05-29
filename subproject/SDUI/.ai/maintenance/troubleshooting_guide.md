@@ -786,7 +786,7 @@ curl http://43.201.237.68:8081/api/content/list \
 @Override
 public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/api/**")
-            .allowedOrigins("http://localhost:3000", "https://sdui-delta.vercel.app")
+            .allowedOrigins("http://localhost:3000", "https://yerin.duckdns.org")
             .allowedMethods("GET", "POST", "PUT", "DELETE")
             .allowCredentials(true);
 }
@@ -1052,7 +1052,7 @@ docker network inspect sdui-network | grep -A 10 sdui-redis
 **증상**:
 ```
 Access to fetch at 'http://43.201.237.68:8081/api/content/list'
-from origin 'https://sdui-delta.vercel.app' has been blocked by CORS policy
+from origin 'https://yerin.duckdns.org' has been blocked by CORS policy
 ```
 
 **원인**:
@@ -1069,7 +1069,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**")
                 .allowedOrigins(
                     "http://localhost:3000",
-                    "https://sdui-delta.vercel.app"
+                    "https://yerin.duckdns.org"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")

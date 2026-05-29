@@ -192,7 +192,7 @@ InterviewService.finishSession()
 ResumeService.analyzeResume()
     └─ FastAPI 분석 완료 (비동기)
            └─ Slack: "📄 이력서 분석 완료! 예상 질문 30개 준비됨 → [면접 시작]"
-                     링크: https://sdui-delta.vercel.app/view/INTERVIEW_PAGE
+                     링크: https://yerin.duckdns.org/view/INTERVIEW_PAGE
 ```
 
 #### 면접 D-1 리마인더

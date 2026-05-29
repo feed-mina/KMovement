@@ -74,8 +74,8 @@
        - KRIDE FastAPI: http://localhost:8000 (comments indicate this is separate)
 
        Web URLs:
-       - Web: http://localhost:3000 (dev) → https://sdui-delta.vercel.app (prod)
-       - Mobile: http://sdui-delta.vercel.app:// (dev)
+       - Web: http://localhost:3000 (dev) → https://yerin.duckdns.org (prod)
+       - Mobile: http://yerin.duckdns.org:// (dev)
 
        Docker Deployment
 

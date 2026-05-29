@@ -627,15 +627,15 @@ private static final List<String> EXCLUDE_URLS = List.of(
 - **2차 현상(2026-03-07 발견):** 배포 후 카카오 로그인 시 로그인이 안되고 바로 메인페이지로 이동.
 - **2차 원인 (쿠키 도메인 불일치):**
   - `KAKAO_REDIRECT_URI`가 백엔드 직접 URL(`yerin.duckdns.org/api/kakao/callback`)로 설정되어 있었음.
-  - 카카오가 브라우저를 `yerin.duckdns.org`로 직접 리다이렉트 → 백엔드가 쿠키를 `yerin.duckdns.org` 도메인에 설정 후 Vercel(sdui-delta.vercel.app)로 302.
+  - 카카오가 브라우저를 `yerin.duckdns.org`로 직접 리다이렉트 → 백엔드가 쿠키를 `yerin.duckdns.org` 도메인에 설정 후 Vercel(yerin.duckdns.org)로 302.
   - 브라우저가 Vercel에 도착하면 `yerin.duckdns.org` 도메인 쿠키는 전송되지 않음 → `accessToken` 없음 → 로그인 안된 상태로 메인페이지 표시.
   - `WEB_URL`도 deploy.yml에 미주입, `http://` 기본값 사용.
 - **2차 해결:**
-  - `deploy.yml`: `KAKAO_REDIRECT_URI=https://sdui-delta.vercel.app/api/kakao/callback` (비밀이 아니므로 하드코딩), `WEB_URL=https://sdui-delta.vercel.app` 추가.
+  - `deploy.yml`: `KAKAO_REDIRECT_URI=https://yerin.duckdns.org/api/kakao/callback` (비밀이 아니므로 하드코딩), `WEB_URL=https://yerin.duckdns.org` 추가.
   - `application-prod.yml`: WEB_URL 기본값을 `https://`로 수정.
   - `V11__fix_kakao_redirect_uri.sql`: DB `ui_metadata`의 카카오 버튼 `action_url`도 새 redirect_uri로 업데이트.
-  - **사용자가 수동으로 해야 할 일**: 카카오 개발자 콘솔에서 `https://sdui-delta.vercel.app/api/kakao/callback`을 Redirect URI로 등록.
-- **동작 원리:** `sdui-delta.vercel.app/api/kakao/callback` → Next.js rewrite → `yerin.duckdns.org/api/kakao/callback` → 백엔드 처리 후 302+Set-Cookie → Next.js가 응답 전달 → 쿠키가 `sdui-delta.vercel.app` 도메인에 설정됨 ✓
+  - **사용자가 수동으로 해야 할 일**: 카카오 개발자 콘솔에서 `https://yerin.duckdns.org/api/kakao/callback`을 Redirect URI로 등록.
+- **동작 원리:** `yerin.duckdns.org/api/kakao/callback` → Next.js rewrite → `yerin.duckdns.org/api/kakao/callback` → 백엔드 처리 후 302+Set-Cookie → Next.js가 응답 전달 → 쿠키가 `yerin.duckdns.org` 도메인에 설정됨 ✓
 
 #### 2. 배포 후 데이터 불일치 미스터리 (진행 중)
 
@@ -760,7 +760,7 @@ public Collection<? extends GrantedAuthority> getAuthorities() {
 | 2026-03-08 | 순서 4~5 완료 — V16/V17 Flyway 마이그레이션 작성 | V16: `find_users_for_admin` query_master 등록 + `GET_ADMIN_STATS` required_role 누락 수정. V17: `USER_LIST` 스크린 ui_metadata 등록 — `user_list_page`(GROUP), `user_list_header`(GROUP), `user_list_title`(TEXT), `user_list_back_btn`(BUTTON/LINK→MAIN_PAGE), `user_list_table`(ADMIN_USER_TABLE). |
 | 2026-03-08 | 순서 6 완료 — Frontend ADMIN_USER_TABLE 컴포넌트 구현 | `useAdminUsers.ts` 훅(검색 query state, 체크박스 max-5, PUT 권한변경), `AdminUserTable.tsx`(기존 Pagination 재사용, 행 클릭 체크박스), `componentMap.tsx`(ADMIN_USER_TABLE 등록), `pages.css`(admin page CSS 추가). |
 | 2026-03-10 | main 브랜치 AWS 배포 — 연속 5가지 오류 수정 | (1) nginx proxy 8081→8080 수정 (`/etc/nginx/sites-enabled/yerin.duckdns.org`). (2) `global.error.GlobalExceptionHandler` 삭제 — `global.exception.GlobalExceptionHandler`와 bean 이름 충돌(`ConflictingBeanDefinitionException`). (3) Flyway V1 checksum 불일치 수정 — SDUI_TD에 SDUI_LAB 값(-559520453)이 들어가 있어 main 브랜치 실제 값(-1381310958)으로 UPDATE. (4) V3 마이그레이션 `SELECT setval(...)` → `PERFORM setval(...)` — PL/pgSQL DO 블록 내에서 SELECT는 목적지 없어 오류. (5) `domain/diary/` 패키지 전체 삭제 — V7이 diary 테이블 드롭했지만 Diary.java @Entity 잔존 → `Hibernate validate: missing table [diary]`. diary→content 마이그레이션 플랜(`.ai/architect/diary_to_content_migration_plan.md`) Step 5 미완이었음. `domain/content`가 이미 완전히 구현되어 있으므로 diary 패키지 삭제. |
-| 2026-03-10 | ADDITIONAL_INFO_PAGE `data:[]` 문제 분석 및 V19 마이그레이션 작성 | Vercel(`sdui-delta.vercel.app`) 접속 시 `/api/ui/ADDITIONAL_INFO_PAGE` → `data:[]` 반환. Flyway V1~V18 중 어느 파일에도 ADDITIONAL_INFO_PAGE 메타데이터 INSERT 없음(V1은 MAIN_SECTION 1건만). `backup_aws_data.sql`에 해당 화면 데이터(ui_id 1036~1039) 존재하나 SDUI_TD에 미적용 상태. V19__add_additional_info_page.sql 작성: HEADER_TEXT(TEXT), PHONE_INPUT(INPUT/ref_data_id=phone), ADDRESS_GROUP(ADDRESS_SEARCH_GROUP), SUBMIT_BTN(BUTTON/SUBMIT_ADDITIONAL_INFO) — WHERE NOT EXISTS 중복 방지. 커밋 대기 중. |
+| 2026-03-10 | ADDITIONAL_INFO_PAGE `data:[]` 문제 분석 및 V19 마이그레이션 작성 | Vercel(`yerin.duckdns.org`) 접속 시 `/api/ui/ADDITIONAL_INFO_PAGE` → `data:[]` 반환. Flyway V1~V18 중 어느 파일에도 ADDITIONAL_INFO_PAGE 메타데이터 INSERT 없음(V1은 MAIN_SECTION 1건만). `backup_aws_data.sql`에 해당 화면 데이터(ui_id 1036~1039) 존재하나 SDUI_TD에 미적용 상태. V19__add_additional_info_page.sql 작성: HEADER_TEXT(TEXT), PHONE_INPUT(INPUT/ref_data_id=phone), ADDRESS_GROUP(ADDRESS_SEARCH_GROUP), SUBMIT_BTN(BUTTON/SUBMIT_ADDITIONAL_INFO) — WHERE NOT EXISTS 중복 방지. 커밋 대기 중. |
 | 2026-03-17 | V23~V26 Flyway squash 완료 + AI 영어 채팅 멤버십 연동 구현 | (1) V23~V40 → V23~V26 squash 마이그레이션 완료. (2) Docker DB V22 PK 충돌 수정: `V22__seed_ui_metadata.sql`에 `SELECT setval(pg_get_serial_sequence('ui_metadata','ui_id'), COALESCE((SELECT MAX(ui_id) FROM ui_metadata),0))` 추가. (3) V26(`interview_resume` 테이블) 끝에 AI 영어 채팅 전환 4개 UPDATE 통합(V27 삭제). (4) `MembershipRepository.findByName(String)` 추가. (5) `UserMembershipService.grantByMembershipName(Long,String,String)` 추가 — 기존 `grant(UserMembershipRequest)` 대신 직접 엔티티 빌더 사용(Request DTO에 setter/builder 없음). (6) `AuthController` SUBMIT_ADDITIONAL_INFO 처리 후 `grantByMembershipName(user.getUserSqno(),"프리미엄","register")` 호출 추가 — 신규 가입자 전원 프리미엄 자동 부여. (7) `application.yml`에 `cloud.gcp.document-ai.*`, `cloud.aws.*`, `fastapi.*` 기본값 추가 — no-profile bootRun(Docker DB 테스트) 시 Bean 초기화 실패 방지. |
 | 2026-03-17 | FastAPI 서버 Docker 배포 설정 추가 → 비활성화 | (1) `pronounce-api/Dockerfile` 생성 — python:3.11-slim + default-jdk-headless(konlpy/JPype용). (2) `docker-compose.yml`·`deploy.yml`에 sdui-fastapi 서비스/배포 추가. **→ 현재 비활성화**: Spring Boot가 FastAPI 대신 OpenAI GPT를 직접 호출하고 있어 주석 처리. 재활성화 조건: AI 면접관 이력서 분석 기능 구현 시 — docker-compose.yml의 `sdui-fastapi` 서비스, `depends_on`, `FASTAPI_URL` 주석 해제 + deploy.yml 빌드 step의 `if: false` 제거 + EC2 스크립트 주석 해제. |
 | 2026-03-17 | 카카오톡 약속 알림 기능 구현 (V27 마이그레이션) | SET_TIME_PAGE 약속 시간 저장 시 3시간/1.5시간/30분 전 카카오톡 자동 알림 3회 발송 기능 구현. 상세 사양은 아래 섹션 참조. |
@@ -1142,7 +1142,7 @@ CREATE INDEX idx_leetcode_unsent ON leetcode_problems (display_order)
     ├─ DB: interview_questions WHERE sent_date IS NULL ORDER BY RANDOM() LIMIT 1
     └─ Slack: 🎯 오늘의 면접 질문 [카테고리]
                 'question text'
-                → 바로 연습하기: https://sdui-delta.vercel.app/view/INTERVIEW_PAGE
+                → 바로 연습하기: https://yerin.duckdns.org/view/INTERVIEW_PAGE
 ```
 
 > LeetCode(09:00)와 시간을 10분 다르게 하여 Slack 메시지 타이밍 분리
@@ -1234,7 +1234,7 @@ CREATE TABLE interview_questions (
 📋 내일 면접이 있습니다! 파이팅!
 📅 날짜: 3월 21일 (토)
 🏢 회사: 카카오
-→ 면접 연습하기: https://sdui-delta.vercel.app/view/INTERVIEW_PAGE
+→ 면접 연습하기: https://yerin.duckdns.org/view/INTERVIEW_PAGE
 ```
 
 ### 아키텍처 결정

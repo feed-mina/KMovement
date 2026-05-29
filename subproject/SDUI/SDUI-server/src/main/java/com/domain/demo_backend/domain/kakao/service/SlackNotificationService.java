@@ -139,7 +139,7 @@ public class SlackNotificationService {
                 "type", "section",
                 "text", Map.of("type", "mrkdwn", "text", "<@" + targetUserId + "> 님, 답변해 보세요!\n" +
                         "*[" + question.getCategory() + "]* " + question.getQuestion() + "\n"
-                        + "<https://sdui-delta.vercel.app/view/INTERVIEW_PAGE|바로 연습하기>")));
+                        + "<https://yerin.duckdns.org/view/INTERVIEW_PAGE|바로 연습하기>")));
 
         postBlocks(blocks, "questionId=" + question.getId());
     }
@@ -173,7 +173,7 @@ public class SlackNotificationService {
                 "type", "context",
                 "elements", List.of(
                         Map.of("type", "mrkdwn", "text",
-                                "<https://sdui-delta.vercel.app/view/INTERVIEW_PAGE|면접 연습하기>"))));
+                                "<https://yerin.duckdns.org/view/INTERVIEW_PAGE|면접 연습하기>"))));
 
         postBlocks(blocks, "scheduleId=" + schedule.getId());
     }

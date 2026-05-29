@@ -136,7 +136,7 @@ SDUI/
 ```
 
 - localStorage 키: `bts_guest_chat_count` (최대 5) (완료 ✅)
-- 5회 소진 시 `sdui-delta.vercel.app` 로그인 페이지로 리다이렉트 (완료 ✅)
+- 5회 소진 시 `yerin.duckdns.org` 로그인 페이지로 리다이렉트 (완료 ✅)
 - 언어별 시스템 프롬프트 분기 (en/ja) (완료 ✅)
 
 **BTS 이벤트 특화 프롬프트 (영어):**

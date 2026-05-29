@@ -71,9 +71,9 @@ Kakao → redirect_uri: yerin.duckdns.org/api/kakao/callback  (백엔드 직접)
     ↓
 Spring Boot가 쿠키를 yerin.duckdns.org 도메인에 Set-Cookie
     ↓
-Spring Boot가 sdui-delta.vercel.app으로 302 리다이렉트
+Spring Boot가 yerin.duckdns.org으로 302 리다이렉트
     ↓
-브라우저가 Vercel(sdui-delta.vercel.app)에 도착
+브라우저가 Vercel(yerin.duckdns.org)에 도착
     → yerin.duckdns.org 쿠키는 전송 안 됨 (다른 도메인)
     → accessToken 없음 → 로그인 안된 상태
 ```
@@ -91,8 +91,8 @@ Spring Boot가 sdui-delta.vercel.app으로 302 리다이렉트
 -e KAKAO_REDIRECT_URI=https://yerin.duckdns.org/api/kakao/callback
 
 # 변경 후
--e KAKAO_REDIRECT_URI=https://sdui-delta.vercel.app/api/kakao/callback
--e WEB_URL=https://sdui-delta.vercel.app
+-e KAKAO_REDIRECT_URI=https://yerin.duckdns.org/api/kakao/callback
+-e WEB_URL=https://yerin.duckdns.org
 ```
 
 **파일:** `SDUI-server/src/main/resources/application-prod.yml`
@@ -102,7 +102,7 @@ kakao:
 
 app:
   url:
-    web: ${WEB_URL:https://sdui-delta.vercel.app}
+    web: ${WEB_URL:https://yerin.duckdns.org}
 ```
 
 #### 2-2. DB의 카카오 버튼 `action_url`도 동기화 (V11 마이그레이션)
@@ -113,7 +113,7 @@ UPDATE ui_metadata
 SET action_url = REGEXP_REPLACE(
     action_url,
     'redirect_uri=[^&]+',
-    'redirect_uri=https://sdui-delta.vercel.app/api/kakao/callback'
+    'redirect_uri=https://yerin.duckdns.org/api/kakao/callback'
 )
 WHERE action_url LIKE '%kauth.kakao.com%'
   AND action_url LIKE '%redirect_uri=%';
@@ -123,18 +123,18 @@ WHERE action_url LIKE '%kauth.kakao.com%'
 
 [카카오 개발자 콘솔](https://developers.kakao.com) → 내 애플리케이션 → 카카오 로그인 → Redirect URI에 추가:
 ```
-https://sdui-delta.vercel.app/api/kakao/callback
+https://yerin.duckdns.org/api/kakao/callback
 ```
 
 **동작 원리 (수정 후):**
 ```
-Kakao → redirect_uri: sdui-delta.vercel.app/api/kakao/callback  (Vercel)
+Kakao → redirect_uri: yerin.duckdns.org/api/kakao/callback  (Vercel)
     ↓
 Next.js /api/kakao/callback (route.ts)가 백엔드로 프록시
     ↓
 Spring Boot가 Set-Cookie 응답 → Next.js가 이를 브라우저로 전달
     ↓
-브라우저에 sdui-delta.vercel.app 도메인으로 쿠키 설정됨 ✓
+브라우저에 yerin.duckdns.org 도메인으로 쿠키 설정됨 ✓
 ```
 
 ---
@@ -154,11 +154,11 @@ Spring Boot가 Set-Cookie 응답 → Next.js가 이를 브라우저로 전달
 [문제 흐름]
 Next.js route.ts → fetch(`백엔드/api/kakao/callback?code=...`)
     ↓
-백엔드: state 없음 → "web" 분기 → 302 리다이렉트 to WEB_URL (sdui-delta.vercel.app)
+백엔드: state 없음 → "web" 분기 → 302 리다이렉트 to WEB_URL (yerin.duckdns.org)
     ↓
 fetch()가 302를 자동으로 따라감 (기본 동작)
     ↓
-sdui-delta.vercel.app에서 HTML 페이지 응답
+yerin.duckdns.org에서 HTML 페이지 응답
     ↓
 route.ts: responseText = <HTML>...</HTML>
     ↓

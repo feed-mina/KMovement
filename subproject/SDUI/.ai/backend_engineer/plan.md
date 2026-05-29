@@ -290,7 +290,7 @@ public void handleEmergency(LocationRequest message, Principal principal) {
 // 변경 후:
 .setAllowedOriginPatterns(
     "http://localhost:3000",
-    "https://sdui-delta.vercel.app"   // 실제 프로덕션 도메인으로 교체
+    "https://yerin.duckdns.org"   // 실제 프로덕션 도메인으로 교체
 )
 ```
 

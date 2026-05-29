@@ -41,7 +41,7 @@ afterEach(() => {
 describe("LatestPage 통합 테스트", () => {
   it("FastAPI /api/regions 응답 → 지역 이름 렌더링", async () => {
     global.fetch = jest.fn((url: string) => {
-      if (url.includes("/api/regions")) {
+      if (url.includes("/kride-api/regions")) {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({
@@ -85,7 +85,7 @@ describe("LatestPage 통합 테스트", () => {
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        expect.stringContaining(`${FASTAPI_BASE}/api/regions`)
+        expect.stringContaining(`/kride-api/regions`)
       );
     });
   });

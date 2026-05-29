@@ -262,7 +262,7 @@ case 'GOOGLE_CALENDAR_CONNECT': {
 - [ ] OAuth 2.0 클라이언트 생성 (웹 애플리케이션 타입)
 - [ ] 승인된 리다이렉트 URI 등록:
   - `http://localhost:3000/view/GOOGLE_CALLBACK` (로컬)
-  - `https://sdui-delta.vercel.app/view/GOOGLE_CALLBACK` (프로덕션)
+  - `https://yerin.duckdns.org/view/GOOGLE_CALLBACK` (프로덕션)
 - [ ] OAuth 동의 화면 설정 (테스트 계정 추가)
 
 ---

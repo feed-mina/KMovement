@@ -42,7 +42,7 @@ afterEach(() => {
 describe("MoviesPage 통합 테스트", () => {
   it("FastAPI /api/artists 응답 → 아티스트 이름 렌더링", async () => {
     global.fetch = jest.fn((url: string) => {
-      if (url.includes("/api/artists")) {
+      if (url.includes("/kride-api/artists")) {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({
@@ -86,7 +86,7 @@ describe("MoviesPage 통합 테스트", () => {
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        expect.stringContaining(`${FASTAPI_BASE}/api/artists`)
+        expect.stringContaining(`/kride-api/artists`)
       );
     });
   });

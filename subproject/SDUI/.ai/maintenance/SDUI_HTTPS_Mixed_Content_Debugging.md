@@ -22,7 +22,7 @@
     - [X] Nginx 설치/설정 및 `8081` 백엔드 프록시 매핑 완료
     - [X] Certbot(Let's Encrypt)으로 무료 HTTPS 인증서 발급 완료 (`https://yerin.duckdns.org`)
 - [X] AWS 데이터베이스 직접 검증 및 [backup.sql](file:///c:/Users/Samsung/Documents/Personal/Resume/2026/job_antigravity/SDUI/backup.sql) 현행화 완료
-    - AWS `ui_metadata` 테이블 내 카카오 `action_url`이 최신 운영 URL(`https://sdui-delta.vercel.app`)로 정상 반영되어 있음을 쿼리로 확인 (추가 DB 업데이트 불필요)
+    - AWS `ui_metadata` 테이블 내 카카오 `action_url`이 최신 운영 URL(`https://yerin.duckdns.org`)로 정상 반영되어 있음을 쿼리로 확인 (추가 DB 업데이트 불필요)
     - `backup_new.sql` 최신 스냅샷 우분투에서 생성 후, 로컬 윈도우 환경으로 다운로드(`scp`) 완료
 - [X] Vercel 프론트엔드([next.config.ts](file:///c:/Users/Samsung/Documents/Personal/Resume/2026/job_antigravity/SDUI/metadata-project/next.config.ts) 및 환경변수)를 새 HTTPS 백엔드 주소로 변경하여 재배포 완료
     - 로컬 코드 변경(HTTPS 도메인 반영) 및 신규 [backup.sql](file:///c:/Users/Samsung/Documents/Personal/Resume/2026/job_antigravity/SDUI/backup.sql) 병합

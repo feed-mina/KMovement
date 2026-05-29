@@ -229,7 +229,7 @@ curl http://43.201.237.68:8080/api/content/list
 curl http://43.201.237.68:8080/api/ui/CONTENT_LIST
 
 # 프론트엔드에서 테스트
-# - http://sdui-delta.vercel.app/view/CONTENT_LIST
+# - http://yerin.duckdns.org/view/CONTENT_LIST
 # - 콘텐츠 작성/수정/삭제 테스트
 ```
 

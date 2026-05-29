@@ -23,7 +23,7 @@ import { useOnboardingStore } from "@/store/onboarding-store";
 export default function LatestPage() {
   const { data } = useQuery({
   queryKey: ['regions'],
-  queryFn: () => fetch(`${process.env.NEXT_PUBLIC_KRIDE_API_BASE}/api/regions`)
+  queryFn: () => fetch(`/kride-api/regions`)
                    .then(r => r.json()),
   staleTime: 1000 * 60 * 60,
 });

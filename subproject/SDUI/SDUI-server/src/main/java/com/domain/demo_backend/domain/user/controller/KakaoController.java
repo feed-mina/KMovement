@@ -267,7 +267,7 @@ public class KakaoController {
         Integer pomodoroCount = (Integer) data.getOrDefault("pomodoroCount", 0);
         Integer pomodoroTotalTime = (Integer) data.getOrDefault("pomodoroTotalTime", 0);
 
-        String recordUrl = (String) data.getOrDefault("recordUrl", "https://sdui-delta.vercel.app");
+        String recordUrl = (String) data.getOrDefault("recordUrl", "https://yerin.duckdns.org");
         log.info("KAKAOCONTROLLER- stopwatchTime: {}초, pomodoroCount: {}회, pomodoroTotalTime: {}분",
                 stopwatchTime, pomodoroCount, pomodoroTotalTime);
         log.info("KAKAOCONTROLLER- recordUrl: {}", recordUrl);

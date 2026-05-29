@@ -109,12 +109,12 @@ ubuntu@ip-172-31-13-22:~$ docker exec -it sdui-db psql -U mina -d SDUI_TD -c "\d
 ubuntu@ip-172-31-13-22:~$ ^C
 ubuntu@ip-172-31-13-22:~$ docker inspect sdui-backend-lab | grep -A 20 '"Env"'
             "Env": [
-                "WEB_URL=https://sdui-delta.vercel.app",
+                "WEB_URL=https://yerin.duckdns.org",
                 "SPRING_PROFILES_ACTIVE=prod",
                 "SPRING_DATASOURCE_URL=jdbc:postgresql://sdui-db:5432/SDUI_LAB",
                 "SPRING_MAIL_PASSWORD=xbfkdgfxevqytije",
                 "JWT_SECRET_KEY=d6ac9ecc0a3aa3c395313fb236e0ec10d71ab78fb36f54ba626664eba0b842b1",
-                "KAKAO_REDIRECT_URI=https://sdui-delta.vercel.app/api/kakao/callback",
+                "KAKAO_REDIRECT_URI=https://yerin.duckdns.org/api/kakao/callback",
                 "SPRING_DATASOURCE_USERNAME=mina",
                 "SPRING_DATASOURCE_PASSWORD=password",
                 "SPRING_DATA_REDIS_HOST=sdui-redis",

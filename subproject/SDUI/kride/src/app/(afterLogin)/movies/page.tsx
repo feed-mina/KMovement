@@ -33,7 +33,7 @@ import { useOnboardingStore } from "@/store/onboarding-store";
 export default function MoviesPage() {
   const { data } = useQuery({
     queryKey: ['artists'],
-    queryFn: () => fetch(`${process.env.NEXT_PUBLIC_KRIDE_API_BASE}/api/artists`)
+    queryFn: () => fetch(`/kride-api/artists`)
                     .then(r => r.json()),
     staleTime: 1000 * 60 * 60,  // 1시간 캐시
   });

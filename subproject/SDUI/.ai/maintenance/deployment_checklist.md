@@ -318,7 +318,7 @@ docker exec sdui-redis redis-cli EXISTS "USER_CONTENT_LIST"
 ### 6. 프론트엔드에서 기능 테스트
 
 **Vercel 프론트엔드 접속**:
-- URL: https://sdui-delta.vercel.app
+- URL: https://yerin.duckdns.org
 
 **테스트 시나리오**:
 1. **로그인 테스트**
@@ -608,7 +608,7 @@ docker run -d --name sdui-backend-lab \
 - [ ] 루트 `.gitignore`에 `!metadata-project/public/icons/*.png` 예외 있는가?
 
 ### 배포 후 PWA 확인 (Vercel)
-1. Chrome으로 `https://sdui-delta.vercel.app/view/MAIN_PAGE` 접속
+1. Chrome으로 `https://yerin.duckdns.org/view/MAIN_PAGE` 접속
 2. DevTools → Application → Manifest 탭에서 에러 없는지 확인
 3. 주소창 오른쪽 설치 아이콘 또는 "앱 설치" 다이얼로그 확인
 4. DevTools → Application → Service Workers에서 `sw.js` Activated 상태 확인

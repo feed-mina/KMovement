@@ -181,7 +181,7 @@ export default function FanBoard({ lang, initialPostId }: { lang: Lang; initialP
         fetchPosts();
       } else if (result.code === "UNAUTHORIZED" || result.status === 401) {
          alert(translations[lang].notice);
-         window.open("https://sdui-delta.vercel.app/login", "_blank");
+         window.open("https://yerin.duckdns.org/login", "_blank");
       }
     } catch (err) {
       console.error("Submit error:", err);

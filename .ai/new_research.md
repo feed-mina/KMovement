@@ -1391,7 +1391,7 @@ Phase 4 (영상 생성)
 
 ## 12. SDUI MSA 통합 연구 (2026-05-06 추가)
 
-> **배경**: 기존 SDUI 프로젝트(https://sdui-delta.vercel.app)를 MSA로 연결해 K-Ride 프론트엔드에 도입.
+> **배경**: 기존 SDUI 프로젝트(https://yerin.duckdns.org)를 MSA로 연결해 K-Ride 프론트엔드에 도입.
 > SDUI 핵심 원칙 — "가장 작은 단위 요소(text, button, image 등)를 블록처럼 쌓아 DOM 트리로 페이지를 구성하고, `ui_metadata` DB 값만 바꾸면 즉시 화면이 바뀐다" — 를 K-Ride 온보딩 전체에 적용.
 
 ---

@@ -65,7 +65,7 @@ export default function FocusPage() {
   const store = useOnboardingStore();
   const { data, isLoading: isItineraryLoading } = useQuery({
     queryKey: ['itinerary', store.duration, store.artists, store.regions],
-    queryFn: () => fetch(`${process.env.NEXT_PUBLIC_KRIDE_API_BASE}/api/recommend/itinerary`, {
+    queryFn: () => fetch(`/kride-api/recommend/itinerary`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

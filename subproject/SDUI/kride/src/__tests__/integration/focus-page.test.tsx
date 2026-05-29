@@ -96,7 +96,7 @@ describe("FocusPage 통합 테스트", () => {
     ];
 
     global.fetch = jest.fn((url: string) => {
-      if (url.includes("/api/recommend/itinerary")) {
+      if (url.includes("/kride-api/recommend/itinerary")) {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({

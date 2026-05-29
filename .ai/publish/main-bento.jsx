@@ -326,7 +326,7 @@ function BrowserShell({ tweak }) {
     <ChromeWindow
       width={1240} height={780}
       tabs={[{ title: route === '/view/MAIN_PAGE' ? 'K-RIDE | 메인' : 'K-RIDE | INTRO' }]}
-      url={`sdui-delta.vercel.app${route}`}
+      url={`yerin.duckdns.org${route}`}
     >
       <div style={{
         width: '100%', height: '100%', position: 'relative', overflow: 'hidden',

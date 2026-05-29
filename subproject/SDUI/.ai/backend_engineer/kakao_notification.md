@@ -135,7 +135,7 @@ if (user.getKakaoTokenExpiresAt().isBefore(LocalDateTime.now().plusMinutes(5))) 
 |------|----------|
 | 카카오 로그인 활성화 | ON |
 | 동의항목 | `talk_message` ("카카오톡 메시지 전송") 추가 |
-| Redirect URI | `https://sdui-delta.vercel.app/api/kakao/callback` 등록 |
+| Redirect URI | `https://yerin.duckdns.org/api/kakao/callback` 등록 |
 | 권한 검수 | 개인 테스트: 불필요 / 타 사용자 서비스: 검수 필요 |
 
 **주의**: `talk_message` 스코프 추가 후 기존 로그인 유저는 **재로그인(재동의)** 필요.

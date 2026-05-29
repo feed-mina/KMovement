@@ -714,8 +714,8 @@ Before clicking `Save Version`:
 
 | 대상 | 상태 | 비고 |
 |------|------|------|
-| AWS EC2 (SDUI) | ✅ 성공 | `sdui-backend:8080` 정상 가동 |
-| GCP VM (AI Services) | 🔧 진행 중 | ChromaDB 헬스체크 수정 후 재배포 필요 |
+| AWS EC2 (SDUI) | ✅ 성공 | `sdui-backend:8080` — `43.201.237.68:8080` |
+| GCP VM (AI Services) | ✅ 성공 | FastAPI + ChromaDB + Redis + Celery — `34.64.221.240:8000` |
 
 ---
 
@@ -806,7 +806,8 @@ Before clicking `Save Version`:
 - **증상**: ChromaDB 컨테이너가 `unhealthy` 상태 → FastAPI 시작 차단
 - **원인**: `chromadb/chroma:latest` 이미지에 `curl` 미설치
 - **수정 1차**: 헬스체크를 `curl` → `python3 -c "import urllib.request; ..."` 로 변경
-- **수정 2차**: `CMD` → `CMD-SHELL` 방식 변경 (셸 해석 필요), `timeout: 5s→10s`, `start_period: 10s→30s` 확대 (ChromaDB 초기 로딩 시간 확보)
+- **수정 2차**: `CMD` → `CMD-SHELL` + `python3 urllib` 시도 → `python3`도 미설치로 실패
+- **수정 3차 (최종)**: `bash -c 'echo > /dev/tcp/localhost/8000'` 방식으로 해결. ChromaDB 이미지에는 `curl`, `wget`, `python3` 모두 없고 `bash`만 사용 가능. `timeout: 10s`, `start_period: 30s`
 
 ---
 
@@ -847,7 +848,7 @@ Before clicking `Save Version`:
 
 | # | 작업 | 상태 |
 |---|------|------|
-| 1 | ChromaDB 헬스체크 수정 커밋 & 푸시 → GCP 재배포 | 대기 중 |
+| 1 | ~~ChromaDB 헬스체크 수정 커밋 & 푸시 → GCP 재배포~~ | ✅ 완료 |
 | 2 | TorchServe 이미지 첫 빌드 & 푸시 (Phase 2) | 미시작 |
 | 3 | TorchServe 모델 파일 (`*.mar`) VM 배치 | 미시작 |
 | 4 | EC2 PostgreSQL (`sdui-db`) 컨테이너 상태 확인 | 미확인 |

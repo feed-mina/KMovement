@@ -29,7 +29,7 @@
 
 <br/>
 
-[![🚀 Live Demo](https://img.shields.io/badge/🚀_Live_Demo-바로가기-brightgreen?style=for-the-badge)](https://sdui-delta.vercel.app)
+[![🚀 Live Demo](https://img.shields.io/badge/🚀_Live_Demo-바로가기-brightgreen?style=for-the-badge)](https://yerin.duckdns.org)
 
 </div>
 

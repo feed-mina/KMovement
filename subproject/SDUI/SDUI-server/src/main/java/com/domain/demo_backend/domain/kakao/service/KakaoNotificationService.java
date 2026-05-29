@@ -72,8 +72,8 @@ public class KakaoNotificationService {
                     "object_type", "text",
                     "text", text,
                     "link", Map.of(
-                            "web_url", "https://sdui-delta.vercel.app",
-                            "mobile_web_url", "https://sdui-delta.vercel.app"));
+                            "web_url", "https://yerin.duckdns.org",
+                            "mobile_web_url", "https://yerin.duckdns.org"));
             String templateObject = mapper.writeValueAsString(messageMap);
 
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();

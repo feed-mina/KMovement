@@ -10,7 +10,7 @@
 
 **증상**:
 - 로컬 개발 환경(localhost:3000)에서는 이미지가 정상 표시됨
-- Vercel 배포 환경(https://sdui-delta.vercel.app)에서는 이미지가 깨지거나 표시되지 않음
+- Vercel 배포 환경(https://yerin.duckdns.org)에서는 이미지가 깨지거나 표시되지 않음
 
 **현재 구현**:
 - 이미지 위치: `metadata-project/public/img/`
@@ -310,7 +310,7 @@ Copying static files
 F12 → Console
 
 # CSP 에러 예시 (발생 시):
-Refused to load the image 'https://sdui-delta.vercel.app/img/logo.svg'
+Refused to load the image 'https://yerin.duckdns.org/img/logo.svg'
 because it violates the following Content Security Policy directive: "img-src 'self'"
 ```
 
@@ -318,8 +318,8 @@ because it violates the following Content Security Policy directive: "img-src 's
 
 **브라우저에서 직접 접근**:
 ```
-https://sdui-delta.vercel.app/img/logo.svg
-https://sdui-delta.vercel.app/img/default.png
+https://yerin.duckdns.org/img/logo.svg
+https://yerin.duckdns.org/img/default.png
 ```
 
 **결과 분석**:
