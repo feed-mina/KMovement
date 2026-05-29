@@ -86,6 +86,7 @@ async function streamSseChunks(
       'Content-Type': 'application/json',
       'Accept': 'text/event-stream',
     },
+    credentials: 'include',
     body: JSON.stringify(body),
     signal,
   });
@@ -214,6 +215,7 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
           const res = await fetch(`${base}/api/v1/kride/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify(req),
             signal: controller.signal,
           });
