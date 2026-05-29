@@ -11,11 +11,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Service
 public class AnimationService {
+
+    private static final Set<String> ALLOWED_ROUTES = Set.of(
+            "animated_drawings_worker",
+            "cogvideox_real",
+            "3d_photo_inpainting_real"
+    );
 
     private final AnimationJobRepository animationJobRepository;
     private final CommunityPostRepository postRepository;
@@ -31,19 +39,22 @@ public class AnimationService {
     }
 
     @Transactional
-    public AnimationJob submitAnimation(Long postId, String imageBase64) {
+    public AnimationJob submitAnimation(Long postId, String imageBase64, String route) {
+        if (!ALLOWED_ROUTES.contains(route)) {
+            throw new IllegalArgumentException("지원하지 않는 route입니다: " + route);
+        }
+
         CommunityPost post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
-        Map<String, Object> payload = Map.of(
-                "route", "animated_drawings_worker",
-                "case_id", "community_" + postId,
-                "place", "Community Sketch",
-                "image_base64", imageBase64,
-                "tts_text", post.getTitle() != null ? post.getTitle() : "커뮤니티 스케치 애니메이션",
-                "bgm_key", "bright_travel",
-                "allow_fallback", true
-        );
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("route", route);
+        payload.put("case_id", "community_" + postId);
+        payload.put("place", "Community Post");
+        payload.put("image_base64", imageBase64);
+        payload.put("tts_text", post.getTitle() != null ? post.getTitle() : "커뮤니티 영상");
+        payload.put("bgm_key", "bright_travel");
+        payload.put("allow_fallback", true);
 
         Map<String, Object> response;
         try {

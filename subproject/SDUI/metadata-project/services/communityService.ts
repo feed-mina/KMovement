@@ -122,8 +122,8 @@ export const communityService = {
         return res.data.data;
     },
 
-    async submitAnimation(postId: number, imageBase64: string) {
-        const res = await api.post(`${BASE}/posts/${postId}/animate`, { imageBase64 });
+    async submitAnimation(postId: number, imageBase64: string, route = 'animated_drawings_worker') {
+        const res = await api.post(`${BASE}/posts/${postId}/animate`, { imageBase64, route });
         return res.data.data as AnimationStatusResponse;
     },
 

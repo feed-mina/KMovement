@@ -655,6 +655,7 @@ function CommunityDetail({ postId }: { postId: number }) {
     const [doodleNotice, setDoodleNotice] = useState('');
     const [animStatus, setAnimStatus] = useState<AnimationStatusResponse | null>(null);
     const [animSubmitting, setAnimSubmitting] = useState(false);
+    const [animRouteModal, setAnimRouteModal] = useState(false);
     const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const isOwner = Boolean(user?.userSqno && post?.authorSqno && user.userSqno === post.authorSqno);
 
@@ -720,35 +721,59 @@ function CommunityDetail({ postId }: { postId: number }) {
         };
     }, []);
 
-    const submitAnimation = async () => {
+    const getImageBase64 = async (route: string): Promise<string | null> => {
+        if (route === 'animated_drawings_worker') {
+            const handoff = typeof window !== 'undefined'
+                ? window.localStorage.getItem(SKETCH_HANDOFF_KEY)
+                : null;
+            if (!handoff) {
+                alert('먼저 스케치를 그려주세요. 글 작성 시 스케치하기를 이용하세요.');
+                return null;
+            }
+            const parsed = JSON.parse(handoff) as SketchHandoff;
+            return parsed.dataUrl?.split(',')[1] || null;
+        }
+        // CogVideoX / 3D Photo: 게시글 첨부 이미지 사용
+        const firstImage = post?.images?.[0];
+        if (!firstImage?.storageUrl) {
+            alert('영상을 생성하려면 게시글에 이미지가 필요합니다.');
+            return null;
+        }
+        try {
+            const res = await fetch(firstImage.storageUrl);
+            const blob = await res.blob();
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const result = reader.result as string;
+                    resolve(result.split(',')[1] || null);
+                };
+                reader.readAsDataURL(blob);
+            });
+        } catch {
+            alert('이미지를 불러오지 못했습니다.');
+            return null;
+        }
+    };
+
+    const submitAnimation = async (route: string) => {
         if (!isLoggedIn) {
             alert('로그인이 필요한 기능입니다.');
             router.push('/view/LOGIN_PAGE');
             return;
         }
 
-        const handoff = typeof window !== 'undefined'
-            ? window.localStorage.getItem(SKETCH_HANDOFF_KEY)
-            : null;
-        if (!handoff) {
-            alert('먼저 스케치를 그려주세요. 글 작성 시 스케치하기를 이용하세요.');
-            return;
-        }
+        const imageBase64 = await getImageBase64(route);
+        if (!imageBase64) return;
 
-        const parsed = JSON.parse(handoff) as SketchHandoff;
-        const imageBase64 = parsed.dataUrl?.split(',')[1];
-        if (!imageBase64) {
-            alert('스케치 데이터를 찾을 수 없습니다.');
-            return;
-        }
-
+        setAnimRouteModal(false);
         setAnimSubmitting(true);
         try {
-            const result = await communityService.submitAnimation(postId, imageBase64);
+            const result = await communityService.submitAnimation(postId, imageBase64, route);
             setAnimStatus(result);
             startAnimPolling();
         } catch {
-            alert('애니메이션 생성 요청에 실패했습니다.');
+            alert('영상 생성 요청에 실패했습니다.');
         } finally {
             setAnimSubmitting(false);
         }
@@ -904,18 +929,18 @@ function CommunityDetail({ postId }: { postId: number }) {
                 <div className="community-animation-section">
                     {animStatus?.status === 'COMPLETED' && animStatus.resultUrl && (
                         <div className="community-animation-result">
-                            <h3>애니메이션 결과</h3>
+                            <h3>영상 결과</h3>
                             <video controls preload="metadata" src={animStatus.resultUrl} />
                         </div>
                     )}
                     {animStatus?.status === 'QUEUED' || animStatus?.status === 'RUNNING' ? (
                         <p className="community-animation-progress">
-                            애니메이션 생성 중... ({animStatus.status})
+                            영상 생성 중... ({animStatus.status})
                         </p>
                     ) : null}
                     {animStatus?.status === 'FAILED' && (
                         <p className="community-animation-error">
-                            애니메이션 생성 실패: {animStatus.errorMessage || '알 수 없는 오류'}
+                            영상 생성 실패: {animStatus.errorMessage || '알 수 없는 오류'}
                         </p>
                     )}
                     {isOwner && (!animStatus || animStatus.status === 'FAILED') && (
@@ -923,10 +948,51 @@ function CommunityDetail({ postId }: { postId: number }) {
                             className="community-primary-btn"
                             type="button"
                             disabled={animSubmitting}
-                            onClick={submitAnimation}
+                            onClick={() => setAnimRouteModal(true)}
                         >
-                            {animSubmitting ? '요청 중...' : '애니메이션 만들기'}
+                            {animSubmitting ? '요청 중...' : '영상 만들기'}
                         </button>
+                    )}
+
+                    {animRouteModal && (
+                        <div className="community-sketch-backdrop" role="dialog" aria-modal="true" aria-label="영상 유형 선택">
+                            <div className="community-sketch-panel" style={{ maxWidth: 420 }}>
+                                <div className="community-sketch-header">
+                                    <h2>어떤 영상을 만들까요?</h2>
+                                    <button className="community-secondary-btn" type="button" onClick={() => setAnimRouteModal(false)}>
+                                        닫기
+                                    </button>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '16px 0' }}>
+                                    <button
+                                        className="community-primary-btn"
+                                        type="button"
+                                        onClick={() => submitAnimation('animated_drawings_worker')}
+                                    >
+                                        스케치 애니메이션
+                                        <br /><small>스케치/그림 → 캐릭터 움직임</small>
+                                    </button>
+                                    <button
+                                        className="community-primary-btn"
+                                        type="button"
+                                        disabled={!post?.images?.length}
+                                        onClick={() => submitAnimation('cogvideox_real')}
+                                    >
+                                        AI 영상 생성
+                                        <br /><small>첨부 사진 → AI 시네마틱 영상 (GPU)</small>
+                                    </button>
+                                    <button
+                                        className="community-primary-btn"
+                                        type="button"
+                                        disabled={!post?.images?.length}
+                                        onClick={() => submitAnimation('3d_photo_inpainting_real')}
+                                    >
+                                        3D 사진 영상
+                                        <br /><small>첨부 사진 → 3D 깊이 카메라 효과</small>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     )}
                 </div>
 

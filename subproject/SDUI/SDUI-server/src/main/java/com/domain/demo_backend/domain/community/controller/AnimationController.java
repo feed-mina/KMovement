@@ -19,7 +19,7 @@ public class AnimationController {
 
     private final AnimationService animationService;
 
-    @Operation(summary = "애니메이션 생성 요청")
+    @Operation(summary = "애니메이션/영상 생성 요청")
     @PostMapping
     public ResponseEntity<ApiResponse<Map<String, Object>>> submitAnimation(
             @PathVariable("postId") Long postId,
@@ -31,7 +31,8 @@ public class AnimationController {
                     .body(ApiResponse.error("imageBase64는 필수입니다."));
         }
 
-        AnimationJob job = animationService.submitAnimation(postId, imageBase64);
+        String route = body.getOrDefault("route", "animated_drawings_worker");
+        AnimationJob job = animationService.submitAnimation(postId, imageBase64, route);
         Map<String, Object> result = Map.of(
                 "jobId", job.getId(),
                 "runpodJobId", job.getRunpodJobId() != null ? job.getRunpodJobId() : "",
