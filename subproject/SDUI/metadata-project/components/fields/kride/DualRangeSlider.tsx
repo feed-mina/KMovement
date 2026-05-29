@@ -75,6 +75,8 @@ export default function DualRangeSlider({ id, data, onChange }: any) {
   };
 
   const midPercent = (minPercent + maxPercent) / 2;
+  const minLabelTransform = minPercent <= 8 ? "translateX(0)" : "translateX(-50%)";
+  const maxLabelTransform = maxPercent >= 92 ? "translateX(-100%)" : "translateX(-50%)";
 
   return (
     <div id={id} className="dual-range-slider flex flex-col gap-6 w-full px-2">
@@ -94,8 +96,8 @@ export default function DualRangeSlider({ id, data, onChange }: any) {
       <div className="relative">
         {/* 왼쪽(min) 라벨 — 클릭 시 편집 */}
         <div
-          className="absolute -top-7 -translate-x-1/2 cursor-pointer"
-          style={{ left: `${minPercent}%` }}
+          className="absolute -top-7 cursor-pointer"
+          style={{ left: `${minPercent}%`, transform: minLabelTransform }}
           onClick={() => startEdit("min")}
         >
           {editingMin ? (
@@ -116,8 +118,8 @@ export default function DualRangeSlider({ id, data, onChange }: any) {
 
         {/* 오른쪽(max) 라벨 — 클릭 시 편집 */}
         <div
-          className="absolute -top-7 -translate-x-1/2 cursor-pointer"
-          style={{ left: `${maxPercent}%` }}
+          className="absolute -top-7 cursor-pointer"
+          style={{ left: `${maxPercent}%`, transform: maxLabelTransform }}
           onClick={() => startEdit("max")}
         >
           {editingMax ? (

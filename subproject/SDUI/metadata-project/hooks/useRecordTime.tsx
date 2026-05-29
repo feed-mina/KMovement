@@ -20,7 +20,8 @@ export const useRecordTime = () => {
             const res = await axios.get('/api/goalTime/getGoalTime');
             return res.data ?? null;
         },
-        enabled: isLoggedIn, // 로그인 상태일때만 호출 (API 최적화)
+        enabled: Boolean(isValidUser), // 실제 회원 번호가 있을 때만 호출 (API 최적화)
+        retry: false,
         staleTime: 1000 * 60 * 5, // @@@@ 2026-02-08 추가 Infinity 대신 5분으로 변경.
         // staleTime: Infinity
     });
@@ -35,7 +36,8 @@ export const useRecordTime = () => {
             const res = await axios.get('/api/goalTime/getGoalList');
             return res.data ?? [];
         },
-        enabled: isLoggedIn,
+        enabled: Boolean(isValidUser),
+        retry: false,
         staleTime: Infinity
     });
 

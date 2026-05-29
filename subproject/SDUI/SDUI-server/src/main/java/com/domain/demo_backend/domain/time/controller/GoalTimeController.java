@@ -37,8 +37,11 @@ public class GoalTimeController {
         Long userSqno = (userDetails != null) ? userDetails.getUserSqno() : null;
         String targetTime = goalTimeQueryService.getGoalTime(userSqno);
         log.debug("targetTime: {}", targetTime);
-        if (targetTime == null || targetTime.isEmpty()) return ResponseEntity.notFound().build();
         Map<String, String> result = new HashMap<>();
+        if (targetTime == null || targetTime.isEmpty()) {
+            result.put("goalTime", null);
+            return ResponseEntity.ok(result);
+        }
         result.put("goalTime", targetTime);
         String memo = goalTimeQueryService.getGoalMemo(userSqno);
         if (memo != null && !memo.isBlank()) result.put("todaysMessage", memo);

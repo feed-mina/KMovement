@@ -131,11 +131,17 @@ export const usePageMetadata = (
 
                 // ** 메타데이터의 필드 타입이 DATA_SOURCE 이고  액션 타입이 AUTO_FETCH(자동호출)이면 페이지가 열리자 말자 바로 가져온다 
 
-                // sources : 컴포넌트 타입이 DATA_SOURCE 이고 액션 타입이 AUTO_FETCH 인 것만 필터링
-                const sources = allComponents.filter((item: any) =>
-                    (item.componentType === "DATA_SOURCE" || item.component_type === "DATA_SOURCE") &&
-                    (item.actionType === "AUTO_FETCH" || item.action_type === "AUTO_FETCH")
-                );
+                // DATA_SOURCE 노드와, ref_data_id가 있는 그룹형 data_sql_key를 자동 조회한다.
+                // KRIDE INTRO2/3 메타데이터는 선택지 쿼리 키를 그리드 그룹에 직접 보관한다.
+                const sources = allComponents.filter((item: any) => {
+                    const type = item.componentType || item.component_type;
+                    const actionType = item.actionType || item.action_type;
+                    const sqlKey = item.dataSqlKey || item.data_sql_key;
+                    const refId = item.refDataId || item.ref_data_id;
+                    const isDataSource = type === "DATA_SOURCE";
+                    const isBoundGroupSource = type === "GROUP" && !!refId && !!sqlKey;
+                    return (isDataSource && actionType === "AUTO_FETCH") || isBoundGroupSource;
+                });
                 // * 메타데이터에 dataSqlKey가 있다면 /api/execute/{key} 형태로 주소를 보낸다
 
                 // dataPromises : 
@@ -177,7 +183,7 @@ export const usePageMetadata = (
                         res = await axios.post(apiUrl, finalParams);
                     }
                     return {
-                        id: source.componentId || source.component_id,
+                        id: source.refDataId || source.ref_data_id || source.componentId || source.component_id,
                         data: res.data.data || res.data
                     };
                 });
