@@ -180,6 +180,7 @@ jobs:
 
             torchserve:
               image: REGISTRY_PLACEHOLDER/torchserve-gpu:latest
+              profiles: ["gpu"]
               ports:
                 - "8085:8085"
                 - "8086:8086"
