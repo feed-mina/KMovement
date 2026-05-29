@@ -123,7 +123,7 @@ jobs:
                   condition: service_healthy
               environment:
                 - TORCHSERVE_URL=http://torchserve:8085
-                - TORCHSERVE_ENABLED=false
+                - TORCHSERVE_ENABLED=true
                 - TORCHSERVE_FALLBACK=true
                 - CELERY_BROKER_URL=redis://redis:6379/1
                 - CHROMA_MODE=client
@@ -170,6 +170,20 @@ jobs:
                 interval: 10s
                 timeout: 3s
                 retries: 3
+              restart: unless-stopped
+
+            torchserve:
+              image: REGISTRY_PLACEHOLDER/torchserve-gpu:latest
+              ports:
+                - "8085:8085"
+                - "8086:8086"
+              deploy:
+                resources:
+                  reservations:
+                    devices:
+                      - driver: nvidia
+                        count: 1
+                        capabilities: [gpu]
               restart: unless-stopped
 
             celery-worker:

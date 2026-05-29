@@ -13,6 +13,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
+    AnimationStatusResponse,
     communityService,
     PostImageDto,
     PostListResponse,
@@ -652,6 +653,9 @@ function CommunityDetail({ postId }: { postId: number }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [doodleNotice, setDoodleNotice] = useState('');
+    const [animStatus, setAnimStatus] = useState<AnimationStatusResponse | null>(null);
+    const [animSubmitting, setAnimSubmitting] = useState(false);
+    const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const isOwner = Boolean(user?.userSqno && post?.authorSqno && user.userSqno === post.authorSqno);
 
     const loadPost = useCallback(async () => {
@@ -677,6 +681,78 @@ function CommunityDetail({ postId }: { postId: number }) {
             .then((status) => setLiked(status.liked))
             .catch(() => undefined);
     }, [isLoggedIn, postId]);
+
+    useEffect(() => {
+        communityService.getAnimationStatus(postId)
+            .then((status) => {
+                setAnimStatus(status);
+                if (status.status === 'QUEUED' || status.status === 'RUNNING') {
+                    startAnimPolling();
+                }
+            })
+            .catch(() => undefined);
+    }, [postId, startAnimPolling]);
+
+    const startAnimPolling = useCallback(() => {
+        if (pollingRef.current) return;
+        pollingRef.current = setInterval(async () => {
+            try {
+                const status = await communityService.getAnimationStatus(postId);
+                setAnimStatus(status);
+                if (status.status === 'COMPLETED' || status.status === 'FAILED') {
+                    if (pollingRef.current) {
+                        clearInterval(pollingRef.current);
+                        pollingRef.current = null;
+                    }
+                }
+            } catch {
+                /* ignore polling errors */
+            }
+        }, 3000);
+    }, [postId]);
+
+    useEffect(() => {
+        return () => {
+            if (pollingRef.current) {
+                clearInterval(pollingRef.current);
+                pollingRef.current = null;
+            }
+        };
+    }, []);
+
+    const submitAnimation = async () => {
+        if (!isLoggedIn) {
+            alert('로그인이 필요한 기능입니다.');
+            router.push('/view/LOGIN_PAGE');
+            return;
+        }
+
+        const handoff = typeof window !== 'undefined'
+            ? window.localStorage.getItem(SKETCH_HANDOFF_KEY)
+            : null;
+        if (!handoff) {
+            alert('먼저 스케치를 그려주세요. 글 작성 시 스케치하기를 이용하세요.');
+            return;
+        }
+
+        const parsed = JSON.parse(handoff) as SketchHandoff;
+        const imageBase64 = parsed.dataUrl?.split(',')[1];
+        if (!imageBase64) {
+            alert('스케치 데이터를 찾을 수 없습니다.');
+            return;
+        }
+
+        setAnimSubmitting(true);
+        try {
+            const result = await communityService.submitAnimation(postId, imageBase64);
+            setAnimStatus(result);
+            startAnimPolling();
+        } catch {
+            alert('애니메이션 생성 요청에 실패했습니다.');
+        } finally {
+            setAnimSubmitting(false);
+        }
+    };
 
     const toggleLike = async () => {
         if (!isLoggedIn) {
@@ -824,6 +900,35 @@ function CommunityDetail({ postId }: { postId: number }) {
                         ))}
                     </div>
                 )}
+
+                <div className="community-animation-section">
+                    {animStatus?.status === 'COMPLETED' && animStatus.resultUrl && (
+                        <div className="community-animation-result">
+                            <h3>애니메이션 결과</h3>
+                            <video controls preload="metadata" src={animStatus.resultUrl} />
+                        </div>
+                    )}
+                    {animStatus?.status === 'QUEUED' || animStatus?.status === 'RUNNING' ? (
+                        <p className="community-animation-progress">
+                            애니메이션 생성 중... ({animStatus.status})
+                        </p>
+                    ) : null}
+                    {animStatus?.status === 'FAILED' && (
+                        <p className="community-animation-error">
+                            애니메이션 생성 실패: {animStatus.errorMessage || '알 수 없는 오류'}
+                        </p>
+                    )}
+                    {isOwner && (!animStatus || animStatus.status === 'FAILED') && (
+                        <button
+                            className="community-primary-btn"
+                            type="button"
+                            disabled={animSubmitting}
+                            onClick={submitAnimation}
+                        >
+                            {animSubmitting ? '요청 중...' : '애니메이션 만들기'}
+                        </button>
+                    )}
+                </div>
 
                 <div className="community-content">{post.content}</div>
 

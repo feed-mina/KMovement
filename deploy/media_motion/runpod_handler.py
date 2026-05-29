@@ -36,6 +36,7 @@ from pathlib import Path
 
 import runpod
 
+from .animated_drawings_worker import run_animated_drawings_worker_case
 from .bgm import ensure_fallback_bgm
 from .cogvideo_fallback import run_cogvideo_fallback_case
 from .cogvideox_real import run_cogvideox_real_case
@@ -50,6 +51,7 @@ SUPPORTED_ROUTES = {
     "cogvideo_fallback",
     "gpt_sovits_tts",
     "musicgen",
+    "animated_drawings_worker",
 }
 
 OUTPUT_DIR = Path(os.environ.get("KRIDE_WORKER_OUTPUT_DIR", "/tmp/kride_outputs"))
@@ -214,6 +216,10 @@ def handler(job: dict) -> dict:
         )
 
         bgm_wav = ensure_fallback_bgm(work_dir / "bgm", case.bgm_key)
+
+        if route == "animated_drawings_worker":
+            result = run_animated_drawings_worker_case(case, work_dir, bgm_wav, cfg=cfg)
+            return _encode_artifacts(result.to_dict())
 
         if route == "cogvideox_real":
             result = run_cogvideox_real_case(case, work_dir, bgm_wav, cfg=cfg)

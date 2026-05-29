@@ -50,6 +50,13 @@ export interface LikeStatusResponse {
     likeCount: number;
 }
 
+export interface AnimationStatusResponse {
+    jobId: number;
+    status: string;
+    resultUrl: string;
+    errorMessage: string;
+}
+
 export const communityService = {
     async createPost(data: PostCreateRequest, images?: File[]) {
         const formData = new FormData();
@@ -113,5 +120,15 @@ export const communityService = {
     async getFollowStatus(userSqno: number) {
         const res = await api.get(`${BASE}/users/${userSqno}/follow/status`);
         return res.data.data;
+    },
+
+    async submitAnimation(postId: number, imageBase64: string) {
+        const res = await api.post(`${BASE}/posts/${postId}/animate`, { imageBase64 });
+        return res.data.data as AnimationStatusResponse;
+    },
+
+    async getAnimationStatus(postId: number) {
+        const res = await api.get(`${BASE}/posts/${postId}/animate/status`);
+        return res.data.data as AnimationStatusResponse;
     },
 };
