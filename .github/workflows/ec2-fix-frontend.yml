@@ -27,7 +27,7 @@ jobs:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_KEY }}
-          envs: DOCKER_USERNAME,DB_USERNAME,DB_PASSWORD,MAIL_PASSWORD,JWT_SECRET_KEY,OPENAI_API_KEY,KAKAO_CLIENT_ID,AWS_ACCESS_KEY_VAL,AWS_SECRET_KEY_VAL,SLACK_WEBHOOK_URL,SLACK_BOT_TOKEN,SLACK_CHANNEL_ID,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REDIRECT_URI,GCP_CREDENTIALS_JSON
+          envs: DOCKER_USERNAME,DB_USERNAME,DB_PASSWORD,MAIL_PASSWORD,JWT_SECRET_KEY,OPENAI_API_KEY,KAKAO_CLIENT_ID,KAKAO_TOKEN_ADMIN,FASTAPI_INTERNAL_API_KEY,AWS_ACCESS_KEY_VAL,AWS_SECRET_KEY_VAL,SLACK_WEBHOOK_URL,SLACK_BOT_TOKEN,SLACK_CHANNEL_ID,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REDIRECT_URI,GCP_CREDENTIALS_JSON
           script: |
             # ── Network ──
             docker network inspect sdui-network >/dev/null 2>&1 || docker network create sdui-network
@@ -75,11 +75,14 @@ jobs:
               -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
               -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
               -e KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
+              -e KAKAO_TOKEN_ADMIN=${{ secrets.KAKAO_TOKEN_ADMIN }} \
               -e KAKAO_REDIRECT_URI=https://yerin.duckdns.org/api/kakao/callback \
               -e WEB_URL=https://yerin.duckdns.org \
+              -e MOBILE_URL=https://yerin.duckdns.org \
               -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
               -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
               -e FASTAPI_URL=http://34.64.221.240:8000 \
+              -e FASTAPI_INTERNAL_API_KEY=${{ secrets.FASTAPI_INTERNAL_API_KEY }} \
               -e KRIDE_FASTAPI_URL=http://34.64.221.240:8000 \
               -e KRIDE_CHATBOT_URL=http://34.64.221.240:8000 \
               -e GCP_PROJECT_ID=kdeliver \
