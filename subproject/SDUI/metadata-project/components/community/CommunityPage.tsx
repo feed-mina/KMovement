@@ -683,17 +683,6 @@ function CommunityDetail({ postId }: { postId: number }) {
             .catch(() => undefined);
     }, [isLoggedIn, postId]);
 
-    useEffect(() => {
-        communityService.getAnimationStatus(postId)
-            .then((status) => {
-                setAnimStatus(status);
-                if (status.status === 'QUEUED' || status.status === 'RUNNING') {
-                    startAnimPolling();
-                }
-            })
-            .catch(() => undefined);
-    }, [postId, startAnimPolling]);
-
     const startAnimPolling = useCallback(() => {
         if (pollingRef.current) return;
         pollingRef.current = setInterval(async () => {
@@ -711,6 +700,17 @@ function CommunityDetail({ postId }: { postId: number }) {
             }
         }, 3000);
     }, [postId]);
+
+    useEffect(() => {
+        communityService.getAnimationStatus(postId)
+            .then((status) => {
+                setAnimStatus(status);
+                if (status.status === 'QUEUED' || status.status === 'RUNNING') {
+                    startAnimPolling();
+                }
+            })
+            .catch(() => undefined);
+    }, [postId, startAnimPolling]);
 
     useEffect(() => {
         return () => {
