@@ -63,10 +63,15 @@ jobs:
       - name: Check TorchServe changes
         id: ts_changes
         run: |
-          if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q "^torchserve/"; then
-            echo "changed=true" >> $GITHUB_OUTPUT
+          # Registry에 이미지가 있는지 확인, 없으면 무조건 빌드
+          if docker manifest inspect ${{ env.REGISTRY }}/${{ env.TORCHSERVE_IMAGE }}:latest >/dev/null 2>&1; then
+            if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q "^torchserve/"; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
           else
-            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Build and push TorchServe image
@@ -215,7 +220,7 @@ jobs:
           GROQ_API_KEY=__GROQ_API_KEY__
           ENV_EOF
 
-          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml pull --ignore-pull-failures
           docker compose -f docker-compose.prod.yml up -d
 
           docker image prune -af --filter "until=24h" || true
