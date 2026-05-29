@@ -76,6 +76,7 @@ jobs:
 
       - name: Build and push TorchServe image
         if: steps.ts_changes.outputs.changed == 'true'
+        continue-on-error: true
         run: |
           docker build -t ${{ env.REGISTRY }}/${{ env.TORCHSERVE_IMAGE }}:${{ env.TAG }} \
                         -t ${{ env.REGISTRY }}/${{ env.TORCHSERVE_IMAGE }}:latest \
