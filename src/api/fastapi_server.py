@@ -38,6 +38,7 @@ try:
     from src.api.neo4j_client import get_artist_pois, get_region_pois, get_regions
     from src.api.rag_client import (
         generate_chat_answer,
+        generate_chat_answer_stream,
         generate_itinerary,
         generate_recommendation_text,
         search_pois_by_purpose,
@@ -54,7 +55,8 @@ except ImportError as _e:
     search_pois_by_purpose = lambda purpose, lat, lon, radius: []
     generate_recommendation_text = lambda purpose, pois: ""
     generate_itinerary = lambda pois, duration, theme: ""
-    generate_chat_answer = lambda message: "K-Ride assistant is ready."
+    generate_chat_answer = lambda message: f"AI 서비스가 현재 준비 중입니다. 잠시 후 다시 시도해주세요.\n\n회원님의 질문: {message}"
+    def generate_chat_answer_stream(message): yield f"AI 서비스가 현재 준비 중입니다. 잠시 후 다시 시도해주세요.\n\n회원님의 질문: {message}"
     get_poi_details = lambda poi_id: None
 
 # 앙상블 랭커 (모델 파일 없어도 서버 기동 가능)
@@ -1120,17 +1122,36 @@ async def recommend_itinerary(req: ItineraryRequest):
 
 @app.post("/api/chat/stream")
 def chat_stream(req: ChatStreamRequest):
+    import json as _json
+
     message = (req.message or "").strip()
     if not message:
-        reply = "K-Ride assistant is ready."
-    else:
+        def _empty():
+            yield f"data: {_json.dumps({'content': 'K-Ride assistant is ready.'})}\n\n"
+            yield "data: [DONE]\n\n"
+        return StreamingResponse(_empty(), media_type="text/event-stream; charset=utf-8")
+
+    def _sse():
         try:
-            reply = generate_chat_answer(message)
+            for token in generate_chat_answer_stream(message):
+                yield f"data: {_json.dumps({'content': token})}\n\n"
         except Exception as exc:
-            print(f"[K-Ride] chat fallback: {exc}")
-            reply = "K-Ride assistant is ready. Please try again with a travel question."
+            print(f"[K-Ride] chat stream fallback: {exc}")
+            yield f"data: {_json.dumps({'content': 'K-Ride assistant is ready. Please try again with a travel question.'})}\n\n"
+        yield "data: [DONE]\n\n"
 
-    def _chunks():
-        yield reply
+    return StreamingResponse(_sse(), media_type="text/event-stream; charset=utf-8")
 
-    return StreamingResponse(_chunks(), media_type="text/plain; charset=utf-8")
+
+@app.post("/api/chat/qa")
+def chat_qa(req: ChatStreamRequest):
+    """Non-streaming QA endpoint — Spring Boot chatSync() 용"""
+    message = (req.message or "").strip()
+    if not message:
+        return {"reply": "K-Ride assistant is ready."}
+    try:
+        reply = generate_chat_answer(message)
+    except Exception as exc:
+        print(f"[K-Ride] chat qa fallback: {exc}")
+        reply = "죄송합니다. 답변 중 오류가 발생했어요. 다시 시도해주세요."
+    return {"reply": reply}

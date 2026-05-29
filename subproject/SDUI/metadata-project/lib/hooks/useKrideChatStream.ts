@@ -66,6 +66,7 @@ function buildRequest(message: string, form: KrideForm | null): KrideChatRequest
     regions: form?.selectedRegions?.map((r) => r.name) ?? [],
     purposes: form?.purposes ?? [],
     duration: durationLabelToInt(form?.duration),
+    budget: form?.budget,
   };
 }
 
@@ -191,6 +192,9 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
       const controller = new AbortController();
       abortRef.current = controller;
 
+      // 30초 타임아웃
+      const timeoutId = setTimeout(() => controller.abort(), 30_000);
+
       try {
         const useStream = opts.forceStream || req.intent === 'qa';
 
@@ -242,6 +246,7 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
           text: '죄송합니다. 답변 중 오류가 발생했어요. 다시 시도해주세요.',
         });
       } finally {
+        clearTimeout(timeoutId);
         setIsLoading(false);
         abortRef.current = null;
       }

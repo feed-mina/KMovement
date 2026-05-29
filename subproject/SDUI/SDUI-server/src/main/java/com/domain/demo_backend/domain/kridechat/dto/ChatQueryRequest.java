@@ -16,4 +16,5 @@ public class ChatQueryRequest {
     private List<String> regions;
     private List<String> purposes;
     private Integer duration;
+    private List<Integer> budget;
 }

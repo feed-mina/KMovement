@@ -6,6 +6,7 @@ import com.domain.demo_backend.global.common.response.ApiResponse;
 import com.domain.demo_backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -28,7 +29,7 @@ public class CommunityPostController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<PostResponse>> createPost(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestPart("post") PostCreateRequest request,
+            @Valid @RequestPart("post") PostCreateRequest request,
             @RequestPart(value = "images", required = false) List<MultipartFile> images) {
 
         PostResponse response = postService.createPost(userDetails.getUserSqno(), request, images);
@@ -59,7 +60,7 @@ public class CommunityPostController {
     public ResponseEntity<ApiResponse<PostResponse>> updatePost(
             @PathVariable("postId") Long postId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestPart("post") PostUpdateRequest request,
+            @Valid @RequestPart("post") PostUpdateRequest request,
             @RequestPart(value = "images", required = false) List<MultipartFile> newImages) {
 
         PostResponse response = postService.updatePost(postId, userDetails.getUserSqno(), request, newImages);

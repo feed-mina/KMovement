@@ -6,6 +6,7 @@ import com.domain.demo_backend.global.common.response.ApiResponse;
 import com.domain.demo_backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,7 +25,7 @@ public class PostReportController {
     public ResponseEntity<ApiResponse<Void>> reportPost(
             @PathVariable("postId") Long postId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody ReportRequest request) {
+            @Valid @RequestBody ReportRequest request) {
 
         reportService.reportPost(postId, userDetails.getUserSqno(), request);
         return ResponseEntity.ok(ApiResponse.success("신고가 접수되었습니다.", null));

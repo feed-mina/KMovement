@@ -67,6 +67,10 @@ dependencies {
 
     //    7. Google Cloud Document AI (PDF OCR)
     implementation 'com.google.cloud:google-cloud-document-ai:2.91.0'
+
+    //    8. Resilience4j 서킷 브레이커 (OpenAI/외부 API 보호)
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.1.0'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 }
 
 tasks.named('test') {

@@ -138,7 +138,7 @@ public class GlobalExceptionHandler {
 
         ApiResponse<Void> response = ApiResponse.error(
                 "서버 내부 오류가 발생했습니다",
-                "NullPointer: " + e.getMessage(),
+                "InternalError",
                 request.getRequestURI()
         );
 
@@ -158,7 +158,7 @@ public class GlobalExceptionHandler {
 
         ApiResponse<Void> response = ApiResponse.error(
                 "서버 오류가 발생했습니다",
-                e.getClass().getSimpleName() + ": " + e.getMessage(),
+                "InternalError",
                 request.getRequestURI()
         );
 

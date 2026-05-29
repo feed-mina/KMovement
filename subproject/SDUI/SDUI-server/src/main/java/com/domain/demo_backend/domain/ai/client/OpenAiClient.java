@@ -5,6 +5,8 @@ package com.domain.demo_backend.domain.ai.client;
 
 import com.domain.demo_backend.domain.kakao.service.OperationAlertService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +53,7 @@ public class OpenAiClient {
 
     // 일일 누적 비용 추적 (단위: 마이크로달러, $0.000001)
     private final AtomicLong dailyMicroDollars = new AtomicLong(0);
+    private volatile boolean costLimitExceeded = false;
 
     private final WebClient webClient = WebClient.create();
     private final HttpClient httpClient = HttpClient.newBuilder()
@@ -61,7 +64,14 @@ public class OpenAiClient {
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
     public void resetDailyCost() {
         dailyMicroDollars.set(0);
-        log.debug("OpenAI 일일 비용 카운터 초기화");
+        costLimitExceeded = false;
+        log.info("OpenAI 일일 비용 카운터 및 차단 플래그 초기화");
+    }
+
+    private void checkCostLimit() {
+        if (costLimitExceeded) {
+            throw new IllegalStateException("일일 AI 비용 한도($" + costThreshold + ")를 초과했습니다. 자정 이후 다시 이용 가능합니다.");
+        }
     }
 
     /**
@@ -75,16 +85,20 @@ public class OpenAiClient {
         long total = dailyMicroDollars.addAndGet(inputMicro + outputMicro);
         double totalDollars = total / 1_000_000.0;
         if (totalDollars >= costThreshold) {
+            costLimitExceeded = true;
             operationAlertService.sendCostAlert(totalDollars, costThreshold);
-            dailyMicroDollars.set(0);  // 알림 후 초기화 (반복 알림 방지)
+            log.warn("OpenAI 일일 비용 한도 초과: ${} >= ${}", totalDollars, costThreshold);
         }
     }
 
     /**
      * STT: Whisper API (multipart/form-data)
      */
+    @CircuitBreaker(name = "openai", fallbackMethod = "transcribeFallback")
+    @RateLimiter(name = "openai")
     @SuppressWarnings("unchecked")
     public String transcribe(MultipartFile audio, String language) throws IOException {
+        checkCostLimit();
         byte[] audioBytes = audio.getBytes();
         String originalFilename = audio.getOriginalFilename() != null
                 ? audio.getOriginalFilename() : "audio.webm";
@@ -120,10 +134,13 @@ public class OpenAiClient {
      * Chat Completions SSE 스트리밍 (비전 지원 — content가 String 또는 List인 경우)
      * 이미지 면접 등 멀티모달 메시지에 사용
      */
+    @CircuitBreaker(name = "openai", fallbackMethod = "streamChatObjectsFallback")
+    @RateLimiter(name = "openai")
     public void streamChatObjects(
             List<Map<String, Object>> messages,
             Consumer<String> onChunk,
             Runnable onComplete) throws Exception {
+        checkCostLimit();
 
         int inputChars = messages.stream()
                 .mapToInt(m -> {
@@ -179,10 +196,13 @@ public class OpenAiClient {
      * Chat Completions SSE 스트리밍
      * java.net.http.HttpClient (Java 17 내장) 사용 — InputStream 라인 단위 파싱
      */
+    @CircuitBreaker(name = "openai", fallbackMethod = "streamChatFallback")
+    @RateLimiter(name = "openai")
     public void streamChat(
             List<Map<String, String>> messages,
             Consumer<String> onChunk,
             Runnable onComplete) throws Exception {
+        checkCostLimit();
 
         int inputChars = messages.stream()
                 .mapToInt(m -> m.getOrDefault("content", "").length())
@@ -249,8 +269,11 @@ public class OpenAiClient {
         return content != null ? content.toString() : null;
     }
 
+    @CircuitBreaker(name = "openai", fallbackMethod = "chatFallback")
+    @RateLimiter(name = "openai")
     @SuppressWarnings("unchecked")
     public String chat(List<Map<String, String>> messages) throws Exception {
+        checkCostLimit();
         int inputChars = messages.stream()
                 .mapToInt(m -> m.getOrDefault("content", "").length())
                 .sum();
@@ -281,5 +304,33 @@ public class OpenAiClient {
 
         trackCost(inputChars, reply != null ? reply.length() : 0);
         return reply;
+    }
+
+    // ── Resilience4j Fallback 메서드 ──
+
+    @SuppressWarnings("unused")
+    private String transcribeFallback(MultipartFile audio, String language, Throwable t) {
+        log.warn("[CircuitBreaker] STT fallback 실행: {}", t.getMessage());
+        throw new IllegalStateException("AI 서비스가 일시적으로 이용 불가합니다. 잠시 후 다시 시도해주세요.");
+    }
+
+    @SuppressWarnings("unused")
+    private void streamChatObjectsFallback(List<Map<String, Object>> messages, Consumer<String> onChunk, Runnable onComplete, Throwable t) {
+        log.warn("[CircuitBreaker] streamChatObjects fallback 실행: {}", t.getMessage());
+        onChunk.accept("AI 서비스가 일시적으로 이용 불가합니다. 잠시 후 다시 시도해주세요.");
+        onComplete.run();
+    }
+
+    @SuppressWarnings("unused")
+    private void streamChatFallback(List<Map<String, String>> messages, Consumer<String> onChunk, Runnable onComplete, Throwable t) {
+        log.warn("[CircuitBreaker] streamChat fallback 실행: {}", t.getMessage());
+        onChunk.accept("AI 서비스가 일시적으로 이용 불가합니다. 잠시 후 다시 시도해주세요.");
+        onComplete.run();
+    }
+
+    @SuppressWarnings("unused")
+    private String chatFallback(List<Map<String, String>> messages, Throwable t) {
+        log.warn("[CircuitBreaker] chat fallback 실행: {}", t.getMessage());
+        throw new IllegalStateException("AI 서비스가 일시적으로 이용 불가합니다. 잠시 후 다시 시도해주세요.");
     }
 }

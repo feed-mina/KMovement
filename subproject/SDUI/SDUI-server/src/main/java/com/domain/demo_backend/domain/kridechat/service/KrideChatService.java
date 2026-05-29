@@ -79,7 +79,8 @@ public class KrideChatService {
     private ChatQueryResponse handleRecommend(ChatQueryRequest request) {
         try {
             Map<String, Object> result = fastApiClient.recommendAi(
-                    request.getArtists(), request.getRegions(), request.getPurposes()
+                    request.getArtists(), request.getRegions(), request.getPurposes(),
+                    request.getBudget()
             ).block();
 
             if (result == null) {
@@ -106,7 +107,8 @@ public class KrideChatService {
         try {
             int duration = request.getDuration() != null ? request.getDuration() : 2;
             Map<String, Object> result = fastApiClient.generateItinerary(
-                    request.getArtists(), request.getRegions(), request.getPurposes(), duration
+                    request.getArtists(), request.getRegions(), request.getPurposes(), duration,
+                    request.getBudget()
             ).block();
 
             if (result == null) {
@@ -125,10 +127,16 @@ public class KrideChatService {
     }
 
     private ChatQueryResponse handleQa(ChatQueryRequest request) {
-        return ChatQueryResponse.builder()
-                .intent("qa")
-                .reply("죄송합니다. 해당 질문에 대한 답변을 준비 중입니다.")
-                .build();
+        try {
+            String reply = fastApiClient.chatSync(request.getMessage());
+            return ChatQueryResponse.builder()
+                    .intent("qa")
+                    .reply(reply)
+                    .build();
+        } catch (Exception e) {
+            log.error("QA API 호출 실패: {}", e.getMessage());
+            return fallbackResponse("qa", "죄송합니다. 답변 서비스에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.");
+        }
     }
 
     private ChatQueryResponse fallbackResponse(String intent, String message) {

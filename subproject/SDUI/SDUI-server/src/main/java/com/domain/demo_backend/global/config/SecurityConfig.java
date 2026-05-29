@@ -114,8 +114,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/community/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/community/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/community/**").authenticated()
-                        // ── [추가] KRIDE 챗봇 ──
-                        .requestMatchers("/api/v1/kride/chat/**").permitAll()
+                        // ── [추가] KRIDE ──
+                        .requestMatchers("/api/v1/kride/chat/**").authenticated()
+                        .requestMatchers("/api/kride/**").permitAll()
                         // DEFAULT — 명시되지 않은 모든 요청 차단
                         .anyRequest().denyAll())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(new Http403ForbiddenEntryPoint()))
@@ -134,12 +135,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://sdui-delta.vercel.app", "http://sdui-delta.vercel.app",
-                "http://localhost:3000", "http://localhost:8080", "http://43.201.237.68", "http://43.201.237.68:8081",
+        configuration.setAllowedOrigins(List.of(
                 "https://yerin.duckdns.org",
-                "https://bts-gwanghwamun.vercel.app"));
+                "http://localhost:3000",
+                "http://localhost:8080",
+                "http://43.201.237.68",
+                "http://43.201.237.68:8081"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowCredentials(true); // 쿠키 허용
         configuration.setMaxAge(10800L); // preflight 캐시 3 * 60 (분) * 60(초)
         configuration.setExposedHeaders(List.of("Authorization", "Authorization-Refresh")); // 앱 개발 - Authorization 헤더

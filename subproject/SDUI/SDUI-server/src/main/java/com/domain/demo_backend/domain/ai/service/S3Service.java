@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -28,12 +29,24 @@ public class S3Service {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    private static final Set<String> ALLOWED_RESUME_TYPES = Set.of(
+            "application/pdf", "image/jpeg", "image/png", "image/webp"
+    );
+    private static final long MAX_RESUME_SIZE = 50 * 1024 * 1024; // 50MB
+
     /**
      * 이력서 파일 업로드 → S3 key 반환
      * key: resume/{userId}/{uuid}.{ext}
      * SSE-S3 서버 측 암호화 적용
      */
     public String uploadResumeFile(MultipartFile file, Long userId) throws IOException {
+        if (file.getSize() > MAX_RESUME_SIZE) {
+            throw new IllegalArgumentException("파일 크기는 50MB를 초과할 수 없습니다.");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_RESUME_TYPES.contains(contentType.toLowerCase())) {
+            throw new IllegalArgumentException("허용되지 않는 파일 형식입니다. (PDF, JPEG, PNG, WebP만 가능)");
+        }
         String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "file";
         String ext = originalName.contains(".")
                 ? originalName.substring(originalName.lastIndexOf('.') + 1).toLowerCase()

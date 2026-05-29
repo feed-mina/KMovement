@@ -137,7 +137,7 @@ export function useAIChatLogic({
                 const originalTranscript = transcript; // 발음 채점용 원본 (번역 전)
 
                 // 한국어 포함 시 번역 수행 (영어/일본어 채팅 모드에서 한국어 입력 시)
-                const containsKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(transcript.replace(/\s/g, ''));
+                const containsKorean = /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(transcript);
                 const isKoreanInput = currentRecordingModeRef.current === 'ko' || containsKorean;
                 if (isKoreanInput && (language === 'en' || language === 'ja')) {
                     try {

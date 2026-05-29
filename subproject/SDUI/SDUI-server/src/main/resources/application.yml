@@ -8,9 +8,9 @@ spring:
       static-locations: classpath:/static/
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/testdb # jdbc:postgresql://localhost:5432/testdb # 5434/SDUI_TD
-    username: postgres # postgres # mina
-    password: 1234 # password # 1234
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/testdb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:1234}
     hikari:
       maximum-pool-size: 12
       connection-timeout: 30000
@@ -38,8 +38,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: yerin4984@gmail.com
-    password: xbfkdgfxevqytije
+    username: ${MAIL_USERNAME:yerin4984@gmail.com}
+    password: ${MAIL_PASSWORD:change-me-local}
     protocol: smtp
     properties:
       mail:
@@ -58,18 +58,18 @@ server:
   forward-headers-strategy: native
 
 jwt:
-  secret-key: d6ac9ecc0a3aa3c395313fb236e0ec10d71ab78fb36f54ba626664eba0b842b1
+  secret-key: ${JWT_SECRET_KEY:d6ac9ecc0a3aa3c395313fb236e0ec10d71ab78fb36f54ba626664eba0b842b1}
   issuer: admin
   expiration: 86400000
 
 app:
   url:
     web: ${WEB_URL:http://localhost:3000}
-    mobile: ${MOBILE_URL:http://sdui-delta.vercel.app://}
+    mobile: ${MOBILE_URL:https://yerin.duckdns.org}
 
 kakao:
-  client-id: ${KAKAO_CLIENT_ID:2d22c7fa1d59eb77a5162a3948a0b6fe}
-  token-admin: ${KAKAO_TOKEN_ADMIN:96ed9105639fb627fb2c710f39e6516f}
+  client-id: ${KAKAO_CLIENT_ID:change-me-local}
+  token-admin: ${KAKAO_TOKEN_ADMIN:change-me-local}
   redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8080/api/kakao/callback}
 
 slack:
@@ -84,14 +84,14 @@ openai:
   whisper-model: whisper-1
 
 fastapi:
-  url: http://localhost:8001
-  internal-api-key: sdui-internal-dev-key
+  url: ${FASTAPI_URL:http://localhost:8001}
+  internal-api-key: ${FASTAPI_INTERNAL_API_KEY:sdui-internal-dev-key}
 
 google:
   oauth:
     client-id: ${GOOGLE_CLIENT_ID:}
     client-secret: ${GOOGLE_CLIENT_SECRET:}
-    redirect-uri: ${GOOGLE_REDIRECT_URI:https://sdui-delta.vercel.app/view/GOOGLE_CALLBACK}
+    redirect-uri: ${GOOGLE_REDIRECT_URI:https://yerin.duckdns.org/view/GOOGLE_CALLBACK}
 
 cloud:
   aws:
@@ -117,6 +117,28 @@ kride:
   fastapi:
     url: ${KRIDE_FASTAPI_URL:http://localhost:8000}
     chatbot-url: ${KRIDE_CHATBOT_URL:http://localhost:8001}
+
+# ── Resilience4j 서킷 브레이커 설정 ──
+resilience4j:
+  circuitbreaker:
+    instances:
+      openai:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        minimum-number-of-calls: 5
+        record-exceptions:
+          - java.lang.IllegalStateException
+          - java.io.IOException
+          - java.net.http.HttpTimeoutException
+  ratelimiter:
+    instances:
+      openai:
+        limit-for-period: 30
+        limit-refresh-period: 60s
+        timeout-duration: 5s
 
 logging:
   file:

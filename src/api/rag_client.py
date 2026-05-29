@@ -1,18 +1,77 @@
 """rag_client.py — ChromaDB 벡터 검색 + Groq LLM (TorchServe 경유)"""
 from __future__ import annotations
 import os
+import time
+import threading
 import chromadb
 from groq import Groq
 
 from src.api.torchserve_client import embed_texts_sync
 
-GROQ_MODEL  = "openai/gpt-oss-120b"
+GROQ_MODEL  = "llama-3.3-70b-versatile"
 CHROMA_MODE = os.environ.get("CHROMA_MODE", "http").strip().lower()
 
 # ChromaDB — HttpClient 모드 (서버 분리)
 CHROMA_HOST = os.environ.get("CHROMA_HOST", "localhost")
 CHROMA_PORT = int(os.environ.get("CHROMA_PORT", "8100"))
 CHROMA_PATH = os.environ.get("CHROMA_PATH", "chroma_db")
+
+
+# ── 서킷 브레이커 ─────────────────────────────────────────────────────────
+class CircuitBreaker:
+    """간단한 서킷 브레이커 — CLOSED → OPEN → HALF_OPEN → CLOSED 순환"""
+
+    def __init__(
+        self,
+        failure_threshold: int = 5,
+        recovery_timeout: float = 30.0,
+        half_open_max_calls: int = 3,
+    ):
+        self._lock = threading.Lock()
+        self._failure_threshold = failure_threshold
+        self._recovery_timeout = recovery_timeout
+        self._half_open_max_calls = half_open_max_calls
+        self._failure_count = 0
+        self._half_open_calls = 0
+        self._state = "CLOSED"          # CLOSED | OPEN | HALF_OPEN
+        self._opened_at: float = 0.0
+
+    @property
+    def state(self) -> str:
+        with self._lock:
+            if self._state == "OPEN" and (time.time() - self._opened_at) >= self._recovery_timeout:
+                self._state = "HALF_OPEN"
+                self._half_open_calls = 0
+            return self._state
+
+    def allow_request(self) -> bool:
+        s = self.state
+        if s == "CLOSED":
+            return True
+        if s == "HALF_OPEN":
+            with self._lock:
+                if self._half_open_calls < self._half_open_max_calls:
+                    self._half_open_calls += 1
+                    return True
+            return False
+        return False  # OPEN
+
+    def record_success(self) -> None:
+        with self._lock:
+            self._failure_count = 0
+            self._state = "CLOSED"
+
+    def record_failure(self) -> None:
+        with self._lock:
+            self._failure_count += 1
+            if self._failure_count >= self._failure_threshold:
+                self._state = "OPEN"
+                self._opened_at = time.time()
+                print(f"[CircuitBreaker] OPEN — {self._failure_count}회 연속 실패, {self._recovery_timeout}초 후 재시도")
+
+
+_groq_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=30.0)
+
 
 # ── 싱글턴 초기화 ──────────────────────────────────────────────────────────
 _chroma: chromadb.ClientAPI | None = None
@@ -34,6 +93,15 @@ def get_groq() -> Groq:
     if _groq is None:
         _groq = Groq(api_key=os.environ["GROQ_API_KEY"])
     return _groq
+
+
+def _check_groq_breaker() -> None:
+    """서킷 브레이커 상태 확인 — OPEN이면 예외 발생"""
+    if not _groq_breaker.allow_request():
+        raise RuntimeError(
+            f"Groq API 서킷 브레이커 OPEN 상태입니다 (상태: {_groq_breaker.state}). "
+            "잠시 후 다시 시도해주세요."
+        )
 
 
 # ── ChromaDB 컬렉션 이름 (기존 4개) ────────────────────────────────────────
@@ -120,16 +188,64 @@ Use only the retrieved context when it is relevant. If the context is thin, say 
 [User question]
 {message}
 """
-    resp = get_groq().chat.completions.create(
-        model=GROQ_MODEL,
-        messages=[
-            {"role": "system", "content": "You are K-Ride Guide, a concise Korean travel assistant."},
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.5,
-        max_tokens=700,
+    _check_groq_breaker()
+    try:
+        resp = get_groq().chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": "You are K-Ride Guide, a concise Korean travel assistant."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.5,
+            max_tokens=700,
+        )
+        _groq_breaker.record_success()
+        return resp.choices[0].message.content
+    except Exception as e:
+        _groq_breaker.record_failure()
+        raise
+
+
+def generate_chat_answer_stream(message: str):
+    """토큰 단위 스트리밍 제너레이터 — Groq stream=True"""
+    _check_groq_breaker()
+    passages = search_chat_context(message, top_k=3)
+    context = "\n".join(
+        f"- {p.get('text', '')[:500]}"
+        for p in passages[:8]
+        if p.get("text")
     )
-    return resp.choices[0].message.content
+    if not context:
+        context = "No retrieved context was available."
+
+    prompt = f"""Answer the user's K-Ride travel question in Korean.
+Use only the retrieved context when it is relevant. If the context is thin, say what is missing and give a careful general answer.
+
+[Retrieved context]
+{context}
+
+[User question]
+{message}
+"""
+    try:
+        stream = get_groq().chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": "You are K-Ride Guide, a concise Korean travel assistant."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.5,
+            max_tokens=700,
+            stream=True,
+        )
+        for chunk in stream:
+            delta = chunk.choices[0].delta
+            if delta.content:
+                yield delta.content
+        _groq_breaker.record_success()
+    except Exception as e:
+        _groq_breaker.record_failure()
+        raise
 
 
 def search_pois_by_purpose(
@@ -189,16 +305,22 @@ def generate_recommendation_text(
 
 한국어로 친절하게 작성하세요."""
 
-    resp = get_groq().chat.completions.create(
-        model=GROQ_MODEL,
-        messages=[
-            {"role": "system", "content": "당신은 한국 여행 전문 AI 가이드입니다."},
-            {"role": "user",   "content": prompt},
-        ],
-        temperature=0.7,
-        max_tokens=512,
-    )
-    return resp.choices[0].message.content
+    _check_groq_breaker()
+    try:
+        resp = get_groq().chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": "당신은 한국 여행 전문 AI 가이드입니다."},
+                {"role": "user",   "content": prompt},
+            ],
+            temperature=0.7,
+            max_tokens=512,
+        )
+        _groq_breaker.record_success()
+        return resp.choices[0].message.content
+    except Exception:
+        _groq_breaker.record_failure()
+        raise
 
 
 def generate_itinerary(
@@ -258,15 +380,21 @@ def generate_itinerary(
 }}
 """
 
-    resp = get_groq().chat.completions.create(
-        model=GROQ_MODEL,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user",   "content": user_prompt},
-        ],
-        temperature=0.5,
-        max_tokens=1500,
-    )
+    _check_groq_breaker()
+    try:
+        resp = get_groq().chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user",   "content": user_prompt},
+            ],
+            temperature=0.5,
+            max_tokens=1500,
+        )
+        _groq_breaker.record_success()
+    except Exception:
+        _groq_breaker.record_failure()
+        raise
     import json
     raw = resp.choices[0].message.content.strip()
     # JSON 블록만 추출 (```json ... ``` 래핑 대응)

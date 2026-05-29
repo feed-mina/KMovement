@@ -13,6 +13,7 @@ export interface KrideChatRequest {
   regions?: string[];
   purposes?: string[];
   duration?: number;
+  budget?: [number, number];
 }
 
 /** 백엔드 ChatQueryResponse.java 와 1:1 대응 */

@@ -1,6 +1,6 @@
 # K-Ride .ai 문서 마스터 인덱스
 
-> 최종 수정: 2026-05-27
+> 최종 수정: 2026-05-29
 > kride-project 루트 `.ai` 폴더의 모든 문서 위치와 역할을 안내합니다.
 > 기존 파일은 편집 없이 유지됩니다. 역할 기반 구조는 신규 생성된 하위 폴더를 참조하세요.
 
@@ -112,7 +112,7 @@
 | 파일 | 내용 | 줄수 |
 |------|------|------|
 | [test_results_community_chatbot.md](test_results_community_chatbot.md) | 커뮤니티 + 챗봇 통합 테스트 결과 (Spring Boot 19 + Jest 9 + pytest 9 = 37 ALL PASSED) | 272 |
-| [code_review_0527.md](code_review_0527.md) | 프론트+백엔드+AI 모델 전체 코드 리뷰 (CRITICAL 4 + HIGH 7 + 모델 배포 상태) | — |
+| [code_review_0527.md](code_review_0527.md) | 프론트+백엔드+AI 모델 전체 코드 리뷰 — K1~K6, F1~F7, B1~B7 **[전체 수정 완료 2026-05-29]** | — |
 
 ### 환경/설정 문서
 | 파일 | 내용 | 줄수 |
@@ -131,6 +131,75 @@ SDUI 서브프로젝트의 역할 기반 문서:
 - `subproject/SDUI/.ai/frontend_engineer/` — DynamicEngine 컴포넌트
 - `subproject/SDUI/.ai/qa_engineer/` — SDUI 테스트 전략
 - `subproject/SDUI/.ai/maintenance/` — 배포/디버깅 가이드
+
+---
+
+## 변경 이력 (2026-05-29 코드 리뷰 수정)
+
+`code_review_0527.md`에서 발견된 전체 이슈에 대한 수정이 완료되었습니다.
+
+### KRIDE 챗봇 (K1~K6) — 10개 파일
+| 이슈 | 상태 | 핵심 변경 |
+|------|------|-----------|
+| K3 Groq 모델명 | ✅ | `rag_client.py` — `llama-3.3-70b-versatile` |
+| K2 진짜 SSE 스트리밍 | ✅ | `rag_client.py` + `fastapi_server.py` — `stream=True` + SSE 포맷 |
+| K1 QA→FastAPI | ✅ | `FastApiChatClient.chatSync()` + `/api/chat/qa` 엔드포인트 |
+| K5 Security 인증 | ✅ | `SecurityConfig.java` — `permitAll()` → `authenticated()` |
+| K6 budget 체인 | ✅ | TS 타입 → buildRequest → Java DTO → Client → Service |
+| K4 fallback 개선 | ✅ | "AI 서비스 준비 중" + 질문 에코 |
+
+### 프론트엔드 (F1~F7)
+| 이슈 | 상태 | 핵심 변경 |
+|------|------|-----------|
+| F1 이미지 크기 제한 | ✅ | `CommunityPage.tsx` — 10MB 필터 + alert |
+| F2 SSE 타임아웃 | ✅ | `useKrideChatStream.ts` — 30초 AbortController |
+| F3 스케치 반응형 | ✅ | `CommunityPage.tsx` — `window.innerWidth` 기반 4:3 |
+| F4 마이크 권한 | ⏭️ | 이미 구현됨 (`useAudioRecorder.ts:52-54`) |
+| F5 한국어 정규식 | ✅ | `useAIChatLogic.ts` — `\|` 제거 |
+| F6 멤버십 에러 | ✅ | `AIChatComponentV2.tsx` — `console.error` 추가 |
+| F7 axios 타임아웃 | ✅ | `axios.tsx` — `timeout: 15000` |
+
+### 백엔드 (B1~B7)
+| 이슈 | 상태 | 핵심 변경 |
+|------|------|-----------|
+| B1 DTO 검증 | ✅ | `@NotBlank`/`@Size`/`@Valid` — 3개 DTO + 2개 컨트롤러 |
+| B2 업로드 크기 | ✅ | Supabase 10MB + S3 50MB 서버 검증 |
+| B3 비밀번호 환경변수 | ✅ | `application.yml` — `${ENV_VAR:default}` 패턴 전환 |
+| B4 MIME 검증 | ✅ | Supabase(이미지) + S3(PDF+이미지) |
+| B5 커뮤니티 권한 | ⏭️ | 이미 구현됨 (작성자 확인 로직 존재) |
+| B6 서킷 브레이커 | ✅ | OpenAI: Resilience4j / Groq: Python CircuitBreaker |
+| B7 에러 노출 방지 | ✅ | `GlobalExceptionHandler` — 상세 메시지 제거 |
+
+### 수정된 파일 총 목록 (22개)
+**FastAPI (Python)**
+1. `src/api/rag_client.py` — K2, K3, B6-Groq
+2. `src/api/fastapi_server.py` — K2, K4
+
+**Spring Boot (Java)**
+3. `KrideChatService.java` — K1, K6
+4. `FastApiChatClient.java` — K1, K6
+5. `ChatQueryRequest.java` — K6
+6. `SecurityConfig.java` — K5
+7. `PostCreateRequest.java` — B1
+8. `PostUpdateRequest.java` — B1
+9. `ReportRequest.java` — B1
+10. `CommunityPostController.java` — B1
+11. `PostReportController.java` — B1
+12. `SupabaseStorageService.java` — B2, B4
+13. `S3Service.java` — B2, B4
+14. `GlobalExceptionHandler.java` — B7
+15. `OpenAiClient.java` — B6
+16. `OpenAiClientV2.java` — B6
+17. `build.gradle` — B6 (resilience4j)
+18. `application.yml` — B3, B6
+
+**Next.js (TypeScript)**
+19. `krideChat.ts` — K6
+20. `useKrideChatStream.ts` — K6, F2
+21. `useAIChatLogic.ts` — F5
+22. `AIChatComponentV2.tsx` — F6
+23. `CommunityPage.tsx` — F1, F3
+24. `axios.tsx` — F7
 
 ---
 

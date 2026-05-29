@@ -13,6 +13,7 @@ const isTestEnv = typeof process !== 'undefined' && process.env?.NODE_ENV === 't
 const api: AxiosInstance = axios.create({
     baseURL: '',  // 빈 문자열: 상대 URL 그대로 전달
     withCredentials: true,
+    timeout: 15000,
 });
 
 // 1. 요청 인터셉터: HttpOnly 쿠키로 토큰이 자동 전송됨 (withCredentials: true)

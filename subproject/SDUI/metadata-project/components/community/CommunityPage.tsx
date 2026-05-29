@@ -226,6 +226,18 @@ function SketchPad({
     const [brushColor, setBrushColor] = useState('#111827');
     const [brushSize, setBrushSize] = useState(10);
     const [isErasing, setIsErasing] = useState(false);
+    const [canvasSize, setCanvasSize] = useState({ w: 640, h: 480 });
+
+    useEffect(() => {
+        const updateSize = () => {
+            const maxW = Math.min(window.innerWidth - 48, 640);
+            const h = Math.round(maxW * 0.75); // 4:3 비율 유지
+            setCanvasSize({ w: maxW, h });
+        };
+        updateSize();
+        window.addEventListener('resize', updateSize);
+        return () => window.removeEventListener('resize', updateSize);
+    }, []);
 
     const prepareCanvas = useCallback(() => {
         const canvas = canvasRef.current;
@@ -239,7 +251,7 @@ function SketchPad({
 
     useEffect(() => {
         prepareCanvas();
-    }, [prepareCanvas]);
+    }, [prepareCanvas, canvasSize]);
 
     const getPoint = (event: ReactPointerEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
@@ -330,8 +342,8 @@ function SketchPad({
                 <canvas
                     ref={canvasRef}
                     className="community-sketch-canvas"
-                    width={640}
-                    height={480}
+                    width={canvasSize.w}
+                    height={canvasSize.h}
                     onPointerDown={startDrawing}
                     onPointerMove={draw}
                     onPointerUp={stopDrawing}
@@ -411,9 +423,16 @@ function ImagePicker({
         };
     }, [previews]);
 
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const selectedFiles = Array.from(event.target.files || [])
+        const imageFiles = Array.from(event.target.files || [])
             .filter((file) => file.type.startsWith('image/'));
+        const oversized = imageFiles.filter((file) => file.size > MAX_FILE_SIZE);
+        if (oversized.length > 0) {
+            alert(`${oversized.map((f) => f.name).join(', ')} 파일이 10MB를 초과합니다. 해당 파일은 제외됩니다.`);
+        }
+        const selectedFiles = imageFiles.filter((file) => file.size <= MAX_FILE_SIZE);
         onChange(selectedFiles);
         event.target.value = '';
     };

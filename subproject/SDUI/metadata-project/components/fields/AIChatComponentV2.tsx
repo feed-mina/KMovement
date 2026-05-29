@@ -61,7 +61,9 @@ export default function AIChatComponentV2({ meta, data }: AIChatComponentProps) 
 
     useEffect(() => {
         if (isDisabled) return;
-        api.get('/api/v1/user-memberships/current').catch(() => {});
+        api.get('/api/v1/user-memberships/current').catch((err) => {
+            console.error('[AIChatComponentV2] 멤버십 조회 실패:', err?.response?.status);
+        });
     }, [isDisabled]);
 
     // ── SDUI Sub-Field Rendering Logic ──
