@@ -1,0 +1,1537 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>K-Ride 2.0 · Final Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Noto+Serif+KR:wght@500;700;900&family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<script type="application/json" id="speaker-notes">
+[
+"표지 슬라이드입니다. 자기소개 한 문장 후 바로 본론으로 들어갑니다. '안녕하세요, 민예린입니다. 지난 2개월 동안 K-Ride를 추천 엔진에서 AI 여행로그 생성 플랫폼으로 확장한 기록을 공유드리겠습니다.' 이 한 줄이면 충분합니다. 기능 나열은 하지 마세요. 청중에게 던지는 약속은 단 하나, 이 발표는 기능이 아니라 '왜 그렇게 구조를 짰는가'의 이야기라는 점입니다.",
+
+"동기 슬라이드입니다. 세 박자로 짧게 끊어 말합니다. 첫째, 기존 K-Ride는 경로와 단순 추천이 전부였습니다. 둘째, 사용자는 '왜 이 장소가 나에게 추천되는지'를 알고 싶어합니다. 셋째, 거기에 생성형 AI를 붙이려면 화면에 모델을 그냥 호출하는 것이 아니라, 데이터와 비동기 운영 구조가 함께 필요했습니다. 한 줄 요약은 화면에 떠 있는 '추천 → 설명 → 생성 → 검증' 흐름입니다. 이 화살표가 이번 발표의 목차이기도 합니다.",
+
+"2개월의 작업이 어디로 흘렀는지 한 장으로 보여줍니다. 네 개의 레이어 — 데이터, 모델링, 서버/서빙, 화면 — 가 있고, 이후 슬라이드들은 전부 이 네 박스 중 하나에 들어간다고 말해주세요. 청중에게 '길을 잃지 않게 해주는 지도'라고 미리 약속합니다. 숫자 두 개 — 6+ 모델 트랙, 82→50 정리된 슬라이드 — 만 짧게 짚고 넘어가도 됩니다.",
+
+"에이전트 사용방법입니다. '저는 코딩만 한 게 아니라 에이전트와 함께 작업했다'는 사실보다, '에이전트를 어떻게 작업 파트너로 썼는가'를 말합니다. 탐색-구현-검증-정리의 네 단계 루프로 굴렸습니다. 단순 코드 생성이 아니라, report와 dataset_report 안의 산출물을 다시 읽고 발표 구조로 재배치하는 데 가장 큰 도움이 됐다고 솔직하게 말하면 신뢰가 올라갑니다.",
+
+"여기서부터 챕터1 데이터입니다. 다섯 종류의 데이터가 각자 다른 역할을 맡았다고 말합니다. POI는 후보군, 도로는 안전, 날씨는 보정, 소비는 예산 현실성, K-culture는 취향 그래프. 숫자를 차례로 읽지 말고, 데이터 한 줄당 '이게 어디에 쓰이는지' 한 단어를 붙여주세요. 87만이라는 숫자 한 번만 강조하면 충분합니다.",
+
+"적재(Ingestion)는 단순 DB insert가 아니라 '모델이 먹을 수 있는 형태로 바꾸는 전처리'였다고 정의합니다. Raw → Clean → Feature → Store → Serve 다섯 단계가 한 줄로 흐르도록 손짓하며 설명합니다. Store가 4종 DB로 갈리는 부분에서 자연스럽게 다음 슬라이드로 넘어가세요.",
+
+"DB는 하나가 아니라 '질문의 종류에 따라' 나눠 썼다고 말합니다. PostgreSQL은 정합성, ChromaDB는 의미 검색, Neo4j는 관계, 파일 저장소는 대용량 미디어. 기술 이름 나열이 아니라 '역할 분리'로 읽혀야 합니다. 이게 GraphRAG가 가능했던 이유라고 한 줄로 매듭짓습니다.",
+
+"GraphRAG는 추천 결과에 '왜 추천됐는지' 설명을 붙이기 위한 것입니다. K-culture 지역 분포와 POI 공동출현 히트맵을 근거 이미지로 보여줍니다. 사용자가 BTS, 전통시장, 일본어 질의를 넣어도 다국어 임베딩과 후보 검색이 연결되는 설계라고 짧게 말하세요. Groq 응답 0.79초라는 수치는 한 번만 던집니다.",
+
+"챕터2 아키텍처로 넘어왔습니다. 핵심 메시지는 '책임 분리'입니다. 화면, 운영 API, AI 오케스트레이션, 모델 서빙 — 이 네 계층을 시각적으로 보여주세요. 화면에서 모델을 직접 부르는 게 아니라 경계가 명확히 나뉘어 있다고 말합니다. 이게 다음 슬라이드들의 전제입니다.",
+
+"SDUI와 커뮤니티를 한 슬라이드에 묶었습니다. SDUI는 화면을 코드가 아닌 메타데이터로 바꿔서 배포 속도를 올린 구조이고, 커뮤니티의 이미지 업로드는 단순 첨부파일이 아니라 뒤에 나오는 AI 영상 생성 파이프라인의 원천 데이터입니다. 두 기능이 화면 단에서 어떻게 연결되는지가 핵심입니다.",
+
+"서버 계층입니다. CRUD와 AI 작업을 같은 방식으로 처리하지 않았다고 말합니다. Spring은 짧은 요청, FastAPI는 AI 오케스트레이션, Celery/Redis는 5~15분 걸리는 영상 생성을 큐로 분리. 'job_id를 즉시 돌려주고 뒤에서 처리한다'는 한 줄이 이 슬라이드의 결론입니다.",
+
+"TorchServe는 '모델을 API 서버에서 떼어내는 배포 레이어'라고 정의합니다. handler-MAR-store-endpoint 네 박스를 짚으면서 한 문장씩. 굳이 깊게 들어가지 마세요. 청중이 기억해야 할 건 'API 서버가 모델 파일을 직접 들고 있지 않다'는 것뿐입니다.",
+
+"배포 파이프라인입니다. 'docker compose build --no-cache 기준으로 재현 가능한 실행'을 목표로 잡았다고 말합니다. 빌드-실행-추적-서빙-검증의 다섯 단계가 한 흐름으로 이어진다는 점, 그리고 아직 운영 배포가 아니라 '검증 가능한 개발 파이프라인'이라는 점을 솔직하게 짚어주세요.",
+
+"챕터3 모델링입니다. 6개의 모델 트랙을 한 장에 펼쳤습니다. 이 슬라이드에서는 이름을 빠르게 훑고, 각 모델은 다음 슬라이드들에서 동일한 4박자 — 입력, 오픈소스 근거, 산출물, 서비스 연결 — 로 설명한다고 미리 약속합니다. 그래야 청중이 6번 반복되는 패턴을 따라옵니다.",
+
+"WeatherLSTM. 날씨 예측 자체가 목적이 아니라 비/흐림을 경로 추천의 안전 보정값으로 연결하기 위한 모델입니다. 14일 시퀀스, 8개 피처, 3-class. 82.16%라는 수치는 한 번만 던지고, '흐림 클래스가 약했다'는 약점을 먼저 드러내세요. 약점을 먼저 말하면 신뢰가 올라갑니다.",
+
+"Safety 모델. RandomForest 기반, 89.1% 매핑률, F1 0.9987. 성능이 높게 나온 만큼 과적합 가능성도 함께 말하세요. '그래서 실서비스에서는 사고 데이터와 최신 도로 데이터를 계속 보강해야 한다'는 한 줄이 솔직한 결론입니다.",
+
+"POI TabNet. AI Hub 21,384행, 23개 컬럼. pytorch-tabnet 기반. 거리만 보는 추천의 한계를 줄이기 위해 만들었고, 방문 순서/체류시간/재방문 의향을 학습해서 tourism score로 연결했다고 설명합니다. 화면의 TabNet 아키텍처 그림은 가볍게 손가락으로 짚어주는 정도면 충분합니다.",
+
+"Consume TabNet. R2 0.5939, MAE 42,764. 숫자는 자랑이 아니라 '예산 현실성 보정'을 위한 수단입니다. 지역별 MAE 차이가 있다는 점이 가장 중요한 발견이고, 이게 다음 트러블슈팅 챕터로 자연스럽게 연결됩니다.",
+
+"GraphRAG. POI 87만 건 인덱스, Groq 응답 0.79초, 임베딩 384차원. qwen2.5 로컬 시도에서 Groq API로 전환하면서 응답 속도가 46초 → 1~2초로 줄어든 점을 짧게 자랑해도 좋습니다. 단, 핵심은 '추천의 설명 가능성'을 맡는 축이라는 점입니다.",
+
+"점수 통합. 개별 모델이 따로 끝나는 게 아니라, 최종 경로 추천의 weight와 설명으로 합쳐진다는 결론을 말합니다. Safety + Weather penalty + Tourism + Budget + Explain. 모델링 파트의 마무리이자, 다음 미디어 AI 파트로 넘어가는 다리입니다.",
+
+"챕터4 미디어 AI 파이프라인. 5단계로 설계했다고 말합니다. Image → Caption → Narration → Media → FFmpeg. 여기서 다시 한 번 '커뮤니티 이미지 업로드'와 연결지어주세요. 게시판 사진이 그냥 첨부가 아니라 이 파이프라인의 입력 데이터라는 점이 깔끔한 연결고리입니다.",
+
+"이미지 → 텍스트는 BLIP-2 기반입니다. Frozen image encoder + Q-Former + Frozen LLM 구조. 핵심은 BLIP-2가 영상을 만드는 모델이 아니라 '사진을 영상 프롬프트로 바꾸는 중간 단계'라는 정의입니다. 영문 캡션이 다음 영상 생성 라우터의 분기 기준이 된다는 것도 함께 짚어주세요.",
+
+"텍스트 → TTS. GPT-SoVITS를 목표로 잡았지만 실제 운영은 gTTS fallback을 함께 설계했다고 말합니다. '연구용 WebUI와 서비스용 API의 입력 규칙이 다르다'는 발견이 가장 중요한 이야기이고, 트러블슈팅 챕터에서 다시 다룬다고 예고합니다.",
+
+"이미지/낙서 → 영상. CogVideoX-5b는 사람/동물이 있을 때, 3D Photo Inpainting은 정적 풍경일 때 — BLIP-2 캡션에 따라 라우팅된다는 게 핵심입니다. 모든 사진에 큰 모델을 쓰는 게 아니라 비용과 대기시간에 맞춰 자동 분기한다는 점이 자랑할 만한 설계입니다. 낙서는 별도로 Meta Animated Drawings 파이프라인을 탑니다.",
+
+"영상 + TTS. FFmpeg가 마지막 합성 단계입니다. BGM은 -18dB로 감쇠시키고 narration을 우선시. -shortest 옵션으로 트랙 길이를 자동 동기화. 이 마지막 단계의 산출물이 화면의 영상입니다. 실제 재생해보면서 'AI가 만든 영상에 AI 음성이 입혀진 결과'라고 짧게 말해주세요.",
+
+"챕터5 트러블슈팅 TTS편. 언어 코드와 실행 환경 차이에서 시작된 문제입니다. WebUI는 한국어/Korean 형태를 기대하고 API는 ko 값을 요구. Mecab C++ 엔진과 한국어 사전 경로가 꼬여서 세그멘테이션 폴트로 서버가 즉사했습니다. 해결책: 시스템 라이브러리 경로를 찾아 mecab 객체에 직접 매핑, BigVGAN은 런타임 몽키 패치로 누락 파라미터 강제 주입. 이게 진짜 밤샘의 흔적입니다.",
+
+"GPU/메모리 트러블. CogVideoX-5b는 16GB VRAM에서 OOM이 나서, enable_sequential_cpu_offload + VAE slicing/tiling 조합으로 극한 최적화했습니다. 그리고 한 요청에 5~15분 걸리는 작업을 동기 API로 받으면 안 되니까 Celery 큐 + 3중 생존 방어막(렌더 실패 → 프레임 추출 → 더미 영상) 구조로 바꿨습니다. '멋있는 모델보다 운영 구조가 중요했다'는 한 줄로 매듭짓습니다.",
+
+"데이터/화면 트러블. 모델 쪽은 흐림 클래스 약함, 소비 지역별 오차, Safety 과적합 검토 필요 — 이 세 가지를 숨기지 않고 산출물로 기록했습니다. 화면 쪽은 인트로 레이아웃 문제와 커뮤니티 이미지 표시 문제를 Playwright 캡처로 검증한 흐름입니다. 21장의 인트로 캡처가 그 증거입니다.",
+
+"현재 사용 중인 도구들. 프론트엔드/백엔드/AI·데이터/Ops 네 줄로 정리. 도구를 많이 쓴 게 자랑이 아니라 '각 도구가 어떤 책임을 맡았는지'가 핵심이라고 말합니다. DagsHub와 MLflow는 실험 추적, TorchServe와 Celery는 배포와 긴 작업 분리.",
+
+"증거 아카이브. 화면 캡처와 모델 차트는 '산출물이 실제로 남았다'는 증거입니다. 완성도를 과장하지 않고 남아 있는 흔적을 보여주는 태도가 시안 발표에는 더 맞습니다. 이 슬라이드는 빠르게 넘기면서 '실제 작업 기록이 이만큼 있다'는 정도로만 말합니다.",
+
+"마지막 메시지입니다. 모든 기능을 다시 요약하지 마세요. 2개월의 핵심은 개별 기능이 아니라 데이터-모델-서버-화면-배포를 연결한 '구조'였다고 마무리합니다. 'K-Ride는 추천 결과를 보여주는 앱에서, 추천 근거와 AI 미디어까지 운영 가능한 시스템으로 확장됐습니다.' 이 한 문장이 청중이 들고 갈 메시지입니다.",
+
+"감사합니다. 연락처는 화면에 있습니다. 질문 받겠습니다."
+]
+</script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-2: #fafaf9;
+    --panel: #f5f5f4;
+    --panel-2: #ededec;
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.18);
+    --text: #0a0a0a;
+    --text-2: #404040;
+    --text-3: #737373;
+    --red: #E50914;
+    --red-dim: #c8102e;
+    --gold: #b8860b;
+    --serif: "Noto Serif KR", "Nanum Myeongjo", serif;
+    --sans: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  html, body { margin: 0; padding: 0; background: #f5f5f4; color: var(--text); font-family: var(--sans); }
+  deck-stage { background: var(--bg); }
+
+  /* SLIDE BASE */
+  .slide {
+    width: 1920px; height: 1080px;
+    background: var(--bg);
+    color: var(--text);
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 80px 100px 100px;
+    display: flex;
+    flex-direction: column;
+  }
+  .slide.padded-sm { padding: 60px 80px; }
+
+  /* TOP RIBBON */
+  .ribbon {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--sans);
+    font-size: 18px;
+    letter-spacing: 0.25em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .ribbon .chap {
+    color: var(--red); font-weight: 700;
+  }
+  .ribbon .pipe { color: var(--text-3); }
+  .ribbon .ind { color: var(--text-2); }
+  .ribbon-r { margin-left: auto; color: var(--text-3); font-size: 16px; letter-spacing: 0.18em; }
+
+  /* HEADINGS */
+  h1.deck-title { font-family: var(--sans); font-weight: 800; font-size: 96px; line-height: 1.02; letter-spacing: -0.03em; margin: 0 0 22px 0; color: var(--text); }
+  h2.section-h {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 72px;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 0 0 22px 0;
+    color: var(--text);
+  }
+  h3.kicker {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.45;
+    color: var(--text-2);
+    margin: 0 0 36px 0;
+    max-width: 1500px;
+  }
+  .red-bar {
+    width: 88px; height: 6px; background: var(--red); margin-bottom: 32px;
+    border-radius: 2px;
+  }
+
+  /* COVER */
+  .cover {
+    background: linear-gradient(135deg, #ffffff 0%, #fafaf9 60%, #f5f1ef 100%);
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+  .cover-inner {
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    padding: 100px 140px;
+    position: relative;
+  }
+  .cover .mark {
+    font-family: var(--sans);
+    font-size: 26px; letter-spacing: 0.35em; color: var(--red);
+    text-transform: uppercase; font-weight: 700;
+    margin-bottom: 40px;
+  }
+  .cover .title {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 220px;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    margin: 0 0 16px 0;
+    color: var(--text);
+  }
+  .cover .title .red { color: var(--red); }
+  .cover .subtitle {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 42px;
+    line-height: 1.35;
+    color: var(--text-2);
+    margin-top: 24px;
+    max-width: 1300px;
+  }
+  .cover .meta-row {
+    margin-top: 100px;
+    display: flex; gap: 60px;
+    color: var(--text-3); font-size: 24px; letter-spacing: 0.2em; text-transform: uppercase;
+    align-items: center;
+  }
+  .cover .meta-row .by { color: var(--text); font-weight: 700; letter-spacing: 0.15em; font-family: var(--sans); }
+  .cover-stripes {
+    position: absolute; right: 0; top: 0; bottom: 0; width: 12px;
+    background: linear-gradient(180deg, var(--red) 0%, var(--red) 30%, transparent 30%, transparent 38%, var(--red) 38%, var(--red) 50%, transparent 50%);
+  }
+  .cover-noise {
+    position: absolute; inset: 0; opacity: 0.025; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='3'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* CONTENT ROWS / GRIDS */
+  .content { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 24px; }
+  .grid-6 { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; gap: 28px; }
+
+  /* CARDS */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 32px 28px;
+    display: flex; flex-direction: column; gap: 14px;
+    min-height: 0;
+  }
+  .card .label {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.18em;
+    color: var(--red);
+    text-transform: uppercase;
+  }
+  .card .h {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--text);
+    line-height: 1.15;
+  }
+  .card .desc {
+    font-family: var(--sans);
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--text-2);
+  }
+  .card .num {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 56px;
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .card .num .unit { font-size: 26px; color: var(--text-2); font-weight: 500; margin-left: 6px; }
+  .card .red-tab { width: 36px; height: 4px; background: var(--red); margin-bottom: 4px; border-radius: 2px; }
+
+  /* STAT TILES */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 8px; }
+  .stat {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; padding: 20px 22px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .stat .v { font-family: var(--sans); font-weight: 800; font-size: 48px; color: var(--text); line-height: 1; letter-spacing: -0.02em; }
+  .stat .v .small { font-size: 26px; color: var(--text-2); font-weight: 500; }
+  .stat .l { font-size: 16px; color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+
+  /* PIPELINE FLOW */
+  .flow { display: flex; gap: 0; align-items: stretch; }
+  .flow .step {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 28px 26px;
+    display: flex; flex-direction: column; gap: 12px;
+    margin-right: 16px;
+    position: relative;
+  }
+  .flow .step:last-child { margin-right: 0; }
+  .flow .step .n {
+    font-family: var(--sans); font-weight: 800; font-size: 14px; letter-spacing: 0.3em;
+    color: var(--red);
+  }
+  .flow .step .title {
+    font-family: var(--sans); font-weight: 700; font-size: 26px; color: var(--text);
+  }
+  .flow .step .body {
+    font-family: var(--sans); font-size: 18px; color: var(--text-2); line-height: 1.5;
+  }
+  .flow .arrow {
+    align-self: center;
+    color: var(--red); font-size: 36px; font-weight: 800;
+    width: 24px; flex: 0 0 auto;
+    margin: 0 -4px;
+  }
+
+  /* BIG IMAGE LAYOUT */
+  .img-wrap {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .img-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .img-cap { font-size: 16px; color: var(--text-3); margin-top: 10px; letter-spacing: 0.08em; font-weight: 500; }
+
+  /* TWO-COLUMN with image right */
+  .two-col { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; flex: 1; min-height: 0; }
+  .two-col .left { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .two-col .right { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+  /* CHAPTER STRIP (inline at top of slide, instead of full divider slide) */
+  .chap-strip {
+    display: inline-flex; align-items: center; gap: 14px;
+    background: var(--red);
+    color: #fff;
+    font-family: var(--sans);
+    font-weight: 800; font-size: 18px;
+    letter-spacing: 0.25em; text-transform: uppercase;
+    padding: 8px 18px;
+    border-radius: 3px;
+    margin-bottom: 24px;
+    align-self: flex-start;
+  }
+  .chap-strip .num { font-family: var(--sans); font-weight: 800; }
+
+  /* SECTION DIVIDER FULL */
+  .divider {
+    background: var(--bg);
+    align-items: stretch; justify-content: stretch;
+    padding: 0;
+  }
+  .divider-inner {
+    flex: 1; display: grid; grid-template-columns: 220px 1fr; gap: 0;
+  }
+  .divider-side {
+    background: var(--red);
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 100px 0;
+    color: #fff;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: var(--sans); font-weight: 800; font-size: 22px; letter-spacing: 0.5em;
+    text-transform: uppercase;
+  }
+  .divider-body {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 100px 120px;
+    gap: 28px;
+  }
+  .divider-body .ch-num {
+    font-family: var(--sans); font-weight: 800; font-size: 26px; color: var(--red);
+    letter-spacing: 0.4em;
+  }
+  .divider-body .ch-title {
+    font-family: var(--sans); font-weight: 800; font-size: 160px;
+    line-height: 0.95; letter-spacing: -0.04em; color: var(--text); margin: 0;
+  }
+  .divider-body .ch-kicker {
+    font-family: var(--serif); font-weight: 500; font-size: 36px; line-height: 1.4;
+    color: var(--text-2); margin-top: 24px; max-width: 1200px;
+  }
+
+  /* LISTS */
+  ul.clean { list-style: none; padding: 0; margin: 0; }
+  ul.clean li {
+    display: grid; grid-template-columns: 8px 1fr; gap: 16px;
+    align-items: baseline;
+    padding: 10px 0;
+    font-size: 22px; color: var(--text); line-height: 1.5;
+  }
+  ul.clean li::before {
+    content: ""; display: block; width: 8px; height: 8px; background: var(--red); border-radius: 50%;
+    transform: translateY(8px);
+  }
+  ul.clean li strong { color: var(--text); font-weight: 700; }
+  ul.clean li span.dim { color: var(--text-2); }
+
+  /* TABLE ROW STYLE */
+  .row-table {
+    display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+  }
+  .row-table .row {
+    display: grid; grid-template-columns: 200px 1fr;
+    border-bottom: 1px solid var(--border);
+    padding: 16px 22px;
+    align-items: baseline;
+    gap: 24px;
+  }
+  .row-table .row:last-child { border-bottom: 0; }
+  .row-table .row .k { font-family: var(--sans); font-weight: 700; color: var(--red); font-size: 18px; letter-spacing: 0.18em; text-transform: uppercase; }
+  .row-table .row .v { font-family: var(--sans); font-weight: 400; color: var(--text); font-size: 20px; line-height: 1.5; }
+  .row-table .row .v strong { color: var(--text); font-weight: 700; }
+
+  /* VIDEO TILES */
+  .vid-tile {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px;
+    overflow: hidden; display: flex; flex-direction: column;
+    position: relative;
+  }
+  .vid-tile video { width: 100%; height: 360px; object-fit: cover; background: #000; display: block; }
+  .vid-tile .vid-meta { padding: 18px 22px; display: flex; flex-direction: column; gap: 6px; }
+  .vid-tile .vid-title { font-weight: 700; font-size: 22px; color: var(--text); }
+  .vid-tile .vid-sub { font-size: 16px; color: var(--text-3); }
+  .vid-tile .play-badge {
+    position: absolute; top: 14px; left: 14px;
+    background: rgba(0,0,0,0.7); color: var(--red);
+    border: 1px solid var(--red);
+    padding: 4px 10px;
+    font-size: 14px; letter-spacing: 0.15em; font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  /* FOOTER */
+  .footer {
+    position: absolute; left: 100px; right: 100px; bottom: 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    color: var(--text-3); font-size: 14px; letter-spacing: 0.15em; text-transform: uppercase;
+    font-weight: 600;
+  }
+  .footer .brand { color: var(--red); font-weight: 800; }
+
+  /* CAPTURE GRID */
+  .cap-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; flex: 1; min-height: 0; }
+  .cap-grid .ct {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
+    overflow: hidden; position: relative;
+    display: flex; flex-direction: column;
+  }
+  .cap-grid .ct img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cap-grid .ct .ct-cap {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 12px 14px;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.85));
+    color: var(--text); font-size: 14px; font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  /* TWO-COL WIDE (text + big image right) */
+  .ti-layout { display: grid; grid-template-columns: 1fr 1.25fr; gap: 56px; flex: 1; min-height: 0; }
+  .ti-layout .ti-left { display: flex; flex-direction: column; gap: 22px; }
+  .ti-layout .ti-right { display: flex; flex-direction: column; gap: 12px; }
+  .ti-layout .ti-img {
+    flex: 1; background: #fff; border: 1px solid var(--border); border-radius: 6px;
+    padding: 24px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ti-layout .ti-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+  /* CONTACT */
+  .contact { background: linear-gradient(135deg, #ffffff 0%, #fafaf9 100%); padding: 0; }
+  .contact-inner {
+    flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; gap: 32px;
+  }
+  .contact .name { font-family: var(--sans); font-weight: 800; font-size: 140px; letter-spacing: -0.03em; color: var(--text); margin: 0; }
+  .contact .seed { font-family: var(--serif); font-style: italic; font-size: 36px; color: var(--text-2); }
+  .contact .info { display: flex; gap: 60px; font-size: 24px; color: var(--text-2); letter-spacing: 0.1em; }
+  .contact .info .k { color: var(--red); font-weight: 700; margin-right: 12px; }
+  .contact .ribbon-bot { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); color: var(--text-3); font-size: 16px; letter-spacing: 0.4em; text-transform: uppercase; }
+
+  /* TROUBLE BEFORE/AFTER */
+  .ba-grid { display: grid; grid-template-columns: 1fr 80px 1fr; gap: 28px; align-items: stretch; }
+  .ba-grid .ba-arrow { display: flex; align-items: center; justify-content: center; color: var(--red); font-size: 70px; font-weight: 800; }
+  .ba-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 28px; display: flex; flex-direction: column; gap: 14px; }
+  .ba-card.before { border-left: 4px solid #a3a3a3; }
+  .ba-card.after { border-left: 4px solid var(--red); }
+  .ba-card .tag { font-family: var(--sans); font-weight: 700; font-size: 14px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-3); }
+  .ba-card.after .tag { color: var(--red); }
+  .ba-card .h { font-family: var(--sans); font-weight: 700; font-size: 24px; color: var(--text); line-height: 1.25; }
+  .ba-card ul { padding-left: 18px; margin: 0; color: var(--text-2); font-size: 18px; line-height: 1.55; }
+
+  /* STACK GRID for tools */
+  .tool-stack { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .tool-col { background: var(--panel); border-top: 4px solid var(--red); padding: 26px 24px; border-radius: 4px; display: flex; flex-direction: column; gap: 12px; }
+  .tool-col h4 { font-family: var(--sans); font-weight: 700; font-size: 22px; color: var(--text); margin: 0 0 8px 0; }
+  .tool-col .item { font-size: 17px; color: var(--text-2); padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .tool-col .item:last-child { border: 0; }
+  .tool-col .item strong { color: var(--text); font-weight: 600; }
+
+  /* FINAL */
+  .final-inner { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 40px; }
+  .final-quote { font-family: var(--serif); font-weight: 500; font-size: 68px; line-height: 1.25; color: var(--text); max-width: 1650px; }
+  .final-quote em { color: var(--red); font-style: normal; font-weight: 700; }
+  .final-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 40px; }
+  .final-grid .fb { padding: 22px; background: var(--panel); border-top: 4px solid var(--red); }
+  .final-grid .fb h5 { margin: 0 0 8px 0; font-size: 20px; color: var(--text); font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; }
+  .final-grid .fb p { margin: 0; font-size: 18px; color: var(--text-2); line-height: 1.5; }
+
+</style>
+</head>
+<body>
+<deck-stage>
+
+<!-- 01 COVER -->
+<section class="slide cover" data-screen-label="01 Cover">
+  <div class="cover-noise"></div>
+  <div class="cover-stripes"></div>
+  <div class="cover-inner">
+    <div class="mark">N · K-Ride Project · 2026</div>
+    <h1 class="title">K-RIDE<br><span class="red">2.0</span></h1>
+    <div class="subtitle">GraphRAG 추천 엔진을 <strong style="color:var(--text);font-weight:700;">AI 여행로그 생성 플랫폼</strong>으로 확장한 2개월의 기록.</div>
+    <div class="meta-row">
+      <div><span class="by">민예린</span> · 단독 개발 · 2026.03 — 2026.05</div>
+      <div>기획 · 데이터 · 모델 · 서버 · 화면 · 배포</div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 MOTIVATION -->
+<section class="slide" data-screen-label="02 Motivation">
+  <div class="ribbon"><span class="chap">00</span><span class="pipe">/</span><span class="ind">Why</span><div class="ribbon-r">Motivation</div></div>
+  <div class="red-bar"></div>
+  <h2 class="section-h">기능을 추가한 게 아니라,<br>경험을 <span style="color:var(--red)">설명 가능한 흐름</span>으로 바꿨다.</h2>
+  <h3 class="kicker">추천 → 설명 → 생성 → 검증. 이 한 줄이 이번 발표의 목차다.</h3>
+  <div class="content">
+    <div class="grid-3" style="margin-top:30px;">
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Problem</div>
+        <div class="h">경로와 단순 추천에서 멈춰 있었다</div>
+        <div class="desc">사용자는 “왜 이 장소가 나에게?”의 답을 받지 못했고, 결과 화면은 이유 없는 리스트였다.</div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Need</div>
+        <div class="h">추천에 근거를 붙여야 한다</div>
+        <div class="desc">K-콘텐츠·아티스트·취향이 얽힌 다차원 질의를 풀려면 데이터 구조와 검색 계층을 다시 짜야 했다.</div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Shift</div>
+        <div class="h">생성형 AI는 화면 위의 호출이 아니다</div>
+        <div class="desc">5~15분 걸리는 영상 생성을 다루려면 비동기 운영 구조와 데이터 파이프라인이 함께 와야 했다.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">K-RIDE 2.0</div><div>02 / 32</div></div>
+</section>
+
+<!-- 03 BUILD MAP -->
+<section class="slide" data-screen-label="03 Build Map">
+  <div class="ribbon"><span class="chap">00</span><span class="pipe">/</span><span class="ind">Overview</span><div class="ribbon-r">2-Month Build Map</div></div>
+  <div class="red-bar"></div>
+  <h2 class="section-h">네 개의 레이어로 쌓아 올린 2개월.</h2>
+  <h3 class="kicker">이후 모든 슬라이드는 이 네 박스 중 하나에 속한다.</h3>
+  <div class="content">
+    <div class="grid-4" style="flex:1;">
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Layer 1 · Data</div>
+        <div class="h">POI · 도로 · 날씨 · 소비 · K-culture</div>
+        <div class="desc">87만 건의 POI를 후보·안전·예산·취향의 입력으로 정렬했다.</div>
+        <div style="margin-top:auto;font-size:42px;font-weight:800;color:var(--red);">874K<span style="font-size:18px;color:var(--text-2);font-weight:500;margin-left:8px;">rows</span></div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Layer 2 · Model</div>
+        <div class="h">WeatherLSTM · TabNet · RF · GraphRAG · BLIP-2 · SoVITS</div>
+        <div class="desc">점수 하나가 아니라 ‘서비스 의사결정’으로 연결되는 6개 트랙.</div>
+        <div style="margin-top:auto;font-size:42px;font-weight:800;color:var(--red);">6+<span style="font-size:18px;color:var(--text-2);font-weight:500;margin-left:8px;">model tracks</span></div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Layer 3 · Serving</div>
+        <div class="h">Spring · FastAPI · TorchServe · Celery · MLflow</div>
+        <div class="desc">CRUD와 5~15분 GPU 작업을 같은 방식으로 처리하지 않았다.</div>
+        <div style="margin-top:auto;font-size:42px;font-weight:800;color:var(--red);">3<span style="font-size:18px;color:var(--text-2);font-weight:500;margin-left:8px;">runtime tiers</span></div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Layer 4 · Screen</div>
+        <div class="h">SDUI · 커뮤니티 · Playwright 검증</div>
+        <div class="desc">화면을 코드가 아닌 메타데이터로 바꾸고, 캡처로 회귀를 막았다.</div>
+        <div style="margin-top:auto;font-size:42px;font-weight:800;color:var(--red);">82→32<span style="font-size:18px;color:var(--text-2);font-weight:500;margin-left:8px;">slides deduped</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">K-RIDE 2.0</div><div>03 / 32</div></div>
+</section>
+
+<!-- 04 AGENT WORKFLOW -->
+<section class="slide" data-screen-label="04 Agent Workflow">
+  <div class="ribbon"><span class="chap">00</span><span class="pipe">/</span><span class="ind">Process</span><div class="ribbon-r">Agent Workflow</div></div>
+  <div class="red-bar"></div>
+  <h2 class="section-h">에이전트는 코드 생성기가 아니라<br><span style="color:var(--red)">탐색-구현-검증-정리</span> 루프였다.</h2>
+  <h3 class="kicker">2개월의 산출물은 문서·코드·캡처가 같은 흐름 안에서 갱신되도록 묶여 있었다.</h3>
+  <div class="content">
+    <div class="flow" style="margin-top:auto;margin-bottom:auto;">
+      <div class="step">
+        <div class="n">STEP 01</div>
+        <div class="title">탐색</div>
+        <div class="body">report · dataset_report · TorchServe · SDUI 코드를 읽고 의사결정의 근거를 모았다.</div>
+      </div>
+      <div class="arrow">›</div>
+      <div class="step">
+        <div class="n">STEP 02</div>
+        <div class="title">구현</div>
+        <div class="body">커뮤니티 CRUD에 이미지 업로드 + read 표시 흐름을 추가, AI 입력 데이터 경로 정리.</div>
+      </div>
+      <div class="arrow">›</div>
+      <div class="step">
+        <div class="n">STEP 03</div>
+        <div class="title">검증</div>
+        <div class="body">로컬 서버·프론트를 띄우고 Playwright 캡처로 회귀 여부를 확인했다.</div>
+      </div>
+      <div class="arrow">›</div>
+      <div class="step">
+        <div class="n">STEP 04</div>
+        <div class="title">정리</div>
+        <div class="body">모델링 산출물과 트러블슈팅을 발표 구조로 재배치, 보고서 6장으로 정리.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">K-RIDE 2.0</div><div>04 / 32</div></div>
+</section>
+
+<!-- 05 DATA · DATASET -->
+<section class="slide" data-screen-label="05 Dataset">
+  <div class="chap-strip"><span class="num">01</span> <span>Data · DB</span></div>
+  <h2 class="section-h">추천 품질은 <span style="color:var(--red)">모델 이전, 데이터 구조</span>에서 결정됐다.</h2>
+  <h3 class="kicker">다섯 종류의 데이터가 각자 다른 역할을 맡았다 — 후보군, 안전, 예산, 취향, 보정.</h3>
+  <div class="content">
+    <div class="stat-row" style="grid-template-columns:repeat(5,1fr);margin-top:30px;">
+      <div class="stat"><div class="v">874K<span class="small"> rows</span></div><div class="l">POI 후보</div></div>
+      <div class="stat"><div class="v">25,893</div><div class="l">소비 예측 행</div></div>
+      <div class="stat"><div class="v">20,262</div><div class="l">자전거 도로</div></div>
+      <div class="stat"><div class="v">14<span class="small"> days</span></div><div class="l">Weather seq</div></div>
+      <div class="stat"><div class="v">39,109</div><div class="l">Graph nodes</div></div>
+    </div>
+    <div class="grid-5" style="margin-top:32px;">
+      <div class="card"><div class="label">POI</div><div class="h">후보군</div><div class="desc">음식점·K-culture·편의시설·관광지를 PostGIS 좌표로 통합.</div></div>
+      <div class="card"><div class="label">도로</div><div class="h">안전</div><div class="desc">자전거 도로망 + district_danger 통계로 위험 보정.</div></div>
+      <div class="card"><div class="label">날씨</div><div class="h">보정</div><div class="desc">14일 시퀀스 8개 피처 → 3-class weather label.</div></div>
+      <div class="card"><div class="label">소비</div><div class="h">예산 현실성</div><div class="desc">국민여행조사 기반, 시도별 1인 비용 보정값 생성.</div></div>
+      <div class="card"><div class="label">K-culture</div><div class="h">취향 그래프</div><div class="desc">아티스트·드라마·촬영지 간 FILMING_AT 관계.</div></div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">DATA · DB</div><div>05 / 32</div></div>
+</section>
+
+<!-- 06 INGESTION -->
+<section class="slide" data-screen-label="06 Ingestion">
+  <div class="chap-strip"><span class="num">01</span> <span>Data · DB</span></div>
+  <h2 class="section-h">적재는 DB insert가 아니라 <span style="color:var(--red)">‘모델이 먹는 형태’</span>로의 전처리였다.</h2>
+  <div class="content">
+    <div class="flow" style="margin-top:40px;">
+      <div class="step"><div class="n">01 · RAW</div><div class="title">Source</div><div class="body">공공데이터, AI Hub, TourAPI, 캡처·문서, 커뮤니티 사진.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">02 · CLEAN</div><div class="title">Normalize</div><div class="body">결측·좌표·범주형·시간 순서 정리, 좌표 PostGIS 변환.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">03 · FEATURE</div><div class="title">Score-ready</div><div class="body">safety / tourism / weather / consume 4개 피처 묶음.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">04 · STORE</div><div class="title">4 stores</div><div class="body">PostgreSQL · ChromaDB · Neo4j · File assets.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">05 · SERVE</div><div class="title">API</div><div class="body">Spring · FastAPI · TorchServe endpoint로 호출.</div></div>
+    </div>
+    <div class="grid-2" style="margin-top:48px;flex:0 0 auto;">
+      <div class="card">
+        <div class="label">Why split?</div>
+        <div class="h">한 DB로는 관계망 + 위치 + 의미 검색을 동시에 못 풀었다</div>
+        <div class="desc">관계형 + 그래프 + 벡터의 3분산 하이브리드 전략으로 데이터를 성격별로 갈랐다. (보고서 §2.1)</div>
+      </div>
+      <div class="card">
+        <div class="label">Why 4 stores?</div>
+        <div class="h">대용량 미디어 + 모델 산출물을 운영 DB와 분리</div>
+        <div class="desc">File/R2/S3는 영상·MAR·체크포인트를 담당, 운영 API의 트랜잭션 크기를 줄였다.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">DATA · DB</div><div>06 / 32</div></div>
+</section>
+
+<!-- 07 DB TOOLS -->
+<section class="slide" data-screen-label="07 DB Tools">
+  <div class="chap-strip"><span class="num">01</span> <span>Data · DB</span></div>
+  <h2 class="section-h">DB는 하나가 아니라, <span style="color:var(--red)">질문의 종류</span>에 따라 나눠 썼다.</h2>
+  <div class="content">
+    <div class="grid-4" style="flex:1;margin-top:24px;">
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">PostgreSQL + PostGIS</div>
+        <div class="h">정합성 · 좌표 · 예산</div>
+        <div class="desc">운영 데이터의 기준점. 음식점 813,631 · K-culture 23,184 · 편의시설 21,645 · 관광지 15,905.</div>
+        <div style="margin-top:auto;font-size:36px;font-weight:800;color:var(--red);">0.01s<span style="font-size:16px;color:var(--text-2);margin-left:8px;font-weight:500;">spatial query</span></div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">ChromaDB · pgvector</div>
+        <div class="h">의미 검색</div>
+        <div class="desc">multilingual-e5-small 384차원 임베딩, HNSW 인덱스. 한·영·일 동시 지원.</div>
+        <div style="margin-top:auto;font-size:36px;font-weight:800;color:var(--red);">384<span style="font-size:16px;color:var(--text-2);margin-left:8px;font-weight:500;">dim · 4 collections</span></div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Neo4j AuraDB</div>
+        <div class="h">관계 그래프</div>
+        <div class="desc">아티스트 20 · 촬영지 POI · FILMING_AT 175. “도깨비 촬영지 근처 또 다른 성지”를 푼다.</div>
+        <div style="margin-top:auto;font-size:36px;font-weight:800;color:var(--red);">39,109<span style="font-size:16px;color:var(--text-2);margin-left:8px;font-weight:500;">nodes</span></div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">File / R2 / S3</div>
+        <div class="h">대용량 산출물</div>
+        <div class="desc">영상·MAR·체크포인트·캡처를 운영 DB와 분리. 트랜잭션 부담을 떨어뜨린다.</div>
+        <div style="margin-top:auto;font-size:36px;font-weight:800;color:var(--red);">MP4 · MAR · PNG</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">DATA · DB</div><div>07 / 32</div></div>
+</section>
+
+<!-- 08 GRAPHRAG EVIDENCE -->
+<section class="slide" data-screen-label="08 GraphRAG Evidence">
+  <div class="chap-strip"><span class="num">01</span> <span>Data · DB</span></div>
+  <h2 class="section-h">추천에 <span style="color:var(--red)">‘왜 추천됐는지’</span>를 붙였다.</h2>
+  <h3 class="kicker">GraphRAG는 결과뿐 아니라 근거를 함께 돌려주는 구조다.</h3>
+  <div class="content">
+    <div class="grid-2" style="flex:1;min-height:0;">
+      <div class="img-wrap">
+        <div style="display:flex;flex-direction:column;height:100%;width:100%;min-height:0;">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0;"><img src="assets/figures/kculture_region_dist.png" alt=""></div>
+          <div class="img-cap">K-CULTURE · 지역 분포 / dataset_report/figures</div>
+        </div>
+      </div>
+      <div class="img-wrap">
+        <div style="display:flex;flex-direction:column;height:100%;width:100%;min-height:0;">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0;"><img src="assets/figures/poi_rec_cooccurrence_heat.png" alt=""></div>
+          <div class="img-cap">POI · 공동출현 히트맵 / dataset_report/figures</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-row" style="margin-top:24px;grid-template-columns:repeat(4,1fr);flex:0 0 auto;">
+      <div class="stat"><div class="v">874K</div><div class="l">POI Index</div></div>
+      <div class="stat"><div class="v">0.79s</div><div class="l">Groq 응답</div></div>
+      <div class="stat"><div class="v">46s → 1~2s</div><div class="l">Latency 개선</div></div>
+      <div class="stat"><div class="v">ko·en·ja</div><div class="l">다국어 임베딩</div></div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">DATA · DB</div><div>08 / 32</div></div>
+</section>
+
+<!-- 09 K-RIDE ARCHITECTURE -->
+<section class="slide" data-screen-label="09 K-Ride Architecture">
+  <div class="chap-strip"><span class="num">02</span> <span>Architecture</span></div>
+  <h2 class="section-h">화면에서 모델을 바로 부르지 않는다 — <span style="color:var(--red)">책임을 4계층으로 분리</span>했다.</h2>
+  <div class="content">
+    <div class="flow" style="margin-top:36px;">
+      <div class="step">
+        <div class="n">TIER 01</div>
+        <div class="title">Frontend</div>
+        <div class="body" style="font-size:17px;">Next.js · React · SDUI metadata · Community CRUD · Playwright 검증.</div>
+      </div>
+      <div class="arrow">›</div>
+      <div class="step">
+        <div class="n">TIER 02</div>
+        <div class="title">Backend API</div>
+        <div class="body" style="font-size:17px;">Spring Boot · auth · content · DB transaction. 짧고 잦은 요청을 받는다.</div>
+      </div>
+      <div class="arrow">›</div>
+      <div class="step">
+        <div class="n">TIER 03</div>
+        <div class="title">AI Orchestrator</div>
+        <div class="body" style="font-size:17px;">FastAPI · GraphRAG · BLIP-2 · TTS · media job 접수. Celery로 비동기 큐 분리.</div>
+      </div>
+      <div class="arrow">›</div>
+      <div class="step">
+        <div class="n">TIER 04</div>
+        <div class="title">Model Ops</div>
+        <div class="body" style="font-size:17px;">TorchServe · MLflow · Docker · model store. 모델 파일은 API에서 떼어 둔다.</div>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:46px;">
+      <div class="card">
+        <div class="label">왜 4계층?</div>
+        <div class="h">짧은 요청과 5~15분 GPU 작업을 같은 방식으로 처리하지 않는다</div>
+        <div class="desc">동기 API가 무거운 추론을 받으면 timeout과 서버 마비로 이어진다. job_id 즉시 발급 → Celery 워커가 뒤에서 처리하는 구조.</div>
+      </div>
+      <div class="card">
+        <div class="label">왜 TorchServe?</div>
+        <div class="h">API 서버가 모델 파일을 직접 들고 있지 않다</div>
+        <div class="desc">handler · MAR · model store · endpoint로 운영 단위를 떼어 두면, AI 코드 변경이 API 재배포로 이어지지 않는다.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">ARCHITECTURE</div><div>09 / 32</div></div>
+</section>
+
+<!-- 10 SDUI + COMMUNITY -->
+<section class="slide" data-screen-label="10 SDUI + Community">
+  <div class="chap-strip"><span class="num">02</span> <span>Architecture</span></div>
+  <h2 class="section-h">SDUI와 커뮤니티는 <span style="color:var(--red)">미디어 AI의 입력 채널</span>이다.</h2>
+  <h3 class="kicker">게시판 사진은 첨부파일이 아니라, 영상 생성 파이프라인의 원천 데이터다.</h3>
+  <div class="content">
+    <div class="grid-2" style="flex:1;">
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <div class="card" style="padding:24px 26px;">
+          <div class="label">SDUI</div>
+          <div class="h">화면을 코드가 아닌 메타데이터로</div>
+          <div class="desc" style="font-size:18px;">DB 변경이 UI 구조로 이어지는 흐름. 화면 배포 속도를 코드 빌드와 분리시켰다.</div>
+        </div>
+        <div class="card" style="padding:24px 26px;">
+          <div class="label">Community</div>
+          <div class="h">목록 · 작성 · 상세 · 수정 · 빈 상태</div>
+          <div class="desc" style="font-size:18px;">이미지가 list → write → detail로 끊김 없이 이어진다 — AI 영상 모델의 입력 픽업 지점.</div>
+        </div>
+      </div>
+      <div class="cap-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="ct"><img src="assets/capture/community-list-with-image.png" alt=""><div class="ct-cap">List · with image</div></div>
+        <div class="ct"><img src="assets/capture/community-write-upload-preview.png" alt=""><div class="ct-cap">Write · upload preview</div></div>
+        <div class="ct"><img src="assets/capture/community-detail-with-image.png" alt=""><div class="ct-cap">Detail · read</div></div>
+        <div class="ct"><img src="assets/capture/community-modify-retained-image.png" alt=""><div class="ct-cap">Modify · retained</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">ARCHITECTURE</div><div>10 / 32</div></div>
+</section>
+
+<!-- 11 SERVER LAYER -->
+<section class="slide" data-screen-label="11 Server Layer">
+  <div class="chap-strip"><span class="num">02</span> <span>Architecture</span></div>
+  <h2 class="section-h">CRUD와 AI 작업을 <span style="color:var(--red)">같은 방식으로 처리하지 않는다.</span></h2>
+  <div class="content">
+    <div class="grid-4" style="flex:1;">
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Spring Boot</div>
+        <div class="h">짧은 요청</div>
+        <div class="desc">회원·콘텐츠·커뮤니티 CRUD · DB 트랜잭션. 응답은 항상 ms 단위로 끝낸다.</div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">FastAPI</div>
+        <div class="h">AI 오케스트레이션</div>
+        <div class="desc">GraphRAG · BLIP-2 · TTS · 영상 생성 job 접수. zrok 터널링으로 클라우드 GPU와 연결.</div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Celery + Redis</div>
+        <div class="h">긴 작업</div>
+        <div class="desc">5~15분 영상 생성을 큐로 분리. 3중 생존 방어막(render→frame→dummy)으로 파이프라인 붕괴 차단.</div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Docker Compose</div>
+        <div class="h">재현 가능한 실행</div>
+        <div class="desc">서비스 단위 묶음 — 로컬 검증의 표준 단위. build --no-cache 기준 재현.</div>
+      </div>
+    </div>
+    <div class="row-table" style="margin-top:32px;">
+      <div class="row"><div class="k">Flow</div><div class="v">사용자 업로드 → FastAPI <strong style="color:var(--red);">job_id 즉시 반환</strong> → Celery 워커 백그라운드 렌더 → MLflow 기록 → 결과 미디어 R2/S3 → 프론트 조회.</div></div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">ARCHITECTURE</div><div>11 / 32</div></div>
+</section>
+
+<!-- 12 MODEL SERVING -->
+<section class="slide" data-screen-label="12 Model Serving">
+  <div class="chap-strip"><span class="num">02</span> <span>Architecture</span></div>
+  <h2 class="section-h">TorchServe — <span style="color:var(--red)">모델을 API 서버에서 떼어내는</span> 배포 레이어.</h2>
+  <h3 class="kicker">handler · MAR · model store · endpoint. API가 모델 파일을 직접 들고 있지 않게 한다.</h3>
+  <div class="content">
+    <div class="flow" style="margin-top:30px;">
+      <div class="step"><div class="n">01</div><div class="title">Handler</div><div class="body">preprocess · inference · postprocess. 모델별 입출력 계약을 한 곳에 둔다.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">02</div><div class="title">MAR Package</div><div class="body">모델 파일 + handler + extra files를 .mar 하나로 묶어 배포.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">03</div><div class="title">Model Store</div><div class="body">embedder · reranker · weather · event NER · drawn humanoid pose 등 분리 보관.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">04</div><div class="title">Endpoint</div><div class="body">FastAPI · Spring에서 inference 호출. AI 코드 변경이 API 재배포로 이어지지 않는다.</div></div>
+    </div>
+    <div class="grid-2" style="margin-top:36px;">
+      <div class="card">
+        <div class="label">실제 사용처</div>
+        <div class="h">drawn_humanoid_detector · pose_estimator</div>
+        <div class="desc">Animated Drawings 파이프라인에서 캐릭터 객체와 관절을 추출하는 TorchServe 워커. (보고서 §3.2)</div>
+      </div>
+      <div class="card">
+        <div class="label">트러블슈팅 (4장에서 다시)</div>
+        <div class="h">TorchServe 0.6.0 + Numpy 1.23.5 강제 고정</div>
+        <div class="desc">mmcv-full · mmpose의 np.float 충돌로 워커가 에러 로그 없이 즉사 → Miniconda 샌드박스에서 버전 핀.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">ARCHITECTURE</div><div>12 / 32</div></div>
+</section>
+
+<!-- 13 DEPLOYMENT PIPELINE -->
+<section class="slide" data-screen-label="13 Deployment Pipeline">
+  <div class="chap-strip"><span class="num">02</span> <span>Architecture</span></div>
+  <h2 class="section-h">배포는 빌드가 아니라 <span style="color:var(--red)">재현 가능한 실행</span>을 목표로 잡았다.</h2>
+  <div class="content">
+    <div class="flow" style="margin-top:30px;">
+      <div class="step"><div class="n">BUILD</div><div class="title">docker compose</div><div class="body">build --no-cache 기준. 의존성 픽스(Numpy 1.23.5, TorchServe 0.6.0)는 이미지에 박는다.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">RUN</div><div class="title">Local stack</div><div class="body">Spring · Next · FastAPI · DB · Redis · Celery 워커를 한 묶음으로 실행.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">TRACK</div><div class="title">MLflow + DagsHub</div><div class="body">params · metrics · artifacts (final mp4, render_summary.json, stderr) 만 선별 업로드.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">SERVE</div><div class="title">TorchServe</div><div class="body">endpoint 분리. AI 모델 갱신이 운영 API 재배포로 이어지지 않게 한다.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">VERIFY</div><div class="title">Playwright</div><div class="body">화면 캡처를 회귀 테스트로 저장. report/capture/ 에 흔적이 남는다.</div></div>
+    </div>
+    <div class="row-table" style="margin-top:36px;">
+      <div class="row"><div class="k">현재 상태</div><div class="v">완성된 운영 배포가 아니라, <strong>재현 가능한 개발·검증 파이프라인</strong>이다 — 실서비스 배포 단계의 단순 마이크로서비스 분리는 6장 확장 로드맵.</div></div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">ARCHITECTURE</div><div>13 / 32</div></div>
+</section>
+
+<!-- 14 MODEL PORTFOLIO -->
+<section class="slide" data-screen-label="14 Model Portfolio">
+  <div class="chap-strip"><span class="num">03</span> <span>Modeling</span></div>
+  <h2 class="section-h">6개 모델, <span style="color:var(--red)">각자 다른 의사결정</span>으로 합류한다.</h2>
+  <h3 class="kicker">다음 6장은 모두 같은 4박자로 — 입력 · 오픈소스 근거 · 산출물 · 서비스 연결.</h3>
+  <div class="content">
+    <div class="grid-3" style="flex:1;">
+      <div class="card">
+        <div class="label">01 · WeatherLSTM</div>
+        <div class="h">날씨 3분류 → safety penalty</div>
+        <div class="desc"><strong style="color:var(--text);">PyTorch</strong> · 14d sequence · 8 features · 82.16% acc</div>
+      </div>
+      <div class="card">
+        <div class="label">02 · Safety RF</div>
+        <div class="h">도로 위험도 → 안전 보정 점수</div>
+        <div class="desc"><strong style="color:var(--text);">scikit-learn</strong> · 89.1% mapping · F1 0.9987</div>
+      </div>
+      <div class="card">
+        <div class="label">03 · POI TabNet</div>
+        <div class="h">방문지 매력도 → tourism score</div>
+        <div class="desc"><strong style="color:var(--text);">pytorch-tabnet</strong> · AI Hub 21,384행</div>
+      </div>
+      <div class="card">
+        <div class="label">04 · Consume TabNet</div>
+        <div class="h">예산 현실성 → 비용 조건</div>
+        <div class="desc"><strong style="color:var(--text);">pytorch-tabnet</strong> · 25,893행 · R² 0.5939</div>
+      </div>
+      <div class="card">
+        <div class="label">05 · GraphRAG</div>
+        <div class="h">질의 → 추천 이유 · 장소</div>
+        <div class="desc"><strong style="color:var(--text);">e5-small + Groq + Neo4j</strong> · 0.79s</div>
+      </div>
+      <div class="card">
+        <div class="label">06 · Media AI</div>
+        <div class="h">이미지 → TTS · 영상</div>
+        <div class="desc"><strong style="color:var(--text);">BLIP-2 · GPT-SoVITS · CogVideoX · 3D Photo · MusicGen · FFmpeg</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">MODELING</div><div>14 / 32</div></div>
+</section>
+
+<!-- 15 WEATHER LSTM -->
+<section class="slide" data-screen-label="15 WeatherLSTM">
+  <div class="chap-strip"><span class="num">03</span> <span>Modeling · 01</span></div>
+  <h2 class="section-h">Weather LSTM</h2>
+  <h3 class="kicker">날씨 예측 자체가 목적이 아니다 — 비/흐림을 <strong style="color:var(--red);">경로 추천의 안전 보정값</strong>으로 연결한다.</h3>
+  <div class="content">
+    <div class="ti-layout">
+      <div class="ti-left">
+        <div class="row-table">
+          <div class="row"><div class="k">Input</div><div class="v">14일 sequence · 8 features (기온·풍속·강수·습도 등)</div></div>
+          <div class="row"><div class="k">Open-source</div><div class="v">PyTorch LSTM · 자체 구현</div></div>
+          <div class="row"><div class="k">Output</div><div class="v">3-class (맑음 · 흐림 · 비/눈) → safety penalty</div></div>
+          <div class="row"><div class="k">Connect</div><div class="v">경로 weight에 weather penalty로 가중</div></div>
+        </div>
+        <div class="stat-row" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat"><div class="v">82.16%</div><div class="l">Test acc</div></div>
+          <div class="stat"><div class="v">14d</div><div class="l">Seq length</div></div>
+          <div class="stat"><div class="v">8</div><div class="l">Features</div></div>
+        </div>
+        <div class="card" style="background:#fdf2f3;border-left:4px solid var(--red);">
+          <div class="label" style="color:var(--red);">Honest weakness</div>
+          <div class="h">흐림 클래스 recall 약함</div>
+          <div class="desc">데이터 불균형. 트러블슈팅 챕터에서 class metric 별도 저장 + 보강 계획으로 연결.</div>
+        </div>
+      </div>
+      <div class="ti-right">
+        <div class="ti-img"><img src="assets/figures/weather_lstm_confusion_matrix.png" alt=""></div>
+        <div class="img-cap">Confusion matrix · weather_lstm</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">MODELING</div><div>15 / 32</div></div>
+</section>
+
+<!-- 16 SAFETY -->
+<section class="slide" data-screen-label="16 Safety Model">
+  <div class="chap-strip"><span class="num">03</span> <span>Modeling · 02</span></div>
+  <h2 class="section-h">Safety Model</h2>
+  <h3 class="kicker">도로 단위 위험도 — 도로 속성과 지역 위험 통계를 결합해 <strong style="color:var(--red);">경로 안전 점수</strong>로 묶는다.</h3>
+  <div class="content">
+    <div class="ti-layout">
+      <div class="ti-left">
+        <div class="row-table">
+          <div class="row"><div class="k">Input</div><div class="v">자전거 도로 20,262 + district_danger 안전 통계</div></div>
+          <div class="row"><div class="k">Open-source</div><div class="v">scikit-learn RandomForest</div></div>
+          <div class="row"><div class="k">Output</div><div class="v">도로 단위 위험도 0~1 → 안전 보정 점수</div></div>
+          <div class="row"><div class="k">Connect</div><div class="v">최종 경로 weight의 safety 항</div></div>
+        </div>
+        <div class="stat-row" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat"><div class="v">89.1%</div><div class="l">Mapping rate</div></div>
+          <div class="stat"><div class="v">0.9987</div><div class="l">F1 / Acc</div></div>
+          <div class="stat"><div class="v">RF</div><div class="l">sklearn basis</div></div>
+        </div>
+        <div class="card" style="background:#fdf2f3;border-left:4px solid var(--red);">
+          <div class="label" style="color:var(--red);">Honest weakness</div>
+          <div class="h">지표가 너무 높다 — 과적합 검토 필요</div>
+          <div class="desc">실서비스에선 사고 데이터·최신 도로 데이터를 계속 보강해야 신뢰가 유지된다.</div>
+        </div>
+      </div>
+      <div class="ti-right">
+        <div class="ti-img"><img src="assets/figures/safety_classifier_feature_importance.png" alt=""></div>
+        <div class="img-cap">Feature importance · safety_classifier</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">MODELING</div><div>16 / 32</div></div>
+</section>
+
+<!-- 17 POI TABNET -->
+<section class="slide" data-screen-label="17 POI TabNet">
+  <div class="chap-strip"><span class="num">03</span> <span>Modeling · 03</span></div>
+  <h2 class="section-h">POI TabNet</h2>
+  <h3 class="kicker">거리만 보는 추천의 한계를 줄였다 — <strong style="color:var(--red);">방문 순서 · 체류 · 재방문 의향</strong>을 학습.</h3>
+  <div class="content">
+    <div class="ti-layout">
+      <div class="ti-left">
+        <div class="row-table">
+          <div class="row"><div class="k">Input</div><div class="v">AI Hub 여행로그 21,384행 · 23 columns</div></div>
+          <div class="row"><div class="k">Open-source</div><div class="v">pytorch-tabnet (Google Research)</div></div>
+          <div class="row"><div class="k">Output</div><div class="v">방문지 매력도 → tourism score</div></div>
+          <div class="row"><div class="k">Connect</div><div class="v">GraphRAG 후보군에 점수 가중치</div></div>
+        </div>
+        <div class="stat-row" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat"><div class="v">21,384</div><div class="l">Rows</div></div>
+          <div class="stat"><div class="v">23</div><div class="l">Columns</div></div>
+          <div class="stat"><div class="v">TabNet</div><div class="l">attention-based</div></div>
+        </div>
+      </div>
+      <div class="ti-right">
+        <div class="ti-img"><img src="assets/charts/11_tabnet_feature_importance.png" alt=""></div>
+        <div class="img-cap">Feature importance · POI TabNet</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">MODELING</div><div>17 / 32</div></div>
+</section>
+
+<!-- 18 CONSUME TABNET -->
+<section class="slide" data-screen-label="18 Consume TabNet">
+  <div class="chap-strip"><span class="num">03</span> <span>Modeling · 04</span></div>
+  <h2 class="section-h">Consume TabNet</h2>
+  <h3 class="kicker">비용을 정확히 맞히는 게 아니라 추천 결과가 <strong style="color:var(--red);">예산 안으로 들어오도록</strong> 보정한다.</h3>
+  <div class="content">
+    <div class="ti-layout">
+      <div class="ti-left">
+        <div class="row-table">
+          <div class="row"><div class="k">Input</div><div class="v">국민여행조사 25,893행 (지역·일자·여행형태·예산)</div></div>
+          <div class="row"><div class="k">Open-source</div><div class="v">pytorch-tabnet · v3 (지역 편차 보강)</div></div>
+          <div class="row"><div class="k">Output</div><div class="v">시도 단위 1인 예산 보정값</div></div>
+          <div class="row"><div class="k">Connect</div><div class="v">추천 후보 필터의 budget gate</div></div>
+        </div>
+        <div class="stat-row" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat"><div class="v">0.5939</div><div class="l">R²</div></div>
+          <div class="stat"><div class="v">42,764</div><div class="l">MAE (원)</div></div>
+          <div class="stat"><div class="v">25,893</div><div class="l">Rows</div></div>
+        </div>
+        <div class="card" style="background:#fdf2f3;border-left:4px solid var(--red);">
+          <div class="label" style="color:var(--red);">Honest finding</div>
+          <div class="h">지역별 MAE 편차가 존재한다</div>
+          <div class="desc">전국 데이터를 넣어 현실성은 올랐지만, 시도별 보정값이 필요. → 4장 트러블슈팅.</div>
+        </div>
+      </div>
+      <div class="ti-right">
+        <div class="ti-img"><img src="assets/figures/consume_v3_sido_mae.png" alt=""></div>
+        <div class="img-cap">시도별 MAE · consume_v3</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">MODELING</div><div>18 / 32</div></div>
+</section>
+
+<!-- 19 GRAPHRAG MODEL -->
+<section class="slide" data-screen-label="19 GraphRAG Model">
+  <div class="chap-strip"><span class="num">03</span> <span>Modeling · 05</span></div>
+  <h2 class="section-h">GraphRAG</h2>
+  <h3 class="kicker">추천 결과에 <strong style="color:var(--red);">‘이유’</strong>를 붙이는 모델링 축. 다국어 임베딩 + ChromaDB + LLM.</h3>
+  <div class="content">
+    <div class="ti-layout">
+      <div class="ti-left">
+        <div class="row-table">
+          <div class="row"><div class="k">Embedding</div><div class="v"><strong>intfloat / multilingual-e5-small</strong> · 384차원 · ko·en·ja</div></div>
+          <div class="row"><div class="k">Vector DB</div><div class="v">ChromaDB HNSW + PostgreSQL pgvector IVFFlat</div></div>
+          <div class="row"><div class="k">Graph</div><div class="v">Neo4j AuraDB · 39,109 nodes · FILMING_AT relations</div></div>
+          <div class="row"><div class="k">LLM</div><div class="v"><strong>Groq API · openai/gpt-oss-120b · llama-3.3-70b</strong></div></div>
+          <div class="row"><div class="k">Output</div><div class="v">Morning/Afternoon 분리된 일정 JSON + 추천 근거</div></div>
+        </div>
+        <div class="stat-row" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat"><div class="v">874K</div><div class="l">POI Index</div></div>
+          <div class="stat"><div class="v">0.79s</div><div class="l">Groq 응답</div></div>
+          <div class="stat"><div class="v">46s → 1~2s</div><div class="l">Ollama → Groq</div></div>
+        </div>
+      </div>
+      <div class="ti-right">
+        <div class="ti-img"><img src="assets/figures/poi_rec_recall_bar.png" alt=""></div>
+        <div class="img-cap">POI rec · recall (카테고리별)</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">MODELING</div><div>19 / 32</div></div>
+</section>
+
+<!-- 20 SCORE INTEGRATION -->
+<section class="slide" data-screen-label="20 Score Integration">
+  <div class="chap-strip"><span class="num">03</span> <span>Modeling · 06</span></div>
+  <h2 class="section-h">개별 모델은 <span style="color:var(--red)">하나의 경로 weight</span>로 통합된다.</h2>
+  <h3 class="kicker">점수 하나가 아니라, Safety + Weather penalty + Tourism + Budget + Explain.</h3>
+  <div class="content">
+    <div class="grid-5" style="flex:1;">
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Safety</div>
+        <div class="h">도로 위험도</div>
+        <div class="desc">RandomForest 보정값 + 지역 위험 통계</div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Weather</div>
+        <div class="h">3-class penalty</div>
+        <div class="desc">비/흐림이면 경로 가중치 감쇠</div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Tourism</div>
+        <div class="h">POI 매력도</div>
+        <div class="desc">TabNet 점수 + 카테고리 선호 보정</div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Budget</div>
+        <div class="h">예산 현실성</div>
+        <div class="desc">Consume TabNet 시도별 보정값</div>
+      </div>
+      <div class="card">
+        <div class="red-tab"></div>
+        <div class="label">Explain</div>
+        <div class="h">추천 이유</div>
+        <div class="desc">GraphRAG가 검색된 POI만으로 일정 생성</div>
+      </div>
+    </div>
+    <div class="row-table" style="margin-top:32px;">
+      <div class="row"><div class="k">Result</div><div class="v"><strong>0~1초</strong> 안에 Morning/Afternoon이 분리된 <strong>JSON 일정 + 근거 텍스트</strong>를 반환. 할루시네이션 차단을 위해 “검색된 POI만 사용하라”는 엄격한 system prompt.</div></div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">MODELING</div><div>20 / 32</div></div>
+</section>
+
+<!-- 21 MEDIA PIPELINE -->
+<section class="slide" data-screen-label="21 Media Pipeline">
+  <div class="chap-strip"><span class="num">04</span> <span>Media AI</span></div>
+  <h2 class="section-h">AI 여행로그 생성은 <span style="color:var(--red)">5단계 파이프라인</span>이다.</h2>
+  <h3 class="kicker">이미지 한 장에서 시작해, 캡션 · 내레이션 · 영상 · 합성으로 확장된다.</h3>
+  <div class="content">
+    <div class="flow" style="margin-top:36px;">
+      <div class="step"><div class="n">01 · IMAGE</div><div class="title">Upload</div><div class="body">커뮤니티 사진 · 여행 사진 · 낙서. 게시판 이미지가 그대로 입력이다.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">02 · CAPTION</div><div class="title">BLIP-2</div><div class="body">시각 → 영문 캡션. 라우팅 분기의 기준 키워드를 만든다.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">03 · NARRATION</div><div class="title">LLM script</div><div class="body">Groq LLM이 캡션과 일정을 영상 스크립트로 정리.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">04 · MEDIA</div><div class="title">TTS · Video · BGM</div><div class="body">GPT-SoVITS · CogVideoX/3D Photo · MusicGen 병렬 실행.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">05 · MUX</div><div class="title">FFmpeg</div><div class="body">영상·음성·BGM·자막을 한 mp4로 합성. -18dB ducking, -shortest 동기화.</div></div>
+    </div>
+    <div class="row-table" style="margin-top:46px;">
+      <div class="row"><div class="k">Why split?</div><div class="v"><strong style="color:var(--red);">단일 거대 모델로 모든 사진을 처리하면 OOM과 비용이 폭발한다.</strong> 시각 정보로 가벼운 모델과 무거운 모델을 분기하는 ‘스마트 라우팅’이 핵심 설계다. (보고서 §3.1)</div></div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">MEDIA AI</div><div>21 / 32</div></div>
+</section>
+
+<!-- 22 IMAGE → TEXT -->
+<section class="slide" data-screen-label="22 Image to Text">
+  <div class="chap-strip"><span class="num">04</span> <span>Media · Image → Text</span></div>
+  <h2 class="section-h">Image → Text · <span style="color:var(--red)">BLIP-2</span></h2>
+  <h3 class="kicker">영상을 만드는 모델이 아니라, 사진을 <strong>영상 프롬프트로 바꾸는 중간 단계</strong>다.</h3>
+  <div class="content">
+    <div class="flow" style="margin-top:30px;">
+      <div class="step"><div class="n">01</div><div class="title">Frozen Image Encoder</div><div class="body">ViT 기반 — 사진의 시각 특징을 고정된 인코더로 추출.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">02</div><div class="title">Q-Former</div><div class="body">학습 가능한 query vectors가 이미지 특징을 LLM이 읽을 수 있게 질의.</div></div>
+      <div class="arrow">›</div>
+      <div class="step"><div class="n">03</div><div class="title">Frozen LLM</div><div class="body">캡션 · video prompt · scene shot list로 변환.</div></div>
+    </div>
+    <div class="grid-2" style="margin-top:46px;">
+      <div class="card">
+        <div class="label">Routing Key</div>
+        <div class="h">캡션에 동적 키워드가 있으면 → CogVideoX</div>
+        <div class="desc">“person · people · dog · animal” 같은 키워드가 잡히면 무거운 비디오 모델로, 정적 풍경이면 가벼운 3D Photo Inpainting으로 자동 분기. (보고서 §3.1)</div>
+      </div>
+      <div class="card">
+        <div class="label">Output Format</div>
+        <div class="h">narration · ko/en prompt · shot list</div>
+        <div class="desc">한국어 내레이션 원문 + 영어 영상 프롬프트 + 컷별 설명을 한 묶음으로 다음 단계에 전달.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">MEDIA AI</div><div>22 / 32</div></div>
+</section>
+
+<!-- 23 TEXT → TTS -->
+<section class="slide" data-screen-label="23 Text to TTS">
+  <div class="chap-strip"><span class="num">04</span> <span>Media · Text → TTS</span></div>
+  <h2 class="section-h">Text → TTS · <span style="color:var(--red)">GPT-SoVITS + gTTS fallback</span></h2>
+  <h3 class="kicker">고품질 음성 목표 + 안정적 폴백을 함께 설계한 하이브리드.</h3>
+  <div class="content">
+    <div class="grid-2" style="flex:1;">
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <div class="card">
+          <div class="red-tab"></div>
+          <div class="label">Primary · GPT-SoVITS V3</div>
+          <div class="h">RoBERTa + BigVGAN 보코더</div>
+          <div class="desc">chinese-roberta-wwm-ext-large가 형태소·문맥 분석 → BigVGAN 보코더가 실제 음성 파형으로. 한국어를 위해 Mecab C++ 엔진(mecab-ko-dic)을 시스템 레벨에 이식.</div>
+        </div>
+        <div class="card">
+          <div class="red-tab"></div>
+          <div class="label">Fallback · gTTS</div>
+          <div class="h">빠르고 안정적인 대체 경로</div>
+          <div class="desc">SoVITS 환경 충돌 시에도 narration이 끊기지 않게 보장.</div>
+        </div>
+        <div class="card" style="background:#fdf2f3;border-left:4px solid var(--red);">
+          <div class="label" style="color:var(--red);">Trouble preview</div>
+          <div class="h">언어 코드 불일치 · Mecab 사전 매핑 · BigVGAN 몽키 패치</div>
+          <div class="desc">WebUI는 “Korean”, API는 “ko”. Mecab 사전 경로 꼬임으로 Segmentation Fault — 4장에서 정공법.</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <div class="card">
+          <div class="label">Open-source basis</div>
+          <div class="h">왜 GPT-SoVITS인가</div>
+          <div class="desc"><strong>커스텀 음색·고품질 한국어</strong>가 가능한 오픈소스 중 운영 안정성과 라이선스가 명확한 후보였다.</div>
+        </div>
+        <div class="card">
+          <div class="label">Output</div>
+          <div class="h">narration.wav (mono · 24kHz)</div>
+          <div class="desc">tts_torchaudito_1~5.wav 등 5개의 검증 샘플 — 영상 합성 단계로 그대로 전달.</div>
+        </div>
+        <div class="stat-row" style="grid-template-columns:1fr 1fr;">
+          <div class="stat"><div class="v">5</div><div class="l">검증 샘플</div></div>
+          <div class="stat"><div class="v">2</div><div class="l">엔진 경로</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">MEDIA AI</div><div>23 / 32</div></div>
+</section>
+
+<!-- 24 IMAGE → VIDEO -->
+<section class="slide" data-screen-label="24 Image to Video">
+  <div class="chap-strip"><span class="num">04</span> <span>Media · Image/Sketch → Video</span></div>
+  <h2 class="section-h">Image · Sketch → Video</h2>
+  <h3 class="kicker">무거운 모델과 가벼운 모션을 <strong style="color:var(--red);">BLIP-2 캡션</strong>으로 자동 분기.</h3>
+  <div class="content">
+    <div class="grid-3" style="flex:1;">
+      <div class="vid-tile">
+        <div class="play-badge">CogVideoX 1.5</div>
+        <video src="assets/video/cogvideox.mp4" muted loop autoplay playsinline></video>
+        <div class="vid-meta">
+          <div class="vid-title">동적 피사체 — CogVideoX-5b-I2V</div>
+          <div class="vid-sub">사람 · 동물 · 움직임. enable_sequential_cpu_offload + VAE slicing/tiling.</div>
+        </div>
+      </div>
+      <div class="vid-tile">
+        <div class="play-badge">3D Photo Inpainting</div>
+        <video src="assets/video/3d_photo.mp4" muted loop autoplay playsinline></video>
+        <div class="vid-meta">
+          <div class="vid-title">정적 풍경 — 3D Photo Light</div>
+          <div class="vid-sub">5초 패닝 · Ken Burns 효과. 가벼운 모션만으로 충분한 시각적 만족.</div>
+        </div>
+      </div>
+      <div class="vid-tile">
+        <div class="play-badge">Meta Animated Drawings</div>
+        <video src="assets/video/meta_animation.mp4" muted loop autoplay playsinline></video>
+        <div class="vid-meta">
+          <div class="vid-title">낙서 → 캐릭터 — Animated Drawings</div>
+          <div class="vid-sub">drawn_humanoid_detector + pose_estimator (TorchServe) · OSMesa 헤드리스 렌더.</div>
+        </div>
+      </div>
+    </div>
+    <div class="row-table" style="margin-top:28px;">
+      <div class="row"><div class="k">Decision</div><div class="v">캡션에 <strong style="color:var(--red);">person · people · dog · animal</strong>이 있으면 CogVideoX, 없으면 3D Photo. 낙서 입력은 별도 Animated Drawings 워커. → GPU 비용 · 대기시간 동시 최적화.</div></div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">MEDIA AI</div><div>24 / 32</div></div>
+</section>
+
+<!-- 25 VIDEO + TTS -->
+<section class="slide" data-screen-label="25 Video + TTS Mux">
+  <div class="chap-strip"><span class="num">04</span> <span>Media · Mux</span></div>
+  <h2 class="section-h">Video + TTS · <span style="color:var(--red)">FFmpeg 합성</span></h2>
+  <h3 class="kicker">생성 모델보다 ‘재생 가능한 한 파일’로 묶는 마지막 단계가 더 중요했다.</h3>
+  <div class="content">
+    <div class="ti-layout">
+      <div class="ti-left">
+        <div class="row-table">
+          <div class="row"><div class="k">Inputs</div><div class="v">① video.mp4 · ② voice.wav (TTS) · ③ bgm.wav (MusicGen) · ④ subtitle.srt</div></div>
+          <div class="row"><div class="k">Filter</div><div class="v"><strong>-filter_complex "[2:a]volume=-18dB[bgm_low]"</strong> — BGM ducking</div></div>
+          <div class="row"><div class="k">Mix</div><div class="v">amix로 narration 우선 + BGM 합성, <strong>-shortest</strong> 동기화</div></div>
+          <div class="row"><div class="k">Output</div><div class="v">final_segment_synced_*.mp4 — 사용자에게 반환할 결과물</div></div>
+        </div>
+        <div class="card" style="background:#f0faf2;border-left:4px solid #2ea043;margin-top:6px;">
+          <div class="label" style="color:#1f7a3a;">Why OS-level</div>
+          <div class="h">파이썬 과부하를 피한다</div>
+          <div class="desc">FFmpeg 합성은 OS 레벨로 오프로딩, Celery 워커는 인자만 넘긴다.</div>
+        </div>
+      </div>
+      <div class="ti-right">
+        <div class="vid-tile" style="flex:1;">
+          <div class="play-badge">Final · narration + BGM</div>
+          <video src="assets/video/final_vlog.mp4" muted loop autoplay playsinline style="height:520px;"></video>
+          <div class="vid-meta">
+            <div class="vid-title">meta_combined_6_Musicgen_tts_success.mp4</div>
+            <div class="vid-sub">애니메이션 + TTS 내레이션 + MusicGen BGM이 한 파일로 합성된 결과</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">MEDIA AI</div><div>25 / 32</div></div>
+</section>
+
+<!-- 26 TROUBLE · TTS -->
+<section class="slide" data-screen-label="26 Trouble TTS">
+  <div class="chap-strip"><span class="num">05</span> <span>Troubleshooting · 01</span></div>
+  <h2 class="section-h">Trouble · TTS</h2>
+  <h3 class="kicker">언어 코드와 실행 환경 차이에서 시작된, <strong style="color:var(--red);">Segmentation Fault</strong>까지 간 문제.</h3>
+  <div class="content">
+    <div class="ba-grid" style="margin-top:30px;">
+      <div class="ba-card before">
+        <div class="tag">Before</div>
+        <div class="h">WebUI · API · OS 레벨이 따로 놀았다</div>
+        <ul>
+          <li>WebUI는 “Korean / 한국어”, API는 “ko”를 요구</li>
+          <li>Mecab C++ 엔진과 한국어 사전(mecab-ko-dic) 경로가 꼬임</li>
+          <li>BigVGAN 로딩 시 huggingface_hub 파라미터 누락</li>
+          <li>결과: 워커가 에러 로그 없이 즉사 (Segmentation Fault)</li>
+        </ul>
+      </div>
+      <div class="ba-arrow">→</div>
+      <div class="ba-card after">
+        <div class="tag">After</div>
+        <div class="h">API 기준 언어 코드 + 런타임 몽키 패치</div>
+        <ul>
+          <li>API 입력 언어 코드를 ko로 통일, fallback gTTS 경로 추가</li>
+          <li>Mecab 사전 경로(/usr/local/lib/.../mecab_ko_dic/dicdir)를 <strong>_g2p.mecab 객체에 직접 매핑</strong></li>
+          <li>BigVGAN._from_pretrained를 <strong>실행 시점에 가로채 파라미터 강제 주입</strong> (Monkey Patching)</li>
+          <li>모델 파일·의존성 체크리스트 문서화 (보고서 §4.2)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">TROUBLESHOOTING</div><div>26 / 32</div></div>
+</section>
+
+<!-- 27 TROUBLE · GPU/MEMORY -->
+<section class="slide" data-screen-label="27 Trouble GPU">
+  <div class="chap-strip"><span class="num">05</span> <span>Troubleshooting · 02</span></div>
+  <h2 class="section-h">Trouble · GPU & Memory</h2>
+  <h3 class="kicker">멋있는 모델보다 <strong style="color:var(--red);">운영 구조</strong>가 중요했다.</h3>
+  <div class="content">
+    <div class="ba-grid" style="margin-top:30px;">
+      <div class="ba-card before">
+        <div class="tag">Before</div>
+        <div class="h">동기 API + 거대 모델이 충돌했다</div>
+        <ul>
+          <li>CogVideoX-5b는 15GB VRAM(Kaggle T4)에서 즉시 OOM</li>
+          <li>의존성 지옥: torchvision · transformers · diffusers · mmcv-full 버전 충돌</li>
+          <li>한 요청이 5~15분 — 동기 API timeout</li>
+          <li>TorchServe 워커가 에러 로그 없이 즉사 (np.float deprecated)</li>
+        </ul>
+      </div>
+      <div class="ba-arrow">→</div>
+      <div class="ba-card after">
+        <div class="tag">After</div>
+        <div class="h">샌드박스 격리 + 비동기 큐 + CPU offload</div>
+        <ul>
+          <li>모델별 Miniconda 가상환경 분리 (TorchServe 0.6.0 · Numpy 1.23.5 핀)</li>
+          <li>CogVideoX: <strong>enable_sequential_cpu_offload + VAE slicing + tiling</strong></li>
+          <li><strong>Celery + Redis</strong>로 작업 분리, FastAPI는 즉시 job_id 반환</li>
+          <li><strong>3중 생존 방어막</strong>: 정상 렌더 → 프레임 추출 후 FFmpeg 강제 조립 → 5초 더미 영상</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">TROUBLESHOOTING</div><div>27 / 32</div></div>
+</section>
+
+<!-- 28 TROUBLE · DATA/SCREEN -->
+<section class="slide" data-screen-label="28 Trouble Data Screen">
+  <div class="chap-strip"><span class="num">05</span> <span>Troubleshooting · 03</span></div>
+  <h2 class="section-h">Trouble · Data &amp; Screen</h2>
+  <h3 class="kicker">실패는 숨기는 게 아니라 <strong style="color:var(--red);">산출물로 기록</strong>하는 것이다.</h3>
+  <div class="content">
+    <div class="grid-2" style="flex:1;margin-top:18px;">
+      <div class="ba-card after">
+        <div class="tag">Data trouble · 모델링</div>
+        <div class="h">약점을 차트로 남겼다</div>
+        <ul>
+          <li>날씨 흐림 클래스 recall 약함 → class metric 별도 저장</li>
+          <li>소비 모델 지역별 오차 → 시도별 MAE 차트로 검증</li>
+          <li>Safety 지표가 너무 높음 → feature importance · confusion matrix 검토</li>
+        </ul>
+      </div>
+      <div class="ba-card after">
+        <div class="tag">Screen trouble · 화면</div>
+        <div class="h">캡처가 회귀 테스트가 됐다</div>
+        <ul>
+          <li>인트로 화면 레이아웃 깨짐 → Playwright 21장 캡처 시리즈로 추적</li>
+          <li>커뮤니티 read 화면 이미지 표시 누락 → list · write · detail · modify 모두 캡처 검증</li>
+          <li>Next 실행 환경과 빌드 옵션 차이 → webpack 기준 로컬 검증 흐름 정리</li>
+        </ul>
+      </div>
+    </div>
+    <div class="cap-grid" style="margin-top:24px;flex:0 0 240px;">
+      <div class="ct"><img src="assets/figures/safety_classifier_confusion_matrix.png" alt=""><div class="ct-cap">Safety · confusion matrix</div></div>
+      <div class="ct"><img src="assets/figures/consume_v3_feature_importance.png" alt=""><div class="ct-cap">Consume v3 · feature importance</div></div>
+      <div class="ct"><img src="assets/figures/weather_lstm_class_metrics.png" alt=""><div class="ct-cap">Weather · class metrics</div></div>
+      <div class="ct"><img src="assets/figures/poi_rec_recall_bar.png" alt=""><div class="ct-cap">POI rec · recall bar</div></div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">TROUBLESHOOTING</div><div>28 / 32</div></div>
+</section>
+
+<!-- 29 CURRENT TOOLS -->
+<section class="slide" data-screen-label="29 Current Tools">
+  <div class="chap-strip"><span class="num">06</span> <span>Tools · Final</span></div>
+  <h2 class="section-h">도구는 <span style="color:var(--red)">‘각자 한 책임’</span>만 맡도록 정리했다.</h2>
+  <div class="content">
+    <div class="tool-stack" style="flex:1;margin-top:24px;">
+      <div class="tool-col">
+        <h4>Frontend</h4>
+        <div class="item"><strong>Next.js · React · TS</strong><br>화면 · SDUI metadata</div>
+        <div class="item"><strong>Playwright</strong><br>커뮤니티/SDUI 회귀 캡처</div>
+        <div class="item"><strong>PWA</strong><br>오프라인/캐시 전략</div>
+      </div>
+      <div class="tool-col">
+        <h4>Backend</h4>
+        <div class="item"><strong>Spring Boot</strong><br>회원 · 콘텐츠 · CRUD</div>
+        <div class="item"><strong>FastAPI</strong><br>AI 오케스트레이션</div>
+        <div class="item"><strong>PostgreSQL · pgvector · ChromaDB · Neo4j · Redis</strong></div>
+      </div>
+      <div class="tool-col">
+        <h4>AI / Data</h4>
+        <div class="item"><strong>PyTorch · pytorch-tabnet · sklearn</strong></div>
+        <div class="item"><strong>BLIP-2 · GPT-SoVITS · MusicGen</strong></div>
+        <div class="item"><strong>CogVideoX · 3D Photo Inpainting · Animated Drawings</strong></div>
+        <div class="item"><strong>Groq API · multilingual-e5-small</strong></div>
+      </div>
+      <div class="tool-col">
+        <h4>Ops / Workflow</h4>
+        <div class="item"><strong>Docker Compose</strong><br>로컬 재현</div>
+        <div class="item"><strong>TorchServe</strong><br>모델 배포 레이어</div>
+        <div class="item"><strong>Celery · zrok</strong><br>비동기 · 터널링</div>
+        <div class="item"><strong>MLflow · DagsHub</strong><br>실험 추적</div>
+        <div class="item"><strong>FFmpeg</strong><br>미디어 합성</div>
+        <div class="item"><strong>Git · GitHub · Jupyter · Colab · Kaggle</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">TOOLS</div><div>29 / 32</div></div>
+</section>
+
+<!-- 30 EVIDENCE -->
+<section class="slide" data-screen-label="30 Evidence Archive">
+  <div class="chap-strip"><span class="num">06</span> <span>Evidence</span></div>
+  <h2 class="section-h">남은 흔적이 <span style="color:var(--red)">시안의 신뢰</span>다.</h2>
+  <h3 class="kicker">완성도를 과장하지 않는다 — 실제 작업 기록을 그대로 보여준다.</h3>
+  <div class="content">
+    <div class="cap-grid" style="grid-template-columns:repeat(5,1fr);flex:1;">
+      <div class="ct"><img src="assets/capture/intro1.png" alt=""><div class="ct-cap">Intro · early layout</div></div>
+      <div class="ct"><img src="assets/capture/intro5.png" alt=""><div class="ct-cap">Intro · iteration 5</div></div>
+      <div class="ct"><img src="assets/capture/intro10.png" alt=""><div class="ct-cap">Intro · iteration 10</div></div>
+      <div class="ct"><img src="assets/capture/intro15.png" alt=""><div class="ct-cap">Intro · iteration 15</div></div>
+      <div class="ct"><img src="assets/capture/intro21.png" alt=""><div class="ct-cap">Intro · final</div></div>
+      <div class="ct"><img src="assets/charts/14_poi_map.png" alt=""><div class="ct-cap">POI map</div></div>
+      <div class="ct"><img src="assets/charts/09_tabnet_architecture.png" alt=""><div class="ct-cap">TabNet architecture</div></div>
+      <div class="ct"><img src="assets/charts/10_tabnet_learning_curve.png" alt=""><div class="ct-cap">TabNet learning curve</div></div>
+      <div class="ct"><img src="assets/charts/12_tabnet_scatter.png" alt=""><div class="ct-cap">TabNet · pred vs actual</div></div>
+      <div class="ct"><img src="assets/charts/20_consume_sido_distribution.png" alt=""><div class="ct-cap">Consume · sido distribution</div></div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">EVIDENCE</div><div>30 / 32</div></div>
+</section>
+
+<!-- 31 FINAL -->
+<section class="slide" data-screen-label="31 Final">
+  <div class="ribbon"><span class="chap">END</span><span class="pipe">/</span><span class="ind">Final</span><div class="ribbon-r">Closing</div></div>
+  <div class="red-bar"></div>
+  <div class="final-inner">
+    <div class="final-quote">기능의 개수가 아니라,<br><em>연결된 구조</em>가 결과물입니다.</div>
+    <div style="font-family:var(--serif);font-size:30px;color:var(--text-2);line-height:1.5;max-width:1400px;">
+      K-Ride는 추천 결과를 보여주는 앱에서, <strong style="color:var(--text);">추천 근거와 AI 미디어까지 운영 가능한 시스템</strong>으로 확장됐습니다.
+    </div>
+    <div class="final-grid">
+      <div class="fb"><h5>Data</h5><p>추천과 생성의 원천</p></div>
+      <div class="fb"><h5>Model</h5><p>점수와 설명을 동시에</p></div>
+      <div class="fb"><h5>Server</h5><p>비동기와 서빙의 분리</p></div>
+      <div class="fb"><h5>Screen</h5><p>사용자 경험으로 연결</p></div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">K-RIDE 2.0</div><div>31 / 32</div></div>
+</section>
+
+<!-- 32 CONTACT -->
+<section class="slide contact" data-screen-label="32 Contact">
+  <div class="cover-noise"></div>
+  <div class="cover-stripes"></div>
+  <div class="contact-inner">
+    <div style="font-size:22px;letter-spacing:0.4em;color:var(--red);font-weight:700;text-transform:uppercase;">Thank you</div>
+    <div class="name">민예린</div>
+    <div class="seed">작은 씨앗을 뿌려봅니다.</div>
+    <div class="info">
+      <div><span class="k">Kakao</span>myeliln12</div>
+      <div><span class="k">Phone</span>010-4641-2537</div>
+    </div>
+    <div class="ribbon-bot">K · RIDE · 2.0 · 2026</div>
+  </div>
+</section>
+
+</deck-stage>
+<script src="deck-stage.js"></script>
+</body>
+</html>

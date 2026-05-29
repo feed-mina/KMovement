@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>K-Ride 2.0 · 기술 보고서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root {
+    --bg: #fafaf9;
+    --ink: #111111;
+    --ink-2: #2a2a2a;
+    --ink-3: #525252;
+    --rule: #d4d4d4;
+    --soft: #ededed;
+    --red: #c8102e;
+    --red-deep: #8a0a1f;
+    --serif: "Noto Serif KR", "Nanum Myeongjo", serif;
+    --sans: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+  body { font-size: 16px; line-height: 1.7; }
+
+  /* PAGE */
+  .page {
+    max-width: 940px; margin: 0 auto;
+    padding: 80px 64px 120px;
+    background: #fff;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  /* COVER */
+  .cover {
+    height: 1080px;
+    background: linear-gradient(180deg, #0a0a0a 0%, #1a0708 100%);
+    color: #fff;
+    padding: 0;
+    position: relative;
+    display: flex; flex-direction: column;
+    border: 0; max-width: 940px; margin: 0 auto;
+    overflow: hidden;
+  }
+  .cover-stripe { position:absolute; right:0; top:0; bottom:0; width:8px; background: linear-gradient(180deg, var(--red) 0%, var(--red) 40%, transparent 40%, transparent 50%, var(--red) 50%, var(--red) 65%, transparent 65%); }
+  .cover-inner { padding: 100px 64px; display:flex; flex-direction:column; flex:1; }
+  .cover .mark { font-size: 14px; color: var(--red); letter-spacing: 0.4em; text-transform: uppercase; font-weight: 700; margin-bottom: 36px; }
+  .cover h1 { font-family: var(--sans); font-weight: 800; font-size: 96px; line-height: 0.95; letter-spacing: -0.03em; margin: 0; }
+  .cover h1 .red { color: var(--red); }
+  .cover .sub { font-family: var(--serif); font-weight: 500; font-size: 28px; line-height: 1.45; color: #d4d4d4; margin-top: 36px; max-width: 700px; }
+  .cover .meta { margin-top:auto; display:grid; grid-template-columns: repeat(3, auto); gap:36px; color:#bababa; font-size:14px; letter-spacing: 0.18em; text-transform: uppercase; padding-top:60px; border-top:1px solid #333; }
+  .cover .meta .k { color: var(--red); font-weight:700; display:block; margin-bottom: 6px; font-size: 12px; }
+  .cover .meta .v { color:#f5f5f5; font-size:18px; letter-spacing: 0.05em; text-transform: none; font-weight: 600; }
+
+  /* TYPO */
+  .ch-num { font-family: var(--sans); font-weight: 700; font-size: 13px; letter-spacing: 0.35em; color: var(--red); text-transform: uppercase; margin-bottom: 12px; }
+  h1.ch-title { font-family: var(--sans); font-weight: 800; font-size: 44px; line-height: 1.15; letter-spacing: -0.025em; margin: 0 0 32px; color: var(--ink); }
+  h2.section { font-family: var(--sans); font-weight: 700; font-size: 26px; line-height: 1.3; margin: 56px 0 16px; color: var(--ink); }
+  h3.sub { font-family: var(--sans); font-weight: 700; font-size: 18px; line-height: 1.4; margin: 32px 0 12px; color: var(--ink-2); }
+  p { margin: 0 0 14px; color: var(--ink-2); }
+  p strong { color: var(--ink); font-weight: 700; }
+  p.lead { font-family: var(--serif); font-size: 18px; line-height: 1.7; color: var(--ink-2); margin-bottom: 32px; padding-left: 16px; border-left: 3px solid var(--red); }
+  ul, ol { margin: 0 0 20px; padding-left: 22px; color: var(--ink-2); }
+  ul li, ol li { margin-bottom: 8px; line-height: 1.65; }
+  ul li::marker { color: var(--red); }
+  code { font-family: var(--mono); font-size: 13px; background: var(--soft); padding: 2px 6px; border-radius: 3px; color: var(--ink); }
+
+  /* CALLOUT */
+  .callout {
+    background: #fafaf6;
+    border-left: 4px solid var(--red);
+    padding: 20px 24px;
+    margin: 24px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout .tag { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--red); font-weight: 700; margin-bottom: 6px; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.dark { background: #111; color: #ededed; border-left-color: var(--red); }
+  .callout.dark p { color: #d4d4d4; }
+  .callout.dark .tag { color: #ff6b7a; }
+
+  /* TABLE */
+  .tbl {
+    width: 100%; border-collapse: collapse;
+    margin: 18px 0 24px;
+    font-size: 14px;
+  }
+  .tbl th, .tbl td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  .tbl th { font-weight: 700; color: var(--ink); background: var(--soft); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; }
+  .tbl td { color: var(--ink-2); }
+  .tbl td strong { color: var(--ink); }
+
+  /* FIGURE */
+  figure {
+    margin: 28px 0;
+    border: 1px solid var(--rule);
+    padding: 16px;
+    background: #fff;
+  }
+  figure img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+  figcaption { margin-top: 10px; font-size: 13px; color: var(--ink-3); letter-spacing: 0.04em; text-align: center; font-family: var(--sans); }
+  figcaption .num { color: var(--red); font-weight: 700; margin-right: 6px; }
+
+  /* TWO COLUMN FIGURES */
+  .fig-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 28px 0; }
+  .fig-row figure { margin: 0; }
+
+  /* STAT BAND */
+  .stat-band {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    margin: 28px 0;
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+  }
+  .stat-band .s { padding: 18px 16px; border-right: 1px solid var(--rule); }
+  .stat-band .s:last-child { border-right: 0; }
+  .stat-band .v { font-family: var(--sans); font-weight: 800; font-size: 30px; color: var(--ink); letter-spacing: -0.02em; line-height: 1; }
+  .stat-band .v .u { font-size: 14px; color: var(--ink-3); font-weight: 500; margin-left: 4px; }
+  .stat-band .l { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); margin-top: 6px; font-weight: 600; }
+
+  /* TOC */
+  .toc {
+    background: #fff;
+    padding: 80px 64px;
+    max-width: 940px; margin: 0 auto;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .toc h2 { font-family: var(--sans); font-weight: 700; font-size: 14px; letter-spacing: 0.3em; color: var(--red); text-transform: uppercase; margin: 0 0 28px; }
+  .toc-list { list-style: none; padding: 0; margin: 0; }
+  .toc-list li {
+    display: grid; grid-template-columns: 60px 1fr auto;
+    align-items: baseline;
+    padding: 16px 0; border-bottom: 1px solid var(--rule);
+    font-family: var(--sans);
+  }
+  .toc-list li .n { font-weight: 800; color: var(--red); font-size: 18px; letter-spacing: 0.05em; }
+  .toc-list li .t { color: var(--ink); font-weight: 600; font-size: 18px; line-height: 1.35; padding-right: 16px; }
+  .toc-list li .t .d { display: block; font-weight: 400; color: var(--ink-3); font-size: 14px; margin-top: 4px; line-height: 1.4; }
+  .toc-list li .p { color: var(--ink-3); font-size: 14px; }
+
+  /* CHAPTER OPENER */
+  .ch-opener {
+    padding: 100px 64px 60px;
+    background: #fff;
+    max-width: 940px; margin: 0 auto;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    border-top: 3px solid var(--red);
+    page-break-before: always;
+  }
+  .ch-opener .ch-num-big {
+    font-family: var(--sans); font-weight: 900; font-size: 200px; line-height: 0.9;
+    color: var(--red); letter-spacing: -0.06em; opacity: 0.9; margin-bottom: 24px;
+  }
+  .ch-opener h1 { font-family: var(--sans); font-weight: 800; font-size: 48px; line-height: 1.15; letter-spacing: -0.025em; margin: 0; color: var(--ink); }
+  .ch-opener .ch-lead { font-family: var(--serif); font-size: 20px; line-height: 1.7; color: var(--ink-3); margin-top: 20px; max-width: 700px; }
+
+  .ch-body {
+    padding: 0 64px 80px;
+    background: #fff;
+    max-width: 940px; margin: 0 auto;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  /* FOOTER */
+  .doc-end {
+    padding: 60px 64px;
+    background: #0a0a0a; color: #d4d4d4;
+    max-width: 940px; margin: 0 auto;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    text-align: center;
+  }
+  .doc-end h3 { font-family: var(--sans); font-weight: 800; font-size: 36px; color: #fff; letter-spacing: -0.02em; margin: 0 0 12px; }
+  .doc-end p { color: #a3a3a3; margin: 0; }
+  .doc-end .red { color: var(--red); font-weight: 700; }
+
+  /* HEADER ON EACH PAGE (sticky topbar) */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+    padding: 14px 24px;
+    display: flex; align-items: center; gap: 20px;
+    font-family: var(--sans); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-3); font-weight: 600;
+  }
+  .topbar .brand { color: var(--red); font-weight: 800; letter-spacing: 0.3em; }
+  .topbar .nav { display:flex; gap: 18px; margin-left: auto; }
+  .topbar .nav a { color: var(--ink-3); text-decoration: none; }
+  .topbar .nav a:hover { color: var(--red); }
+
+  @media print {
+    .topbar { display: none; }
+    .page, .toc, .ch-opener, .ch-body, .doc-end, .cover { border: 0; max-width: none; }
+    .ch-opener { page-break-before: always; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">K · Ride · 2.0</div>
+  <div>Technical Report · 민예린 · 2026.05</div>
+  <div class="nav">
+    <a href="#toc">목차</a>
+    <a href="#ch1">1장</a>
+    <a href="#ch2">2장</a>
+    <a href="#ch3">3장</a>
+    <a href="#ch4">4장</a>
+    <a href="#ch5">5장</a>
+    <a href="#ch6">6장</a>
+  </div>
+</div>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-stripe"></div>
+  <div class="cover-inner">
+    <div class="mark">N · Technical Report · 2026</div>
+    <h1>지능형 <span class="red">K-관광</span><br>추천 및 멀티모달<br>AI 시스템<br><span class="red">아키텍처 연구</span></h1>
+    <div class="sub">GraphRAG 추천 엔진을 AI 여행로그 생성 플랫폼으로 확장한 2개월의 기록 — 데이터, 모델, 서버, 화면, 배포의 연결 구조에 관한 기술 보고서.</div>
+    <div class="meta">
+      <div><span class="k">Author</span><span class="v">민예린</span></div>
+      <div><span class="k">Period</span><span class="v">2026.03 — 2026.05</span></div>
+      <div><span class="k">Version</span><span class="v">v2.0 · Final</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="toc" id="toc">
+  <h2>목차 · Table of Contents</h2>
+  <ul class="toc-list">
+    <li><span class="n">01</span><span class="t">서론<span class="d">프로젝트 배경 및 목적 / 시스템 아키텍처 개요</span></span><span class="p">§ 1.1 — 1.2</span></li>
+    <li><span class="n">02</span><span class="t">지식 그래프 및 LLM 기반 여행 추천 파이프라인<span class="d">하이브리드 DB 아키텍처 / GraphRAG 기반 지능형 추천 시스템</span></span><span class="p">§ 2.1 — 2.2</span></li>
+    <li><span class="n">03</span><span class="t">멀티모달 AI 미디어 자동 생성 모델 및 파이프라인<span class="d">지능형 라우팅 / Animated Drawings / AI 한국어 음성·BGM 합성</span></span><span class="p">§ 3.1 — 3.3</span></li>
+    <li><span class="n">04</span><span class="t">시스템 한계 극복 및 최적화 엔지니어링 (트러블슈팅)<span class="d">샌드박스 격리 / 메모리 최적화 및 런타임 몽키 패치</span></span><span class="p">§ 4.1 — 4.2</span></li>
+    <li><span class="n">05</span><span class="t">비동기 백엔드 배포 및 MLOps 파이프라인<span class="d">FastAPI · Celery / MLflow · DagsHub 실험 추적</span></span><span class="p">§ 5.1 — 5.2</span></li>
+    <li><span class="n">06</span><span class="t">결론 및 향후 과제<span class="d">구현 성과 요약 / 시스템 한계 및 확장 계획</span></span><span class="p">§ 6.1 — 6.2</span></li>
+  </ul>
+</div>
+
+<!-- CH 1 -->
+<div class="ch-opener" id="ch1">
+  <div class="ch-num-big">01</div>
+  <h1>서론</h1>
+  <div class="ch-lead">왜 K-Ride 시스템을 만들었는가, 그리고 어떤 기술적 뼈대로 구성되어 있는가에 관한 첫 장.</div>
+</div>
+<div class="ch-body">
+  <h2 class="section">1.1 프로젝트 배경 및 목적</h2>
+  <p>최근 글로벌 시장에서 K-Pop, K-Drama 등 한국 대중문화(K-Culture)의 세계적인 흥행에 힘입어, 단순한 유명 관광지 방문을 넘어 콘텐츠의 배경이 된 장소를 직접 체험하고자 하는 <strong>'K-콘텐츠 기반 관광(K-Ride)'</strong> 수요가 급증하고 있다. 그러나 기존의 관광 추천 시스템은 파편화된 장소 정보(POI)를 단순 나열하거나 위치 기반으로만 제공하는 수준에 머물러 있어, <em>"특정 드라마 촬영지 근처의 맛집"</em>이나 <em>"선호 아티스트와 연관된 힐링 장소"</em> 등 사용자의 복잡하고 다차원적인 의도를 충족시키기에는 명확한 한계가 존재한다.</p>
+  <p>이에 본 프로젝트는 사용자의 세밀한 온보딩 데이터 — 여행 기간·선호 아티스트·방문 희망 지역·여행 목적·예산 — 를 종합적으로 분석하여, <strong>할루시네이션(거짓 정보) 없이 개인화된 최적의 여행 일정을 자동으로 생성하는 지능형 추천 시스템</strong> 구축을 첫 번째 목적으로 한다.</p>
+  <p>더 나아가, 단순한 일정 텍스트 제공을 넘어 사용자 경험(UX)을 극대화하기 위해 <strong>'멀티모달 AI 기반 미디어 자동 생성 파이프라인'</strong>을 도입하였다. 사용자가 제공한 풍경 사진이나 낙서(스케치)를 기반으로 여행 브이로그 영상, 2D 캐릭터 애니메이션, 자연스러운 AI 한국어 내레이션(TTS), 그리고 분위기에 맞는 맞춤형 배경음악(BGM)을 자동 합성함으로써, 시각적이고 청각적인 몰입감을 극대화하는 혁신적인 스마트 관광 서비스를 구현하고자 한다.</p>
+
+  <h2 class="section">1.2 시스템 아키텍처 개요</h2>
+  <p>본 연구에서 제안하는 <strong>'K-Ride 시스템'</strong>은 방대한 데이터 처리와 무거운 AI 연산의 효율성을 확보하기 위해 크게 두 가지의 핵심 파이프라인(<strong>Two-track Architecture</strong>)으로 분리되어 유기적으로 상호작용한다.</p>
+
+  <h3 class="sub">트랙 1 · 지식 그래프 기반 지능형 여행 추천 파이프라인 (GraphRAG)</h3>
+  <p>본 파이프라인은 약 <strong>87만 건</strong>에 달하는 대규모 관광지 및 편의시설 데이터를 효율적으로 다루기 위해 하이브리드 데이터베이스 아키텍처를 채택하였다. 좌표 기반의 고속 검색과 메타데이터 필터링은 관계형 DB인 PostgreSQL을 활용하고, 사용자의 추상적인 여행 목적에 부합하는 의미론적 탐색은 다국어 임베딩(<code>multilingual-e5-small</code>) 기반의 벡터 DB(ChromaDB, pgvector)를 통해 수행한다.</p>
+  <p>특히 아티스트와 드라마 촬영지 간의 복잡한 연결망(<code>FILMING_AT</code> 관계)을 쿼리하기 위해 지식 그래프(Neo4j)를 구축하였으며, 이러한 다중 DB 검색 결과를 대형 언어 모델(<strong>Groq API</strong>)에 컨텍스트로 제공함으로써 초고속으로 맞춤형 일정 JSON을 생성한다.</p>
+
+  <h3 class="sub">트랙 2 · 멀티모달 AI 미디어 자동 생성 파이프라인</h3>
+  <p>생성된 여행 일정과 사용자의 시각적 입력물을 바탕으로 다양한 이기종 AI 모델이 병렬로 구동된다. 시각 정보 분석 모델(<strong>BLIP-2</strong>)을 통해 인물이나 동물 등 동적 객체의 유무를 파악하고, 이를 바탕으로 무거운 비디오 생성 모델(<strong>CogVideoX-5b</strong>)과 가벼운 패닝 모델(<strong>3D Photo Inpainting</strong>) 중 최적의 경로를 선택하는 <strong>'스마트 라우팅(Intelligent Routing)'</strong>을 수행하여 메모리 초과(OOM) 방지 및 서버 비용 최적화를 달성한다. 낙서 이미지의 경우 Meta의 <strong>Animated Drawings</strong> 프레임워크를 통해 뼈대를 추출하여 춤추는 애니메이션을 생성한다.</p>
+  <p>동시에 <strong>GPT-SoVITS(V3)</strong> 기반의 고품질 한국어 음성 합성과 <strong>MusicGen</strong>을 통한 텍스트 프롬프트 기반 BGM 생성을 수행한 뒤, 최종적으로 FFmpeg를 활용해 비동기 백엔드 환경에서 하나의 영상 파일(MP4)로 믹싱(Mixing)한다.</p>
+
+  <div class="callout">
+    <div class="tag">Operational Layer</div>
+    <p>이러한 일련의 투트랙 아키텍처는 무거운 딥러닝 추론의 병목을 막기 위해 <strong>Celery와 Redis 기반의 비동기 메시지 큐 시스템</strong> 위에서 구동되며, MLflow 및 DagsHub와 연동된 MLOps 체계를 통해 생성 시간과 품질을 실시간으로 추적하는 엔터프라이즈급 백엔드 생태계로 구성된다.</p>
+  </div>
+</div>
+
+<!-- CH 2 -->
+<div class="ch-opener" id="ch2">
+  <div class="ch-num-big">02</div>
+  <h1>지식 그래프 및 LLM 기반 여행 추천 파이프라인</h1>
+  <div class="ch-lead">87만 건의 POI를 할루시네이션 없이 1~2초 안에 풀어내기 위한 GraphRAG 아키텍처.</div>
+</div>
+<div class="ch-body">
+  <p class="lead">단일 데이터베이스 모델로는 복잡한 관계망 쿼리와 대용량 위치 기반 검색을 동시에 만족시키기 어렵다. K-Ride 시스템은 데이터의 성격과 활용 목적에 따라 관계형 DB · 지식 그래프 · 벡터 DB를 철저히 분리하고 융합하는 <strong>3분산 하이브리드 전략</strong>을 채택했다.</p>
+
+  <h2 class="section">2.1 하이브리드 데이터베이스 아키텍처 설계</h2>
+
+  <h3 class="sub">관계형 DB · PostgreSQL + PostGIS</h3>
+  <p>시스템의 메인 저장소인 PostgreSQL은 총 <strong>87만 건 이상의 관광 및 편의시설(POI)</strong> 데이터를 관리한다. 세부적으로는 음식점 813,631건, K-Culture 관련 장소 23,184건, 편의시설 21,645건, 일반 관광지 15,905건으로 구성되어 있다.</p>
+  <p>이러한 대규모 데이터는 단순히 메타데이터를 저장하는 것에 그치지 않고, <code>course_template</code>(여행 코스 템플릿), <code>district_danger</code>(안전 통계 데이터), <code>bicycle_paths</code>(자전거 도로망) 등의 테이블과 함께 구축되어 있다. 특히 공간 쿼리를 지원하는 PostGIS 확장을 통해 <em>"특정 촬영지 주변 1km 이내 맛집 리스트"</em>와 같은 좌표 기반 검색과 예산 필터링을 <strong>0.01초</strong> 만에 수행하는 고속 백엔드 역할을 담당한다.</p>
+
+  <h3 class="sub">지식 그래프 · Neo4j AuraDB</h3>
+  <p>단순 위치 기반 검색을 넘어, K-콘텐츠 기반의 맥락적 연결성을 파악하기 위해 클라우드 기반의 Neo4j AuraDB를 도입하였다. 지식 그래프 내에는 총 <strong>39,109개의 노드</strong>가 구축되어 있으며, 이 중 핵심인 아티스트 노드 20개와 촬영지 POI 간에 <strong>175개의 FILMING_AT 관계 엣지</strong>가 형성되어 있다.</p>
+  <p>이러한 그래프 구조는 <em>"드라마 '도깨비' 촬영지 근처의 또 다른 드라마 성지"</em>와 같은 다차원적 관계망을 고속으로 탐색하는 데 최적화되어 있다. 초기 시스템에서는 <code>models/kride_graph.json</code> 파일을 메모리에 직접 로드하여 커뮤니티 노드를 계산하였으나, 데이터 증가에 따른 메모리 과부하를 방지하기 위해 DB 쿼리를 통한 <strong>동적 서브 그래프 추출 방식</strong>으로 아키텍처 개선을 진행하고 있다.</p>
+
+  <figure>
+    <img src="assets/figures/kculture_region_dist.png" alt="K-culture region distribution">
+    <figcaption><span class="num">Fig 2.1</span>K-culture 지역 분포 — 아티스트·드라마 촬영지의 광역시도 단위 분포</figcaption>
+  </figure>
+
+  <h2 class="section">2.2 GraphRAG 기반 지능형 추천 시스템 구현</h2>
+
+  <h3 class="sub">다국어 임베딩 및 벡터 DB · ChromaDB + pgvector</h3>
+  <p>사용자의 추상적인 '여행 목적'이나 '감성'을 기존의 키워드 검색으로 찾는 것은 불가능하다. 이를 해결하기 위해 87만 건의 POI 데이터를 <strong>384차원의 고밀도 벡터</strong>로 변환하는 <code>intfloat/multilingual-e5-small</code> 다국어 임베딩 모델을 채택하였다. 이 모델은 한국어·영어·일본어를 동시에 지원하므로 글로벌 사용자의 쿼리에도 유연하게 대응한다.</p>
+  <p>생성된 임베딩 벡터는 두 가지 방식으로 저장 및 관리된다. 첫째, 로컬 환경의 <strong>ChromaDB</strong>를 통해 HNSW(Hierarchical Navigable Small World) 알고리즘 기반의 4개 UUID 컬렉션으로 분산 저장된다. 둘째, PostgreSQL 내부의 <strong>pgvector 확장</strong>을 통해 <code>poi</code> 테이블의 <code>embedding(vector(384))</code> 컬럼에 직접 저장되며, IVFFlat 인덱스를 생성하여 RDBMS 내에서도 초고속 벡터 유사도 검색이 가능하도록 설계되었다.</p>
+
+  <h3 class="sub">Groq API를 활용한 초고속 개인화 일정 JSON 생성 로직</h3>
+  <p>온보딩 단계에서 수집된 사용자 데이터(여행 기간·선호 아티스트·지역·목적·예산)는 통합 API 엔드포인트(<code>POST /api/recommend/itinerary</code>)를 통해 백엔드로 전달된다. 파이프라인은 4단계로 작동한다.</p>
+  <ol>
+    <li>Neo4j를 호출하여 선택된 아티스트와 연관된 <code>FILMING_AT</code> POI 및 지역의 안전·기상 프로파일을 추출한다.</li>
+    <li>ChromaDB 또는 pgvector를 통해 사용자의 '여행 목적'과 벡터 코사인 유사도가 가장 높은 POI들을 색인한다.</li>
+    <li>PostgreSQL에서 예산(Budget) 및 좌표 제한 필터링을 거쳐 최종 추천 장소 리스트를 압축한다.</li>
+    <li>압축된 고품질의 컨텍스트를 <strong>Groq API</strong>(<code>openai/gpt-oss-120b</code> 또는 <code>llama-3.3-70b-versatile</code> 모델)에 주입한다.</li>
+  </ol>
+  <p>LLM에는 <em>"검색된 POI 목록만 사용하여 일정을 생성하라"</em>는 엄격한 시스템 프롬프트가 주어지며, 할루시네이션을 차단한 상태에서 오전(Morning)과 오후(Afternoon)가 분리된 완벽한 JSON 포맷의 일정을 반환한다.</p>
+
+  <div class="callout dark">
+    <div class="tag">Latency · 46s → 1~2s</div>
+    <p>특히 기존 Ollama 로컬 모델을 사용했을 당시 약 <strong>46초</strong>가 소요되던 응답 지연 시간(Latency)을, LPU(Language Processing Unit) 기반의 Groq API로 전환함으로써 단 <strong>1~2초</strong> 수준으로 극단적인 최적화를 이뤄냈다.</p>
+  </div>
+
+  <figure>
+    <img src="assets/figures/poi_rec_cooccurrence_heat.png" alt="POI co-occurrence heatmap">
+    <figcaption><span class="num">Fig 2.2</span>POI 공동출현 히트맵 — 카테고리 간 함께 방문되는 패턴</figcaption>
+  </figure>
+
+  <p>이러한 GraphRAG 기반의 지능형 추천 파이프라인에서 생성된 여행 일정과 시각적 컨텍스트는, 다음 장에서 설명할 '멀티모달 AI 미디어 자동 생성 파이프라인'의 필수 입력 데이터(프롬프트)로 전달되어 최종적인 사용자 맞춤형 브이로그 미디어로 확장된다.</p>
+</div>
+
+<!-- CH 3 -->
+<div class="ch-opener" id="ch3">
+  <div class="ch-num-big">03</div>
+  <h1>멀티모달 AI 미디어 자동 생성 모델 및 파이프라인</h1>
+  <div class="ch-lead">이미지 한 장에서 캡션·내레이션·영상·BGM이 한 mp4로 묶이는 5단계 파이프라인.</div>
+</div>
+<div class="ch-body">
+  <p class="lead">무거운 이기종 딥러닝 모델들을 제한된 GPU 환경(Kaggle T4 15GB)에서 메모리 초과(OOM) 없이 안정적으로 구동하기 위한 <strong>지능형 라우팅과 헤드리스(Headless) 파이프라인 설계</strong>에 초점을 맞춘다.</p>
+
+  <h2 class="section">3.1 시각 정보 기반 지능형 라우팅 로직</h2>
+
+  <h3 class="sub">BLIP-2 모델을 활용한 이미지 영문 캡셔닝 체계</h3>
+  <p>사용자가 업로드한 여행 사진(예: 해변의 풍경, 반려동물과의 사진)은 가장 먼저 시각-언어 모델인 <strong>BLIP-2</strong>(Bootstrapping Language-Image Pre-training)로 전달된다. BLIP-2는 입력된 이미지를 분석하여 <em>"A woman sitting on the beach with a dog"</em> 또는 <em>"A wide shot of beautiful blue ocean waves"</em>와 같은 고품질의 영문 캡션을 자동으로 추출한다. 이 캡션 데이터는 이어지는 비디오 생성 모델의 입력 프롬프트로 활용될 뿐만 아니라, <strong>라우팅의 핵심 기준점</strong>이 된다.</p>
+
+  <h3 class="sub">자원 최적화를 위한 조건부 분기 · CogVideoX vs 3D Photo Inpainting</h3>
+  <p>추출된 영문 캡션은 파이썬 기반의 라우터 함수(<code>route_video_model</code>)를 거친다. 시스템은 캡션 내에 <strong>'person · people · dog · animal'</strong> 등 동적인 피사체를 의미하는 특정 키워드가 하나라도 포함되어 있는지 검사한다.</p>
+  <p>동적 키워드가 감지되면, 사람이나 동물의 자연스러운 모션 생성에 탁월하지만 연산량이 무거운 <strong>'CogVideoX 1.5 (CogVideoX-5b-I2V)'</strong> 모델로 작업을 배정한다. 반면, 동적 피사체가 없는 단순 자연 풍경이나 건축물 사진의 경우, 5초 내외의 가벼운 패닝(Panning) 효과만으로도 충분한 시각적 만족감을 줄 수 있으므로 연산량이 적은 <strong>'3D Photo Inpainting'</strong> 모델로 자동 배정한다. 이와 같은 하이브리드 영상 생성 라우팅 로직은 서버 파이프라인의 처리 소요 시간과 GPU 비용을 획기적으로 감축시킨다.</p>
+
+  <table class="tbl">
+    <thead><tr><th style="width:25%">분기 조건</th><th>선택 모델</th><th>특징</th></tr></thead>
+    <tbody>
+      <tr><td><strong>동적 키워드 감지</strong> (person, people, dog, animal …)</td><td>CogVideoX 1.5 (5b-I2V)</td><td>사람·동물의 자연스러운 모션 생성. VAE slicing/tiling + sequential CPU offload로 OOM 방지.</td></tr>
+      <tr><td><strong>정적 풍경 · 건축</strong></td><td>3D Photo Inpainting</td><td>5초 패닝/Ken Burns. 가벼운 모션만으로 충분한 몰입.</td></tr>
+      <tr><td><strong>낙서 · 스케치 입력</strong></td><td>Meta Animated Drawings</td><td>뼈대 추출 → BVH 모션 매핑. TorchServe로 별도 워커.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="section">3.2 2D 캐릭터 애니메이션 자동화 · Animated Drawings</h2>
+
+  <h3 class="sub">포즈 추정 및 뼈대 추출 모델 구조</h3>
+  <p>낙서 이미지에 생명을 불어넣기 위해 시스템은 컴퓨터 비전 라이브러리인 <strong>mmcv-full의 CUDA 연산</strong>을 활용한다. 우선 <code>drawn_humanoid_detector.mar</code> 모델을 TorchServe 엔진에 적재하여 캐릭터의 객체 위치(Bounding Box)와 전반적인 뼈대를 추출한다. 이후 <code>drawn_humanoid_pose_estimator.mar</code> 모델이 머리·팔·다리 등 세부 관절(Joint)의 위치를 정밀하게 예측한다. 이렇게 추출된 관절 데이터는 2D 캐릭터가 3D 모션을 수행할 수 있는 <strong>리깅(Rigging) 기반</strong>을 형성한다.</p>
+
+  <h3 class="sub">MESA 헤드리스 렌더링 및 모션 데이터(BVH) 매핑 원리</h3>
+  <p>클라우드 서버(Kaggle 등) 환경은 디스플레이 모니터가 존재하지 않는 헤드리스(Headless) 환경이므로, 3D 그래픽 렌더링 시 치명적인 에러가 발생한다. K-Ride 시스템은 설정 파일(<code>mvc_base_cfg.yaml</code>) 내부의 <code>USE_MESA</code> 옵션을 <code>True</code>로 강제하고, 환경 변수에 <code>PYOPENGL_PLATFORM="osmesa"</code>와 <code>MPLBACKEND="Agg"</code>를 주입하여 <strong>가상의 도화지(OSMesa)</strong>를 펼치는 방식으로 이를 돌파한다.</p>
+  <p>렌더링 단계에서는 좀비 걸음(<code>zombie.yaml</code>), 춤(<code>jesse_dance.yaml</code>) 등의 <strong>모션 캡처 데이터(BVH)</strong>가 호출된다. 3D 모션 데이터의 축(Y축 기준)과 거대한 크기 스케일을 캐릭터에 맞게 조정(Scale: 0.005)한 뒤, PCA 연산과 <strong>ARAP(As-Rigid-As-Possible) 알고리즘</strong>을 통해 3D 관절의 움직임을 2D 이미지 뼈대에 수학적으로 정렬하고 투영하여 최종적인 애니메이션 프레임(<code>.gif / .mp4</code>)을 그려낸다.</p>
+
+  <h2 class="section">3.3 AI 한국어 음성 및 배경음악 합성</h2>
+
+  <h3 class="sub">GPT-SoVITS V3 (RoBERTa + BigVGAN)를 활용한 고품질 TTS</h3>
+  <p>한국어 대본은 최첨단 오픈소스 음성 합성 모델인 <strong>GPT-SoVITS (V3)</strong>를 통해 고품질 오디오(<code>.wav</code>)로 변환된다. 텍스트 분석(Text-to-Semantic) 단계에서는 <code>chinese-roberta-wwm-ext-large</code>와 같은 언어 모델(<strong>RoBERTa</strong>)이 형태소와 문맥을 파악하며, 한국어 처리를 위해 <strong>Mecab C++ 엔진(mecab-ko-dic)</strong>을 시스템 레벨에 이식하여 세그멘테이션 폴트(Segmentation Fault) 없이 안정적으로 형태소를 분절한다. 분석된 의미 데이터는 최종적으로 <strong>BigVGAN 보코더(Vocoder)</strong>를 통해 실제 사람의 목소리와 유사한 자연스러운 음성 파형으로 변환된다.</p>
+  <p>특히 BigVGAN 가중치 다운로드 시 발생하는 라이브러리 충돌을 막기 위해 실행 시점에 <code>_from_pretrained</code> 메서드를 강제로 조작하는 <strong>몽키 패치(Monkey Patching)</strong> 기법을 사용하여 서버 안정성을 극대화하였다.</p>
+
+  <h3 class="sub">Facebook MusicGen을 활용한 텍스트 프롬프트 기반 BGM 자동 생성</h3>
+  <p>영상 분위기를 고조시키는 배경음악은 <code>facebook/musicgen-small</code> 모델에 텍스트 프롬프트를 입력하여 생성한다. 예를 들어, LLM이 생성한 <em>"A cheerful acoustic guitar travel vlog instrumental, happy, bright"</em>와 같은 프롬프트를 MusicGen 모델의 파이프라인에 주입하면, 해당 맥락에 맞는 분위기의 BGM 파일(<code>.wav</code>)이 자동으로 합성된다.</p>
+
+  <div class="callout">
+    <div class="tag">FFmpeg Final Mux</div>
+    <p>독립적으로 생성된 애니메이션(비디오) · 한국어 TTS(오디오) · BGM(음악) 트랙은 마지막 미디어 믹싱 단계에서 FFmpeg 파이프라인(<code>-filter_complex "[2:a]volume=-18dB"</code>)을 통해 BGM의 볼륨을 낮추고, 영상과 오디오의 길이를 <code>-shortest</code>로 자동 동기화하여 하나의 완벽한 여행 브이로그 영상(MP4)으로 병합된다.</p>
+  </div>
+</div>
+
+<!-- CH 4 -->
+<div class="ch-opener" id="ch4">
+  <div class="ch-num-big">04</div>
+  <h1>시스템 한계 극복 및 최적화 엔지니어링</h1>
+  <div class="ch-lead">의존성 지옥 · OOM · Segmentation Fault — 2개월의 밤샘이 남긴 엔지니어링 흔적.</div>
+</div>
+<div class="ch-body">
+  <p class="lead">제한된 클라우드 연산 자원(Kaggle T4 GPU · 15GB VRAM) 환경에서 이기종 멀티모달 AI 모델들을 통합하며 발생한 치명적인 시스템 오류(Crash)와 메모리 부족(OOM) 현상의 근본 원인을 분석한다.</p>
+
+  <h2 class="section">4.1 샌드박스 격리 및 의존성 충돌 해결 (Dependency Hell)</h2>
+
+  <h3 class="sub">TorchServe 0.6.0 다운그레이드 · Numpy 1.23.5 고정으로 워커 즉사 차단</h3>
+  <p>Animated Drawings 파이프라인 구동 시, 딥러닝 모델을 서빙하는 TorchServe 워커(Worker) 프로세스가 어떠한 에러 로그도 남기지 않고 즉사(Kill)하는 치명적인 에러가 발생했다. 원인 분석 결과, 캐릭터의 뼈대(Pose)와 위치를 추출하는 핵심 엔진인 <code>mmcv-full</code> 라이브러리가 최신 파이썬 환경(3.12)에서 C++ 컴파일러(CUDA)와의 연결 고리가 끊어진 것이 원인이었다.</p>
+  <p>또한, 내부적으로 사용되는 <code>mmdet</code>와 <code>mmpose</code> 모듈은 Numpy 1.24 버전부터 완전히 삭제된 <code>np.float</code> 문법을 사용하고 있어 최신 버전의 Numpy 환경에서는 즉각적인 충돌을 일으켰다. 이를 해결하기 위해 Miniconda 기반의 독립된 샌드박스 가상환경(<code>ad_env</code>)을 구축하고, 모델 호환성이 가장 안정적으로 보장되는 <strong>'TorchServe 0.6.0' 엔진과 'Numpy 1.23.5' 버전으로 강제 고정(Pinning)</strong>하여 재구축함으로써 워커 즉사 에러를 원천 차단하였다.</p>
+
+  <h3 class="sub">이기종 AI 모델 간 라이브러리 충돌 차단 · 가상 환경 분리 전략</h3>
+  <p>AI 음성 합성을 담당하는 GPT-SoVITS와 영상 생성을 담당하는 CogVideoX, 애니메이션 엔진은 각기 다른 <em>"의존성 세계관"</em>을 가지고 있어 하나의 파이썬 환경에 설치할 경우 지속적인 패키지 충돌을 유발했다.</p>
+  <p>이러한 의존성 지옥을 타개하기 위해, K-Ride 파이프라인은 모델별로 워커(Worker) 환경을 물리적으로 분리하는 <strong>하이브리드 배포 전략</strong>을 채택했다. 특히 음성 합성 환경에서는 런타임 충돌을 막기 위해 환경 변수에 <code>TRANSFORMERS_NO_TORCHVISION=1</code> 및 <code>TRANSFORMERS_NO_IMAGE_PROCESSING=1</code>을 명시적으로 주입하여 불필요한 비전 모듈 로딩을 강제로 비활성화하는 엔지니어링 최적화를 적용했다.</p>
+
+  <h2 class="section">4.2 메모리 최적화(OOM 방지) 및 런타임 몽키 패치</h2>
+
+  <h3 class="sub">CogVideoX의 enable_sequential_cpu_offload를 통한 VRAM 최적화</h3>
+  <p>실사 이미지 기반 비디오 생성을 담당하는 <strong>CogVideoX-5b</strong> 모델은 파라미터가 매우 무거워 16GB VRAM 환경에서 즉각적인 OOM(Out of Memory)을 유발한다. 초기에는 단순히 <code>enable_model_cpu_offload()</code>를 적용하였으나 메모리 폭발을 완벽히 제어하지 못했다.</p>
+  <p>이에 따라 파이프라인 아키텍처를 전면 수정하여, 가장 강력한 순차적 오프로딩 기법인 <code>enable_sequential_cpu_offload()</code>를 적용하였다. 또한, 메모리를 가장 많이 점유하는 VAE(변량 자동 인코더) 단계에서 <code>pipe.vae.enable_slicing()</code>과 <code>pipe.vae.enable_tiling()</code>을 동시 적용하여 연산 블록을 미세하게 쪼개어 처리함으로써, 저사양 GPU 환경에서도 <strong>극한의 메모리 최적화</strong>와 안정적인 비디오 프레임 추출을 달성했다.</p>
+
+  <h3 class="sub">BigVGAN 런타임 강제 주입 · Mecab C++ 엔진 직접 매핑</h3>
+  <p>파이프라인 최적화 과정에서 가장 해결 난이도가 높았던 문제는 한국어 텍스트-음성 변환(TTS) 중 발생한 <strong>세그멘테이션 폴트(Segmentation Fault, 잘못된 메모리 참조)</strong>에 의한 서버 즉사 현상이었다.</p>
+  <ul>
+    <li><strong>Mecab C++ 사전 강제 매핑:</strong> 파이썬 환경에 형태소 분석기 래퍼(<code>python-mecab-ko</code>)가 설치되어 있었으나, 실제 형태소를 분절하는 OS 레벨의 C++ 엔진과 <strong>한국어 단어 사전(mecab-ko-dic)</strong>의 경로가 꼬여 파이썬 코드가 텅 빈 사전을 참조하려다 OS에 의해 강제 종료되는 문제였다. 이를 해결하기 위해 파이썬의 <code>AttributeError</code> 예외 처리 블록 내에서 시스템 라이브러리 경로(<code>/usr/local/lib/python3.12/dist-packages/mecab_ko_dic/dicdir</code>)를 찾아 <code>text.korean._g2p.mecab</code> 객체에 직접 이식하는 강제 매핑을 수행했다.</li>
+    <li><strong>BigVGAN 몽키 패치:</strong> TTS의 최종 음성 파형을 생성하는 BigVGAN 모델 로딩 시, 최신 <code>huggingface_hub</code> 라이브러리와의 규격 불일치로 <code>proxies</code>와 <code>resume_download</code> 파라미터가 누락되어 에러가 발생했다. 패키지 코드를 직접 수정할 수 없는 클라우드 환경의 특성을 고려하여, 실행 시점(Runtime)에 파이썬 메모리에 올라간 <code>BigVGAN._from_pretrained</code> 클래스 메서드를 가로채어 필수 파라미터를 강제로 주입한 뒤 원본 메서드로 돌려보내는 <strong>'전역 몽키 패치(Monkey Patching)' 백도어</strong>를 설계했다.</li>
+  </ul>
+
+  <div class="callout dark">
+    <div class="tag">Result</div>
+    <p>이러한 선제적인 런타임 메모리 조작과 철저한 샌드박스 격리를 통해, K-Ride 시스템은 잦은 의존성 충돌과 메모리 한계를 완벽히 극복하고 <strong>안정적인 백엔드 자동화 미디어 서빙 체계</strong>를 완성할 수 있었다.</p>
+  </div>
+</div>
+
+<!-- CH 5 -->
+<div class="ch-opener" id="ch5">
+  <div class="ch-num-big">05</div>
+  <h1>비동기 백엔드 배포 및 MLOps 파이프라인</h1>
+  <div class="ch-lead">5~15분 걸리는 GPU 작업을 동기 API로 받지 않기 위한 Celery·Redis 구조와 실험 추적.</div>
+</div>
+<div class="ch-body">
+  <p class="lead">극심한 GPU 메모리 점유율과 긴 연산 시간(수십 초~수 분)을 요구하는 생성형 AI의 특성상, 일반적인 동기(Synchronous) 방식의 웹 서버 아키텍처는 즉각적인 응답 지연(Timeout)과 서버 마비(Crash)를 초래한다.</p>
+
+  <h2 class="section">5.1 FastAPI와 Celery/Redis 기반 비동기 미디어 처리</h2>
+  <p>K-Ride 시스템의 백엔드는 고성능 비동기 웹 프레임워크인 <strong>FastAPI</strong>를 기반으로 설계되었으며, 클라우드 환경(Kaggle 등) 내부의 포트를 외부 퍼블릭 URL로 개방하기 위해 <strong>zrok 터널링</strong> 기술을 적용하여 프론트엔드와 통신한다.</p>
+
+  <h3 class="sub">무거운 AI 연산의 블로킹 방지 · 메시지 큐 구조</h3>
+  <p>사용자로부터 이미지와 텍스트(일정)가 접수되면 FastAPI 메인 서버는 <strong>즉시 고유한 작업 식별자(job_id)를 발급하고 응답을 반환</strong>한다. 실제 미디어 생성 작업은 <strong>Redis를 메시지 브로커(Broker)</strong>로 삼아 큐(Queue)에 적재되며, 독립된 가상환경 샌드박스에서 대기 중인 <strong>Celery 워커(Worker)</strong>가 이를 수신하여 백그라운드 연산을 시작한다.</p>
+
+  <div class="callout">
+    <div class="tag">3중 생존 방어막 · Error Migration</div>
+    <p>파이프라인의 붕괴를 막기 위해 Celery 워커 내부에는 <strong>'3중 생존 방어막'</strong> 로직이 적용되어 있다. ① 1단계로 정상적인 비디오 렌더링을 시도하고, ② 메모리 한계로 실패할 경우 2단계로 개별 프레임(PNG)을 디스크에 우선 추출한 뒤 FFmpeg로 강제 조립하며, ③ 이마저 실패할 경우 3단계로 <strong>5초짜리 더미(Dummy) 영상</strong>을 반환하여 전체 파이프라인(TTS, BGM 믹싱 등)이 중단되는 것을 원천 차단한다.</p>
+  </div>
+
+  <h3 class="sub">FFmpeg를 이용한 비디오 · TTS · BGM 볼륨 믹싱 및 정규화</h3>
+  <p>비동기 워커를 통해 병렬로 생성된 ① 비디오(MP4 또는 GIF), ② 한국어 내레이션(TTS WAV), ③ 배경음악(MusicGen BGM WAV)은 최종적으로 단일 미디어 컨테이너로 합성된다. 이 믹싱 과정은 파이썬의 과부하를 피하기 위해 <strong>OS 레벨의 FFmpeg 엔진</strong>으로 오프로딩된다.</p>
+  <p>단순한 파일 병합을 넘어, 브이로그로서의 시청각적 품질을 높이기 위해 복합 필터(<code>-filter_complex</code>)가 적용된다. AI가 생성한 BGM이 내레이션의 전달력을 해치지 않도록 BGM의 볼륨을 <strong>-10dB에서 -18dB 수준으로 감쇠(Ducking)</strong>시키는 오디오 정규화 필터(<code>[2:a]volume=-18dB[bgm_low]</code>)를 거친다. 이후 오디오 믹스 필터(<code>amix</code>)를 통해 두 소리를 합성하며, <code>-shortest</code> 옵션을 인자로 주어 비디오나 오디오 중 가장 짧은 트랙의 길이에 맞춰 영상 재생이 자연스럽게 종료되도록 동기화한다.</p>
+
+  <h2 class="section">5.2 MLflow 및 DagsHub 연동을 통한 실험 추적</h2>
+  <p>수많은 하이퍼파라미터 조율과 프롬프트 엔지니어링이 수반되는 멀티모달 파이프라인의 특성상, 어떤 입력값이 어떤 결과물을 냈는지 체계적으로 기록하는 MLOps 체계가 필수적이다. K-Ride 시스템은 로컬 환경에 의존하지 않고 클라우드 기반 원격 추적 저장소인 <strong>DagsHub와 MLflow</strong>를 통합하여 파이프라인 가시성을 확보했다.</p>
+
+  <table class="tbl">
+    <thead><tr><th style="width:24%">기록 항목</th><th style="width:32%">예시 키</th><th>설명</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Params · 입력</strong></td><td><code>prompt_text · bgm_prompt · target_model · fallback_used</code></td><td>렌더링의 뼈대가 되는 메타데이터. 어떤 조건 분기에서 연산이 수행되었는지 즉시 역추적.</td></tr>
+      <tr><td><strong>Metrics · 지표</strong></td><td><code>animation_seconds · tts_seconds · ffmpeg_seconds · return_code</code></td><td>모델별 처리 시간 분리 측정. 워커 비정상 종료 방어 결과(Success/Fail)도 함께 기록.</td></tr>
+      <tr><td><strong>Artifacts · 산출물</strong></td><td><code>final_video.mp4 · render_summary.json · render_stderr.txt</code></td><td>중간 프레임은 저장하지 않는다 (스토리지 낭비 방지). 최종 산출물과 에러 로그만 선별 업로드.</td></tr>
+    </tbody>
+  </table>
+  <p>이 기록 체계 덕분에 런타임 세션이 종료(Kill)되더라도 이전의 렌더링 결과물과 실패 로그를 <strong>중앙 대시보드에서 안전하게 조회하고 다운로드</strong>할 수 있다.</p>
+</div>
+
+<!-- CH 6 -->
+<div class="ch-opener" id="ch6">
+  <div class="ch-num-big">06</div>
+  <h1>결론 및 향후 과제</h1>
+  <div class="ch-lead">2개월의 성과와 한계, 그리고 엔터프라이즈급 확장을 위한 로드맵.</div>
+</div>
+<div class="ch-body">
+  <h2 class="section">6.1 프로젝트 구현 성과 요약</h2>
+  <p>본 연구를 통해 구축된 'K-Ride AI 시스템'은 단순한 정보 제공을 넘어, 사용자 맞춤형 일정 추천과 시청각적 몰입감을 극대화한 미디어 기반 스마트 관광 생태계의 새로운 패러다임을 제시하였다.</p>
+
+  <div class="stat-band">
+    <div class="s"><div class="v">874K</div><div class="l">POI Index</div></div>
+    <div class="s"><div class="v">39,109</div><div class="l">Graph Nodes</div></div>
+    <div class="s"><div class="v">1~2s</div><div class="l">Itinerary Latency</div></div>
+    <div class="s"><div class="v">3-Track</div><div class="l">Hybrid DB</div></div>
+  </div>
+
+  <h3 class="sub">① 하이브리드 데이터베이스 + GraphRAG</h3>
+  <p>약 <strong>87만 건</strong>의 방대한 관광지 및 편의시설(POI) 데이터를 관계형 DB(PostgreSQL), 벡터 DB(ChromaDB, pgvector), 지식 그래프(Neo4j)로 분산 처리하는 하이브리드 아키텍처를 완성하였다. 이를 바탕으로 LPU 기반의 Groq API와 다국어 임베딩(multilingual-e5-small)을 결합한 초고속 GraphRAG 파이프라인을 구축하여, 단 <strong>1~2초</strong> 만에 할루시네이션 없는 맞춤형 일정 JSON을 생성하는 성과를 거두었다.</p>
+
+  <h3 class="sub">② 스마트 라우팅 기반 미디어 자동 생성</h3>
+  <p>이미지 캡셔닝(BLIP-2)을 활용해 피사체의 동적/정적 여부를 판별하여 무거운 비디오 모델(CogVideoX 1.5)과 가벼운 패닝 모델(3D Photo Inpainting)로 작업을 분배하는 <strong>'스마트 라우팅'</strong> 로직을 구현하여 자원 효율성을 극대화하였다. 또한, 사용자의 낙서를 애니메이션으로 변환하는 과정(Animated Drawings)에서 TorchServe 0.6.0 엔진과 Numpy 1.23.5 환경을 격리 구축하고 MESA 헤드리스 설정을 적용해 서버 즉사(Crash) 에러를 완벽히 차단하였다.</p>
+
+  <h3 class="sub">③ 한국어 TTS + BGM + 비동기 백엔드</h3>
+  <p>고품질 한국어 음성 합성(GPT-SoVITS V3)과 배경음악 생성(MusicGen) 파이프라인을 구축하며 발생한 의존성 지옥 및 세그멘테이션 폴트(Segmentation Fault) 오류를 런타임 몽키 패치(BigVGAN 및 Mecab C++ 사전 강제 매핑)로 돌파하였다. 이 모든 개별 파이프라인은 <strong>FastAPI와 Celery/Redis 비동기 큐</strong>를 통해 결합되었고, FFmpeg 오디오 정규화 믹싱을 거쳐 최종 브이로그 영상(MP4)으로 서빙되며, 이 과정은 <strong>DagsHub와 MLflow</strong>를 통해 체계적으로 추적·기록되었다.</p>
+
+  <h2 class="section">6.2 시스템의 한계점 및 향후 확장 계획</h2>
+
+  <h3 class="sub">한계 ① · 무료 GPU 쿼터 제한 및 VRAM 한계</h3>
+  <p>현재 시스템이 구동되는 Kaggle T4 GPU 환경은 VRAM이 <strong>15GB</strong>로 제한되어 있으며, 무거운 생성형 AI 모델(GPT-SoVITS · MusicGen · CogVideoX)을 단일 프로세스 메모리에 동시에 적재할 경우 즉각적인 OOM 에러와 GPU 할당량 소진으로 세션이 끊기는 한계가 존재한다.</p>
+  <p><strong>확장 계획</strong> · 향후 실제 운영(Production) 배포 시에는 단일 서버가 아닌 모델별 워커 환경을 물리적으로 분리하는 <strong>마이크로서비스 아키텍처(MSA)</strong>를 도입할 계획이다. 구체적으로 <code>animation-worker · tts-worker · video-worker · mix-worker</code> 등으로 격리된 인스턴스를 구성하고 비동기 호출을 통해 의존성 충돌과 OOM을 원천 방어할 예정이다. 더불어 zrok을 통한 임시 터널링 방식을 넘어 독립된 클라우드 런타임(GCP · AWS 등) 위에서 상시 구동되는 API 체계로 전환한다.</p>
+
+  <h3 class="sub">한계 ② · 데이터 파편화 및 벡터 저장 용량</h3>
+  <p>현재 약 87만 건의 POI 데이터는 로컬 PostgreSQL, 벡터 데이터는 로컬 ChromaDB, 지식 그래프는 Neo4j 등 <strong>3분산 구조</strong>로 데이터 파편화가 발생하고 있다. 특히 1536차원으로 확장된 87만 건의 전체 임베딩 데이터는 5~6GB의 용량을 차지해 무료 티어 인프라에서는 적재 자체가 불가능하다.</p>
+  <p><strong>확장 계획</strong> · 이 파편화된 RDBMS와 벡터 DB를 클라우드 기반의 <strong>Supabase(PostgreSQL 기반)</strong>로 전면 통합할 계획이다. Supabase의 pgvector 확장을 사용하면 관계형 데이터 필터링(예산·좌표)과 벡터 유사도 검색을 단일 쿼리로 수행할 수 있어 속도가 비약적으로 향상된다. 이를 위해 월 $25 규모의 <strong>Supabase Pro 플랜</strong>으로 인프라를 확장하여 대용량 벡터 스토리지를 확보할 것이다.</p>
+
+  <h3 class="sub">한계 ③ · GraphRAG 메모리 효율</h3>
+  <p>현재 지식 그래프 계산 시 <code>models/kride_graph.json</code> 파일을 서버 메모리에 직접 로드하는 방식을 혼용하고 있어, 노드와 엣지 데이터가 증가할수록 백엔드 서버의 메모리 부하가 기하급수적으로 커지는 구조적 약점이 있다.</p>
+  <p><strong>확장 계획</strong> · 로컬 파일 참조 방식을 완전히 탈피하고, 사용자의 질의가 발생할 때마다 Neo4j 데이터베이스에 직접 <strong>Cypher 쿼리</strong>를 던져 필요한 서브 그래프(Sub-graph)만 동적으로 추출한 뒤, 파이썬(NetworkX 등)에서 가벼운 연산만 수행하도록 GraphRAG 아키텍처를 고도화할 예정이다.</p>
+
+  <div class="callout">
+    <div class="tag">Closing</div>
+    <p>이러한 클라우드 통합과 분산 아키텍처 확장이 성공적으로 이루어진다면, K-Ride 시스템은 데이터 증가와 동시 접속자 수의 급증에도 유연하게 대처할 수 있는 <strong>완벽한 엔터프라이즈급 AI 관광 플랫폼</strong>으로 자리매김할 것이다.</p>
+  </div>
+</div>
+
+<!-- DOC END -->
+<div class="doc-end">
+  <h3>K · Ride · <span class="red">2.0</span></h3>
+  <p>Technical Report · 민예린 · 2026.05 · v2.0 Final</p>
+  <p style="margin-top:8px;font-size:13px;letter-spacing:0.2em;color:#737373;text-transform:uppercase;">END OF DOCUMENT</p>
+</div>
+
+</body>
+</html>
