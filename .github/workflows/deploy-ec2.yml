@@ -141,6 +141,18 @@ jobs:
 
               client_max_body_size 50M;
 
+              # ── Next.js API Route (KRIDE 프록시) — /api/ 보다 긴 prefix이므로 우선 매칭 ──
+              location /api/kride/ {
+                  proxy_pass http://localhost:3000;
+                  proxy_http_version 1.1;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+                  proxy_read_timeout 120s;
+                  proxy_send_timeout 120s;
+              }
+
               # ── Spring Boot API (쿠키 직접 전달 + SSE 지원) ──
               location /api/ {
                   proxy_pass http://localhost:8080;
