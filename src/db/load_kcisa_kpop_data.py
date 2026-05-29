@@ -20,7 +20,7 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 CSV_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
-    "..", "..", "kcisa_media_locations_2023.csv",
+    "..", "..", "dataset", "source", "kculture_media", "kcisa_media_locations_2023.csv",
 )
 
 # ── INTRO2에 표시할 K-pop 아티스트 20명 ──────────────────────────────

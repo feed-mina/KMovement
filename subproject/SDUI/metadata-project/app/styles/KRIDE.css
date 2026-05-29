@@ -82,7 +82,7 @@
     font-weight: 800;
     font-size: 1.75rem;
     line-height: 1.2;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
     word-break: keep-all;
     margin: 1.75rem 0 0;
 }
@@ -102,4 +102,173 @@
     gap: 0.625rem;
     margin-top: auto;
     padding-bottom: 0.5rem;
+}
+
+/* KRIDE onboarding shell */
+.kride-fullscreen {
+    min-height: 100dvh;
+    background: #000;
+}
+
+.kride-fullscreen .main-contents-area,
+.kride-fullscreen .page-view-container,
+.kride-fullscreen .engine-container,
+.kride-fullscreen .content-area {
+    width: 100%;
+    min-height: 100dvh;
+}
+
+.kride-fullscreen .page-view-container {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    overflow-x: hidden;
+    background: #000;
+}
+
+.page-wrap.KRIDE_INTRO1,
+.page-wrap.KRIDE_INTRO2,
+.page-wrap.KRIDE_INTRO3,
+.page-wrap.KRIDE_INTRO4,
+.page-wrap.KRIDE_INTRO5 {
+    position: relative;
+    width: 100%;
+    max-width: 430px;
+    min-height: 100dvh;
+    margin: 0 auto;
+    overflow: hidden;
+    background: #000;
+    color: #fff;
+}
+
+.page-wrap.KRIDE_INTRO1 .content-area,
+.page-wrap.KRIDE_INTRO2 .content-area,
+.page-wrap.KRIDE_INTRO3 .content-area,
+.page-wrap.KRIDE_INTRO4 .content-area,
+.page-wrap.KRIDE_INTRO5 .content-area {
+    min-height: 100dvh;
+}
+
+.group-intro1_root,
+.group-intro2_root,
+.group-intro3_root,
+.group-intro4_root,
+.group-intro5_root {
+    position: relative;
+    width: 100%;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #000;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 48px 24px 104px;
+}
+
+.group-intro1_root {
+    padding-top: 40px;
+    padding-bottom: 28px;
+}
+
+.group-intro2_root,
+.group-intro3_root,
+.group-intro4_root,
+.group-intro5_root {
+    gap: 0;
+}
+
+.group-intro2_root > div:first-child,
+.group-intro3_root > div:first-child,
+.group-intro4_root > div:first-child,
+.group-intro5_root > div:first-child {
+    margin-bottom: 8px;
+    font-size: 1.5rem;
+    line-height: 1.25;
+    font-weight: 800;
+    letter-spacing: 0;
+    word-break: keep-all;
+}
+
+.group-intro2_root > div:nth-child(2),
+.group-intro3_root > div:nth-child(2),
+.group-intro4_root > div:nth-child(2),
+.group-intro5_root > div:nth-child(2) {
+    margin-bottom: 24px;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.group-intro5_root > div:nth-child(2) {
+    margin-bottom: 36px;
+}
+
+.kride-intro1-hero-slot {
+    width: 100%;
+}
+
+.kride-intro1-hero-slot img,
+img.kride-intro1-hero-slot {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.kride-artist-grid,
+.kride-region-grid {
+    flex: 1 1 auto;
+    align-content: flex-start;
+}
+
+.group-intro4_purposes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.page-wrap.KRIDE_INTRO2 .kride-next-btn-br,
+.page-wrap.KRIDE_INTRO3 .kride-next-btn-br,
+.page-wrap.KRIDE_INTRO5 .kride-next-btn-br {
+    position: sticky;
+    right: auto;
+    bottom: 24px;
+    z-index: 50;
+    width: fit-content;
+    min-width: 144px;
+    margin-top: auto;
+    margin-left: auto;
+}
+
+.page-wrap.KRIDE_INTRO5 .kride-next-btn-br {
+    min-width: 176px;
+}
+
+.dual-range-slider {
+    min-width: 0;
+}
+
+@media (max-width: 390px) {
+    .group-intro1_root,
+    .group-intro2_root,
+    .group-intro3_root,
+    .group-intro4_root,
+    .group-intro5_root {
+        padding-right: 18px;
+        padding-left: 18px;
+    }
+
+    .kride-artist-grid {
+        gap: 1rem;
+    }
+
+    .kride-artist-grid > div {
+        width: calc((100% - 2rem) / 3);
+    }
+
+    .kride-region-grid > div {
+        width: calc((100% - 1.5rem) / 3);
+    }
 }

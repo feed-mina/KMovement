@@ -26,15 +26,20 @@ jwt:
 
 app:
   url:
-    web: ${WEB_URL:https://sdui-delta.vercel.app}
-    mobile: ${MOBILE_URL:https://sdui-delta.vercel.app}
+    web: ${WEB_URL:https://yerin.duckdns.org}
+    mobile: ${MOBILE_URL:https://yerin.duckdns.org}
 
 kakao:
   redirect-uri: ${KAKAO_REDIRECT_URI}
 
 fastapi:
-  url: ${FASTAPI_URL:http://sdui-fastapi:8001}
+  url: ${FASTAPI_URL:http://34.64.221.240:8000}
   internal-api-key: ${FASTAPI_INTERNAL_API_KEY:sdui-internal-dev-key}
+
+kride:
+  fastapi:
+    url: ${KRIDE_FASTAPI_URL:http://34.64.221.240:8000}
+    chatbot-url: ${KRIDE_CHATBOT_URL:http://34.64.221.240:8000}
 
 cloud:
   aws:

@@ -120,11 +120,13 @@ jobs:
               -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
               -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
               -e KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
-              -e KAKAO_REDIRECT_URI=https://sdui-delta.vercel.app/api/kakao/callback \
-              -e WEB_URL=https://sdui-delta.vercel.app \
+              -e KAKAO_REDIRECT_URI=https://yerin.duckdns.org/api/kakao/callback \
+              -e WEB_URL=https://yerin.duckdns.org \
               -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
               -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
-              -e FASTAPI_URL=http://sdui-fastapi:8001 \
+              -e FASTAPI_URL=http://34.64.221.240:8000 \
+              -e KRIDE_FASTAPI_URL=http://34.64.221.240:8000 \
+              -e KRIDE_CHATBOT_URL=http://34.64.221.240:8000 \
               -e GCP_PROJECT_ID=kdeliver \
               -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
               -e GCP_CREDENTIALS_PATH=/app/gcp-credentials.json \
@@ -134,6 +136,8 @@ jobs:
               -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
               -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
               -e GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }} \
+              -e SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+              -e SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} \
               -v /home/ubuntu/gcp-credentials.json:/app/gcp-credentials.json:ro \
               -v /home/ubuntu/study-materials:/app/assets/study:ro \
               ${{ secrets.DOCKER_USERNAME }}/sdui-app:${{ env.BRANCH_TAG }}

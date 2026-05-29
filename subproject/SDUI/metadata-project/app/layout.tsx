@@ -1,6 +1,5 @@
 import "./styles/index.css";
 import type { Metadata, Viewport } from 'next';
-import { Analytics } from "@vercel/analytics/react";
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider"; // 방금 만든 방 가져오기
 import {MetadataProvider} from "@/components/providers/MetadataProvider";
 import { AuthProvider } from '@/context/AuthContext';
@@ -77,7 +76,6 @@ export default function RootLayout({children}: Readonly<{
             </MetadataProvider>
             </AuthProvider>
         </ReactQueryProvider>
-        <Analytics />
         </body>
         </html>
     );
