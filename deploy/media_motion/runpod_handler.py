@@ -43,11 +43,13 @@ from .cogvideox_real import run_cogvideox_real_case
 from .gpt_sovits_worker import run_gpt_sovits_tts_case
 from .schemas import TravelCase
 from .three_d_photo_light import run_3d_photo_light_case
+from .three_d_photo_real import run_3d_photo_inpainting_real_case
 from .worker_config import load_worker_config
 
 SUPPORTED_ROUTES = {
     "cogvideox_real",
     "3d_photo_light",
+    "3d_photo_inpainting_real",
     "cogvideo_fallback",
     "gpt_sovits_tts",
     "musicgen",
@@ -223,6 +225,8 @@ def handler(job: dict) -> dict:
 
         if route == "cogvideox_real":
             result = run_cogvideox_real_case(case, work_dir, bgm_wav, cfg=cfg)
+        elif route == "3d_photo_inpainting_real":
+            result = run_3d_photo_inpainting_real_case(case, work_dir, bgm_wav, cfg=cfg)
         elif route == "3d_photo_light":
             result = run_3d_photo_light_case(case, work_dir, bgm_wav)
         elif route == "cogvideo_fallback":
