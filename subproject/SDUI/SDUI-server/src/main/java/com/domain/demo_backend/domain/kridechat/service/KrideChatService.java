@@ -37,7 +37,7 @@ public class KrideChatService {
                 fastApiClient.streamChat(request.getMessage())
                         .doOnNext(chunk -> {
                             try {
-                                emitter.send(SseEmitter.event().data(Map.of("content", chunk)));
+                                emitter.send(SseEmitter.event().data(chunk));
                             } catch (IOException e) {
                                 emitter.completeWithError(e);
                             }
