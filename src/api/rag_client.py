@@ -172,20 +172,25 @@ def search_chat_context(message: str, top_k: int = 4) -> list[dict]:
 
 def generate_chat_answer(message: str, graphrag_context: str = "") -> str:
     passages = search_chat_context(message, top_k=3)
+    
+    # 유효한 유사도를 가진 결과만 필터링 (distance가 0.25 이하인 경우만 관련성 높음으로 간주)
+    filtered_passages = [p for p in passages if p.get("distance", 1.0) <= 0.25]
+    
     context = "\n".join(
         f"- {p.get('text', '')[:500]}"
-        for p in passages[:8]
+        for p in filtered_passages[:8]
         if p.get("text")
     )
     if not context:
-        context = "No retrieved context was available."
+        context = "[참고 자료 없음] 데이터베이스에 관련 장소나 맛집 정보가 없습니다."
 
     graphrag_section = ""
     if graphrag_context:
         graphrag_section = f"\n[GraphRAG — 관련 아티스트 촬영지/장소]\n{graphrag_context}\n"
 
     prompt = f"""Answer the user's K-Ride travel question in Korean.
-Use only the retrieved context when it is relevant. If the context is thin, say what is missing and give a careful general answer.
+If the retrieved context says "[참고 자료 없음]" and the user is looking for a specific place/restaurant, do NOT invent places. Simply reply with: "죄송합니다. 현재 데이터베이스에 요청하신 조건에 맞는 장소나 맛집 정보가 없습니다."
+Use only the retrieved context when it is relevant.
 GraphRAG context contains artist-related filming locations — incorporate these when the user asks about specific artists or locations.
 
 [Retrieved context]
@@ -216,20 +221,25 @@ def generate_chat_answer_stream(message: str, graphrag_context: str = ""):
     """토큰 단위 스트리밍 제너레이터 — Groq stream=True"""
     _check_groq_breaker()
     passages = search_chat_context(message, top_k=3)
+    
+    # 유효한 유사도를 가진 결과만 필터링 (distance가 0.25 이하인 경우만 관련성 높음으로 간주)
+    filtered_passages = [p for p in passages if p.get("distance", 1.0) <= 0.25]
+    
     context = "\n".join(
         f"- {p.get('text', '')[:500]}"
-        for p in passages[:8]
+        for p in filtered_passages[:8]
         if p.get("text")
     )
     if not context:
-        context = "No retrieved context was available."
+        context = "[참고 자료 없음] 데이터베이스에 관련 장소나 맛집 정보가 없습니다."
 
     graphrag_section = ""
     if graphrag_context:
         graphrag_section = f"\n[GraphRAG — 관련 아티스트 촬영지/장소]\n{graphrag_context}\n"
 
     prompt = f"""Answer the user's K-Ride travel question in Korean.
-Use only the retrieved context when it is relevant. If the context is thin, say what is missing and give a careful general answer.
+If the retrieved context says "[참고 자료 없음]" and the user is looking for a specific place/restaurant, do NOT invent places. Simply reply with: "죄송합니다. 현재 데이터베이스에 요청하신 조건에 맞는 장소나 맛집 정보가 없습니다."
+Use only the retrieved context when it is relevant.
 GraphRAG context contains artist-related filming locations — incorporate these when the user asks about specific artists or locations.
 
 [Retrieved context]
