@@ -23,6 +23,7 @@ function buildExternalUrls(data: any) {
 export default function RouteNode({ data, index = 0, onSelect }: Props) {
   const name = data?.name || data?.placeName || data?.place_name || "";
   const desc = data?.description || data?.address || "";
+  const reason = data?.reason || data?.tip || "";
   const urls = buildExternalUrls(data);
 
   return (
@@ -43,6 +44,7 @@ export default function RouteNode({ data, index = 0, onSelect }: Props) {
         <div className="flex-1 min-w-0">
           <p className="text-white text-sm font-medium truncate">{name}</p>
           {desc && <p className="text-gray-400 text-xs truncate">{desc}</p>}
+          {reason && <p className="text-yellow-400/80 text-[11px] mt-0.5 truncate">{reason}</p>}
         </div>
       </button>
       {urls && (

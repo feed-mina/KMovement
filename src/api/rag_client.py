@@ -1,5 +1,6 @@
 """rag_client.py — ChromaDB 벡터 검색 + Groq LLM (TorchServe 경유)"""
 from __future__ import annotations
+import math
 import os
 import time
 import threading
@@ -323,6 +324,45 @@ def generate_recommendation_text(
         raise
 
 
+def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """두 좌표 간 거리 (km)"""
+    R = 6371.0
+    rlat1, rlon1 = math.radians(lat1), math.radians(lon1)
+    rlat2, rlon2 = math.radians(lat2), math.radians(lon2)
+    dlat, dlon = rlat2 - rlat1, rlon2 - rlon1
+    a = math.sin(dlat / 2) ** 2 + math.cos(rlat1) * math.cos(rlat2) * math.sin(dlon / 2) ** 2
+    return R * 2 * math.asin(math.sqrt(a))
+
+
+def _cluster_pois_by_proximity(pois: list[dict]) -> list[dict]:
+    """Nearest Neighbor 휴리스틱으로 POI를 지리적 순서로 정렬"""
+    if len(pois) <= 2:
+        return pois
+
+    # 좌표 없는 POI는 끝에 붙이기
+    with_coords = [p for p in pois if p.get("lat") and p.get("lon")]
+    without_coords = [p for p in pois if not (p.get("lat") and p.get("lon"))]
+
+    if len(with_coords) <= 1:
+        return pois
+
+    remaining = list(with_coords)
+    ordered = [remaining.pop(0)]
+
+    while remaining:
+        last = ordered[-1]
+        nearest_idx = min(
+            range(len(remaining)),
+            key=lambda i: _haversine(
+                last["lat"], last["lon"],
+                remaining[i]["lat"], remaining[i]["lon"],
+            ),
+        )
+        ordered.append(remaining.pop(nearest_idx))
+
+    return ordered + without_coords
+
+
 def generate_itinerary(
     duration: str,
     artists: list[str],
@@ -338,14 +378,40 @@ def generate_itinerary(
     """
     day_count = {"당일치기": 1, "1박2일": 2, "2박3일": 3}.get(duration, 1)
 
-    context = "\n".join([
-        f"{i+1}. {p.get('name','?')} ({p.get('sido','?')}, {p.get('category','?')}) — {p.get('address','')}"
-        for i, p in enumerate(pois[:15])
-    ])
+    # 일정별 고정 배분
+    ALLOCATION = {
+        1: [(4, 4)],                      # 당일치기: 오전4 + 오후4 = 8
+        2: [(3, 3), (3, 2)],              # 1박2일: 6 + 5 = 11
+        3: [(3, 2), (3, 3), (2, 2)],      # 2박3일: 5 + 6 + 4 = 15
+    }
+    alloc = ALLOCATION.get(day_count, [(4, 4)])
+
+    # 배분 설명 문자열
+    alloc_desc = "\n".join(
+        f"  - {d}일차: 오전 {m}곳, 오후 {a}곳"
+        for d, (m, a) in enumerate(alloc, 1)
+    )
+
+    # POI를 주소에서 지역 추출하여 그룹별로 표시
+    region_groups: dict[str, list[str]] = {}
+    for i, p in enumerate(pois):
+        addr = p.get("address", "")
+        # 주소에서 시/도 + 시/군/구 추출
+        parts = addr.split()
+        region_key = " ".join(parts[:2]) if len(parts) >= 2 else (parts[0] if parts else "기타")
+        line = f"  {i+1}. {p.get('name','?')} ({p.get('category','?')}) — {addr}"
+        region_groups.setdefault(region_key, []).append(line)
+
+    context_lines = []
+    for region_key, lines in region_groups.items():
+        context_lines.append(f"[{region_key}]")
+        context_lines.extend(lines)
+    context = "\n".join(context_lines)
 
     system_prompt = (
-        "당신은 한국 여행 일정 전문가입니다. "
+        "당신은 한국 여행 일정 전문가이자 동선 최적화 전문가입니다. "
         "반드시 제공된 POI 목록에서만 장소를 선택하세요. "
+        "같은 지역의 장소를 같은 날, 같은 시간대에 묶어 이동 거리를 최소화하세요. "
         "응답은 순수 JSON만 출력하고 다른 텍스트는 포함하지 마세요."
     )
 
@@ -357,7 +423,14 @@ def generate_itinerary(
 여행목적: {', '.join(purposes)}
 예산: {budget.get('min', 0):,}원 ~ {budget.get('max', 2000000):,}원
 
-[사용 가능한 POI 목록]
+[중요 규칙]
+1. 아래 배분을 정확히 지켜주세요:
+{alloc_desc}
+2. 같은 지역의 장소를 같은 날/시간대에 배치하세요 (동선 최적화)
+3. 모든 장소에 추천 이유(reason)를 반드시 작성하세요
+4. 제공된 POI 목록의 장소만 사용하세요 (이름과 주소를 정확히 복사)
+
+[사용 가능한 POI 목록 — 지역별 그룹]
 {context}
 
 출력 형식 (JSON만, 설명 없이):
@@ -367,12 +440,12 @@ def generate_itinerary(
       "day": 1,
       "morning": {{
         "places": [
-          {{"name": "장소명", "address": "주소", "tip": "한줄 팁"}}
+          {{"name": "장소명", "address": "주소", "reason": "이 장소를 추천하는 이유 한 문장"}}
         ]
       }},
       "afternoon": {{
         "places": [
-          {{"name": "장소명", "address": "주소", "tip": "한줄 팁"}}
+          {{"name": "장소명", "address": "주소", "reason": "이 장소를 추천하는 이유 한 문장"}}
         ]
       }}
     }}
@@ -389,7 +462,7 @@ def generate_itinerary(
                 {"role": "user",   "content": user_prompt},
             ],
             temperature=0.5,
-            max_tokens=1500,
+            max_tokens=3000,
         )
         _groq_breaker.record_success()
     except Exception:

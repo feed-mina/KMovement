@@ -42,6 +42,7 @@ try:
         generate_itinerary,
         generate_recommendation_text,
         search_pois_by_purpose,
+        _cluster_pois_by_proximity,
     )
     from src.api.supabase_client import get_all_artists, get_poi_details
     HAS_AI = True
@@ -66,6 +67,13 @@ try:
 except ImportError:
     HAS_ENSEMBLE = False
     ensemble_rank_pois = None
+# GraphRAG 모듈 (graph.json 없어도 서버 기동 가능)
+try:
+    from src.api.graphrag_client import get_graphrag_pois
+    HAS_GRAPHRAG = True
+except ImportError:
+    HAS_GRAPHRAG = False
+    get_graphrag_pois = None
 # 날씨 모듈 (KMA API 키 없어도 서버 기동 가능)
 try:
     from weather_kma import get_weather_weight, weather_to_safety_penalty
@@ -989,36 +997,61 @@ async def recommend_itinerary(req: ItineraryRequest):
         except Exception as e:
             print(f"[K-Ride] ❌ ChromaDB 실패: {e}")
 
+    # 3.5 GraphRAG — 2-hop + community 기반 POI 확장
+    graphrag_pois = []
+    if HAS_GRAPHRAG and get_graphrag_pois:
+        try:
+            existing_ids = set()
+            for p in artist_pois + region_pois + chroma_pois:
+                pid = p.get("poi_id") or p.get("id") or ""
+                if pid:
+                    existing_ids.add(pid)
+            # 아티스트 ID 추출 (artist_XX 형태)
+            artist_graph_ids = [f"artist_{i+1}" for i in range(len(search_artists))]
+            graphrag_pois = get_graphrag_pois(
+                artist_ids=artist_graph_ids,
+                existing_poi_ids=existing_ids,
+                max_pois=10,
+            )
+            print(f"[K-Ride] graphrag_pois: {len(graphrag_pois)}건")
+        except Exception as e:
+            print(f"[K-Ride] ❌ GraphRAG 실패: {e}")
+
+    # 4. duration별 동적 top_k
+    top_k_map = {"당일치기": 8, "1박2일": 11, "2박3일": 15}
+    dynamic_top_k = top_k_map.get(req.duration, 15)
+
     # 4. 앙상블 랭킹 또는 단순 합산
     neo4j_pois = artist_pois + region_pois
+    all_source_pois = neo4j_pois + chroma_pois + graphrag_pois
     if HAS_ENSEMBLE and ensemble_rank_pois:
         try:
             all_pois = ensemble_rank_pois(
-                neo4j_pois=neo4j_pois,
+                neo4j_pois=neo4j_pois + graphrag_pois,
                 chroma_pois=chroma_pois,
                 artists=req.artists,
                 regions=req.regions,
                 purposes=req.purposes,
                 budget=req.budget.dict(),
-                top_k=15,
+                top_k=dynamic_top_k,
             )
-            print(f"[K-Ride] 앙상블 랭킹: {len(all_pois)}건 (neo4j={len(neo4j_pois)} + chroma={len(chroma_pois)})")
+            print(f"[K-Ride] 앙상블 랭킹: {len(all_pois)}건 (neo4j={len(neo4j_pois)} + chroma={len(chroma_pois)} + graphrag={len(graphrag_pois)}, top_k={dynamic_top_k})")
         except Exception as e:
             print(f"[K-Ride] 앙상블 fallback → union: {e}")
             merged: dict[str, dict] = {}
-            for p in neo4j_pois + chroma_pois:
+            for p in all_source_pois:
                 key = p.get("poi_id") or p.get("name", "")
                 if key not in merged:
                     merged[key] = p
-            all_pois = list(merged.values())
+            all_pois = list(merged.values())[:dynamic_top_k]
     else:
         merged: dict[str, dict] = {}
-        for p in neo4j_pois + chroma_pois:
+        for p in all_source_pois:
             key = p.get("poi_id") or p.get("name", "")
             if key not in merged:
                 merged[key] = p
-        all_pois = list(merged.values())
-        print(f"[K-Ride] 총 POI: {len(all_pois)}건 (artist={len(artist_pois)} + region={len(region_pois)} + chroma={len(chroma_pois)})")
+        all_pois = list(merged.values())[:dynamic_top_k]
+        print(f"[K-Ride] 총 POI: {len(all_pois)}건 (artist={len(artist_pois)} + region={len(region_pois)} + chroma={len(chroma_pois)} + graphrag={len(graphrag_pois)}, top_k={dynamic_top_k})")
 
     # 4-1. Supabase fallback — Neo4j/ChromaDB 모두 실패 시 Supabase에서 POI 조회
     if not all_pois:
@@ -1069,6 +1102,10 @@ async def recommend_itinerary(req: ItineraryRequest):
                 print(f"[K-Ride] Supabase fallback: {len(all_pois)}건 POI 로드")
         except Exception as e:
             print(f"[K-Ride] ❌ Supabase fallback 실패: {e}")
+
+    # 4-2. 지리적 클러스터링 (동선 최적화)
+    all_pois = _cluster_pois_by_proximity(all_pois)
+    print(f"[K-Ride] 클러스터링 완료: {len(all_pois)}건 POI → LLM 전달")
 
     # 5. Groq — 일정 생성
     try:
