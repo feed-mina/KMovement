@@ -42,7 +42,6 @@ try:
         generate_itinerary,
         generate_recommendation_text,
         search_pois_by_purpose,
-        _cluster_pois_by_proximity,
     )
     from src.api.supabase_client import get_all_artists, get_poi_details
     HAS_AI = True
@@ -59,6 +58,13 @@ except ImportError as _e:
     generate_chat_answer = lambda message: f"AI 서비스가 현재 준비 중입니다. 잠시 후 다시 시도해주세요.\n\n회원님의 질문: {message}"
     def generate_chat_answer_stream(message): yield f"AI 서비스가 현재 준비 중입니다. 잠시 후 다시 시도해주세요.\n\n회원님의 질문: {message}"
     get_poi_details = lambda poi_id: None
+
+# POI 클러스터링 (math만 의존, 외부 모듈 불필요)
+try:
+    from src.api.rag_client import _cluster_pois_by_proximity
+except ImportError:
+    def _cluster_pois_by_proximity(pois: list) -> list:
+        return pois
 
 # 앙상블 랭커 (모델 파일 없어도 서버 기동 가능)
 try:
