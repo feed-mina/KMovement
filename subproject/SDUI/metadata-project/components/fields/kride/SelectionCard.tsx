@@ -43,7 +43,7 @@ export default function SelectionCard({ id, meta, data, onChange, onAction, form
         className={`cursor-pointer w-full flex items-center justify-center px-3 py-2.5 rounded-full border-2 text-sm font-medium transition-all
           ${selected
             ? "bg-white text-black border-white"
-            : "bg-transparent text-white border-white/40 hover:border-white"}
+            : "bg-gray-800 text-gray-200 border-gray-600 hover:border-gray-300 hover:bg-gray-700"}
           ${disabled && !selected ? "opacity-40" : ""}
         `}
         onClick={handleClick}

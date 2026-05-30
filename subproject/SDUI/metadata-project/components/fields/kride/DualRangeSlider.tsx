@@ -86,7 +86,7 @@ export default function DualRangeSlider({ id, data, onChange }: any) {
           className="absolute -translate-x-1/2 text-center whitespace-nowrap"
           style={{ left: `${midPercent}%` }}
         >
-          <span className="text-white text-lg font-bold">
+          <span className="text-gray-300 text-sm font-semibold">
             {formatWon(localMin)} ~ {formatWon(localMax)}
           </span>
         </div>
@@ -110,7 +110,7 @@ export default function DualRangeSlider({ id, data, onChange }: any) {
               onKeyDown={(e) => handleKeyDown("min", e)}
             />
           ) : (
-            <span className="text-white text-xs font-medium bg-gray-800 px-2 py-0.5 rounded-full">
+            <span className="text-white text-sm font-bold bg-gray-800 px-3 py-1 rounded-full shadow-md border border-gray-600">
               {formatWon(localMin)}
             </span>
           )}
@@ -132,7 +132,7 @@ export default function DualRangeSlider({ id, data, onChange }: any) {
               onKeyDown={(e) => handleKeyDown("max", e)}
             />
           ) : (
-            <span className="text-white text-xs font-medium bg-gray-800 px-2 py-0.5 rounded-full">
+            <span className="text-white text-sm font-bold bg-gray-800 px-3 py-1 rounded-full shadow-md border border-gray-600">
               {formatWon(localMax)}
             </span>
           )}
@@ -165,7 +165,7 @@ export default function DualRangeSlider({ id, data, onChange }: any) {
       </div>
 
       {/* 하단 최소/최대 범위 기준선 */}
-      <div className="flex justify-between text-xs text-gray-600">
+      <div className="flex justify-between text-sm text-gray-400 font-medium px-1">
         <span>{formatWon(MIN)}</span>
         <span>{formatWon(MAX)}</span>
       </div>
