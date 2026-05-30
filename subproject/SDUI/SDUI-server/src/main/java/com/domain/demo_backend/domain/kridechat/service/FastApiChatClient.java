@@ -25,14 +25,13 @@ public class FastApiChatClient {
     }
 
     public Mono<Map<String, Object>> recommendAi(
-            List<String> artists, List<String> regions, List<String> purposes, List<Integer> budget) {
+            List<String> artists, List<String> regions, List<String> purposes, Map<String, Integer> budget) {
         java.util.Map<String, Object> body = new java.util.HashMap<>();
         body.put("artists", artists != null ? artists : List.of());
         body.put("regions", regions != null ? regions : List.of());
         body.put("purposes", purposes != null ? purposes : List.of());
-        if (budget != null && budget.size() == 2) {
-            body.put("budget_min", budget.get(0));
-            body.put("budget_max", budget.get(1));
+        if (budget != null) {
+            body.put("budget", budget);
         }
 
         return webClient.post()
@@ -43,15 +42,14 @@ public class FastApiChatClient {
     }
 
     public Mono<Map<String, Object>> generateItinerary(
-            List<String> artists, List<String> regions, List<String> purposes, int duration, List<Integer> budget) {
+            List<String> artists, List<String> regions, List<String> purposes, int duration, Map<String, Integer> budget) {
         java.util.Map<String, Object> body = new java.util.HashMap<>();
         body.put("artists", artists != null ? artists : List.of());
         body.put("regions", regions != null ? regions : List.of());
         body.put("purposes", purposes != null ? purposes : List.of());
         body.put("duration", duration);
-        if (budget != null && budget.size() == 2) {
-            body.put("budget_min", budget.get(0));
-            body.put("budget_max", budget.get(1));
+        if (budget != null) {
+            body.put("budget", budget);
         }
 
         return webClient.post()
