@@ -40,7 +40,7 @@ public class GoalTimeController {
             String targetTime = goalTimeQueryService.getGoalTime(userSqno);
             log.debug("targetTime: {}", targetTime);
             if (targetTime == null || targetTime.isEmpty()) {
-                result.put("goalTime", null);
+                result.put("goalTime", "");
                 return ResponseEntity.ok(result);
             }
             result.put("goalTime", targetTime);
@@ -49,7 +49,7 @@ public class GoalTimeController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("[getGoalTime] userSqno={}, error: {}", userSqno, e.getMessage(), e);
-            result.put("goalTime", null);
+            result.put("goalTime", "");
             return ResponseEntity.ok(result);
         }
     }
