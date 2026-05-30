@@ -1028,6 +1028,12 @@ async def recommend_itinerary(req: ItineraryRequest):
     dynamic_top_k = top_k_map.get(req.duration, 15)
 
     # 4. 앙상블 랭킹 또는 단순 합산
+    # 지역 필터링 (선택한 지역이 있을 경우 다른 지역 POI 배제)
+    if req.regions:
+        artist_pois = [p for p in artist_pois if any(r in (p.get("address") or p.get("sido") or "") for r in req.regions)]
+        chroma_pois = [p for p in chroma_pois if any(r in (p.get("address") or p.get("sido") or "") for r in req.regions)]
+        graphrag_pois = [p for p in graphrag_pois if any(r in (p.get("address") or p.get("sido") or "") for r in req.regions)]
+
     neo4j_pois = artist_pois + region_pois
     all_source_pois = neo4j_pois + chroma_pois + graphrag_pois
     if HAS_ENSEMBLE and ensemble_rank_pois:

@@ -399,7 +399,14 @@ def generate_itinerary(
         # 주소에서 시/도 + 시/군/구 추출
         parts = addr.split()
         region_key = " ".join(parts[:2]) if len(parts) >= 2 else (parts[0] if parts else "기타")
-        line = f"  {i+1}. {p.get('name','?')} ({p.get('category','?')}) — {addr}"
+        
+        # 아티스트 방문 정보 추가
+        visited_artists = p.get("artists")
+        artist_info = ""
+        if visited_artists and isinstance(visited_artists, list):
+            artist_info = f" [{', '.join(visited_artists)} 방문]"
+            
+        line = f"  {i+1}. {p.get('name','?')} ({p.get('category','?')}){artist_info} — {addr}"
         region_groups.setdefault(region_key, []).append(line)
 
     context_lines = []
@@ -427,7 +434,7 @@ def generate_itinerary(
 1. 아래 배분을 정확히 지켜주세요:
 {alloc_desc}
 2. 같은 지역의 장소를 같은 날/시간대에 배치하세요 (동선 최적화)
-3. 모든 장소에 추천 이유(reason)를 반드시 작성하세요
+3. 모든 장소에 추천 이유(reason)를 반드시 작성하세요. (목록에 [OOO 방문] 표시가 있다면, 추천 이유에 "OOO가 방문한 곳으로..." 처럼 반드시 포함하세요)
 4. 제공된 POI 목록의 장소만 사용하세요 (이름과 주소를 정확히 복사)
 
 [사용 가능한 POI 목록 — 지역별 그룹]
