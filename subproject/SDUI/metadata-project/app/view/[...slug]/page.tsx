@@ -22,6 +22,8 @@ import CommunityPage from "@/components/community/CommunityPage";
 const PROTECTED_SCREENS = ["MY_PAGE", "CONTENT_LIST", "CONTENT_WRITE", "CONTENT_DETAIL", "CONTENT_MODIFY", "USER_LIST", "AI_ENGLISH_CHAT_PAGE", "AI_KOREAN_CHAT_PAGE", "KRIDE_MY_LIST", "KRIDE_CHAT"];
 
 
+import KrideChatComponent from "@/components/fields/kride/chat/KrideChatComponent";
+
 // CommonPage 역할 : 전체 화면의 구성, 메타데이터와 데이터를 가져와 엔진에 전달
 export default function CommonPage() {
 
@@ -44,6 +46,10 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
     // * 상태 선언(useState)를 훅 호출보다 위로 올림
     const [currentPage, setCurrentPage] = useState(1);
     const [isOnlyMine, setIsOnlyMine] = useState(false);
+    
+    // 챗봇 모달 상태 (FOCUS 화면 진입 시 기본적으로 열림)
+    const [isChatModalOpen, setIsChatModalOpen] = useState(screenId === "KRIDE_FOCUS");
+
     //   메타데이터 훅 호출 (가공된 metadata를 가져옴)
     const {metadata, pageData, totalCount, loading: dataLoading} = usePageMetadata(
         screenId, // MetadataProvider 에서 가져온 screenId
@@ -51,7 +57,7 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
         isOnlyMine,
         refId
     );
-    const {formData, setFormData, handleChange, handleAction, showPassword, pwType, activeModal, closeModal} = usePageHook(screenId, metadata, pageData);
+    const {formData, setFormData, handleChange, handleAction: defaultHandleAction, showPassword, pwType, activeModal, closeModal} = usePageHook(screenId, metadata, pageData);
     const krideItinerary = useKrideItinerary(screenId, formData);
 
     // 구글 캘린더 OAuth 콜백 처리
@@ -102,6 +108,15 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
         setCurrentPage(1);
     };
 
+    // 액션 핸들러 래핑 (채팅 모달 열기 가로채기)
+    const handleAction = async (meta: any, data?: any) => {
+        const actionUrl = meta?.actionUrl || meta?.action_url;
+        if (screenId === "KRIDE_FOCUS" && (actionUrl === "/view/CHAT" || actionUrl === "/view/KRIDE_CHAT")) {
+            setIsChatModalOpen(prev => !prev); // 토글
+            return;
+        }
+        return defaultHandleAction(meta, data);
+    };
 
 
     // 구글 콜백 처리 중 로딩 표시
@@ -171,6 +186,17 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
                         // console.log(`[페이지 변경] 현재 페이지: ${currentPage}, 변경된 페이지: ${page}`);
                     }}
                 />
+            )}
+
+            {/* Floating Chat Modal for KRIDE_FOCUS */}
+            {screenId === "KRIDE_FOCUS" && isChatModalOpen && (
+                <div className="fixed bottom-[90px] right-6 w-[380px] h-[600px] max-h-[75vh] z-[100] shadow-2xl rounded-2xl overflow-hidden border border-gray-700 bg-[#0A0A0A] flex flex-col">
+                    <KrideChatComponent 
+                        meta={{ labelText: 'K-RIDE 여행봇', cssClass: 'h-full w-full' }} 
+                        data={{}}
+                        onCloseModal={() => setIsChatModalOpen(false)}
+                    />
+                </div>
             )}
         </div>
     );

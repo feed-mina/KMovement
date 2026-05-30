@@ -18,20 +18,6 @@ const DURATION_TO_DAYS: Record<string, number> = {
   "당일치기": 1,
   "1박2일": 2,
   "2박3일": 3,
-
-interface TimeSlot {
-  places: { name: string; description?: string }[];
-}
-
-interface DayPlan {
-  morning: TimeSlot;
-  afternoon: TimeSlot;
-}
-
-const DURATION_TO_DAYS: Record<string, number> = {
-  "당일치기": 1,
-  "1박2일": 2,
-  "2박3일": 3,
   day: 1,
   onenight: 2,
   twonight: 3,

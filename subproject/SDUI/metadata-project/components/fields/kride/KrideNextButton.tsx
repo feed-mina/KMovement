@@ -13,7 +13,10 @@ export default function KrideNextButton({ id, meta, onAction, formData }: any) {
 
   if (!isVisible) return null;
 
-  const label = meta?.labelText || meta?.label_text || "다음";
+  let label = meta?.labelText || meta?.label_text || "다음";
+  if (label === "AI 여행봇과 상담") {
+    label = "AI 여행봇 채팅";
+  }
   const wrapperClass: string = meta?.cssClass || meta?.css_class || "";
 
   const handleClick = () => onAction?.(meta, {});

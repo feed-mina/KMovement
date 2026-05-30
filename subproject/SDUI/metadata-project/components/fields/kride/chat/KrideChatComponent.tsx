@@ -36,6 +36,7 @@ interface KrideChatComponentProps {
     suggestions?: string[];
     contextOverride?: KrideForm;
   };
+  onCloseModal?: () => void;
 }
 
 const DEFAULT_SUGGESTIONS = [
@@ -47,7 +48,7 @@ const DEFAULT_SUGGESTIONS = [
   '내 일정에 저장',
 ];
 
-export default function KrideChatComponent({ meta, data }: KrideChatComponentProps) {
+export default function KrideChatComponent({ meta, data, onCloseModal }: KrideChatComponentProps) {
   const containerClass = meta?.cssClass || meta?.css_class || '';
   const title = meta?.labelText || meta?.label_text || 'K-RIDE 여행봇';
   const suggestions = data?.suggestions ?? DEFAULT_SUGGESTIONS;
@@ -80,7 +81,10 @@ export default function KrideChatComponent({ meta, data }: KrideChatComponentPro
       <Header
         title={title}
         status={status}
-        onClose={reset}
+        onClose={() => {
+          reset();
+          if (onCloseModal) onCloseModal();
+        }}
         variant="full"
       />
 

@@ -5,7 +5,7 @@ import RecordTimeComponent from "@/components/fields/RecordTimeComponent";
 import {useDeviceType} from "@/hooks/useDeviceType";
 import { usePathname } from 'next/navigation';
 
-const KRIDE_PATHS = ['/INTRO1', '/INTRO2', '/INTRO3', '/INTRO4', '/INTRO5', '/MY_LIST', '/FOCUS'];
+const KRIDE_PATHS = ['/INTRO1', '/INTRO2', '/INTRO3', '/INTRO4', '/INTRO5', '/MY_LIST', '/FOCUS', '/CHAT', '/KRIDE_CHAT'];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
     const { isMobile, deviceClass } = useDeviceType();
