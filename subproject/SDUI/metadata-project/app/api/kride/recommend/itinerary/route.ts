@@ -39,8 +39,9 @@ export async function POST(request: NextRequest) {
         { status: 504 }
       );
     }
+    console.error("[itinerary proxy] error:", err.message, "cause:", err.cause);
     return NextResponse.json(
-      { error: err.message ?? "프록시 오류" },
+      { error: err.message ?? "프록시 오류", detail: String(err.cause ?? "") },
       { status: 502 }
     );
   }
