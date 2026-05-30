@@ -195,6 +195,42 @@ export function useAIChatLogic({
         startRecording();
     };
 
+    const handleSendTextMessage = async (text: string) => {
+        if (!text.trim()) return;
+        
+        try {
+            let finalText = text;
+            const originalText = text;
+            const containsKorean = /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(text);
+            const isKoreanMode = currentRecordingModeRef.current === 'ko';
+            
+            const wasTranslated = (isKoreanMode || containsKorean) && (language === 'en' || language === 'ja');
+            
+            if (wasTranslated) {
+                const transRes = await api.post(translateEndpoint, {
+                    text,
+                    target: language
+                });
+                if (transRes.data?.data) {
+                    finalText = transRes.data.data;
+                }
+            }
+
+            const userMsg: ChatMessage = {
+                role: 'user',
+                content: finalText,
+                originalText: wasTranslated ? originalText : undefined,
+            };
+            
+            const updatedMsgs = [...messages, userMsg];
+            setMessages(updatedMsgs);
+            await sendToAI(updatedMsgs);
+        } catch (err) {
+            console.error('[useAIChatLogic] Text send failed:', err);
+            onError?.('Failed to send text message.');
+        }
+    };
+
     const handleEndChat = () => {
         abort();
         setMessages([]);
@@ -221,6 +257,7 @@ export function useAIChatLogic({
         stopRecording,
         cancelRecording,
         handleEndChat,
-        sendToAI
+        sendToAI,
+        handleSendTextMessage
     };
 }
