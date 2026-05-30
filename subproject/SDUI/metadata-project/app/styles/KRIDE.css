@@ -100,7 +100,6 @@
 /* ── intro1 buttons — 하단 고정 ── */
 .kride-intro1-buttons {
     gap: 0.625rem;
-    margin-top: auto;
     padding-bottom: 0.5rem;
 }
 
@@ -165,6 +164,15 @@
     display: flex;
     flex-direction: column;
     padding: 48px 24px 104px;
+    scrollbar-width: none; /* Firefox */
+}
+
+.group-intro1_root::-webkit-scrollbar,
+.group-intro2_root::-webkit-scrollbar,
+.group-intro3_root::-webkit-scrollbar,
+.group-intro4_root::-webkit-scrollbar,
+.group-intro5_root::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
 .group-intro1_root {
@@ -199,6 +207,7 @@
     color: rgba(255, 255, 255, 0.62);
     font-size: 0.875rem;
     line-height: 1.5;
+    background-color: transparent !important;
 }
 
 .group-intro5_root > div:nth-child(2) {
