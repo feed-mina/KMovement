@@ -22,6 +22,8 @@ jobs:
         run: |
           docker build \
             --build-arg NEXT_PUBLIC_BACKEND_URL=https://yerin.duckdns.org \
+            --build-arg NEXT_PUBLIC_KAKAO_MAP_APP_KEY="${{ secrets.NEXT_PUBLIC_KAKAO_MAP_APP_KEY }}" \
+            --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}" \
             -t ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest \
             -t ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:${{ github.sha }} \
             ./subproject/SDUI/metadata-project
