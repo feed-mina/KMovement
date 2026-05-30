@@ -170,7 +170,7 @@ def search_chat_context(message: str, top_k: int = 4) -> list[dict]:
     return sorted(passages, key=lambda row: row.get("distance", 1.0))[:top_k * 2]
 
 
-def generate_chat_answer(message: str) -> str:
+def generate_chat_answer(message: str, graphrag_context: str = "") -> str:
     passages = search_chat_context(message, top_k=3)
     context = "\n".join(
         f"- {p.get('text', '')[:500]}"
@@ -180,12 +180,17 @@ def generate_chat_answer(message: str) -> str:
     if not context:
         context = "No retrieved context was available."
 
+    graphrag_section = ""
+    if graphrag_context:
+        graphrag_section = f"\n[GraphRAG — 관련 아티스트 촬영지/장소]\n{graphrag_context}\n"
+
     prompt = f"""Answer the user's K-Ride travel question in Korean.
 Use only the retrieved context when it is relevant. If the context is thin, say what is missing and give a careful general answer.
+GraphRAG context contains artist-related filming locations — incorporate these when the user asks about specific artists or locations.
 
 [Retrieved context]
 {context}
-
+{graphrag_section}
 [User question]
 {message}
 """
@@ -207,7 +212,7 @@ Use only the retrieved context when it is relevant. If the context is thin, say 
         raise
 
 
-def generate_chat_answer_stream(message: str):
+def generate_chat_answer_stream(message: str, graphrag_context: str = ""):
     """토큰 단위 스트리밍 제너레이터 — Groq stream=True"""
     _check_groq_breaker()
     passages = search_chat_context(message, top_k=3)
@@ -219,12 +224,17 @@ def generate_chat_answer_stream(message: str):
     if not context:
         context = "No retrieved context was available."
 
+    graphrag_section = ""
+    if graphrag_context:
+        graphrag_section = f"\n[GraphRAG — 관련 아티스트 촬영지/장소]\n{graphrag_context}\n"
+
     prompt = f"""Answer the user's K-Ride travel question in Korean.
 Use only the retrieved context when it is relevant. If the context is thin, say what is missing and give a careful general answer.
+GraphRAG context contains artist-related filming locations — incorporate these when the user asks about specific artists or locations.
 
 [Retrieved context]
 {context}
-
+{graphrag_section}
 [User question]
 {message}
 """

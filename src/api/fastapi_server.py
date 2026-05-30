@@ -75,11 +75,17 @@ except ImportError:
     ensemble_rank_pois = None
 # GraphRAG 모듈 (graph.json 없어도 서버 기동 가능)
 try:
-    from src.api.graphrag_client import get_graphrag_pois
+    from src.api.graphrag_client import (
+        get_graphrag_pois,
+        search_artists_by_name,
+        get_graphrag_context_for_chat,
+    )
     HAS_GRAPHRAG = True
 except ImportError:
     HAS_GRAPHRAG = False
     get_graphrag_pois = None
+    search_artists_by_name = None
+    get_graphrag_context_for_chat = None
 # 날씨 모듈 (KMA API 키 없어도 서버 기동 가능)
 try:
     from weather_kma import get_weather_weight, weather_to_safety_penalty
@@ -919,9 +925,24 @@ def recommend_ai(req: RecommendAIRequest):
         except Exception:
             pass
 
+    # 2.5 GraphRAG — 2-hop + community 기반 POI 확장
+    graphrag_pois = []
+    if HAS_GRAPHRAG and req.artists:
+        try:
+            search_names = list(set(
+                req.artists + [ARTIST_NAME_MAP.get(a, a) for a in req.artists]
+            ))
+            artist_ids = search_artists_by_name(search_names)
+            existing_ids = {p.get("poi_id") or p.get("name", "") for p in neo4j_pois + chroma_pois}
+            if artist_ids:
+                graphrag_pois = get_graphrag_pois(artist_ids, existing_ids, max_pois=10)
+                print(f"[K-Ride] recommend/ai graphrag_pois: {len(graphrag_pois)}건")
+        except Exception as e:
+            print(f"[K-Ride] recommend/ai graphrag fallback: {e}")
+
     # 3. 합산 + 중복 제거
     merged: dict[str, dict] = {}
-    for p in neo4j_pois + chroma_pois:
+    for p in neo4j_pois + chroma_pois + graphrag_pois:
         key = p.get("poi_id") or p.get("name", "")
         if key not in merged:
             merged[key] = p
@@ -1169,6 +1190,27 @@ async def recommend_itinerary(req: ItineraryRequest):
     }
 
 
+def _build_graphrag_chat_context(message: str) -> str:
+    """채팅 메시지에서 GraphRAG POI 컨텍스트를 텍스트로 생성"""
+    if not HAS_GRAPHRAG:
+        return ""
+    try:
+        pois = get_graphrag_context_for_chat(message, max_pois=5)
+        if not pois:
+            return ""
+        lines = []
+        for p in pois:
+            name = p.get("name", "")
+            addr = p.get("address", "")
+            cat = p.get("category", "")
+            lines.append(f"- {name} ({cat}) — {addr}")
+        print(f"[K-Ride] chat graphrag_pois: {len(pois)}건")
+        return "\n".join(lines)
+    except Exception as e:
+        print(f"[K-Ride] chat graphrag fallback: {e}")
+        return ""
+
+
 @app.post("/api/chat/stream")
 def chat_stream(req: ChatStreamRequest):
     import json as _json
@@ -1180,9 +1222,11 @@ def chat_stream(req: ChatStreamRequest):
             yield "data: [DONE]\n\n"
         return StreamingResponse(_empty(), media_type="text/event-stream; charset=utf-8")
 
+    graphrag_ctx = _build_graphrag_chat_context(message)
+
     def _sse():
         try:
-            for token in generate_chat_answer_stream(message):
+            for token in generate_chat_answer_stream(message, graphrag_context=graphrag_ctx):
                 yield f"data: {_json.dumps({'content': token})}\n\n"
         except Exception as exc:
             print(f"[K-Ride] chat stream fallback: {exc}")
@@ -1199,7 +1243,8 @@ def chat_qa(req: ChatStreamRequest):
     if not message:
         return {"reply": "K-Ride assistant is ready."}
     try:
-        reply = generate_chat_answer(message)
+        graphrag_ctx = _build_graphrag_chat_context(message)
+        reply = generate_chat_answer(message, graphrag_context=graphrag_ctx)
     except Exception as exc:
         print(f"[K-Ride] chat qa fallback: {exc}")
         reply = "죄송합니다. 답변 중 오류가 발생했어요. 다시 시도해주세요."

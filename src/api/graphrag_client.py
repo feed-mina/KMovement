@@ -115,3 +115,100 @@ def get_graphrag_pois(
         })
 
     return formatted
+
+
+# ─────────────────────────────────────────────
+# 이름 기반 아티스트 검색 (recommend/ai, chat/qa 용)
+# ─────────────────────────────────────────────
+
+def _build_artist_name_index() -> dict[str, str]:
+    """아티스트 이름(한글/영문) → graph artist_id 매핑 생성"""
+    g = _load_graph()
+    index: dict[str, str] = {}
+    for nid, node in g["nodes"].items():
+        if node.get("type") != "Artist":
+            continue
+        name = node.get("name", "")
+        if name:
+            index[name] = nid
+            index[name.upper()] = nid
+            index[name.lower()] = nid
+    return index
+
+
+_artist_name_idx: dict[str, str] | None = None
+
+
+def _get_artist_name_index() -> dict[str, str]:
+    global _artist_name_idx
+    if _artist_name_idx is None:
+        _artist_name_idx = _build_artist_name_index()
+    return _artist_name_idx
+
+
+def search_artists_by_name(names: list[str]) -> list[str]:
+    """아티스트 이름 리스트 → graph artist_id 리스트 반환
+
+    영문/한글 모두 지원. 매칭 안 되는 이름은 무시.
+    """
+    idx = _get_artist_name_index()
+    found: list[str] = []
+    seen: set[str] = set()
+    for name in names:
+        aid = idx.get(name) or idx.get(name.upper()) or idx.get(name.lower())
+        if aid and aid not in seen:
+            found.append(aid)
+            seen.add(aid)
+    return found
+
+
+def extract_artist_ids_from_text(text: str) -> list[str]:
+    """자유 텍스트에서 아티스트 이름을 검색하여 artist_id 리스트 반환
+
+    그래프에 등록된 모든 아티스트 이름(한글)을 text에서 substring 매칭.
+    """
+    g = _load_graph()
+    idx = _get_artist_name_index()
+    found: list[str] = []
+    seen: set[str] = set()
+
+    for nid, node in g["nodes"].items():
+        if node.get("type") != "Artist":
+            continue
+        name = node.get("name", "")
+        if name and name in text and nid not in seen:
+            found.append(nid)
+            seen.add(nid)
+
+    return found
+
+
+def get_graphrag_context_for_chat(
+    message: str,
+    artist_names: list[str] | None = None,
+    max_pois: int = 5,
+) -> list[dict]:
+    """채팅 메시지에서 GraphRAG POI 컨텍스트 추출
+
+    1. artist_names가 주어지면 이름 기반 검색
+    2. 메시지 텍스트에서 아티스트 이름 추출
+    3. 매칭된 아티스트의 관련 POI 반환
+    """
+    artist_ids: list[str] = []
+
+    # 명시적 아티스트 이름으로 검색
+    if artist_names:
+        artist_ids = search_artists_by_name(artist_names)
+
+    # 텍스트에서 아티스트 이름 추출
+    text_ids = extract_artist_ids_from_text(message)
+    seen = set(artist_ids)
+    for aid in text_ids:
+        if aid not in seen:
+            artist_ids.append(aid)
+            seen.add(aid)
+
+    if not artist_ids:
+        return []
+
+    return get_graphrag_pois(artist_ids, set(), max_pois=max_pois)

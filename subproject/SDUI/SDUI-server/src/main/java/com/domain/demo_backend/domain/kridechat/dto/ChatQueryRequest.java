@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -16,5 +17,5 @@ public class ChatQueryRequest {
     private List<String> regions;
     private List<String> purposes;
     private Integer duration;
-    private List<Integer> budget;
+    private Map<String, Integer> budget;
 }
