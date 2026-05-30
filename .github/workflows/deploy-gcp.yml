@@ -105,6 +105,8 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+          RUNPOD_ENDPOINT_ID: ${{ secrets.RUNPOD_ENDPOINT_ID }}
         run: |
           cat > /tmp/deploy.sh << 'SCRIPT_EOF'
           set -e
@@ -146,6 +148,8 @@ jobs:
                 - SUPABASE_URL=${SUPABASE_URL}
                 - SUPABASE_KEY=${SUPABASE_KEY}
                 - GROQ_API_KEY=${GROQ_API_KEY}
+                - RUNPOD_API_KEY=${RUNPOD_API_KEY}
+                - RUNPOD_ENDPOINT_ID=${RUNPOD_ENDPOINT_ID}
               restart: unless-stopped
 
             chromadb:
@@ -220,6 +224,8 @@ jobs:
           SUPABASE_URL=__SUPABASE_URL__
           SUPABASE_KEY=__SUPABASE_KEY__
           GROQ_API_KEY=__GROQ_API_KEY__
+          RUNPOD_API_KEY=__RUNPOD_API_KEY__
+          RUNPOD_ENDPOINT_ID=__RUNPOD_ENDPOINT_ID__
           ENV_EOF
 
           docker compose -f docker-compose.prod.yml pull --ignore-pull-failures
@@ -249,6 +255,8 @@ jobs:
           sed -i "s|__SUPABASE_URL__|${SUPABASE_URL}|g" /tmp/deploy.sh
           sed -i "s|__SUPABASE_KEY__|${SUPABASE_KEY}|g" /tmp/deploy.sh
           sed -i "s|__GROQ_API_KEY__|${GROQ_API_KEY}|g" /tmp/deploy.sh
+          sed -i "s|__RUNPOD_API_KEY__|${RUNPOD_API_KEY}|g" /tmp/deploy.sh
+          sed -i "s|__RUNPOD_ENDPOINT_ID__|${RUNPOD_ENDPOINT_ID}|g" /tmp/deploy.sh
 
       - name: Deploy to GCP VM
         run: |

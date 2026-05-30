@@ -943,7 +943,7 @@ function CommunityDetail({ postId }: { postId: number }) {
                             영상 생성 실패: {animStatus.errorMessage || '알 수 없는 오류'}
                         </p>
                     )}
-                    {isOwner && (!animStatus || animStatus.status === 'FAILED') && (
+                    {isOwner && (!animStatus || animStatus.status === 'FAILED' || animStatus.status === 'NONE') && (
                         <button
                             className="community-primary-btn"
                             type="button"
