@@ -16,46 +16,28 @@ jobs:
           echo "${{ secrets.AWS_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-      - name: Flyway repair — fix V11 checksum mismatch
+      - name: Check backend logs for goalTime error
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_KEY }}
           script: |
-            echo "=== Current flyway_schema_history for V11 ==="
-            docker exec sdui-db psql -U ${{ secrets.DB_USERNAME }} -d SDUI_TD -c \
-              "SELECT version, checksum, description FROM flyway_schema_history WHERE version = '11';"
+            echo "=== Backend container status ==="
+            docker ps --format "table {{.Names}}\t{{.Status}}" | grep backend
 
             echo ""
-            echo "=== Updating V11 checksum to match current file ==="
-            docker exec sdui-db psql -U ${{ secrets.DB_USERNAME }} -d SDUI_TD -c \
-              "UPDATE flyway_schema_history SET checksum = 898325472 WHERE version = '11';"
+            echo "=== Last 50 lines of backend logs ==="
+            docker logs sdui-backend --tail 50 2>&1
 
             echo ""
-            echo "=== Verified ==="
-            docker exec sdui-db psql -U ${{ secrets.DB_USERNAME }} -d SDUI_TD -c \
-              "SELECT version, checksum, description FROM flyway_schema_history WHERE version = '11';"
-
-      - name: Restart backend and verify
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.AWS_HOST }}
-          username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.AWS_KEY }}
-          script: |
-            echo "=== Restarting backend ==="
-            docker restart sdui-backend
-            sleep 15
+            echo "=== goalTime related errors ==="
+            docker logs sdui-backend 2>&1 | grep -i -E "goalTime|getGoalTime|GoalTime|GET_USER_GOAL" | tail -20
 
             echo ""
-            echo "=== Backend logs (last 20 lines) ==="
-            docker logs sdui-backend --tail 20
+            echo "=== Recent ERROR/Exception lines ==="
+            docker logs sdui-backend 2>&1 | grep -i -E "ERROR|Exception|Caused by" | tail -30
 
             echo ""
-            echo "=== API test ==="
-            curl -sS -o /dev/null -w "Backend: HTTP %{http_code}\n" http://localhost:8080/api/ui/MAIN_PAGE
-
-            echo ""
-            echo "=== Flushing Redis cache ==="
-            docker exec sdui-redis redis-cli FLUSHDB
+            echo "=== Test goalTime endpoint ==="
+            curl -sS http://localhost:8080/api/goalTime/getGoalTime 2>&1 | head -5
