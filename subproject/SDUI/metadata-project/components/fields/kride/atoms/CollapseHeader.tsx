@@ -13,7 +13,7 @@ export default function CollapseHeader({ meta, label, isOpen, onToggle }: Props)
   const text = label || meta?.labelText || meta?.label_text || "";
   return (
     <button
-      className="collapse-header flex items-center justify-between w-full py-3 px-4 text-white font-semibold bg-gray-900 hover:bg-gray-800 transition-colors"
+      className="collapse-header flex items-center justify-between w-full py-3 pl-6 pr-4 text-white font-semibold bg-gray-900 hover:bg-gray-800 transition-colors"
       onClick={onToggle}
       aria-expanded={isOpen}
     >
