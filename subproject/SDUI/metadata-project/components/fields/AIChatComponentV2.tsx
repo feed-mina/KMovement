@@ -31,6 +31,7 @@ export default function AIChatComponentV2({ meta, data }: AIChatComponentProps) 
     const systemPromptTemplate = meta.system_prompt_template || ''; // Placeholder for template logic
     
     const [isStarted, setIsStarted] = useState(false);
+    const [inputText, setInputText] = useState('');
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [showGoalModal, setShowGoalModal] = useState(false);
     const [upgradeModalMsg, setUpgradeModalMsg] = useState(data?.upgrade_message || 'Voice conversation requires a PREMIUM membership.');
@@ -48,6 +49,7 @@ export default function AIChatComponentV2({ meta, data }: AIChatComponentProps) 
         stopRecording,
         cancelRecording,
         handleEndChat,
+        handleSendTextMessage,
     } = useAIChatLogic({
         language: targetLanguage,
         systemPrompt: systemPromptTemplate || defaultPrompt,
@@ -86,6 +88,38 @@ export default function AIChatComponentV2({ meta, data }: AIChatComponentProps) 
             </div>
 
             <div className="ai-chat-footer-area">
+                <div className="ai-chat-text-input-row" style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                    <input 
+                        type="text" 
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                if (inputText.trim() && !isDisabled && !isStreaming && recordingState === 'idle') {
+                                    handleSendTextMessage(inputText);
+                                    setInputText('');
+                                }
+                            }
+                        }}
+                        placeholder="Type your message here..."
+                        disabled={isDisabled || isStreaming || recordingState !== 'idle'}
+                        style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #ddd', outline: 'none', fontSize: '15px' }}
+                    />
+                    <button 
+                        onClick={() => {
+                            if (inputText.trim()) {
+                                handleSendTextMessage(inputText);
+                                setInputText('');
+                            }
+                        }}
+                        disabled={!inputText.trim() || isDisabled || isStreaming || recordingState !== 'idle'}
+                        style={{ padding: '10px 16px', borderRadius: '8px', background: '#6366F1', color: 'white', border: 'none', fontWeight: 'bold', cursor: 'pointer', opacity: (!inputText.trim() || isDisabled || isStreaming || recordingState !== 'idle') ? 0.5 : 1 }}
+                    >
+                        전송
+                    </button>
+                </div>
+                
                 <div className="ai-chat-input-wrapper">
                     <AudioRecorder
                         state={recordingState}
