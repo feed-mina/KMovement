@@ -281,3 +281,18 @@ img.kride-intro1-hero-slot {
         width: calc((100% - 1.5rem) / 3);
     }
 }
+
+/* ── FOCUS 레이아웃 동적 대응 (지도 크기 유연화, 아코디언 핸들용) ── */
+#focus_map {
+    height: auto !important;
+    min-height: 40vh !important;
+    flex: 1 1 0% !important;
+}
+
+#focus_itinerary {
+    flex: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    height: fit-content !important;
+}
