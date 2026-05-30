@@ -46,13 +46,23 @@ public class AnimationController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAnimationStatus(
             @PathVariable("postId") Long postId) {
 
-        AnimationJob job = animationService.getAnimationStatus(postId);
-        Map<String, Object> result = Map.of(
-                "jobId", job.getId(),
-                "status", job.getStatus(),
-                "resultUrl", job.getResultUrl() != null ? job.getResultUrl() : "",
-                "errorMessage", job.getErrorMessage() != null ? job.getErrorMessage() : ""
-        );
-        return ResponseEntity.ok(ApiResponse.success(result));
+        try {
+            AnimationJob job = animationService.getAnimationStatus(postId);
+            Map<String, Object> result = Map.of(
+                    "jobId", job.getId(),
+                    "status", job.getStatus(),
+                    "resultUrl", job.getResultUrl() != null ? job.getResultUrl() : "",
+                    "errorMessage", job.getErrorMessage() != null ? job.getErrorMessage() : ""
+            );
+            return ResponseEntity.ok(ApiResponse.success(result));
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> result = Map.of(
+                    "jobId", 0,
+                    "status", "NONE",
+                    "resultUrl", "",
+                    "errorMessage", ""
+            );
+            return ResponseEntity.ok(ApiResponse.success(result));
+        }
     }
 }
