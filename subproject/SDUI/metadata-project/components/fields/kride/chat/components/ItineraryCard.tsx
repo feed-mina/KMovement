@@ -92,6 +92,21 @@ export default function ItineraryCard({ itinerary, onApply }: Props) {
                             </div>
                           </div>
                         ))}
+                        
+                        {(slot?.restaurants && slot.restaurants.length > 0) && (
+                          <div style={{
+                            marginTop: 10, marginBottom: 12, padding: '10px 14px',
+                            background: '#FDFBF7', color: '#1A1A1A', borderRadius: 12,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)', border: '1px solid #EBE9E4'
+                          }}>
+                            <div style={{ fontSize: 11.5, fontWeight: 700, marginBottom: 4, color: '#E50914', display: 'flex', alignItems: 'center', gap: 4 }}>
+                              <span>✨</span> {label} 주변 검증된 맛집 추천
+                            </div>
+                            <div style={{ fontSize: 12.5, fontWeight: 500, lineHeight: 1.4, color: '#4A4A4A' }}>
+                              {slot.restaurants.map(r => `[${r.tag}] ${r.name}(별${r.rating})`).join(', ')} 입니다.
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                 </div>

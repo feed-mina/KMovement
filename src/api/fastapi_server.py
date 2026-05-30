@@ -120,6 +120,7 @@ GRAPH_PATH    = os.path.join(MODELS_DIR, "route_graph.pkl")
 SCORED_PATH   = os.path.join(RAW_DIR,    "road_scored.csv")
 FACILITY_PATH = os.path.join(RAW_DIR,    "facility_clean.csv")
 POI_PATH      = os.path.join(RAW_DIR,    "tour_poi.csv")
+PREMIUM_FOOD_PATH = os.path.join(RAW_DIR, "premium_food_clean.csv")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -183,11 +184,13 @@ G, G_main, graph_meta = _load_graph()
 df_scored   = _load_df(SCORED_PATH)
 df_facility = _load_df(FACILITY_PATH)
 df_poi      = _load_df(POI_PATH)
+df_premium_food = _load_df(PREMIUM_FOOD_PATH)
 
 print(f"[K-Ride] 그래프 로드: {graph_meta}")
 print(f"[K-Ride] road_scored: {df_scored.shape if df_scored is not None else 'None'}")
 print(f"[K-Ride] facility:    {df_facility.shape if df_facility is not None else 'None'}")
 print(f"[K-Ride] poi:         {df_poi.shape if df_poi is not None else 'None'}")
+print(f"[K-Ride] premium food: {df_premium_food.shape if df_premium_food is not None else 'None'}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -243,6 +246,56 @@ async def geocode_itinerary_places(itinerary: list) -> list[dict]:
             print(f"[K-Ride] 지오코딩 실패 주소: '{place['address']}' (장소: {place['name']})")
         await asyncio.sleep(1.1)  # Nominatim rate limit: 1 req/s
     return markers
+
+
+def _add_restaurant_recommendations(itinerary_result: dict, all_pois: list):
+    """일정 결과의 오전/오후 섹션에 추천 프리미엄 맛집 추가"""
+    if df_premium_food is None or df_premium_food.empty:
+        return
+        
+    itinerary = itinerary_result.get("itinerary", [])
+    if not itinerary:
+        return
+        
+    poi_dict = {p.get("name"): p for p in all_pois}
+    
+    for day in itinerary:
+        for slot in ["morning", "afternoon"]:
+            slot_data = day.get(slot, {})
+            places = slot_data.get("places", [])
+            
+            lats, lons = [], []
+            for place in places:
+                p_name = place.get("name")
+                matched_poi = poi_dict.get(p_name)
+                if matched_poi and matched_poi.get("lat") and matched_poi.get("lon"):
+                    lats.append(float(matched_poi["lat"]))
+                    lons.append(float(matched_poi["lon"]))
+                elif place.get("lat") and place.get("lon"):
+                    lats.append(float(place["lat"]))
+                    lons.append(float(place["lon"]))
+                    
+            if lats and lons:
+                avg_lat = sum(lats) / len(lats)
+                avg_lon = sum(lons) / len(lons)
+                
+                recs = []
+                for _, row in df_premium_food.iterrows():
+                    if pd.notna(row.get("lat")) and pd.notna(row.get("lon")):
+                        dist = haversine((avg_lat, avg_lon), (float(row["lat"]), float(row["lon"])))
+                        recs.append({
+                            "name": row["name"],
+                            "rating": row.get("rating", 4.8),
+                            "tag": row.get("tag", "프리미엄 맛집"),
+                            "dist": dist
+                        })
+                recs = sorted(recs, key=lambda x: x["dist"])
+                top_recs = [r for r in recs if r["dist"] < 30][:3]
+                
+                if top_recs:
+                    for r in top_recs:
+                        del r["dist"]
+                    slot_data["restaurants"] = top_recs
 
 
 def get_nearby_facilities(path_coords: list, radius_m: float = 500) -> list:
@@ -1167,6 +1220,9 @@ async def recommend_itinerary(req: ItineraryRequest):
     if not isinstance(itinerary_result, dict):
         itinerary_result = {"itinerary": []}
     itinerary_result.setdefault("itinerary", [])
+
+    # 오전/오후 섹션에 추천 프리미엄 맛집 추가
+    _add_restaurant_recommendations(itinerary_result, all_pois)
 
     # 6. mapData 마커 생성 (좌표 있는 POI만)
     markers = [
