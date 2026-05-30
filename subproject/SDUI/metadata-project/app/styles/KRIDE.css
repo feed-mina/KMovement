@@ -287,6 +287,14 @@ img.kride-intro1-hero-slot {
     height: auto !important;
     min-height: 40vh !important;
     flex: 1 1 0% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+#focus_map > div {
+    flex: 1;
+    height: 100%;
+    width: 100%;
 }
 
 #focus_itinerary {

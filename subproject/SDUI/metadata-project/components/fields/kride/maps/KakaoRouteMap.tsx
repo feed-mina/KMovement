@@ -105,6 +105,7 @@ export default function KakaoRouteMap({ appKey, data, selectedMarkerId, onMarker
     if (!marker || !kakaoMarker || !infoWindow || !kakao?.maps) return;
 
     const position = new kakao.maps.LatLng(marker.lat, marker.lng);
+    mapRef.current.setLevel(4, { animate: true });
     mapRef.current.panTo(position);
     infoWindow.open(mapRef.current, kakaoMarker);
   }, [data.markers, selectedMarkerId]);

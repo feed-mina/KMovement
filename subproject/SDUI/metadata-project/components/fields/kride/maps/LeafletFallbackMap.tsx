@@ -7,14 +7,16 @@ const MapViewInner = dynamic(() => import('../MapViewInner'), { ssr: false });
 
 type Props = {
   data: RouteMapData;
+  selectedMarkerId?: string;
 };
 
-export default function LeafletFallbackMap({ data }: Props) {
+export default function LeafletFallbackMap({ data, selectedMarkerId }: Props) {
   return (
     <MapViewInner
       center={data.center}
       markers={data.markers}
       zoom={data.zoom}
+      selectedMarkerId={selectedMarkerId}
     />
   );
 }

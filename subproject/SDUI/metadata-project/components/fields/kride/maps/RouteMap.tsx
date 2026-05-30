@@ -102,7 +102,7 @@ export default function RouteMap({ data }: Props) {
           onMarkerSelect={handleMarkerSelect}
         />
       )
-      : <LeafletFallbackMap data={data} />;
+      : <LeafletFallbackMap data={data} selectedMarkerId={selectedMarkerId} />;
 
   return (
     <div className="route-map">

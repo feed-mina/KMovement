@@ -1,5 +1,6 @@
 'use client';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { RouteMapMarker } from './maps/mapTypes';
@@ -28,9 +29,30 @@ interface Props {
   center?: [number, number];
   markers?: Array<RouteMarker | RouteMapMarker>;
   zoom?: number;
+  selectedMarkerId?: string;
 }
 
-export default function MapViewInner({ center = [37.5665, 126.978], markers = [], zoom = 13 }: Props) {
+function MapController({ markers, selectedMarkerId }: { markers: Array<RouteMarker | RouteMapMarker>; selectedMarkerId?: string }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (!selectedMarkerId) return;
+    const marker = markers.find(m => {
+      const id = 'id' in m ? m.id : undefined;
+      return id === selectedMarkerId;
+    });
+    if (!marker) return;
+    
+    const lng = marker.lng ?? ('lon' in marker ? marker.lon : undefined);
+    if (marker.lat != null && lng != null) {
+      map.flyTo([marker.lat, lng], 15, { animate: true, duration: 1.5 });
+    }
+  }, [map, markers, selectedMarkerId]);
+  
+  return null;
+}
+
+export default function MapViewInner({ center = [37.5665, 126.978], markers = [], zoom = 13, selectedMarkerId }: Props) {
   const positions = markers
     .map((marker) => {
       const lng = marker.lng ?? ('lon' in marker ? marker.lon : undefined);
@@ -45,6 +67,7 @@ export default function MapViewInner({ center = [37.5665, 126.978], markers = []
       scrollWheelZoom={true}
       style={{ width: '100%', height: '100%', minHeight: '400px' }}
     >
+      <MapController markers={markers} selectedMarkerId={selectedMarkerId} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
