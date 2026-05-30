@@ -47,8 +47,8 @@ export interface KrideItinerary {
 
 export interface KrideDayPlan {
   day: number;
-  morning: { places: KridePlaceStop[] };
-  afternoon: { places: KridePlaceStop[] };
+  morning: { places: KridePlaceStop[]; restaurants?: { name: string; rating: number; tag: string }[] };
+  afternoon: { places: KridePlaceStop[]; restaurants?: { name: string; rating: number; tag: string }[] };
 }
 
 export interface KridePlaceStop {
