@@ -32,8 +32,13 @@ export default function RouteNode({ data, index = 0, onSelect }: Props) {
         className="flex flex-1 items-start gap-3 text-left min-w-0"
         onClick={onSelect}
       >
-        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-white text-xs font-bold">
-          {index + 1}
+        <div className="relative flex-shrink-0 w-6 h-8 flex items-center justify-center">
+          <svg className="absolute w-full h-full text-red-600 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+          </svg>
+          <span className="relative text-white font-bold" style={{ fontSize: "10px", marginTop: "-6px" }}>
+            {index + 1}
+          </span>
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-white text-sm font-medium truncate">{name}</p>

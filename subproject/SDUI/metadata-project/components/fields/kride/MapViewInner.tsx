@@ -53,8 +53,17 @@ export default function MapViewInner({ center = [37.5665, 126.978], markers = []
       {markers.map((m, i) => {
         const lng = m.lng ?? ('lon' in m ? m.lon : undefined);
         if (m.lat == null || lng == null) return null;
+        
+        const num = m.index != null ? m.index + 1 : i + 1;
+        const numberedIcon = L.divIcon({
+          className: 'custom-leaflet-marker',
+          html: `<div style="background-color: #dc2626; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); border: 2px solid white;">${num}</div>`,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+        });
+
         return (
-          <Marker key={`${m.name}-${i}`} position={[m.lat, lng]}>
+          <Marker key={`${m.name}-${i}`} position={[m.lat, lng]} icon={numberedIcon}>
             <Popup>{m.index != null ? `${m.index + 1}. ` : ''}{m.name}</Popup>
           </Marker>
         );

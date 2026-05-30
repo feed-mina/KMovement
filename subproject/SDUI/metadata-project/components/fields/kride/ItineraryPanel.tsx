@@ -58,7 +58,7 @@ export default function ItineraryPanel({ id, data }: any) {
 
         return (
           <div key={dayIdx} className="border border-gray-800 rounded-xl overflow-hidden">
-            <div className="bg-gray-800 px-4 py-2">
+            <div className="bg-gray-800 pl-6 pr-4 py-2">
               <h3 className="text-white font-bold text-sm">
                 {dayCount === 1 ? "당일" : `Day ${dayIdx + 1}`}
               </h3>
