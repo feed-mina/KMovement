@@ -60,41 +60,30 @@ public class KakaoService {
         log.info("KAKAOSERVICE-body : " + body);
 
         try {
+            @SuppressWarnings("unchecked")
             Map<String, Object> kakaoAccount = (Map<String, Object>) body.get("kakao_account");
+            @SuppressWarnings("unchecked")
             Map<String, Object> properties = (Map<String, Object>) body.get("properties");
 
-            log.error("@@@@@kakaoAccount", kakaoAccount);
-            log.error("@@@@@properties", properties);
-
             Long id = ((Number) body.get("id")).longValue();
-            String connectedAt = (String) body.get("connected_at");
-            String nickname = (String) properties.get("nickname");
-//        String email = (kakaoAccount.get("email") != null) ? kakaoAccount.get("email").toString() : null;
-            String email = (kakaoAccount.get("email") != null) ? kakaoAccount.get("email").toString() : null;
-            if (email == null || email.isBlank()) {
-                email = "kakao_" + id + "@noemail.kakao"; // 가짜 이메일 생성
+
+            String nickname = (properties != null) ? (String) properties.get("nickname") : null;
+            if (nickname == null || nickname.isBlank()) {
+                nickname = "kakao_" + id;
             }
 
-            String userId = email != null && email.contains("@") ? email.split("@")[0] : "kakao_user";
-
-            boolean hasEmail = (Boolean) kakaoAccount.getOrDefault("has_email", false);
-            boolean isEmailValid = (Boolean) kakaoAccount.getOrDefault("is_email_valid", false);
-            boolean isEmailVerified = (Boolean) kakaoAccount.getOrDefault("is_email_verified", false);
-            boolean hasAgeRange = (Boolean) kakaoAccount.getOrDefault("has_age_range", false);
-            boolean hasBirthday = (Boolean) kakaoAccount.getOrDefault("has_birthday", false);
-            boolean hasGender = (Boolean) kakaoAccount.getOrDefault("has_gender", false);
+            String email = null;
+            if (kakaoAccount != null && kakaoAccount.get("email") != null) {
+                email = kakaoAccount.get("email").toString();
+            }
             if (email == null || email.isBlank()) {
-                log.error("카카오에서 이메일 정보를 받아오지 못했습니다.");
-                throw new RuntimeException("카카오에서 이메일 정보를 받아오지 못했습니다.");
+                email = "kakao_" + id + "@noemail.kakao";
             }
 
-            log.info("KAKAOSERVICE-kakaoAccount : " + kakaoAccount);
-            log.info("KAKAOSERVICE-properties : " + properties);
-
-            log.info("KAKAOSERVICE-nickname : " + nickname);
+            log.info("KAKAOSERVICE-nickname : {}, email : {}", nickname, email);
 
         } catch (Exception e) {
-            log.error(" 카카오 사용자 정보 가져오기 실패", e);
+            log.error("카카오 사용자 정보 가져오기 실패", e);
             throw new RuntimeException("카카오 사용자 정보 가져오기 실패: " + e.getMessage());
         }
         return KakaoUserInfo.fromMap(body, accessToken);

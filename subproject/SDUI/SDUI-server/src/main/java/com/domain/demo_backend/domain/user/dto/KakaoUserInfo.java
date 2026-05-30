@@ -36,13 +36,16 @@ public class KakaoUserInfo {
         String nickname = (String) properties.getOrDefault("nickname", "카카오 사용자");
         Long kakaoId = body.get("id") != null ? ((Number) body.get("id")).longValue() : null;
         String email = (String) kakaoAccount.getOrDefault("email", "");
+        if (email == null || email.isBlank()) {
+            email = "kakao_" + kakaoId + "@noemail.kakao";
+        }
         return KakaoUserInfo.builder()
                 .userId(kakaoId)
                 .password(accessToken) // accessToken을 임시 password로 저장
                 .hashedPassword(PasswordUtil.sha256(accessToken)) // 직접 구현한 유틸
                 .userId(body.get("id") != null ? ((Number) body.get("id")).longValue() : null)
                 .connectedAt((String) body.getOrDefault("connected_at", ""))
-                .email((String) kakaoAccount.getOrDefault("email", ""))
+                .email(email)
                 .hasEmail((Boolean) kakaoAccount.getOrDefault("has_email", false))
                 .isEmailValid((Boolean) kakaoAccount.getOrDefault("is_email_valid", false))
                 .isEmailVerified((Boolean) kakaoAccount.getOrDefault("is_email_verified", false))
