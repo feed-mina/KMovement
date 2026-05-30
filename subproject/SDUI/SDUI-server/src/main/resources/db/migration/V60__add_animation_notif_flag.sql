@@ -1,0 +1,1 @@
+ALTER TABLE community_animation_jobs ADD COLUMN IF NOT EXISTS notif_sent BOOLEAN DEFAULT FALSE;

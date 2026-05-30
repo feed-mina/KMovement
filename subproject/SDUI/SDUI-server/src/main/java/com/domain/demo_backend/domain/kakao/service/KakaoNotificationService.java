@@ -1,5 +1,6 @@
 package com.domain.demo_backend.domain.kakao.service;
 
+import com.domain.demo_backend.domain.community.domain.AnimationJob;
 import com.domain.demo_backend.domain.time.domain.GoalSetting;
 import com.domain.demo_backend.domain.user.domain.User;
 import com.domain.demo_backend.domain.user.service.KakaoService;
@@ -93,6 +94,56 @@ public class KakaoNotificationService {
         } catch (Exception e) {
             log.error("KakaoNotification-발송 실패. userId={}, minutesBefore={}", user.getUserId(), minutesBefore, e);
             throw new RuntimeException("카카오 알림 발송 실패", e);
+        }
+    }
+
+    public void sendAnimationComplete(User user, AnimationJob job) {
+        String text = "\uD83C\uDFAC 영상 제작이 완료되었습니다!\n결과 확인: " + job.getResultUrl();
+        sendKakaoMessage(user, text, job.getResultUrl());
+    }
+
+    public void sendAnimationFailed(User user, AnimationJob job) {
+        String text = "영상 제작이 실패했습니다. 다시 시도해주세요.";
+        sendKakaoMessage(user, text, "https://yerin.duckdns.org");
+    }
+
+    private void sendKakaoMessage(User user, String text, String linkUrl) {
+        String token = user.getKakaoAccessToken();
+        if (user.getKakaoTokenExpiresAt() != null &&
+                user.getKakaoTokenExpiresAt().isBefore(LocalDateTime.now().plusMinutes(5))) {
+            token = kakaoService.refreshKakaoToken(user);
+        }
+
+        if (token == null) {
+            log.warn("KakaoNotification-토큰 없음. userId={}", user.getUserId());
+            return;
+        }
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> messageMap = Map.of(
+                    "object_type", "text",
+                    "text", text,
+                    "link", Map.of(
+                            "web_url", linkUrl != null ? linkUrl : "https://yerin.duckdns.org",
+                            "mobile_web_url", linkUrl != null ? linkUrl : "https://yerin.duckdns.org"));
+            String templateObject = mapper.writeValueAsString(messageMap);
+
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("template_object", templateObject);
+
+            webClient.post()
+                    .uri(KAKAO_SEND_URL)
+                    .header("Authorization", "Bearer " + token)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .bodyValue(params)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            log.info("KakaoNotification-발송 성공. userId={}, text={}", user.getUserId(), text.substring(0, Math.min(text.length(), 30)));
+        } catch (Exception e) {
+            log.error("KakaoNotification-발송 실패. userId={}", user.getUserId(), e);
         }
     }
 }

@@ -38,6 +38,10 @@ public class AnimationJob {
     @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;
 
+    @Builder.Default
+    @Column(name = "notif_sent", nullable = false)
+    private boolean notifSent = false;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
