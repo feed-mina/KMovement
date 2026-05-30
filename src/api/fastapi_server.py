@@ -29,7 +29,7 @@ import networkx as nx
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 load_dotenv()
@@ -1305,3 +1305,60 @@ def chat_qa(req: ChatStreamRequest):
         print(f"[K-Ride] chat qa fallback: {exc}")
         reply = "죄송합니다. 답변 중 오류가 발생했어요. 다시 시도해주세요."
     return {"reply": reply}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RunPod Serverless Proxy — 커뮤니티 영상 생성
+# ─────────────────────────────────────────────────────────────────────────────
+RUNPOD_API_KEY = os.environ.get("RUNPOD_API_KEY", "")
+RUNPOD_ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID", "")
+
+
+class RunPodJobRequest(BaseModel):
+    route: str = Field(..., description="animated_drawings_worker, cogvideox_real, 3d_photo_inpainting_real 등")
+    case_id: str = "travel_case"
+    place: str = "Travel Place"
+    image_base64: str = ""
+    tts_text: str = "여행 영상입니다."
+    bgm_key: str = "bright_travel"
+    motion: str = "slow_zoom_in"
+    prompt: str = ""
+    allow_fallback: bool = True
+    musicgen_description: str = "calm Korean ambient music"
+    musicgen_duration: int = 15
+
+
+@app.post("/jobs/runpod")
+def runpod_proxy(request: RunPodJobRequest):
+    if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
+        return JSONResponse(
+            status_code=501,
+            content={"ok": False, "message": "RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID are required."},
+        )
+
+    headers = {"Authorization": f"Bearer {RUNPOD_API_KEY}", "Content-Type": "application/json"}
+    payload = {"input": request.model_dump()}
+    url = f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/run"
+
+    try:
+        resp = httpx.post(url, headers=headers, json=payload, timeout=30)
+        resp.raise_for_status()
+        return JSONResponse(content={"ok": True, **resp.json()})
+    except Exception as exc:
+        return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
+
+
+@app.get("/jobs/runpod/{job_id}")
+def runpod_status(job_id: str):
+    if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
+        return JSONResponse(status_code=501, content={"ok": False, "message": "RunPod not configured."})
+
+    headers = {"Authorization": f"Bearer {RUNPOD_API_KEY}"}
+    url = f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/status/{job_id}"
+
+    try:
+        resp = httpx.get(url, headers=headers, timeout=30)
+        resp.raise_for_status()
+        return JSONResponse(content={"ok": True, **resp.json()})
+    except Exception as exc:
+        return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
