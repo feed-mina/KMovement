@@ -266,6 +266,7 @@ jobs:
               --network sdui-network \
               -p 3000:3000 \
               -e HOSTNAME=0.0.0.0 \
+              -e FASTAPI_URL=__GCP_FASTAPI_URL__ \
               __FRONTEND_IMAGE__:__BRANCH_TAG__
 
             echo "Waiting for Next.js..."

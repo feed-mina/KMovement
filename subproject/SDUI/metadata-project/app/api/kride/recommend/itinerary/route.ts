@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const FASTAPI_URL = process.env.FASTAPI_URL ?? "http://yerin.duckdns.org:8000";
+const FASTAPI_URL = process.env.FASTAPI_URL ?? "http://34.64.221.240:8000";
 
 /**
  * FastAPI /api/recommend/itinerary 프록시
