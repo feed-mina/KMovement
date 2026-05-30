@@ -40,7 +40,7 @@ export default function Composer({ onSend, disabled, onAbort }: Props) {
           aria-label="음성 입력"
           style={{
             width: 34, height: 34, borderRadius: '50%', border: 'none', cursor: 'pointer',
-            background: 'transparent', color: 'rgba(255,255,255,0.62)', fontSize: 16,
+            background: 'transparent', color: 'rgba(10,10,10,0.5)', fontSize: 16,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >

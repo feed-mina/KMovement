@@ -298,6 +298,11 @@ img.kride-intro1-hero-slot {
 }
 
 #focus_itinerary {
+    position: absolute !important;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
     flex: none !important;
     background: transparent !important;
     padding: 0 !important;

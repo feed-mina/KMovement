@@ -190,7 +190,7 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
 
             {/* Floating Chat Modal for KRIDE_FOCUS */}
             {screenId === "KRIDE_FOCUS" && isChatModalOpen && (
-                <div className="fixed bottom-[90px] right-6 w-[380px] h-[600px] max-h-[75vh] z-[100] shadow-2xl rounded-2xl overflow-hidden border border-gray-700 bg-[#0A0A0A] flex flex-col">
+                <div className="fixed bottom-[90px] left-4 right-4 md:left-auto md:right-6 md:w-[380px] h-[600px] max-h-[75vh] z-[100] shadow-2xl rounded-2xl overflow-hidden border border-gray-700 bg-[#0A0A0A] flex flex-col">
                     <KrideChatComponent 
                         meta={{ labelText: 'K-RIDE 여행봇', cssClass: 'h-full w-full' }} 
                         data={{}}
