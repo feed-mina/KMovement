@@ -116,6 +116,14 @@ jobs:
 
           gcloud auth configure-docker ${GAR_REGION}-docker.pkg.dev --quiet
 
+          # 디스크 공간 확보 — 사용하지 않는 Docker 리소스 정리
+          echo "=== Disk usage before cleanup ==="
+          df -h / || true
+          docker system prune -af --filter "until=24h" || true
+          docker volume prune -f || true
+          echo "=== Disk usage after cleanup ==="
+          df -h / || true
+
           mkdir -p ~/kride && cd ~/kride
 
           cat > docker-compose.prod.yml << 'COMPOSE_EOF'
