@@ -113,18 +113,19 @@ async function streamSseChunks(
         .split('\n')
         .filter((l) => l.startsWith('data:'))
         .map((l) => l.slice(5).trim());
+      
       if (dataLines.length === 0) continue;
-      const raw = dataLines.join('\n');
 
-      if (raw === '[DONE]' || raw === '"[DONE]"') return;
+      for (const raw of dataLines) {
+        if (raw === '[DONE]' || raw === '"[DONE]"') return;
 
-      // 백엔드: emitter.send(data(Map.of("content", chunk))) → {"content":"..."}
-      try {
-        const parsed = JSON.parse(raw) as { content?: string };
-        if (parsed.content) onChunk(parsed.content);
-      } catch {
-        // JSON 파싱 실패 시 raw 자체를 텍스트로 취급 (보수적)
-        if (raw && raw !== '[DONE]') onChunk(raw);
+        try {
+          const parsed = JSON.parse(raw) as { content?: string };
+          if (parsed.content) onChunk(parsed.content);
+        } catch {
+          // JSON 파싱 실패 시 raw 자체를 텍스트로 취급 (보수적)
+          if (raw && raw !== '[DONE]') onChunk(raw);
+        }
       }
     }
   }
