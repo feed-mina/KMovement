@@ -129,7 +129,8 @@
 .page-wrap.KRIDE_INTRO2,
 .page-wrap.KRIDE_INTRO3,
 .page-wrap.KRIDE_INTRO4,
-.page-wrap.KRIDE_INTRO5 {
+.page-wrap.KRIDE_INTRO5,
+.page-wrap.KRIDE_FOCUS {
     position: relative;
     width: 100%;
     max-width: 430px;
@@ -144,7 +145,8 @@
 .page-wrap.KRIDE_INTRO2 .content-area,
 .page-wrap.KRIDE_INTRO3 .content-area,
 .page-wrap.KRIDE_INTRO4 .content-area,
-.page-wrap.KRIDE_INTRO5 .content-area {
+.page-wrap.KRIDE_INTRO5 .content-area,
+.page-wrap.KRIDE_FOCUS .content-area {
     min-height: 100dvh;
 }
 
@@ -152,7 +154,8 @@
 .group-intro2_root,
 .group-intro3_root,
 .group-intro4_root,
-.group-intro5_root {
+.group-intro5_root,
+.group-focus_root {
     position: relative;
     width: 100%;
     min-height: 100dvh;
@@ -167,11 +170,16 @@
     scrollbar-width: none; /* Firefox */
 }
 
+.group-focus_root {
+    padding: 0;
+}
+
 .group-intro1_root::-webkit-scrollbar,
 .group-intro2_root::-webkit-scrollbar,
 .group-intro3_root::-webkit-scrollbar,
 .group-intro4_root::-webkit-scrollbar,
-.group-intro5_root::-webkit-scrollbar {
+.group-intro5_root::-webkit-scrollbar,
+.group-focus_root::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
 }
 
