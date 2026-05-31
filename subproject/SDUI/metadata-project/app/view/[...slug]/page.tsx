@@ -127,6 +127,18 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
         return () => window.removeEventListener('kride-chat-update', handleChatUpdate);
     }, [setFormData]);
 
+    // AI 일정 추천 결과를 formData에 동기화하여 UI(지도 마커, 일정 리스트)에 반영
+    useEffect(() => {
+        if (krideItinerary.data) {
+            setFormData((prev: any) => ({
+                ...prev,
+                itinerary: krideItinerary.data?.itinerary,
+                markers: krideItinerary.data?.markers,
+                mapData: krideItinerary.data?.mapData
+            }));
+        }
+    }, [krideItinerary.data, setFormData]);
+
     const combineData = useMemo(() => ({
         ...pageData,
         ...krideItinerary.data,
