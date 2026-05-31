@@ -13,6 +13,11 @@ export function loadKakaoMaps(appKey: string): Promise<any> {
     return Promise.reject(new Error('Kakao Maps can only load in the browser.'));
   }
 
+  if (!appKey) {
+    return Promise.reject(new Error('Kakao Maps API 키가 설정되지 않았습니다. NEXT_PUBLIC_KAKAO_MAP_APP_KEY를 확인해주세요.'));
+  }
+
+  // 이미 로드 완료된 경우
   if (window.kakao?.maps) {
     return new Promise((resolve) => window.kakao.maps.load(() => resolve(window.kakao)));
   }
@@ -24,6 +29,7 @@ export function loadKakaoMaps(appKey: string): Promise<any> {
 
     const handleLoaded = () => {
       if (!window.kakao?.maps) {
+        kakaoMapsPromise = null; // 재시도 가능하게 초기화
         reject(new Error('Kakao Maps SDK failed to initialize.'));
         return;
       }
@@ -31,8 +37,16 @@ export function loadKakaoMaps(appKey: string): Promise<any> {
     };
 
     if (existingScript) {
+      // 스크립트가 이미 로드 완료된 경우 바로 처리
+      if (existingScript.dataset.loaded === 'true') {
+        handleLoaded();
+        return;
+      }
       existingScript.addEventListener('load', handleLoaded, { once: true });
-      existingScript.addEventListener('error', () => reject(new Error('Kakao Maps SDK failed to load.')), { once: true });
+      existingScript.addEventListener('error', () => {
+        kakaoMapsPromise = null;
+        reject(new Error('Kakao Maps SDK failed to load.'));
+      }, { once: true });
       return;
     }
 
@@ -40,8 +54,14 @@ export function loadKakaoMaps(appKey: string): Promise<any> {
     script.id = 'kakao-maps-sdk';
     script.async = true;
     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(appKey)}&autoload=false`;
-    script.onload = handleLoaded;
-    script.onerror = () => reject(new Error('Kakao Maps SDK failed to load.'));
+    script.onload = () => {
+      script.dataset.loaded = 'true';
+      handleLoaded();
+    };
+    script.onerror = () => {
+      kakaoMapsPromise = null;
+      reject(new Error('Kakao Maps SDK failed to load.'));
+    };
     document.head.appendChild(script);
   });
 
