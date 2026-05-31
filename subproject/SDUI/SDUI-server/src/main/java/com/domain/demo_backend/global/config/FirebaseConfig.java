@@ -19,10 +19,13 @@ public class FirebaseConfig {
     @PostConstruct
     public void init() {
         try {
-            // firebase-adminsdk.json 경로 (src/main/resources 아래에 배치하거나 환경 변수 사용)
-            // 배포 환경에서는 보통 환경 변수나 절대 경로로 주입받습니다.
-            // 여기서는 기본 클래스패스나 특정 디렉토리로 예시 작성 (수정 가능)
-            String path = "src/main/resources/firebase-adminsdk.json";
+            // 배포 환경(Docker)에서는 /app/firebase-adminsdk.json 에 마운트됩니다.
+            // 로컬 개발 환경에서는 src/main/resources/firebase-adminsdk.json 을 찾습니다.
+            String path = "/app/firebase-adminsdk.json";
+            java.io.File file = new java.io.File(path);
+            if (!file.exists()) {
+                path = "src/main/resources/firebase-adminsdk.json";
+            }
             
             try (FileInputStream serviceAccount = new FileInputStream(path)) {
                 FirebaseOptions options = FirebaseOptions.builder()
@@ -35,7 +38,7 @@ public class FirebaseConfig {
                 }
             }
         } catch (IOException e) {
-            log.warn("Firebase credentials not found or invalid (path: src/main/resources/firebase-adminsdk.json). FCM will not work until this is configured.");
+            log.warn("Firebase credentials not found or invalid. FCM will not work until this is configured.");
         }
     }
 }

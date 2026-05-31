@@ -116,8 +116,15 @@ jobs:
           else
             echo "{}" > /tmp/gcp-credentials.json
           fi
+
+          if [ -n "${{ secrets.FIREBASE_ADMINSDK_JSON }}" ]; then
+            echo "${{ secrets.FIREBASE_ADMINSDK_JSON }}" | base64 -d > /tmp/firebase-adminsdk.json
+          else
+            echo "{}" > /tmp/firebase-adminsdk.json
+          fi
+
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            /tmp/gcp-credentials.json ${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }}:/home/ubuntu/gcp-credentials.json
+            /tmp/gcp-credentials.json /tmp/firebase-adminsdk.json ${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }}:/home/ubuntu/
 
       # ── Create Nginx config ──
       - name: Write Host Nginx SSL config to EC2
@@ -250,6 +257,7 @@ jobs:
               -e GOOGLE_CLIENT_SECRET=__GOOGLE_CLIENT_SECRET__ \
               -e GOOGLE_REDIRECT_URI=__GOOGLE_REDIRECT_URI__ \
               -v /home/ubuntu/gcp-credentials.json:/app/gcp-credentials.json:ro \
+              -v /home/ubuntu/firebase-adminsdk.json:/app/firebase-adminsdk.json:ro \
               -v /home/ubuntu/study-materials:/app/assets/study:ro \
               __SDUI_IMAGE__:__BRANCH_TAG__
 
