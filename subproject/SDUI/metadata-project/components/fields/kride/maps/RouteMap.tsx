@@ -124,10 +124,14 @@ export default function RouteMap({ data }: Props) {
           Google
         </button>
       </div>
-      <div className="route-map__body">
-        {data.markers.length === 0 ? (
-          <div className="route-map__state">표시할 장소가 없습니다.</div>
-        ) : map}
+      <div className="route-map__body relative w-full h-full">
+        {map}
+        {data.markers.length === 0 && (
+          <div className="route-map__state absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white font-semibold z-[400] pointer-events-none rounded-b-2xl text-center px-4">
+            <span>표시할 장소가 없습니다.</span>
+            <span className="text-sm mt-2 text-gray-200">우측 하단 [AI 여행봇 채팅]을 열어<br/>일정을 생성해주세요!</span>
+          </div>
+        )}
       </div>
     </div>
   );

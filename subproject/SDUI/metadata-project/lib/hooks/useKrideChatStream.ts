@@ -235,6 +235,18 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
             itinerary: payload.itinerary,
             streaming: false,
           });
+
+          // AI가 생성한 일정을 전역 상태(페이지)로 전달하여 지도와 패널이 업데이트되도록 이벤트 발생
+          if (typeof window !== 'undefined' && (payload.itinerary || payload.pois)) {
+            window.dispatchEvent(
+              new CustomEvent('kride-chat-update', {
+                detail: {
+                  itinerary: payload.itinerary,
+                  pois: payload.pois,
+                },
+              })
+            );
+          }
         }
       } catch (e: unknown) {
         if ((e as Error)?.name === 'AbortError') {

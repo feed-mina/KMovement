@@ -97,6 +97,36 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
 
     // @@@@ 2026-02-07 추가 서버 데이터(pageData)와 사용자 입력 데이터(formData)를 합친다. 사용자 입력값이 있을 경우 formData를 우선하고 없으면 초기값을 쓴다
 
+    // AI 챗봇이 생성한 새로운 일정/장소를 지도와 패널에 실시간 반영하기 위한 이벤트 리스너
+    useEffect(() => {
+        const handleChatUpdate = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (!detail) return;
+            setFormData((prev: any) => {
+                const next = { ...prev };
+                if (detail.itinerary) next.itinerary = detail.itinerary;
+                if (detail.pois) next.pois = detail.pois;
+                
+                // 지도 컴포넌트(KrideMapView)가 markers 속성을 사용하므로 매핑
+                if (detail.pois) {
+                    next.markers = detail.pois;
+                    // mapData.markers 형태로도 접근할 수 있도록 이중 세팅 (하위 호환성)
+                    next.mapData = { ...next.mapData, markers: detail.pois, itinerary: detail.itinerary };
+                }
+                
+                // localStorage 동기화
+                try {
+                    localStorage.setItem('kride_form', JSON.stringify(next));
+                } catch {}
+                
+                return next;
+            });
+        };
+
+        window.addEventListener('kride-chat-update', handleChatUpdate);
+        return () => window.removeEventListener('kride-chat-update', handleChatUpdate);
+    }, [setFormData]);
+
     const combineData = useMemo(() => ({
         ...pageData,
         ...krideItinerary.data,
