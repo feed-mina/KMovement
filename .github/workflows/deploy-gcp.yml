@@ -238,6 +238,8 @@ jobs:
 
           docker compose -f docker-compose.prod.yml pull --ignore-pull-failures
           docker compose -f docker-compose.prod.yml down --remove-orphans || true
+          # Force remove any leftover containers from previous failed deploys
+          docker rm -f kride-fastapi-1 kride-celery-worker-1 kride-chromadb-1 kride-redis-1 2>/dev/null || true
           docker compose -f docker-compose.prod.yml up -d
 
           docker image prune -af --filter "until=24h" || true
