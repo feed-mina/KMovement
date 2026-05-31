@@ -110,30 +110,34 @@ def _generate_sketch_segment(
         tts_text=item.tts_text,
     )
 
-    try:
-        gif_path = run_animated_drawings_pipeline(case, output_dir, cfg)
-        # gif_path is actually mp4 already from gif_to_mp4 inside the pipeline
-        # We need the raw gif for overlay use, so find it
-        work_dir = output_dir / f"{case.case_id}_animated_drawings_work"
-        raw_gif = work_dir / "video.gif"
-        mp4 = output_dir / f"{case.case_id}_animated_drawings.mp4"
-        if not mp4.exists():
-            mp4 = gif_to_mp4(raw_gif, mp4) if raw_gif.exists() else gif_path
-        return mp4, raw_gif if raw_gif.exists() else None
-    except Exception:
-        # Fallback: simple zoompan for sketch too
-        out = output_dir / f"{case.case_id}_sketch_zoom.mp4"
-        run_ffmpeg([
-            "-loop", "1",
-            "-i", str(item.image_path),
-            "-vf", "zoompan=z='min(zoom+0.001,1.2)':d=100:s=512x512,format=yuv420p",
-            "-t", "4",
-            "-c:v", "libx264",
-            "-preset", "veryfast",
-            "-crf", "23",
-            str(out),
-        ])
-        return out, None
+    # Try AnimatedDrawings if available, fallback to zoompan
+    ad_available = bool(cfg.animated_drawings_dir and cfg.animated_drawings_dir.resolve().exists())
+
+    if ad_available:
+        try:
+            gif_path = run_animated_drawings_pipeline(case, output_dir, cfg)
+            work_dir = output_dir / f"{case.case_id}_animated_drawings_work"
+            raw_gif = work_dir / "video.gif"
+            mp4 = output_dir / f"{case.case_id}_animated_drawings.mp4"
+            if not mp4.exists():
+                mp4 = gif_to_mp4(raw_gif, mp4) if raw_gif.exists() else gif_path
+            return mp4, raw_gif if raw_gif.exists() else None
+        except Exception:
+            pass  # fall through to zoompan fallback
+
+    # Fallback: simple zoompan for sketch
+    out = output_dir / f"{case.case_id}_sketch_zoom.mp4"
+    run_ffmpeg([
+        "-loop", "1",
+        "-i", str(item.image_path),
+        "-vf", "zoompan=z='min(zoom+0.001,1.2)':d=100:s=512x512,format=yuv420p",
+        "-t", "4",
+        "-c:v", "libx264",
+        "-preset", "veryfast",
+        "-crf", "23",
+        str(out),
+    ])
+    return out, None
 
 
 def run_batch_video_case(
