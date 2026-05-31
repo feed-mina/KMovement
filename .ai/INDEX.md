@@ -1,6 +1,6 @@
 # K-Ride .ai 문서 마스터 인덱스
 
-> 최종 수정: 2026-05-29
+> 최종 수정: 2026-05-31
 > kride-project 루트 `.ai` 폴더의 모든 문서 위치와 역할을 안내합니다.
 > 기존 파일은 편집 없이 유지됩니다. 역할 기반 구조는 신규 생성된 하위 폴더를 참조하세요.
 
@@ -93,6 +93,7 @@
 | `cogvideo_fallback.py` | CogVideoX Fallback | Ready (FFmpeg) |
 | `three_d_photo_light.py` | 3D Photo Light | Ready (FFmpeg) |
 | `tts.py` | gTTS Fallback | Ready |
+| `batch_video_worker.py` | 다중 이미지 배치 영상 오케스트레이션 | Ready (2026-05-31) |
 
 ### Kaggle 배포
 | 파일 | 내용 |
@@ -105,7 +106,7 @@
 ### 미디어 프리뷰 서버 (`deploy/cloud_gateway/`)
 | 파일 | 내용 |
 |------|------|
-| `app.py` | Read-only FastAPI (미디어 에셋 서빙, /manifest.json, /media/{id}) |
+| `app.py` | Read-only FastAPI (미디어 에셋 서빙, /manifest.json, /media/{id}, /jobs/runpod/batch) |
 | `Dockerfile` | python:3.11-slim, 포트 7860 |
 
 ### 커뮤니티 ↔ 모델 연동 + TorchServe (2026-05-29)
@@ -120,6 +121,13 @@
 | [test_results_community_chatbot.md](test_results_community_chatbot.md) | 커뮤니티 + 챗봇 통합 테스트 결과 (Spring Boot 19 + Jest 9 + pytest 9 = 37 ALL PASSED) | 272 |
 | [code_review_0527.md](code_review_0527.md) | 프론트+백엔드+AI 모델 전체 코드 리뷰 — K1~K6, F1~F7, B1~B7 **[전체 수정 완료 2026-05-29]** | — |
 | [issues_0529.md](issues_0529.md) | 미해결 이슈 — 구글 캘린더 OAuth + BTS 광화문 점검 (G1~G6) | — |
+| [issues_0530.md](issues_0530.md) | 카카오 로그인 리다이렉트 + 챗봇 SSE 400 + 챗봇 일정 500 (GCP 재배포) | — |
+
+### AI 파이프라인 개선 (2026-05-30)
+| 파일 | 내용 |
+|------|------|
+| [llm_graphrag_route_optimization_0530.md](llm_graphrag_route_optimization_0530.md) | LLM 프롬프트 개선 + 동선 최적화 + GraphRAG 확장 + UI reason 필드 |
+| [css_artist_images_guide.md](css_artist_images_guide.md) | CSS nth-child 기반 아티스트 이미지 강제 적용 가이드 |
 
 ### 환경/설정 문서
 | 파일 | 내용 | 줄수 |

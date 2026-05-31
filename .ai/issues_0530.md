@@ -1,0 +1,443 @@
+# 이슈 및 수정 — 2026-05-30
+
+## 범위
+카카오 로그인 리다이렉트 문제 + KRIDE 챗봇 SSE 400 에러
+
+---
+
+## 1. 카카오 로그인 후 `sdui-delta.vercel.app`으로 리다이렉트되는 문제
+
+### 현상
+- `https://yerin.duckdns.org/`에서 카카오 로그인 성공 후 `https://sdui-delta.vercel.app/view/MAIN_PAGE`로 이동
+- 카카오 개발자 콘솔 설정 문제로 추정했으나, 실제 원인은 백엔드 환경변수
+
+### 원인
+`KakaoController.java:211`에서 로그인 완료 후 `webUrl`로 302 리다이렉트:
+```java
+redirectHeaders.setLocation(URI.create(webUrl));  // webUrl = WEB_URL 환경변수
+```
+
+EC2 Docker 컨테이너의 `WEB_URL` 환경변수가 `https://sdui-delta.vercel.app`으로 설정되어 있음.
+
+### 관련 파일
+| 파일 | 역할 |
+|------|------|
+| `SDUI-server/.../user/controller/KakaoController.java:44-45,211` | `@Value("${app.url.web}")` → 302 리다이렉트 |
+| `SDUI-server/src/main/resources/application-prod.yml:29` | `web: ${WEB_URL:https://yerin.duckdns.org}` (기본값 정상) |
+| `.github/workflows/deploy-ec2.yml:235-236,303-304` | GitHub Secrets `WEB_URL`, `KAKAO_REDIRECT_URI` 주입 |
+| `subproject/SDUI/.github/workflows/deploy.yml:123-124` | 하드코딩 `WEB_URL=https://yerin.duckdns.org` (정상) |
+
+### 해결 방법 (사용자 수동 조치 필요)
+1. **GitHub repo Settings → Secrets** → `WEB_URL` 값을 `https://yerin.duckdns.org`로 변경
+2. **GitHub repo Settings → Secrets** → `KAKAO_REDIRECT_URI` 값을 `https://yerin.duckdns.org/api/kakao/callback`로 변경
+3. 백엔드 재배포 (`Deploy K-Ride services to EC2` 워크플로우 실행)
+4. **카카오 개발자 콘솔**: Redirect URI에 `https://yerin.duckdns.org/api/kakao/callback` 등록 확인 (구 `sdui-delta.vercel.app` URI 제거)
+
+### 상태: ⏳ 사용자 조치 대기
+
+---
+
+## 2. KRIDE 챗봇 SSE 400 에러 — `credentials: 'include'` 누락 [수정 완료]
+
+### 현상
+- 로그인 성공 후 (카카오/일반 로그인 모두) KRIDE 챗봇에서 메시지 전송 시:
+  ```
+  SSE failed: 400
+  죄송합니다. 답변 중 오류가 발생했어요. 다시 시도해주세요.
+  ```
+
+### 원인
+`SecurityConfig.java:118`에서 KRIDE 챗봇 엔드포인트는 인증 필수:
+```java
+.requestMatchers("/api/v1/kride/chat/**").authenticated()
+```
+
+그런데 `useKrideChatStream.ts`의 fetch 호출에 `credentials: 'include'`가 누락 → JWT 쿠키 미전송 → 백엔드 403 Forbidden.
+
+다른 SSE 훅(`useSSEStream.ts:21`, `useSSEStreamV2.ts:28`)은 모두 `credentials: 'include'` 사용 중이었으나,
+`useKrideChatStream.ts`만 누락.
+
+### 수정 내용
+**파일**: `metadata-project/lib/hooks/useKrideChatStream.ts`
+
+#### 변경 1 — SSE 스트리밍 fetch (line 83~91)
+```diff
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'text/event-stream',
+    },
++   credentials: 'include',
+    body: JSON.stringify(body),
+    signal,
+  });
+```
+
+#### 변경 2 — 일반 POST fetch (line 214~219)
+```diff
+  const res = await fetch(`${base}/api/v1/kride/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
++   credentials: 'include',
+    body: JSON.stringify(req),
+    signal: controller.signal,
+  });
+```
+
+### 검증
+- GCP FastAPI (`http://34.64.221.240:8000`) 직접 호출 → 정상 (stream, qa 모두 200)
+- Spring Boot 프로덕션 (`https://yerin.duckdns.org/api/v1/kride/chat/stream`) → 쿠키 없이 403 확인
+- `credentials: 'include'` 추가 후 JWT 쿠키 전송으로 인증 통과 예상
+
+### 상태: ✅ 수정 완료 — 배포 필요
+
+---
+
+## 3. KRIDE 챗봇 일정 생성 500 에러 — GCP FastAPI 구버전 배포 [해결]
+
+### 현상
+Focus 페이지 챗봇에서 일정 관련 메시지("강남 데이트 코스 짜줘") 전송 시:
+```
+HTTP 500
+{"status":"error","message":"서버 오류가 발생했습니다","error":"InternalError"}
+```
+
+### payload 예시
+```json
+{
+  "message": "강남 데이트 코스 짜줘",
+  "intent": "itinerary",
+  "artists": ["EXO","BTS","BLACKPINK","NewJeans","ENHYPEN"],
+  "regions": ["경주","인천"],
+  "purposes": ["food"],
+  "duration": 3,
+  "budget": {"min":30000,"max":1530000}
+}
+```
+
+### 에러 흐름
+```
+프론트 useKrideChatStream (intent: "itinerary")
+  → POST /api/v1/kride/chat
+  → Spring Boot KrideChatService.handleItinerary()
+  → FastApiChatClient.generateItinerary()
+  → GCP FastAPI POST /api/recommend/itinerary
+  → 400 Bad Request (엔드포인트 미존재)
+  → Spring Boot 500 InternalError로 전파
+```
+
+### 원인
+GCP FastAPI 서버(`34.64.221.240:8000`)가 구버전 코드를 실행 중.
+`/api/recommend/itinerary`, `/api/chat/qa`, `/api/chat/stream` 등 챗봇 관련 엔드포인트가 **등록되지 않은 상태**.
+
+기존 엔드포인트(6개)만 존재: `/api/health`, `/api/recommend`, `/api/route`, `/api/course`, `/api/facilities`, `/api/pois`
+
+### 해결
+`gh workflow run deploy-gcp.yml --ref main`으로 수동 재배포:
+- Docker 이미지 재빌드 + GCP VM에 pull & 컨테이너 재생성
+- Run: https://github.com/feed-mina/KMovement/actions/runs/26676868243
+- 배포 후 13개 엔드포인트 모두 등록 확인
+- `/api/recommend/itinerary` 테스트 → reason 필드 포함 일정 JSON 정상 반환
+
+### 상태: ✅ 해결 완료 (GCP 재배포)
+
+---
+
+## 4. KRIDE 챗봇 recommend intent 500 에러 — budget 타입 불일치 [수정 완료]
+
+### 현상
+Focus 페이지 챗봇에서 추천 관련 메시지 전송 시 (intent: "recommend"):
+```
+POST https://yerin.duckdns.org/api/v1/kride/chat 500 (Internal Server Error)
+{"status":"error","message":"서버 오류가 발생했습니다","error":"InternalError"}
+```
+
+### 원인
+프론트엔드가 `budget`을 **객체** 형태로 전송:
+```json
+{"budget": {"min": 30000, "max": 1030000}}
+```
+
+그러나 Spring Boot `ChatQueryRequest.java`에서 `budget` 필드가 `List<Integer>`로 선언:
+```java
+private List<Integer> budget;  // ← JSON 객체를 List로 역직렬화 불가
+```
+
+Jackson이 `{"min":30000,"max":1030000}` 객체를 `List<Integer>`로 변환할 수 없어 역직렬화 실패 → 컨트롤러 진입 전 500 에러.
+
+추가로 `FastApiChatClient`가 `budget_min`/`budget_max` 별도 필드로 전송했으나, FastAPI의 `BudgetSchema`는 `budget: {min, max}` 중첩 객체를 기대.
+
+### 수정 내용
+
+**파일 1**: `ChatQueryRequest.java`
+```diff
+- private List<Integer> budget;
++ private Map<String, Integer> budget;
+```
+
+**파일 2**: `FastApiChatClient.java` — `recommendAi()`, `generateItinerary()` 모두
+```diff
+- List<Integer> budget
++ Map<String, Integer> budget
+
+- body.put("budget_min", budget.get(0));
+- body.put("budget_max", budget.get(1));
++ body.put("budget", budget);
+```
+
+### 상태: ✅ 수정 완료 — 백엔드 재배포 필요
+
+---
+
+## 우선순위 정리
+
+| # | 이슈 | 상태 | 조치 |
+|---|------|------|------|
+| 1 | 카카오 로그인 → sdui-delta 리다이렉트 | ⏳ | GitHub Secrets 변경 + 재배포 |
+| 2 | KRIDE 챗봇 SSE 400 | ✅ | `credentials: 'include'` 추가 — 배포 필요 |
+| 3 | KRIDE 챗봇 일정 생성 500 | ✅ | GCP FastAPI 수동 재배포로 해결 |
+| 4 | KRIDE 챗봇 recommend 500 | ✅ | budget 타입 `List<Integer>` → `Map<String, Integer>` — 백엔드 재배포 필요 |
+
+---
+
+---
+
+## 5. goalTime 500 에러 — `null` 직렬화 NPE [수정 완료]
+
+### 원인
+`GoalTimeController.java`에서 `result.put("goalTime", null)` → Kotlin Serialization `StringSerializer`가 null 처리 불가 → NPE
+
+### 수정
+`null` → `""` (빈 문자열)로 변경 (line 43, 53)
+
+### 상태: ✅ 수정 완료
+
+---
+
+## 6. AnimationController 400 에러 — 작업 없는 게시글 [수정 완료]
+
+### 현상
+커뮤니티 글 작성/낙서 저장 후 상세페이지 진입 시 400 에러 + "애니메이션 작업을 찾을 수 없습니다"
+
+### 원인
+`AnimationService.getAnimationStatus()`가 해당 게시글에 animation job이 없으면 `IllegalArgumentException` throw
+
+### 수정
+`AnimationController.getAnimationStatus()`에 try-catch 추가, 예외 시 `{ status: "NONE", jobId: 0 }` 반환
+
+### 상태: ✅ 수정 완료
+
+---
+
+## 7. "영상 만들기" 버튼 미표시 — NONE 상태 미처리 [수정 완료]
+
+### 현상
+AnimationController 수정 후 `{ status: "NONE" }` 반환 → 기존 조건 `(!animStatus || animStatus.status === 'FAILED')`에 해당하지 않아 버튼 숨김
+
+### 수정
+`CommunityPage.tsx` line 946: `animStatus.status === 'NONE'` 조건 추가
+
+### 상태: ✅ 수정 완료
+
+---
+
+## 8. 카카오 로그인 NPE — properties/kakao_account null [수정 완료]
+
+### 현상
+카카오 로그인 시 500 에러. 카카오 API가 동의항목 미설정 시 `properties`/`kakao_account` 없이 반환
+
+### 수정
+- `KakaoService.getKakaoUserInfo()`: `properties != null` null guard 추가
+- `KakaoUserInfo.fromMap()`: email 빈 값 시 `"kakao_" + kakaoId + "@noemail.kakao"` fallback
+
+### 상태: ✅ 수정 완료
+
+---
+
+## 9. 챗봇 SSE 이중 래핑 — raw JSON 표시 [수정 완료]
+
+### 현상
+Focus 페이지 챗봇에서 메시지 전송 시 `{"content":"안"}{"content":"녕"}` 식으로 raw JSON 표시
+
+### 원인
+FastAPI가 `{"content":"안"}` 전송 → Spring `KrideChatService.streamChat()`이 `Map.of("content", chunk)`로 재래핑 → 프론트 파서가 이중 JSON 파싱 실패
+
+### 수정
+`emitter.send(SseEmitter.event().data(chunk))` — `Map.of("content", ...)` 래핑 제거
+
+### 상태: ✅ 수정 완료
+
+---
+
+## 10. deploy-ec2.yml 변경 감지 실패 — fetch-depth [수정 완료]
+
+### 원인
+`actions/checkout@v4` 기본 `fetch-depth: 1` → shallow clone → `git diff HEAD~1` 실패 → `DEPLOY_BACKEND=false`
+
+### 수정
+`fetch-depth: 2` 추가
+
+### 상태: ✅ 수정 완료
+
+---
+
+## 11. RunPod 연결 — FastAPI 프록시 엔드포인트 부재 [수정 완료]
+
+### 현상
+`AnimationService`가 `POST /jobs/runpod`으로 호출하지만 GCP FastAPI(`src/api/fastapi_server.py`)에 해당 엔드포인트 미존재. `deploy/cloud_gateway/app.py`에만 구현되어 있었음.
+
+### 수정
+`src/api/fastapi_server.py` 끝부분에 RunPod 프록시 라우트 추가:
+- `POST /jobs/runpod` — RunPod Serverless에 작업 제출
+- `GET /jobs/runpod/{job_id}` — 작업 상태 조회
+- `JSONResponse` import 추가
+
+### 상태: ✅ 수정 완료 — RunPod `IN_QUEUE` 응답 확인
+
+---
+
+## 12. deploy-gcp.yml RunPod 환경변수 미주입 [수정 완료]
+
+### 현상
+GCP FastAPI 컨테이너에 `RUNPOD_API_KEY`, `RUNPOD_ENDPOINT_ID` 미주입 → `/jobs/runpod` 호출 시 501
+
+### 수정
+`deploy-gcp.yml`에 추가:
+1. `env:` 섹션에 `RUNPOD_API_KEY`, `RUNPOD_ENDPOINT_ID` GitHub Secrets 참조
+2. docker-compose fastapi environment에 변수 추가
+3. `.env` 파일에 값 추가
+4. `sed` 치환 추가
+5. 배포 전 디스크 정리 (`docker system prune -af --filter "until=24h"`) 추가
+
+### 상태: ✅ 수정 완료
+
+---
+
+## 13. GCP VM 디스크 100% 사용 [해결]
+
+### 현상
+69GB 디스크가 100% 사용 → 배포 실패 (`No space left on device`)
+
+### 수정
+- `docker system prune -af` → 13.63GB 확보
+- `deploy-gcp.yml`에 자동 정리 스크립트 추가 (매 배포 전 실행)
+
+### 상태: ✅ 해결
+
+---
+
+## 14. 카카오톡 알림 기능 신규 구현 [완료]
+
+### 구현 파일
+| 파일 | 역할 |
+|------|------|
+| `AnimationJobPollingScheduler.java` (신규) | 60초 폴링, QUEUED/RUNNING job 상태 확인, 완료/실패 시 카카오톡 알림 |
+| `V60__add_animation_notif_flag.sql` (신규) | `community_animation_jobs.notif_sent` 컬럼 추가 |
+| `AnimationJob.java` | `notifSent` boolean 필드 추가 |
+| `AnimationJobRepository.java` | `findByStatusInAndNotifSentFalse()` 쿼리 추가 |
+| `KakaoNotificationService.java` | `sendAnimationComplete()`, `sendAnimationFailed()`, `sendKakaoMessage()` 메서드 추가 |
+
+### 동작 흐름
+```
+@Scheduled(fixedDelay = 60000)
+  → QUEUED/RUNNING job에서 notifSent=false 조회
+  → RunPod 상태 API 호출
+  → COMPLETED → resultUrl 저장 + 카카오톡 나에게 보내기 API
+  → FAILED → errorMessage 저장 + 실패 알림
+  → notifSent = true (중복 방지)
+```
+
+### 상태: ✅ 구현 완료 — 실제 카카오톡 발송은 RunPod 워커 처리 완료 후 테스트 필요
+
+---
+
+## 우선순위 정리 (업데이트)
+
+| # | 이슈 | 상태 | 조치 |
+|---|------|------|------|
+| 1 | 카카오 로그인 → sdui-delta 리다이렉트 | ✅ 해결 | GitHub Secrets WEB_URL 변경 |
+| 2 | KRIDE 챗봇 SSE 400 | ✅ | `credentials: 'include'` 추가 |
+| 3 | KRIDE 챗봇 일정 생성 500 | ✅ | GCP FastAPI 재배포 |
+| 4 | KRIDE 챗봇 recommend 500 | ✅ | budget 타입 수정 |
+| 5 | goalTime 500 | ✅ | null → "" |
+| 6 | AnimationController 400 | ✅ | NONE 상태 반환 |
+| 7 | 영상 만들기 버튼 미표시 | ✅ | NONE 조건 추가 |
+| 8 | 카카오 로그인 NPE | ✅ | null guard |
+| 9 | 챗봇 SSE raw JSON | ✅ | 이중 래핑 제거 |
+| 10 | deploy-ec2.yml 감지 실패 | ✅ | fetch-depth: 2 |
+| 11 | RunPod 프록시 미존재 | ✅ | fastapi_server.py에 병합 |
+| 12 | deploy-gcp.yml RunPod 미주입 | ✅ | 환경변수 주입 추가 |
+| 13 | GCP 디스크 부족 | ✅ | prune + 자동 정리 |
+| 14 | 카카오톡 알림 | ✅ | 신규 구현 |
+
+---
+
+---
+
+## 15. 다중 이미지 배치 영상 생성 파이프라인 [구현 완료]
+
+### 개요
+커뮤니티 게시글의 다중 이미지(최대 10장)를 하나의 영상으로 합성하는 전체 파이프라인 신규 구현.
+- 이미지별 TTS 나레이션 + BGM + 순차 연결
+- 사진/낙서 자동 분류 (색상 수 기반 휴리스틱)
+- 사진+낙서 혼합 시 GIF 오버레이 합성
+
+### 변경 파일 (12개)
+
+**Phase 1 — RunPod 워커:**
+- `deploy/media_motion/ffmpeg_utils.py` — `concat_videos`, `overlay_gif_on_video`, `mix_video_tts`, `apply_bgm_to_video` 4개 함수 추가
+- `deploy/media_motion/schemas.py` — `BatchImageItem`, `BatchTravelCase` 데이터클래스
+- `deploy/media_motion/batch_video_worker.py` — **신규** 배치 오케스트레이션
+- `deploy/media_motion/runpod_handler.py` — `batch_video` 라우트 + images[] 파싱
+
+**Phase 2 — API 게이트웨이:**
+- `deploy/cloud_gateway/app.py` — `POST /jobs/runpod/batch`
+- `src/api/fastapi_server.py` — `POST /jobs/runpod/batch` 미러
+
+**Phase 3 — Spring Boot:**
+- `V62__animation_batch_columns.sql` — total_images, processed_images, route 컬럼
+- `AnimationJob.java` — 3개 필드 추가
+- `AnimationService.java` — `submitBatchAnimation()` + ALLOWED_ROUTES에 batch_video
+- `AnimationController.java` — `POST /batch` 엔드포인트
+
+**Phase 4 — 프론트엔드:**
+- `communityService.ts` — `BatchImageInput`, `submitBatchAnimation()`
+- `CommunityPage.tsx` — "전체 이미지 영상 만들기" 버튼 + TTS/타입 설정 모달
+
+### 향후 확장
+- 이미지 캡셔닝 (BLIP-2): 이미지→텍스트 자동 생성 → TTS + MusicGen description 자동 결정
+- 현재는 사용자 직접 TTS 텍스트 입력 (비워두면 게시글 제목 사용)
+
+### 상태: ✅ 구현 완료 — 배포 필요 (RunPod 이미지 재빌드 + GCP/EC2 재배포)
+
+---
+
+## 우선순위 정리 (최종 업데이트)
+
+| # | 이슈 | 상태 | 조치 |
+|---|------|------|------|
+| 1 | 카카오 로그인 → sdui-delta 리다이렉트 | ✅ 해결 | GitHub Secrets WEB_URL 변경 |
+| 2 | KRIDE 챗봇 SSE 400 | ✅ | `credentials: 'include'` 추가 |
+| 3 | KRIDE 챗봇 일정 생성 500 | ✅ | GCP FastAPI 재배포 |
+| 4 | KRIDE 챗봇 recommend 500 | ✅ | budget 타입 수정 |
+| 5 | goalTime 500 | ✅ | null → "" |
+| 6 | AnimationController 400 | ✅ | NONE 상태 반환 |
+| 7 | 영상 만들기 버튼 미표시 | ✅ | NONE 조건 추가 |
+| 8 | 카카오 로그인 NPE | ✅ | null guard |
+| 9 | 챗봇 SSE raw JSON | ✅ | 이중 래핑 제거 |
+| 10 | deploy-ec2.yml 감지 실패 | ✅ | fetch-depth: 2 |
+| 11 | RunPod 프록시 미존재 | ✅ | fastapi_server.py에 병합 |
+| 12 | deploy-gcp.yml RunPod 미주입 | ✅ | 환경변수 주입 추가 |
+| 13 | GCP 디스크 부족 | ✅ | prune + 자동 정리 |
+| 14 | 카카오톡 알림 | ✅ | 신규 구현 |
+| 15 | 다중 이미지 배치 영상 | ✅ | 12파일 신규/수정, 배포 필요 |
+
+---
+
+## 참조 문서
+- `.ai/issues_0529.md` — 이전 미해결 이슈 (구글 캘린더 + BTS 광화문)
+- `.ai/code_review_0527.md` — K5 (Security 인증 설정) 관련
+- `.ai/llm_graphrag_route_optimization_0530.md` — LLM + GraphRAG + 동선 최적화 구현 및 배포 상세
+- `subproject/SDUI/.ai/maintenance/kakao_login_error_history.md` — 카카오 로그인 디버깅 이력
+- `.ai/github_secrets_checklist.md` — GitHub Secrets 전체 목록 및 상태
