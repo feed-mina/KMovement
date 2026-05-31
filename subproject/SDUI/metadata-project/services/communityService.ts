@@ -57,6 +57,19 @@ export interface AnimationStatusResponse {
     errorMessage: string;
 }
 
+export interface BatchImageInput {
+    imageBase64: string;
+    ttsText: string;
+    imageType: 'photo' | 'sketch' | 'auto';
+}
+
+export interface BatchAnimationResponse {
+    jobId: number;
+    runpodJobId: string;
+    status: string;
+    totalImages: number;
+}
+
 export const communityService = {
     async createPost(data: PostCreateRequest, images?: File[]) {
         const formData = new FormData();
@@ -130,5 +143,23 @@ export const communityService = {
     async getAnimationStatus(postId: number) {
         const res = await api.get(`${BASE}/posts/${postId}/animate/status`);
         return res.data.data as AnimationStatusResponse;
+    },
+
+    async submitBatchAnimation(
+        postId: number,
+        images: BatchImageInput[],
+        bgmKey = 'bright_travel',
+        photoRoute = '3d_photo_light',
+    ) {
+        const res = await api.post(`${BASE}/posts/${postId}/animate/batch`, {
+            images: images.map((img) => ({
+                image_base64: img.imageBase64,
+                tts_text: img.ttsText,
+                image_type: img.imageType,
+            })),
+            bgmKey,
+            photoRoute,
+        });
+        return res.data.data as BatchAnimationResponse;
     },
 };

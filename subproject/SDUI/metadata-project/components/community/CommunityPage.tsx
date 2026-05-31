@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
     AnimationStatusResponse,
+    BatchImageInput,
     communityService,
     PostImageDto,
     PostListResponse,
@@ -656,6 +657,10 @@ function CommunityDetail({ postId }: { postId: number }) {
     const [animStatus, setAnimStatus] = useState<AnimationStatusResponse | null>(null);
     const [animSubmitting, setAnimSubmitting] = useState(false);
     const [animRouteModal, setAnimRouteModal] = useState(false);
+    const [batchModal, setBatchModal] = useState(false);
+    const [batchTtsTexts, setBatchTtsTexts] = useState<string[]>([]);
+    const [batchImageTypes, setBatchImageTypes] = useState<('photo' | 'sketch' | 'auto')[]>([]);
+    const [batchSubmitting, setBatchSubmitting] = useState(false);
     const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const isOwner = Boolean(user?.userSqno && post?.authorSqno && user.userSqno === post.authorSqno);
 
@@ -776,6 +781,56 @@ function CommunityDetail({ postId }: { postId: number }) {
             alert('영상 생성 요청에 실패했습니다.');
         } finally {
             setAnimSubmitting(false);
+        }
+    };
+
+    const openBatchModal = () => {
+        if (!post?.images?.length || post.images.length < 2) {
+            alert('배치 영상 생성에는 이미지가 2장 이상 필요합니다.');
+            return;
+        }
+        setBatchTtsTexts(post.images.map(() => ''));
+        setBatchImageTypes(post.images.map(() => 'auto'));
+        setBatchModal(true);
+    };
+
+    const submitBatchAnimation = async () => {
+        if (!post?.images?.length) return;
+        setBatchSubmitting(true);
+        try {
+            const batchImages: BatchImageInput[] = [];
+            for (let i = 0; i < post.images.length; i++) {
+                const img = post.images[i];
+                const res = await fetch(img.storageUrl);
+                const blob = await res.blob();
+                const base64 = await new Promise<string>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const result = reader.result as string;
+                        resolve(result.split(',')[1] || '');
+                    };
+                    reader.readAsDataURL(blob);
+                });
+                batchImages.push({
+                    imageBase64: base64,
+                    ttsText: batchTtsTexts[i] || post.title || '',
+                    imageType: batchImageTypes[i] || 'auto',
+                });
+            }
+
+            const result = await communityService.submitBatchAnimation(postId, batchImages);
+            setAnimStatus({
+                jobId: result.jobId,
+                status: result.status,
+                resultUrl: '',
+                errorMessage: '',
+            });
+            setBatchModal(false);
+            startAnimPolling();
+        } catch {
+            alert('배치 영상 생성 요청에 실패했습니다.');
+        } finally {
+            setBatchSubmitting(false);
         }
     };
 
@@ -944,14 +999,26 @@ function CommunityDetail({ postId }: { postId: number }) {
                         </p>
                     )}
                     {isOwner && (!animStatus || animStatus.status === 'FAILED' || animStatus.status === 'NONE') && (
-                        <button
-                            className="community-primary-btn"
-                            type="button"
-                            disabled={animSubmitting}
-                            onClick={() => setAnimRouteModal(true)}
-                        >
-                            {animSubmitting ? '요청 중...' : '영상 만들기'}
-                        </button>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <button
+                                className="community-primary-btn"
+                                type="button"
+                                disabled={animSubmitting}
+                                onClick={() => setAnimRouteModal(true)}
+                            >
+                                {animSubmitting ? '요청 중...' : '영상 만들기'}
+                            </button>
+                            {post?.images && post.images.length >= 2 && (
+                                <button
+                                    className="community-primary-btn"
+                                    type="button"
+                                    disabled={batchSubmitting}
+                                    onClick={openBatchModal}
+                                >
+                                    {batchSubmitting ? '요청 중...' : '전체 이미지 영상 만들기'}
+                                </button>
+                            )}
+                        </div>
                     )}
 
                     {animRouteModal && (
@@ -989,6 +1056,65 @@ function CommunityDetail({ postId }: { postId: number }) {
                                     >
                                         3D 사진 영상
                                         <br /><small>첨부 사진 → 3D 깊이 카메라 효과</small>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {batchModal && post?.images && (
+                        <div className="community-sketch-backdrop" role="dialog" aria-modal="true" aria-label="배치 영상 설정">
+                            <div className="community-sketch-panel" style={{ maxWidth: 560 }}>
+                                <div className="community-sketch-header">
+                                    <h2>전체 이미지 영상 만들기</h2>
+                                    <button className="community-secondary-btn" type="button" onClick={() => setBatchModal(false)}>
+                                        닫기
+                                    </button>
+                                </div>
+                                <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                    <p style={{ color: '#c8ccd5', fontSize: 14 }}>
+                                        각 이미지에 들어갈 나레이션 텍스트를 입력하세요. 비워두면 게시글 제목이 사용됩니다.
+                                    </p>
+                                    {post.images.map((img, idx) => (
+                                        <div key={imageKey(img)} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                                            <img
+                                                src={img.storageUrl}
+                                                alt={img.originalName || `이미지 ${idx + 1}`}
+                                                style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 6 }}
+                                            />
+                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                <input
+                                                    className="community-input"
+                                                    placeholder={`이미지 ${idx + 1} 나레이션 (선택)`}
+                                                    value={batchTtsTexts[idx] || ''}
+                                                    onChange={(e) => {
+                                                        const next = [...batchTtsTexts];
+                                                        next[idx] = e.target.value;
+                                                        setBatchTtsTexts(next);
+                                                    }}
+                                                />
+                                                <select
+                                                    className="community-input"
+                                                    value={batchImageTypes[idx] || 'auto'}
+                                                    onChange={(e) => {
+                                                        const next = [...batchImageTypes];
+                                                        next[idx] = e.target.value as 'photo' | 'sketch' | 'auto';
+                                                        setBatchImageTypes(next);
+                                                    }}
+                                                >
+                                                    <option value="auto">자동 감지</option>
+                                                    <option value="photo">사진</option>
+                                                    <option value="sketch">낙서/스케치</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button
+                                        className="community-primary-btn"
+                                        type="button"
+                                        disabled={batchSubmitting}
+                                        onClick={submitBatchAnimation}
+                                    >
+                                        {batchSubmitting ? '요청 중...' : `${post.images.length}장 영상 생성하기`}
                                     </button>
                                 </div>
                             </div>
