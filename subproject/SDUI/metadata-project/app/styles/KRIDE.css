@@ -30,7 +30,28 @@
     bottom: 1.5rem;
     right: 1.5rem;
     z-index: 50;
-    min-width: 6rem;
+    min-width: 7.5rem;
+    padding: 0.875rem 1.5rem;
+    background: linear-gradient(135deg, #E50914, #8B0610);
+    color: #ffffff !important;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 9999px;
+    box-shadow: 0 8px 24px rgba(229, 9, 20, 0.4);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.kride-next-btn-br:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(229, 9, 20, 0.5);
+}
+.kride-next-btn-br:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 16px rgba(229, 9, 20, 0.4);
 }
 
 /* ── 지역 그리드 (4열, KRIDE_INTRO3) ── */
@@ -92,9 +113,10 @@
     font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
     font-size: 0.875rem;
     line-height: 1.55;
-    color: rgba(255, 255, 255, 0.62);
+    color: rgba(255, 255, 255, 0.62) !important;
+    background-color: transparent !important;
     word-break: keep-all;
-    margin: 0.625rem 0 0;
+    margin: 1rem 0 2.5rem;
 }
 
 /* ── intro1 buttons — 하단 고정 ── */
