@@ -19,6 +19,7 @@ import type {
   KrideChatRequest,
   KrideChatResponse,
   KrideForm,
+  KrideItinerary,
 } from '@/lib/types/krideChat';
 
 const STORAGE_KEY = 'kride_form';
@@ -229,19 +230,30 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
               ? (json as { data: KrideChatResponse }).data
               : (json as KrideChatResponse);
 
+          // 백엔드 itinerary 응답 정규화:
+          // API는 { itinerary: [...days] } 형태로 반환하지만
+          // 프론트 KrideItinerary 타입은 { days: [...] } 를 기대함
+          const rawIt = payload.itinerary;
+          const normalizedItinerary = rawIt
+            ? {
+                ...rawIt,
+                days: rawIt.days ?? (rawIt as Record<string, unknown>).itinerary as KrideItinerary['days'],
+              }
+            : undefined;
+
           updateLast({
             text: payload.reply ?? payload.recommendationText ?? '',
             pois: payload.pois,
-            itinerary: payload.itinerary,
+            itinerary: normalizedItinerary,
             streaming: false,
           });
 
           // AI가 생성한 일정을 전역 상태(페이지)로 전달하여 지도와 패널이 업데이트되도록 이벤트 발생
-          if (typeof window !== 'undefined' && (payload.itinerary || payload.pois)) {
+          if (typeof window !== 'undefined' && (normalizedItinerary || payload.pois)) {
             window.dispatchEvent(
               new CustomEvent('kride-chat-update', {
                 detail: {
-                  itinerary: payload.itinerary,
+                  itinerary: normalizedItinerary,
                   pois: payload.pois,
                 },
               })
