@@ -33,6 +33,9 @@ WORKDIR /app
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ffmpeg \
+        pkg-config \
+        libavformat-dev libavcodec-dev libavdevice-dev \
+        libavutil-dev libswscale-dev libswresample-dev libavfilter-dev \
         libosmesa6 libosmesa6-dev \
         freeglut3-dev libglfw3-dev \
         libgl1-mesa-glx \
