@@ -133,7 +133,7 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
             setFormData((prev: any) => ({
                 ...prev,
                 itinerary: krideItinerary.data?.itinerary,
-                markers: krideItinerary.data?.markers,
+                markers: krideItinerary.data?.mapData?.markers,
                 mapData: krideItinerary.data?.mapData
             }));
         }
