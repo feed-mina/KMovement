@@ -4,6 +4,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import RecordTimeComponent from "@/components/fields/RecordTimeComponent";
 import {useDeviceType} from "@/hooks/useDeviceType";
 import { usePathname } from 'next/navigation';
+import FocusFooterBar from "@/components/layout/FocusFooterBar";
 
 const KRIDE_PATHS = ['/INTRO1', '/INTRO2', '/INTRO3', '/INTRO4', '/INTRO5', '/MY_LIST', '/FOCUS', '/CHAT', '/KRIDE_CHAT'];
 
@@ -12,6 +13,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     const isPc = !isMobile;
     const pathname = usePathname();
     const isKrideScreen = KRIDE_PATHS.some(p => pathname?.includes(p));
+    const isFocusScreen = pathname?.includes('/FOCUS');
 
     return (
         <div className={`app-wrapper ${deviceClass} ${isKrideScreen ? 'kride-fullscreen' : ''}`}>
@@ -28,6 +30,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <section className="page-view-container">
                     {children}
                 </section>
+                
+                {isFocusScreen && <FocusFooterBar />}
             </main>
         </div>
     );

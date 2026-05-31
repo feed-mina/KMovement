@@ -285,6 +285,11 @@ img.kride-intro1-hero-slot {
     min-width: 176px;
 }
 
+/* 푸터 바(64px)가 있는 FOCUS 화면에서는 다음(채팅) 버튼을 위로 올림 */
+.page-wrap.KRIDE_FOCUS .kride-next-btn-br {
+    bottom: calc(64px + 1.5rem);
+}
+
 .dual-range-slider {
     min-width: 0;
 }
@@ -329,7 +334,7 @@ img.kride-intro1-hero-slot {
 
 #focus_itinerary {
     position: absolute !important;
-    bottom: 0;
+    bottom: 64px !important;
     left: 0;
     right: 0;
     z-index: 50;
