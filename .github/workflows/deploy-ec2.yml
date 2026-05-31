@@ -96,6 +96,13 @@ jobs:
         run: |
           docker build \
             --build-arg NEXT_PUBLIC_BACKEND_URL=http://sdui-backend:8080 \
+            --build-arg NEXT_PUBLIC_FIREBASE_API_KEY="${{ secrets.FIREBASE_API_KEY }}" \
+            --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="${{ secrets.FIREBASE_AUTH_DOMAIN }}" \
+            --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID="${{ secrets.FIREBASE_PROJECT_ID }}" \
+            --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="${{ secrets.FIREBASE_STORAGE_BUCKET }}" \
+            --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" \
+            --build-arg NEXT_PUBLIC_FIREBASE_APP_ID="${{ secrets.FIREBASE_APP_ID }}" \
+            --build-arg NEXT_PUBLIC_FIREBASE_VAPID_KEY="${{ secrets.FIREBASE_VAPID_KEY }}" \
             -t $FRONTEND_IMAGE:${{ env.BRANCH_TAG }} \
             -t $FRONTEND_IMAGE:latest \
             ./subproject/SDUI/metadata-project
