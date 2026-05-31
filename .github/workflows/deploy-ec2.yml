@@ -256,6 +256,8 @@ jobs:
               -e GOOGLE_CLIENT_ID=__GOOGLE_CLIENT_ID__ \
               -e GOOGLE_CLIENT_SECRET=__GOOGLE_CLIENT_SECRET__ \
               -e GOOGLE_REDIRECT_URI=__GOOGLE_REDIRECT_URI__ \
+              -e SUPABASE_URL=__SUPABASE_URL__ \
+              -e SUPABASE_KEY=__SUPABASE_KEY__ \
               -v /home/ubuntu/gcp-credentials.json:/app/gcp-credentials.json:ro \
               -v /home/ubuntu/firebase-adminsdk.json:/app/firebase-adminsdk.json:ro \
               -v /home/ubuntu/study-materials:/app/assets/study:ro \
@@ -322,6 +324,8 @@ jobs:
           sed -i "s|__GOOGLE_CLIENT_ID__|${{ secrets.GOOGLE_CLIENT_ID }}|g" /tmp/deploy.sh
           sed -i "s|__GOOGLE_CLIENT_SECRET__|${{ secrets.GOOGLE_CLIENT_SECRET }}|g" /tmp/deploy.sh
           sed -i "s|__GOOGLE_REDIRECT_URI__|${{ secrets.GOOGLE_REDIRECT_URI }}|g" /tmp/deploy.sh
+          sed -i "s|__SUPABASE_URL__|${{ secrets.SUPABASE_URL }}|g" /tmp/deploy.sh
+          sed -i "s|__SUPABASE_KEY__|${{ secrets.SUPABASE_KEY }}|g" /tmp/deploy.sh
           sed -i "s|__DEPLOY_BACKEND__|${{ steps.changes.outputs.backend }}|g" /tmp/deploy.sh
           sed -i "s|__DEPLOY_FRONTEND__|${{ steps.changes.outputs.frontend }}|g" /tmp/deploy.sh
 
