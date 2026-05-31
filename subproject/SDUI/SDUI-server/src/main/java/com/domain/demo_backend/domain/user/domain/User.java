@@ -83,6 +83,9 @@ public class User {
     @Column(name = "kakao_token_expires_at")
     private LocalDateTime kakaoTokenExpiresAt;
 
+    @Column(name = "fcm_token")
+    private String fcmToken;
+
     private String roadAddress;
 
     private String detailAddress;

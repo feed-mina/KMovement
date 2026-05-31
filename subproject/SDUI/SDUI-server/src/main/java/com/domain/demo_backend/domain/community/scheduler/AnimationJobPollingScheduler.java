@@ -2,7 +2,7 @@ package com.domain.demo_backend.domain.community.scheduler;
 
 import com.domain.demo_backend.domain.community.domain.AnimationJob;
 import com.domain.demo_backend.domain.community.domain.AnimationJobRepository;
-import com.domain.demo_backend.domain.kakao.service.KakaoNotificationService;
+import com.domain.demo_backend.domain.notification.service.UnifiedNotificationService;
 import com.domain.demo_backend.domain.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import java.util.Map;
 public class AnimationJobPollingScheduler {
 
     private final AnimationJobRepository animationJobRepository;
-    private final KakaoNotificationService kakaoNotificationService;
+    private final UnifiedNotificationService unifiedNotificationService;
     private final Logger log = LoggerFactory.getLogger(AnimationJobPollingScheduler.class);
 
     @Value("${kride.fastapi.url:http://localhost:8000}")
@@ -94,24 +94,24 @@ public class AnimationJobPollingScheduler {
     private void sendNotification(AnimationJob job, boolean success) {
         try {
             User author = job.getPost().getAuthor();
-            if (author == null || author.getKakaoAccessToken() == null) {
-                log.debug("AnimationJobPoller-카카오 토큰 없음, 알림 skip. jobId={}", job.getId());
+            if (author == null) {
+                log.debug("AnimationJobPoller-작성자 없음, 알림 skip. jobId={}", job.getId());
                 job.setNotifSent(true);
                 animationJobRepository.save(job);
                 return;
             }
 
             if (success) {
-                kakaoNotificationService.sendAnimationComplete(author, job);
+                unifiedNotificationService.sendAnimationComplete(author, job);
             } else {
-                kakaoNotificationService.sendAnimationFailed(author, job);
+                unifiedNotificationService.sendAnimationFailed(author, job);
             }
 
             job.setNotifSent(true);
             animationJobRepository.save(job);
-            log.info("AnimationJobPoller-카카오 알림 발송 완료. jobId={}, success={}", job.getId(), success);
+            log.info("AnimationJobPoller-통합 알림 발송 완료. jobId={}, success={}", job.getId(), success);
         } catch (Exception e) {
-            log.error("AnimationJobPoller-카카오 알림 발송 실패. jobId={}", job.getId(), e);
+            log.error("AnimationJobPoller-통합 알림 발송 실패. jobId={}", job.getId(), e);
         }
     }
 }
