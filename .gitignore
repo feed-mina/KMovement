@@ -110,3 +110,4 @@ access_token
 tools/zrok/
 deploy/*.pid
 deploy/run_media_preview.cmd
+.claude/settings.local.json

@@ -220,8 +220,7 @@ jobs:
 
           # ── Backend ──
           if [ "__DEPLOY_BACKEND__" = "true" ]; then
-            docker stop __CONTAINER_NAME__ || true
-            docker rm __CONTAINER_NAME__ || true
+            docker rm -f __CONTAINER_NAME__ || true
             docker run -d --name __CONTAINER_NAME__ \
               -p __TARGET_PORT__:8080 \
               --network sdui-network \
@@ -262,8 +261,7 @@ jobs:
 
           # ── Frontend ──
           if [ "__DEPLOY_FRONTEND__" = "true" ]; then
-            docker stop sdui-frontend || true
-            docker rm sdui-frontend || true
+            docker rm -f sdui-frontend || true
             docker run -d --name sdui-frontend \
               --network sdui-network \
               -p 3000:3000 \

@@ -105,14 +105,16 @@ RUN pip install --no-cache-dir "audiocraft>=1.3,<2" || echo "WARN: audiocraft in
 RUN pip install --no-cache-dir "runpod>=1.7,<2"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Application code
+# Pre-download model weights (before COPY so layer is cached across code changes)
+# ─────────────────────────────────────────────────────────────────────────────
+RUN python -c "from diffusers import CogVideoXImageToVideoPipeline; CogVideoXImageToVideoPipeline.from_pretrained('THUDM/CogVideoX-2b')" || echo "WARN: CogVideoX pre-download failed — will download at runtime"
+RUN python -c "from audiocraft.models import MusicGen; MusicGen.get_pretrained('facebook/musicgen-small')" || echo "WARN: MusicGen pre-download failed — sine-wave fallback available"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Application code (changes here do NOT re-download models)
 # ─────────────────────────────────────────────────────────────────────────────
 COPY deploy /app/deploy
 
 RUN mkdir -p /tmp/kride_outputs /app/media
-
-# Pre-download models (optional — uncomment to bake into image for faster cold start)
-# RUN python -c "from diffusers import CogVideoXImageToVideoPipeline; CogVideoXImageToVideoPipeline.from_pretrained('THUDM/CogVideoX-2b')"
-# RUN python -c "from audiocraft.models import MusicGen; MusicGen.get_pretrained('facebook/musicgen-small')"
 
 CMD ["python", "-m", "deploy.media_motion.runpod_handler"]

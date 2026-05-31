@@ -40,7 +40,13 @@
       "Bash(npx jest:*)",
       "Bash(ls gradlew*:*)",
       "Bash(./gradlew test:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(./gradlew compileJava:*)",
+      "Bash(printf {\"\"artists\"\": [\"\"BTS\"\"], \"\"duration\"\": \"\"1day\"\", \"\"regions\"\": [\"\"Seoul\"\"], \"\"budget\"\": {\"\"min\"\": 30000, \"\"max\"\": 100000}}:*)",
+      "Bash(printf {\"\"message\"\": \"\"BTS related places\"\", \"\"intent\"\": \"\"recommend\"\", \"\"artists\"\": [\"\"BTS\"\"], \"\"duration\"\": \"\"1day\"\", \"\"region\"\": \"\"Seoul\"\", \"\"budget\"\": {\"\"min\"\": 30000, \"\"max\"\": 100000}}:*)",
+      "Bash(printf {\"\"message\"\": \"\"BTS related places\"\", \"\"artists\"\": [\"\"BTS\"\"], \"\"region\"\": \"\"Seoul\"\", \"\"budget\"\": {\"\"min\"\": 30000, \"\"max\"\": 100000}}:*)",
+      "Bash(find:*)",
+      "Bash(./gradlew build:*)"
     ]
   }
 }
