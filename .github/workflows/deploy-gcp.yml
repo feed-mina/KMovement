@@ -237,6 +237,7 @@ jobs:
           ENV_EOF
 
           docker compose -f docker-compose.prod.yml pull --ignore-pull-failures
+          docker compose -f docker-compose.prod.yml down --remove-orphans || true
           docker compose -f docker-compose.prod.yml up -d
 
           docker image prune -af --filter "until=24h" || true
