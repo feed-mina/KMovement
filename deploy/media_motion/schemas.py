@@ -20,6 +20,27 @@ class TravelCase:
 
 
 @dataclass(slots=True)
+class BatchImageItem:
+    """Individual image in a batch video request."""
+
+    index: int
+    image_path: Path
+    tts_text: str
+    image_type: str = "auto"  # "photo", "sketch", or "auto"
+
+
+@dataclass(slots=True)
+class BatchTravelCase:
+    """Batch video generation request with multiple images."""
+
+    case_id: str
+    place: str
+    items: list[BatchImageItem]
+    bgm_key: str = "bright_travel"
+    photo_route: str = "3d_photo_light"  # "cogvideox_real", "3d_photo_light", etc.
+
+
+@dataclass(slots=True)
 class Artifact:
     """Generated artifact metadata."""
 

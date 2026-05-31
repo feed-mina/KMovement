@@ -37,11 +37,12 @@ from pathlib import Path
 import runpod
 
 from .animated_drawings_worker import run_animated_drawings_worker_case
+from .batch_video_worker import run_batch_video_case
 from .bgm import ensure_fallback_bgm
 from .cogvideo_fallback import run_cogvideo_fallback_case
 from .cogvideox_real import run_cogvideox_real_case
 from .gpt_sovits_worker import run_gpt_sovits_tts_case
-from .schemas import TravelCase
+from .schemas import BatchImageItem, BatchTravelCase, TravelCase
 from .three_d_photo_light import run_3d_photo_light_case
 from .three_d_photo_real import run_3d_photo_inpainting_real_case
 from .worker_config import load_worker_config
@@ -54,6 +55,7 @@ SUPPORTED_ROUTES = {
     "gpt_sovits_tts",
     "musicgen",
     "animated_drawings_worker",
+    "batch_video",
 }
 
 OUTPUT_DIR = Path(os.environ.get("KRIDE_WORKER_OUTPUT_DIR", "/tmp/kride_outputs"))
@@ -198,6 +200,38 @@ def handler(job: dict) -> dict:
                 output_root=work_dir,
                 cfg=cfg,
             )
+            return _encode_artifacts(result.to_dict())
+
+        # Batch video route — multiple images
+        if route == "batch_video":
+            images_raw = job_input.get("images", [])
+            if not images_raw or not isinstance(images_raw, list):
+                return {"error": "images[] array is required for batch_video route"}
+
+            items: list[BatchImageItem] = []
+            for idx, img_data in enumerate(images_raw[:10]):
+                img_b64 = img_data.get("image_base64", "")
+                if not img_b64:
+                    continue
+                img_path = _decode_image(img_b64, f"{job_input.get('case_id', 'batch')}_img{idx}", work_dir)
+                items.append(BatchImageItem(
+                    index=idx,
+                    image_path=img_path,
+                    tts_text=img_data.get("tts_text", ""),
+                    image_type=img_data.get("image_type", "auto"),
+                ))
+
+            if not items:
+                return {"error": "No valid images found in images[] array"}
+
+            batch_case = BatchTravelCase(
+                case_id=job_input.get("case_id", "batch"),
+                place=job_input.get("place", "Community Post"),
+                items=items,
+                bgm_key=job_input.get("bgm_key", "bright_travel"),
+                photo_route=job_input.get("photo_route", "3d_photo_light"),
+            )
+            result = run_batch_video_case(batch_case, work_dir, cfg)
             return _encode_artifacts(result.to_dict())
 
         # Video routes need an image

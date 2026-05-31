@@ -345,6 +345,56 @@ def runpod_status(job_id: str) -> JSONResponse:
         return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
 
 
+class BatchImageInput(BaseModel):
+    """Single image in a batch video request."""
+    image_base64: str
+    tts_text: str = ""
+    image_type: str = "auto"  # "photo", "sketch", or "auto"
+
+
+class RunPodBatchJobRequest(BaseModel):
+    """RunPod batch video proxy request."""
+    case_id: str = "batch_case"
+    place: str = "Community Post"
+    images: list[BatchImageInput] = Field(..., min_length=1, max_length=10)
+    bgm_key: str = "bright_travel"
+    photo_route: str = "3d_photo_light"
+    allow_fallback: bool = True
+
+
+@app.post("/jobs/runpod/batch")
+def runpod_batch_proxy(request: RunPodBatchJobRequest) -> JSONResponse:
+    """Proxy batch video job to RunPod Serverless endpoint."""
+    if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
+        return JSONResponse(
+            status_code=501,
+            content={"ok": False, "message": "RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID are required."},
+        )
+
+    import httpx
+
+    payload = {
+        "input": {
+            "route": "batch_video",
+            "case_id": request.case_id,
+            "place": request.place,
+            "images": [img.model_dump() for img in request.images],
+            "bgm_key": request.bgm_key,
+            "photo_route": request.photo_route,
+            "allow_fallback": request.allow_fallback,
+        }
+    }
+    headers = {"Authorization": f"Bearer {RUNPOD_API_KEY}", "Content-Type": "application/json"}
+    url = f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/run"
+
+    try:
+        resp = httpx.post(url, headers=headers, json=payload, timeout=30)
+        resp.raise_for_status()
+        return JSONResponse(content={"ok": True, **resp.json()})
+    except Exception as exc:
+        return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
+
+
 @app.post("/jobs/generate")
 def generate_job(request: GenerateJobRequest) -> JSONResponse:
     # STEP 6. Optional cloud worker endpoint.

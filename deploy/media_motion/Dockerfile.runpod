@@ -1,7 +1,12 @@
 # RunPod Serverless GPU Image for K-Ride Media Motion
-# Models: CogVideoX, MusicGen, gTTS, FFmpeg fallbacks
+# Models: AnimatedDrawings (conda py3.8), CogVideoX, MusicGen, gTTS, FFmpeg fallbacks
 #
-# Build:
+# AnimatedDrawings requires Python 3.8 + torch 1.13 + mmcv/mmdet/mmpose
+# while CogVideoX/MusicGen need Python 3.11 + torch 2.4.
+# Solution: Miniconda creates an isolated py3.8 env for AnimatedDrawings,
+# the main py3.11 handles everything else.
+#
+# Build (no GPU needed):
 #   docker build -f deploy/media_motion/Dockerfile.runpod -t kride-media-gpu .
 #
 # Local test:
@@ -15,16 +20,77 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     KRIDE_WORKER_OUTPUT_DIR=/tmp/kride_outputs \
     KRIDE_WORKER_ALLOW_FALLBACK=true \
     KRIDE_COGVIDEOX_CPU_OFFLOAD=true \
-    MUSICGEN_MODEL=facebook/musicgen-small
+    MUSICGEN_MODEL=facebook/musicgen-small \
+    KRIDE_ANIMATED_DRAWINGS_DIR=/app/AnimatedDrawings \
+    KRIDE_ANIMATED_DRAWINGS_PYTHON=/opt/miniconda/envs/ad_env/bin/python \
+    PYOPENGL_PLATFORM=osmesa
 
 WORKDIR /app
 
-# System dependencies
+# ─────────────────────────────────────────────────────────────────────────────
+# System dependencies (ffmpeg + OSMesa for headless OpenGL + freeglut for AD)
+# ─────────────────────────────────────────────────────────────────────────────
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg && \
+    apt-get install -y --no-install-recommends \
+        ffmpeg \
+        libosmesa6 libosmesa6-dev \
+        freeglut3-dev libglfw3-dev \
+        libgl1-mesa-glx \
+        libglib2.0-0 \
+        git curl wget && \
     rm -rf /var/lib/apt/lists/*
 
-# Python dependencies — base
+# ─────────────────────────────────────────────────────────────────────────────
+# AnimatedDrawings — isolated Python 3.8 conda environment
+# (matches Kaggle/Colab tested setup from track_b_requirements_notes.md)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Install Miniconda
+RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-py38_23.11.0-2-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -b -p /opt/miniconda && \
+    rm /tmp/miniconda.sh
+
+# Create py3.8 environment for AnimatedDrawings
+RUN /opt/miniconda/bin/conda create -n ad_env python=3.8 -y && \
+    /opt/miniconda/bin/conda clean -afy
+
+# Clone AnimatedDrawings
+RUN git clone --depth 1 https://github.com/facebookresearch/AnimatedDrawings.git /app/AnimatedDrawings
+
+# Patch annotations_to_animation.py to enable USE_MESA for headless rendering
+RUN cd /app/AnimatedDrawings && \
+    sed -i "s/'controller': {/'view': {'USE_MESA': True},\n        'controller': {/" \
+        examples/annotations_to_animation.py || true
+
+# Install AnimatedDrawings dependencies in conda env (tested versions from Kaggle)
+ENV AD_PIP=/opt/miniconda/envs/ad_env/bin/pip
+RUN ${AD_PIP} install --upgrade pip "setuptools==65.5.0" wheel six --quiet && \
+    ${AD_PIP} install chumpy --no-build-isolation --quiet && \
+    ${AD_PIP} install \
+        "torch==1.13.1+cu116" \
+        "torchvision==0.14.1+cu116" \
+        "torchaudio==0.13.1" \
+        --extra-index-url https://download.pytorch.org/whl/cu116 --quiet && \
+    ${AD_PIP} install \
+        "mmcv-full==1.7.0" \
+        -f https://download.openmmlab.com/mmcv/dist/cu116/torch1.13.0/index.html --quiet && \
+    ${AD_PIP} install "mmdet==2.28.2" "mmpose==0.28.1" --quiet && \
+    ${AD_PIP} install \
+        scikit-image scikit-learn \
+        "PyOpenGL==3.1.7" PyOpenGL-accelerate \
+        imageio imageio-ffmpeg shapely \
+        pillow pyyaml requests tqdm matplotlib \
+        opencv-python-headless --quiet
+
+# Install AnimatedDrawings package itself in the conda env
+RUN cd /app/AnimatedDrawings && \
+    ${AD_PIP} install --no-cache-dir -e . --quiet
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Main Python 3.11 env — CogVideoX, MusicGen, gTTS, RunPod handler
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Python dependencies — base (gTTS, soundfile)
 COPY deploy/media_motion/requirements.txt /tmp/req-base.txt
 RUN pip install --no-cache-dir -r /tmp/req-base.txt
 
@@ -38,7 +104,9 @@ RUN pip install --no-cache-dir "audiocraft>=1.3,<2" || echo "WARN: audiocraft in
 # RunPod SDK
 RUN pip install --no-cache-dir "runpod>=1.7,<2"
 
-# Copy application code
+# ─────────────────────────────────────────────────────────────────────────────
+# Application code
+# ─────────────────────────────────────────────────────────────────────────────
 COPY deploy /app/deploy
 
 RUN mkdir -p /tmp/kride_outputs /app/media
