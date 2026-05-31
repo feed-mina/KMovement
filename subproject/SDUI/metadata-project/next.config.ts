@@ -77,10 +77,10 @@ const nextConfig: NextConfig = {
                         value: [
                             "default-src 'self'",
                             "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://t1.daumcdn.net https://t1.daumcdn.net https://dapi.kakao.com https://t1.kakaocdn.net https://k.kakaocdn.net https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com https://vercel.live https://*.vercel.app https://va.vercel-scripts.com",
-                            "style-src 'self' 'unsafe-inline'",
+                            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                             "img-src 'self' data: blob: https: http://k.kakaocdn.net https://*.daumcdn.net https://*.kakao.com https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com",
                             `connect-src ${Array.from(new Set(connectSrc)).join(' ')}`,
-                            "font-src 'self' data:",
+                            "font-src 'self' data: https://fonts.gstatic.com",
                             "media-src 'self' blob:",
                             "frame-src http://postcode.map.daum.net https://postcode.map.daum.net http://postcode.map.kakao.com https://postcode.map.kakao.com",
                             "object-src 'none'",
