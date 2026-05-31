@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,7 +23,8 @@ public class AnimationService {
     private static final Set<String> ALLOWED_ROUTES = Set.of(
             "animated_drawings_worker",
             "cogvideox_real",
-            "3d_photo_inpainting_real"
+            "3d_photo_inpainting_real",
+            "batch_video"
     );
 
     private final AnimationJobRepository animationJobRepository;
@@ -79,6 +81,51 @@ public class AnimationService {
                 .post(post)
                 .runpodJobId(runpodJobId)
                 .status("QUEUED")
+                .build();
+
+        return animationJobRepository.save(job);
+    }
+
+    @Transactional
+    public AnimationJob submitBatchAnimation(Long postId, List<Map<String, String>> images, String bgmKey, String photoRoute) {
+        CommunityPost post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("case_id", "community_batch_" + postId);
+        payload.put("place", "Community Post");
+        payload.put("images", images);
+        payload.put("bgm_key", bgmKey != null ? bgmKey : "bright_travel");
+        payload.put("photo_route", photoRoute != null ? photoRoute : "3d_photo_light");
+        payload.put("allow_fallback", true);
+
+        Map<String, Object> response;
+        try {
+            response = gatewayClient.post()
+                    .uri("/jobs/runpod/batch")
+                    .bodyValue(payload)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                    .block();
+        } catch (Exception e) {
+            log.error("RunPod 배치 제출 실패: {}", e.getMessage());
+            AnimationJob job = AnimationJob.builder()
+                    .post(post)
+                    .status("FAILED")
+                    .route("batch_video")
+                    .totalImages(images.size())
+                    .errorMessage("RunPod 배치 제출 실패: " + e.getMessage())
+                    .build();
+            return animationJobRepository.save(job);
+        }
+
+        String runpodJobId = response != null ? String.valueOf(response.get("id")) : null;
+        AnimationJob job = AnimationJob.builder()
+                .post(post)
+                .runpodJobId(runpodJobId)
+                .status("QUEUED")
+                .route("batch_video")
+                .totalImages(images.size())
                 .build();
 
         return animationJobRepository.save(job);

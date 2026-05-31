@@ -38,6 +38,16 @@ public class AnimationJob {
     @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;
 
+    @Column(name = "total_images")
+    private Integer totalImages;
+
+    @Builder.Default
+    @Column(name = "processed_images")
+    private Integer processedImages = 0;
+
+    @Column(name = "route", length = 50)
+    private String route;
+
     @Builder.Default
     @Column(name = "notif_sent", nullable = false)
     private boolean notifSent = false;

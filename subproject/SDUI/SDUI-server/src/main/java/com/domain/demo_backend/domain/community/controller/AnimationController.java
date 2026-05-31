@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -39,6 +40,36 @@ public class AnimationController {
                 "status", job.getStatus()
         );
         return ResponseEntity.ok(ApiResponse.success("애니메이션 생성이 요청되었습니다.", result));
+    }
+
+    @Operation(summary = "배치 영상 생성 요청 (다중 이미지)")
+    @PostMapping("/batch")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> submitBatchAnimation(
+            @PathVariable("postId") Long postId,
+            @RequestBody Map<String, Object> body) {
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> images = (List<Map<String, String>>) body.get("images");
+        if (images == null || images.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("images 배열은 필수입니다."));
+        }
+        if (images.size() > 10) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("이미지는 최대 10장까지 가능합니다."));
+        }
+
+        String bgmKey = body.getOrDefault("bgmKey", "bright_travel").toString();
+        String photoRoute = body.getOrDefault("photoRoute", "3d_photo_light").toString();
+
+        AnimationJob job = animationService.submitBatchAnimation(postId, images, bgmKey, photoRoute);
+        Map<String, Object> result = Map.of(
+                "jobId", job.getId(),
+                "runpodJobId", job.getRunpodJobId() != null ? job.getRunpodJobId() : "",
+                "status", job.getStatus(),
+                "totalImages", job.getTotalImages() != null ? job.getTotalImages() : 0
+        );
+        return ResponseEntity.ok(ApiResponse.success("배치 영상 생성이 요청되었습니다.", result));
     }
 
     @Operation(summary = "애니메이션 상태 조회")
