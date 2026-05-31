@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface CommunityPostRepository extends JpaRepository<CommunityPost, Long> {
 
-    @EntityGraph(attributePaths = {"author"})
+    @EntityGraph(attributePaths = {"author", "images"})
     Page<CommunityPost> findByDelYnOrderByCreatedAtDesc(String delYn, Pageable pageable);
 
     @EntityGraph(attributePaths = {"author", "images"})

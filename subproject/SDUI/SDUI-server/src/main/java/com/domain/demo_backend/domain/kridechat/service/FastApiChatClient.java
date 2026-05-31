@@ -25,8 +25,9 @@ public class FastApiChatClient {
     }
 
     public Mono<Map<String, Object>> recommendAi(
-            List<String> artists, List<String> regions, List<String> purposes, Map<String, Integer> budget) {
+            String message, List<String> artists, List<String> regions, List<String> purposes, Map<String, Integer> budget) {
         java.util.Map<String, Object> body = new java.util.HashMap<>();
+        body.put("message", message != null ? message : "");
         body.put("artists", artists != null ? artists : List.of());
         body.put("regions", regions != null ? regions : List.of());
         body.put("purposes", purposes != null ? purposes : List.of());
@@ -42,8 +43,9 @@ public class FastApiChatClient {
     }
 
     public Mono<Map<String, Object>> generateItinerary(
-            List<String> artists, List<String> regions, List<String> purposes, int duration, Map<String, Integer> budget) {
+            String message, List<String> artists, List<String> regions, List<String> purposes, int duration, Map<String, Integer> budget) {
         java.util.Map<String, Object> body = new java.util.HashMap<>();
+        body.put("message", message != null ? message : "");
         body.put("artists", artists != null ? artists : List.of());
         body.put("regions", regions != null ? regions : List.of());
         body.put("purposes", purposes != null ? purposes : List.of());

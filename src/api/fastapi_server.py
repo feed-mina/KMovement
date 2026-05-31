@@ -833,17 +833,43 @@ class BudgetSchema(BaseModel):
     max: int = 2000000
 
 class RecommendAIRequest(BaseModel):
+    message:  str = ""
     artists:  list[str] = Field(default_factory=list)
     regions:  list[str] = Field(default_factory=list)
     purposes: list[str] = Field(default_factory=list)
     budget:   BudgetSchema = Field(default_factory=BudgetSchema)
 
 class ItineraryRequest(BaseModel):
+    message:  str = ""
     duration: str | int = "당일치기"   # 당일치기 | 1박2일 | 2박3일
     artists:  list[str] = Field(default_factory=list)
     regions:  list[str] = Field(default_factory=list)
     purposes: list[str] = Field(default_factory=list)
     budget:   BudgetSchema = Field(default_factory=BudgetSchema)
+
+# 채팅 메시지에서 지역명/목적 키워드 추출
+_KNOWN_REGIONS = [
+    "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+    "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주",
+    "전주", "경주", "여수", "속초", "강릉", "춘천", "수원", "성남",
+    "고양", "용인", "창원", "포항", "김해", "안동", "목포", "순천",
+    "통영", "거제", "남해", "하동", "담양", "보성", "완도", "해남",
+]
+_KNOWN_PURPOSES = [
+    "맛집", "관광지", "촬영지", "카페", "숙소", "호텔", "게스트하우스",
+    "자연", "힐링", "액티비티", "문화", "역사", "쇼핑", "야경",
+    "데이트", "가족", "혼자", "친구",
+]
+
+def _extract_from_message(message: str, regions: list[str], purposes: list[str]):
+    """채팅 메시지에서 지역/목적 키워드를 추출하여 기존 폼 데이터에 병합"""
+    if not message:
+        return regions, purposes
+    msg_regions = [r for r in _KNOWN_REGIONS if r in message]
+    msg_purposes = [p for p in _KNOWN_PURPOSES if p in message]
+    merged_regions = list(dict.fromkeys(msg_regions + regions))
+    merged_purposes = list(dict.fromkeys(msg_purposes + purposes))
+    return merged_regions, merged_purposes
 
 class ChatStreamRequest(BaseModel):
     message: str = ""
@@ -958,7 +984,11 @@ def recommend_ai(req: RecommendAIRequest):
     if not HAS_AI:
         raise HTTPException(status_code=503, detail="AI 모듈 미설치")
 
-    # 1. Neo4j — 아��스트 촬영지 POI
+    # 0. 메시지에서 지역/목적 추출하여 폼 데이터 보강
+    regions, purposes = _extract_from_message(req.message, req.regions, req.purposes)
+    print(f"[K-Ride] recommend/ai message='{req.message}' regions={regions} purposes={purposes}")
+
+    # 1. Neo4j — 아티스트 촬영지 POI
     neo4j_pois = []
     if req.artists:
         search_names = list(set(
@@ -971,8 +1001,8 @@ def recommend_ai(req: RecommendAIRequest):
 
     # 2. ChromaDB — 목적 기반 유사 POI
     chroma_pois = []
-    if req.purposes:
-        query_text = " ".join(req.purposes + req.regions)
+    if purposes:
+        query_text = " ".join(purposes + regions)
         try:
             chroma_pois = search_pois_by_purpose(req.purposes, query_text, top_k=5)
         except Exception:
@@ -1015,7 +1045,7 @@ def recommend_ai(req: RecommendAIRequest):
     if pois:
         try:
             rec_text = generate_recommendation_text(
-                pois, req.artists, req.regions, req.purposes
+                pois, req.artists, regions, purposes
             )
         except Exception as e:
             rec_text = f"추천 텍스트 생성 실패: {e}"
@@ -1039,7 +1069,11 @@ async def recommend_itinerary(req: ItineraryRequest):
     if not HAS_AI:
         raise HTTPException(status_code=503, detail="AI 모듈 미설치")
 
-    # 0. 아티스트 이름 변환 (영문 → 한글, Neo4j는 한글명으로 저장)
+    # 0. 메시지에서 지역/목적 추출하여 폼 데이터 보강
+    regions, purposes = _extract_from_message(req.message, req.regions, req.purposes)
+    print(f"[K-Ride] itinerary message='{req.message}' regions={regions} purposes={purposes}")
+
+    # 0.5 아티스트 이름 변환 (영문 → 한글, Neo4j는 한글명으로 저장)
     resolved_artists = []
     for a in req.artists:
         resolved = ARTIST_NAME_MAP.get(a, a)
@@ -1060,20 +1094,20 @@ async def recommend_itinerary(req: ItineraryRequest):
 
     # 2. Neo4j — 지역 POI
     region_pois = []
-    if req.regions:
+    if regions:
         try:
-            region_pois = get_region_pois(req.regions, limit=10)
-            print(f"[K-Ride] region_pois: {len(region_pois)}건 (regions={req.regions})")
+            region_pois = get_region_pois(regions, limit=10)
+            print(f"[K-Ride] region_pois: {len(region_pois)}건 (regions={regions})")
         except Exception as e:
             print(f"[K-Ride] ❌ Neo4j region_pois 실패: {e}")
 
     # 3. ChromaDB — 목적 기반 POI
     chroma_pois = []
-    if req.purposes:
-        query_text = " ".join(req.purposes + req.regions)
+    if purposes:
+        query_text = " ".join(purposes + regions)
         try:
-            chroma_pois = search_pois_by_purpose(req.purposes, query_text, top_k=5)
-            print(f"[K-Ride] chroma_pois: {len(chroma_pois)}건 (purposes={req.purposes})")
+            chroma_pois = search_pois_by_purpose(purposes, query_text, top_k=5)
+            print(f"[K-Ride] chroma_pois: {len(chroma_pois)}건 (purposes={purposes})")
         except Exception as e:
             print(f"[K-Ride] ❌ ChromaDB 실패: {e}")
 
@@ -1103,10 +1137,10 @@ async def recommend_itinerary(req: ItineraryRequest):
 
     # 4. 앙상블 랭킹 또는 단순 합산
     # 지역 필터링 (선택한 지역이 있을 경우 다른 지역 POI 배제)
-    if req.regions:
-        artist_pois = [p for p in artist_pois if any(r in (p.get("address") or p.get("sido") or "") for r in req.regions)]
-        chroma_pois = [p for p in chroma_pois if any(r in (p.get("address") or p.get("sido") or "") for r in req.regions)]
-        graphrag_pois = [p for p in graphrag_pois if any(r in (p.get("address") or p.get("sido") or "") for r in req.regions)]
+    if regions:
+        artist_pois = [p for p in artist_pois if any(r in (p.get("address") or p.get("sido") or "") for r in regions)]
+        chroma_pois = [p for p in chroma_pois if any(r in (p.get("address") or p.get("sido") or "") for r in regions)]
+        graphrag_pois = [p for p in graphrag_pois if any(r in (p.get("address") or p.get("sido") or "") for r in regions)]
 
     neo4j_pois = artist_pois + region_pois
     all_source_pois = neo4j_pois + chroma_pois + graphrag_pois
@@ -1116,8 +1150,8 @@ async def recommend_itinerary(req: ItineraryRequest):
                 neo4j_pois=neo4j_pois + graphrag_pois,
                 chroma_pois=chroma_pois,
                 artists=req.artists,
-                regions=req.regions,
-                purposes=req.purposes,
+                regions=regions,
+                purposes=purposes,
                 budget=req.budget.dict(),
                 top_k=dynamic_top_k,
             )
@@ -1162,12 +1196,12 @@ async def recommend_itinerary(req: ItineraryRequest):
                         fallback_poi_ids.append(edge["source"])
 
             # 지역 기반 POI 조회
-            if req.regions and not fallback_poi_ids:
+            if regions and not fallback_poi_ids:
                 poi_resp = sb.table("nodes").select("id, metadata").like("id", "poi_%").limit(200).execute()
                 for row in (poi_resp.data or []):
                     meta = row.get("metadata") or {}
                     addr = meta.get("address", "")
-                    if any(r in addr for r in req.regions):
+                    if any(r in addr for r in regions):
                         fallback_poi_ids.append(row["id"])
 
             # POI 상세 조회
@@ -1198,13 +1232,13 @@ async def recommend_itinerary(req: ItineraryRequest):
         itinerary_result = generate_itinerary(
             duration=req.duration,
             artists=req.artists,
-            regions=req.regions,
-            purposes=req.purposes,
+            regions=regions,
+            purposes=purposes,
             budget=req.budget.dict(),
             pois=all_pois,
         )
     except TypeError:
-        theme = req.purposes[0] if req.purposes else ""
+        theme = purposes[0] if purposes else ""
         itinerary_result = generate_itinerary(all_pois, req.duration, theme)
     except Exception as e:
         print(f"[K-Ride] itinerary fallback: {e}")

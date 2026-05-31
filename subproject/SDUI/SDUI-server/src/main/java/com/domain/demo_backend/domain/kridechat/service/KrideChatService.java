@@ -79,7 +79,7 @@ public class KrideChatService {
     private ChatQueryResponse handleRecommend(ChatQueryRequest request) {
         try {
             Map<String, Object> result = fastApiClient.recommendAi(
-                    request.getArtists(), request.getRegions(), request.getPurposes(),
+                    request.getMessage(), request.getArtists(), request.getRegions(), request.getPurposes(),
                     request.getBudget()
             ).block();
 
@@ -107,7 +107,7 @@ public class KrideChatService {
         try {
             int duration = request.getDuration() != null ? request.getDuration() : 2;
             Map<String, Object> result = fastApiClient.generateItinerary(
-                    request.getArtists(), request.getRegions(), request.getPurposes(), duration,
+                    request.getMessage(), request.getArtists(), request.getRegions(), request.getPurposes(), duration,
                     request.getBudget()
             ).block();
 
