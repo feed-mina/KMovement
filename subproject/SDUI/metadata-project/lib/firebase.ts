@@ -1,55 +1,105 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+import {
+  initializeApp,
+  getApps,
+  getApp,
+  type FirebaseApp,
+  type FirebaseOptions,
+} from "firebase/app";
 import { getMessaging, getToken, onMessage, isSupported } from "firebase/messaging";
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+const fallbackFirebaseConfig: FirebaseOptions = {
+  apiKey: "AIzaSyB3P8KTUQ6CTziP0cmnyH64TCcD4N-rLI8",
+  authDomain: "krider-8186e.firebaseapp.com",
+  projectId: "krider-8186e",
+  storageBucket: "krider-8186e.firebasestorage.app",
+  messagingSenderId: "455700419792",
+  appId: "1:455700419792:web:42d756588879e5133abad5",
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const firebaseConfig: FirebaseOptions = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || fallbackFirebaseConfig.apiKey,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || fallbackFirebaseConfig.authDomain,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || fallbackFirebaseConfig.projectId,
+  storageBucket:
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || fallbackFirebaseConfig.storageBucket,
+  messagingSenderId:
+    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
+    fallbackFirebaseConfig.messagingSenderId,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || fallbackFirebaseConfig.appId,
+};
+
+const requiredConfigKeys = [
+  "apiKey",
+  "authDomain",
+  "projectId",
+  "messagingSenderId",
+  "appId",
+] as const;
+
+const missingConfigKeys = requiredConfigKeys.filter((key) => !firebaseConfig[key]);
+
+const getFirebaseApp = (): FirebaseApp | null => {
+  if (missingConfigKeys.length > 0) {
+    console.warn(
+      `Firebase messaging disabled. Missing config values: ${missingConfigKeys.join(", ")}`
+    );
+    return null;
+  }
+
+  return !getApps().length ? initializeApp(firebaseConfig) : getApp();
+};
+
+const app = getFirebaseApp();
 
 export const requestForToken = async () => {
   try {
     const supported = await isSupported();
     if (!supported) {
-      console.warn("이 브라우저는 알림을 지원하지 않습니다.");
+      console.warn("This browser does not support Firebase messaging.");
+      return null;
+    }
+
+    if (!app) {
       return null;
     }
 
     const messaging = getMessaging(app);
+    const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
     const currentToken = await getToken(messaging, {
-      vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+      ...(vapidKey ? { vapidKey } : {}),
     });
 
     if (currentToken) {
-      console.log("현재 토큰: ", currentToken);
-      // 서버로 토큰 전송 (추후 구현)
+      console.log("Current FCM token: ", currentToken);
       return currentToken;
-    } else {
-      console.log("권한이 거부되었거나 토큰을 가져올 수 없습니다.");
-      return null;
     }
+
+    console.log("No registration token available. Permission may be denied.");
+    return null;
   } catch (err) {
-    console.error("토큰을 가져오는 중 오류 발생: ", err);
+    console.error("An error occurred while retrieving the FCM token: ", err);
     return null;
   }
 };
 
 export const onMessageListener = () =>
-  new Promise((resolve) => {
-    isSupported().then((supported) => {
-      if (supported) {
+  new Promise((resolve, reject) => {
+    isSupported()
+      .then((supported: boolean) => {
+        if (!supported) {
+          reject(new Error("This browser does not support Firebase messaging."));
+          return;
+        }
+
+        if (!app) {
+          reject(new Error("Firebase messaging is not configured."));
+          return;
+        }
+
         const messaging = getMessaging(app);
-        onMessage(messaging, (payload) => {
-          resolve(payload);
-        });
-      }
-    });
+        onMessage(messaging, resolve);
+      })
+      .catch(reject);
   });
 
 export { app };
