@@ -435,6 +435,95 @@ GCP FastAPI 컨테이너에 `RUNPOD_API_KEY`, `RUNPOD_ENDPOINT_ID` 미주입 →
 
 ---
 
+## 16. 챗봇 일정 카드 "0일 · 0 스팟" 렌더링 버그 [수정 완료]
+
+### 현상
+챗봇에서 일정 생성 시 ItineraryCard에 "0일 추천 일정 / 0일 · 0 스팟"으로 표시, 실제 일정 내용 미렌더링
+
+### 원인
+API 응답 구조와 프론트엔드 타입 불일치:
+- 백엔드: `{ itinerary: { itinerary: [{day:1, morning:...}], mapData:..., source_pois:... } }`
+- 프론트 `KrideItinerary` 타입: `{ days?: KrideDayPlan[] }` ← `days` 필드 기대
+- `itinerary.days`가 `undefined` → `days.length === 0` → "0일 · 0 스팟"
+
+### 수정
+**파일**: `metadata-project/lib/hooks/useKrideChatStream.ts`
+- `KrideItinerary` import 추가
+- 응답 파싱 시 `rawIt.itinerary` → `normalizedItinerary.days`로 매핑
+- `kride-chat-update` 이벤트에도 정규화된 itinerary 전달
+
+### 상태: ✅ 수정 완료 — 프론트 재배포 필요
+
+---
+
+## 17. "강남 데이트 코스"에 에버랜드/고양시 추천되는 문제 [수정 완료]
+
+### 현상
+"강남 데이트 코스 짜줘" 입력 시 에버랜드(용인), 정와한옥마을(고양) 등 강남과 무관한 장소 추천
+
+### 원인
+`fastapi_server.py`의 `_KNOWN_REGIONS`에 "강남"이 없음 → 메시지에서 지역 추출 실패 → 폼의 `["서울", "경기"]`로 너무 넓게 필터링
+
+### 수정
+**파일**: `src/api/fastapi_server.py`
+`_KNOWN_REGIONS`에 서울 구/동 단위 22개 추가:
+```python
+"강남", "서초", "송파", "마포", "홍대", "이태원", "용산", "종로",
+"성수", "잠실", "여의도", "강서", "영등포", "동대문", "명동",
+"강북", "노원", "은평", "관악", "광진", "성동", "중구",
+```
+
+### 상태: ✅ 수정 완료 — GCP FastAPI 재배포 필요
+
+---
+
+## 18. RunPod Dockerfile pip install 빌드 실패 [수정 완료]
+
+### 현상
+`Dockerfile.runpod` 빌드 시 단일 RUN 레이어에서 pip install 실패. `--quiet` 플래그로 에러 원인 불명확.
+
+### 원인 후보
+1. `mmcv-full==1.7.0` 프리빌트 휠 URL 제거 (OpenMMLab deprecated)
+2. `chumpy` 빌드 실패 (Python 3.8 + 최신 setuptools)
+3. `PyOpenGL-accelerate` 컴파일 실패
+
+### 수정
+**파일**: `deploy/media_motion/Dockerfile.runpod`
+- 단일 RUN → 7개 레이어로 분리 (실패 지점 특정 + Docker 캐시 활용)
+- `--quiet` 제거 (에러 메시지 노출)
+- `chumpy` fallback: PyPI 실패 시 GitHub 소스 설치
+- `mmcv-full` fallback: 프리빌트 휠 없으면 소스 빌드
+- `PyOpenGL-accelerate` 선택적: 컴파일 실패해도 빌드 계속
+
+### 상태: ✅ 수정 완료 — RunPod 이미지 재빌드 필요
+
+---
+
+## 우선순위 정리 (최종 업데이트 2026-05-31 #2)
+
+| # | 이슈 | 상태 | 조치 |
+|---|------|------|------|
+| 1 | 카카오 로그인 → sdui-delta 리다이렉트 | ✅ 해결 | GitHub Secrets WEB_URL 변경 |
+| 2 | KRIDE 챗봇 SSE 400 | ✅ | `credentials: 'include'` 추가 |
+| 3 | KRIDE 챗봇 일정 생성 500 | ✅ | GCP FastAPI 재배포 |
+| 4 | KRIDE 챗봇 recommend 500 | ✅ | budget 타입 수정 |
+| 5 | goalTime 500 | ✅ | null → "" |
+| 6 | AnimationController 400 | ✅ | NONE 상태 반환 |
+| 7 | 영상 만들기 버튼 미표시 | ✅ | NONE 조건 추가 |
+| 8 | 카카오 로그인 NPE | ✅ | null guard |
+| 9 | 챗봇 SSE raw JSON | ✅ | 이중 래핑 제거 |
+| 10 | deploy-ec2.yml 감지 실패 | ✅ | fetch-depth: 2 |
+| 11 | RunPod 프록시 미존재 | ✅ | fastapi_server.py에 병합 |
+| 12 | deploy-gcp.yml RunPod 미주입 | ✅ | 환경변수 주입 추가 |
+| 13 | GCP 디스크 부족 | ✅ | prune + 자동 정리 |
+| 14 | 카카오톡 알림 | ✅ | 신규 구현 |
+| 15 | 다중 이미지 배치 영상 | ✅ | 12파일 신규/수정, 배포 필요 |
+| 16 | 챗봇 일정 카드 "0일" 버그 | ✅ | itinerary→days 정규화 |
+| 17 | 강남 지역 필터링 누락 | ✅ | _KNOWN_REGIONS 구 단위 추가 |
+| 18 | RunPod Dockerfile 빌드 실패 | ✅ | pip 레이어 분리 + fallback |
+
+---
+
 ## 참조 문서
 - `.ai/issues_0529.md` — 이전 미해결 이슈 (구글 캘린더 + BTS 광화문)
 - `.ai/code_review_0527.md` — K5 (Security 인증 설정) 관련
