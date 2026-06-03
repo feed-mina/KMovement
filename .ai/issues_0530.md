@@ -370,6 +370,41 @@ GCP FastAPI 컨테이너에 `RUNPOD_API_KEY`, `RUNPOD_ENDPOINT_ID` 미주입 →
 | 12 | deploy-gcp.yml RunPod 미주입 | ✅ | 환경변수 주입 추가 |
 | 13 | GCP 디스크 부족 | ✅ | prune + 자동 정리 |
 | 14 | 카카오톡 알림 | ✅ | 신규 구현 |
+| 15 | 다중 이미지 배치 영상 파이프라인 | ✅ | 신규 구현 |
+| 16 | RunPod 502 Bad Gateway | ✅ | Endpoint ID + API Key + deploy 스크립트 수정 |
+
+---
+
+## 16. RunPod 502 Bad Gateway — Endpoint ID/API Key 불일치 [해결]
+
+### 현상
+`POST http://34.64.221.240:8000/jobs/runpod` → `502 Bad Gateway`
+실제 원인: RunPod API가 `404 Not Found` 반환 (`https://api.runpod.ai/v2/fi81pdhrdkc5z5/run`)
+
+### 원인 (3단계)
+1. **Endpoint ID 만료**: 기존 `fi81pdhrdkc5z5` endpoint가 RunPod에서 삭제/비활성화됨 → 404
+2. **GitHub Secret 미반영**: Secret을 `tg97vn7mggcxkp`로 업데이트했으나 GCP VM의 쉘 환경변수가 `.env`보다 우선 적용되어 이전 값 유지
+3. **API Key 불일치**: 새 endpoint에 대해 기존 API Key가 `401 Unauthorized` 반환
+
+### 수정
+1. GitHub Secret `RUNPOD_ENDPOINT_ID` → `tg97vn7mggcxkp` (CLI: `gh secret set`)
+2. GitHub Secret `RUNPOD_API_KEY` → 새 키로 업데이트
+3. `deploy-gcp.yml` 배포 스크립트에 `.env` 명시적 export 추가:
+```bash
+# .env 파일의 값을 쉘 환경에 export하여 docker-compose 변수 치환에 확실히 반영
+set -a
+source .env
+set +a
+```
+이 수정으로 GCP VM에 이전 환경변수가 남아있어도 `.env` 값이 확실히 적용됨.
+
+### 검증
+```
+$ curl -X POST http://34.64.221.240:8000/jobs/runpod -d '{"route":"3d_photo_light",...}'
+→ {"ok":true,"id":"9dde3c23-...","status":"IN_QUEUE"}  (HTTP 200)
+```
+
+### 상태: ✅ 해결 — 커밋 `c1de884b`
 
 ---
 
