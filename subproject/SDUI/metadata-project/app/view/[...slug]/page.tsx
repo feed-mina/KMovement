@@ -106,12 +106,19 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
                 const next = { ...prev };
                 if (detail.itinerary) next.itinerary = detail.itinerary;
                 if (detail.pois) next.pois = detail.pois;
+                if (detail.sourcePois) next.source_pois = detail.sourcePois;
+                const markers = detail.markers ?? detail.pois ?? detail.mapData?.markers ?? detail.itinerary?.mapData?.markers;
                 
                 // 지도 컴포넌트(KrideMapView)가 markers 속성을 사용하므로 매핑
-                if (detail.pois) {
-                    next.markers = detail.pois;
+                if (markers) {
+                    next.markers = markers;
                     // mapData.markers 형태로도 접근할 수 있도록 이중 세팅 (하위 호환성)
-                    next.mapData = { ...next.mapData, markers: detail.pois, itinerary: detail.itinerary };
+                    next.mapData = {
+                        ...next.mapData,
+                        ...detail.mapData,
+                        markers,
+                        itinerary: detail.itinerary ?? detail.mapData?.itinerary ?? next.itinerary,
+                    };
                 }
                 
                 // localStorage 동기화
