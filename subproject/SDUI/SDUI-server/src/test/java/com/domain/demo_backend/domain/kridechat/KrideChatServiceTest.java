@@ -44,7 +44,7 @@ class KrideChatServiceTest {
                 "recommendation_text", "BTS 관련 서울 추천 장소입니다.",
                 "count", 1
         );
-        when(fastApiClient.recommendAi(any(), any(), any()))
+        when(fastApiClient.recommendAi(any(), any(), any(), any(), any()))
                 .thenReturn(Mono.just(mockResult));
 
         // When
@@ -69,7 +69,7 @@ class KrideChatServiceTest {
                 "itinerary", List.of(Map.of("day", 1, "morning", Map.of())),
                 "mapData", Map.of("markers", List.of())
         );
-        when(fastApiClient.generateItinerary(any(), any(), any(), anyInt()))
+        when(fastApiClient.generateItinerary(any(), any(), any(), any(), anyInt(), any()))
                 .thenReturn(Mono.just(mockResult));
 
         ChatQueryResponse response = chatService.chat(request);
@@ -81,6 +81,7 @@ class KrideChatServiceTest {
     @Test
     @DisplayName("의도 분류 — 일반 질문은 qa 의도")
     void chat_qaIntent() {
+        when(fastApiClient.chatSync(any())).thenReturn("K-RIDE QA response");
         ChatQueryRequest request = new ChatQueryRequest();
         request.setMessage("한국 관광 가이드북 내용 알려줘");
 
@@ -103,7 +104,7 @@ class KrideChatServiceTest {
                 "recommendation_text", "추천 결과",
                 "count", 0
         );
-        when(fastApiClient.recommendAi(any(), any(), any()))
+        when(fastApiClient.recommendAi(any(), any(), any(), any(), any()))
                 .thenReturn(Mono.just(mockResult));
 
         ChatQueryResponse response = chatService.chat(request);
@@ -118,7 +119,7 @@ class KrideChatServiceTest {
         request.setMessage("맛집 추천해줘");
         request.setArtists(List.of("BTS"));
 
-        when(fastApiClient.recommendAi(any(), any(), any()))
+        when(fastApiClient.recommendAi(any(), any(), any(), any(), any()))
                 .thenReturn(Mono.error(new RuntimeException("Connection refused")));
 
         ChatQueryResponse response = chatService.chat(request);
