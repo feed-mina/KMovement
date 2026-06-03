@@ -23,6 +23,16 @@ import type {
 } from '@/lib/types/krideChat';
 
 const STORAGE_KEY = 'kride_form';
+const MESSAGE_REGION_KEYWORDS = [
+  '강남', '서초', '송파', '잠실', '홍대', '마포', '이태원', '용산', '종로',
+  '성수', '여의도', '강서', '영등포', '동대문', '명동', '강북', '노원',
+  '대학로', '광화문', '신촌', '압구정', '청담', '서울', '경기', '인천',
+  '제주', '부산', '대구', '대전', '광주', '울산', '강릉', '속초', '경주',
+];
+const MESSAGE_PURPOSE_KEYWORDS = [
+  '데이트', '맛집', '카페', '야경', '힐링', '자연', '문화', '역사', '쇼핑',
+  '촬영지', '관광지', '액티비티', '혼자', '친구', '가족',
+];
 
 /** "당일치기" → 1, "1박2일" → 2, "2박3일" → 3 */
 function durationLabelToInt(label?: string): number | undefined {
@@ -58,14 +68,49 @@ function genId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function extractMessageKeywords(message: string, keywords: string[]) {
+  return keywords.filter((keyword) => message.includes(keyword));
+}
+
+function mergeUnique<T>(primary: T[], secondary: T[]) {
+  return Array.from(new Set([...primary, ...secondary]));
+}
+
+function hasPlaces(value: any): boolean {
+  const days = Array.isArray(value?.days)
+    ? value.days
+    : Array.isArray(value?.itinerary)
+      ? value.itinerary
+      : [];
+
+  return days.some((day: any) => (
+    (day?.morning?.places?.length ?? 0) > 0 ||
+    (day?.afternoon?.places?.length ?? 0) > 0 ||
+    (Array.isArray(day?.places) && day.places.length > 0)
+  ));
+}
+
+function readItineraryMarkers(value: any) {
+  return Array.isArray(value?.mapData?.markers)
+    ? value.mapData.markers
+    : Array.isArray(value?.markers)
+      ? value.markers
+      : [];
+}
+
 /** kride_form + 사용자 입력 → ChatQueryRequest 빌더 */
 function buildRequest(message: string, form: KrideForm | null): KrideChatRequest {
+  const messageRegions = extractMessageKeywords(message, MESSAGE_REGION_KEYWORDS);
+  const messagePurposes = extractMessageKeywords(message, MESSAGE_PURPOSE_KEYWORDS);
+  const formRegions = form?.selectedRegions?.map((r) => r.name) ?? [];
+  const formPurposes = form?.purposes ?? [];
+
   return {
     message,
     intent: classifyIntent(message),
     artists: form?.selectedArtists?.map((a) => a.name) ?? [],
-    regions: form?.selectedRegions?.map((r) => r.name) ?? [],
-    purposes: form?.purposes ?? [],
+    regions: messageRegions.length > 0 ? messageRegions : formRegions,
+    purposes: mergeUnique(messagePurposes, formPurposes),
     duration: durationLabelToInt(form?.duration),
     budget: form?.budget,
   };
@@ -250,11 +295,22 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
 
           // AI가 생성한 일정을 전역 상태(페이지)로 전달하여 지도와 패널이 업데이트되도록 이벤트 발생
           if (typeof window !== 'undefined' && (normalizedItinerary || payload.pois)) {
+            const itineraryMarkers = readItineraryMarkers(normalizedItinerary);
+            const markers = payload.pois?.length ? payload.pois : itineraryMarkers;
+            const shouldPublishItinerary = normalizedItinerary && (
+              hasPlaces(normalizedItinerary) || itineraryMarkers.length > 0
+            );
+
             window.dispatchEvent(
               new CustomEvent('kride-chat-update', {
                 detail: {
-                  itinerary: normalizedItinerary,
+                  itinerary: shouldPublishItinerary ? normalizedItinerary : undefined,
                   pois: payload.pois,
+                  markers,
+                  mapData: markers.length > 0
+                    ? { ...(normalizedItinerary as any)?.mapData, markers, itinerary: normalizedItinerary }
+                    : (normalizedItinerary as any)?.mapData,
+                  sourcePois: (normalizedItinerary as any)?.source_pois,
                 },
               })
             );

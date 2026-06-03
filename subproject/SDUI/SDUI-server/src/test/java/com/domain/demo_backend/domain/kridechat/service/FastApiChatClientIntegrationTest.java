@@ -110,7 +110,7 @@ class FastApiChatClientIntegrationTest {
         assertThat(body.get("artists").get(0).asText()).isEqualTo("BLACKPINK");
         assertThat(body.get("regions").get(0).asText()).isEqualTo("Busan");
         assertThat(body.get("purposes").get(0).asText()).isEqualTo("photo");
-        assertThat(body.get("duration").asInt()).isEqualTo(2);
+        assertThat(body.get("duration").asText()).isEqualTo("1\uBC152\uC77C");
     }
 
     @Test

@@ -873,7 +873,7 @@ def _extract_from_message(message: str, regions: list[str], purposes: list[str])
         return regions, purposes
     msg_regions = [r for r in _KNOWN_REGIONS if r in message]
     msg_purposes = [p for p in _KNOWN_PURPOSES if p in message]
-    merged_regions = list(dict.fromkeys(msg_regions + regions))
+    merged_regions = list(dict.fromkeys(msg_regions if msg_regions else regions))
     merged_purposes = list(dict.fromkeys(msg_purposes + purposes))
     return merged_regions, merged_purposes
 
