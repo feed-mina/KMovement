@@ -236,6 +236,11 @@ jobs:
           RUNPOD_ENDPOINT_ID=__RUNPOD_ENDPOINT_ID__
           ENV_EOF
 
+          # .env 파일의 값을 쉘 환경에 export하여 docker-compose 변수 치환에 확실히 반영
+          set -a
+          source .env
+          set +a
+
           docker compose -f docker-compose.prod.yml pull --ignore-pull-failures
           docker compose -f docker-compose.prod.yml down --remove-orphans || true
           # Force remove any leftover containers from previous failed deploys
