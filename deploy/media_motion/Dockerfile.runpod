@@ -2,7 +2,7 @@
 # Models: AnimatedDrawings (conda py3.8), CogVideoX, MusicGen, gTTS, FFmpeg fallbacks
 #
 # AnimatedDrawings requires Python 3.8 + torch 1.13 + mmcv/mmdet/mmpose
-# while CogVideoX/MusicGen need Python 3.11 + torch 2.4.
+# while CogVideoX/MusicGen use Python 3.11 + a Blackwell-compatible PyTorch.
 # Solution: Miniconda creates an isolated py3.8 env for AnimatedDrawings,
 # the main py3.11 handles everything else.
 #
@@ -12,7 +12,7 @@
 # Local test:
 #   docker run --gpus all -p 8000:8000 kride-media-gpu
 
-FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+FROM ghcr.io/pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -20,11 +20,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     KRIDE_WORKER_OUTPUT_DIR=/tmp/kride_outputs \
     KRIDE_WORKER_ALLOW_FALLBACK=true \
     KRIDE_COGVIDEOX_CPU_OFFLOAD=true \
+    KRIDE_RESULT_URL_REQUIRED=true \
+    KRIDE_MAX_INLINE_OUTPUT_BYTES=6291456 \
     MUSICGEN_MODEL=facebook/musicgen-small \
     KRIDE_ANIMATED_DRAWINGS_DIR=/app/AnimatedDrawings \
     KRIDE_ANIMATED_DRAWINGS_PYTHON=/opt/miniconda/envs/ad_env/bin/python \
-    PYOPENGL_PLATFORM=osmesa \
-    TORCH_CUDA_ARCH_LIST="7.0 7.5 8.0 8.6 8.9 9.0"
+    PYOPENGL_PLATFORM=osmesa
 
 WORKDIR /app
 
@@ -131,6 +132,14 @@ RUN pip install --no-cache-dir "audiocraft>=1.3,<2" || echo "WARN: audiocraft in
 
 # RunPod SDK
 RUN pip install --no-cache-dir "runpod>=1.7,<2"
+
+# Guard against optional packages replacing the Blackwell-compatible torch build.
+RUN pip install --no-cache-dir --upgrade \
+        "torch==2.7.1" \
+        "torchvision==0.22.1" \
+        "torchaudio==2.7.1" \
+        --index-url https://download.pytorch.org/whl/cu128 && \
+    python -c "import torch; assert torch.__version__.startswith('2.7.1'); assert torch.version.cuda == '12.8'; assert 'sm_120' in torch.cuda.get_arch_list(), torch.cuda.get_arch_list()"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Pre-download model weights (before COPY so layer is cached across code changes)

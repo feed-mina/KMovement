@@ -58,6 +58,8 @@ def run_animated_drawings_pipeline(case: TravelCase, output_dir: Path, cfg: Work
     work_dir.mkdir(parents=True, exist_ok=True)
 
     env = {
+        # torch 1.13/CUDA 11.6 cannot execute kernels on Blackwell GPUs.
+        "CUDA_VISIBLE_DEVICES": "",
         "PYOPENGL_PLATFORM": "osmesa",
         "MESA_GL_VERSION_OVERRIDE": "3.3",
         "MESA_GLSL_VERSION_OVERRIDE": "330",
