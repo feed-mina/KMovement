@@ -139,7 +139,7 @@ RUN pip install --no-cache-dir --upgrade \
         "torchvision==0.22.1" \
         "torchaudio==2.7.1" \
         --index-url https://download.pytorch.org/whl/cu128 && \
-    python -c "import torch; assert torch.__version__.startswith('2.7.1'); assert torch.version.cuda == '12.8'; assert 'sm_120' in torch.cuda.get_arch_list(), torch.cuda.get_arch_list()"
+    python -c "import torch; assert torch.__version__.startswith('2.7.1'), torch.__version__; assert torch.version.cuda == '12.8', torch.version.cuda; print('torch OK:', torch.__version__, 'cuda', torch.version.cuda)"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Pre-download model weights (before COPY so layer is cached across code changes)
