@@ -23,7 +23,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     MUSICGEN_MODEL=facebook/musicgen-small \
     KRIDE_ANIMATED_DRAWINGS_DIR=/app/AnimatedDrawings \
     KRIDE_ANIMATED_DRAWINGS_PYTHON=/opt/miniconda/envs/ad_env/bin/python \
-    PYOPENGL_PLATFORM=osmesa
+    PYOPENGL_PLATFORM=osmesa \
+    TORCH_CUDA_ARCH_LIST="7.0 7.5 8.0 8.6 8.9 9.0"
 
 WORKDIR /app
 
@@ -92,6 +93,9 @@ RUN ${AD_PIP} install \
 # Step 5: mmdet + mmpose
 RUN ${AD_PIP} install "mmdet==2.28.2" "mmpose==0.28.1"
 
+# Pin numpy<2 in conda env
+RUN ${AD_PIP} install "numpy<2"
+
 # Step 6: other Python deps
 RUN ${AD_PIP} install \
         scikit-image scikit-learn \
@@ -110,6 +114,9 @@ RUN cd /app/AnimatedDrawings && \
 # ─────────────────────────────────────────────────────────────────────────────
 # Main Python 3.11 env — CogVideoX, MusicGen, gTTS, RunPod handler
 # ─────────────────────────────────────────────────────────────────────────────
+
+# Pin numpy<2 before any other installs to prevent NumPy 2.x incompatibility
+RUN pip install --no-cache-dir "numpy<2"
 
 # Python dependencies — base (gTTS, soundfile)
 COPY deploy/media_motion/requirements.txt /tmp/req-base.txt
