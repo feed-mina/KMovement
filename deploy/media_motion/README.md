@@ -71,6 +71,20 @@ export KRIDE_COGVIDEOX_CPU_OFFLOAD=true
 export KRIDE_WORKER_ALLOW_FALLBACK=true
 ```
 
+RunPod video routes upload the final MP4 to Cloudinary and return its public
+URL as `result_url`. Configure these variables on the Serverless endpoint:
+
+```bash
+export CLOUDINARY_CLOUD_NAME="..."
+export CLOUDINARY_API_KEY="..."
+export CLOUDINARY_API_SECRET="..."
+```
+
+The production RunPod image sets `KRIDE_RESULT_URL_REQUIRED=true`, so a missing
+upload configuration produces a clear failed job instead of a completed job
+with an empty URL. Generated media is not embedded in the response after a
+public URL is available because RunPod `/run` responses are limited to 10 MB.
+
 ## 3D Photo Inpainting Real Worker
 
 This adapter calls your full 3D Photo Inpainting/depth/mesh command. Provide either a JSON command template or a shell-style command template.
