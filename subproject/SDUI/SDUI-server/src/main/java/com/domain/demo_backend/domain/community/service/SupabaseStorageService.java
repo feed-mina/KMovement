@@ -54,8 +54,12 @@ public class SupabaseStorageService {
         String uploadUrl = supabaseUrl + "/storage/v1/object/" + bucket + "/" + objectPath;
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + supabaseKey);
         headers.set("apikey", supabaseKey);
+        // Opaque sb_* keys are API keys, not JWTs. The Supabase gateway derives the
+        // service role from the apikey header; legacy service_role JWTs still need Bearer.
+        if (!supabaseKey.startsWith("sb_")) {
+            headers.setBearerAuth(supabaseKey);
+        }
         headers.setContentType(MediaType.parseMediaType(
                 file.getContentType() != null ? file.getContentType() : "application/octet-stream"));
 
