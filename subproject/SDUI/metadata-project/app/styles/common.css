@@ -144,6 +144,22 @@
     font-size: 14px;
 }
 
+.route-map__fallback-notice {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 1000;
+    max-width: calc(100% - 24px);
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: #ffffff;
+    background: rgba(17, 24, 39, 0.88);
+    font-size: 12px;
+    font-weight: 600;
+    pointer-events: none;
+}
+
 .route-node {
     border: 0;
     background: transparent;
@@ -172,4 +188,3 @@
     background: #e11d48;
     color: #fff;
 }
-

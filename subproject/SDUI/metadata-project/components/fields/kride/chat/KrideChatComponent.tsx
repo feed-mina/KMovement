@@ -85,14 +85,14 @@ export default function KrideChatComponent({ meta, data, onCloseModal }: KrideCh
           reset();
           if (onCloseModal) onCloseModal();
         }}
-        variant="full"
+        variant={onCloseModal ? 'sheet' : 'full'}
       />
 
       {isEmpty ? (
-        <>
+        <div className="kride-chat-empty">
           <EmptyState context={context} />
           <Suggestions items={suggestions} onPick={(s) => void send(s)} />
-        </>
+        </div>
       ) : (
         <Thread messages={messages} />
       )}

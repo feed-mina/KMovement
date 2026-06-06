@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { buildMarkerInfoHtml, RouteMapData, RouteMapMarker } from './mapTypes';
+import LeafletFallbackMap from './LeafletFallbackMap';
 import { loadKakaoMaps } from './loadKakaoMaps';
 
 type Props = {
@@ -111,7 +112,14 @@ export default function KakaoRouteMap({ appKey, data, selectedMarkerId, onMarker
   }, [data.markers, selectedMarkerId]);
 
   if (error) {
-    return <div className="route-map__state">{error}</div>;
+    return (
+      <>
+        <LeafletFallbackMap data={data} selectedMarkerId={selectedMarkerId} />
+        <div className="route-map__fallback-notice" role="status">
+          Kakao Maps is unavailable. Showing the fallback map.
+        </div>
+      </>
+    );
   }
 
   return <div ref={containerRef} className="route-map__canvas" />;

@@ -403,16 +403,20 @@ function SketchPad({
     );
 }
 
+const MAX_IMAGES = 10;
+
 function ImagePicker({
     files,
     onChange,
     onRemove,
     onOpenSketch,
+    currentTotal,
 }: {
     files: File[];
     onChange: (files: File[]) => void;
     onRemove: (index: number) => void;
     onOpenSketch: () => void;
+    currentTotal: number;
 }) {
     const previews = useMemo(
         () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
@@ -434,15 +438,22 @@ function ImagePicker({
         if (oversized.length > 0) {
             alert(`${oversized.map((f) => f.name).join(', ')} 파일이 10MB를 초과합니다. 해당 파일은 제외됩니다.`);
         }
-        const selectedFiles = imageFiles.filter((file) => file.size <= MAX_FILE_SIZE);
-        onChange(selectedFiles);
+        let selectedFiles = imageFiles.filter((file) => file.size <= MAX_FILE_SIZE);
+        const remaining = MAX_IMAGES - currentTotal;
+        if (selectedFiles.length > remaining) {
+            alert(`이미지는 최대 ${MAX_IMAGES}장까지 첨부할 수 있습니다. ${remaining}장만 추가됩니다.`);
+            selectedFiles = selectedFiles.slice(0, remaining);
+        }
+        if (selectedFiles.length > 0) {
+            onChange(selectedFiles);
+        }
         event.target.value = '';
     };
 
     return (
         <div className="community-image-field">
             <div className="community-field-head">
-                <label className="community-label" htmlFor="community-images">이미지 첨부</label>
+                <label className="community-label" htmlFor="community-images">이미지 첨부 (최소 1장, 최대 {MAX_IMAGES}장)</label>
                 <button className="community-secondary-btn" type="button" onClick={onOpenSketch}>
                     스케치하기
                 </button>
@@ -511,8 +522,21 @@ function CommunityForm({
 
     const isModify = mode === 'modify';
 
+    const totalImages = retainedImages.length + newImages.length;
+
     const addImages = (files: File[]) => {
-        setNewImages((prev) => [...prev, ...files]);
+        setNewImages((prev) => {
+            const remaining = MAX_IMAGES - retainedImages.length - prev.length;
+            if (remaining <= 0) {
+                alert(`이미지는 최대 ${MAX_IMAGES}장까지 첨부할 수 있습니다.`);
+                return prev;
+            }
+            const toAdd = files.slice(0, remaining);
+            if (toAdd.length < files.length) {
+                alert(`이미지는 최대 ${MAX_IMAGES}장까지 첨부할 수 있습니다. ${toAdd.length}장만 추가됩니다.`);
+            }
+            return [...prev, ...toAdd];
+        });
     };
 
     const addSketchImage = (file: File, dataUrl: string) => {
@@ -543,6 +567,15 @@ function CommunityForm({
         }
         if (!content.trim()) {
             alert('내용을 입력해주세요.');
+            return;
+        }
+        const imageTotal = retainedImages.length + newImages.length;
+        if (imageTotal < 1) {
+            alert('이미지를 최소 1장 이상 첨부해주세요.');
+            return;
+        }
+        if (imageTotal > MAX_IMAGES) {
+            alert(`이미지는 최대 ${MAX_IMAGES}장까지 첨부할 수 있습니다.`);
             return;
         }
 
@@ -621,6 +654,7 @@ function CommunityForm({
                         onChange={addImages}
                         onRemove={removeNewImage}
                         onOpenSketch={() => setSketchOpen(true)}
+                        currentTotal={totalImages}
                     />
                     {sketchNotice && (
                         <p className="community-sketch-notice" role="status">
