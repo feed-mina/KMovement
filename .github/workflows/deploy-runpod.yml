@@ -39,11 +39,10 @@ jobs:
           context: .
           file: deploy/media_motion/Dockerfile.runpod
           push: true
+          no-cache: true
           tags: |
             ${{ env.DOCKERHUB_IMAGE }}:latest
             ${{ env.DOCKERHUB_IMAGE }}:${{ steps.meta.outputs.sha_short }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Summary
         run: |
