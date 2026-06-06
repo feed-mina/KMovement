@@ -28,9 +28,7 @@ Output: GenerationResult dict with base64-encoded artifacts.
 from __future__ import annotations
 
 import base64
-import json
 import os
-import tempfile
 import traceback
 from pathlib import Path
 
@@ -42,6 +40,7 @@ from .bgm import ensure_fallback_bgm
 from .cogvideo_fallback import run_cogvideo_fallback_case
 from .cogvideox_real import run_cogvideox_real_case
 from .gpt_sovits_worker import run_gpt_sovits_tts_case
+from .result_delivery import finalize_result
 from .schemas import BatchImageItem, BatchTravelCase, TravelCase
 from .three_d_photo_light import run_3d_photo_light_case
 from .three_d_photo_real import run_3d_photo_inpainting_real_case
@@ -73,17 +72,8 @@ def _decode_image(image_base64: str, case_id: str, work_dir: Path) -> Path:
 
 
 def _encode_artifacts(result_dict: dict) -> dict:
-    """Encode artifact file contents as base64 for RunPod response."""
-    for artifact in result_dict.get("artifacts", []):
-        fpath = Path(artifact["path"])
-        if fpath.exists() and fpath.stat().st_size < 200 * 1024 * 1024:  # <200MB
-            artifact["data_base64"] = base64.b64encode(fpath.read_bytes()).decode()
-        else:
-            artifact["data_base64"] = None
-    # RunPod treats non-empty "error" as FAILED — clear it for fallback_used
-    if result_dict.get("status") == "fallback_used":
-        result_dict["fallback_reason"] = result_dict.pop("error", "")
-    return result_dict
+    """Publish final media and prepare a payload-safe RunPod response."""
+    return finalize_result(result_dict)
 
 
 def _run_musicgen(job_input: dict, work_dir: Path) -> dict:
