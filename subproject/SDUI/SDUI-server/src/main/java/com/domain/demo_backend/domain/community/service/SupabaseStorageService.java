@@ -32,6 +32,10 @@ public class SupabaseStorageService {
     );
 
     public String upload(MultipartFile file, Long postId) throws IOException {
+        if (supabaseUrl == null || supabaseUrl.isBlank() || supabaseKey == null || supabaseKey.isBlank()) {
+            throw new IllegalStateException(
+                    "Supabase Storage 설정이 누락되었습니다. SUPABASE_URL, SUPABASE_KEY 환경변수를 확인하세요.");
+        }
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new IllegalArgumentException("파일 크기는 10MB를 초과할 수 없습니다.");
         }

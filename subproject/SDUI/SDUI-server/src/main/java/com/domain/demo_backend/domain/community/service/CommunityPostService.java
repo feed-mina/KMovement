@@ -26,8 +26,19 @@ public class CommunityPostService {
     private final UserRepository userRepository;
     private final SupabaseStorageService storageService;
 
+    private static final int MIN_IMAGES = 1;
+    private static final int MAX_IMAGES = 10;
+
     @Transactional
     public PostResponse createPost(Long userSqno, PostCreateRequest request, List<MultipartFile> images) {
+        if (images == null || images.stream().noneMatch(f -> !f.isEmpty())) {
+            throw new IllegalArgumentException("이미지를 최소 1장 이상 첨부해야 합니다.");
+        }
+        long validCount = images.stream().filter(f -> !f.isEmpty()).count();
+        if (validCount > MAX_IMAGES) {
+            throw new IllegalArgumentException("이미지는 최대 " + MAX_IMAGES + "장까지 가능합니다.");
+        }
+
         User author = userRepository.findById(userSqno)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
@@ -39,27 +50,30 @@ public class CommunityPostService {
 
         postRepository.save(post);
 
-        if (images != null && !images.isEmpty()) {
-            int sortOrder = 1;
-            for (MultipartFile file : images) {
-                if (file.isEmpty()) continue;
-                try {
-                    String publicUrl = storageService.upload(file, post.getPostId());
-                    PostImage postImage = PostImage.builder()
-                            .post(post)
-                            .storageUrl(publicUrl)
-                            .originalName(file.getOriginalFilename())
-                            .storedName(storageService.getStoredName(publicUrl))
-                            .mimeType(file.getContentType())
-                            .fileSize(file.getSize())
-                            .sortOrder(sortOrder++)
-                            .build();
-                    imageRepository.save(postImage);
-                    post.getImages().add(postImage);
-                } catch (IOException e) {
-                    log.error("이미지 업로드 실패: {}", e.getMessage());
-                }
+        int sortOrder = 1;
+        int failCount = 0;
+        for (MultipartFile file : images) {
+            if (file.isEmpty()) continue;
+            try {
+                String publicUrl = storageService.upload(file, post.getPostId());
+                PostImage postImage = PostImage.builder()
+                        .post(post)
+                        .storageUrl(publicUrl)
+                        .originalName(file.getOriginalFilename())
+                        .storedName(storageService.getStoredName(publicUrl))
+                        .mimeType(file.getContentType())
+                        .fileSize(file.getSize())
+                        .sortOrder(sortOrder++)
+                        .build();
+                imageRepository.save(postImage);
+                post.getImages().add(postImage);
+            } catch (IOException e) {
+                log.error("이미지 업로드 실패: {}", e.getMessage());
+                failCount++;
             }
+        }
+        if (failCount > 0 && post.getImages().isEmpty()) {
+            throw new RuntimeException("모든 이미지 업로드에 실패했습니다. 서버 설정을 확인해주세요.");
         }
 
         return PostResponse.from(post);
@@ -101,11 +115,23 @@ public class CommunityPostService {
                     !request.getRetainedImages().contains(img.getStoredName()));
         }
 
+        int retainedCount = post.getImages().size();
+        long newValidCount = (newImages == null) ? 0 : newImages.stream().filter(f -> !f.isEmpty()).count();
+        long totalCount = retainedCount + newValidCount;
+
+        if (totalCount < MIN_IMAGES) {
+            throw new IllegalArgumentException("이미지를 최소 1장 이상 첨부해야 합니다.");
+        }
+        if (totalCount > MAX_IMAGES) {
+            throw new IllegalArgumentException("이미지는 최대 " + MAX_IMAGES + "장까지 가능합니다.");
+        }
+
         // 새 이미지 추가
         if (newImages != null && !newImages.isEmpty()) {
             int maxSort = post.getImages().stream()
                     .mapToInt(PostImage::getSortOrder)
                     .max().orElse(0);
+            int failCount = 0;
             for (MultipartFile file : newImages) {
                 if (file.isEmpty()) continue;
                 try {
@@ -122,7 +148,11 @@ public class CommunityPostService {
                     post.getImages().add(postImage);
                 } catch (IOException e) {
                     log.error("이미지 업로드 실패: {}", e.getMessage());
+                    failCount++;
                 }
+            }
+            if (failCount > 0 && post.getImages().size() <= retainedCount) {
+                throw new RuntimeException("새 이미지 업로드에 모두 실패했습니다. 서버 설정을 확인해주세요.");
             }
         }
 
