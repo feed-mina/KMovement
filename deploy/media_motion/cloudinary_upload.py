@@ -5,18 +5,37 @@ Uploads generated media artifacts (MP4, WAV) to Cloudinary CDN.
 Falls back to local/zrok serving when Cloudinary is unavailable.
 
 Environment variables:
-    CLOUDINARY_CLOUD_NAME  — Cloudinary cloud name
-    CLOUDINARY_API_KEY     — Cloudinary API key
-    CLOUDINARY_API_SECRET  — Cloudinary API secret
+    CLOUDINARY_URL         — cloudinary://API_KEY:API_SECRET@CLOUD_NAME (preferred)
+    CLOUDINARY_CLOUD_NAME  — Cloudinary cloud name (fallback)
+    CLOUDINARY_API_KEY     — Cloudinary API key (fallback)
+    CLOUDINARY_API_SECRET  — Cloudinary API secret (fallback)
     KRIDE_ZROK_BASE_URL    — zrok fallback base URL (optional)
 """
 from __future__ import annotations
 
 import base64
 import os
+import re
 import tempfile
 from pathlib import Path
 from typing import Any
+
+
+def _parse_cloudinary_url() -> None:
+    """Parse CLOUDINARY_URL and set individual env vars if not already set."""
+    url = os.environ.get("CLOUDINARY_URL", "")
+    if not url:
+        return
+    # Format: cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+    m = re.match(r"cloudinary://([^:]+):([^@]+)@(.+)", url)
+    if not m:
+        return
+    os.environ.setdefault("CLOUDINARY_API_KEY", m.group(1))
+    os.environ.setdefault("CLOUDINARY_API_SECRET", m.group(2))
+    os.environ.setdefault("CLOUDINARY_CLOUD_NAME", m.group(3))
+
+
+_parse_cloudinary_url()
 
 
 def _cloudinary_configured() -> bool:
