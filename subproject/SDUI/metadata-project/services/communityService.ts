@@ -135,8 +135,15 @@ export const communityService = {
         return res.data.data;
     },
 
-    async submitAnimation(postId: number, postImageId: number, route = 'animated_drawings_worker') {
-        const res = await api.post(`${BASE}/posts/${postId}/animate`, { postImageId, route });
+    async submitAnimation(
+        postId: number,
+        postImageId: number,
+        route = 'animated_drawings_worker',
+        trajectoryPreset = '',
+    ) {
+        const body: Record<string, unknown> = { postImageId, route };
+        if (trajectoryPreset) body.trajectoryPreset = trajectoryPreset;
+        const res = await api.post(`${BASE}/posts/${postId}/animate`, body);
         return res.data.data as AnimationStatusResponse;
     },
 

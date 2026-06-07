@@ -824,7 +824,7 @@ function CommunityDetail({ postId }: { postId: number }) {
                 postId,
                 batchImages,
                 'bright_travel',
-                'cogvideox_real',
+                'auto',
                 batchBgmDescription,
                 batchBgmDuration,
             );
