@@ -331,28 +331,37 @@ public class AuthController {
             log.info("@@@@@  토큰 유효성 먼저 검증 ");
             Claims claims = jwtUtil.validateToken(refreshToken);
             String email = claims.getSubject();
-            //  2. DB에 저장된 리프레시 토큰과 비교
-            log.info("@@@@@ DB에 저장된 리프레시 토큰과 비교");
-            RefreshToken saved = refreshTokenRepository.findByEmail(email)
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+            // Redis lookups should use the primary key instead of an unindexed email field.
+            RefreshToken saved = refreshTokenRepository.findById(user.getUserSqno())
                     .orElseThrow(() -> new IllegalArgumentException("로그인 정보가 만료되었습니다."));
 
             if (!saved.getRefreshToken().equals(refreshToken)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다");
             }
-            //3. 새 Access Token 발급
-            log.info("@@@@@  새 Access Token 발급");
-            // 4.  새 Access Token 발급을 위해 사용자 정보 조회
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-            String newAccessToken = jwtUtil.createAccessToken(user);
 
-            // 5. 웹 ResponseCookie
-            ResponseCookie newAccessCookie = ResponseCookie.from("accessToken", newAccessToken)
-                    .httpOnly(true).path("/").maxAge(60 * 60).build();
+            // Rotate both tokens so active sessions receive a fresh seven-day window.
+            TokenResponse refreshedTokens = jwtUtil.generateTokens(user);
+            ResponseCookie newAccessCookie = ResponseCookie.from("accessToken", refreshedTokens.getAccessToken())
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(60 * 60)
+                    .sameSite("Lax")
+                    .build();
+            ResponseCookie newRefreshCookie = ResponseCookie.from("refreshToken", refreshedTokens.getRefreshToken())
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(60 * 60 * 24 * 7)
+                    .sameSite("Lax")
+                    .build();
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
-                    .body(Map.of("accessToken", newAccessToken));
+                    .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
+                    .body(Map.of("accessToken", refreshedTokens.getAccessToken()));
 
         } catch (ExpiredJwtException e) {
             log.info("@@@@@ 리프레시 토큰이 만료");

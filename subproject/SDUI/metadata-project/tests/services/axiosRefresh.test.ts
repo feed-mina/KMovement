@@ -1,0 +1,78 @@
+import axios, {
+  AxiosAdapter,
+  AxiosError,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from 'axios';
+import api from '@/services/axios';
+
+function unauthorized(config: InternalAxiosRequestConfig): Promise<never> {
+  const response: AxiosResponse = {
+    data: null,
+    status: 401,
+    statusText: 'Unauthorized',
+    headers: {},
+    config,
+  };
+  return Promise.reject(
+    new AxiosError('Unauthorized', 'ERR_BAD_REQUEST', config, undefined, response)
+  );
+}
+
+describe('axios refresh handling', () => {
+  const originalAdapter = api.defaults.adapter;
+
+  afterEach(() => {
+    api.defaults.adapter = originalAdapter;
+    jest.restoreAllMocks();
+  });
+
+  test('serializes concurrent 401 responses into one refresh request', async () => {
+    const attempts = new Map<string, number>();
+    let refreshCallCount = 0;
+
+    api.defaults.adapter = (async (config: InternalAxiosRequestConfig) => {
+      const url = config.url ?? '';
+      const count = (attempts.get(url) ?? 0) + 1;
+      attempts.set(url, count);
+
+      if (count === 1) {
+        return unauthorized(config);
+      }
+
+      return {
+        data: { url },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config,
+      };
+    }) as AxiosAdapter;
+
+    jest.spyOn(axios, 'post').mockImplementation(async () => {
+      refreshCallCount++;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      return {} as AxiosResponse;
+    });
+
+    const [first, second] = await Promise.all([
+      api.get('/api/protected/first'),
+      api.get('/api/protected/second'),
+    ]);
+
+    expect(first.data).toEqual({ url: '/api/protected/first' });
+    expect(second.data).toEqual({ url: '/api/protected/second' });
+    expect(refreshCallCount).toBe(1);
+  });
+
+  test('does not recursively retry when refresh fails', async () => {
+    api.defaults.adapter = ((config: InternalAxiosRequestConfig) =>
+      unauthorized(config)) as AxiosAdapter;
+    const refreshSpy = jest.spyOn(axios, 'post').mockRejectedValue(
+      new AxiosError('Refresh failed', 'ERR_BAD_REQUEST')
+    );
+
+    await expect(api.get('/api/protected')).rejects.toThrow('Refresh failed');
+    expect(refreshSpy).toHaveBeenCalledTimes(1);
+  });
+});

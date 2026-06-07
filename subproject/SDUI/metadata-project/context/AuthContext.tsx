@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import api from '@/services/axios';
+import api, { refreshSession } from '@/services/axios';
 import { useRouter } from "next/navigation";
 import { requestForToken, onMessageListener } from '@/lib/firebase';
 
@@ -71,8 +71,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const checkLoginStatus = async () => {
         try {
-            // /api/auth/me를 호출하면 브라우저가 HttpOnly 쿠키를 자동으로 실어 보냄
-            const res = await api.get('/api/auth/me');
+            let res = await api.get('/api/auth/me');
+
+            // The browser removes an expired access cookie. In that case /me
+            // looks anonymous even when a valid HttpOnly refresh cookie exists.
+            if (!res.data.isLoggedIn) {
+                try {
+                    await refreshSession();
+                    res = await api.get('/api/auth/me');
+                } catch {
+                    // A real guest has no refresh cookie.
+                }
+            }
+
             setUser(res.data);
             setIsLoggedIn(res.data.isLoggedIn);
         } catch (err) {
@@ -87,6 +98,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         checkLoginStatus();
     }, []);
+
+    useEffect(() => {
+        if (!isLoggedIn) return;
+
+        // Refresh before the one-hour access token expires. The backend also
+        // rotates the refresh token, extending an active session.
+        const intervalId = window.setInterval(() => {
+            void refreshSession().catch(() => undefined);
+        }, 50 * 60 * 1000);
+
+        return () => window.clearInterval(intervalId);
+    }, [isLoggedIn]);
 
     // RBAC: 카카오 로그인 후 ROLE_GUEST이면 추가 정보 입력 페이지로 리다이렉트 (2026-03-01 추가)
     useEffect(() => {

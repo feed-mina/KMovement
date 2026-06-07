@@ -1,6 +1,5 @@
 package com.domain.demo_backend.global.security;
 
-import com.domain.demo_backend.domain.token.domain.RefreshTokenRepository;
 import com.domain.demo_backend.domain.user.domain.User;
 import com.domain.demo_backend.domain.user.domain.UserRepository;
 import io.jsonwebtoken.Claims;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -35,9 +33,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/ui/LOGIN_PAGE"
     );
     private final JwtUtil jwtUtil;
-    // 2026-01-25 RefreshTokenRepository 주입 성능개선
-    private final RefreshTokenRepository refreshTokenRepository;
-
     private final UserRepository userRepository;
 
     @Override
@@ -45,13 +40,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         return EXCLUDE_URLS.stream().anyMatch(path::startsWith);
     }
-
-
-
-    /*
-     * @@@ 2026-01-25 사용자가 요청을 보낼때마다 만료시간을 3시간 뒤로 미루는 (슬라이딩 만료) 방법 추가
-     * 필터 내에서 RefreshTokenRepository 주입받아 저장 > TTL 초기화
-     * */
 
     /**
      * 토큰 추출 로직 분리
@@ -103,26 +91,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Long userSqno = claims.get("userSqno", Long.class);
 
                 if (email != null) {
-                    /*
-                     * @@@ 2026-01-25 RefreshTokenRepository 주입받아 저장 > TTL 초기화
-                     * 슬라이딩 만료 최적화
-                     * */
-
                     User user = userRepository.findByEmail(email)
                             .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-                    Date issuedAt = claims.getIssuedAt();
-                    long now = System.currentTimeMillis();
-                    long passedTime = now - issuedAt.getTime();
-
-                    // 2026-01-25 로그인(토큰 발행)한지 30분이 지났는지 확인
-                    if (passedTime > 1000L * 60 * 30) {
-                        // 2026-01-25 Redis 갱신 (findById 후 save 할때 TTL 이 다시 3시간ㄴ으로 초기화)
-                        // 30분 이후 요청에 대해서만 Redis 에 접근
-                        refreshTokenRepository.findByEmail(email).ifPresent(existingToken -> {
-                            refreshTokenRepository.save(existingToken);
-                        });
-                    }
-
                     // JWT 클레임에서 role 읽기 (DB 역할 체계 반영)
                     String role = claims.get("role", String.class);
                     if (role == null || role.isBlank()) {
@@ -135,7 +105,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    handleSlidingExpiration(claims, email);
                 }
             } catch (Exception e) {
                 // 유효하지 않은 토큰 예외 처리
@@ -149,17 +118,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
 
-    /**
-     * 슬라이딩 만료 처리 (코드 가독성을 위해 분리) 
-     */
-    private void handleSlidingExpiration(Claims claims, String email) {
-        Date issuedAt = claims.getIssuedAt();
-        long now = System.currentTimeMillis();
-        long passedTime = now - issuedAt.getTime();
-
-        // 30분이 지났으면 Redis 갱신 
-        if (passedTime > 1000L * 60 * 30) {
-            refreshTokenRepository.findByEmail(email).ifPresent(refreshTokenRepository::save);
-        }
-    }
 }
