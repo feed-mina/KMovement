@@ -1367,7 +1367,7 @@ def _require_internal_api_key(
 
 
 class RunPodJobRequest(BaseModel):
-    route: str = Field(..., description="animated_drawings_worker, cogvideox_real, 3d_photo_inpainting_real 등")
+    route: str = Field(..., description="animated_drawings_worker, cogvideox_real, 3d_photo_inpainting_real, tora_cogvideox_i2v 등")
     case_id: str = "travel_case"
     place: str = "Travel Place"
     image_url: str = Field(..., min_length=1)
@@ -1378,6 +1378,8 @@ class RunPodJobRequest(BaseModel):
     allow_fallback: bool = True
     musicgen_description: str = "calm Korean ambient music"
     musicgen_duration: int = 15
+    trajectory_points: list | None = None  # [[x,y], ...] normalized 0.0~1.0
+    trajectory_preset: str = ""  # "object_pan_right", "arc_up", etc.
 
 
 class BatchImageInput(BaseModel):
@@ -1391,7 +1393,7 @@ class RunPodBatchJobRequest(BaseModel):
     place: str = "Community Post"
     images: list[BatchImageInput] = Field(..., min_length=1, max_length=10)
     bgm_key: str = "bright_travel"
-    photo_route: str = "cogvideox_real"
+    photo_route: str = "auto"  # "auto", "cogvideox_real", "3d_photo_light"
     allow_fallback: bool = True
     bgm_description: str = ""  # MusicGen prompt (empty → sine-wave fallback)
     bgm_duration: int = 15  # MusicGen generation length in seconds
