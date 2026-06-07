@@ -74,7 +74,7 @@ def _generate_photo_segment(
 
         out = output_dir / f"{case.case_id}_cogvideox.mp4"
         try:
-            return create_cogvideox_real_video(case.image_path, out, cfg=cfg)
+            return create_cogvideox_real_video(case, out, cfg=cfg)
         except Exception as exc:
             print(f"[batch_video] CogVideoX failed for {case.case_id}: {exc}")
             import traceback
