@@ -69,6 +69,9 @@ class WorkerConfig:
     blip2_translation_model_id: str = "Helsinki-NLP/opus-mt-en-ko"
     blip2_enabled: bool = True
 
+    depth_model_id: str = "Intel/dpt-large"  # MiDaS DPT-Large (transformers)
+    depth_parallax_enabled: bool = True
+
 
 def load_worker_config(*, allow_fallback: bool | None = None) -> WorkerConfig:
     cfg = WorkerConfig(
@@ -100,6 +103,8 @@ def load_worker_config(*, allow_fallback: bool | None = None) -> WorkerConfig:
         blip2_model_id=os.environ.get("KRIDE_BLIP2_MODEL_ID", "Salesforce/blip-image-captioning-base"),
         blip2_translation_model_id=os.environ.get("KRIDE_BLIP2_TRANSLATION_MODEL_ID", "Helsinki-NLP/opus-mt-en-ko"),
         blip2_enabled=env_bool("KRIDE_BLIP2_ENABLED", True),
+        depth_model_id=os.environ.get("KRIDE_DEPTH_MODEL_ID", "Intel/dpt-large"),
+        depth_parallax_enabled=env_bool("KRIDE_DEPTH_PARALLAX_ENABLED", True),
     )
     if allow_fallback is not None:
         cfg.allow_fallback = allow_fallback

@@ -54,7 +54,10 @@ def build_zoompan_filter(motion: str, *, duration: int = 7, fps: int = 8) -> str
 
 
 def create_3d_photo_light_video(case: TravelCase, output_dir: Path) -> Path:
-    """Generate a lightweight 3D-photo-style pan/zoom video."""
+    """Generate a lightweight 3D-photo-style pan/zoom video.
+
+    Priority: depth parallax (MoGe/MiDaS) → ffmpeg zoompan fallback.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
     output_mp4 = output_dir / f"{case.case_id}_3d_photo_light.mp4"
     if output_mp4.exists():
@@ -63,6 +66,20 @@ def create_3d_photo_light_video(case: TravelCase, output_dir: Path) -> Path:
     if not case.image_path.exists():
         raise FileNotFoundError(f"missing input image: {case.image_path}")
 
+    # Depth parallax first
+    try:
+        from .depth_parallax import create_depth_parallax_video
+        from .worker_config import load_worker_config
+
+        cfg = load_worker_config()
+        if cfg.depth_parallax_enabled:
+            return create_depth_parallax_video(
+                case.image_path, output_mp4, motion=case.motion, cfg=cfg,
+            )
+    except Exception as exc:
+        print(f"[3d_photo_light] Depth parallax failed, using zoompan: {exc}")
+
+    # Zoompan fallback
     vf = build_zoompan_filter(case.motion)
     command = [
         _find_ffmpeg(),
