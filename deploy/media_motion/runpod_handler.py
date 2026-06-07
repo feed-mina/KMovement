@@ -13,7 +13,7 @@ Input schema (RunPod job input):
   "route": "cogvideox_real",
   "case_id": "gangneung_beach",
   "place": "Gangneung Beach",
-  "image_base64": "<base64-encoded image>",
+  "image_url": "https://project.supabase.co/storage/v1/object/public/...",
   "tts_text": "강릉 해변의 아름다운 풍경입니다.",
   "bgm_key": "bright_travel",
   "motion": "slow_zoom_in",
@@ -28,9 +28,13 @@ Output: GenerationResult dict with base64-encoded artifacts.
 from __future__ import annotations
 
 import base64
+import ipaddress
 import os
+import socket
 import traceback
 from pathlib import Path
+from urllib.parse import urlparse
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 import runpod
 
@@ -58,14 +62,71 @@ SUPPORTED_ROUTES = {
 }
 
 OUTPUT_DIR = Path(os.environ.get("KRIDE_WORKER_OUTPUT_DIR", "/tmp/kride_outputs"))
+MAX_IMAGE_BYTES = int(os.environ.get("KRIDE_MAX_INPUT_IMAGE_BYTES", str(10 * 1024 * 1024)))
+IMAGE_DOWNLOAD_TIMEOUT = int(os.environ.get("KRIDE_IMAGE_DOWNLOAD_TIMEOUT_SECONDS", "30"))
 
 
-def _decode_image(image_base64: str, case_id: str, work_dir: Path) -> Path:
-    """Decode base64 image to a temporary file."""
-    img_bytes = base64.b64decode(image_base64)
-    ext = ".jpg"
-    if img_bytes[:8].startswith(b"\x89PNG"):
+def _allowed_image_hosts() -> list[str]:
+    raw = os.environ.get("KRIDE_ALLOWED_IMAGE_HOSTS", ".supabase.co")
+    return [item.strip().lower() for item in raw.split(",") if item.strip()]
+
+
+def _validate_image_url(image_url: str) -> None:
+    parsed = urlparse(image_url)
+    if parsed.scheme != "https" or not parsed.hostname:
+        raise ValueError("image_url must use HTTPS")
+
+    hostname = parsed.hostname.lower()
+    allowed = _allowed_image_hosts()
+    if allowed and not any(
+        hostname == rule or (rule.startswith(".") and hostname.endswith(rule))
+        for rule in allowed
+    ):
+        raise ValueError(f"image_url host is not allowed: {hostname}")
+
+    for address in socket.getaddrinfo(hostname, 443, type=socket.SOCK_STREAM):
+        ip = ipaddress.ip_address(address[4][0])
+        if not ip.is_global:
+            raise ValueError("image_url resolved to a non-public address")
+
+
+class _ValidatedRedirectHandler(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        _validate_image_url(newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def _download_image(image_url: str, case_id: str, work_dir: Path) -> Path:
+    """Download a validated public image without passing it through the API payload."""
+    _validate_image_url(image_url)
+    request = Request(image_url, headers={"User-Agent": "K-Ride-Media-Worker/1.0"})
+    opener = build_opener(_ValidatedRedirectHandler())
+    with opener.open(request, timeout=IMAGE_DOWNLOAD_TIMEOUT) as response:
+        final_url = response.geturl()
+        _validate_image_url(final_url)
+
+        content_type = response.headers.get_content_type()
+        if not content_type.startswith("image/"):
+            raise ValueError(f"image_url returned unsupported content type: {content_type}")
+
+        declared_size = response.headers.get("Content-Length")
+        if declared_size and int(declared_size) > MAX_IMAGE_BYTES:
+            raise ValueError("image_url content exceeds the 10MB limit")
+
+        img_bytes = response.read(MAX_IMAGE_BYTES + 1)
+        if len(img_bytes) > MAX_IMAGE_BYTES:
+            raise ValueError("image_url content exceeds the 10MB limit")
+
+    if img_bytes[:3] == b"\xff\xd8\xff":
+        ext = ".jpg"
+    elif img_bytes[:8] == b"\x89PNG\r\n\x1a\n":
         ext = ".png"
+    elif img_bytes[:6] in (b"GIF87a", b"GIF89a"):
+        ext = ".gif"
+    elif img_bytes[:4] == b"RIFF" and img_bytes[8:12] == b"WEBP":
+        ext = ".webp"
+    else:
+        raise ValueError("image_url did not return a supported image file")
     img_path = work_dir / f"{case_id}{ext}"
     img_path.write_bytes(img_bytes)
     return img_path
@@ -199,11 +260,22 @@ def handler(job: dict) -> dict:
                 return {"error": "images[] array is required for batch_video route"}
 
             items: list[BatchImageItem] = []
+            download_failed_indexes: list[int] = []
             for idx, img_data in enumerate(images_raw[:10]):
-                img_b64 = img_data.get("image_base64", "")
-                if not img_b64:
+                image_url = img_data.get("image_url", "")
+                if not image_url:
+                    download_failed_indexes.append(idx)
                     continue
-                img_path = _decode_image(img_b64, f"{job_input.get('case_id', 'batch')}_img{idx}", work_dir)
+                try:
+                    img_path = _download_image(
+                        image_url,
+                        f"{job_input.get('case_id', 'batch')}_img{idx}",
+                        work_dir,
+                    )
+                except Exception as exc:
+                    print(f"[runpod_handler] Image download failed for index {idx}: {exc}")
+                    download_failed_indexes.append(idx)
+                    continue
                 items.append(BatchImageItem(
                     index=idx,
                     image_path=img_path,
@@ -224,14 +296,30 @@ def handler(job: dict) -> dict:
                 bgm_duration=min(job_input.get("bgm_duration", 15), 30),
             )
             result = run_batch_video_case(batch_case, work_dir, cfg)
-            return _encode_artifacts(result.to_dict())
+            result_dict = result.to_dict()
+            metadata = result_dict.setdefault("metadata", {})
+            worker_failed = metadata.get("failed_image_indexes", [])
+            if not isinstance(worker_failed, list):
+                worker_failed = []
+            metadata["total_images"] = min(len(images_raw), 10)
+            metadata["failed_image_indexes"] = sorted(
+                set(download_failed_indexes + worker_failed)
+            )
+            metadata["processed_images"] = (
+                metadata["total_images"] - len(metadata["failed_image_indexes"])
+            )
+            return _encode_artifacts(result_dict)
 
         # Video routes need an image
-        image_base64 = job_input.get("image_base64", "")
-        if not image_base64:
-            return {"error": "image_base64 is required for video routes"}
+        image_url = job_input.get("image_url", "")
+        if not image_url:
+            return {"error": "image_url is required for video routes"}
 
-        image_path = _decode_image(image_base64, job_input.get("case_id", "img"), work_dir)
+        image_path = _download_image(
+            image_url,
+            job_input.get("case_id", "img"),
+            work_dir,
+        )
 
         case = TravelCase(
             case_id=job_input.get("case_id", "default"),

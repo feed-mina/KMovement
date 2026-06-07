@@ -53,4 +53,24 @@ class AnimationRunPodOutputTest {
         assertThat(parsed.succeeded()).isFalse();
         assertThat(parsed.errorMessage()).contains("public result URL");
     }
+
+    @Test
+    void parsesBatchResultMetadata() {
+        AnimationRunPodOutput.Parsed parsed = AnimationRunPodOutput.parse(
+                Map.of(
+                        "status", "success",
+                        "result_url", "https://cdn.example/final.mp4",
+                        "metadata", Map.of(
+                                "processed_images", 2,
+                                "actual_model", "mixed:animated_drawings_worker,cogvideox_real",
+                                "failed_image_indexes", List.of(1)
+                        )
+                )
+        );
+
+        assertThat(parsed.processedImages()).isEqualTo(2);
+        assertThat(parsed.actualModel())
+                .isEqualTo("mixed:animated_drawings_worker,cogvideox_real");
+        assertThat(parsed.failedImageIndexes()).isEqualTo("[1]");
+    }
 }

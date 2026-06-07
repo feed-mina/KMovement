@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import html
 import json
 import os
@@ -10,13 +11,24 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 RUNPOD_API_KEY = os.environ.get("RUNPOD_API_KEY", "")
 RUNPOD_ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID", "")
+FASTAPI_INTERNAL_API_KEY = (
+    os.environ.get("FASTAPI_INTERNAL_API_KEY", "").strip()
+    or "sdui-internal-dev-key"
+)
+
+
+def _require_internal_api_key(
+    x_internal_api_key: str = Header(default="", alias="X-Internal-Api-Key"),
+) -> None:
+    if not hmac.compare_digest(x_internal_api_key, FASTAPI_INTERNAL_API_KEY):
+        raise HTTPException(status_code=401, detail="Invalid internal API key.")
 
 
 # STEP 0. Deployment configuration.
@@ -293,7 +305,7 @@ class RunPodJobRequest(BaseModel):
     route: str = Field(..., description="cogvideox_real, 3d_photo_light, cogvideo_fallback, gpt_sovits_tts, musicgen")
     case_id: str = "travel_case"
     place: str = "Travel Place"
-    image_base64: str = ""
+    image_url: str = Field(..., min_length=1)
     tts_text: str = "여행 영상입니다."
     bgm_key: str = "bright_travel"
     motion: str = "slow_zoom_in"
@@ -304,7 +316,10 @@ class RunPodJobRequest(BaseModel):
 
 
 @app.post("/jobs/runpod")
-def runpod_proxy(request: RunPodJobRequest) -> JSONResponse:
+def runpod_proxy(
+    request: RunPodJobRequest,
+    _: None = Depends(_require_internal_api_key),
+) -> JSONResponse:
     """Proxy job to RunPod Serverless endpoint."""
     if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
         return JSONResponse(
@@ -327,7 +342,10 @@ def runpod_proxy(request: RunPodJobRequest) -> JSONResponse:
 
 
 @app.get("/jobs/runpod/{job_id}")
-def runpod_status(job_id: str) -> JSONResponse:
+def runpod_status(
+    job_id: str,
+    _: None = Depends(_require_internal_api_key),
+) -> JSONResponse:
     """Check RunPod job status."""
     if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
         return JSONResponse(status_code=501, content={"ok": False, "message": "RunPod not configured."})
@@ -347,7 +365,7 @@ def runpod_status(job_id: str) -> JSONResponse:
 
 class BatchImageInput(BaseModel):
     """Single image in a batch video request."""
-    image_base64: str
+    image_url: str = Field(..., min_length=1)
     tts_text: str = ""
     image_type: str = "auto"  # "photo", "sketch", or "auto"
 
@@ -365,7 +383,10 @@ class RunPodBatchJobRequest(BaseModel):
 
 
 @app.post("/jobs/runpod/batch")
-def runpod_batch_proxy(request: RunPodBatchJobRequest) -> JSONResponse:
+def runpod_batch_proxy(
+    request: RunPodBatchJobRequest,
+    _: None = Depends(_require_internal_api_key),
+) -> JSONResponse:
     """Proxy batch video job to RunPod Serverless endpoint."""
     if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
         return JSONResponse(

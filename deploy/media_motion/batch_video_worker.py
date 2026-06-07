@@ -59,7 +59,7 @@ def _generate_photo_segment(
     output_dir: Path,
     photo_route: str,
     cfg: WorkerConfig,
-) -> Path:
+) -> tuple[Path, str]:
     """Generate a video segment from a photo image."""
     case = TravelCase(
         case_id=f"{case_id}_img{item.index}",
@@ -73,25 +73,17 @@ def _generate_photo_segment(
 
         out = output_dir / f"{case.case_id}_cogvideox.mp4"
         try:
-            return create_cogvideox_real_video(case, out, cfg=cfg)
+            return create_cogvideox_real_video(case, out, cfg=cfg), "cogvideox_real"
         except Exception as exc:
             print(f"[batch_video] CogVideoX failed for {case.case_id}: {exc}")
             import traceback
             traceback.print_exc()
 
-    # Default / fallback: 3d_photo_light (ffmpeg zoompan)
-    out = output_dir / f"{case.case_id}_zoompan.mp4"
-    run_ffmpeg([
-        "-loop", "1",
-        "-i", str(item.image_path),
-        "-vf", "zoompan=z='min(zoom+0.001,1.3)':d=150:s=512x512,format=yuv420p",
-        "-t", "5",
-        "-c:v", "libx264",
-        "-preset", "veryfast",
-        "-crf", "23",
-        str(out),
-    ])
-    return out
+    # Default / fallback: depth parallax → zoompan (via create_3d_photo_light_video)
+    from .three_d_photo_light import create_3d_photo_light_video
+
+    out = create_3d_photo_light_video(case, output_dir)
+    return out, "3d_photo_light"
 
 
 def _generate_sketch_segment(
@@ -99,7 +91,7 @@ def _generate_sketch_segment(
     case_id: str,
     output_dir: Path,
     cfg: WorkerConfig,
-) -> tuple[Path, Path | None]:
+) -> tuple[Path, Path | None, str]:
     """Generate a video and optionally a GIF from a sketch image.
 
     Returns (mp4_path, gif_path_or_None).
@@ -122,26 +114,22 @@ def _generate_sketch_segment(
             mp4 = output_dir / f"{case.case_id}_animated_drawings.mp4"
             if not mp4.exists():
                 mp4 = gif_to_mp4(raw_gif, mp4) if raw_gif.exists() else gif_path
-            return mp4, raw_gif if raw_gif.exists() else None
+            return (
+                mp4,
+                raw_gif if raw_gif.exists() else None,
+                "animated_drawings_worker",
+            )
         except Exception as exc:
             print(f"[batch_video] AnimatedDrawings failed for {case.case_id}: {exc}")
             import traceback
             traceback.print_exc()
             # fall through to zoompan fallback
 
-    # Fallback: simple zoompan for sketch
-    out = output_dir / f"{case.case_id}_sketch_zoom.mp4"
-    run_ffmpeg([
-        "-loop", "1",
-        "-i", str(item.image_path),
-        "-vf", "zoompan=z='min(zoom+0.001,1.2)':d=100:s=512x512,format=yuv420p",
-        "-t", "4",
-        "-c:v", "libx264",
-        "-preset", "veryfast",
-        "-crf", "23",
-        str(out),
-    ])
-    return out, None
+    # Fallback: depth parallax → zoompan (via create_3d_photo_light_video)
+    from .three_d_photo_light import create_3d_photo_light_video
+
+    out = create_3d_photo_light_video(case, output_dir)
+    return out, None, "3d_photo_light"
 
 
 def run_batch_video_case(
@@ -186,21 +174,25 @@ def run_batch_video_case(
     # Step 2: Generate per-image video segments (sequential — GPU intensive)
     video_paths: dict[int, Path] = {}
     sketch_gifs: dict[int, Path] = {}
+    actual_models: dict[int, str] = {}
+    failed_image_indexes: list[int] = []
 
     for item, img_type in classified:
         try:
             if img_type == "photo":
-                video = _generate_photo_segment(
+                video, actual_model = _generate_photo_segment(
                     item, batch_case.case_id, raw_dir, batch_case.photo_route, cfg,
                 )
             else:
-                video, gif = _generate_sketch_segment(
+                video, gif, actual_model = _generate_sketch_segment(
                     item, batch_case.case_id, raw_dir, cfg,
                 )
                 if gif:
                     sketch_gifs[item.index] = gif
             video_paths[item.index] = video
+            actual_models[item.index] = actual_model
         except Exception as exc:
+            failed_image_indexes.append(item.index)
             print(f"[batch_video] Segment generation failed for image {item.index} ({img_type}): {exc}")
             import traceback
             traceback.print_exc()
@@ -256,6 +248,7 @@ def run_batch_video_case(
 
     # Mix TTS into video segments
     segment_paths: list[Path] = []
+    segment_item_indexes: list[int] = []
     for item, _ in classified:
         if item.index not in video_paths:
             continue
@@ -269,6 +262,7 @@ def run_batch_video_case(
                 segment_paths.append(video)
         else:
             segment_paths.append(video)
+        segment_item_indexes.append(item.index)
 
     # Step 2b: If both photos and sketches, overlay sketch GIFs on photo segments
     if has_both and sketch_gifs:
@@ -278,7 +272,7 @@ def run_batch_video_case(
         gif_idx = 0
 
         for seg_idx, seg_path in enumerate(segment_paths):
-            item_index = classified[seg_idx][0].index
+            item_index = segment_item_indexes[seg_idx]
             if item_index in photo_indices and gif_idx < len(gif_list):
                 overlay_out = segments_dir / f"{batch_case.case_id}_overlay{seg_idx}.mp4"
                 try:
@@ -347,10 +341,21 @@ def run_batch_video_case(
     apply_bgm_to_video(concat_mp4, bgm_wav, final_mp4)
 
     # Step 6: Build result
+    executed_models = sorted(set(actual_models.values()))
     metadata = {
         "route": "batch_video",
         "case_id": batch_case.case_id,
         "total_images": len(batch_case.items),
+        "processed_images": len(segment_paths),
+        "failed_image_indexes": sorted(set(failed_image_indexes)),
+        "actual_model": (
+            executed_models[0]
+            if len(executed_models) == 1
+            else "mixed:" + ",".join(executed_models)
+        ),
+        "actual_models": {
+            str(index): model for index, model in sorted(actual_models.items())
+        },
         "classification": {
             str(item.index): img_type for item, img_type in classified
         },

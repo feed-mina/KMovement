@@ -22,12 +22,13 @@ from __future__ import annotations
 import math
 import os
 import pickle
+import hmac
 from typing import Optional
 import httpx
 
 import networkx as nx
 import pandas as pd
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
@@ -1352,13 +1353,24 @@ def chat_qa(req: ChatStreamRequest):
 # ─────────────────────────────────────────────────────────────────────────────
 RUNPOD_API_KEY = os.environ.get("RUNPOD_API_KEY", "")
 RUNPOD_ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID", "")
+FASTAPI_INTERNAL_API_KEY = (
+    os.environ.get("FASTAPI_INTERNAL_API_KEY", "").strip()
+    or "sdui-internal-dev-key"
+)
+
+
+def _require_internal_api_key(
+    x_internal_api_key: str = Header(default="", alias="X-Internal-Api-Key"),
+) -> None:
+    if not hmac.compare_digest(x_internal_api_key, FASTAPI_INTERNAL_API_KEY):
+        raise HTTPException(status_code=401, detail="Invalid internal API key.")
 
 
 class RunPodJobRequest(BaseModel):
     route: str = Field(..., description="animated_drawings_worker, cogvideox_real, 3d_photo_inpainting_real 등")
     case_id: str = "travel_case"
     place: str = "Travel Place"
-    image_base64: str = ""
+    image_url: str = Field(..., min_length=1)
     tts_text: str = "여행 영상입니다."
     bgm_key: str = "bright_travel"
     motion: str = "slow_zoom_in"
@@ -1369,7 +1381,7 @@ class RunPodJobRequest(BaseModel):
 
 
 class BatchImageInput(BaseModel):
-    image_base64: str
+    image_url: str = Field(..., min_length=1)
     tts_text: str = ""
     image_type: str = "auto"
 
@@ -1379,14 +1391,17 @@ class RunPodBatchJobRequest(BaseModel):
     place: str = "Community Post"
     images: list[BatchImageInput] = Field(..., min_length=1, max_length=10)
     bgm_key: str = "bright_travel"
-    photo_route: str = "3d_photo_light"
+    photo_route: str = "cogvideox_real"
     allow_fallback: bool = True
     bgm_description: str = ""  # MusicGen prompt (empty → sine-wave fallback)
     bgm_duration: int = 15  # MusicGen generation length in seconds
 
 
 @app.post("/jobs/runpod/batch")
-def runpod_batch_proxy(request: RunPodBatchJobRequest):
+def runpod_batch_proxy(
+    request: RunPodBatchJobRequest,
+    _: None = Depends(_require_internal_api_key),
+):
     """Proxy batch video job to RunPod Serverless endpoint."""
     if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
         return JSONResponse(
@@ -1419,7 +1434,10 @@ def runpod_batch_proxy(request: RunPodBatchJobRequest):
 
 
 @app.post("/jobs/runpod")
-def runpod_proxy(request: RunPodJobRequest):
+def runpod_proxy(
+    request: RunPodJobRequest,
+    _: None = Depends(_require_internal_api_key),
+):
     if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
         return JSONResponse(
             status_code=501,
@@ -1439,7 +1457,10 @@ def runpod_proxy(request: RunPodJobRequest):
 
 
 @app.get("/jobs/runpod/{job_id}")
-def runpod_status(job_id: str):
+def runpod_status(
+    job_id: str,
+    _: None = Depends(_require_internal_api_key),
+):
     if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
         return JSONResponse(status_code=501, content={"ok": False, "message": "RunPod not configured."})
 

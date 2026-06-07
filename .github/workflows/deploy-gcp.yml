@@ -107,6 +107,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
           RUNPOD_ENDPOINT_ID: ${{ secrets.RUNPOD_ENDPOINT_ID }}
+          FASTAPI_INTERNAL_API_KEY: ${{ secrets.FASTAPI_INTERNAL_API_KEY }}
         run: |
           cat > /tmp/deploy.sh << 'SCRIPT_EOF'
           set -e
@@ -158,6 +159,7 @@ jobs:
                 - GROQ_API_KEY=${GROQ_API_KEY}
                 - RUNPOD_API_KEY=${RUNPOD_API_KEY}
                 - RUNPOD_ENDPOINT_ID=${RUNPOD_ENDPOINT_ID}
+                - FASTAPI_INTERNAL_API_KEY=${FASTAPI_INTERNAL_API_KEY}
               restart: unless-stopped
 
             chromadb:
@@ -234,6 +236,7 @@ jobs:
           GROQ_API_KEY=__GROQ_API_KEY__
           RUNPOD_API_KEY=__RUNPOD_API_KEY__
           RUNPOD_ENDPOINT_ID=__RUNPOD_ENDPOINT_ID__
+          FASTAPI_INTERNAL_API_KEY=__FASTAPI_INTERNAL_API_KEY__
           ENV_EOF
 
           # .env 파일의 값을 쉘 환경에 export하여 docker-compose 변수 치환에 확실히 반영
@@ -273,6 +276,7 @@ jobs:
           sed -i "s|__GROQ_API_KEY__|${GROQ_API_KEY}|g" /tmp/deploy.sh
           sed -i "s|__RUNPOD_API_KEY__|${RUNPOD_API_KEY}|g" /tmp/deploy.sh
           sed -i "s|__RUNPOD_ENDPOINT_ID__|${RUNPOD_ENDPOINT_ID}|g" /tmp/deploy.sh
+          sed -i "s|__FASTAPI_INTERNAL_API_KEY__|${FASTAPI_INTERNAL_API_KEY}|g" /tmp/deploy.sh
 
       - name: Deploy to GCP VM
         run: |
