@@ -85,12 +85,16 @@ RUN ${AD_PIP} install \
         "torchaudio==0.13.1" \
         --extra-index-url https://download.pytorch.org/whl/cu116
 
-# Step 4: mmcv-full (try prebuilt wheel, fall back to source build)
+# Step 4: mmcv-full (prebuilt wheel from openmmlab → PyPI fallback → source build)
 RUN ${AD_PIP} install \
         "mmcv-full==1.7.0" \
-        -f https://download.openmmlab.com/mmcv/dist/cu116/torch1.13.0/index.html || \
-    ( echo "WARN: prebuilt mmcv-full wheel unavailable, building from source..." && \
-      ${AD_PIP} install "mmcv-full==1.7.0" )
+        -f https://download.openmmlab.com/mmcv/dist/cu116/torch1.13.0/index.html \
+        --timeout 30 --retries 1 || \
+    ( echo "WARN: openmmlab mirror timed out, trying mmcv from PyPI..." && \
+      ${AD_PIP} install "mmcv-full==1.7.0" --timeout 60 ) || \
+    ( echo "WARN: mmcv-full install failed, trying openmim..." && \
+      ${AD_PIP} install openmim && \
+      /opt/miniconda/envs/ad_env/bin/mim install "mmcv-full==1.7.0" )
 
 # Step 5: mmdet + mmpose
 RUN ${AD_PIP} install "mmdet==2.28.2" "mmpose==0.28.1"
@@ -162,6 +166,18 @@ RUN python -c "from diffusers import CogVideoXImageToVideoPipeline; CogVideoXIma
 RUN python -c "from audiocraft.models import MusicGen; MusicGen.get_pretrained('facebook/musicgen-small')" || echo "WARN: MusicGen pre-download failed — sine-wave fallback available"
 RUN python -c "from transformers import BlipProcessor, BlipForConditionalGeneration; BlipProcessor.from_pretrained('Salesforce/blip-image-captioning-base'); BlipForConditionalGeneration.from_pretrained('Salesforce/blip-image-captioning-base')" || echo "WARN: BLIP pre-download failed — will download at runtime"
 RUN python -c "from transformers import AutoTokenizer, AutoModelForSeq2SeqLM; AutoTokenizer.from_pretrained('Helsinki-NLP/opus-mt-en-ko'); AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-en-ko')" || echo "WARN: MarianMT pre-download failed — will download at runtime"
+
+# opencv-python-headless (needed for depth parallax rendering in main env)
+RUN pip install --no-cache-dir opencv-python-headless
+
+# MoGe depth model (optional, MiDaS fallback available)
+RUN pip install --no-cache-dir moge-model || echo "WARN: MoGe install failed — MiDaS fallback"
+
+# MiDaS DPT-Large model pre-download
+RUN python -c "from transformers import DPTForDepthEstimation, DPTImageProcessor; \
+    DPTImageProcessor.from_pretrained('Intel/dpt-large'); \
+    DPTForDepthEstimation.from_pretrained('Intel/dpt-large')" \
+    || echo "WARN: MiDaS pre-download failed — will download at runtime"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Application code (changes here do NOT re-download models)
