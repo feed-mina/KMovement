@@ -358,7 +358,7 @@ class RunPodBatchJobRequest(BaseModel):
     place: str = "Community Post"
     images: list[BatchImageInput] = Field(..., min_length=1, max_length=10)
     bgm_key: str = "bright_travel"
-    photo_route: str = "3d_photo_light"
+    photo_route: str = "cogvideox_real"
     allow_fallback: bool = True
 
 

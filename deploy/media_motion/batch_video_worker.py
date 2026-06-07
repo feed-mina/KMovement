@@ -75,8 +75,10 @@ def _generate_photo_segment(
         out = output_dir / f"{case.case_id}_cogvideox.mp4"
         try:
             return create_cogvideox_real_video(case.image_path, out, cfg=cfg)
-        except Exception:
-            pass
+        except Exception as exc:
+            print(f"[batch_video] CogVideoX failed for {case.case_id}: {exc}")
+            import traceback
+            traceback.print_exc()
 
     # Default / fallback: 3d_photo_light (ffmpeg zoompan)
     out = output_dir / f"{case.case_id}_zoompan.mp4"
@@ -122,8 +124,11 @@ def _generate_sketch_segment(
             if not mp4.exists():
                 mp4 = gif_to_mp4(raw_gif, mp4) if raw_gif.exists() else gif_path
             return mp4, raw_gif if raw_gif.exists() else None
-        except Exception:
-            pass  # fall through to zoompan fallback
+        except Exception as exc:
+            print(f"[batch_video] AnimatedDrawings failed for {case.case_id}: {exc}")
+            import traceback
+            traceback.print_exc()
+            # fall through to zoompan fallback
 
     # Fallback: simple zoompan for sketch
     out = output_dir / f"{case.case_id}_sketch_zoom.mp4"
@@ -171,28 +176,34 @@ def run_batch_video_case(
     sketch_gifs: dict[int, Path] = {}
 
     for item, img_type in classified:
-        if img_type == "photo":
-            video = _generate_photo_segment(
-                item, batch_case.case_id, raw_dir, batch_case.photo_route, cfg,
-            )
-        else:
-            video, gif = _generate_sketch_segment(
-                item, batch_case.case_id, raw_dir, cfg,
-            )
-            if gif:
-                sketch_gifs[item.index] = gif
+        try:
+            if img_type == "photo":
+                video = _generate_photo_segment(
+                    item, batch_case.case_id, raw_dir, batch_case.photo_route, cfg,
+                )
+            else:
+                video, gif = _generate_sketch_segment(
+                    item, batch_case.case_id, raw_dir, cfg,
+                )
+                if gif:
+                    sketch_gifs[item.index] = gif
 
-        # TTS for this segment
-        if item.tts_text.strip():
-            tts_wav = synthesize_gtts(
-                item.tts_text,
-                tts_dir / f"{batch_case.case_id}_img{item.index}.wav",
-            )
-            segment_with_tts = segments_dir / f"{batch_case.case_id}_seg{item.index}.mp4"
-            mix_video_tts(video, tts_wav, segment_with_tts)
-            segment_paths.append(segment_with_tts)
-        else:
-            segment_paths.append(video)
+            # TTS for this segment
+            if item.tts_text.strip():
+                tts_wav = synthesize_gtts(
+                    item.tts_text,
+                    tts_dir / f"{batch_case.case_id}_img{item.index}.wav",
+                )
+                segment_with_tts = segments_dir / f"{batch_case.case_id}_seg{item.index}.mp4"
+                mix_video_tts(video, tts_wav, segment_with_tts)
+                segment_paths.append(segment_with_tts)
+            else:
+                segment_paths.append(video)
+        except Exception as exc:
+            print(f"[batch_video] Segment generation failed for image {item.index} ({img_type}): {exc}")
+            import traceback
+            traceback.print_exc()
+            # Skip this image and continue with remaining images
 
     # Step 2b: If both photos and sketches, overlay sketch GIFs on photo segments
     if has_both and sketch_gifs:

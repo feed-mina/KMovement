@@ -60,7 +60,7 @@ public class AnimationController {
         }
 
         String bgmKey = body.getOrDefault("bgmKey", "bright_travel").toString();
-        String photoRoute = body.getOrDefault("photoRoute", "3d_photo_light").toString();
+        String photoRoute = body.getOrDefault("photoRoute", "cogvideox_real").toString();
 
         AnimationJob job = animationService.submitBatchAnimation(postId, images, bgmKey, photoRoute);
         Map<String, Object> result = Map.of(

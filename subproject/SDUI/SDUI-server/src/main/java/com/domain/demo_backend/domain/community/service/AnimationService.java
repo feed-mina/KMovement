@@ -96,7 +96,7 @@ public class AnimationService {
         payload.put("place", "Community Post");
         payload.put("images", images);
         payload.put("bgm_key", bgmKey != null ? bgmKey : "bright_travel");
-        payload.put("photo_route", photoRoute != null ? photoRoute : "3d_photo_light");
+        payload.put("photo_route", photoRoute != null ? photoRoute : "cogvideox_real");
         payload.put("allow_fallback", true);
 
         Map<String, Object> response;

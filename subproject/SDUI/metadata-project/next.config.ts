@@ -35,6 +35,7 @@ const connectSrc = [
     'https://*.gstatic.com',
     'wss://ws-us3.pusher.com',
     'https://*.supabase.co',
+    'https://res.cloudinary.com',
 ];
 
 const nextConfig: NextConfig = {
@@ -86,7 +87,7 @@ const nextConfig: NextConfig = {
                             "img-src 'self' data: blob: https: http://*.daumcdn.net http://*.kakaocdn.net https://*.daumcdn.net https://*.kakao.com https://*.kakaocdn.net https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com https://*.supabase.co",
                             `connect-src ${Array.from(new Set(connectSrc)).join(' ')}`,
                             "font-src 'self' data: https://fonts.gstatic.com",
-                            "media-src 'self' blob: https://*.supabase.co",
+                            "media-src 'self' blob: https://*.supabase.co https://res.cloudinary.com",
                             "frame-src http://postcode.map.daum.net https://postcode.map.daum.net http://postcode.map.kakao.com https://postcode.map.kakao.com",
                             "object-src 'none'",
                             "frame-ancestors 'none'",

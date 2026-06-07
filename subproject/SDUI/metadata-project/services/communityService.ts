@@ -149,7 +149,7 @@ export const communityService = {
         postId: number,
         images: BatchImageInput[],
         bgmKey = 'bright_travel',
-        photoRoute = '3d_photo_light',
+        photoRoute = 'cogvideox_real',
     ) {
         const res = await api.post(`${BASE}/posts/${postId}/animate/batch`, {
             images: images.map((img) => ({
