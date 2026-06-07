@@ -19,7 +19,7 @@ import CommunityPage from "@/components/community/CommunityPage";
 
 
 //  보호가 필요한 스크린 ID 목록 정의
-const PROTECTED_SCREENS = ["MY_PAGE", "CONTENT_LIST", "CONTENT_WRITE", "CONTENT_DETAIL", "CONTENT_MODIFY", "USER_LIST", "AI_ENGLISH_CHAT_PAGE", "AI_KOREAN_CHAT_PAGE", "KRIDE_MY_LIST", "KRIDE_CHAT"];
+const PROTECTED_SCREENS = ["MY_PAGE", "CONTENT_LIST", "CONTENT_WRITE", "CONTENT_DETAIL", "CONTENT_MODIFY", "USER_LIST", "AI_ENGLISH_CHAT_PAGE", "AI_JAPANESE_CHAT_PAGE", "AI_KOREAN_CHAT_PAGE", "KRIDE_MY_LIST", "KRIDE_CHAT"];
 
 
 import KrideChatComponent from "@/components/fields/kride/chat/KrideChatComponent";

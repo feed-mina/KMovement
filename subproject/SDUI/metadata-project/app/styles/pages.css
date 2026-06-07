@@ -2504,6 +2504,38 @@ button:hover {
     background: #182030;
 }
 
+.main-ai-chat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.bento-card-ai {
+    min-height: 130px;
+    justify-content: center;
+    cursor: pointer;
+    border: 1.5px solid #e2e8f0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.bento-card-ai-en {
+    background: linear-gradient(145deg, #eff6ff, #ffffff);
+    color: #1e3a8a;
+}
+
+.bento-card-ai-ja {
+    background: linear-gradient(145deg, #fff1f2, #ffffff);
+    color: #be123c;
+}
+
+.bento-card-ai:hover,
+.bento-card-ai:focus-visible {
+    transform: translateY(-3px);
+    border-color: currentColor;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+    outline: none;
+}
+
 /* ── 카드 내부 요소 ── */
 .bento-card-body {
     display: flex;
@@ -2623,6 +2655,10 @@ button:hover {
     .col-span-2,
     .col-span-3 {
         grid-column: 1 !important;
+    }
+
+    .main-ai-chat-grid {
+        grid-template-columns: 1fr;
     }
 }
 

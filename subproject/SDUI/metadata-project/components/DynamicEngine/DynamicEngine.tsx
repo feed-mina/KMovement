@@ -126,12 +126,23 @@ const DynamicEngine: React.FC<DynamicEngineProps> = (props) => {
 
                 // 4. 일반 그룹의 클릭 핸들러 (rowData 전달)
                 const handleGroupClick = hasAction ? () => onAction(node, rowData) : undefined;
+                const handleGroupKeyDown = hasAction
+                    ? (event: React.KeyboardEvent<HTMLDivElement>) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            onAction(node, rowData);
+                        }
+                    }
+                    : undefined;
                 return (
                     <div
                         key={uId}
                         className={combinedClassName}
                         style={{ cursor: hasAction ? 'pointer' : 'default' }}
                         onClick={handleGroupClick}
+                        onKeyDown={handleGroupKeyDown}
+                        role={hasAction ? 'link' : undefined}
+                        tabIndex={hasAction ? 0 : undefined}
                     >
                         {renderNodes(node.children, rowData)}
                     </div>

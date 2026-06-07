@@ -99,10 +99,6 @@ export default function Sidebar() {
                                 onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/COMMUNITY_LIST' })}>
                                 커뮤니티
                             </div>
-                            <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/TUTORIAL_PAGE' ? 'bg-green-50 text-green-700 font-bold' : ''}`}
-                                onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/TUTORIAL_PAGE' })}>
-                                튜토리얼 보러가기
-                            </div>
                         </nav>
                     ) : (
                         <div className="text-red-500 text-sm text-center">로그인 메타데이터 누락</div>
