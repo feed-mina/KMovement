@@ -1,0 +1,92 @@
+# Tora CogVideoX-5B I2V — Trajectory-controlled Image-to-Video
+# Official Tora environment: Python 3.10, PyTorch 2.4.0, CUDA 12.1
+#
+# Build:
+#   docker build -f deploy/media_motion/Dockerfile.tora -t kride-tora-gpu .
+#
+# Run:
+#   docker run --gpus all -p 8000:8000 \
+#     -v /path/to/tora-checkpoints:/runpod-vol/tora \
+#     kride-tora-gpu
+
+FROM ghcr.io/pytorch/pytorch:2.4.0-cuda12.1-cudnn9-devel
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    KRIDE_MEDIA_DIR=/app/media \
+    KRIDE_WORKER_OUTPUT_DIR=/tmp/kride_outputs \
+    KRIDE_WORKER_ALLOW_FALLBACK=true \
+    KRIDE_COGVIDEOX_CPU_OFFLOAD=true \
+    KRIDE_RESULT_URL_REQUIRED=true \
+    KRIDE_MAX_INLINE_OUTPUT_BYTES=6291456 \
+    KRIDE_TORA_DIR=/app/Tora \
+    KRIDE_TORA_CHECKPOINT_PATH=/runpod-vol/tora/i2v/mp_rank_00_model_states.pt \
+    KRIDE_TORA_ENABLED=true \
+    KRIDE_COGVIDEOX_MODEL_ID=zai-org/CogVideoX-5b-I2V
+
+WORKDIR /app
+
+# ─────────────────────────────────────────────────────────────────────────────
+# System dependencies
+# ─────────────────────────────────────────────────────────────────────────────
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ffmpeg git curl wget \
+        libglib2.0-0 && \
+    rm -rf /var/lib/apt/lists/*
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Tora repository (commit SHA pinned for reproducibility)
+# ─────────────────────────────────────────────────────────────────────────────
+RUN git clone https://github.com/alibaba/Tora.git /app/Tora
+
+# SwissArmyTransformer (Tora dependency)
+RUN cd /app/Tora/modules/SwissArmyTransformer && pip install --no-cache-dir -e .
+
+# Tora sat requirements
+RUN cd /app/Tora/sat && pip install --no-cache-dir -r requirements.txt
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Python dependencies — KRIDE worker
+# ─────────────────────────────────────────────────────────────────────────────
+RUN pip install --no-cache-dir "numpy<2"
+
+COPY deploy/media_motion/requirements.txt /tmp/req-base.txt
+RUN pip install --no-cache-dir -r /tmp/req-base.txt
+
+COPY deploy/media_motion/requirements-tora.txt /tmp/req-tora.txt
+RUN pip install --no-cache-dir -r /tmp/req-tora.txt
+
+# CogVideoX I2V pipeline (used as fallback when Tora fails)
+COPY deploy/media_motion/requirements-cogvideox.txt /tmp/req-cogvideox.txt
+RUN pip install --no-cache-dir -r /tmp/req-cogvideox.txt
+
+# sentencepiece — required by MarianMT (BLIP-2 caption translation)
+RUN pip install --no-cache-dir sentencepiece
+
+# RunPod SDK
+RUN pip install --no-cache-dir "runpod>=1.7,<2"
+
+# opencv-python-headless (depth parallax fallback)
+RUN pip install --no-cache-dir opencv-python-headless
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pre-download model weights
+# ─────────────────────────────────────────────────────────────────────────────
+RUN python -c "from diffusers import CogVideoXImageToVideoPipeline; CogVideoXImageToVideoPipeline.from_pretrained('zai-org/CogVideoX-5b-I2V')" \
+    || echo "WARN: CogVideoX-5b-I2V pre-download failed — will download at runtime"
+
+RUN python -c "from transformers import BlipProcessor, BlipForConditionalGeneration; BlipProcessor.from_pretrained('Salesforce/blip-image-captioning-base'); BlipForConditionalGeneration.from_pretrained('Salesforce/blip-image-captioning-base')" \
+    || echo "WARN: BLIP pre-download failed"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Application code
+# ─────────────────────────────────────────────────────────────────────────────
+COPY deploy /app/deploy
+
+RUN mkdir -p /tmp/kride_outputs /app/media
+
+# Tora checkpoint is expected on RunPod Network Volume at:
+#   /runpod-vol/tora/i2v/mp_rank_00_model_states.pt
+
+CMD ["python", "-u", "-m", "deploy.media_motion.runpod_handler"]

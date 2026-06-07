@@ -1,0 +1,12 @@
+# Tora-specific dependencies (beyond SwissArmyTransformer + sat/requirements.txt)
+# These are installed in the Tora Dockerfile after the official Tora deps.
+
+# Image processing
+Pillow>=10.0
+imageio
+imageio-ffmpeg
+
+# Utilities
+tqdm
+pyyaml
+requests
