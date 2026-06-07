@@ -37,11 +37,13 @@ public class AnimationService {
     private static final Set<String> ALLOWED_ROUTES = Set.of(
             "animated_drawings_worker",
             "cogvideox_real",
-            "3d_photo_inpainting_real"
+            "3d_photo_inpainting_real",
+            "tora_cogvideox_i2v"
     );
     private static final Set<String> ALLOWED_PHOTO_ROUTES = Set.of(
             "cogvideox_real",
-            "3d_photo_light"
+            "3d_photo_light",
+            "tora_cogvideox_i2v"
     );
     private static final List<String> ACTIVE_STATUSES = List.of("QUEUED", "RUNNING");
     private static final Set<String> TERMINAL_STATUSES = Set.of(

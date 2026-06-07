@@ -19,7 +19,7 @@ public class BatchAnimationRequest {
     @Pattern(regexp = "bright_travel|cute_character|city_walk|cinematic_memory")
     private String bgmKey = "bright_travel";
 
-    @Pattern(regexp = "cogvideox_real|3d_photo_light")
+    @Pattern(regexp = "cogvideox_real|3d_photo_light|tora_cogvideox_i2v")
     private String photoRoute = "cogvideox_real";
 
     private String bgmDescription = "";
