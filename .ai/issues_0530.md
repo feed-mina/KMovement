@@ -559,6 +559,47 @@ API 응답 구조와 프론트엔드 타입 불일치:
 
 ---
 
+## 19. 배치 영상 품질 개선 + BGM/TTS 수정 + CSP Cloudinary 추가 [수정 완료] (2026-06-07)
+
+### 현상 (3가지 문제)
+1. **영상 품질 저하**: `photo_route` 기본값이 `3d_photo_light` (ffmpeg zoompan) → CogVideoX GPU 모델 미사용
+2. **BGM 안 들림**: sine wave BGM이 `-18dB` 감쇠로 거의 무음
+3. **CSP 차단**: `res.cloudinary.com`이 `media-src`에 미등록 → 브라우저에서 영상 재생 차단
+
+### 수정 내용
+
+#### (1) photoRoute 기본값 `3d_photo_light` → `cogvideox_real` (4파일)
+- `communityService.ts:152` — `submitBatchAnimation()` 기본 파라미터
+- `AnimationService.java:99` — fallback 기본값
+- `AnimationController.java:63` — fallback 기본값
+- `cloud_gateway/app.py:361` — `RunPodBatchJobRequest.photo_route` 기본값
+
+#### (2) BGM 볼륨 조정 (`ffmpeg_utils.py`)
+- `mix_video_tts_bgm()`: `-18dB` → `-8dB`
+- `apply_bgm_to_video()`: `-18dB` → `-8dB`
+- `make_sine_bgm()`: `-18dB/-22dB` → `-10dB/-14dB`
+
+#### (3) 에러 로깅 강화 (`batch_video_worker.py`)
+- `_generate_photo_segment()`: CogVideoX 실패 시 `print()` + `traceback.print_exc()`
+- `_generate_sketch_segment()`: AnimatedDrawings 실패 시 동일
+- `run_batch_video_case()`: segment 루프 try/except + 실패 이미지 건너뛰기
+
+#### (4) CSP Cloudinary 추가 (`next.config.ts`) — 이전 커밋에서 완료
+- `connectSrc` + `media-src`에 `https://res.cloudinary.com`
+
+### 상태: ✅ 수정 완료 — 배포 필요 (RunPod 이미지 재빌드 + EC2/GCP 재배포)
+
+---
+
+## 우선순위 정리 (최종 업데이트 2026-06-07)
+
+| # | 이슈 | 상태 | 조치 |
+|---|------|------|------|
+| 1~18 | (이전 이슈 모두) | ✅ | — |
+| 19 | 배치 영상 품질/BGM/CSP | ✅ | photoRoute→cogvideox_real, BGM 볼륨 +10dB, 에러 로깅, CSP 추가 |
+
+---
+
 ## 참조 문서
 - `.ai/issues_0529.md` — 이전 미해결 이슈 (구글 캘린더 + BTS 광화문)
 - `.ai/code_review_0527.md` — K5 (Security 인증 설정) 관련
