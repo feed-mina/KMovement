@@ -101,6 +101,23 @@ def _generate_photo_segment(
 
     resolved_route = _resolve_photo_route(item, photo_route, cfg)
 
+    if resolved_route == "animated_drawings_worker":
+        ad_available = bool(cfg.animated_drawings_dir and cfg.animated_drawings_dir.resolve().exists())
+        if ad_available:
+            try:
+                gif_path = run_animated_drawings_pipeline(case, output_dir, cfg)
+                work_dir = output_dir / f"{case.case_id}_animated_drawings_work"
+                raw_gif = work_dir / "video.gif"
+                mp4 = output_dir / f"{case.case_id}_animated_drawings.mp4"
+                if not mp4.exists():
+                    mp4 = gif_to_mp4(raw_gif, mp4) if raw_gif.exists() else gif_path
+                return mp4, "animated_drawings_worker"
+            except Exception as exc:
+                print(f"[batch_video] AnimatedDrawings failed for {case.case_id}: {exc}")
+                import traceback
+                traceback.print_exc()
+                # Fall through to 3d_photo_light
+
     if resolved_route == "tora_cogvideox_i2v":
         from .tora_cogvideox_real import create_tora_cogvideox_video
 

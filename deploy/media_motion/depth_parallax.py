@@ -146,8 +146,13 @@ def estimate_depth(
     )
     depth = depth_resized.squeeze().numpy().astype(np.float32)
 
+    # MiDaS DPT outputs **inverse depth** (disparity): large values = close.
+    # Invert to get metric-like depth: large values = far.
+    depth[depth < 1e-6] = 1e-6
+    depth = 1.0 / depth
+
     # MiDaS has no mask/intrinsics — use defaults
-    mask = np.ones((h_orig, w_orig), dtype=bool)
+    mask = np.isfinite(depth)
     K = np.array([
         [float(w_orig), 0.0, w_orig / 2.0],
         [0.0, float(w_orig), h_orig / 2.0],
@@ -223,7 +228,7 @@ def _forward_splat_zbuffer(
     z_flat = z_new.ravel()
     idx_flat = np.arange(h * w)
 
-    valid = (dst_x >= 0) & (dst_x < w) & (dst_y >= 0) & (dst_y < h) & (z_flat > 0)
+    valid = (dst_x >= 0) & (dst_x < w) & (dst_y >= 0) & (dst_y < h) & np.isfinite(z_flat) & (z_flat > 0)
     dst_x = dst_x[valid]
     dst_y = dst_y[valid]
     z_val = z_flat[valid]
@@ -279,15 +284,16 @@ def render_parallax_video(
 
     # Normalise depth to usable range [1, 5]
     d = dr.depth.astype(np.float64)
-    valid_d = d[dr.mask] if dr.mask.any() else d.ravel()
+    valid_mask = dr.mask & np.isfinite(d) & (d > 0)
+    valid_d = d[valid_mask] if valid_mask.any() else d.ravel()
     d_min, d_max = valid_d.min(), valid_d.max()
     if d_max - d_min > 1e-6:
         d = 1.0 + 4.0 * (d - d_min) / (d_max - d_min)
     else:
         d = np.full_like(d, 3.0)
 
-    # Zero out invalid pixels (from MoGe mask)
-    d[~dr.mask] = 0.0
+    # Mark invalid pixels with NaN so they are excluded from Z-buffer
+    d[~valid_mask] = np.nan
 
     # Pre-compute pixel grid
     x_grid, y_grid = np.meshgrid(
@@ -311,61 +317,64 @@ def render_parallax_video(
     frame_dir = output_mp4.parent / f"_frames_{output_mp4.stem}"
     frame_dir.mkdir(parents=True, exist_ok=True)
 
+    # Precompute valid-pixel mask for depth (NaN = invalid)
+    depth_valid = np.isfinite(d)
+
     for t, C_t in enumerate(rt_sequence):
         # ── Forward warp (source→dest) for Z-buffer ──
         C_t_inv = np.linalg.inv(C_t)
         fwd = points_3d @ C_t_inv.T  # [H, W, 4]
         z_fwd = fwd[..., 2].copy()
-        z_fwd[z_fwd < 1e-5] = 1e-5
-        fwd_x = (fwd[..., 0] * fx / z_fwd + cx)
-        fwd_y = (fwd[..., 1] * fy / z_fwd + cy)
+        # Mark invalid pixels with inf so they lose in Z-buffer
+        z_fwd[~depth_valid] = np.inf
+        z_safe = z_fwd.copy()
+        z_safe[z_safe < 1e-5] = 1e-5
+        fwd_x = (fwd[..., 0] * fx / z_safe + cx)
+        fwd_y = (fwd[..., 1] * fy / z_safe + cy)
 
         zbuf, src_idx = _forward_splat_zbuffer(fwd_x, fwd_y, z_fwd, h, w)
 
-        # ── Inverse warp (dest→source) for cv2.remap ──
-        # For destination pixel (x', y'), find which source pixel maps there.
-        # Inverse of C_t⁻¹ is C_t itself.
-        # Dest 3D = un-project dest pixel with dest depth from zbuf,
-        # then transform by C_t to get source 3D, then project to source 2D.
-        #
-        # But zbuf gives us the source index directly — use that for the
-        # remap. Where src_idx == -1, the pixel is a disoccluded hole.
-        hole_mask = (src_idx < 0).astype(np.uint8)
+        # ── Analytic inverse warp (dest→source) for sub-pixel cv2.remap ──
+        # For each destination pixel with a valid zbuf entry, un-project
+        # using the Z-buffer depth, transform by C_t (inverse of C_t_inv),
+        # then project back to source pixel coordinates.
+        hole_mask = np.isinf(zbuf) | (zbuf <= 0)
 
-        # Build remap from source indices
-        src_y_flat = np.zeros(h * w, dtype=np.float32)
-        src_x_flat = np.zeros(h * w, dtype=np.float32)
+        # Un-project destination pixels using Z-buffer depth
+        dest_z = zbuf.copy()
+        dest_z[hole_mask] = 1.0  # placeholder, will be masked
 
-        flat_idx = src_idx.ravel()
-        valid = flat_idx >= 0
+        dest_x3d = (x_grid - cx) * dest_z / fx
+        dest_y3d = (y_grid - cy) * dest_z / fy
+        dest_pts = np.stack(
+            (dest_x3d, dest_y3d, dest_z, np.ones_like(dest_z)),
+            axis=-1,
+        )  # [H, W, 4]
 
-        # Source pixel coords from flat index
-        src_y_flat[valid] = (flat_idx[valid] // w).astype(np.float32)
-        src_x_flat[valid] = (flat_idx[valid] % w).astype(np.float32)
+        # Transform back to source frame
+        src_pts = dest_pts @ C_t.T  # C_t is inverse of C_t_inv
+        src_z = src_pts[..., 2]
+        src_z[src_z < 1e-5] = 1e-5
+        map_x = (src_pts[..., 0] * fx / src_z + cx).astype(np.float32)
+        map_y = (src_pts[..., 1] * fy / src_z + cy).astype(np.float32)
 
-        map_x = src_x_flat.reshape(h, w)
-        map_y = src_y_flat.reshape(h, w)
+        # Mark holes
+        map_x[hole_mask] = -1.0
+        map_y[hole_mask] = -1.0
 
-        # For holes, set to -1 (will be border-filled then inpainted)
-        map_x[hole_mask == 1] = -1.0
-        map_y[hole_mask == 1] = -1.0
-
-        # Remap: destination→source (correct direction for cv2.remap)
+        # Remap with sub-pixel bilinear interpolation
         frame = cv2.remap(
             image, map_x, map_y, cv2.INTER_LINEAR,
             borderMode=cv2.BORDER_REPLICATE,
         )
 
-        # Also mark invalid mask pixels
-        invalid_mask = hole_mask.copy()
-        if not dr.mask.all():
-            # Pixels from invalid depth regions
-            src_invalid = np.zeros(h * w, dtype=np.uint8)
-            mask_flat = dr.mask.ravel()
-            src_invalid[valid] = (~mask_flat[flat_idx[valid].astype(int)]).astype(np.uint8)
-            invalid_mask = np.clip(
-                invalid_mask + src_invalid.reshape(h, w), 0, 1
-            ).astype(np.uint8)
+        # Build invalid mask: holes + pixels mapped from invalid depth
+        invalid_mask = hole_mask.astype(np.uint8)
+        # Also check if source coords land on invalid-depth pixels
+        src_xi = np.clip(np.round(map_x).astype(int), 0, w - 1)
+        src_yi = np.clip(np.round(map_y).astype(int), 0, h - 1)
+        src_from_invalid = ~depth_valid[src_yi, src_xi] & ~hole_mask
+        invalid_mask[src_from_invalid] = 1
 
         # Inpaint only actual holes (disoccluded + invalid depth)
         if invalid_mask.any():

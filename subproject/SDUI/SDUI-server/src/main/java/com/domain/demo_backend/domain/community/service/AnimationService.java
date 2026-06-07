@@ -41,6 +41,7 @@ public class AnimationService {
             "tora_cogvideox_i2v"
     );
     private static final Set<String> ALLOWED_PHOTO_ROUTES = Set.of(
+            "auto",
             "cogvideox_real",
             "3d_photo_light",
             "tora_cogvideox_i2v"

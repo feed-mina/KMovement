@@ -1374,6 +1374,7 @@ class RunPodJobRequest(BaseModel):
     tts_text: str = "여행 영상입니다."
     bgm_key: str = "bright_travel"
     motion: str = "slow_zoom_in"
+    motion_intensity: float = 0.03
     prompt: str = ""
     allow_fallback: bool = True
     musicgen_description: str = "calm Korean ambient music"
