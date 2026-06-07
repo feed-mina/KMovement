@@ -17,6 +17,9 @@ class TravelCase:
     prompt: str = ""
     route: str = ""
     motion: str = "slow_zoom_in"
+    motion_intensity: float = 0.03
+    trajectory_points: list | None = None  # [[x,y], ...] normalized 0.0~1.0
+    trajectory_preset: str = ""  # "object_pan_right", "arc_up", etc.
 
 
 @dataclass(slots=True)
@@ -37,7 +40,7 @@ class BatchTravelCase:
     place: str
     items: list[BatchImageItem]
     bgm_key: str = "bright_travel"
-    photo_route: str = "3d_photo_light"  # "cogvideox_real", "3d_photo_light", etc.
+    photo_route: str = "auto"  # "auto", "cogvideox_real", "3d_photo_light"
     bgm_description: str = ""  # MusicGen prompt (empty → bgm_key sine-wave fallback)
     bgm_duration: int = 15  # MusicGen generation length in seconds
 

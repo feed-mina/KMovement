@@ -75,6 +75,7 @@ def create_3d_photo_light_video(case: TravelCase, output_dir: Path) -> Path:
         if cfg.depth_parallax_enabled:
             return create_depth_parallax_video(
                 case.image_path, output_mp4, motion=case.motion, cfg=cfg,
+                intensity=case.motion_intensity,
             )
     except Exception as exc:
         print(f"[3d_photo_light] Depth parallax failed, using zoompan: {exc}")

@@ -53,6 +53,37 @@ def _resolve_type(item: BatchImageItem) -> str:
     return _classify_image(item.image_path)
 
 
+def _resolve_photo_route(
+    item: BatchImageItem,
+    photo_route: str,
+    cfg: WorkerConfig,
+) -> str:
+    """Resolve photo_route="auto" to a concrete route using BLIP-2 caption."""
+    if photo_route != "auto":
+        return photo_route
+
+    if not cfg.blip2_enabled:
+        return "cogvideox_real"
+
+    try:
+        from .blip2_captioning import generate_english_caption
+        from .routers import route_media_motion
+
+        en_caption = generate_english_caption(item.image_path, cfg)
+        if not en_caption:
+            return "cogvideox_real"
+
+        is_sketch = _classify_image(item.image_path) == "sketch"
+        resolved = route_media_motion(
+            en_caption, is_doodle=is_sketch, is_static_photo=True,
+        )
+        print(f"[batch_video] Auto-route img{item.index}: '{en_caption}' → {resolved}")
+        return resolved
+    except Exception as exc:
+        print(f"[batch_video] Auto-route failed for img{item.index}: {exc}")
+        return "cogvideox_real"
+
+
 def _generate_photo_segment(
     item: BatchImageItem,
     case_id: str,
@@ -68,7 +99,21 @@ def _generate_photo_segment(
         tts_text=item.tts_text,
     )
 
-    if photo_route == "cogvideox_real":
+    resolved_route = _resolve_photo_route(item, photo_route, cfg)
+
+    if resolved_route == "tora_cogvideox_i2v":
+        from .tora_cogvideox_real import create_tora_cogvideox_video
+
+        out = output_dir / f"{case.case_id}_tora_i2v.mp4"
+        try:
+            return create_tora_cogvideox_video(case, out, cfg=cfg), "tora_cogvideox_i2v"
+        except Exception as exc:
+            print(f"[batch_video] Tora CogVideoX failed for {case.case_id}: {exc}")
+            import traceback
+            traceback.print_exc()
+            # Fall through to cogvideox_real, then 3d_photo_light
+
+    if resolved_route in ("cogvideox_real", "tora_cogvideox_i2v"):
         from .cogvideox_real import create_cogvideox_real_video
 
         out = output_dir / f"{case.case_id}_cogvideox.mp4"

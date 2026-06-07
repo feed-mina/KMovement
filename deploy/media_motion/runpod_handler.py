@@ -2,6 +2,7 @@
 RunPod Serverless Handler for K-Ride Media Motion
 ==================================================
 Supported routes:
+  - tora_cogvideox_i2v  (GPU: Tora trajectory-controlled CogVideoX I2V)
   - cogvideox_real      (GPU: CogVideoX image-to-video)
   - 3d_photo_light      (CPU: ffmpeg zoompan)
   - cogvideo_fallback   (CPU: ffmpeg photo-motion)
@@ -48,6 +49,7 @@ from .result_delivery import finalize_result
 from .schemas import BatchImageItem, BatchTravelCase, TravelCase
 from .three_d_photo_light import run_3d_photo_light_case
 from .three_d_photo_real import run_3d_photo_inpainting_real_case
+from .tora_cogvideox_real import run_tora_cogvideox_case
 from .worker_config import load_worker_config
 
 SUPPORTED_ROUTES = {
@@ -59,6 +61,7 @@ SUPPORTED_ROUTES = {
     "musicgen",
     "animated_drawings_worker",
     "batch_video",
+    "tora_cogvideox_i2v",
 }
 
 OUTPUT_DIR = Path(os.environ.get("KRIDE_WORKER_OUTPUT_DIR", "/tmp/kride_outputs"))
@@ -291,7 +294,7 @@ def handler(job: dict) -> dict:
                 place=job_input.get("place", "Community Post"),
                 items=items,
                 bgm_key=job_input.get("bgm_key", "bright_travel"),
-                photo_route=job_input.get("photo_route", "3d_photo_light"),
+                photo_route=job_input.get("photo_route", "auto"),
                 bgm_description=job_input.get("bgm_description", ""),
                 bgm_duration=min(job_input.get("bgm_duration", 15), 30),
             )
@@ -329,6 +332,9 @@ def handler(job: dict) -> dict:
             bgm_key=job_input.get("bgm_key", "bright_travel"),
             prompt=job_input.get("prompt", ""),
             motion=job_input.get("motion", "slow_zoom_in"),
+            motion_intensity=float(job_input.get("motion_intensity", 0.03)),
+            trajectory_points=job_input.get("trajectory_points"),
+            trajectory_preset=job_input.get("trajectory_preset", ""),
         )
 
         bgm_wav = ensure_fallback_bgm(work_dir / "bgm", case.bgm_key)
@@ -337,7 +343,9 @@ def handler(job: dict) -> dict:
             result = run_animated_drawings_worker_case(case, work_dir, bgm_wav, cfg=cfg)
             return _encode_artifacts(result.to_dict())
 
-        if route == "cogvideox_real":
+        if route == "tora_cogvideox_i2v":
+            result = run_tora_cogvideox_case(case, work_dir, bgm_wav, cfg=cfg)
+        elif route == "cogvideox_real":
             result = run_cogvideox_real_case(case, work_dir, bgm_wav, cfg=cfg)
         elif route == "3d_photo_inpainting_real":
             result = run_3d_photo_inpainting_real_case(case, work_dir, bgm_wav, cfg=cfg)

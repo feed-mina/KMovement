@@ -32,9 +32,12 @@ def create_cogvideox_real_video(case: TravelCase, output_mp4: Path, cfg: WorkerC
         pipe.enable_model_cpu_offload()
     else:
         pipe.to(device)
+    pipe.vae.enable_slicing()
+    pipe.vae.enable_tiling()
 
     image = Image.open(case.image_path).convert("RGB")
     prompt = case.prompt or f"A cinematic travel video from a real photo of {case.place}."
+    generator = torch.Generator(device=device).manual_seed(cfg.cogvideox_seed)
 
     result = pipe(
         prompt=prompt,
@@ -42,7 +45,8 @@ def create_cogvideox_real_video(case: TravelCase, output_mp4: Path, cfg: WorkerC
         num_videos_per_prompt=1,
         num_inference_steps=cfg.cogvideox_num_inference_steps,
         num_frames=cfg.cogvideox_num_frames,
-        guidance_scale=6.0,
+        guidance_scale=cfg.cogvideox_guidance_scale,
+        generator=generator,
     )
     frames = result.frames[0]
     export_to_video(frames, str(output_mp4), fps=cfg.cogvideox_fps)
@@ -77,6 +81,8 @@ def run_cogvideox_real_case(
             "image": str(case.image_path),
             "prompt": case.prompt,
             "model_id": cfg.cogvideox_model_id,
+            "seed": cfg.cogvideox_seed,
+            "guidance_scale": cfg.cogvideox_guidance_scale,
             "actual_model_executed": True,
             "status": "success",
         }

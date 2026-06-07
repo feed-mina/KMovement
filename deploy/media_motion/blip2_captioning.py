@@ -81,6 +81,33 @@ def generate_caption(image_path: Path, cfg: WorkerConfig) -> str:
     return ko_caption or en_caption
 
 
+def generate_english_caption(image_path: Path, cfg: WorkerConfig) -> str:
+    """Generate an English-only caption (no translation).  Used for auto-routing."""
+    import torch
+    from PIL import Image
+    from transformers import BlipForConditionalGeneration, BlipProcessor
+
+    try:
+        processor = BlipProcessor.from_pretrained(cfg.blip2_model_id)
+        model = BlipForConditionalGeneration.from_pretrained(
+            cfg.blip2_model_id, torch_dtype=torch.float16,
+        ).to("cuda")
+
+        raw_image = Image.open(image_path).convert("RGB")
+        inputs = processor(raw_image, return_tensors="pt").to("cuda", torch.float16)
+
+        with torch.no_grad():
+            out_ids = model.generate(**inputs, max_new_tokens=50)
+
+        caption: str = processor.decode(out_ids[0], skip_special_tokens=True).strip()
+        del model, processor, inputs, out_ids
+        torch.cuda.empty_cache()
+        return caption
+    except Exception:
+        torch.cuda.empty_cache()
+        return ""
+
+
 def _fallback_caption(image_path: Path) -> str:
     """Return a simple Korean fallback based on the filename."""
     stem = image_path.stem.replace("_", " ").replace("-", " ")

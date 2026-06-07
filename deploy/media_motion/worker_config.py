@@ -44,11 +44,17 @@ class WorkerConfig:
     timeout_seconds: int = 1800
     allow_fallback: bool = True
 
-    cogvideox_model_id: str = "THUDM/CogVideoX-2b"
+    cogvideox_model_id: str = "zai-org/CogVideoX-5b-I2V"
     cogvideox_num_frames: int = 49
     cogvideox_num_inference_steps: int = 30
     cogvideox_fps: int = 8
     cogvideox_cpu_offload: bool = True
+    cogvideox_guidance_scale: float = 6.0
+    cogvideox_seed: int = 42
+
+    tora_dir: Path | None = None
+    tora_checkpoint_path: Path | None = None
+    tora_enabled: bool = False
 
     gpt_sovits_dir: Path | None = None
     gpt_sovits_python: str = ""
@@ -70,6 +76,7 @@ class WorkerConfig:
     blip2_enabled: bool = True
 
     depth_model_id: str = "Intel/dpt-large"  # MiDaS DPT-Large (transformers)
+    moge_model_id: str = "Ruicheng/moge-2-vitl-normal"  # MoGe-2 (microsoft/MoGe)
     depth_parallax_enabled: bool = True
 
 
@@ -77,11 +84,16 @@ def load_worker_config(*, allow_fallback: bool | None = None) -> WorkerConfig:
     cfg = WorkerConfig(
         timeout_seconds=env_int("KRIDE_WORKER_TIMEOUT_SECONDS", 1800),
         allow_fallback=env_bool("KRIDE_WORKER_ALLOW_FALLBACK", True),
-        cogvideox_model_id=os.environ.get("KRIDE_COGVIDEOX_MODEL_ID", "THUDM/CogVideoX-2b"),
+        cogvideox_model_id=os.environ.get("KRIDE_COGVIDEOX_MODEL_ID", "zai-org/CogVideoX-5b-I2V"),
         cogvideox_num_frames=env_int("KRIDE_COGVIDEOX_NUM_FRAMES", 49),
         cogvideox_num_inference_steps=env_int("KRIDE_COGVIDEOX_STEPS", 30),
         cogvideox_fps=env_int("KRIDE_COGVIDEOX_FPS", 8),
         cogvideox_cpu_offload=env_bool("KRIDE_COGVIDEOX_CPU_OFFLOAD", True),
+        cogvideox_guidance_scale=float(os.environ.get("KRIDE_COGVIDEOX_GUIDANCE_SCALE", "6.0")),
+        cogvideox_seed=env_int("KRIDE_COGVIDEOX_SEED", 42),
+        tora_dir=env_path("KRIDE_TORA_DIR"),
+        tora_checkpoint_path=env_path("KRIDE_TORA_CHECKPOINT_PATH"),
+        tora_enabled=env_bool("KRIDE_TORA_ENABLED", False),
         gpt_sovits_dir=env_path("KRIDE_GPT_SOVITS_DIR"),
         gpt_sovits_python=os.environ.get("KRIDE_GPT_SOVITS_PYTHON", ""),
         gpt_sovits_ref_wav=env_path("KRIDE_GPT_SOVITS_REF_WAV"),
@@ -104,6 +116,7 @@ def load_worker_config(*, allow_fallback: bool | None = None) -> WorkerConfig:
         blip2_translation_model_id=os.environ.get("KRIDE_BLIP2_TRANSLATION_MODEL_ID", "Helsinki-NLP/opus-mt-en-ko"),
         blip2_enabled=env_bool("KRIDE_BLIP2_ENABLED", True),
         depth_model_id=os.environ.get("KRIDE_DEPTH_MODEL_ID", "Intel/dpt-large"),
+        moge_model_id=os.environ.get("KRIDE_MOGE_MODEL_ID", "Ruicheng/moge-2-vitl-normal"),
         depth_parallax_enabled=env_bool("KRIDE_DEPTH_PARALLAX_ENABLED", True),
     )
     if allow_fallback is not None:

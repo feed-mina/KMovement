@@ -51,6 +51,7 @@ WORKER_ROUTES = {
     "gpt_sovits_tts",
     "animated_drawings_worker",
     "meta_animation",
+    "tora_cogvideox_i2v",
 }
 
 
@@ -302,7 +303,7 @@ def media(asset_id: str) -> FileResponse:
 
 class RunPodJobRequest(BaseModel):
     """RunPod serverless proxy request."""
-    route: str = Field(..., description="cogvideox_real, 3d_photo_light, cogvideo_fallback, gpt_sovits_tts, musicgen")
+    route: str = Field(..., description="cogvideox_real, 3d_photo_light, cogvideo_fallback, gpt_sovits_tts, musicgen, tora_cogvideox_i2v")
     case_id: str = "travel_case"
     place: str = "Travel Place"
     image_url: str = Field(..., min_length=1)
@@ -313,6 +314,8 @@ class RunPodJobRequest(BaseModel):
     allow_fallback: bool = True
     musicgen_description: str = "calm Korean ambient music"
     musicgen_duration: int = 15
+    trajectory_points: list | None = None  # [[x,y], ...] normalized 0.0~1.0
+    trajectory_preset: str = ""  # "object_pan_right", "arc_up", etc.
 
 
 @app.post("/jobs/runpod")
