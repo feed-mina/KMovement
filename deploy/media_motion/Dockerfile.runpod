@@ -162,8 +162,10 @@ RUN pip install --no-cache-dir --upgrade \
 # ─────────────────────────────────────────────────────────────────────────────
 # Pre-download model weights (before COPY so layer is cached across code changes)
 # ─────────────────────────────────────────────────────────────────────────────
-RUN python -c "from diffusers import CogVideoXImageToVideoPipeline; CogVideoXImageToVideoPipeline.from_pretrained('zai-org/CogVideoX-5b-I2V')" || echo "WARN: CogVideoX pre-download failed — will download at runtime"
-RUN python -c "from audiocraft.models import MusicGen; MusicGen.get_pretrained('facebook/musicgen-small')" || echo "WARN: MusicGen pre-download failed — sine-wave fallback available"
+# NOTE: Large models (CogVideoX ~30GB, MusicGen ~2GB) are NOT pre-downloaded
+# to keep the Docker image within GitHub Actions runner disk limits (14GB).
+# They will be downloaded on first request at runtime.
+# Only small models (<500MB) are pre-downloaded.
 RUN python -c "from transformers import BlipProcessor, BlipForConditionalGeneration; BlipProcessor.from_pretrained('Salesforce/blip-image-captioning-base'); BlipForConditionalGeneration.from_pretrained('Salesforce/blip-image-captioning-base')" || echo "WARN: BLIP pre-download failed — will download at runtime"
 RUN python -c "from transformers import AutoTokenizer, AutoModelForSeq2SeqLM; AutoTokenizer.from_pretrained('Helsinki-NLP/opus-mt-en-ko'); AutoModelForSeq2SeqLM.from_pretrained('Helsinki-NLP/opus-mt-en-ko')" || echo "WARN: MarianMT pre-download failed — will download at runtime"
 
@@ -173,15 +175,8 @@ RUN pip install --no-cache-dir opencv-python-headless
 # MoGe-2 depth model (official: microsoft/MoGe — optional, MiDaS fallback available)
 RUN pip install --no-cache-dir "git+https://github.com/microsoft/MoGe.git" || echo "WARN: MoGe install failed — MiDaS fallback"
 
-# MoGe-2 model weights pre-download
-RUN python -c "from moge.model.v2 import MoGeModel; MoGeModel.from_pretrained('Ruicheng/moge-2-vitl-normal')" \
-    || echo "WARN: MoGe-2 pre-download failed — will download at runtime or use MiDaS"
-
-# MiDaS DPT-Large model pre-download
-RUN python -c "from transformers import DPTForDepthEstimation, DPTImageProcessor; \
-    DPTImageProcessor.from_pretrained('Intel/dpt-large'); \
-    DPTForDepthEstimation.from_pretrained('Intel/dpt-large')" \
-    || echo "WARN: MiDaS pre-download failed — will download at runtime"
+# MoGe-2 / MiDaS depth models — downloaded at runtime to save image size
+# MoGe-2 (~1.2GB) and MiDaS DPT-Large (~1.3GB) will auto-download on first use
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Application code (changes here do NOT re-download models)
