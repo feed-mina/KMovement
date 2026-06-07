@@ -58,7 +58,7 @@ export interface AnimationStatusResponse {
 }
 
 export interface BatchImageInput {
-    imageBase64: string;
+    postImageId: number;
     ttsText: string;
     imageType: 'photo' | 'sketch' | 'auto';
 }
@@ -135,8 +135,8 @@ export const communityService = {
         return res.data.data;
     },
 
-    async submitAnimation(postId: number, imageBase64: string, route = 'animated_drawings_worker') {
-        const res = await api.post(`${BASE}/posts/${postId}/animate`, { imageBase64, route });
+    async submitAnimation(postId: number, postImageId: number, route = 'animated_drawings_worker') {
+        const res = await api.post(`${BASE}/posts/${postId}/animate`, { postImageId, route });
         return res.data.data as AnimationStatusResponse;
     },
 
@@ -150,15 +150,19 @@ export const communityService = {
         images: BatchImageInput[],
         bgmKey = 'bright_travel',
         photoRoute = 'cogvideox_real',
+        bgmDescription = '',
+        bgmDuration = 15,
     ) {
         const res = await api.post(`${BASE}/posts/${postId}/animate/batch`, {
             images: images.map((img) => ({
-                image_base64: img.imageBase64,
-                tts_text: img.ttsText,
-                image_type: img.imageType,
+                postImageId: img.postImageId,
+                ttsText: img.ttsText,
+                imageType: img.imageType,
             })),
             bgmKey,
             photoRoute,
+            bgmDescription,
+            bgmDuration,
         });
         return res.data.data as BatchAnimationResponse;
     },

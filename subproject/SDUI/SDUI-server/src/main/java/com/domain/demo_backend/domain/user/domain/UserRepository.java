@@ -2,12 +2,14 @@ package com.domain.demo_backend.domain.user.domain;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import jakarta.persistence.LockModeType;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -19,6 +21,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByuserId(String userId);
 
     Optional<User> findByUserSqno(Long userSqno);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.userSqno = :userSqno")
+    Optional<User> findByUserSqnoForAnimationLimit(@Param("userSqno") Long userSqno);
 
     // 2026.01.11 update 관련ㄹ 메서드들은 더티 체킹을 사용한다.
     // 2026.01.11 insert 대신 기본 제공되는 save()를 사용하면 된다.

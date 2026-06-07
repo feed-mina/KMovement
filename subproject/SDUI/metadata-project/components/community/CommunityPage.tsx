@@ -694,6 +694,8 @@ function CommunityDetail({ postId }: { postId: number }) {
     const [batchModal, setBatchModal] = useState(false);
     const [batchTtsTexts, setBatchTtsTexts] = useState<string[]>([]);
     const [batchImageTypes, setBatchImageTypes] = useState<('photo' | 'sketch' | 'auto')[]>([]);
+    const [batchBgmDescription, setBatchBgmDescription] = useState('');
+    const [batchBgmDuration, setBatchBgmDuration] = useState(15);
     const [batchSubmitting, setBatchSubmitting] = useState(false);
     const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const isOwner = Boolean(user?.userSqno && post?.authorSqno && user.userSqno === post.authorSqno);
@@ -760,39 +762,13 @@ function CommunityDetail({ postId }: { postId: number }) {
         };
     }, []);
 
-    const getImageBase64 = async (route: string): Promise<string | null> => {
-        if (route === 'animated_drawings_worker') {
-            const handoff = typeof window !== 'undefined'
-                ? window.localStorage.getItem(SKETCH_HANDOFF_KEY)
-                : null;
-            if (!handoff) {
-                alert('먼저 스케치를 그려주세요. 글 작성 시 스케치하기를 이용하세요.');
-                return null;
-            }
-            const parsed = JSON.parse(handoff) as SketchHandoff;
-            return parsed.dataUrl?.split(',')[1] || null;
-        }
-        // CogVideoX / 3D Photo: 게시글 첨부 이미지 사용
+    const getFirstPostImageId = (): number | null => {
         const firstImage = post?.images?.[0];
-        if (!firstImage?.storageUrl) {
+        if (!firstImage?.postImageId) {
             alert('영상을 생성하려면 게시글에 이미지가 필요합니다.');
             return null;
         }
-        try {
-            const res = await fetch(firstImage.storageUrl);
-            const blob = await res.blob();
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    const result = reader.result as string;
-                    resolve(result.split(',')[1] || null);
-                };
-                reader.readAsDataURL(blob);
-            });
-        } catch {
-            alert('이미지를 불러오지 못했습니다.');
-            return null;
-        }
+        return firstImage.postImageId;
     };
 
     const submitAnimation = async (route: string) => {
@@ -802,13 +778,13 @@ function CommunityDetail({ postId }: { postId: number }) {
             return;
         }
 
-        const imageBase64 = await getImageBase64(route);
-        if (!imageBase64) return;
+        const postImageId = getFirstPostImageId();
+        if (!postImageId) return;
 
         setAnimRouteModal(false);
         setAnimSubmitting(true);
         try {
-            const result = await communityService.submitAnimation(postId, imageBase64, route);
+            const result = await communityService.submitAnimation(postId, postImageId, route);
             setAnimStatus(result);
             startAnimPolling();
         } catch {
@@ -825,6 +801,8 @@ function CommunityDetail({ postId }: { postId: number }) {
         }
         setBatchTtsTexts(post.images.map(() => ''));
         setBatchImageTypes(post.images.map(() => 'auto'));
+        setBatchBgmDescription('');
+        setBatchBgmDuration(15);
         setBatchModal(true);
     };
 
@@ -835,24 +813,21 @@ function CommunityDetail({ postId }: { postId: number }) {
             const batchImages: BatchImageInput[] = [];
             for (let i = 0; i < post.images.length; i++) {
                 const img = post.images[i];
-                const res = await fetch(img.storageUrl);
-                const blob = await res.blob();
-                const base64 = await new Promise<string>((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        const result = reader.result as string;
-                        resolve(result.split(',')[1] || '');
-                    };
-                    reader.readAsDataURL(blob);
-                });
                 batchImages.push({
-                    imageBase64: base64,
+                    postImageId: img.postImageId,
                     ttsText: batchTtsTexts[i] || post.title || '',
                     imageType: batchImageTypes[i] || 'auto',
                 });
             }
 
-            const result = await communityService.submitBatchAnimation(postId, batchImages);
+            const result = await communityService.submitBatchAnimation(
+                postId,
+                batchImages,
+                'bright_travel',
+                'cogvideox_real',
+                batchBgmDescription,
+                batchBgmDuration,
+            );
             setAnimStatus({
                 jobId: result.jobId,
                 status: result.status,
@@ -1142,6 +1117,33 @@ function CommunityDetail({ postId }: { postId: number }) {
                                             </div>
                                         </div>
                                     ))}
+                                    <div style={{ borderTop: '1px solid #333', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                        <label style={{ color: '#c8ccd5', fontSize: 14 }}>
+                                            BGM 설명 (MusicGen AI 생성, 비워두면 기본 BGM)
+                                        </label>
+                                        <input
+                                            className="community-input"
+                                            placeholder="예: calm Korean ambient music for travel"
+                                            value={batchBgmDescription}
+                                            onChange={(e) => setBatchBgmDescription(e.target.value)}
+                                        />
+                                        {batchBgmDescription && (
+                                            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                                <label style={{ color: '#c8ccd5', fontSize: 13, whiteSpace: 'nowrap' }}>
+                                                    BGM 길이 (초)
+                                                </label>
+                                                <input
+                                                    className="community-input"
+                                                    type="number"
+                                                    min={5}
+                                                    max={30}
+                                                    value={batchBgmDuration}
+                                                    onChange={(e) => setBatchBgmDuration(Math.min(30, Math.max(5, Number(e.target.value) || 15)))}
+                                                    style={{ width: 80 }}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                     <button
                                         className="community-primary-btn"
                                         type="button"

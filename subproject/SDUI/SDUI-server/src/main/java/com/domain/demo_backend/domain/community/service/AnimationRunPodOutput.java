@@ -1,26 +1,31 @@
 package com.domain.demo_backend.domain.community.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.List;
 import java.util.Map;
 
 final class AnimationRunPodOutput {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private AnimationRunPodOutput() {
     }
 
     static Parsed parse(Object output) {
         if (!(output instanceof Map<?, ?> outputMap)) {
-            return new Parsed(null, "RunPod completed without a valid output object.");
+            return Parsed.failure("RunPod completed without a valid output object.");
         }
 
         String error = nonBlank(outputMap.get("error"));
         if (error != null) {
-            return new Parsed(null, error);
+            return Parsed.failure(error);
         }
 
         String outputStatus = nonBlank(outputMap.get("status"));
         if ("failed".equalsIgnoreCase(outputStatus)) {
-            return new Parsed(null, "RunPod worker reported a failed result.");
+            return Parsed.failure("RunPod worker reported a failed result.");
         }
 
         String resultUrl = firstNonBlank(
@@ -35,12 +40,28 @@ final class AnimationRunPodOutput {
         }
 
         if (resultUrl == null) {
-            return new Parsed(
-                    null,
-                    "RunPod completed, but the worker did not return a public result URL."
-            );
+            return Parsed.failure(
+                    "RunPod completed, but the worker did not return a public result URL.");
         }
-        return new Parsed(resultUrl, null);
+
+        Map<?, ?> metadata = outputMap.get("metadata") instanceof Map<?, ?> value
+                ? value
+                : Map.of();
+        Integer processedImages = integerValue(metadata.get("processed_images"));
+        String actualModel = firstNonBlank(
+                nonBlank(metadata.get("actual_model")),
+                nonBlank(metadata.get("model_id")),
+                nonBlank(metadata.get("route"))
+        );
+        String failedImageIndexes = jsonValue(metadata.get("failed_image_indexes"));
+
+        return new Parsed(
+                resultUrl,
+                null,
+                processedImages,
+                actualModel,
+                failedImageIndexes
+        );
     }
 
     private static String findUrl(Object value, String preferredKind) {
@@ -88,7 +109,42 @@ final class AnimationRunPodOutput {
         return text.isEmpty() || "null".equalsIgnoreCase(text) ? null : text;
     }
 
-    record Parsed(String resultUrl, String errorMessage) {
+    private static Integer integerValue(Object value) {
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        try {
+            return value == null ? null : Integer.valueOf(String.valueOf(value));
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+    }
+
+    private static String jsonValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof String text) {
+            return text.isBlank() ? null : text;
+        }
+        try {
+            return OBJECT_MAPPER.writeValueAsString(value);
+        } catch (JsonProcessingException ignored) {
+            return String.valueOf(value);
+        }
+    }
+
+    record Parsed(
+            String resultUrl,
+            String errorMessage,
+            Integer processedImages,
+            String actualModel,
+            String failedImageIndexes
+    ) {
+        static Parsed failure(String errorMessage) {
+            return new Parsed(null, errorMessage, null, null, null);
+        }
+
         boolean succeeded() {
             return resultUrl != null;
         }

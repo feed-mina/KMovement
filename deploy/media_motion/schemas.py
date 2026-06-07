@@ -38,6 +38,8 @@ class BatchTravelCase:
     items: list[BatchImageItem]
     bgm_key: str = "bright_travel"
     photo_route: str = "3d_photo_light"  # "cogvideox_real", "3d_photo_light", etc.
+    bgm_description: str = ""  # MusicGen prompt (empty → bgm_key sine-wave fallback)
+    bgm_duration: int = 15  # MusicGen generation length in seconds
 
 
 @dataclass(slots=True)

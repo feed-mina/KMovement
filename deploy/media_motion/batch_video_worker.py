@@ -30,7 +30,6 @@ from .schemas import (
     GenerationResult,
     TravelCase,
 )
-from .tts import synthesize_gtts
 from .worker_config import WorkerConfig, load_worker_config
 
 
@@ -171,8 +170,21 @@ def run_batch_video_case(
     sketches = [(item, t) for item, t in classified if t == "sketch"]
     has_both = bool(photos) and bool(sketches)
 
-    # Step 2 & 3: Generate per-image segments with TTS
-    segment_paths: list[Path] = []
+    # Step 1.5: Auto-caption for items with empty tts_text
+    if cfg.blip2_enabled:
+        from .blip2_captioning import generate_caption
+
+        for item, _ in classified:
+            if not item.tts_text.strip():
+                try:
+                    item.tts_text = generate_caption(item.image_path, cfg)
+                    print(f"[batch_video] BLIP-2 caption for img{item.index}: {item.tts_text}")
+                except Exception as exc:
+                    print(f"[batch_video] BLIP-2 failed for img{item.index}: {exc}")
+                    # tts_text remains empty → TTS skipped for this image
+
+    # Step 2: Generate per-image video segments (sequential — GPU intensive)
+    video_paths: dict[int, Path] = {}
     sketch_gifs: dict[int, Path] = {}
 
     for item, img_type in classified:
@@ -187,23 +199,76 @@ def run_batch_video_case(
                 )
                 if gif:
                     sketch_gifs[item.index] = gif
-
-            # TTS for this segment
-            if item.tts_text.strip():
-                tts_wav = synthesize_gtts(
-                    item.tts_text,
-                    tts_dir / f"{batch_case.case_id}_img{item.index}.wav",
-                )
-                segment_with_tts = segments_dir / f"{batch_case.case_id}_seg{item.index}.mp4"
-                mix_video_tts(video, tts_wav, segment_with_tts)
-                segment_paths.append(segment_with_tts)
-            else:
-                segment_paths.append(video)
+            video_paths[item.index] = video
         except Exception as exc:
             print(f"[batch_video] Segment generation failed for image {item.index} ({img_type}): {exc}")
             import traceback
             traceback.print_exc()
-            # Skip this image and continue with remaining images
+
+    # Step 3: TTS — Celery group for parallel processing
+    tts_wav_paths: dict[int, Path] = {}
+    tts_items = [
+        (item, str(tts_dir / f"{batch_case.case_id}_img{item.index}.wav"))
+        for item, _ in classified
+        if item.tts_text.strip() and item.index in video_paths
+    ]
+
+    if tts_items:
+        try:
+            from celery import group as celery_group
+
+            from .media_tasks import task_tts_segment
+
+            use_gpt_sovits = bool(cfg.gpt_sovits_dir)
+            gpt_sovits_dir_str = str(cfg.gpt_sovits_dir) if cfg.gpt_sovits_dir else None
+
+            tts_tasks = [
+                task_tts_segment.s(
+                    item.tts_text,
+                    wav_path,
+                    use_gpt_sovits,
+                    gpt_sovits_dir_str,
+                )
+                for item, wav_path in tts_items
+            ]
+
+            print(f"[batch_video] Dispatching {len(tts_tasks)} TTS tasks via Celery group")
+            job = celery_group(tts_tasks)
+            results = job.apply_async()
+            tts_results = results.get(timeout=cfg.timeout_seconds)
+
+            for (item, wav_path), result in zip(tts_items, tts_results):
+                tts_wav_paths[item.index] = Path(result["wav_path"])
+                print(f"[batch_video] TTS img{item.index}: engine={result['engine']}")
+        except Exception as exc:
+            print(f"[batch_video] Celery TTS failed, falling back to sequential gTTS: {exc}")
+            import traceback
+            traceback.print_exc()
+            # Fallback: sequential gTTS
+            from .tts import synthesize_gtts
+
+            for item, wav_path in tts_items:
+                if item.index not in tts_wav_paths:
+                    try:
+                        tts_wav_paths[item.index] = synthesize_gtts(item.tts_text, Path(wav_path))
+                    except Exception as tts_exc:
+                        print(f"[batch_video] gTTS fallback failed for img{item.index}: {tts_exc}")
+
+    # Mix TTS into video segments
+    segment_paths: list[Path] = []
+    for item, _ in classified:
+        if item.index not in video_paths:
+            continue
+        video = video_paths[item.index]
+        if item.index in tts_wav_paths:
+            segment_with_tts = segments_dir / f"{batch_case.case_id}_seg{item.index}.mp4"
+            try:
+                mix_video_tts(video, tts_wav_paths[item.index], segment_with_tts)
+                segment_paths.append(segment_with_tts)
+            except Exception:
+                segment_paths.append(video)
+        else:
+            segment_paths.append(video)
 
     # Step 2b: If both photos and sketches, overlay sketch GIFs on photo segments
     if has_both and sketch_gifs:
@@ -254,8 +319,30 @@ def run_batch_video_case(
     concat_mp4 = final_dir / f"{batch_case.case_id}_concat.mp4"
     concat_videos(normalized, concat_mp4)
 
-    # Step 5: Apply BGM
-    bgm_wav = ensure_fallback_bgm(branch_dir / "bgm", batch_case.bgm_key)
+    # Step 5: Apply BGM — MusicGen preferred, sine-wave fallback
+    bgm_dir = branch_dir / "bgm"
+    bgm_wav = None
+
+    if batch_case.bgm_description:
+        try:
+            from .media_tasks import task_musicgen_bgm
+
+            print(f"[batch_video] MusicGen BGM: '{batch_case.bgm_description}' ({batch_case.bgm_duration}s)")
+            result = task_musicgen_bgm.delay(
+                batch_case.bgm_description,
+                str(bgm_dir / f"{batch_case.case_id}_musicgen.wav"),
+                batch_case.bgm_duration,
+            )
+            bgm_result = result.get(timeout=120)
+            bgm_wav = Path(bgm_result["wav_path"])
+            print(f"[batch_video] MusicGen BGM generated: {bgm_wav}")
+        except Exception as exc:
+            print(f"[batch_video] MusicGen BGM failed, using sine-wave fallback: {exc}")
+            bgm_wav = None
+
+    if bgm_wav is None:
+        bgm_wav = ensure_fallback_bgm(bgm_dir, batch_case.bgm_key)
+
     final_mp4 = final_dir / f"{batch_case.case_id}_batch_final.mp4"
     apply_bgm_to_video(concat_mp4, bgm_wav, final_mp4)
 

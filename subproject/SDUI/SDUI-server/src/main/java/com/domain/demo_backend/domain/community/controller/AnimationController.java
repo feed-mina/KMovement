@@ -1,99 +1,105 @@
 package com.domain.demo_backend.domain.community.controller;
 
 import com.domain.demo_backend.domain.community.domain.AnimationJob;
+import com.domain.demo_backend.domain.community.dto.AnimationCreateRequest;
+import com.domain.demo_backend.domain.community.dto.BatchAnimationRequest;
 import com.domain.demo_backend.domain.community.service.AnimationService;
 import com.domain.demo_backend.global.common.response.ApiResponse;
+import com.domain.demo_backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/community/posts/{postId}/animate")
 @RequiredArgsConstructor
-@Tag(name = "Community Animation", description = "커뮤니티 스케치 애니메이션 API")
+@Tag(name = "Community Animation", description = "Community media generation API")
 public class AnimationController {
 
     private final AnimationService animationService;
 
-    @Operation(summary = "애니메이션/영상 생성 요청")
+    @Operation(summary = "Submit a single-image video job")
     @PostMapping
     public ResponseEntity<ApiResponse<Map<String, Object>>> submitAnimation(
             @PathVariable("postId") Long postId,
-            @RequestBody Map<String, String> body) {
-
-        String imageBase64 = body.get("imageBase64");
-        if (imageBase64 == null || imageBase64.isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("imageBase64는 필수입니다."));
-        }
-
-        String route = body.getOrDefault("route", "animated_drawings_worker");
-        AnimationJob job = animationService.submitAnimation(postId, imageBase64, route);
-        Map<String, Object> result = Map.of(
-                "jobId", job.getId(),
-                "runpodJobId", job.getRunpodJobId() != null ? job.getRunpodJobId() : "",
-                "status", job.getStatus()
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody AnimationCreateRequest request
+    ) {
+        AnimationJob job = animationService.submitAnimation(
+                postId,
+                userDetails.getUserSqno(),
+                request
         );
-        return ResponseEntity.ok(ApiResponse.success("애니메이션 생성이 요청되었습니다.", result));
+        return ResponseEntity.ok(ApiResponse.success(
+                "영상 생성 작업을 요청했습니다.",
+                submissionResponse(job)
+        ));
     }
 
-    @Operation(summary = "배치 영상 생성 요청 (다중 이미지)")
+    @Operation(summary = "Submit a multi-image video job")
     @PostMapping("/batch")
     public ResponseEntity<ApiResponse<Map<String, Object>>> submitBatchAnimation(
             @PathVariable("postId") Long postId,
-            @RequestBody Map<String, Object> body) {
-
-        @SuppressWarnings("unchecked")
-        List<Map<String, String>> images = (List<Map<String, String>>) body.get("images");
-        if (images == null || images.isEmpty()) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("images 배열은 필수입니다."));
-        }
-        if (images.size() > 10) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("이미지는 최대 10장까지 가능합니다."));
-        }
-
-        String bgmKey = body.getOrDefault("bgmKey", "bright_travel").toString();
-        String photoRoute = body.getOrDefault("photoRoute", "cogvideox_real").toString();
-
-        AnimationJob job = animationService.submitBatchAnimation(postId, images, bgmKey, photoRoute);
-        Map<String, Object> result = Map.of(
-                "jobId", job.getId(),
-                "runpodJobId", job.getRunpodJobId() != null ? job.getRunpodJobId() : "",
-                "status", job.getStatus(),
-                "totalImages", job.getTotalImages() != null ? job.getTotalImages() : 0
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody BatchAnimationRequest request
+    ) {
+        AnimationJob job = animationService.submitBatchAnimation(
+                postId,
+                userDetails.getUserSqno(),
+                request
         );
-        return ResponseEntity.ok(ApiResponse.success("배치 영상 생성이 요청되었습니다.", result));
+        Map<String, Object> result = submissionResponse(job);
+        result.put("totalImages", job.getTotalImages() != null ? job.getTotalImages() : 0);
+        return ResponseEntity.ok(ApiResponse.success(
+                "배치 영상 생성 작업을 요청했습니다.",
+                result
+        ));
     }
 
-    @Operation(summary = "애니메이션 상태 조회")
+    @Operation(summary = "Get the latest video job status")
     @GetMapping("/status")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAnimationStatus(
-            @PathVariable("postId") Long postId) {
-
+            @PathVariable("postId") Long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
         try {
             AnimationJob job = animationService.getAnimationStatus(postId);
+            boolean owner = userDetails != null
+                    && animationService.isPostOwner(job, userDetails.getUserSqno());
             Map<String, Object> result = Map.of(
                     "jobId", job.getId(),
                     "status", job.getStatus(),
                     "resultUrl", job.getResultUrl() != null ? job.getResultUrl() : "",
-                    "errorMessage", job.getErrorMessage() != null ? job.getErrorMessage() : ""
+                    "errorMessage",
+                    owner && job.getErrorMessage() != null ? job.getErrorMessage() : ""
             );
             return ResponseEntity.ok(ApiResponse.success(result));
         } catch (IllegalArgumentException e) {
-            Map<String, Object> result = Map.of(
+            return ResponseEntity.ok(ApiResponse.success(Map.of(
                     "jobId", 0,
                     "status", "NONE",
                     "resultUrl", "",
                     "errorMessage", ""
-            );
-            return ResponseEntity.ok(ApiResponse.success(result));
+            )));
         }
+    }
+
+    private Map<String, Object> submissionResponse(AnimationJob job) {
+        return new java.util.HashMap<>(Map.of(
+                "jobId", job.getId(),
+                "runpodJobId", job.getRunpodJobId() != null ? job.getRunpodJobId() : "",
+                "status", job.getStatus()
+        ));
     }
 }

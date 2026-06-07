@@ -1381,6 +1381,8 @@ class RunPodBatchJobRequest(BaseModel):
     bgm_key: str = "bright_travel"
     photo_route: str = "3d_photo_light"
     allow_fallback: bool = True
+    bgm_description: str = ""  # MusicGen prompt (empty → sine-wave fallback)
+    bgm_duration: int = 15  # MusicGen generation length in seconds
 
 
 @app.post("/jobs/runpod/batch")
@@ -1401,6 +1403,8 @@ def runpod_batch_proxy(request: RunPodBatchJobRequest):
             "bgm_key": request.bgm_key,
             "photo_route": request.photo_route,
             "allow_fallback": request.allow_fallback,
+            "bgm_description": request.bgm_description,
+            "bgm_duration": request.bgm_duration,
         }
     }
     headers = {"Authorization": f"Bearer {RUNPOD_API_KEY}", "Content-Type": "application/json"}

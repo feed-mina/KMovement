@@ -220,6 +220,8 @@ def handler(job: dict) -> dict:
                 items=items,
                 bgm_key=job_input.get("bgm_key", "bright_travel"),
                 photo_route=job_input.get("photo_route", "3d_photo_light"),
+                bgm_description=job_input.get("bgm_description", ""),
+                bgm_duration=min(job_input.get("bgm_duration", 15), 30),
             )
             result = run_batch_video_case(batch_case, work_dir, cfg)
             return _encode_artifacts(result.to_dict())

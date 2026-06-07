@@ -4,14 +4,28 @@ import com.domain.demo_backend.domain.community.domain.AnimationJob;
 import com.domain.demo_backend.domain.community.domain.AnimationJobRepository;
 import com.domain.demo_backend.domain.community.domain.CommunityPost;
 import com.domain.demo_backend.domain.community.domain.CommunityPostRepository;
+import com.domain.demo_backend.domain.community.domain.PostImage;
+import com.domain.demo_backend.domain.community.domain.PostImageRepository;
+import com.domain.demo_backend.domain.community.dto.AnimationCreateRequest;
+import com.domain.demo_backend.domain.community.dto.BatchAnimationImageRequest;
+import com.domain.demo_backend.domain.community.dto.BatchAnimationRequest;
+import com.domain.demo_backend.domain.user.domain.UserRepository;
+import com.domain.demo_backend.global.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.net.URI;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,125 +37,162 @@ public class AnimationService {
     private static final Set<String> ALLOWED_ROUTES = Set.of(
             "animated_drawings_worker",
             "cogvideox_real",
-            "3d_photo_inpainting_real",
-            "batch_video"
+            "3d_photo_inpainting_real"
     );
+    private static final Set<String> ALLOWED_PHOTO_ROUTES = Set.of(
+            "cogvideox_real",
+            "3d_photo_light"
+    );
+    private static final List<String> ACTIVE_STATUSES = List.of("QUEUED", "RUNNING");
+    private static final Set<String> TERMINAL_STATUSES = Set.of(
+            "COMPLETED",
+            "FAILED",
+            "TIMED_OUT"
+    );
+    private static final int MAX_CONCURRENT_JOBS_PER_USER = 2;
+    private static final int MAX_DAILY_JOBS_PER_USER = 10;
+    private static final long MAX_IMAGE_SIZE = 10L * 1024 * 1024;
+    private static final long MAX_JOB_IMAGE_SIZE = 50L * 1024 * 1024;
 
     private final AnimationJobRepository animationJobRepository;
     private final CommunityPostRepository postRepository;
+    private final PostImageRepository imageRepository;
+    private final UserRepository userRepository;
     private final WebClient gatewayClient;
+    private final int timeoutMinutes;
 
     public AnimationService(
             AnimationJobRepository animationJobRepository,
             CommunityPostRepository postRepository,
-            @Value("${kride.fastapi.url:http://localhost:8000}") String fastApiUrl) {
+            PostImageRepository imageRepository,
+            UserRepository userRepository,
+            @Value("${kride.fastapi.url:http://localhost:8000}") String fastApiUrl,
+            @Value("${fastapi.internal-api-key:sdui-internal-dev-key}") String internalApiKey,
+            @Value("${kride.animation.timeout-minutes:60}") int timeoutMinutes
+    ) {
         this.animationJobRepository = animationJobRepository;
         this.postRepository = postRepository;
-        this.gatewayClient = WebClient.builder().baseUrl(fastApiUrl).build();
+        this.imageRepository = imageRepository;
+        this.userRepository = userRepository;
+        this.timeoutMinutes = timeoutMinutes;
+
+        WebClient.Builder builder = WebClient.builder().baseUrl(fastApiUrl);
+        if (internalApiKey != null && !internalApiKey.isBlank()) {
+            builder.defaultHeader("X-Internal-Api-Key", internalApiKey);
+        }
+        this.gatewayClient = builder.build();
     }
 
     @Transactional
-    public AnimationJob submitAnimation(Long postId, String imageBase64, String route) {
+    public AnimationJob submitAnimation(
+            Long postId,
+            Long userSqno,
+            AnimationCreateRequest request
+    ) {
+        String route = request.getRoute();
         if (!ALLOWED_ROUTES.contains(route)) {
-            throw new IllegalArgumentException("지원하지 않는 route입니다: " + route);
+            throw new BusinessException("지원하지 않는 영상 생성 방식입니다.", HttpStatus.BAD_REQUEST);
         }
 
-        CommunityPost post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        CommunityPost post = prepareSubmission(postId, userSqno);
+        PostImage image = resolvePostImage(postId, request.getPostImageId());
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("route", route);
         payload.put("case_id", "community_" + postId);
         payload.put("place", "Community Post");
-        payload.put("image_base64", imageBase64);
-        payload.put("tts_text", post.getTitle() != null ? post.getTitle() : "커뮤니티 영상");
+        payload.put("image_url", image.getStorageUrl());
+        payload.put("tts_text", defaultNarration(post));
         payload.put("bgm_key", "bright_travel");
         payload.put("allow_fallback", true);
 
-        Map<String, Object> response;
-        try {
-            response = gatewayClient.post()
-                    .uri("/jobs/runpod")
-                    .bodyValue(payload)
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                    .block();
-        } catch (Exception e) {
-            log.error("RunPod 제출 실패: {}", e.getMessage());
-            AnimationJob job = AnimationJob.builder()
-                    .post(post)
-                    .status("FAILED")
-                    .errorMessage("RunPod 제출 실패: " + e.getMessage())
-                    .build();
-            return animationJobRepository.save(job);
-        }
-
-        String runpodJobId = response != null ? String.valueOf(response.get("id")) : null;
-        AnimationJob job = AnimationJob.builder()
-                .post(post)
-                .runpodJobId(runpodJobId)
-                .status("QUEUED")
-                .build();
-
-        return animationJobRepository.save(job);
+        return submitToGateway(post, route, 1, "/jobs/runpod", payload);
     }
 
     @Transactional
-    public AnimationJob submitBatchAnimation(Long postId, List<Map<String, String>> images, String bgmKey, String photoRoute) {
-        CommunityPost post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+    public AnimationJob submitBatchAnimation(
+            Long postId,
+            Long userSqno,
+            BatchAnimationRequest request
+    ) {
+        if (request.getImages() == null || request.getImages().isEmpty()) {
+            throw new BusinessException("영상에 사용할 이미지를 선택해주세요.", HttpStatus.BAD_REQUEST);
+        }
+        if (!ALLOWED_PHOTO_ROUTES.contains(request.getPhotoRoute())) {
+            throw new BusinessException("지원하지 않는 사진 영상 생성 방식입니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        CommunityPost post = prepareSubmission(postId, userSqno);
+        Set<Long> selectedIds = new HashSet<>();
+        List<Map<String, Object>> images = new ArrayList<>();
+        long totalBytes = 0;
+
+        for (BatchAnimationImageRequest item : request.getImages()) {
+            if (!selectedIds.add(item.getPostImageId())) {
+                throw new BusinessException("같은 이미지를 중복 선택할 수 없습니다.", HttpStatus.BAD_REQUEST);
+            }
+            PostImage image = resolvePostImage(postId, item.getPostImageId());
+            totalBytes += image.getFileSize() != null ? image.getFileSize() : 0;
+            if (totalBytes > MAX_JOB_IMAGE_SIZE) {
+                throw new BusinessException(
+                        "한 작업의 이미지 전체 크기는 50MB를 초과할 수 없습니다.",
+                        HttpStatus.PAYLOAD_TOO_LARGE
+                );
+            }
+
+            Map<String, Object> imagePayload = new HashMap<>();
+            imagePayload.put("image_url", image.getStorageUrl());
+            imagePayload.put(
+                    "tts_text",
+                    item.getTtsText() == null || item.getTtsText().isBlank()
+                            ? defaultNarration(post)
+                            : item.getTtsText().trim()
+            );
+            imagePayload.put(
+                    "image_type",
+                    item.getImageType() == null ? "auto" : item.getImageType()
+            );
+            images.add(imagePayload);
+        }
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("case_id", "community_batch_" + postId);
         payload.put("place", "Community Post");
         payload.put("images", images);
-        payload.put("bgm_key", bgmKey != null ? bgmKey : "bright_travel");
-        payload.put("photo_route", photoRoute != null ? photoRoute : "cogvideox_real");
+        payload.put("bgm_key", request.getBgmKey());
+        payload.put("photo_route", request.getPhotoRoute());
         payload.put("allow_fallback", true);
+        payload.put("bgm_description", request.getBgmDescription() != null ? request.getBgmDescription() : "");
+        payload.put("bgm_duration", request.getBgmDuration());
 
-        Map<String, Object> response;
-        try {
-            response = gatewayClient.post()
-                    .uri("/jobs/runpod/batch")
-                    .bodyValue(payload)
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                    .block();
-        } catch (Exception e) {
-            log.error("RunPod 배치 제출 실패: {}", e.getMessage());
-            AnimationJob job = AnimationJob.builder()
-                    .post(post)
-                    .status("FAILED")
-                    .route("batch_video")
-                    .totalImages(images.size())
-                    .errorMessage("RunPod 배치 제출 실패: " + e.getMessage())
-                    .build();
-            return animationJobRepository.save(job);
-        }
-
-        String runpodJobId = response != null ? String.valueOf(response.get("id")) : null;
-        AnimationJob job = AnimationJob.builder()
-                .post(post)
-                .runpodJobId(runpodJobId)
-                .status("QUEUED")
-                .route("batch_video")
-                .totalImages(images.size())
-                .build();
-
-        return animationJobRepository.save(job);
+        return submitToGateway(
+                post,
+                "batch_video",
+                images.size(),
+                "/jobs/runpod/batch",
+                payload
+        );
     }
 
     @Transactional
     public AnimationJob getAnimationStatus(Long postId) {
-        AnimationJob job = animationJobRepository.findTopByPostPostIdOrderByCreatedAtDesc(postId)
-                .orElseThrow(() -> new IllegalArgumentException("애니메이션 작업을 찾을 수 없습니다."));
+        AnimationJob job = animationJobRepository
+                .findTopByPostPostIdOrderByCreatedAtDesc(postId)
+                .orElseThrow(() -> new IllegalArgumentException("영상 생성 작업을 찾을 수 없습니다."));
+        return refreshAnimationJob(job);
+    }
 
-        if ("COMPLETED".equals(job.getStatus()) || "FAILED".equals(job.getStatus())) {
+    @Transactional
+    public AnimationJob refreshAnimationJob(AnimationJob job) {
+        if (TERMINAL_STATUSES.contains(job.getStatus()) || job.getRunpodJobId() == null) {
             return job;
         }
 
-        if (job.getRunpodJobId() == null) {
-            return job;
+        if (job.getCreatedAt() != null
+                && job.getCreatedAt().isBefore(LocalDateTime.now().minusMinutes(timeoutMinutes))) {
+            job.setStatus("TIMED_OUT");
+            job.setErrorMessage("영상 생성 제한 시간을 초과했습니다.");
+            return animationJobRepository.save(job);
         }
 
         try {
@@ -150,33 +201,214 @@ public class AnimationService {
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                     .block();
-
-            if (statusResponse != null) {
-                String runpodStatus = String.valueOf(statusResponse.get("status"));
-                switch (runpodStatus) {
-                    case "COMPLETED" -> {
-                        job.setStatus("COMPLETED");
-                        Object output = statusResponse.get("output");
-                        if (output instanceof Map<?, ?> outputMap) {
-                            Object resultUrl = outputMap.get("result_url");
-                            if (resultUrl != null) {
-                                job.setResultUrl(String.valueOf(resultUrl));
-                            }
-                        }
-                    }
-                    case "FAILED" -> {
-                        job.setStatus("FAILED");
-                        job.setErrorMessage(String.valueOf(statusResponse.getOrDefault("error", "RunPod 작업 실패")));
-                    }
-                    case "IN_PROGRESS" -> job.setStatus("RUNNING");
-                    default -> { /* QUEUED 등 유지 */ }
-                }
-                animationJobRepository.save(job);
-            }
+            applyRunPodStatus(job, statusResponse);
         } catch (Exception e) {
-            log.warn("RunPod 상태 조회 실패: {}", e.getMessage());
+            log.warn(
+                    "RunPod 상태 조회 실패. jobId={}, error={}",
+                    job.getRunpodJobId(),
+                    e.getMessage()
+            );
+        }
+        return animationJobRepository.save(job);
+    }
+
+    public boolean isPostOwner(AnimationJob job, Long userSqno) {
+        return userSqno != null
+                && job.getPost() != null
+                && job.getPost().getAuthor() != null
+                && userSqno.equals(job.getPost().getAuthor().getUserSqno());
+    }
+
+    private CommunityPost prepareSubmission(Long postId, Long userSqno) {
+        userRepository.findByUserSqnoForAnimationLimit(userSqno)
+                .orElseThrow(() -> new BusinessException(
+                        "사용자를 찾을 수 없습니다.",
+                        HttpStatus.UNAUTHORIZED
+                ));
+
+        CommunityPost post = postRepository.findByPostIdForAnimationUpdate(postId)
+                .orElseThrow(() -> new BusinessException(
+                        "게시글을 찾을 수 없습니다.",
+                        HttpStatus.NOT_FOUND
+                ));
+        if (post.getAuthor() == null
+                || !userSqno.equals(post.getAuthor().getUserSqno())) {
+            throw new BusinessException(
+                    "게시글 작성자만 영상을 생성할 수 있습니다.",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+        if (animationJobRepository.existsByPost_PostIdAndStatusIn(postId, ACTIVE_STATUSES)) {
+            throw new BusinessException(
+                    "이 게시글의 영상이 이미 생성 중입니다.",
+                    HttpStatus.CONFLICT
+            );
         }
 
-        return job;
+        long concurrentJobs = animationJobRepository
+                .countByPost_Author_UserSqnoAndStatusIn(userSqno, ACTIVE_STATUSES);
+        if (concurrentJobs >= MAX_CONCURRENT_JOBS_PER_USER) {
+            throw new BusinessException(
+                    "동시에 생성할 수 있는 영상은 2개까지입니다.",
+                    HttpStatus.TOO_MANY_REQUESTS
+            );
+        }
+
+        LocalDateTime today = LocalDate.now().atStartOfDay();
+        long dailyJobs = animationJobRepository
+                .countByPost_Author_UserSqnoAndCreatedAtGreaterThanEqual(userSqno, today);
+        if (dailyJobs >= MAX_DAILY_JOBS_PER_USER) {
+            throw new BusinessException(
+                    "하루 영상 생성 횟수 10회를 초과했습니다.",
+                    HttpStatus.TOO_MANY_REQUESTS
+            );
+        }
+        return post;
+    }
+
+    private PostImage resolvePostImage(Long postId, Long postImageId) {
+        PostImage image = imageRepository
+                .findByPostImageIdAndPost_PostId(postImageId, postId)
+                .orElseThrow(() -> new BusinessException(
+                        "게시글에 속한 이미지를 찾을 수 없습니다.",
+                        HttpStatus.BAD_REQUEST
+                ));
+
+        if (image.getMimeType() == null || !image.getMimeType().startsWith("image/")) {
+            throw new BusinessException("이미지 형식만 사용할 수 있습니다.", HttpStatus.BAD_REQUEST);
+        }
+        if (image.getFileSize() != null && image.getFileSize() > MAX_IMAGE_SIZE) {
+            throw new BusinessException(
+                    "이미지 한 장은 10MB를 초과할 수 없습니다.",
+                    HttpStatus.PAYLOAD_TOO_LARGE
+            );
+        }
+
+        try {
+            URI uri = URI.create(image.getStorageUrl());
+            if (!"https".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null) {
+                throw new IllegalArgumentException();
+            }
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException("안전한 이미지 URL이 아닙니다.", HttpStatus.BAD_REQUEST);
+        }
+        return image;
+    }
+
+    private AnimationJob submitToGateway(
+            CommunityPost post,
+            String route,
+            int totalImages,
+            String gatewayPath,
+            Map<String, Object> payload
+    ) {
+        try {
+            Map<String, Object> response = gatewayClient.post()
+                    .uri(gatewayPath)
+                    .bodyValue(payload)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                    .block();
+
+            String runpodJobId = response == null ? null : text(response.get("id"));
+            if (runpodJobId == null) {
+                return saveFailedJob(
+                        post,
+                        route,
+                        totalImages,
+                        "RunPod가 작업 ID를 반환하지 않았습니다."
+                );
+            }
+
+            return animationJobRepository.save(AnimationJob.builder()
+                    .post(post)
+                    .runpodJobId(runpodJobId)
+                    .status("QUEUED")
+                    .route(route)
+                    .totalImages(totalImages)
+                    .build());
+        } catch (Exception e) {
+            log.error("RunPod 작업 제출 실패. route={}, error={}", route, e.getMessage());
+            return saveFailedJob(
+                    post,
+                    route,
+                    totalImages,
+                    "RunPod 작업 제출 실패: " + e.getMessage()
+            );
+        }
+    }
+
+    private AnimationJob saveFailedJob(
+            CommunityPost post,
+            String route,
+            int totalImages,
+            String errorMessage
+    ) {
+        return animationJobRepository.save(AnimationJob.builder()
+                .post(post)
+                .status("FAILED")
+                .route(route)
+                .totalImages(totalImages)
+                .errorMessage(errorMessage)
+                .build());
+    }
+
+    private void applyRunPodStatus(
+            AnimationJob job,
+            Map<String, Object> statusResponse
+    ) {
+        if (statusResponse == null) {
+            return;
+        }
+
+        String runpodStatus = text(statusResponse.get("status"));
+        if ("COMPLETED".equals(runpodStatus)) {
+            AnimationRunPodOutput.Parsed parsed =
+                    AnimationRunPodOutput.parse(statusResponse.get("output"));
+            if (!parsed.succeeded()) {
+                job.setStatus("FAILED");
+                job.setErrorMessage(parsed.errorMessage());
+                return;
+            }
+            job.setStatus("COMPLETED");
+            job.setResultUrl(parsed.resultUrl());
+            job.setErrorMessage(null);
+            if (parsed.processedImages() != null) {
+                job.setProcessedImages(parsed.processedImages());
+            } else if (job.getTotalImages() != null) {
+                job.setProcessedImages(job.getTotalImages());
+            }
+            job.setActualModel(parsed.actualModel());
+            job.setFailedImageIndexes(parsed.failedImageIndexes());
+            return;
+        }
+
+        if ("FAILED".equals(runpodStatus)) {
+            job.setStatus("FAILED");
+            job.setErrorMessage(
+                    text(statusResponse.get("error")) != null
+                            ? text(statusResponse.get("error"))
+                            : "RunPod 작업이 실패했습니다."
+            );
+            return;
+        }
+
+        if ("IN_PROGRESS".equals(runpodStatus)) {
+            job.setStatus("RUNNING");
+        }
+    }
+
+    private String defaultNarration(CommunityPost post) {
+        return post.getTitle() != null && !post.getTitle().isBlank()
+                ? post.getTitle()
+                : "커뮤니티 영상";
+    }
+
+    private String text(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String text = String.valueOf(value).trim();
+        return text.isEmpty() || "null".equalsIgnoreCase(text) ? null : text;
     }
 }

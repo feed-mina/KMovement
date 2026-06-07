@@ -48,6 +48,12 @@ public class AnimationJob {
     @Column(name = "route", length = 50)
     private String route;
 
+    @Column(name = "actual_model", length = 100)
+    private String actualModel;
+
+    @Column(name = "failed_image_indexes", columnDefinition = "TEXT")
+    private String failedImageIndexes;
+
     @Builder.Default
     @Column(name = "notif_sent", nullable = false)
     private boolean notifSent = false;

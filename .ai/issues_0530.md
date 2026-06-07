@@ -584,6 +584,10 @@ API 응답 구조와 프론트엔드 타입 불일치:
 - `_generate_sketch_segment()`: AnimatedDrawings 실패 시 동일
 - `run_batch_video_case()`: segment 루프 try/except + 실패 이미지 건너뛰기
 
+#### (5) CogVideoX 호출 버그 수정 (`batch_video_worker.py:77`)
+- `create_cogvideox_real_video(case.image_path, ...)` → `create_cogvideox_real_video(case, ...)`
+- 함수가 `TravelCase` 객체를 기대하는데 `PosixPath`를 전달하여 `AttributeError` 발생
+
 #### (4) CSP Cloudinary 추가 (`next.config.ts`) — 이전 커밋에서 완료
 - `connectSrc` + `media-src`에 `https://res.cloudinary.com`
 
@@ -597,6 +601,145 @@ API 응답 구조와 프론트엔드 타입 불일치:
 |---|------|------|------|
 | 1~18 | (이전 이슈 모두) | ✅ | — |
 | 19 | 배치 영상 품질/BGM/CSP | ✅ | photoRoute→cogvideox_real, BGM 볼륨 +10dB, 에러 로깅, CSP 추가 |
+
+---
+
+## 20. BLIP-2 자동 캡셔닝 → 한국어 TTS 연동 [구현 완료] (2026-06-07)
+
+### 개요
+배치 영상 생성 시 `tts_text`가 비어있는 이미지에 BLIP-2로 자동 캡셔닝 → 한국어 번역 → gTTS 나레이션 생성.
+
+### 파이프라인
+```
+이미지 → BLIP-2 (영어 캡션) → MarianMT (영→한 번역) → gTTS(ko) → 영상 나레이션
+```
+
+### 모델
+- `Salesforce/blip-image-captioning-base` (~1GB VRAM) — 이미지→영어 캡션
+- `Helsinki-NLP/opus-mt-en-ko` (~300MB) — 영→한 번역
+
+### 변경 파일 (4개)
+| 파일 | 변경 |
+|------|------|
+| `deploy/media_motion/blip2_captioning.py` | **신규** — BLIP-2 캡셔닝 + MarianMT 번역 모듈 |
+| `deploy/media_motion/worker_config.py` | `blip2_model_id`, `blip2_translation_model_id`, `blip2_enabled` 3개 필드 추가 |
+| `deploy/media_motion/batch_video_worker.py` | Step 1.5 캡셔닝 호출 삽입 (tts_text 빈 경우만) |
+| `deploy/media_motion/Dockerfile.runpod` | `sentencepiece` pip install + BLIP/MarianMT 모델 pre-download |
+
+### 동작 조건
+- `cfg.blip2_enabled=True` (기본값) + `tts_text.strip()`이 빈 문자열일 때만 실행
+- 사용자가 TTS 텍스트를 입력한 이미지는 BLIP-2 건너뜀
+
+### 메모리 관리
+- BLIP-2 추론 후 `torch.cuda.empty_cache()` 호출 → CogVideoX VRAM 충돌 방지
+- 번역 모델도 추론 후 즉시 해제
+
+### Fallback
+- BLIP-2 실패 → 파일명 기반 기본 텍스트 ("여행 사진: {파일명}")
+- 번역 실패 → 영어 캡션 그대로 gTTS에 전달
+
+### 상태: ✅ 구현 완료 — RunPod 이미지 재빌드 필요
+
+---
+
+## 우선순위 정리 (최종 업데이트 2026-06-07 #2)
+
+| # | 이슈 | 상태 | 조치 |
+|---|------|------|------|
+| 1~19 | (이전 이슈 모두) | ✅ | — |
+| 20 | BLIP-2 자동 캡셔닝 + 한국어 TTS | ✅ | 신규 구현, RunPod 재빌드 필요 |
+
+---
+
+## 21. GPT-SoVITS TTS + MusicGen BGM + Celery/Redis 병렬화 [구현 완료] (2026-06-07)
+
+### 개요
+배치 영상 파이프라인의 TTS를 Celery group으로 병렬 처리하고, GPT-SoVITS/MusicGen 실제 모델을 연결.
+RunPod 컨테이너 내부에 embedded Redis + Celery worker + supervisord 프로세스 관리 적용.
+
+### 아키텍처
+```
+[RunPod Container]
+├── redis-server (embedded, localhost:6379)
+├── Celery Worker (media queue, concurrency=4)
+│   ├── task_tts_segment(img0~N) ── parallel (group)
+│   └── task_musicgen_bgm()       ── 별도 task
+├── supervisord (redis → celery → handler 순서 관리)
+└── RunPod Handler (batch_video 라우트)
+```
+
+### Fallback 전략
+- **TTS**: GPT-SoVITS → gTTS (per-task fallback) → 순차 gTTS (Celery 연결 실패 시)
+- **BGM**: MusicGen (bgm_description 있을 때) → sine-wave preset (bgm_key 기반)
+
+### 신규 파일 (4개)
+| 파일 | 역할 |
+|------|------|
+| `deploy/media_motion/celery_media.py` | Celery app 설정 (Redis localhost broker, media queue) |
+| `deploy/media_motion/media_tasks.py` | `task_tts_segment`, `task_musicgen_bgm` Celery tasks |
+| `deploy/media_motion/musicgen_bgm.py` | MusicGen 헬퍼 함수 (runpod_handler에서 추출) |
+| `deploy/media_motion/supervisord.conf` | Redis→Celery→Handler 프로세스 관리 |
+
+### 수정 파일 (6개)
+| 파일 | 변경 |
+|------|------|
+| `deploy/media_motion/schemas.py` | `bgm_description`, `bgm_duration` 필드 추가 |
+| `deploy/media_motion/batch_video_worker.py` | Step 2/3 분리, TTS Celery group 병렬화, BGM MusicGen 우선 |
+| `deploy/media_motion/runpod_handler.py` | `bgm_description`, `bgm_duration` 파싱 |
+| `deploy/media_motion/Dockerfile.runpod` | redis-server, supervisor, celery[redis], GPT-SoVITS deps, CMD→supervisord |
+| `deploy/cloud_gateway/app.py` | `bgm_description`, `bgm_duration` 전달 |
+| `src/api/fastapi_server.py` | `bgm_description`, `bgm_duration` 전달 |
+
+### 핵심 변경: batch_video_worker.py
+- **Step 2** (영상 생성): 기존 순차 유지 (GPU 메모리 집약적)
+- **Step 3** (TTS): `celery.group`으로 병렬 디스패치 → 전체 완료 대기 → mix
+- **Step 5** (BGM): `bgm_description` 있으면 MusicGen Celery task → 실패 시 sine-wave fallback
+
+### 상태: ✅ 구현 완료 — RunPod 이미지 재빌드 + GCP/EC2 재배포 필요
+
+---
+
+---
+
+## 22. 프론트엔드 + Spring Boot — MusicGen BGM 파라미터 연결 [구현 완료] (2026-06-07)
+
+### 개요
+#21에서 구현한 MusicGen BGM 생성을 프론트엔드 UI에서 제어할 수 있도록 `bgmDescription`, `bgmDuration` 파라미터를 전체 파이프라인에 연결.
+
+### 변경 파일 (4개)
+
+| 파일 | 변경 |
+|------|------|
+| `metadata-project/services/communityService.ts` | `submitBatchAnimation()`에 `bgmDescription`, `bgmDuration` 파라미터 + payload 전달 |
+| `metadata-project/components/community/CommunityPage.tsx` | `batchBgmDescription`, `batchBgmDuration` state + 배치 모달에 BGM 설명 입력 필드 + 길이 설정 (5~30초) |
+| `SDUI-server/.../dto/BatchAnimationRequest.java` | `bgmDescription` (String), `bgmDuration` (int, @Min(5) @Max(30)) 필드 추가 |
+| `SDUI-server/.../service/AnimationService.java` | payload에 `bgm_description`, `bgm_duration` 전달 |
+
+### 데이터 흐름
+```
+프론트 배치 모달 BGM 설명 입력
+  → communityService.submitBatchAnimation(bgmDescription, bgmDuration)
+  → Spring Boot BatchAnimationRequest → AnimationService payload
+  → GCP FastAPI /jobs/runpod/batch → RunPod handler
+  → batch_video_worker → MusicGen Celery task or sine-wave fallback
+```
+
+### UI 동작
+- BGM 설명 입력 필드: 비워두면 기존 sine-wave BGM (bgm_key 기반)
+- BGM 설명 입력 시 → MusicGen AI로 BGM 자동 생성
+- BGM 길이 설정 (5~30초): BGM 설명 입력 시에만 표시
+
+### 상태: ✅ 구현 완료 — EC2/GCP 재배포 필요
+
+---
+
+## 우선순위 정리 (최종 업데이트 2026-06-07 #4)
+
+| # | 이슈 | 상태 | 조치 |
+|---|------|------|------|
+| 1~20 | (이전 이슈 모두) | ✅ | — |
+| 21 | GPT-SoVITS + MusicGen + Celery 병렬화 | ✅ | 10파일 신규/수정, RunPod 재빌드 필요 |
+| 22 | MusicGen BGM 프론트+백엔드 연결 | ✅ | 4파일 수정, EC2/GCP 재배포 필요 |
 
 ---
 

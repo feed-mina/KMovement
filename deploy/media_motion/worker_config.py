@@ -65,6 +65,10 @@ class WorkerConfig:
     three_d_photo_command: str = ""
     three_d_photo_command_json: str = ""
 
+    blip2_model_id: str = "Salesforce/blip-image-captioning-base"
+    blip2_translation_model_id: str = "Helsinki-NLP/opus-mt-en-ko"
+    blip2_enabled: bool = True
+
 
 def load_worker_config(*, allow_fallback: bool | None = None) -> WorkerConfig:
     cfg = WorkerConfig(
@@ -93,6 +97,9 @@ def load_worker_config(*, allow_fallback: bool | None = None) -> WorkerConfig:
         animated_drawings_retarget=env_path("KRIDE_ANIMATED_DRAWINGS_RETARGET"),
         three_d_photo_command=os.environ.get("KRIDE_3D_PHOTO_COMMAND", ""),
         three_d_photo_command_json=os.environ.get("KRIDE_3D_PHOTO_COMMAND_JSON", ""),
+        blip2_model_id=os.environ.get("KRIDE_BLIP2_MODEL_ID", "Salesforce/blip-image-captioning-base"),
+        blip2_translation_model_id=os.environ.get("KRIDE_BLIP2_TRANSLATION_MODEL_ID", "Helsinki-NLP/opus-mt-en-ko"),
+        blip2_enabled=env_bool("KRIDE_BLIP2_ENABLED", True),
     )
     if allow_fallback is not None:
         cfg.allow_fallback = allow_fallback
