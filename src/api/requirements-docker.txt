@@ -33,9 +33,8 @@ psycopg2-binary==2.9.12
 celery[redis]>=5.3,<6
 flower>=2.0,<3
 
-# --- Media worker (lightweight routes) ---
-gTTS>=2.5,<3
-soundfile>=0.12,<1
+# --- Media worker deps는 Dockerfile.runpod / Dockerfile.worker에서 별도 설치 ---
+# gTTS, soundfile, cloudinary는 media worker 전용 (click 충돌 방지)
 cloudinary>=1.41,<2
 
 # --- Utilities ---
