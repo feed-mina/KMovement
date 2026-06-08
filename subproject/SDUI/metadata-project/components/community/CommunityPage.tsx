@@ -1010,9 +1010,26 @@ function CommunityDetail({ postId }: { postId: number }) {
                         </p>
                     ) : null}
                     {animStatus?.status === 'FAILED' && (
-                        <p className="community-animation-error">
-                            영상 생성 실패: {animStatus.errorMessage || '알 수 없는 오류'}
-                        </p>
+                        <div className="community-animation-error">
+                            <p>영상 생성 실패: {animStatus.errorMessage || '알 수 없는 오류'}</p>
+                            {isOwner && (
+                                <button
+                                    className="community-secondary-btn"
+                                    type="button"
+                                    style={{ marginTop: 6, fontSize: 12 }}
+                                    onClick={async () => {
+                                        try {
+                                            await communityService.resetAnimationStatus(postId);
+                                            setAnimStatus(null);
+                                        } catch {
+                                            alert('초기화 실패');
+                                        }
+                                    }}
+                                >
+                                    에러 기록 초기화
+                                </button>
+                            )}
+                        </div>
                     )}
                     {isOwner && (!animStatus || animStatus.status === 'FAILED' || animStatus.status === 'NONE') && (
                         <div style={{ display: 'flex', gap: 8 }}>

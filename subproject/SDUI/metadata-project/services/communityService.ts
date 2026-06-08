@@ -157,6 +157,11 @@ export const communityService = {
         return res.data.data as AnimationStatusResponse;
     },
 
+    async resetAnimationStatus(postId: number) {
+        const res = await api.delete(`${BASE}/posts/${postId}/animate/status`);
+        return res.data;
+    },
+
     async submitBatchAnimation(
         postId: number,
         images: BatchImageInput[],
