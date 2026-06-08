@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -100,6 +101,19 @@ public class AnimationController {
                     "errorMessage", ""
             )));
         }
+    }
+
+    @Operation(summary = "Reset a failed/completed video job so a new one can be submitted")
+    @DeleteMapping("/status")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> resetAnimationStatus(
+            @PathVariable("postId") Long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        animationService.resetAnimationStatus(postId, userDetails.getUserSqno());
+        return ResponseEntity.ok(ApiResponse.success(
+                "영상 생성 기록을 초기화했습니다.",
+                Map.of("postId", postId)
+        ));
     }
 
     private Map<String, Object> submissionResponse(AnimationJob job) {

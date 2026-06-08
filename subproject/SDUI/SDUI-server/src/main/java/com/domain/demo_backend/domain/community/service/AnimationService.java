@@ -215,6 +215,29 @@ public class AnimationService {
         return animationJobRepository.save(job);
     }
 
+    @Transactional
+    public void resetAnimationStatus(Long postId, Long userSqno) {
+        AnimationJob job = animationJobRepository
+                .findTopByPostPostIdOrderByCreatedAtDesc(postId)
+                .orElseThrow(() -> new BusinessException(
+                        "영상 생성 작업을 찾을 수 없습니다.",
+                        HttpStatus.NOT_FOUND
+                ));
+        if (!isPostOwner(job, userSqno)) {
+            throw new BusinessException(
+                    "게시글 작성자만 초기화할 수 있습니다.",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+        if (ACTIVE_STATUSES.contains(job.getStatus())) {
+            throw new BusinessException(
+                    "진행 중인 작업은 초기화할 수 없습니다.",
+                    HttpStatus.CONFLICT
+            );
+        }
+        animationJobRepository.delete(job);
+    }
+
     public boolean isPostOwner(AnimationJob job, Long userSqno) {
         return userSqno != null
                 && job.getPost() != null
