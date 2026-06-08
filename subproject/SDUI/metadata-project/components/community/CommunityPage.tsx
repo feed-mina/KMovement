@@ -28,17 +28,7 @@ type CommunityPageProps = {
 
 type CommunityMode = 'list' | 'write' | 'detail' | 'modify';
 
-type SketchHandoff = {
-    kind: 'community-sketch' | 'community-image';
-    filename?: string;
-    dataUrl?: string;
-    sourceUrl?: string;
-    originalName?: string;
-    createdAt: string;
-};
-
 const PAGE_SIZE = 5;
-const SKETCH_HANDOFF_KEY = 'kride:doodle-source';
 
 function getMode(screenId: string): CommunityMode {
     if (screenId.includes('WRITE')) return 'write';
@@ -79,9 +69,36 @@ function imageKey(image: PostImageDto) {
     return image.storedName || image.storageUrl || String(image.postImageId);
 }
 
-function rememberDoodleSource(payload: SketchHandoff) {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(SKETCH_HANDOFF_KEY, JSON.stringify(payload));
+function animationRouteLabel(route?: string) {
+    switch (route) {
+        case 'animated_drawings_worker':
+            return '스케치/캐릭터 애니메이션';
+        case 'cogvideox_real':
+            return 'CogVideoX 사진 영상';
+        case '3d_photo_inpainting_real':
+            return '3D 사진 영상';
+        case '3d_photo_light':
+            return '3D 사진 라이트';
+        case 'tora_cogvideox_i2v':
+            return 'Tora 경로 제어 영상';
+        case 'batch_video':
+            return '전체 이미지 배치 영상';
+        default:
+            return route || '';
+    }
+}
+
+function formatFailedImageIndexes(value?: string) {
+    if (!value) return '';
+    try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) {
+            return parsed.map((item) => `${Number(item) + 1}번째`).join(', ');
+        }
+    } catch {
+        /* use the raw value below */
+    }
+    return value;
 }
 
 function dataUrlToFile(dataUrl: string, filename: string) {
@@ -334,7 +351,7 @@ function SketchPad({
                 <div className="community-sketch-header">
                     <div>
                         <h2>스케치</h2>
-                        <p>그린 이미지는 글의 첨부 이미지와 낙서 입력으로 저장됩니다.</p>
+                        <p>그린 이미지는 글의 첨부 이미지로 저장됩니다.</p>
                     </div>
                     <button className="community-secondary-btn" type="button" onClick={onClose}>
                         닫기
@@ -539,15 +556,9 @@ function CommunityForm({
         });
     };
 
-    const addSketchImage = (file: File, dataUrl: string) => {
+    const addSketchImage = (file: File, _dataUrl: string) => {
         setNewImages((prev) => [...prev, file]);
-        rememberDoodleSource({
-            kind: 'community-sketch',
-            filename: file.name,
-            dataUrl,
-            createdAt: new Date().toISOString(),
-        });
-        setSketchNotice('스케치가 첨부 이미지에 추가되고 낙서 입력으로 저장되었습니다.');
+        setSketchNotice('스케치가 첨부 이미지에 추가되었습니다.');
         setSketchOpen(false);
     };
 
@@ -687,7 +698,6 @@ function CommunityDetail({ postId }: { postId: number }) {
     const [liked, setLiked] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [doodleNotice, setDoodleNotice] = useState('');
     const [animStatus, setAnimStatus] = useState<AnimationStatusResponse | null>(null);
     const [animSubmitting, setAnimSubmitting] = useState(false);
     const [animRouteModal, setAnimRouteModal] = useState(false);
@@ -833,6 +843,11 @@ function CommunityDetail({ postId }: { postId: number }) {
                 status: result.status,
                 resultUrl: '',
                 errorMessage: '',
+                route: 'batch_video',
+                totalImages: result.totalImages,
+                processedImages: 0,
+                actualModel: '',
+                failedImageIndexes: '',
             });
             setBatchModal(false);
             startAnimPolling();
@@ -898,17 +913,6 @@ function CommunityDetail({ postId }: { postId: number }) {
         }
     };
 
-    const sendImageToDoodle = (image: PostImageDto) => {
-        rememberDoodleSource({
-            kind: 'community-image',
-            sourceUrl: image.storageUrl,
-            originalName: image.originalName,
-            createdAt: new Date().toISOString(),
-        });
-        setDoodleNotice('선택한 이미지가 낙서 입력으로 저장되었습니다.');
-        alert('이 이미지를 낙서 입력으로 보낼 준비가 완료되었습니다.');
-    };
-
     if (loading) {
         return (
             <div className="community-page">
@@ -929,6 +933,11 @@ function CommunityDetail({ postId }: { postId: number }) {
             </div>
         );
     }
+
+    const animRouteText = animationRouteLabel(animStatus?.route);
+    const failedImageText = formatFailedImageIndexes(animStatus?.failedImageIndexes);
+    const hasBatchProgress =
+        typeof animStatus?.totalImages === 'number' && animStatus.totalImages > 1;
 
     return (
         <div className="community-page community-detail-page">
@@ -960,12 +969,6 @@ function CommunityDetail({ postId }: { postId: number }) {
                     </div>
                 </header>
 
-                {doodleNotice && (
-                    <p className="community-sketch-notice" role="status">
-                        {doodleNotice}
-                    </p>
-                )}
-
                 {post.images?.length > 0 && (
                     <div className="community-detail-images">
                         {post.images.map((image) => (
@@ -978,13 +981,6 @@ function CommunityDetail({ postId }: { postId: number }) {
                                 >
                                     <img src={image.storageUrl} alt={image.originalName || '커뮤니티 이미지'} />
                                 </a>
-                                <button
-                                    className="community-image-doodle-btn"
-                                    type="button"
-                                    onClick={() => sendImageToDoodle(image)}
-                                >
-                                    낙서로 보내기
-                                </button>
                             </div>
                         ))}
                     </div>
@@ -995,11 +991,22 @@ function CommunityDetail({ postId }: { postId: number }) {
                         <div className="community-animation-result">
                             <h3>영상 결과</h3>
                             <video controls preload="metadata" src={animStatus.resultUrl} />
+                            <div className="community-animation-meta">
+                                {animRouteText && <span>{animRouteText}</span>}
+                                {hasBatchProgress && (
+                                    <span>
+                                        {animStatus.processedImages ?? 0}/{animStatus.totalImages}장 처리
+                                    </span>
+                                )}
+                                {animStatus.actualModel && <span>실행 모델 {animStatus.actualModel}</span>}
+                                {failedImageText && <span>실패 이미지 {failedImageText}</span>}
+                            </div>
                         </div>
                     )}
                     {animStatus?.status === 'QUEUED' || animStatus?.status === 'RUNNING' ? (
                         <p className="community-animation-progress">
                             영상 생성 중... ({animStatus.status})
+                            {hasBatchProgress && ` ${animStatus.processedImages ?? 0}/${animStatus.totalImages}장`}
                         </p>
                     ) : null}
                     {animStatus?.status === 'FAILED' && (
@@ -1015,7 +1022,7 @@ function CommunityDetail({ postId }: { postId: number }) {
                                 disabled={animSubmitting}
                                 onClick={() => setAnimRouteModal(true)}
                             >
-                                {animSubmitting ? '요청 중...' : '영상 만들기'}
+                                {animSubmitting ? '요청 중...' : '첫 이미지 영상 만들기'}
                             </button>
                             {post?.images && post.images.length >= 2 && (
                                 <button
@@ -1024,7 +1031,7 @@ function CommunityDetail({ postId }: { postId: number }) {
                                     disabled={batchSubmitting}
                                     onClick={openBatchModal}
                                 >
-                                    {batchSubmitting ? '요청 중...' : '전체 이미지 영상 만들기'}
+                                    {batchSubmitting ? '요청 중...' : '전체 이미지로 영상 만들기'}
                                 </button>
                             )}
                         </div>
@@ -1034,7 +1041,10 @@ function CommunityDetail({ postId }: { postId: number }) {
                         <div className="community-sketch-backdrop" role="dialog" aria-modal="true" aria-label="영상 유형 선택">
                             <div className="community-sketch-panel" style={{ maxWidth: 420 }}>
                                 <div className="community-sketch-header">
-                                    <h2>어떤 영상을 만들까요?</h2>
+                                    <div>
+                                        <h2>첫 번째 이미지 영상 만들기</h2>
+                                        <p>게시글의 첫 번째 이미지만 사용합니다.</p>
+                                    </div>
                                     <button className="community-secondary-btn" type="button" onClick={() => setAnimRouteModal(false)}>
                                         닫기
                                     </button>
@@ -1045,8 +1055,8 @@ function CommunityDetail({ postId }: { postId: number }) {
                                         type="button"
                                         onClick={() => submitAnimation('animated_drawings_worker')}
                                     >
-                                        스케치 애니메이션
-                                        <br /><small>스케치/그림 → 캐릭터 움직임</small>
+                                        스케치/캐릭터 애니메이션
+                                        <br /><small>첫 이미지가 낙서나 캐릭터 그림일 때</small>
                                     </button>
                                     <button
                                         className="community-primary-btn"
@@ -1054,8 +1064,8 @@ function CommunityDetail({ postId }: { postId: number }) {
                                         disabled={!post?.images?.length}
                                         onClick={() => submitAnimation('cogvideox_real')}
                                     >
-                                        AI 영상 생성
-                                        <br /><small>첨부 사진 → AI 시네마틱 영상 (GPU)</small>
+                                        사진 AI 영상
+                                        <br /><small>첫 사진 → CogVideoX 시네마틱 영상</small>
                                     </button>
                                     <button
                                         className="community-primary-btn"
@@ -1063,8 +1073,8 @@ function CommunityDetail({ postId }: { postId: number }) {
                                         disabled={!post?.images?.length}
                                         onClick={() => submitAnimation('3d_photo_inpainting_real')}
                                     >
-                                        3D 사진 영상
-                                        <br /><small>첨부 사진 → 3D 깊이 카메라 효과</small>
+                                        사진 3D 모션
+                                        <br /><small>첫 사진 → 3D 깊이/카메라 이동 효과</small>
                                     </button>
                                 </div>
                             </div>
@@ -1074,14 +1084,14 @@ function CommunityDetail({ postId }: { postId: number }) {
                         <div className="community-sketch-backdrop" role="dialog" aria-modal="true" aria-label="배치 영상 설정">
                             <div className="community-sketch-panel" style={{ maxWidth: 560 }}>
                                 <div className="community-sketch-header">
-                                    <h2>전체 이미지 영상 만들기</h2>
+                                    <h2>전체 이미지로 영상 만들기</h2>
                                     <button className="community-secondary-btn" type="button" onClick={() => setBatchModal(false)}>
                                         닫기
                                     </button>
                                 </div>
                                 <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                    <p style={{ color: '#c8ccd5', fontSize: 14 }}>
-                                        각 이미지에 들어갈 나레이션 텍스트를 입력하세요. 비워두면 게시글 제목이 사용됩니다.
+                                    <p style={{ color: '#64748b', fontSize: 14 }}>
+                                        모든 첨부 이미지를 장면으로 만들고 이어붙입니다. 나레이션을 비워두면 게시글 제목이 사용됩니다.
                                     </p>
                                     {post.images.map((img, idx) => (
                                         <div key={imageKey(img)} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
@@ -1117,8 +1127,8 @@ function CommunityDetail({ postId }: { postId: number }) {
                                             </div>
                                         </div>
                                     ))}
-                                    <div style={{ borderTop: '1px solid #333', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                        <label style={{ color: '#c8ccd5', fontSize: 14 }}>
+                                    <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                        <label style={{ color: '#64748b', fontSize: 14 }}>
                                             BGM 설명 (MusicGen AI 생성, 비워두면 기본 BGM)
                                         </label>
                                         <input
@@ -1129,7 +1139,7 @@ function CommunityDetail({ postId }: { postId: number }) {
                                         />
                                         {batchBgmDescription && (
                                             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                                <label style={{ color: '#c8ccd5', fontSize: 13, whiteSpace: 'nowrap' }}>
+                                                <label style={{ color: '#64748b', fontSize: 13, whiteSpace: 'nowrap' }}>
                                                     BGM 길이 (초)
                                                 </label>
                                                 <input
@@ -1150,7 +1160,7 @@ function CommunityDetail({ postId }: { postId: number }) {
                                         disabled={batchSubmitting}
                                         onClick={submitBatchAnimation}
                                     >
-                                        {batchSubmitting ? '요청 중...' : `${post.images.length}장 영상 생성하기`}
+                                        {batchSubmitting ? '요청 중...' : `${post.images.length}장으로 영상 생성하기`}
                                     </button>
                                 </div>
                             </div>

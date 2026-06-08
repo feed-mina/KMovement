@@ -77,12 +77,19 @@ public class AnimationController {
             AnimationJob job = animationService.getAnimationStatus(postId);
             boolean owner = userDetails != null
                     && animationService.isPostOwner(job, userDetails.getUserSqno());
-            Map<String, Object> result = Map.of(
-                    "jobId", job.getId(),
-                    "status", job.getStatus(),
-                    "resultUrl", job.getResultUrl() != null ? job.getResultUrl() : "",
+            Map<String, Object> result = submissionResponse(job);
+            result.put("resultUrl", job.getResultUrl() != null ? job.getResultUrl() : "");
+            result.put(
                     "errorMessage",
                     owner && job.getErrorMessage() != null ? job.getErrorMessage() : ""
+            );
+            result.put("totalImages", job.getTotalImages() != null ? job.getTotalImages() : 0);
+            result.put("processedImages", job.getProcessedImages() != null ? job.getProcessedImages() : 0);
+            result.put("route", job.getRoute() != null ? job.getRoute() : "");
+            result.put("actualModel", job.getActualModel() != null ? job.getActualModel() : "");
+            result.put(
+                    "failedImageIndexes",
+                    job.getFailedImageIndexes() != null ? job.getFailedImageIndexes() : ""
             );
             return ResponseEntity.ok(ApiResponse.success(result));
         } catch (IllegalArgumentException e) {
@@ -96,10 +103,12 @@ public class AnimationController {
     }
 
     private Map<String, Object> submissionResponse(AnimationJob job) {
-        return new java.util.HashMap<>(Map.of(
+        Map<String, Object> result = new java.util.HashMap<>(Map.of(
                 "jobId", job.getId(),
                 "runpodJobId", job.getRunpodJobId() != null ? job.getRunpodJobId() : "",
                 "status", job.getStatus()
         ));
+        result.put("route", job.getRoute() != null ? job.getRoute() : "");
+        return result;
     }
 }

@@ -1005,21 +1005,6 @@
     font-size: 12px;
 }
 
-.community-image-doodle-btn {
-    position: absolute;
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-    min-height: 34px;
-    border: 0;
-    border-radius: 8px;
-    background: rgba(37, 99, 235, 0.9);
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 750;
-    cursor: pointer;
-}
-
 .community-sketch-notice {
     margin: 2px 0 0;
     padding: 10px 12px;
@@ -1029,6 +1014,23 @@
     color: #1d4ed8;
     font-size: 14px;
     line-height: 1.45;
+}
+
+.community-animation-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.community-animation-meta span {
+    padding: 5px 8px;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 700;
 }
 
 .community-sketch-backdrop {

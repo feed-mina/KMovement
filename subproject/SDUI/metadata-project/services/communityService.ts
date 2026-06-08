@@ -55,6 +55,11 @@ export interface AnimationStatusResponse {
     status: string;
     resultUrl: string;
     errorMessage: string;
+    route?: string;
+    totalImages?: number;
+    processedImages?: number;
+    actualModel?: string;
+    failedImageIndexes?: string;
 }
 
 export interface BatchImageInput {
