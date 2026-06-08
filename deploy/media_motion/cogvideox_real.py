@@ -10,6 +10,41 @@ from .tts import synthesize_gtts
 from .worker_config import WorkerConfig, load_worker_config
 
 
+_cached_pipe = None
+_cached_pipe_key: str | None = None
+
+
+def _get_or_load_pipeline(model_id: str, dtype, device: str, cpu_offload: bool):
+    """Cache the CogVideoX pipeline across calls to avoid reloading ~30GB weights."""
+    global _cached_pipe, _cached_pipe_key
+
+    key = f"{model_id}|{dtype}|{device}|{cpu_offload}"
+    if _cached_pipe is not None and _cached_pipe_key == key:
+        return _cached_pipe
+
+    import torch
+    from diffusers import CogVideoXImageToVideoPipeline
+
+    # Free previous pipeline first
+    if _cached_pipe is not None:
+        del _cached_pipe
+        _cached_pipe = None
+        _cached_pipe_key = None
+        torch.cuda.empty_cache()
+
+    pipe = CogVideoXImageToVideoPipeline.from_pretrained(model_id, torch_dtype=dtype)
+    if device == "cuda" and cpu_offload:
+        pipe.enable_model_cpu_offload()
+    else:
+        pipe.to(device)
+    pipe.vae.enable_slicing()
+    pipe.vae.enable_tiling()
+
+    _cached_pipe = pipe
+    _cached_pipe_key = key
+    return pipe
+
+
 def create_cogvideox_real_video(case: TravelCase, output_mp4: Path, cfg: WorkerConfig) -> Path:
     """Run real CogVideoX image-to-video inference when dependencies are installed."""
     output_mp4.parent.mkdir(parents=True, exist_ok=True)
@@ -18,38 +53,37 @@ def create_cogvideox_real_video(case: TravelCase, output_mp4: Path, cfg: WorkerC
     if not case.image_path.exists():
         raise FileNotFoundError(f"missing input image: {case.image_path}")
 
-    # Heavy imports stay inside this function so the gateway can import safely.
     import torch
-    from diffusers import CogVideoXImageToVideoPipeline
     from diffusers.utils import export_to_video
     from PIL import Image
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     dtype = torch.bfloat16 if device == "cuda" and torch.cuda.is_bf16_supported() else torch.float16
 
-    pipe = CogVideoXImageToVideoPipeline.from_pretrained(cfg.cogvideox_model_id, torch_dtype=dtype)
-    if device == "cuda" and cfg.cogvideox_cpu_offload:
-        pipe.enable_model_cpu_offload()
-    else:
-        pipe.to(device)
-    pipe.vae.enable_slicing()
-    pipe.vae.enable_tiling()
+    pipe = _get_or_load_pipeline(cfg.cogvideox_model_id, dtype, device, cfg.cogvideox_cpu_offload)
 
     image = Image.open(case.image_path).convert("RGB")
     prompt = case.prompt or f"A cinematic travel video from a real photo of {case.place}."
-    generator = torch.Generator(device=device).manual_seed(cfg.cogvideox_seed)
+    # Use CPU generator when cpu_offload is enabled to avoid device mismatch
+    gen_device = "cpu" if cfg.cogvideox_cpu_offload else device
+    generator = torch.Generator(device=gen_device).manual_seed(cfg.cogvideox_seed)
 
-    result = pipe(
-        prompt=prompt,
-        image=image,
-        num_videos_per_prompt=1,
-        num_inference_steps=cfg.cogvideox_num_inference_steps,
-        num_frames=cfg.cogvideox_num_frames,
-        guidance_scale=cfg.cogvideox_guidance_scale,
-        generator=generator,
-    )
-    frames = result.frames[0]
-    export_to_video(frames, str(output_mp4), fps=cfg.cogvideox_fps)
+    try:
+        result = pipe(
+            prompt=prompt,
+            image=image,
+            num_videos_per_prompt=1,
+            num_inference_steps=cfg.cogvideox_num_inference_steps,
+            num_frames=cfg.cogvideox_num_frames,
+            guidance_scale=cfg.cogvideox_guidance_scale,
+            generator=generator,
+        )
+        frames = result.frames[0]
+        export_to_video(frames, str(output_mp4), fps=cfg.cogvideox_fps)
+    finally:
+        # Free inference tensors even on failure
+        torch.cuda.empty_cache()
+
     return output_mp4
 
 
