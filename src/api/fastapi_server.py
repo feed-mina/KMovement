@@ -29,6 +29,7 @@ import httpx
 import networkx as nx
 import pandas as pd
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
@@ -1476,3 +1477,132 @@ def runpod_status(
         return JSONResponse(content={"ok": True, **resp.json()})
     except Exception as exc:
         return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
+
+
+# ── Celery Job API ───────────────────────────────────────────────────────────
+
+
+class CeleryEmbedRequest(BaseModel):
+    texts: list[str] = Field(..., min_length=1, max_length=100)
+
+
+class CeleryRerankRequest(BaseModel):
+    query: str = Field(..., min_length=1)
+    documents: list[str] = Field(..., min_length=1, max_length=100)
+
+
+class CeleryWeatherRequest(BaseModel):
+    sequence: list = Field(..., min_length=1)
+
+
+class CeleryEventRequest(BaseModel):
+    text: str = Field(..., min_length=1)
+
+
+def _celery_submit_response(result) -> JSONResponse:
+    return JSONResponse(content={
+        "ok": True,
+        "task_id": result.id,
+        "status": "QUEUED",
+        "status_url": f"/jobs/celery/{result.id}",
+    })
+
+
+def _submit_celery_task(task, *args) -> JSONResponse:
+    try:
+        result = task.apply_async(args=args)
+    except Exception as exc:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "ok": False,
+                "message": "Celery broker에 작업을 제출하지 못했습니다.",
+                "error": str(exc)[:2000],
+            },
+        )
+    return _celery_submit_response(result)
+
+
+@app.post("/jobs/celery/embed")
+def celery_embed(
+    request: CeleryEmbedRequest,
+    _: None = Depends(_require_internal_api_key),
+):
+    """배치 임베딩 작업을 Celery 큐에 제출"""
+    from src.api.tasks import task_embed_texts
+    return _submit_celery_task(task_embed_texts, request.texts)
+
+
+@app.post("/jobs/celery/rerank")
+def celery_rerank(
+    request: CeleryRerankRequest,
+    _: None = Depends(_require_internal_api_key),
+):
+    """리랭킹 작업을 Celery 큐에 제출"""
+    from src.api.tasks import task_rerank
+    return _submit_celery_task(task_rerank, request.query, request.documents)
+
+
+@app.post("/jobs/celery/weather")
+def celery_weather(
+    request: CeleryWeatherRequest,
+    _: None = Depends(_require_internal_api_key),
+):
+    """날씨 예측 작업을 Celery 큐에 제출"""
+    from src.api.tasks import task_predict_weather
+    return _submit_celery_task(task_predict_weather, request.sequence)
+
+
+@app.post("/jobs/celery/event")
+def celery_event(
+    request: CeleryEventRequest,
+    _: None = Depends(_require_internal_api_key),
+):
+    """이벤트 분류 작업을 Celery 큐에 제출"""
+    from src.api.tasks import task_classify_event
+    return _submit_celery_task(task_classify_event, request.text)
+
+
+@app.get("/jobs/celery/{task_id}")
+def celery_status(
+    task_id: str,
+    _: None = Depends(_require_internal_api_key),
+):
+    """Celery 작업 상태 조회
+
+    상태 매핑:
+      PENDING  → 큐 대기 중 (또는 존재하지 않는 task_id)
+      STARTED  → 실행 중
+      RETRY    → 재시도 대기
+      SUCCESS  → 완료
+      FAILURE  → 실패
+      (custom) → task 내부 update_state로 설정한 진행 상태
+    """
+    from celery.result import AsyncResult
+    from src.api.celery_app import celery as celery_app
+
+    result = AsyncResult(task_id, app=celery_app)
+
+    celery_status_value = result.status
+    public_status = {
+        "PENDING": "QUEUED",
+        "STARTED": "RUNNING",
+        "RETRY": "RETRYING",
+    }.get(celery_status_value, celery_status_value)
+
+    response: dict = {
+        "ok": True,
+        "task_id": task_id,
+        "status": public_status,
+        "celery_status": celery_status_value,
+    }
+
+    if celery_status_value == "SUCCESS":
+        response["result"] = jsonable_encoder(result.result)
+    elif celery_status_value == "FAILURE":
+        response["error"] = str(result.result)[:2000] if result.result else "Unknown error"
+    elif result.info and isinstance(result.info, dict):
+        # custom update_state meta (진행률 등)
+        response["meta"] = jsonable_encoder(result.info)
+
+    return JSONResponse(content=response)
