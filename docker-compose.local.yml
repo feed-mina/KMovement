@@ -4,6 +4,11 @@
 #   docker compose -f docker-compose.local.yml up -d
 #   docker compose -f docker-compose.local.yml logs -f fastapi
 #   docker compose -f docker-compose.local.yml down
+#
+# Redis DB 번호 규약:
+#   DB 0 — Spring Boot (공유 Redis 배포 시 cache, token, OAuth, location)
+#   DB 1 — FastAPI Celery broker / result backend
+# 로컬 SDUI compose는 별도 Redis를 사용하며 기본 호스트 포트 6380을 사용한다.
 
 services:
   # ── FastAPI (K-Ride AI) ──────────────────────────────────────────────────
@@ -20,10 +25,12 @@ services:
       redis:
         condition: service_healthy
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       - TORCHSERVE_URL=http://host.docker.internal:8085
       - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
       - CHROMA_HOST=chromadb
       - CHROMA_PORT=8000
       - HF_HOME=/tmp/hf_cache
@@ -53,7 +60,7 @@ services:
     image: redis:7-alpine
     container_name: kride_redis
     ports:
-      - "6379:6379"
+      - "${KRIDE_REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -62,25 +69,65 @@ services:
       timeout: 3s
       retries: 3
 
-  # ── Celery Worker (CPU only) ─────────────────────────────────────────────
-  celery-worker:
+  # ── Celery ML Worker (CPU) ─────────────────────────────────────────────
+  celery-ml-worker:
     build:
       context: .
       dockerfile: Dockerfile.worker
-    container_name: kride_celery
-    command: celery -A src.api.celery_app worker -l info -c 2 -Q ml,media
+    container_name: kride_celery_ml
+    command: celery -A src.api.celery_app worker -l info -c 2 -Q ml
     depends_on:
       redis:
         condition: service_healthy
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       - TORCHSERVE_URL=http://host.docker.internal:8085
       - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
       - CHROMA_HOST=chromadb
       - CHROMA_PORT=8000
       - HF_HOME=/tmp/hf_cache
       - TRANSFORMERS_CACHE=/tmp/hf_cache/hub
+    restart: unless-stopped
+
+  # ── Celery Media Worker (CPU) ──────────────────────────────────────────
+  celery-media-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: kride_celery_media
+    command: celery -A src.api.celery_app worker -l info -c 1 -Q media
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - TORCHSERVE_URL=http://host.docker.internal:8085
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - HF_HOME=/tmp/hf_cache
+      - TRANSFORMERS_CACHE=/tmp/hf_cache/hub
+    restart: unless-stopped
+
+  # ── Flower (Celery 모니터링 대시보드) ───────────────────────────────────
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: kride_flower
+    command: celery -A src.api.celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
     restart: unless-stopped
 
 volumes:

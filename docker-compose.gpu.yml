@@ -6,7 +6,7 @@
 #   docker compose -f docker-compose.gpu.yml down
 #
 # Redis DB 번호 규약:
-#   DB 0 — Spring Boot (cache, token, OAuth, location)
+#   DB 0 — Spring Boot (공유 Redis 배포 시 cache, token, OAuth, location)
 #   DB 1 — FastAPI Celery broker / result backend
 
 services:
@@ -97,7 +97,7 @@ services:
     image: redis:7-alpine
     container_name: kride_redis
     ports:
-      - "6379:6379"
+      - "${KRIDE_REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -138,16 +138,28 @@ services:
   celery-media-worker:
     build:
       context: .
-      dockerfile: Dockerfile.worker
+      dockerfile: deploy/media_motion/Dockerfile.runpod
     container_name: kride_celery_media
     command: celery -A src.api.celery_app worker -l info -c 1 -Q media
     depends_on:
       redis:
         condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     environment:
       - TORCHSERVE_URL=http://torchserve:8085
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - CLOUDINARY_URL=${CLOUDINARY_URL:-}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:-}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-}
+      - KRIDE_RESULT_URL_REQUIRED=${KRIDE_RESULT_URL_REQUIRED:-true}
     restart: unless-stopped
 
   # ── Flower (Celery 모니터링 대시보드) ───────────────────────────────────
