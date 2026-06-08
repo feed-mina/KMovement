@@ -39,6 +39,9 @@ services:
       - SUPABASE_URL=${SUPABASE_URL:-}
       - SUPABASE_KEY=${SUPABASE_KEY:-}
       - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - RUNPOD_API_KEY=${RUNPOD_API_KEY:-}
+      - RUNPOD_ENDPOINT_ID=${RUNPOD_ENDPOINT_ID:-}
+      - RUNPOD_TORA_ENDPOINT_ID=${RUNPOD_TORA_ENDPOINT_ID:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]

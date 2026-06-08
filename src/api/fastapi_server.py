@@ -1353,11 +1353,22 @@ def chat_qa(req: ChatStreamRequest):
 # RunPod Serverless Proxy — 커뮤니티 영상 생성
 # ─────────────────────────────────────────────────────────────────────────────
 RUNPOD_API_KEY = os.environ.get("RUNPOD_API_KEY", "")
-RUNPOD_ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID", "")
+RUNPOD_ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID", "")          # A타입: Media Worker
+RUNPOD_TORA_ENDPOINT_ID = os.environ.get("RUNPOD_TORA_ENDPOINT_ID", "")  # B타입: Tora Worker
 FASTAPI_INTERNAL_API_KEY = (
     os.environ.get("FASTAPI_INTERNAL_API_KEY", "").strip()
     or "sdui-internal-dev-key"
 )
+
+# Tora 전용 라우트 목록 — 이 라우트는 B타입 엔드포인트로 전송
+_TORA_ROUTES = {"tora_cogvideox_i2v"}
+
+
+def _resolve_endpoint_id(route: str) -> str:
+    """라우트에 따라 적절한 RunPod 엔드포인트 ID를 반환한다."""
+    if route in _TORA_ROUTES and RUNPOD_TORA_ENDPOINT_ID:
+        return RUNPOD_TORA_ENDPOINT_ID
+    return RUNPOD_ENDPOINT_ID
 
 
 def _require_internal_api_key(
@@ -1442,20 +1453,21 @@ def runpod_proxy(
     request: RunPodJobRequest,
     _: None = Depends(_require_internal_api_key),
 ):
-    if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
+    endpoint_id = _resolve_endpoint_id(request.route)
+    if not RUNPOD_API_KEY or not endpoint_id:
         return JSONResponse(
             status_code=501,
-            content={"ok": False, "message": "RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID are required."},
+            content={"ok": False, "message": "RUNPOD_API_KEY and endpoint ID are required."},
         )
 
     headers = {"Authorization": f"Bearer {RUNPOD_API_KEY}", "Content-Type": "application/json"}
     payload = {"input": request.model_dump()}
-    url = f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/run"
+    url = f"https://api.runpod.ai/v2/{endpoint_id}/run"
 
     try:
         resp = httpx.post(url, headers=headers, json=payload, timeout=30)
         resp.raise_for_status()
-        return JSONResponse(content={"ok": True, **resp.json()})
+        return JSONResponse(content={"ok": True, "endpoint": endpoint_id, **resp.json()})
     except Exception as exc:
         return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
 
@@ -1463,20 +1475,50 @@ def runpod_proxy(
 @app.get("/jobs/runpod/{job_id}")
 def runpod_status(
     job_id: str,
+    endpoint: str = "",
     _: None = Depends(_require_internal_api_key),
 ):
-    if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
+    """RunPod 작업 상태 조회.
+
+    endpoint 파라미터로 조회할 엔드포인트를 지정할 수 있다.
+    미지정 시 기본(Media) 엔드포인트를 먼저 조회하고, 404면 Tora 엔드포인트도 시도한다.
+    """
+    if not RUNPOD_API_KEY:
         return JSONResponse(status_code=501, content={"ok": False, "message": "RunPod not configured."})
 
     headers = {"Authorization": f"Bearer {RUNPOD_API_KEY}"}
-    url = f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/status/{job_id}"
 
-    try:
-        resp = httpx.get(url, headers=headers, timeout=30)
-        resp.raise_for_status()
-        return JSONResponse(content={"ok": True, **resp.json()})
-    except Exception as exc:
-        return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
+    # 명시적 endpoint 지정 시 해당 엔드포인트만 조회
+    if endpoint:
+        url = f"https://api.runpod.ai/v2/{endpoint}/status/{job_id}"
+        try:
+            resp = httpx.get(url, headers=headers, timeout=30)
+            resp.raise_for_status()
+            return JSONResponse(content={"ok": True, "endpoint": endpoint, **resp.json()})
+        except Exception as exc:
+            return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
+
+    # 미지정 시 Media → Tora 순서로 시도
+    endpoints_to_try = [eid for eid in [RUNPOD_ENDPOINT_ID, RUNPOD_TORA_ENDPOINT_ID] if eid]
+    if not endpoints_to_try:
+        return JSONResponse(status_code=501, content={"ok": False, "message": "No RunPod endpoint configured."})
+
+    last_exc = None
+    for eid in endpoints_to_try:
+        url = f"https://api.runpod.ai/v2/{eid}/status/{job_id}"
+        try:
+            resp = httpx.get(url, headers=headers, timeout=15)
+            if resp.status_code == 404:
+                continue
+            resp.raise_for_status()
+            return JSONResponse(content={"ok": True, "endpoint": eid, **resp.json()})
+        except Exception as exc:
+            last_exc = exc
+
+    return JSONResponse(
+        status_code=502,
+        content={"ok": False, "error": str(last_exc)[:2000] if last_exc else "Job not found on any endpoint."},
+    )
 
 
 # ── Celery Job API ───────────────────────────────────────────────────────────
