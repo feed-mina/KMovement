@@ -43,6 +43,7 @@ class BatchTravelCase:
     photo_route: str = "auto"  # "auto", "cogvideox_real", "3d_photo_light"
     bgm_description: str = ""  # MusicGen prompt (empty → bgm_key sine-wave fallback)
     bgm_duration: int = 15  # MusicGen generation length in seconds
+    default_tts_text: str = ""  # BLIP-2 실패 시 fallback TTS 텍스트 (게시글 제목 등)
 
 
 @dataclass(slots=True)

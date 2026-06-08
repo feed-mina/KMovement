@@ -221,17 +221,21 @@ def run_batch_video_case(
     has_both = bool(photos) and bool(sketches)
 
     # Step 1.5: Auto-caption for items with empty tts_text
-    if cfg.blip2_enabled:
-        from .blip2_captioning import generate_caption
-
-        for item, _ in classified:
-            if not item.tts_text.strip():
+    for item, _ in classified:
+        if not item.tts_text.strip():
+            if cfg.blip2_enabled:
                 try:
+                    from .blip2_captioning import generate_caption
+
                     item.tts_text = generate_caption(item.image_path, cfg)
                     print(f"[batch_video] BLIP-2 caption for img{item.index}: {item.tts_text}")
                 except Exception as exc:
                     print(f"[batch_video] BLIP-2 failed for img{item.index}: {exc}")
-                    # tts_text remains empty → TTS skipped for this image
+
+            # BLIP-2 비활성화이거나 실패한 경우, default_tts_text를 fallback으로 사용
+            if not item.tts_text.strip() and batch_case.default_tts_text:
+                item.tts_text = batch_case.default_tts_text
+                print(f"[batch_video] Fallback TTS for img{item.index}: {item.tts_text}")
 
     # Step 2: Generate per-image video segments (sequential — GPU intensive)
     video_paths: dict[int, Path] = {}

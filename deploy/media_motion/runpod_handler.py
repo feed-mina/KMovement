@@ -297,6 +297,7 @@ def handler(job: dict) -> dict:
                 photo_route=job_input.get("photo_route", "auto"),
                 bgm_description=job_input.get("bgm_description", ""),
                 bgm_duration=min(job_input.get("bgm_duration", 15), 30),
+                default_tts_text=job_input.get("default_tts_text", ""),
             )
             result = run_batch_video_case(batch_case, work_dir, cfg)
             result_dict = result.to_dict()

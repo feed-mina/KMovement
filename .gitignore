@@ -113,3 +113,8 @@ tools/zrok/
 deploy/*.pid
 deploy/run_media_preview.cmd
 .claude/settings.local.json
+0607_cloudinary.txt
+docs/celery_redis_current_state_and_plan.md
+report/0608_runpod_media_deploy_fix.md
+report/3D inpainting.txt
+report/community_22_cogvideo_photo_final.mp4

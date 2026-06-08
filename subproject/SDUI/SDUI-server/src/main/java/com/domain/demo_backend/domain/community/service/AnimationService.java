@@ -145,10 +145,12 @@ public class AnimationService {
 
             Map<String, Object> imagePayload = new HashMap<>();
             imagePayload.put("image_url", image.getStorageUrl());
+            // tts_text가 비어있으면 빈 문자열을 보내서 RunPod worker가
+            // BLIP-2 이미지 캡셔닝으로 자동 생성하도록 한다.
             imagePayload.put(
                     "tts_text",
                     item.getTtsText() == null || item.getTtsText().isBlank()
-                            ? defaultNarration(post)
+                            ? ""
                             : item.getTtsText().trim()
             );
             imagePayload.put(
@@ -167,6 +169,8 @@ public class AnimationService {
         payload.put("allow_fallback", true);
         payload.put("bgm_description", request.getBgmDescription() != null ? request.getBgmDescription() : "");
         payload.put("bgm_duration", request.getBgmDuration());
+        // BLIP-2 캡셔닝 실패 시 fallback으로 사용할 게시글 제목
+        payload.put("default_tts_text", defaultNarration(post));
 
         return submitToGateway(
                 post,

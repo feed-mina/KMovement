@@ -46,6 +46,8 @@ FastAPI 쪽에는 Celery 기반 비동기 큐 설정이 있습니다.
 - `docker-compose.local.yml`
 - `Dockerfile.worker`
 
+상세 진단과 연결 작업 계획은 `docs/celery_redis_current_state_and_plan.md`에 별도로 정리했습니다. 이 문서에서는 면접/발표에 필요한 핵심 흐름만 요약합니다.
+
 `src/api/celery_app.py`에서는 Redis를 Celery의 broker와 result backend로 사용합니다.
 
 ```python
@@ -93,7 +95,19 @@ celery-worker:
 
 여기서 `-c 2`는 worker 동시 실행 수를 2로 제한한다는 의미입니다. GPU 메모리 과부하를 줄이기 위한 설정입니다.
 
-중요한 점은, 현재 코드 기준으로 Celery 인프라와 태스크 정의는 준비되어 있지만 FastAPI 메인 엔드포인트에서 `delay()`나 `apply_async()`로 Celery 작업을 실제 제출하는 연결은 아직 뚜렷하게 보이지 않는다는 점입니다. 따라서 현재 사용자 기능과 직접 연결된 비동기 흐름은 아래 RunPod 구조에 더 가깝습니다.
+현재는 FastAPI에 Celery ML task 제출 API와 상태 조회 API가 추가되어 실제 `apply_async()` 제출이 가능합니다. 다만 기존 추천·날씨·이벤트 API는 호환성을 위해 동기 TorchServe 호출을 유지하고 있으며, 사용자-facing 영상 생성은 아래 RunPod 구조가 여전히 중심입니다.
+
+추가로 현재 `task_routes`에는 `task_rerank`, `task_classify_event`가 빠져 있습니다. worker는 `ml,media` 큐만 소비하도록 실행되므로, 이 두 task를 실제로 Celery로 호출하려면 먼저 route를 `ml` 큐에 명시적으로 추가해야 합니다.
+
+향후 FastAPI와 Celery를 실제 사용자 흐름에 연결하려면 다음 작업이 필요합니다.
+
+1. Redis DB 번호와 책임을 분리한다. 예: Spring cache/token은 DB 0, FastAPI Celery는 DB 1.
+2. `CELERY_BROKER_URL`과 `CELERY_RESULT_BACKEND`를 명확히 설정한다.
+3. 누락된 task route를 추가하고, `result_expires`로 결과 만료 시간을 정한다.
+4. FastAPI에 `POST /jobs/celery/...` 작업 제출 API와 `GET /jobs/celery/{task_id}` 상태 조회 API를 추가한다.
+5. Spring Boot는 기존 RunPod job 저장 방식처럼 `task_id`, `status`, `result`를 DB에 저장하거나, FastAPI status API를 proxy한다.
+6. 긴 미디어 작업에는 `self.update_state(...)`로 진행률을 업데이트해 향후 SSE/WebSocket UI와 연결할 수 있게 한다.
+7. Docker Compose smoke test로 Redis, worker, task roundtrip을 검증한다.
 
 #### 2. RunPod + DB 상태 폴링 구조
 
@@ -184,7 +198,7 @@ case "COMPLETED" -> {
 
 K-Ride 프로젝트에서는 무거운 AI 작업을 사용자 요청 안에서 바로 실행하지 않도록 비동기 구조를 적용했습니다. 예를 들어 커뮤니티 영상 생성 요청이 들어오면 Spring 서버가 FastAPI의 `/jobs/runpod` 엔드포인트로 작업을 제출하고, RunPod Serverless에서 실제 GPU 작업을 처리합니다. 서버는 RunPod가 반환한 작업 ID를 DB에 저장하고 상태를 `QUEUED`, `RUNNING`, `COMPLETED`, `FAILED`로 관리합니다. 이후 Scheduler가 주기적으로 상태를 폴링해 DB를 갱신하고 완료 시 알림을 보냅니다.
 
-또한 FastAPI 쪽에는 Celery와 Redis 기반의 비동기 큐 구조도 준비되어 있습니다. Redis를 broker와 result backend로 사용하고, `ml`, `media` 큐를 나누어 AI 추론 작업과 미디어 생성 작업을 분리할 수 있게 했습니다. 다만 현재 메인 API에서 Celery 태스크를 직접 제출하는 연결은 아직 완전히 붙어 있지 않아, 실제 사용자-facing 영상 생성 기능은 RunPod와 DB 폴링 구조가 중심입니다.
+또한 FastAPI 쪽에는 Celery와 Redis 기반의 비동기 큐 구조가 구현되어 있습니다. Redis를 broker와 result backend로 사용하고, `ml`, `media` 큐를 나누어 AI 추론 작업과 미디어 생성 작업을 분리했습니다. ML task 제출/상태 조회 API는 연결됐으며, 실제 사용자-facing 영상 생성 기능은 RunPod와 DB 폴링 구조가 중심입니다.
 
 ---
 
@@ -300,8 +314,8 @@ worker_prefetch_multiplier=1
 
 과장해서 말하지 않는 것이 좋습니다.
 
-현재 코드 기준으로 Celery와 Redis 인프라는 준비되어 있지만, FastAPI 메인 API에서 Celery 태스크를 직접 enqueue하는 연결은 아직 명확하게 붙어 있지 않습니다. 따라서 면접에서는 다음처럼 말하는 것이 자연스럽습니다.
+현재 코드 기준으로 FastAPI의 Celery task 제출과 상태 조회 연결까지 구현되어 있습니다. 다만 기존 사용자-facing 영상 생성은 RunPod 구조가 중심이므로, 면접에서는 두 흐름의 역할을 구분해 말하는 것이 자연스럽습니다.
 
-> Celery/Redis 기반 큐 구조는 준비했고, 실제 커뮤니티 영상 생성 기능은 RunPod Serverless와 DB 상태 폴링 구조로 비동기 처리했습니다.
+> Celery/Redis 기반 ML task 제출과 상태 조회 API를 구현했고, 실제 커뮤니티 영상 생성 기능은 RunPod Serverless와 DB 상태 폴링 구조로 비동기 처리했습니다.
 
 이렇게 말하면 구현한 부분과 준비한 부분을 정확히 구분할 수 있습니다.

@@ -1410,6 +1410,7 @@ class RunPodBatchJobRequest(BaseModel):
     allow_fallback: bool = True
     bgm_description: str = ""  # MusicGen prompt (empty → sine-wave fallback)
     bgm_duration: int = 15  # MusicGen generation length in seconds
+    default_tts_text: str = ""  # BLIP-2 실패 시 fallback TTS (게시글 제목)
 
 
 @app.post("/jobs/runpod/batch")
@@ -1435,6 +1436,7 @@ def runpod_batch_proxy(
             "allow_fallback": request.allow_fallback,
             "bgm_description": request.bgm_description,
             "bgm_duration": request.bgm_duration,
+            "default_tts_text": request.default_tts_text,
         }
     }
     headers = {"Authorization": f"Bearer {RUNPOD_API_KEY}", "Content-Type": "application/json"}
