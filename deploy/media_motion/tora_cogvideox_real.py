@@ -7,6 +7,7 @@ collects the generated MP4.  Falls back to ``cogvideox_real`` →
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import traceback
 from pathlib import Path
@@ -87,7 +88,6 @@ def create_tora_cogvideox_video(
     # Image directory (Tora --img_dir expects a directory)
     image_dir = work_dir / "images"
     image_dir.mkdir(parents=True, exist_ok=True)
-    import shutil
     target_img = image_dir / case.image_path.name
     if not target_img.exists():
         shutil.copy2(case.image_path, target_img)
@@ -146,8 +146,7 @@ def create_tora_cogvideox_video(
         )
 
     # Use the first (or only) generated video
-    import shutil as _shutil
-    _shutil.move(str(mp4_files[0]), str(output_mp4))
+    shutil.move(str(mp4_files[0]), str(output_mp4))
     return output_mp4
 
 
