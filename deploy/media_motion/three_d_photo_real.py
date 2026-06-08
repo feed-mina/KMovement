@@ -42,8 +42,12 @@ def create_3d_photo_inpainting_real_video(case: TravelCase, output_mp4: Path, cf
     elif cfg.three_d_photo_command:
         command = command_from_template(cfg.three_d_photo_command, values)
     else:
-        raise RuntimeError(
-            "KRIDE_3D_PHOTO_COMMAND_JSON or KRIDE_3D_PHOTO_COMMAND is required for real 3D Photo Inpainting."
+        # No external command configured — use depth parallax as primary method
+        from .depth_parallax import create_depth_parallax_video
+
+        return create_depth_parallax_video(
+            case.image_path, output_mp4, motion=case.motion, cfg=cfg,
+            intensity=case.motion_intensity,
         )
 
     command_result = run_external_command(command, cwd=work_dir, timeout_seconds=cfg.timeout_seconds)
