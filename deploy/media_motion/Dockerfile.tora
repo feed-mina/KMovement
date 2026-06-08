@@ -38,7 +38,8 @@ RUN apt-get update && \
 # ─────────────────────────────────────────────────────────────────────────────
 # Tora repository (commit SHA pinned for reproducibility)
 # ─────────────────────────────────────────────────────────────────────────────
-RUN git clone https://github.com/alibaba/Tora.git /app/Tora
+RUN git clone --depth 1 https://github.com/alibaba/Tora.git /app/Tora && \
+    cd /app/Tora && git log --oneline -1
 
 # SwissArmyTransformer (Tora dependency)
 RUN cd /app/Tora/modules/SwissArmyTransformer && pip install --no-cache-dir -e .
@@ -71,11 +72,15 @@ RUN pip install --no-cache-dir "runpod>=1.7,<2"
 RUN pip install --no-cache-dir opencv-python-headless
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Pre-download model weights
+# Verify PyTorch survived dependency installs (Tora/SAT may downgrade it)
 # ─────────────────────────────────────────────────────────────────────────────
-RUN python -c "from diffusers import CogVideoXImageToVideoPipeline; CogVideoXImageToVideoPipeline.from_pretrained('zai-org/CogVideoX-5b-I2V')" \
-    || echo "WARN: CogVideoX-5b-I2V pre-download failed — will download at runtime"
+RUN python -c "import torch; v=torch.__version__; print('PyTorch:', v); assert v.startswith('2.'), f'Expected PyTorch 2.x but got {v}'"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Pre-download small model weights only (<500MB)
+# CogVideoX-5b-I2V (~30GB) is NOT pre-downloaded — it downloads at first request
+# and is cached on RunPod Network Volume for subsequent calls.
+# ─────────────────────────────────────────────────────────────────────────────
 RUN python -c "from transformers import BlipProcessor, BlipForConditionalGeneration; BlipProcessor.from_pretrained('Salesforce/blip-image-captioning-base'); BlipForConditionalGeneration.from_pretrained('Salesforce/blip-image-captioning-base')" \
     || echo "WARN: BLIP pre-download failed"
 

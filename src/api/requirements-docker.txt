@@ -30,7 +30,13 @@ supabase==2.30.0
 psycopg2-binary==2.9.12
 
 # --- Celery ---
-celery[redis]
+celery[redis]>=5.3,<6
+flower>=2.0,<3
+
+# --- Media worker (lightweight routes) ---
+gTTS>=2.5,<3
+soundfile>=0.12,<1
+cloudinary>=1.41,<2
 
 # --- Utilities ---
 orjson==3.11.8

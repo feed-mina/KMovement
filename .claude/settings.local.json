@@ -46,7 +46,8 @@
       "Bash(printf {\"\"message\"\": \"\"BTS related places\"\", \"\"intent\"\": \"\"recommend\"\", \"\"artists\"\": [\"\"BTS\"\"], \"\"duration\"\": \"\"1day\"\", \"\"region\"\": \"\"Seoul\"\", \"\"budget\"\": {\"\"min\"\": 30000, \"\"max\"\": 100000}}:*)",
       "Bash(printf {\"\"message\"\": \"\"BTS related places\"\", \"\"artists\"\": [\"\"BTS\"\"], \"\"region\"\": \"\"Seoul\"\", \"\"budget\"\": {\"\"min\"\": 30000, \"\"max\"\": 100000}}:*)",
       "Bash(find:*)",
-      "Bash(./gradlew build:*)"
+      "Bash(./gradlew build:*)",
+      "Bash(chmod +x:*)"
     ]
   }
 }

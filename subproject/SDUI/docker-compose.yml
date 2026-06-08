@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
 # 1. 데이터베이스 서비스 
@@ -20,7 +18,8 @@ services:
     image: redis:latest
     container_name: sdui-redis
     ports:
-      - "6379:6379"
+      # K-Ride Redis의 기본 호스트 포트 6379와 충돌하지 않도록 6380 사용
+      - "${SDUI_REDIS_PORT:-6380}:6379"
     networks:
       - sdui-network
 
@@ -40,8 +39,9 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/SDUI_TD
       - SPRING_DATASOURCE_USERNAME=mina
       - SPRING_DATASOURCE_PASSWORD=password
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_DATABASE=0
       # [FastAPI 비활성화] AI 면접관 이력서 분석 기능 구현 시 주석 해제
       # - FASTAPI_URL=http://sdui-fastapi:8001
       # - FASTAPI_INTERNAL_API_KEY=sdui-internal-dev-key

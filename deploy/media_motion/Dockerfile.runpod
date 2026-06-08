@@ -135,8 +135,9 @@ RUN pip install --no-cache-dir -r /tmp/req-cogvideox.txt
 # Python dependencies — MusicGen (optional: falls back to sine-wave BGM)
 RUN pip install --no-cache-dir "audiocraft>=1.3,<2" || echo "WARN: audiocraft install failed — sine-wave BGM fallback will be used"
 
-# Celery + Redis broker for parallel TTS/BGM tasks
-RUN pip install --no-cache-dir "celery[redis]>=5.3,<6"
+# Celery + Redis broker for parallel TTS/BGM tasks.
+# httpx is needed when this image is reused as the FastAPI Celery media worker.
+RUN pip install --no-cache-dir "celery[redis]>=5.3,<6" httpx
 
 # GPT-SoVITS (optional: falls back to gTTS)
 RUN git clone --depth 1 https://github.com/RVC-Boss/GPT-SoVITS.git /app/GPT-SoVITS || echo "WARN: GPT-SoVITS clone failed"
@@ -181,6 +182,7 @@ RUN pip install --no-cache-dir "git+https://github.com/microsoft/MoGe.git" || ec
 # ─────────────────────────────────────────────────────────────────────────────
 # Application code (changes here do NOT re-download models)
 # ─────────────────────────────────────────────────────────────────────────────
+COPY src /app/src
 COPY deploy /app/deploy
 
 # supervisord config for Redis → Celery → RunPod handler process management
