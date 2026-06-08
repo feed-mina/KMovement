@@ -107,7 +107,7 @@ def run_cogvideo_fallback_case(case: TravelCase, output_root: Path, bgm_wav: Pat
         "place": case.place,
         "image": str(case.image_path),
         "prompt": case.prompt,
-        "model_attempted": "THUDM/CogVideoX-2b",
+        "model_attempted": "zai-org/CogVideoX-5b-I2V",
         "actual_model_executed": False,
         "status": "fallback_used",
         "fallback_type": "photo_motion_video",
