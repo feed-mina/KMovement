@@ -6,7 +6,7 @@
 #
 # Run:
 #   docker run --gpus all -p 8000:8000 \
-#     -v /path/to/tora-checkpoints:/runpod-vol/tora \
+#     -v /path/to/network-volume:/runpod-volume \
 #     kride-tora-gpu
 
 FROM ghcr.io/pytorch/pytorch:2.4.0-cuda12.1-cudnn9-devel
@@ -20,9 +20,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     KRIDE_RESULT_URL_REQUIRED=true \
     KRIDE_MAX_INLINE_OUTPUT_BYTES=6291456 \
     KRIDE_TORA_DIR=/app/Tora \
-    KRIDE_TORA_CHECKPOINT_PATH=/runpod-vol/tora/i2v/mp_rank_00_model_states.pt \
+    KRIDE_TORA_CHECKPOINT_PATH=/runpod-volume/tora/i2v/mp_rank_00_model_states.pt \
     KRIDE_TORA_ENABLED=true \
-    KRIDE_COGVIDEOX_MODEL_ID=zai-org/CogVideoX-5b-I2V
+    KRIDE_COGVIDEOX_MODEL_ID=zai-org/CogVideoX-5b-I2V \
+    HF_HOME=/runpod-volume/huggingface-cache \
+    HUGGINGFACE_HUB_CACHE=/runpod-volume/huggingface-cache/hub
 
 WORKDIR /app
 
@@ -69,12 +71,13 @@ RUN pip install --no-cache-dir sentencepiece
 RUN pip install --no-cache-dir "runpod>=1.7,<2"
 
 # opencv-python-headless (depth parallax fallback)
-RUN pip install --no-cache-dir opencv-python-headless
+# OpenCV 4.12+ requires NumPy 2.x, while Tora/SciPy still require NumPy 1.x.
+RUN pip install --no-cache-dir "opencv-python-headless<4.12" "numpy<2"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Verify PyTorch survived dependency installs (Tora/SAT may downgrade it)
+# Verify core versions survived dependency installs (Tora/SAT may change them)
 # ─────────────────────────────────────────────────────────────────────────────
-RUN python -c "import torch; v=torch.__version__; print('PyTorch:', v); assert v.startswith('2.'), f'Expected PyTorch 2.x but got {v}'"
+RUN python -c "import numpy, torch; tv=torch.__version__; nv=numpy.__version__; print('PyTorch:', tv, 'NumPy:', nv); assert tv.startswith('2.'), f'Expected PyTorch 2.x but got {tv}'; assert int(nv.split('.')[0]) < 2, f'Expected NumPy 1.x but got {nv}'"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Pre-download small model weights only (<500MB)
@@ -92,6 +95,6 @@ COPY deploy /app/deploy
 RUN mkdir -p /tmp/kride_outputs /app/media
 
 # Tora checkpoint is expected on RunPod Network Volume at:
-#   /runpod-vol/tora/i2v/mp_rank_00_model_states.pt
+#   /runpod-volume/tora/i2v/mp_rank_00_model_states.pt
 
 CMD ["python", "-u", "-m", "deploy.media_motion.runpod_handler"]
