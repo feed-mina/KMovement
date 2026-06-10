@@ -740,6 +740,40 @@ RunPod 컨테이너 내부에 embedded Redis + Celery worker + supervisord 프�
 | 1~20 | (이전 이슈 모두) | ✅ | — |
 | 21 | GPT-SoVITS + MusicGen + Celery 병렬화 | ✅ | 10파일 신규/수정, RunPod 재빌드 필요 |
 | 22 | MusicGen BGM 프론트+백엔드 연결 | ✅ | 4파일 수정, EC2/GCP 재배포 필요 |
+| 23 | RunPod Pod 시작 실패 | ⚠️ | Docker daemon timeout/호스트 리소스 상태 확인 필요 |
+
+---
+
+## 23. RunPod Pod 시작 실패 — `docker.sock` timeout (`context deadline exceeded`)
+
+### 현상
+RunPod Pod 생성 중 다음 오류가 발생했습니다:
+
+```text
+error creating container: container: create: container create: Post "http://%2Fvar%2Frun%2Fdocker.sock/v1.51/containers/create?name=bbtlsygauasmii-0": context deadline exceeded
+```
+
+### 원인 추정
+- RunPod 호스트의 Docker 데몬이 과부하 또는 응답 불가 상태
+- `/var/run/docker.sock`에 대한 접근 지연 또는 타임아웃
+- 이미지 풀/컨테이너 생성 중 호스트 I/O나 네트워크 지연
+- 호스트 디스크/메모리 리소스 부족 또는 Docker 데몬 재시작 중
+
+### 조치
+1. RunPod 호스트 상태 확인
+   - Docker 데몬이 살아 있는지, `/var/run/docker.sock` 접근이 가능한지
+   - 호스트의 디스크 사용량 및 I/O 대기 상태
+   - 현재 컨테이너 생성 로그에서 Docker daemon 관련 오류
+2. 동일 볼륨과 이미지로 Pod를 다시 생성해 봅니다.
+3. 같은 에러가 반복되면 다른 호스트/리전의 RunPod 노드로 재배포를 시도합니다.
+4. 필요 시 RunPod 지원팀에 로그와 함께 문의합니다.
+
+### 해결 방법
+- 일반적인 경우에는 동일한 `yerinmin/kride-tora-gpu:976947d` 이미지와 활성 `kride-tora-models` 볼륨을 그대로 재시도합니다.
+- Pod 생성 과정에서 호스트 리소스 문제가 있을 수 있으므로, `docker.sock` timeout이 계속 발생하면 노드를 교체하거나 RunPod 측 서비스 상태를 점검해야 합니다.
+
+### 상태
+- ⚠️ 조사 중 — 재시도 및 호스트 상태 확인 필요
 
 ---
 

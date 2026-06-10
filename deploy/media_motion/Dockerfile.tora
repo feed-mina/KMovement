@@ -105,4 +105,7 @@ RUN ln -sfn /runpod-volume/tora-ckpts /app/Tora/ckpts
 #   /runpod-volume/tora-ckpts/vae/3d-vae.pt              (ckpts/vae/3d-vae.pt)
 #   /runpod-volume/tora-ckpts/t5-v1_1-xxl/               (ckpts/t5-v1_1-xxl)
 
-CMD ["python", "-u", "-m", "deploy.media_motion.runpod_handler"]
+COPY deploy/media_motion/tora_entrypoint.sh /app/tora_entrypoint.sh
+RUN chmod +x /app/tora_entrypoint.sh
+
+ENTRYPOINT ["/app/tora_entrypoint.sh"]
