@@ -94,7 +94,15 @@ COPY deploy /app/deploy
 
 RUN mkdir -p /tmp/kride_outputs /app/media
 
-# Tora checkpoint is expected on RunPod Network Volume at:
-#   /runpod-volume/tora/i2v/mp_rank_00_model_states.pt
+# Tora's sat configs reference the VAE and T5 encoder via the *relative* path
+# `ckpts/...` (resolved from KRIDE_TORA_DIR=/app/Tora). Point that at the network
+# volume so the large weights live on the volume instead of being baked in.
+# Dangling at build time; resolves once the network volume mounts at runtime.
+RUN ln -sfn /runpod-volume/tora-ckpts /app/Tora/ckpts
+
+# RunPod Network Volume layout expected at runtime:
+#   /runpod-volume/tora/i2v/mp_rank_00_model_states.pt   (transformer, via --load)
+#   /runpod-volume/tora-ckpts/vae/3d-vae.pt              (ckpts/vae/3d-vae.pt)
+#   /runpod-volume/tora-ckpts/t5-v1_1-xxl/               (ckpts/t5-v1_1-xxl)
 
 CMD ["python", "-u", "-m", "deploy.media_motion.runpod_handler"]
