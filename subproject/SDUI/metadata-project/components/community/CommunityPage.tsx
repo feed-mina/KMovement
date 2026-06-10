@@ -1088,6 +1088,15 @@ function CommunityDetail({ postId }: { postId: number }) {
                                         className="community-primary-btn"
                                         type="button"
                                         disabled={!post?.images?.length}
+                                        onClick={() => submitAnimation('tora_cogvideox_i2v')}
+                                    >
+                                        사진 Tora 영상
+                                        <br /><small>첫 사진 → Tora 엔드포인트 I2V</small>
+                                    </button>
+                                    <button
+                                        className="community-primary-btn"
+                                        type="button"
+                                        disabled={!post?.images?.length}
                                         onClick={() => submitAnimation('3d_photo_inpainting_real')}
                                     >
                                         사진 3D 모션
