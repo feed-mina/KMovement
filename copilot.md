@@ -58,7 +58,23 @@ gh auth refresh -s project
 
 그 다음 다시 프로젝트를 생성합니다.
 
-## 3. 이슈를 프로젝트에 연결하기
+## 3. 프로젝트 생성 및 이슈 연결 예시
+
+아래는 실제 수행한 명령어와 결과입니다.
+
+```bash
+cd /workspaces/KMovement
+
+gh project create --owner feed-mina --title "K-ride"
+# 출력: https://github.com/users/feed-mina/projects/2
+
+gh issue edit 1 --add-project "K-ride"
+# 출력: https://github.com/feed-mina/KMovement/issues/1
+```
+
+프로젝트가 생성되었고 이슈 `#1`이 `K-ride` 프로젝트에 정상 등록되었습니다.
+
+## 4. 이슈를 프로젝트에 연결하기
 
 프로젝트가 생성된 뒤, 이슈를 연결하려면 아래 명령을 사용합니다.
 
