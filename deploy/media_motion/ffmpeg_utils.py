@@ -23,12 +23,18 @@ def run_ffmpeg(args: list[str], *, quiet: bool = True) -> None:
     ffmpeg_bin = _find_ffmpeg()
     command = [ffmpeg_bin, "-y", *args]
     if quiet:
-        command.extend(["-loglevel", "quiet"])
+        # "error" (not "quiet") keeps the verbose banner suppressed while still
+        # printing the actual failure to stderr, so a non-zero exit is diagnosable.
+        command.extend(["-loglevel", "error"])
 
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
-        stderr = result.stderr[-2000:] if result.stderr else ""
-        raise RuntimeError(f"ffmpeg failed with code {result.returncode}: {stderr}")
+        stderr = (result.stderr or "")[-2000:]
+        stdout = (result.stdout or "")[-1000:]
+        raise RuntimeError(
+            f"ffmpeg failed with code {result.returncode}: {stderr}\n"
+            f"cmd: {' '.join(command)}\nstdout: {stdout}"
+        )
 
 
 def ensure_parent(path: Path) -> Path:
