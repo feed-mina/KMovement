@@ -58,6 +58,11 @@ def create_tora_cogvideox_video(
             "Set KRIDE_TORA_CHECKPOINT_PATH."
         )
 
+    # SAT's load_checkpoint joins 'mp_rank_00_model_states.pt' directly onto the
+    # --load path, so --load must be the *directory* containing the checkpoint,
+    # not the file itself. Accept either form for KRIDE_TORA_CHECKPOINT_PATH.
+    load_path = checkpoint.parent if checkpoint.is_file() else checkpoint
+
     # --- Resolve trajectory ---
     if case.trajectory_points:
         trajectories = validate_trajectory(case.trajectory_points)
@@ -107,7 +112,7 @@ def create_tora_cogvideox_video(
         str(sat_dir / "configs" / "tora" / "model" / "cogvideox_5b_tora_i2v.yaml"),
         str(sat_dir / "configs" / "tora" / "inference_sparse.yaml"),
         "--load",
-        str(checkpoint),
+        str(load_path),
         "--point_path",
         str(point_file),
         "--input-file",
