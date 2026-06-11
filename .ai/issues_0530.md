@@ -532,6 +532,20 @@ API 응답 구조와 프론트엔드 타입 불일치:
 
 ### 상태: ✅ 수정 완료 — RunPod 이미지 재빌드 필요
 
+### 진행 현황
+- 로컬에서 실행한 `docker build -f Dockerfile.tora -t yerinmin/kride-tora-gpu:976947d .` 명령은 파일 경로가 올바르지 않아 실패했습니다.
+- 실제 Dockerfile 경로는 `deploy/media_motion/Dockerfile.tora`입니다.
+- `docker pull yerinmin/kride-tora-gpu:976947d`에서 exit code 130이 발생했는데, 이는 다운로드 도중 사용자가 중단했을 가능성이 큽니다.
+
+### 다음 단계
+1. `/workspaces/KMovement` 루트에서 아래 명령으로 다시 빌드
+   ```bash
+   docker build -f deploy/media_motion/Dockerfile.tora -t yerinmin/kride-tora-gpu:976947d .
+   ```
+2. 빌드가 성공하면 `docker push yerinmin/kride-tora-gpu:976947d`
+3. RunPod에서 새 Pod를 생성할 때 `Container image`에 `yerinmin/kride-tora-gpu:976947d` 입력
+4. `Network volume`은 `kride-tora-models`, mount path는 `/workspace` 유지
+
 ---
 
 ## 우선순위 정리 (최종 업데이트 2026-05-31 #2)
@@ -774,6 +788,13 @@ error creating container: container: create: container create: Post "http://%2Fv
 
 ### 상태
 - ⚠️ 조사 중 — 재시도 및 호스트 상태 확인 필요
+
+### 현재 상황 업데이트
+- GitHub Actions에서 `build / push` 작업이 진행 중입니다.
+- 현재 실행 중인 Pod는 새 이미지를 자동으로 반영하지 않습니다.
+- 새 이미지가 빌드/푸시된 뒤에는 기존 Pod를 중지하고, 동일 `kride-tora-models` 볼륨으로 새 Pod를 다시 생성하는 것이 바람직합니다.
+- 기존 Pod는 비용 절감을 위해 불필요하면 종료해도 되며, 새 이미지 테스트 전까지 계속 켜둘 필요는 없습니다.
+- 새 Pod를 띄울 때는 `Container image`를 `yerinmin/kride-tora-gpu:976947d`, `Network volume`을 활성 `kride-tora-models`로 설정하고, `Volume mount path`는 일반 Pod면 `/workspace`로 둡니다.
 
 ---
 
