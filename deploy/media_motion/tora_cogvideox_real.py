@@ -131,14 +131,25 @@ def create_tora_cogvideox_video(
     )
 
     if result.returncode != 0:
-        # Keep a generous tail: torchrun appends its own wrapper traceback after
-        # the child's output, so the *child* traceback (which names the failing
-        # HF repo / from_pretrained call) sits well above the last 2000 chars.
-        stderr_tail = (result.stderr or "")[-8000:]
-        stdout_tail = (result.stdout or "")[-3000:]
+        # SAT's sample_video.py prints a huge args/config dump at startup, which
+        # otherwise drowns out the real failure in a fixed-size tail. Extract the
+        # diagnostically-relevant lines (tracebacks, exceptions, CUDA/OOM, the
+        # torchrun ChildFailedError block with the child's real exitcode) so an
+        # OOM-kill (no Python traceback) is distinguishable from a true exception.
+        stderr = result.stderr or ""
+        keywords = (
+            "Traceback", "Error", "error", "Exception", "assert", "Assertion",
+            "CUDA", "out of memory", "OutOfMemory", "OOM", "Killed", "killed",
+            "SIGKILL", "ChildFailedError", "exitcode", "FAILED", "No module",
+            "not found", "token", "permission", "raise", "RuntimeError",
+        )
+        diag = [ln for ln in stderr.splitlines() if any(k in ln for k in keywords)]
+        diag_text = "\n".join(diag[-80:])
         raise RuntimeError(
             f"Tora subprocess failed (exit {result.returncode}):\n"
-            f"stderr: {stderr_tail}\nstdout: {stdout_tail}"
+            f"--- diagnostic lines ---\n{diag_text}\n"
+            f"--- stderr tail ---\n{stderr[-3000:]}\n"
+            f"--- stdout tail ---\n{(result.stdout or '')[-1500:]}"
         )
 
     # --- Collect output MP4 ---
