@@ -231,7 +231,9 @@ python -m deploy.media_motion.run_cases \
   --source-mp4 meta_combined_6.mp4 \
   --gif-overlay animation_watermark.gif \
   --overlay-position "main_w-overlay_w-10:main_h-overlay_h-10" \
-  --overlay-scale 200
+  --overlay-scale 200 \
+  --overlay-alpha 0.7 \
+  --overlay-speed 1.2
 ```
 
 **Parameters:**

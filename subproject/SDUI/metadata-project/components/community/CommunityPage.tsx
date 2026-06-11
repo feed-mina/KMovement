@@ -701,6 +701,9 @@ function CommunityDetail({ postId }: { postId: number }) {
     const [animStatus, setAnimStatus] = useState<AnimationStatusResponse | null>(null);
     const [animSubmitting, setAnimSubmitting] = useState(false);
     const [animRouteModal, setAnimRouteModal] = useState(false);
+    const [overlayPosition, setOverlayPosition] = useState('main_w-overlay_w-10:main_h-overlay_h-10');
+    const [overlayAlpha, setOverlayAlpha] = useState(1.0);
+    const [overlaySpeed, setOverlaySpeed] = useState(1.0);
     const [batchModal, setBatchModal] = useState(false);
     const [batchTtsTexts, setBatchTtsTexts] = useState<string[]>([]);
     const [batchImageTypes, setBatchImageTypes] = useState<('photo' | 'sketch' | 'auto')[]>([]);
@@ -794,7 +797,15 @@ function CommunityDetail({ postId }: { postId: number }) {
         setAnimRouteModal(false);
         setAnimSubmitting(true);
         try {
-            const result = await communityService.submitAnimation(postId, postImageId, route);
+            const result = await communityService.submitAnimation(
+                postId,
+                postImageId,
+                route,
+                '',
+                overlayPosition,
+                overlayAlpha,
+                overlaySpeed,
+            );
             setAnimStatus(result);
             startAnimPolling();
         } catch {
@@ -1056,7 +1067,7 @@ function CommunityDetail({ postId }: { postId: number }) {
 
                     {animRouteModal && (
                         <div className="community-sketch-backdrop" role="dialog" aria-modal="true" aria-label="영상 유형 선택">
-                            <div className="community-sketch-panel" style={{ maxWidth: 420 }}>
+                            <div className="community-sketch-panel" style={{ maxWidth: 520 }}>
                                 <div className="community-sketch-header">
                                     <div>
                                         <h2>첫 번째 이미지 영상 만들기</h2>
@@ -1066,7 +1077,53 @@ function CommunityDetail({ postId }: { postId: number }) {
                                         닫기
                                     </button>
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '16px 0' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '16px 0' }}>
+                                    <div className="community-panel community-panel-secondary">
+                                        <h3>GIF 오버레이 설정</h3>
+                                        <div style={{ display: 'grid', gap: 12 }}>
+                                            <label className="community-input-label">
+                                                위치
+                                                <select
+                                                    className="community-input"
+                                                    value={overlayPosition}
+                                                    onChange={(e) => setOverlayPosition(e.target.value)}
+                                                >
+                                                    <option value="main_w-overlay_w-10:main_h-overlay_h-10">우측 하단</option>
+                                                    <option value="10:10">좌측 상단</option>
+                                                    <option value="main_w-overlay_w-10:10">우측 상단</option>
+                                                    <option value="10:main_h-overlay_h-10">좌측 하단</option>
+                                                    <option value="(main_w-overlay_w)/2:(main_h-overlay_h)/2">가운데</option>
+                                                </select>
+                                            </label>
+                                            <label className="community-input-label">
+                                                투명도 {overlayAlpha.toFixed(2)}
+                                                <input
+                                                    className="community-input"
+                                                    type="range"
+                                                    min={0.1}
+                                                    max={1.0}
+                                                    step={0.05}
+                                                    value={overlayAlpha}
+                                                    onChange={(e) => setOverlayAlpha(Number(e.target.value))}
+                                                />
+                                            </label>
+                                            <label className="community-input-label">
+                                                재생 속도 {overlaySpeed.toFixed(2)}x
+                                                <input
+                                                    className="community-input"
+                                                    type="range"
+                                                    min={0.5}
+                                                    max={2.0}
+                                                    step={0.1}
+                                                    value={overlaySpeed}
+                                                    onChange={(e) => setOverlaySpeed(Number(e.target.value))}
+                                                />
+                                            </label>
+                                            <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+                                                GIF 오버레이는 애니메이션 생성 시 합성되는 투명 레이어입니다. 위치, 투명도, 재생 속도를 조절할 수 있습니다.
+                                            </p>
+                                        </div>
+                                    </div>
                                     <button
                                         className="community-primary-btn"
                                         type="button"

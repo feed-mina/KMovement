@@ -33,6 +33,29 @@ describe('community animation requests', () => {
             .not.toContain('base64');
     });
 
+    it('submits overlay position, alpha, and speed settings when provided', async () => {
+        await communityService.submitAnimation(
+            7,
+            42,
+            'animated_drawings_worker',
+            '',
+            '10:10',
+            0.6,
+            1.4,
+        );
+
+        expect(api.post).toHaveBeenCalledWith(
+            '/api/v1/community/posts/7/animate',
+            {
+                postImageId: 42,
+                route: 'animated_drawings_worker',
+                overlayPosition: '10:10',
+                overlayAlpha: 0.6,
+                overlaySpeed: 1.4,
+            },
+        );
+    });
+
     it('submits batch image IDs with the standardized field names', async () => {
         await communityService.submitBatchAnimation(
             7,

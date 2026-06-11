@@ -145,9 +145,15 @@ export const communityService = {
         postImageId: number,
         route = 'animated_drawings_worker',
         trajectoryPreset = '',
+        overlayPosition = 'main_w-overlay_w-10:main_h-overlay_h-10',
+        overlayAlpha = 1.0,
+        overlaySpeed = 1.0,
     ) {
         const body: Record<string, unknown> = { postImageId, route };
         if (trajectoryPreset) body.trajectoryPreset = trajectoryPreset;
+        if (overlayPosition) body.overlayPosition = overlayPosition;
+        if (overlayAlpha !== undefined) body.overlayAlpha = overlayAlpha;
+        if (overlaySpeed !== undefined) body.overlaySpeed = overlaySpeed;
         const res = await api.post(`${BASE}/posts/${postId}/animate`, body);
         return res.data.data as AnimationStatusResponse;
     },

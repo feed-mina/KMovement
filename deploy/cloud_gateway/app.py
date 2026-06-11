@@ -74,6 +74,8 @@ class GenerateJobRequest(BaseModel):
     gif_overlay_path: str = Field(default="", description="Optional GIF file path for meta_animation overlay.")
     overlay_position: str = Field(default="main_w-overlay_w-10:main_h-overlay_h-10", description="FFmpeg overlay position.")
     overlay_scale: int = Field(default=0, description="GIF overlay scale in pixels (width). 0 = auto.")
+    overlay_alpha: float = Field(default=1.0, description="GIF overlay transparency from 0.0 to 1.0.")
+    overlay_speed: float = Field(default=1.0, description="GIF overlay playback speed multiplier.")
     allow_fallback: bool = True
 
 
@@ -489,6 +491,10 @@ def generate_job(request: GenerateJobRequest) -> JSONResponse:
             command.extend(["--overlay-position", request.overlay_position])
         if request.overlay_scale > 0:
             command.extend(["--overlay-scale", str(request.overlay_scale)])
+        if request.overlay_alpha != 1.0:
+            command.extend(["--overlay-alpha", str(request.overlay_alpha)])
+        if request.overlay_speed != 1.0:
+            command.extend(["--overlay-speed", str(request.overlay_speed)])
     
     if not request.allow_fallback:
         command.append("--no-allow-fallback")

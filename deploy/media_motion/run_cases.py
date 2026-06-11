@@ -43,6 +43,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--gif-overlay", default="", help="Optional path to GIF file to overlay on meta-animation MP4 (bottom-right, ~1/5 scale).")
     parser.add_argument("--overlay-position", default="main_w-overlay_w-10:main_h-overlay_h-10", help="FFmpeg overlay position (e.g., '10:10' or 'main_w-overlay_w-10:main_h-overlay_h-10' for bottom-right).")
     parser.add_argument("--overlay-scale", type=int, default=0, help="GIF overlay scale in pixels (width). 0 = auto (~200 for 1920p video).")
+    parser.add_argument("--overlay-alpha", type=float, default=1.0, help="GIF overlay transparency: 0.0 (transparent) to 1.0 (opaque).")
+    parser.add_argument("--overlay-speed", type=float, default=1.0, help="GIF overlay playback speed multiplier. 1.0 = normal speed.")
     parser.add_argument("--allow-fallback", action=argparse.BooleanOptionalAction, default=True)
     return parser.parse_args()
 
@@ -86,6 +88,8 @@ def main() -> None:
             case_id=args.case_id,
             overlay_position=args.overlay_position,
             overlay_scale=overlay_scale,
+            overlay_alpha=args.overlay_alpha,
+            overlay_speed=args.overlay_speed,
         )
     elif args.route == "gpt_sovits_tts":
         result = run_gpt_sovits_tts_case(case_id=args.case_id, text=args.tts, output_root=output_dir, cfg=cfg)

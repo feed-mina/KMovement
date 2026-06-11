@@ -109,16 +109,37 @@ def concat_videos(video_paths: list[Path], output_mp4: Path) -> Path:
 
 
 def overlay_gif_on_video(
-    video: Path, gif: Path, output: Path,
-    *, position: str = "10:10", scale: int = 200,
+    video: Path,
+    gif: Path,
+    output: Path,
+    *,
+    position: str = "10:10",
+    scale: int = 200,
+    alpha: float = 1.0,
+    speed: float = 1.0,
 ) -> Path:
     """Overlay an animated GIF on top of a video."""
     ensure_parent(output)
+
+    if alpha <= 0.0 or alpha > 1.0:
+        raise ValueError("alpha must be between 0.0 and 1.0")
+    if speed <= 0.0:
+        raise ValueError("speed must be greater than 0.0")
+
+    gif_filter = [f"scale={scale}:-1"]
+    if speed != 1.0:
+        gif_filter.insert(0, f"setpts=PTS/{speed}")
+    gif_filter.append("format=rgba")
+    if alpha != 1.0:
+        gif_filter.append(f"colorchannelmixer=aa={alpha}")
+
+    gif_filter_expr = ",".join(gif_filter)
+
     run_ffmpeg([
         "-i", str(video),
         "-ignore_loop", "0", "-i", str(gif),
         "-filter_complex",
-        f"[1:v]scale={scale}:-1[ovr];[0:v][ovr]overlay={position}:shortest=1",
+        f"[1:v]{gif_filter_expr}[ovr];[0:v][ovr]overlay={position}:shortest=1",
         "-c:a", "copy",
         str(output),
     ])

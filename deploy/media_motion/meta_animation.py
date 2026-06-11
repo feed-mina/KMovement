@@ -45,6 +45,8 @@ def register_meta_animation_with_gif_overlay(
     case_id: str = "meta_combined_6",
     overlay_position: str = "main_w-overlay_w-10:main_h-overlay_h-10",
     overlay_scale: int | None = None,
+    overlay_alpha: float = 1.0,
+    overlay_speed: float = 1.0,
 ) -> GenerationResult:
     """Register meta-animation MP4 with optional animated GIF overlay.
     
@@ -63,7 +65,9 @@ def register_meta_animation_with_gif_overlay(
         case_id: Case identifier.
         overlay_position: FFmpeg overlay position (e.g., "10:10" or "main_w-overlay_w-10:main_h-overlay_h-10" for bottom-right).
         overlay_scale: GIF scale in pixels (width). If None, uses ~1/5 of video width (200px default).
-    
+        overlay_alpha: Alpha transparency for the GIF overlay, from 0.0 to 1.0.
+        overlay_speed: Playback speed multiplier for the GIF overlay.
+
     Returns:
         GenerationResult with the final video (with or without overlay).
     
@@ -75,6 +79,8 @@ def register_meta_animation_with_gif_overlay(
         ...     case_id="my_case",
         ...     overlay_position="main_w-overlay_w-10:main_h-overlay_h-10",
         ...     overlay_scale=150,
+        ...     overlay_alpha=0.6,
+        ...     overlay_speed=1.2,
         ... )
         >>> # Output: video_with_overlay.mp4 in output/meta_animation/
     """
@@ -115,6 +121,8 @@ def register_meta_animation_with_gif_overlay(
             final_mp4,
             position=overlay_position,
             scale=overlay_scale or 200,  # default ~1/5 of typical 1920 width
+            alpha=overlay_alpha,
+            speed=overlay_speed,
         )
         
         return GenerationResult(
@@ -132,6 +140,8 @@ def register_meta_animation_with_gif_overlay(
                 "gif_overlay": str(gif_overlay_path),
                 "overlay_position": overlay_position,
                 "overlay_scale": overlay_scale or 200,
+                "overlay_alpha": overlay_alpha,
+                "overlay_speed": overlay_speed,
                 "note": "Meta-animation with GIF overlay composited via FFmpeg.",
             },
         )
