@@ -78,17 +78,12 @@ def create_tora_cogvideox_video(
     work_dir = output_mp4.parent / f"{case.case_id}_tora_work"
     work_dir.mkdir(parents=True, exist_ok=True)
 
-    # Point file
-    point_file = write_tora_point_file(
+    # Point files — one text file per trajectory (Tora --point_path is nargs="+")
+    point_files = write_tora_point_file(
         trajectories,
-        work_dir / "points.json",
+        work_dir / "points",
         num_frames=cfg.cogvideox_num_frames,
     )
-
-    # Prompt file (Tora expects a text file with the prompt)
-    prompt_text = case.prompt or f"A cinematic travel video from a real photo of {case.place}."
-    prompt_file = work_dir / "prompt.txt"
-    prompt_file.write_text(prompt_text, encoding="utf-8")
 
     # Image directory (Tora --img_dir expects a directory)
     image_dir = work_dir / "images"
@@ -96,6 +91,14 @@ def create_tora_cogvideox_video(
     target_img = image_dir / case.image_path.name
     if not target_img.exists():
         shutil.copy2(case.image_path, target_img)
+
+    # Prompt file. In image2video mode sample_video.py parses each line as
+    # ``<prompt>@@<image_filename>`` and resolves the image via
+    # ``os.path.join(args.img_dir, image_filename)`` — so the prompt and the
+    # image basename must be joined with ``@@`` on a single line.
+    prompt_text = case.prompt or f"A cinematic travel video from a real photo of {case.place}."
+    prompt_file = work_dir / "prompt.txt"
+    prompt_file.write_text(f"{prompt_text}@@{target_img.name}", encoding="utf-8")
 
     # Output directory
     tora_output_dir = work_dir / "output"
@@ -114,7 +117,7 @@ def create_tora_cogvideox_video(
         "--load",
         str(load_path),
         "--point_path",
-        str(point_file),
+        *[str(p) for p in point_files],
         "--input-file",
         str(prompt_file),
         "--img_dir",

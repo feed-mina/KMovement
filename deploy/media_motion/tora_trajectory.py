@@ -6,7 +6,6 @@ normalised 0.0-1.0 coordinates.
 """
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -139,20 +138,26 @@ def write_tora_point_file(
     output_path: Path,
     num_frames: int,
     canvas_size: int = 256,
-) -> Path:
-    """Write a Tora-compatible point file.
+) -> list[Path]:
+    """Write Tora-compatible trajectory point files (one text file per trajectory).
 
-    The official Tora ``--point_path`` expects a JSON file mapping trajectory
-    index → list of ``{"x": int, "y": int}`` dicts on a 256x256 canvas,
-    one entry per frame.
+    The official Tora ``--point_path`` takes ``nargs="+"`` — a list of text file
+    paths. Each file is parsed by ``read_points()`` as newline-separated
+    ``x,y`` integer pairs in a 256x256 coordinate space (one point per frame).
+    Returns the list of written file paths (to be expanded onto ``--point_path``).
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    stem = output_path.stem
 
-    data: dict[str, list[dict[str, int]]] = {}
+    paths: list[Path] = []
     for idx, traj in enumerate(trajectories):
         interpolated = interpolate_points(traj, num_frames)
         canvas_pts = normalize_to_canvas(interpolated, canvas_size)
-        data[str(idx)] = [{"x": x, "y": y} for x, y in canvas_pts]
+        traj_path = output_path.parent / f"{stem}_traj{idx}.txt"
+        traj_path.write_text(
+            "\n".join(f"{x},{y}" for x, y in canvas_pts) + "\n",
+            encoding="utf-8",
+        )
+        paths.append(traj_path)
 
-    output_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
-    return output_path
+    return paths
