@@ -71,6 +71,9 @@ class GenerateJobRequest(BaseModel):
     motion: str = "slow_zoom_in"
     prompt: str = ""
     source_mp4: str = "meta_combined_6.mp4"
+    gif_overlay_path: str = Field(default="", description="Optional GIF file path for meta_animation overlay.")
+    overlay_position: str = Field(default="main_w-overlay_w-10:main_h-overlay_h-10", description="FFmpeg overlay position.")
+    overlay_scale: int = Field(default=0, description="GIF overlay scale in pixels (width). 0 = auto.")
     allow_fallback: bool = True
 
 
@@ -444,6 +447,8 @@ def generate_job(request: GenerateJobRequest) -> JSONResponse:
 
     if request.route == "meta_animation":
         resolve_media_relative(request.source_mp4)
+        if request.gif_overlay_path:
+            resolve_media_relative(request.gif_overlay_path)
     elif request.route != "gpt_sovits_tts":
         resolve_media_relative(request.image)
 
@@ -475,6 +480,16 @@ def generate_job(request: GenerateJobRequest) -> JSONResponse:
         "--source-mp4",
         request.source_mp4,
     ]
+    
+    # Add meta_animation overlay parameters if provided
+    if request.route == "meta_animation":
+        if request.gif_overlay_path:
+            command.extend(["--gif-overlay", request.gif_overlay_path])
+        if request.overlay_position != "main_w-overlay_w-10:main_h-overlay_h-10":
+            command.extend(["--overlay-position", request.overlay_position])
+        if request.overlay_scale > 0:
+            command.extend(["--overlay-scale", str(request.overlay_scale)])
+    
     if not request.allow_fallback:
         command.append("--no-allow-fallback")
 

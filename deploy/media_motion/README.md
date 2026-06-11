@@ -18,7 +18,7 @@ It is intentionally separate from `deploy/cloud_gateway/`:
 | `animated_drawings_worker` | Drawing/photo -> AnimatedDrawings/TorchServe pipeline -> TTS/BGM mix | Calls an existing AnimatedDrawings runtime. |
 | `3d_photo_light` | Real static photo -> lightweight pan/zoom/dolly -> TTS/BGM mix | Stable fallback/static-photo branch. |
 | `cogvideo_fallback` | Real photo CogVideoX branch fallback | Explicitly records `actual_model_executed=false`. |
-| `meta_animation` | Register/copy an existing meta-animation MP4 | For already generated animation artifacts. |
+| `meta_animation` | Register existing MP4 + optional GIF overlay | For pre-generated animation (e.g., from AnimatedDrawings) with looping GIF watermark. |
 
 ## Base Install
 
@@ -218,12 +218,49 @@ python -m deploy.media_motion.log_result_to_mlflow \
   --experiment track-b-media-motion-workers
 ```
 
-Set these first:
+## AnimatedDrawings & Meta-Animation Worker
+
+Register pre-generated animation MP4s with optional animated GIF overlay watermark:
 
 ```bash
-export MLFLOW_TRACKING_USERNAME=myelin24m
-export MLFLOW_TRACKING_PASSWORD=<DAGSHUB_TOKEN>
-export MLFLOW_TRACKING_URI=https://dagshub.com/myelin24m/Kride.mlflow
+python -m deploy.media_motion.run_cases \
+  --route meta_animation \
+  --input-dir report \
+  --output-dir outputs/media_motion \
+  --case-id my_animation \
+  --source-mp4 meta_combined_6.mp4 \
+  --gif-overlay animation_watermark.gif \
+  --overlay-position "main_w-overlay_w-10:main_h-overlay_h-10" \
+  --overlay-scale 200
+```
+
+**Parameters:**
+
+- `--source-mp4`: Path to base MP4 video (relative to `--input-dir`).
+- `--gif-overlay`: Optional GIF file to overlay (loops continuously to match video length).
+- `--overlay-position`: FFmpeg overlay position string:
+  - `"10:10"` = top-left at (10, 10) pixels.
+  - `"main_w-overlay_w-10:main_h-overlay_h-10"` = bottom-right with 10px margin (default).
+  - Other formats: `"x:y"` or expressions like `"main_w/2-overlay_w/2:main_h/2-overlay_h/2"` for center.
+- `--overlay-scale`: GIF width in pixels (height scales proportionally). Default `200` (~1/5 of 1920px video width).
+
+**Output:**
+
+- Base video registered as `meta_animation_video` artifact.
+- If GIF overlay provided: composited video saved as `{source_mp4_name}_with_overlay.mp4`.
+
+**Cloud Gateway Example (with overlay):**
+
+```json
+POST /jobs/generate
+{
+  "route": "meta_animation",
+  "case_id": "animation_with_watermark",
+  "source_mp4": "meta_combined_6.mp4",
+  "gif_overlay_path": "watermark.gif",
+  "overlay_position": "main_w-overlay_w-10:main_h-overlay_h-10",
+  "overlay_scale": 180
+}
 ```
 
 ## Progress Notes

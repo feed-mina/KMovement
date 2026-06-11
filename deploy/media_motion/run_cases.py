@@ -9,7 +9,7 @@ from .bgm import ensure_fallback_bgm
 from .cogvideo_fallback import run_cogvideo_fallback_case
 from .cogvideox_real import run_cogvideox_real_case
 from .gpt_sovits_worker import run_gpt_sovits_tts_case
-from .meta_animation import register_existing_meta_animation
+from .meta_animation import register_existing_meta_animation, register_meta_animation_with_gif_overlay
 from .schemas import TravelCase
 from .three_d_photo_light import run_3d_photo_light_case
 from .three_d_photo_real import run_3d_photo_inpainting_real_case
@@ -40,6 +40,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--motion", default="slow_zoom_in")
     parser.add_argument("--prompt", default="")
     parser.add_argument("--source-mp4", default="meta_combined_6.mp4")
+    parser.add_argument("--gif-overlay", default="", help="Optional path to GIF file to overlay on meta-animation MP4 (bottom-right, ~1/5 scale).")
+    parser.add_argument("--overlay-position", default="main_w-overlay_w-10:main_h-overlay_h-10", help="FFmpeg overlay position (e.g., '10:10' or 'main_w-overlay_w-10:main_h-overlay_h-10' for bottom-right).")
+    parser.add_argument("--overlay-scale", type=int, default=0, help="GIF overlay scale in pixels (width). 0 = auto (~200 for 1920p video).")
     parser.add_argument("--allow-fallback", action=argparse.BooleanOptionalAction, default=True)
     return parser.parse_args()
 
@@ -70,7 +73,20 @@ def main() -> None:
 
     # STEP 3. Dispatch to selected model/fallback worker.
     if args.route == "meta_animation":
-        result = register_existing_meta_animation(input_dir / args.source_mp4, output_dir, case_id=args.case_id)
+        source_mp4 = input_dir / args.source_mp4
+        gif_overlay = None
+        if args.gif_overlay:
+            gif_overlay = input_dir / args.gif_overlay
+        
+        overlay_scale = args.overlay_scale if args.overlay_scale > 0 else None
+        result = register_meta_animation_with_gif_overlay(
+            source_mp4,
+            gif_overlay,
+            output_dir,
+            case_id=args.case_id,
+            overlay_position=args.overlay_position,
+            overlay_scale=overlay_scale,
+        )
     elif args.route == "gpt_sovits_tts":
         result = run_gpt_sovits_tts_case(case_id=args.case_id, text=args.tts, output_root=output_dir, cfg=cfg)
     else:
