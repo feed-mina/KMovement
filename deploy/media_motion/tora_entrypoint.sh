@@ -3,6 +3,22 @@ set -euo pipefail
 
 echo "[tora_entrypoint] validating Tora RunPod environment..."
 
+# Pod compatibility: on a *Pod* the network volume mounts at /workspace, while on
+# *serverless* it is /runpod-volume. If /runpod-volume is absent but /workspace
+# holds the Tora weights, bridge them so the same image is debuggable on a Pod.
+if [[ ! -e /runpod-volume && -e /workspace/tora/i2v ]]; then
+  echo "[tora_entrypoint] /runpod-volume absent; symlinking -> /workspace (Pod mode)."
+  ln -sfn /workspace /runpod-volume
+fi
+
+# Debug bypass: set KRIDE_TORA_DEBUG_SHELL=1 on a Pod to skip validation and drop
+# into an idle shell, so you can run torchrun/sample_video.py by hand and read the
+# FULL, untruncated stderr (which names the failing HF repo). No rebuild needed.
+if [[ "${KRIDE_TORA_DEBUG_SHELL:-}" == "1" ]]; then
+  echo "[tora_entrypoint] DEBUG SHELL mode — validation skipped, sleeping."
+  exec sleep infinity
+fi
+
 default_checkpoint="/runpod-volume/tora/i2v/mp_rank_00_model_states.pt"
 vaedir="/runpod-volume/tora-ckpts/vae"
 t5dir="/runpod-volume/tora-ckpts/t5-v1_1-xxl"

@@ -131,8 +131,11 @@ def create_tora_cogvideox_video(
     )
 
     if result.returncode != 0:
-        stderr_tail = (result.stderr or "")[-2000:]
-        stdout_tail = (result.stdout or "")[-1000:]
+        # Keep a generous tail: torchrun appends its own wrapper traceback after
+        # the child's output, so the *child* traceback (which names the failing
+        # HF repo / from_pretrained call) sits well above the last 2000 chars.
+        stderr_tail = (result.stderr or "")[-8000:]
+        stdout_tail = (result.stdout or "")[-3000:]
         raise RuntimeError(
             f"Tora subprocess failed (exit {result.returncode}):\n"
             f"stderr: {stderr_tail}\nstdout: {stdout_tail}"
