@@ -161,13 +161,20 @@ def create_tora_cogvideox_video(
         )
 
     # --- Collect output MP4 ---
-    mp4_files = sorted(tora_output_dir.glob("*.mp4"))
+    # sample_video.py writes the generated video to <output_dir>/video/<name>.mp4
+    # (and, when trajectories are supplied, a trajectory-overlay copy under
+    # <output_dir>/traj_video/). Prefer the real video; never the overlay.
+    mp4_files = sorted((tora_output_dir / "video").glob("*.mp4"))
+    if not mp4_files:
+        mp4_files = sorted(
+            p for p in tora_output_dir.rglob("*.mp4")
+            if "traj_video" not in p.parts
+        )
     if not mp4_files:
         raise FileNotFoundError(
-            f"Tora produced no MP4 files in {tora_output_dir}"
+            f"Tora produced no MP4 files under {tora_output_dir}"
         )
 
-    # Use the first (or only) generated video
     shutil.move(str(mp4_files[0]), str(output_mp4))
     return output_mp4
 
