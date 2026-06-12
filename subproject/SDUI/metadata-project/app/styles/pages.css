@@ -3302,3 +3302,189 @@ button:hover {
         font-size: 12.5px;
     }
 }
+
+/* ==========================================
+   THEME_SETTINGS — 디자인 토큰 관리 화면 (issue #4 Phase 4)
+   ========================================== */
+.theme-settings-page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--kride-space-5);
+    padding-bottom: calc(var(--kride-space-8) + var(--kride-safe-bottom));
+}
+
+.theme-settings-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--kride-text-strong);
+}
+
+.theme-settings-desc {
+    font-size: 0.9rem;
+    color: var(--kride-text-sub);
+    margin-bottom: var(--kride-space-4);
+}
+
+.theme-settings-status {
+    padding: var(--kride-space-6);
+    text-align: center;
+    color: var(--kride-text-sub);
+}
+
+.theme-settings-section {
+    margin-bottom: var(--kride-space-6);
+}
+
+.theme-settings-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--kride-text-strong);
+    border-left: 4px solid var(--kride-primary);
+    padding-left: var(--kride-space-2);
+    margin-bottom: var(--kride-space-3);
+}
+
+.theme-settings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--kride-space-2);
+}
+
+.theme-token-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--kride-space-3);
+    padding: var(--kride-space-2) var(--kride-space-3);
+    background: var(--kride-bg-card);
+    border: 1.5px solid var(--kride-border);
+    border-radius: var(--kride-radius-md);
+}
+
+.theme-token-row.is-dirty {
+    border-color: var(--kride-primary);
+    background: var(--kride-primary-soft);
+}
+
+.theme-token-key {
+    font-family: ui-monospace, monospace;
+    font-size: 0.82rem;
+    color: var(--kride-text-main);
+    flex-shrink: 0;
+}
+
+.theme-token-inputs {
+    display: flex;
+    align-items: center;
+    gap: var(--kride-space-2);
+    flex: 1;
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+.theme-token-color {
+    width: 40px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--kride-border);
+    border-radius: var(--kride-radius-sm);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.theme-token-text {
+    width: 100%;
+    max-width: 280px;
+    height: 36px;
+    padding: 0 var(--kride-space-2);
+    font-family: ui-monospace, monospace;
+    font-size: 0.82rem;
+    border: 1px solid var(--kride-border);
+    border-radius: var(--kride-radius-sm);
+}
+
+.theme-token-text:focus {
+    outline: none;
+    border-color: var(--kride-primary);
+    box-shadow: 0 0 0 3px var(--kride-focus-ring);
+}
+
+.theme-settings-actions {
+    display: flex;
+    gap: var(--kride-space-3);
+    justify-content: flex-end;
+    position: sticky;
+    bottom: calc(var(--kride-space-3) + var(--kride-safe-bottom));
+    padding: var(--kride-space-3);
+    background: var(--kride-bg-cream);
+    border: 1.5px solid var(--kride-bg-cream-2);
+    border-radius: var(--kride-radius-lg);
+    box-shadow: var(--kride-shadow-float);
+}
+
+.theme-settings-save,
+.theme-settings-reset {
+    height: var(--kride-touch-target);
+    padding: 0 var(--kride-space-6);
+    border: none;
+    border-radius: var(--kride-radius-md);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.theme-settings-save {
+    background: var(--kride-primary);
+    color: var(--kride-text-invert);
+}
+
+.theme-settings-save:hover:not(:disabled) {
+    background: var(--kride-primary-dark);
+}
+
+.theme-settings-reset {
+    background: transparent;
+    color: var(--kride-text-main);
+    border: 2px solid var(--kride-border);
+}
+
+.theme-settings-save:disabled,
+.theme-settings-reset:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.theme-settings-message {
+    margin-top: var(--kride-space-3);
+    padding: var(--kride-space-3);
+    border-radius: var(--kride-radius-md);
+    font-size: 0.9rem;
+}
+
+.theme-settings-message.success {
+    background: var(--kride-primary-soft);
+    color: var(--kride-primary-dark);
+}
+
+.theme-settings-message.error {
+    background: #FEF2F2;
+    color: #B91C1C;
+    border: 1px solid #FECACA;
+}
+
+/* 모바일: 토큰 행을 세로 배치 */
+@media (max-width: 767px) {
+    .theme-token-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .theme-token-inputs {
+        justify-content: space-between;
+    }
+
+    .theme-token-text {
+        max-width: none;
+    }
+}
