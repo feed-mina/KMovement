@@ -2,6 +2,7 @@ import "./styles/index.css";
 import type { Metadata, Viewport } from 'next';
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider"; // 방금 만든 방 가져오기
 import {MetadataProvider} from "@/components/providers/MetadataProvider";
+import {ThemeProvider} from "@/components/providers/ThemeProvider";
 import { AuthProvider } from '@/context/AuthContext';
 import AppShell from "@/components/layout/AppShell";
 
@@ -66,6 +67,8 @@ export default function RootLayout({children}: Readonly<{
         <body className="antialiased">
         {/* 가장 바깥에서 QueryClient를 공급한다  */}
         <ReactQueryProvider>
+            {/* DB design_tokens를 :root CSS 변수로 주입 (실패 시 tokens.css 폴백) */}
+            <ThemeProvider>
             {/* screenId는 일단 전달하되, 나중에 URL 파라미터나 경로 기반으로 동적 처리할 것 */}
             <AuthProvider>
             <MetadataProvider>
@@ -75,6 +78,7 @@ export default function RootLayout({children}: Readonly<{
                 </AppShell>
             </MetadataProvider>
             </AuthProvider>
+            </ThemeProvider>
         </ReactQueryProvider>
         </body>
         </html>

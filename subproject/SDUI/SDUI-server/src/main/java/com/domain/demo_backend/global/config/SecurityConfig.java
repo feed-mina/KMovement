@@ -91,6 +91,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/kakao/**").permitAll()
                         .requestMatchers("/api/google/callback").permitAll()
                         .requestMatchers("/api/google/**").authenticated()
+                        // 테마 토큰 수정은 관리자 전용 (permitAll보다 먼저 매칭되어야 함)
+                        .requestMatchers(HttpMethod.PUT, "/api/ui/theme/**").hasRole("ADMIN")
                         .requestMatchers("/api/ui/**").permitAll()
                         .requestMatchers("/api/timer/**").permitAll()
                         .requestMatchers("/api/goalTime/**").permitAll() // 컨트롤러 레벨에서 인증 처리
