@@ -70,7 +70,10 @@ def mix_video_tts_bgm(video_path: Path, tts_wav: Path, bgm_wav: Path, output_mp4
         "-i",
         str(bgm_wav),
         "-filter_complex",
-        "[2:a]volume=-8dB[bgm];[1:a][bgm]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[aout]",
+        # amix's `normalize` option only exists on ffmpeg >= 4.4; the Tora image
+        # ships an older ffmpeg. Omit it and compensate for amix's built-in
+        # /N attenuation with an explicit volume=2.0 (works on old and new alike).
+        "[2:a]volume=-8dB[bgm];[1:a][bgm]amix=inputs=2:duration=first:dropout_transition=0,volume=2.0[aout]",
         "-map",
         "0:v",
         "-map",
@@ -176,7 +179,8 @@ def apply_bgm_to_video(video: Path, bgm_wav: Path, output: Path) -> Path:
         "-stream_loop", "-1",
         "-i", str(bgm_wav),
         "-filter_complex",
-        "[1:a]volume=-8dB[bgm];[0:a][bgm]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[aout]",
+        # See mix_video_tts_bgm: avoid amix `normalize` (ffmpeg >= 4.4 only).
+        "[1:a]volume=-8dB[bgm];[0:a][bgm]amix=inputs=2:duration=first:dropout_transition=0,volume=2.0[aout]",
         "-map", "0:v",
         "-map", "[aout]",
         "-c:v", "copy",
