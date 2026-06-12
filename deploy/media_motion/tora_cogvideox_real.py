@@ -23,6 +23,10 @@ from .tora_trajectory import (
 from .tts import synthesize_gtts
 from .worker_config import WorkerConfig, load_worker_config
 
+# Used when a Tora request arrives without any trajectory (e.g. the website's
+# single-image Tora button). Keeps Tora actually running instead of falling back.
+DEFAULT_TRAJECTORY_PRESET = "object_pan_right"
+
 
 def create_tora_cogvideox_video(
     case: TravelCase,
@@ -70,9 +74,16 @@ def create_tora_cogvideox_video(
         preset_pts = resolve_preset(case.trajectory_preset)
         trajectories = [preset_pts]
     else:
-        raise ValueError(
-            "tora_cogvideox_i2v requires trajectory_points or trajectory_preset"
+        # No trajectory supplied (e.g. the website Tora button without a preset).
+        # Default to a gentle pan so Tora actually runs, instead of hard-failing
+        # into the cogvideox_real fallback. Record the effective preset so the
+        # metadata reflects what was used.
+        print(
+            f"[tora] no trajectory provided; defaulting to preset "
+            f"'{DEFAULT_TRAJECTORY_PRESET}'"
         )
+        case.trajectory_preset = DEFAULT_TRAJECTORY_PRESET
+        trajectories = [resolve_preset(DEFAULT_TRAJECTORY_PRESET)]
 
     # --- Prepare working directory ---
     work_dir = output_mp4.parent / f"{case.case_id}_tora_work"
@@ -179,6 +190,51 @@ def create_tora_cogvideox_video(
     return output_mp4
 
 
+def _synthesize_narration(
+    text: str, output_wav: Path, cfg: WorkerConfig,
+) -> tuple[Path, str]:
+    """Narration via GPT-SoVITS (production), falling back to gTTS.
+
+    Returns ``(wav_path, engine)`` where engine is ``"gpt_sovits"`` or ``"gtts"``.
+    GPT-SoVITS needs ``KRIDE_GPT_SOVITS_DIR`` + weights; until provisioned this
+    cleanly degrades to gTTS.
+    """
+    if cfg.gpt_sovits_dir:
+        try:
+            from .gpt_sovits_worker import synthesize_gpt_sovits
+
+            wav_path, _ = synthesize_gpt_sovits(text, output_wav, cfg=cfg)
+            return wav_path, "gpt_sovits"
+        except Exception as exc:  # noqa: BLE001 — degrade, don't fail the video
+            print(f"[tora][tts] GPT-SoVITS failed ({exc}); falling back to gTTS")
+    return synthesize_gtts(text, output_wav), "gtts"
+
+
+def _resolve_bgm(
+    case: TravelCase, sine_bgm: Path, bgm_dir: Path, cfg: WorkerConfig,
+) -> tuple[Path, str]:
+    """BGM via MusicGen, falling back to the provided sine-wave preset.
+
+    Returns ``(bgm_path, engine)`` where engine is ``"musicgen"`` or ``"sine"``.
+    MusicGen needs ``audiocraft``; if unavailable this degrades to the sine BGM.
+    """
+    description = (
+        "gentle cinematic instrumental background music, calm and emotional, "
+        f"for a travel memory video of {case.place}"
+    )
+    try:
+        from .musicgen_bgm import synthesize_musicgen
+
+        bgm_dir.mkdir(parents=True, exist_ok=True)
+        bgm_path = synthesize_musicgen(
+            description, bgm_dir / f"{case.case_id}_musicgen.wav", duration=15,
+        )
+        return bgm_path, "musicgen"
+    except Exception as exc:  # noqa: BLE001 — degrade, don't fail the video
+        print(f"[tora][bgm] MusicGen failed ({exc}); using sine-wave BGM")
+        return sine_bgm, "sine"
+
+
 def run_tora_cogvideox_case(
     case: TravelCase,
     output_root: Path,
@@ -197,9 +253,12 @@ def run_tora_cogvideox_case(
 
     try:
         create_tora_cogvideox_video(case, raw_mp4, cfg)
-        tts_wav = synthesize_gtts(case.tts_text, tts_dir / f"{case.case_id}.wav")
+        tts_wav, tts_engine = _synthesize_narration(
+            case.tts_text, tts_dir / f"{case.case_id}.wav", cfg,
+        )
+        bgm_path, bgm_engine = _resolve_bgm(case, bgm_wav, branch_dir / "bgm", cfg)
         final_mp4 = mix_video_tts_bgm(
-            raw_mp4, tts_wav, bgm_wav,
+            raw_mp4, tts_wav, bgm_path,
             final_dir / f"{case.case_id}_tora_i2v_final.mp4",
         )
 
@@ -217,6 +276,8 @@ def run_tora_cogvideox_case(
                 len(case.trajectory_points) if case.trajectory_points else 0
             ),
             "actual_model_executed": True,
+            "tts_engine": tts_engine,
+            "bgm_engine": bgm_engine,
             "status": "success",
         }
         meta_dir.mkdir(parents=True, exist_ok=True)

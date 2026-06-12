@@ -704,6 +704,7 @@ function CommunityDetail({ postId }: { postId: number }) {
     const [overlayPosition, setOverlayPosition] = useState('main_w-overlay_w-10:main_h-overlay_h-10');
     const [overlayAlpha, setOverlayAlpha] = useState(1.0);
     const [overlaySpeed, setOverlaySpeed] = useState(1.0);
+    const [trajectoryPreset, setTrajectoryPreset] = useState('object_pan_right');
     const [batchModal, setBatchModal] = useState(false);
     const [batchTtsTexts, setBatchTtsTexts] = useState<string[]>([]);
     const [batchImageTypes, setBatchImageTypes] = useState<('photo' | 'sketch' | 'auto')[]>([]);
@@ -804,7 +805,7 @@ function CommunityDetail({ postId }: { postId: number }) {
                 postId,
                 postImageId,
                 route,
-                '',
+                route === 'tora_cogvideox_i2v' ? trajectoryPreset : '',
                 usesOverlay ? overlayPosition : undefined,
                 usesOverlay ? overlayAlpha : undefined,
                 usesOverlay ? overlaySpeed : undefined,
@@ -1144,6 +1145,19 @@ function CommunityDetail({ postId }: { postId: number }) {
                                         사진 AI 영상
                                         <br /><small>첫 사진 → CogVideoX 시네마틱 영상</small>
                                     </button>
+                                    <label className="community-traj-select">
+                                        경로(궤적):
+                                        <select
+                                            value={trajectoryPreset}
+                                            onChange={(e) => setTrajectoryPreset(e.target.value)}
+                                        >
+                                            <option value="object_pan_right">오른쪽으로 이동</option>
+                                            <option value="object_pan_left">왼쪽으로 이동</option>
+                                            <option value="arc_up">위로 아치</option>
+                                            <option value="arc_down">아래로 아치</option>
+                                            <option value="pause_then_move">멈췄다 이동</option>
+                                        </select>
+                                    </label>
                                     <button
                                         className="community-primary-btn"
                                         type="button"
@@ -1151,7 +1165,7 @@ function CommunityDetail({ postId }: { postId: number }) {
                                         onClick={() => submitAnimation('tora_cogvideox_i2v')}
                                     >
                                         사진 Tora 영상
-                                        <br /><small>첫 사진 → Tora 엔드포인트 I2V</small>
+                                        <br /><small>첫 사진 → Tora 엔드포인트 I2V (경로 제어)</small>
                                     </button>
                                     <button
                                         className="community-primary-btn"

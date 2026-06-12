@@ -14,4 +14,11 @@ public class AnimationCreateRequest {
 
     @NotBlank
     private String route;
+
+    /**
+     * Optional trajectory preset for the {@code tora_cogvideox_i2v} route
+     * (e.g. {@code object_pan_right}). Ignored by other routes. When blank,
+     * the backend supplies a default so Tora runs instead of falling back.
+     */
+    private String trajectoryPreset;
 }

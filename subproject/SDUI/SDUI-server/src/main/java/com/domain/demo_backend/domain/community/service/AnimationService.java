@@ -109,6 +109,17 @@ public class AnimationService {
         payload.put("bgm_key", "bright_travel");
         payload.put("allow_fallback", true);
 
+        // Tora is trajectory-controlled: without a trajectory the worker hard-fails
+        // and silently falls back to cogvideox_real. Always forward a preset
+        // (the user's choice, or a sensible default) so real Tora runs.
+        if ("tora_cogvideox_i2v".equals(route)) {
+            String preset = request.getTrajectoryPreset();
+            payload.put(
+                    "trajectory_preset",
+                    preset != null && !preset.isBlank() ? preset.trim() : "object_pan_right"
+            );
+        }
+
         return submitToGateway(post, route, 1, "/jobs/runpod", payload);
     }
 
