@@ -12,8 +12,9 @@ import subprocess
 import traceback
 from pathlib import Path
 
+from .animated_drawings_worker import run_animated_drawings_pipeline
 from .cogvideox_real import run_cogvideox_real_case
-from .ffmpeg_utils import mix_video_tts_bgm
+from .ffmpeg_utils import mix_video_tts_bgm, overlay_gif_on_video
 from .schemas import Artifact, GenerationResult, TravelCase
 from .tora_trajectory import (
     resolve_preset,
@@ -26,6 +27,7 @@ from .worker_config import WorkerConfig, load_worker_config
 # Used when a Tora request arrives without any trajectory (e.g. the website's
 # single-image Tora button). Keeps Tora actually running instead of falling back.
 DEFAULT_TRAJECTORY_PRESET = "object_pan_right"
+TORA_ACTUAL_MODEL = "alibaba/Tora (CogVideoX-5B-I2V)"
 
 
 def create_tora_cogvideox_video(
@@ -268,7 +270,9 @@ def run_tora_cogvideox_case(
             "place": case.place,
             "image": str(case.image_path),
             "prompt": case.prompt,
-            "model_id": cfg.cogvideox_model_id,
+            "actual_model": TORA_ACTUAL_MODEL,
+            "model_id": TORA_ACTUAL_MODEL,
+            "base_model_id": cfg.cogvideox_model_id,
             "seed": cfg.cogvideox_seed,
             "guidance_scale": cfg.cogvideox_guidance_scale,
             "trajectory_preset": case.trajectory_preset,
@@ -315,3 +319,113 @@ def run_tora_cogvideox_case(
         fallback.status = "fallback_used"
         fallback.error = str(exc)[:2000]
         return fallback
+
+
+def run_tora_doodle_overlay_case(
+    case: TravelCase,
+    overlay_image_path: Path,
+    output_root: Path,
+    bgm_wav: Path,
+    *,
+    overlay_position: str = "main_w-overlay_w-10:main_h-overlay_h-10",
+    overlay_alpha: float = 1.0,
+    overlay_speed: float = 1.0,
+    overlay_scale_ratio: float = 0.2,
+    cfg: WorkerConfig | None = None,
+) -> GenerationResult:
+    """Generate a Tora video and composite an AnimatedDrawings GIF over it."""
+    cfg = cfg or load_worker_config()
+    branch_dir = output_root / "tora_doodle_overlay"
+    raw_dir = branch_dir / "raw"
+    overlay_dir = branch_dir / "overlay"
+    tts_dir = branch_dir / "tts"
+    final_dir = branch_dir / "final"
+    meta_dir = branch_dir / "metadata"
+    raw_tora = raw_dir / f"{case.case_id}_tora_i2v.mp4"
+
+    create_tora_cogvideox_video(case, raw_tora, cfg)
+
+    overlay_case = TravelCase(
+        case_id=f"{case.case_id}_doodle",
+        place=case.place,
+        image_path=overlay_image_path,
+        tts_text="",
+    )
+    run_animated_drawings_pipeline(overlay_case, overlay_dir, cfg)
+    raw_gif = (
+        overlay_dir
+        / f"{overlay_case.case_id}_animated_drawings_work"
+        / "video.gif"
+    )
+    if not raw_gif.exists():
+        raise FileNotFoundError(f"AnimatedDrawings overlay GIF missing: {raw_gif}")
+
+    composited_mp4 = raw_dir / f"{case.case_id}_tora_with_doodle.mp4"
+    overlay_gif_on_video(
+        raw_tora,
+        raw_gif,
+        composited_mp4,
+        position=overlay_position,
+        scale=None,
+        scale_ratio=overlay_scale_ratio,
+        alpha=overlay_alpha,
+        speed=overlay_speed,
+        remove_white_background=True,
+    )
+
+    tts_wav, tts_engine = _synthesize_narration(
+        case.tts_text, tts_dir / f"{case.case_id}.wav", cfg,
+    )
+    bgm_path, bgm_engine = _resolve_bgm(case, bgm_wav, branch_dir / "bgm", cfg)
+    final_mp4 = mix_video_tts_bgm(
+        composited_mp4,
+        tts_wav,
+        bgm_path,
+        final_dir / f"{case.case_id}_tora_doodle_final.mp4",
+    )
+
+    metadata = {
+        "route": "tora_cogvideox_i2v",
+        "case_id": case.case_id,
+        "place": case.place,
+        "image": str(case.image_path),
+        "overlay_image": str(overlay_image_path),
+        "actual_model": TORA_ACTUAL_MODEL,
+        "model_id": TORA_ACTUAL_MODEL,
+        "base_model_id": cfg.cogvideox_model_id,
+        "actual_model_executed": True,
+        "trajectory_preset": case.trajectory_preset,
+        "trajectory_points_count": (
+            len(case.trajectory_points) if case.trajectory_points else 0
+        ),
+        "doodle_overlay_executed": True,
+        "overlay_position": overlay_position,
+        "overlay_alpha": overlay_alpha,
+        "overlay_speed": overlay_speed,
+        "overlay_scale_ratio": overlay_scale_ratio,
+        "overlay_background": "transparent_white_key",
+        "tts_engine": tts_engine,
+        "bgm_engine": bgm_engine,
+        "status": "success",
+    }
+    meta_dir.mkdir(parents=True, exist_ok=True)
+    meta_path = meta_dir / f"{case.case_id}_tora_doodle.json"
+    meta_path.write_text(
+        json.dumps(metadata, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    return GenerationResult(
+        route="tora_cogvideox_i2v",
+        status="success",
+        case_id=case.case_id,
+        artifacts=[
+            Artifact.from_path("raw_model_video", raw_tora),
+            Artifact.from_path("raw_doodle_gif", raw_gif),
+            Artifact.from_path("composited_video", composited_mp4),
+            Artifact.from_path("tts", tts_wav),
+            Artifact.from_path("final_video", final_mp4),
+            Artifact.from_path("metadata", meta_path),
+        ],
+        metadata=metadata,
+    )

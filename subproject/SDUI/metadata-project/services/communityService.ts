@@ -148,12 +148,14 @@ export const communityService = {
         overlayPosition?: string,
         overlayAlpha?: number,
         overlaySpeed?: number,
+        overlayPostImageId?: number,
     ) {
         const body: Record<string, unknown> = { postImageId, route };
         if (trajectoryPreset) body.trajectoryPreset = trajectoryPreset;
         if (overlayPosition) body.overlayPosition = overlayPosition;
         if (overlayAlpha !== undefined) body.overlayAlpha = overlayAlpha;
         if (overlaySpeed !== undefined) body.overlaySpeed = overlaySpeed;
+        if (overlayPostImageId !== undefined) body.overlayPostImageId = overlayPostImageId;
         const res = await api.post(`${BASE}/posts/${postId}/animate`, body);
         return res.data.data as AnimationStatusResponse;
     },

@@ -84,4 +84,11 @@ if [[ -n "${KRIDE_TORA_DIR:-}" && ! -d "${KRIDE_TORA_DIR}" ]]; then
 fi
 
 echo "[tora_entrypoint] validation successful. Starting Tora worker..."
+
+echo "[tora_entrypoint] starting AnimatedDrawings TorchServe..."
+CUDA_VISIBLE_DEVICES="" /opt/miniconda/envs/ad_env/bin/torchserve \
+  --start \
+  --ncs \
+  --ts-config /home/torchserve/config.properties
+
 exec python -u -m deploy.media_motion.runpod_handler

@@ -56,6 +56,13 @@ public class AnimationService {
     private static final int MAX_DAILY_JOBS_PER_USER = 10;
     private static final long MAX_IMAGE_SIZE = 10L * 1024 * 1024;
     private static final long MAX_JOB_IMAGE_SIZE = 50L * 1024 * 1024;
+    private static final Set<String> ALLOWED_OVERLAY_POSITIONS = Set.of(
+            "main_w-overlay_w-10:main_h-overlay_h-10",
+            "10:10",
+            "main_w-overlay_w-10:10",
+            "10:main_h-overlay_h-10",
+            "(main_w-overlay_w)/2:(main_h-overlay_h)/2"
+    );
 
     private final AnimationJobRepository animationJobRepository;
     private final CommunityPostRepository postRepository;
@@ -102,12 +109,12 @@ public class AnimationService {
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("route", route);
-        payload.put("case_id", "community_" + postId);
+        payload.put("case_id", uniqueCaseId("community_" + postId));
         payload.put("place", "Community Post");
         payload.put("image_url", image.getStorageUrl());
         payload.put("tts_text", defaultNarration(post));
         payload.put("bgm_key", "bright_travel");
-        payload.put("allow_fallback", true);
+        payload.put("allow_fallback", !"tora_cogvideox_i2v".equals(route));
 
         // Tora is trajectory-controlled: without a trajectory the worker hard-fails
         // and silently falls back to cogvideox_real. Always forward a preset
@@ -118,6 +125,26 @@ public class AnimationService {
                     "trajectory_preset",
                     preset != null && !preset.isBlank() ? preset.trim() : "object_pan_right"
             );
+            if (request.getOverlayPostImageId() != null) {
+                PostImage overlayImage = resolvePostImage(
+                        postId,
+                        request.getOverlayPostImageId()
+                );
+                if (overlayImage.getPostImageId().equals(image.getPostImageId())) {
+                    throw new BusinessException(
+                            "배경 사진과 낙서 이미지는 서로 달라야 합니다.",
+                            HttpStatus.BAD_REQUEST
+                    );
+                }
+                payload.put("overlay_image_url", overlayImage.getStorageUrl());
+                payload.put(
+                        "overlay_position",
+                        validatedOverlayPosition(request.getOverlayPosition())
+                );
+                payload.put("overlay_alpha", boundedOverlayAlpha(request.getOverlayAlpha()));
+                payload.put("overlay_speed", boundedOverlaySpeed(request.getOverlaySpeed()));
+                payload.put("overlay_scale_ratio", 0.2);
+            }
         }
 
         return submitToGateway(post, route, 1, "/jobs/runpod", payload);
@@ -172,7 +199,7 @@ public class AnimationService {
         }
 
         Map<String, Object> payload = new HashMap<>();
-        payload.put("case_id", "community_batch_" + postId);
+        payload.put("case_id", uniqueCaseId("community_batch_" + postId));
         payload.put("place", "Community Post");
         payload.put("images", images);
         payload.put("bgm_key", request.getBgmKey());
@@ -443,6 +470,46 @@ public class AnimationService {
         return post.getTitle() != null && !post.getTitle().isBlank()
                 ? post.getTitle()
                 : "커뮤니티 영상";
+    }
+
+    private String uniqueCaseId(String prefix) {
+        return prefix + "_" + System.currentTimeMillis();
+    }
+
+    private String validatedOverlayPosition(String position) {
+        if (position == null || position.isBlank()) {
+            return "main_w-overlay_w-10:main_h-overlay_h-10";
+        }
+        String value = position.trim();
+        if (!ALLOWED_OVERLAY_POSITIONS.contains(value)) {
+            throw new BusinessException(
+                    "지원하지 않는 GIF 배치 위치입니다.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+        return value;
+    }
+
+    private double boundedOverlayAlpha(Double alpha) {
+        double value = alpha == null ? 1.0 : alpha;
+        if (value < 0.1 || value > 1.0) {
+            throw new BusinessException(
+                    "GIF 투명도는 0.1에서 1.0 사이여야 합니다.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+        return value;
+    }
+
+    private double boundedOverlaySpeed(Double speed) {
+        double value = speed == null ? 1.0 : speed;
+        if (value < 0.5 || value > 2.0) {
+            throw new BusinessException(
+                    "GIF 재생 속도는 0.5에서 2.0 사이여야 합니다.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+        return value;
     }
 
     private String text(Object value) {

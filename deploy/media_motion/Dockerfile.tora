@@ -23,6 +23,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     KRIDE_TORA_CHECKPOINT_PATH=/runpod-volume/tora/i2v/mp_rank_00_model_states.pt \
     KRIDE_TORA_ENABLED=true \
     KRIDE_COGVIDEOX_MODEL_ID=zai-org/CogVideoX-5b-I2V \
+    KRIDE_ANIMATED_DRAWINGS_DIR=/app/AnimatedDrawings \
+    KRIDE_ANIMATED_DRAWINGS_PYTHON=/opt/miniconda/envs/ad_env/bin/python \
+    PYOPENGL_PLATFORM=osmesa \
     HF_HOME=/runpod-volume/huggingface-cache \
     HUGGINGFACE_HUB_CACHE=/runpod-volume/huggingface-cache/hub
 
@@ -34,7 +37,11 @@ WORKDIR /app
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ffmpeg git curl wget \
-        libglib2.0-0 && \
+        pkg-config \
+        libosmesa6 libosmesa6-dev \
+        freeglut3-dev libglfw3-dev \
+        libgl1-mesa-glx libglib2.0-0 \
+        openjdk-17-jre-headless && \
     rm -rf /var/lib/apt/lists/*
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -48,6 +55,58 @@ RUN cd /app/Tora/modules/SwissArmyTransformer && pip install --no-cache-dir -e .
 
 # Tora sat requirements
 RUN cd /app/Tora/sat && pip install --no-cache-dir -r requirements.txt
+
+# AnimatedDrawings uses an isolated Python 3.8 environment because its
+# torch/mmcv stack is incompatible with Tora's Python 3.10 + torch 2.4 runtime.
+RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-py38_23.11.0-2-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -b -p /opt/miniconda && \
+    rm /tmp/miniconda.sh && \
+    /opt/miniconda/bin/conda create -n ad_env python=3.8 -y && \
+    /opt/miniconda/bin/conda clean -afy
+
+RUN git clone --depth 1 https://github.com/facebookresearch/AnimatedDrawings.git /app/AnimatedDrawings && \
+    cd /app/AnimatedDrawings && \
+    sed -i "s/'controller': {/'view': {'USE_MESA': True},\n        'controller': {/" \
+        examples/annotations_to_animation.py || true
+
+ENV AD_PIP=/opt/miniconda/envs/ad_env/bin/pip
+
+RUN ${AD_PIP} install --upgrade pip "setuptools==65.5.0" wheel six && \
+    (${AD_PIP} install chumpy --no-build-isolation || \
+     ${AD_PIP} install git+https://github.com/mattloper/chumpy.git --no-build-isolation)
+
+RUN ${AD_PIP} install \
+        "torch==1.13.1+cu116" \
+        "torchvision==0.14.1+cu116" \
+        "torchaudio==0.13.1" \
+        --extra-index-url https://download.pytorch.org/whl/cu116
+
+RUN ${AD_PIP} install \
+        "mmcv-full==1.7.0" \
+        -f https://download.openmmlab.com/mmcv/dist/cu116/torch1.13.0/index.html \
+        --timeout 30 --retries 1 || \
+    (${AD_PIP} install "mmcv-full==1.7.0" --timeout 60) || \
+    (${AD_PIP} install openmim && \
+     /opt/miniconda/envs/ad_env/bin/mim install "mmcv-full==1.7.0")
+
+RUN ${AD_PIP} install \
+        "mmdet==2.28.2" "mmpose==0.28.1" "numpy<2" \
+        scikit-image scikit-learn \
+        "PyOpenGL==3.1.7" \
+        imageio imageio-ffmpeg shapely pillow pyyaml requests tqdm matplotlib \
+        opencv-python-headless && \
+    (${AD_PIP} install PyOpenGL-accelerate || true) && \
+    cd /app/AnimatedDrawings && \
+    ${AD_PIP} install --no-cache-dir -e . --quiet
+
+RUN ${AD_PIP} install --no-cache-dir "torchserve==0.7.1" && \
+    mkdir -p /home/torchserve/model-store && \
+    wget -q https://github.com/facebookresearch/AnimatedDrawings/releases/download/v0.0.1/drawn_humanoid_detector.mar \
+        -O /home/torchserve/model-store/drawn_humanoid_detector.mar && \
+    wget -q https://github.com/facebookresearch/AnimatedDrawings/releases/download/v0.0.1/drawn_humanoid_pose_estimator.mar \
+        -O /home/torchserve/model-store/drawn_humanoid_pose_estimator.mar
+
+COPY deploy/media_motion/torchserve_config.properties /home/torchserve/config.properties
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Python dependencies — KRIDE worker

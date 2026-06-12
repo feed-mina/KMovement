@@ -49,7 +49,10 @@ from .result_delivery import finalize_result
 from .schemas import BatchImageItem, BatchTravelCase, TravelCase
 from .three_d_photo_light import run_3d_photo_light_case
 from .three_d_photo_real import run_3d_photo_inpainting_real_case
-from .tora_cogvideox_real import run_tora_cogvideox_case
+from .tora_cogvideox_real import (
+    run_tora_cogvideox_case,
+    run_tora_doodle_overlay_case,
+)
 from .worker_config import load_worker_config
 
 SUPPORTED_ROUTES = {
@@ -345,7 +348,33 @@ def handler(job: dict) -> dict:
             return _encode_artifacts(result.to_dict())
 
         if route == "tora_cogvideox_i2v":
-            result = run_tora_cogvideox_case(case, work_dir, bgm_wav, cfg=cfg)
+            overlay_image_url = job_input.get("overlay_image_url", "")
+            if overlay_image_url:
+                overlay_image_path = _download_image(
+                    overlay_image_url,
+                    f"{job_input.get('case_id', 'img')}_overlay",
+                    work_dir,
+                )
+                result = run_tora_doodle_overlay_case(
+                    case,
+                    overlay_image_path,
+                    work_dir,
+                    bgm_wav,
+                    overlay_position=job_input.get(
+                        "overlay_position",
+                        "main_w-overlay_w-10:main_h-overlay_h-10",
+                    ),
+                    overlay_alpha=float(job_input.get("overlay_alpha", 1.0)),
+                    overlay_speed=float(job_input.get("overlay_speed", 1.0)),
+                    overlay_scale_ratio=float(
+                        job_input.get("overlay_scale_ratio", 0.2)
+                    ),
+                    cfg=cfg,
+                )
+            else:
+                result = run_tora_cogvideox_case(
+                    case, work_dir, bgm_wav, cfg=cfg,
+                )
         elif route == "cogvideox_real":
             result = run_cogvideox_real_case(case, work_dir, bgm_wav, cfg=cfg)
         elif route == "3d_photo_inpainting_real":

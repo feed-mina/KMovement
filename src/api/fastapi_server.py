@@ -1393,6 +1393,11 @@ class RunPodJobRequest(BaseModel):
     musicgen_duration: int = 15
     trajectory_points: list | None = None  # [[x,y], ...] normalized 0.0~1.0
     trajectory_preset: str = ""  # "object_pan_right", "arc_up", etc.
+    overlay_image_url: str = ""
+    overlay_position: str = "main_w-overlay_w-10:main_h-overlay_h-10"
+    overlay_alpha: float = Field(default=1.0, ge=0.1, le=1.0)
+    overlay_speed: float = Field(default=1.0, ge=0.5, le=2.0)
+    overlay_scale_ratio: float = Field(default=0.2, gt=0.0, le=1.0)
 
 
 class BatchImageInput(BaseModel):

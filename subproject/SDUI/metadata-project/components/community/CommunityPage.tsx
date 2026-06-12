@@ -776,8 +776,12 @@ function CommunityDetail({ postId }: { postId: number }) {
         };
     }, []);
 
-    const getFirstPostImageId = (): number | null => {
-        const firstImage = post?.images?.[0];
+    const isDoodleImage = (image: PostImageDto): boolean =>
+        image.originalName?.startsWith('kride-doodle-sketch-') ||
+        image.storedName?.startsWith('kride-doodle-sketch-');
+
+    const getFirstPhotoImageId = (): number | null => {
+        const firstImage = post?.images?.find((image) => !isDoodleImage(image));
         if (!firstImage?.postImageId) {
             alert('영상을 생성하려면 게시글에 이미지가 필요합니다.');
             return null;
@@ -792,14 +796,18 @@ function CommunityDetail({ postId }: { postId: number }) {
             return;
         }
 
-        const postImageId = getFirstPostImageId();
+        const doodleImage = post?.images
+            ?.slice()
+            .reverse()
+            .find(isDoodleImage);
+        const postImageId = route === 'animated_drawings_worker'
+            ? doodleImage?.postImageId ?? getFirstPhotoImageId()
+            : getFirstPhotoImageId();
         if (!postImageId) return;
 
         setAnimRouteModal(false);
         setAnimSubmitting(true);
-        // GIF 오버레이는 스케치/캐릭터 애니메이션 라우트에서만 합성된다.
-        // 사진/영상 라우트(cogvideox_real 등)에는 오버레이 파라미터를 보내지 않는다.
-        const usesOverlay = route === 'animated_drawings_worker';
+        const usesOverlay = route === 'tora_cogvideox_i2v' && Boolean(doodleImage);
         try {
             const result = await communityService.submitAnimation(
                 postId,
@@ -809,6 +817,7 @@ function CommunityDetail({ postId }: { postId: number }) {
                 usesOverlay ? overlayPosition : undefined,
                 usesOverlay ? overlayAlpha : undefined,
                 usesOverlay ? overlaySpeed : undefined,
+                usesOverlay ? doodleImage?.postImageId : undefined,
             );
             setAnimStatus(result);
             startAnimPolling();
@@ -1124,7 +1133,7 @@ function CommunityDetail({ postId }: { postId: number }) {
                                                 />
                                             </label>
                                             <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
-                                                GIF 오버레이는 애니메이션 생성 시 합성되는 투명 레이어입니다. 위치, 투명도, 재생 속도를 조절할 수 있습니다.
+                                                Tora 영상 위에 마지막 낙서를 원본 사진 너비의 1/5 크기로 투명 합성합니다. 위치, 투명도, 재생 속도를 조절할 수 있습니다.
                                             </p>
                                         </div>
                                     </div>
@@ -1161,11 +1170,14 @@ function CommunityDetail({ postId }: { postId: number }) {
                                     <button
                                         className="community-primary-btn"
                                         type="button"
-                                        disabled={!post?.images?.length}
+                                        disabled={
+                                            !post?.images?.some((image) => !isDoodleImage(image)) ||
+                                            !post.images.some(isDoodleImage)
+                                        }
                                         onClick={() => submitAnimation('tora_cogvideox_i2v')}
                                     >
-                                        사진 Tora 영상
-                                        <br /><small>첫 사진 → Tora 엔드포인트 I2V (경로 제어)</small>
+                                        사진 Tora + 낙서 GIF
+                                        <br /><small>첫 사진에 경로 제어를 적용하고 마지막 낙서를 1/5 크기로 합성</small>
                                     </button>
                                     <button
                                         className="community-primary-btn"

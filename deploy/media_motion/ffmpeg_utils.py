@@ -123,9 +123,11 @@ def overlay_gif_on_video(
     output: Path,
     *,
     position: str = "10:10",
-    scale: int = 200,
+    scale: int | None = 200,
+    scale_ratio: float | None = None,
     alpha: float = 1.0,
     speed: float = 1.0,
+    remove_white_background: bool = False,
 ) -> Path:
     """Overlay an animated GIF on top of a video."""
     ensure_parent(output)
@@ -134,21 +136,38 @@ def overlay_gif_on_video(
         raise ValueError("alpha must be between 0.0 and 1.0")
     if speed <= 0.0:
         raise ValueError("speed must be greater than 0.0")
+    if scale_ratio is not None and (scale_ratio <= 0.0 or scale_ratio > 1.0):
+        raise ValueError("scale_ratio must be between 0.0 and 1.0")
+    if scale_ratio is None and (scale is None or scale <= 0):
+        raise ValueError("scale must be greater than 0")
 
-    gif_filter = [f"scale={scale}:-1"]
+    gif_filter: list[str] = []
     if speed != 1.0:
-        gif_filter.insert(0, f"setpts=PTS/{speed}")
+        gif_filter.append(f"setpts=PTS/{speed}")
     gif_filter.append("format=rgba")
+    if remove_white_background:
+        gif_filter.append("colorkey=0xFFFFFF:0.12:0.06")
     if alpha != 1.0:
         gif_filter.append(f"colorchannelmixer=aa={alpha}")
 
     gif_filter_expr = ",".join(gif_filter)
+    if scale_ratio is not None:
+        filter_complex = (
+            f"[1:v]{gif_filter_expr}[gif];"
+            f"[gif][0:v]scale2ref=w=main_w*{scale_ratio}:h=-1[ovr][base];"
+            f"[base][ovr]overlay={position}:shortest=1"
+        )
+    else:
+        filter_complex = (
+            f"[1:v]{gif_filter_expr},scale={scale}:-1[ovr];"
+            f"[0:v][ovr]overlay={position}:shortest=1"
+        )
 
     run_ffmpeg([
         "-i", str(video),
         "-ignore_loop", "0", "-i", str(gif),
         "-filter_complex",
-        f"[1:v]{gif_filter_expr}[ovr];[0:v][ovr]overlay={position}:shortest=1",
+        filter_complex,
         "-c:a", "copy",
         str(output),
     ])

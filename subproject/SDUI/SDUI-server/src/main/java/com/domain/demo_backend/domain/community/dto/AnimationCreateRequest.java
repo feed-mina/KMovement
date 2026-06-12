@@ -21,4 +21,12 @@ public class AnimationCreateRequest {
      * the backend supplies a default so Tora runs instead of falling back.
      */
     private String trajectoryPreset;
+
+    private Long overlayPostImageId;
+
+    private String overlayPosition;
+
+    private Double overlayAlpha;
+
+    private Double overlaySpeed;
 }

@@ -1,13 +1,18 @@
 package com.domain.demo_backend.domain.community.service;
 
+import com.domain.demo_backend.domain.community.domain.AnimationJob;
 import com.domain.demo_backend.domain.community.domain.AnimationJobRepository;
 import com.domain.demo_backend.domain.community.domain.CommunityPost;
 import com.domain.demo_backend.domain.community.domain.CommunityPostRepository;
+import com.domain.demo_backend.domain.community.domain.PostImage;
 import com.domain.demo_backend.domain.community.domain.PostImageRepository;
 import com.domain.demo_backend.domain.community.dto.AnimationCreateRequest;
 import com.domain.demo_backend.domain.user.domain.User;
 import com.domain.demo_backend.domain.user.domain.UserRepository;
 import com.domain.demo_backend.global.exception.BusinessException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,9 +20,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -104,6 +115,97 @@ class AnimationServiceTest {
         );
 
         verifyNoInteractions(imageRepository);
+    }
+
+    @Test
+    void submitsToraPhotoAndDoodleAsSeparateGatewayInputs() throws Exception {
+        AtomicReference<String> requestBody = new AtomicReference<>();
+        HttpServer server = HttpServer.create(new InetSocketAddress(0), 0);
+        server.createContext("/jobs/runpod", exchange -> {
+            requestBody.set(new String(
+                    exchange.getRequestBody().readAllBytes(),
+                    StandardCharsets.UTF_8
+            ));
+            byte[] response = "{\"id\":\"runpod-job-41\"}"
+                    .getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, response.length);
+            exchange.getResponseBody().write(response);
+            exchange.close();
+        });
+        server.start();
+
+        try {
+            animationService = new AnimationService(
+                    animationJobRepository,
+                    postRepository,
+                    imageRepository,
+                    userRepository,
+                    "http://localhost:" + server.getAddress().getPort(),
+                    "test-internal-key",
+                    60
+            );
+
+            User owner = User.builder().userSqno(10L).build();
+            CommunityPost post = CommunityPost.builder()
+                    .postId(41L)
+                    .author(owner)
+                    .title("Tora doodle smoke")
+                    .build();
+            PostImage photo = PostImage.builder()
+                    .postImageId(101L)
+                    .post(post)
+                    .storageUrl("https://example.supabase.co/photo.jpg")
+                    .mimeType("image/jpeg")
+                    .fileSize(1024L)
+                    .build();
+            PostImage doodle = PostImage.builder()
+                    .postImageId(102L)
+                    .post(post)
+                    .storageUrl("https://example.supabase.co/doodle.png")
+                    .mimeType("image/png")
+                    .fileSize(1024L)
+                    .build();
+
+            when(userRepository.findByUserSqnoForAnimationLimit(10L))
+                    .thenReturn(Optional.of(owner));
+            when(postRepository.findByPostIdForAnimationUpdate(41L))
+                    .thenReturn(Optional.of(post));
+            when(imageRepository.findByPostImageIdAndPost_PostId(101L, 41L))
+                    .thenReturn(Optional.of(photo));
+            when(imageRepository.findByPostImageIdAndPost_PostId(102L, 41L))
+                    .thenReturn(Optional.of(doodle));
+            when(animationJobRepository.save(any(AnimationJob.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            AnimationCreateRequest request = new AnimationCreateRequest();
+            request.setPostImageId(101L);
+            request.setRoute("tora_cogvideox_i2v");
+            request.setTrajectoryPreset("arc_up");
+            request.setOverlayPostImageId(102L);
+            request.setOverlayPosition("10:10");
+            request.setOverlayAlpha(0.65);
+            request.setOverlaySpeed(1.2);
+
+            AnimationJob job = animationService.submitAnimation(41L, 10L, request);
+            Map<String, Object> payload = new ObjectMapper().readValue(
+                    requestBody.get(),
+                    new TypeReference<>() {}
+            );
+
+            assertThat(job.getRunpodJobId()).isEqualTo("runpod-job-41");
+            assertThat(payload.get("route")).isEqualTo("tora_cogvideox_i2v");
+            assertThat(payload.get("image_url")).isEqualTo(photo.getStorageUrl());
+            assertThat(payload.get("overlay_image_url")).isEqualTo(doodle.getStorageUrl());
+            assertThat(payload.get("trajectory_preset")).isEqualTo("arc_up");
+            assertThat(payload.get("overlay_position")).isEqualTo("10:10");
+            assertThat(payload.get("overlay_scale_ratio")).isEqualTo(0.2);
+            assertThat(payload.get("allow_fallback")).isEqualTo(false);
+            assertThat(payload.get("case_id").toString())
+                    .startsWith("community_41_");
+        } finally {
+            server.stop(0);
+        }
     }
 
     private AnimationCreateRequest request(Long postImageId) {

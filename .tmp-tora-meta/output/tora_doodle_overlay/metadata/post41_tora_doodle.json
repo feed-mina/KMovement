@@ -1,0 +1,22 @@
+{
+  "route": "tora_cogvideox_i2v",
+  "case_id": "post41",
+  "place": "Community Post",
+  "image": ".tmp-tora-meta\\photo.jpg",
+  "overlay_image": ".tmp-tora-meta\\doodle.png",
+  "actual_model": "alibaba/Tora (CogVideoX-5B-I2V)",
+  "model_id": "alibaba/Tora (CogVideoX-5B-I2V)",
+  "base_model_id": "zai-org/CogVideoX-5b-I2V",
+  "actual_model_executed": true,
+  "trajectory_preset": "object_pan_right",
+  "trajectory_points_count": 0,
+  "doodle_overlay_executed": true,
+  "overlay_position": "main_w-overlay_w-10:main_h-overlay_h-10",
+  "overlay_alpha": 1.0,
+  "overlay_speed": 1.0,
+  "overlay_scale_ratio": 0.2,
+  "overlay_background": "transparent_white_key",
+  "tts_engine": "gtts",
+  "bgm_engine": "sine",
+  "status": "success"
+}
