@@ -80,6 +80,18 @@ RUN pip install --no-cache-dir "opencv-python-headless<4.12" "numpy<2"
 RUN python -c "import numpy, torch; tv=torch.__version__; nv=numpy.__version__; print('PyTorch:', tv, 'NumPy:', nv); assert tv.startswith('2.'), f'Expected PyTorch 2.x but got {tv}'; assert int(nv.split('.')[0]) < 2, f'Expected NumPy 1.x but got {nv}'"
 
 # ─────────────────────────────────────────────────────────────────────────────
+# MusicGen BGM (optional). audiocraft may perturb the pinned torch 2.4.0 / NumPy
+# <2 stack that Tora's SAT inference depends on, so install it, then re-pin and
+# re-verify. If audiocraft cannot coexist, the worker degrades to sine-wave BGM
+# (handled in tora_cogvideox_real._resolve_bgm) while Tora inference stays intact.
+# ─────────────────────────────────────────────────────────────────────────────
+RUN pip install --no-cache-dir "audiocraft>=1.3,<2" \
+    || echo "WARN: audiocraft install failed — sine-wave BGM fallback will be used"
+RUN pip install --no-cache-dir "torch==2.4.0" "torchaudio==2.4.0" "numpy<2" \
+    || echo "WARN: torch/numpy re-pin after audiocraft failed"
+RUN python -c "import numpy, torch; tv=torch.__version__; nv=numpy.__version__; print('PyTorch:', tv, 'NumPy:', nv); assert tv.startswith('2.4'), f'Tora needs torch 2.4.x, got {tv}'; assert int(nv.split('.')[0]) < 2, f'Tora needs numpy 1.x, got {nv}'"
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Pre-download small model weights only (<500MB)
 # CogVideoX-5b-I2V (~30GB) is NOT pre-downloaded — it downloads at first request
 # and is cached on RunPod Network Volume for subsequent calls.
