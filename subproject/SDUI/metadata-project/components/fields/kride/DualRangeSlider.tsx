@@ -74,29 +74,27 @@ export default function DualRangeSlider({ id, data, onChange }: any) {
     if (e.key === "Escape") { setEditingMin(false); setEditingMax(false); }
   };
 
-  const midPercent = (minPercent + maxPercent) / 2;
+  // 두 라벨이 가까우면(약 22% 미만) max 라벨을 트랙 아래로 내려 겹침을 방지한다
+  const labelsCollide = maxPercent - minPercent < 22;
   const minLabelTransform = minPercent <= 8 ? "translateX(0)" : "translateX(-50%)";
-  const maxLabelTransform = maxPercent >= 92 ? "translateX(-100%)" : "translateX(-50%)";
+  const maxLabelTransform = maxPercent >= 92 ? "translateX(-100%)"
+    : labelsCollide && maxPercent <= 8 ? "translateX(0)"
+    : "translateX(-50%)";
 
   return (
     <div id={id} className="dual-range-slider flex flex-col gap-6 w-full px-2">
-      {/* 슬라이더 가운데 위에 현재 범위 표시 */}
-      <div className="relative h-6">
-        <div
-          className="absolute -translate-x-1/2 text-center whitespace-nowrap"
-          style={{ left: `${midPercent}%` }}
-        >
-          <span className="text-gray-300 text-sm font-semibold">
-            {formatWon(localMin)} ~ {formatWon(localMax)}
-          </span>
-        </div>
+      {/* 슬라이더 가운데 위에 현재 범위 표시 — 고정 중앙 정렬(절대배치 시 좌측 잘림 버그) */}
+      <div className="h-6 text-center whitespace-nowrap">
+        <span className="text-gray-300 text-sm font-semibold">
+          {formatWon(localMin)} ~ {formatWon(localMax)}
+        </span>
       </div>
 
-      {/* 슬라이더 트랙 + 썸 위치 라벨 */}
-      <div className="relative">
-        {/* 왼쪽(min) 라벨 — 클릭 시 편집 */}
+      {/* 슬라이더 트랙 + 썸 위치 라벨 (라벨이 아래로 내려가면 하단 여백 확보) */}
+      <div className={`relative ${labelsCollide ? "mb-8" : ""}`}>
+        {/* 왼쪽(min) 라벨 — 클릭 시 편집. 편집 중엔 최상위(z-30)로 올려 가림 방지 */}
         <div
-          className="absolute -top-7 cursor-pointer"
+          className={`absolute -top-7 cursor-pointer ${editingMin ? "z-30" : "z-10"}`}
           style={{ left: `${minPercent}%`, transform: minLabelTransform }}
           onClick={() => startEdit("min")}
         >
@@ -116,9 +114,9 @@ export default function DualRangeSlider({ id, data, onChange }: any) {
           )}
         </div>
 
-        {/* 오른쪽(max) 라벨 — 클릭 시 편집 */}
+        {/* 오른쪽(max) 라벨 — 클릭 시 편집. 라벨이 겹치면 트랙 아래로 내려간다 */}
         <div
-          className="absolute -top-7 cursor-pointer"
+          className={`absolute cursor-pointer ${labelsCollide ? "top-9" : "-top-7"} ${editingMax ? "z-30" : "z-10"}`}
           style={{ left: `${maxPercent}%`, transform: maxLabelTransform }}
           onClick={() => startEdit("max")}
         >
