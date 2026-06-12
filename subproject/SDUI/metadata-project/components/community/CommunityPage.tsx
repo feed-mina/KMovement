@@ -796,15 +796,18 @@ function CommunityDetail({ postId }: { postId: number }) {
 
         setAnimRouteModal(false);
         setAnimSubmitting(true);
+        // GIF 오버레이는 스케치/캐릭터 애니메이션 라우트에서만 합성된다.
+        // 사진/영상 라우트(cogvideox_real 등)에는 오버레이 파라미터를 보내지 않는다.
+        const usesOverlay = route === 'animated_drawings_worker';
         try {
             const result = await communityService.submitAnimation(
                 postId,
                 postImageId,
                 route,
                 '',
-                overlayPosition,
-                overlayAlpha,
-                overlaySpeed,
+                usesOverlay ? overlayPosition : undefined,
+                usesOverlay ? overlayAlpha : undefined,
+                usesOverlay ? overlaySpeed : undefined,
             );
             setAnimStatus(result);
             startAnimPolling();

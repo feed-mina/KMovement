@@ -145,9 +145,9 @@ export const communityService = {
         postImageId: number,
         route = 'animated_drawings_worker',
         trajectoryPreset = '',
-        overlayPosition = 'main_w-overlay_w-10:main_h-overlay_h-10',
-        overlayAlpha = 1.0,
-        overlaySpeed = 1.0,
+        overlayPosition?: string,
+        overlayAlpha?: number,
+        overlaySpeed?: number,
     ) {
         const body: Record<string, unknown> = { postImageId, route };
         if (trajectoryPreset) body.trajectoryPreset = trajectoryPreset;
