@@ -12,6 +12,34 @@ from .tts import synthesize_gtts
 from .worker_config import WorkerConfig, load_worker_config
 
 
+def _wait_for_torchserve(
+    timeout_seconds: int = 90, url: str = "http://localhost:8080/ping"
+) -> None:
+    """Block until TorchServe answers on :8080 (or time out).
+
+    AnimatedDrawings' image_to_animation.py POSTs to localhost:8080; on a cold
+    container TorchServe may still be loading when the first job arrives, which
+    would surface as a "Connection refused". Polling /ping avoids that race.
+    """
+    import time
+    import urllib.request
+
+    deadline = time.time() + timeout_seconds
+    last_err: Exception | None = None
+    while time.time() < deadline:
+        try:
+            with urllib.request.urlopen(url, timeout=5) as resp:
+                if resp.status == 200:
+                    return
+        except Exception as exc:  # noqa: BLE001 — keep retrying until the deadline
+            last_err = exc
+            time.sleep(3)
+    print(
+        f"[animated_drawings] WARN: TorchServe not ready after {timeout_seconds}s "
+        f"({last_err}); proceeding anyway"
+    )
+
+
 def gif_to_mp4(gif_path: Path, output_mp4: Path) -> Path:
     output_mp4.parent.mkdir(parents=True, exist_ok=True)
     run_ffmpeg(
@@ -56,6 +84,10 @@ def run_animated_drawings_pipeline(case: TravelCase, output_dir: Path, cfg: Work
     if work_dir.exists():
         shutil.rmtree(work_dir)
     work_dir.mkdir(parents=True, exist_ok=True)
+
+    # image_to_animation.py calls the TorchServe detector/pose models on :8080;
+    # make sure the server is up before the subprocess runs (cold-start race).
+    _wait_for_torchserve()
 
     env = {
         # torch 1.13/CUDA 11.6 cannot execute kernels on Blackwell GPUs.

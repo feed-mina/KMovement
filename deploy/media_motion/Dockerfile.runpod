@@ -43,7 +43,8 @@ RUN apt-get update && \
         libgl1-mesa-glx \
         libglib2.0-0 \
         git curl wget \
-        redis-server supervisor && \
+        redis-server supervisor \
+        openjdk-17-jre-headless && \
     rm -rf /var/lib/apt/lists/*
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -116,6 +117,23 @@ RUN ${AD_PIP} install PyOpenGL-accelerate || echo "WARN: PyOpenGL-accelerate ski
 # Install AnimatedDrawings package itself in the conda env
 RUN cd /app/AnimatedDrawings && \
     ${AD_PIP} install --no-cache-dir -e . --quiet
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TorchServe for AnimatedDrawings — serves the drawn-humanoid detector + pose
+# estimator on localhost:8080. image_to_animation.py POSTs to these; without the
+# server the pipeline fails with "Connection refused". Runs in the ad_env (py3.8 +
+# torch 1.13 + mmdet/mmpose already installed), started by supervisord.
+# ─────────────────────────────────────────────────────────────────────────────
+RUN ${AD_PIP} install --no-cache-dir "torchserve==0.7.1"
+
+# Pre-built model archives (Meta GitHub releases) — auto-loaded by config (load_models=all)
+RUN mkdir -p /home/torchserve/model-store && \
+    wget -q https://github.com/facebookresearch/AnimatedDrawings/releases/download/v0.0.1/drawn_humanoid_detector.mar \
+        -O /home/torchserve/model-store/drawn_humanoid_detector.mar && \
+    wget -q https://github.com/facebookresearch/AnimatedDrawings/releases/download/v0.0.1/drawn_humanoid_pose_estimator.mar \
+        -O /home/torchserve/model-store/drawn_humanoid_pose_estimator.mar
+
+COPY deploy/media_motion/torchserve_config.properties /home/torchserve/config.properties
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Main Python 3.11 env — CogVideoX, MusicGen, gTTS, RunPod handler
