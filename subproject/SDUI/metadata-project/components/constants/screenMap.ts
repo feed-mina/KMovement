@@ -27,6 +27,7 @@ export const SCREEN_MAP: Record<string, string> = {
     "/MY_LIST": "KRIDE_MY_LIST",
     "/FOCUS": "KRIDE_FOCUS",
     "/CHAT": "KRIDE_CHAT",
+    "/THEME_SETTINGS": "THEME_SETTINGS",
 };
 
 export const DEFAULT_SCREEN_ID = "MAIN_PAGE";
