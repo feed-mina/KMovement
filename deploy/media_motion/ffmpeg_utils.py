@@ -1,12 +1,26 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
 
 
 def _find_ffmpeg() -> str:
-    """Find ffmpeg binary: system PATH first, then imageio-ffmpeg bundle."""
+    """Find a full-featured ffmpeg binary.
+
+    Prefer the apt-installed build (``/usr/bin/ffmpeg``) over conda's, which can
+    appear first on PATH in conda-based images (e.g. the Tora image) but is a
+    minimal build lacking libx264 — so ``-preset``/``-crf`` fail with
+    "Unrecognized option 'preset'". Order: env override → apt build → PATH →
+    imageio bundle.
+    """
+    override = os.environ.get("KRIDE_FFMPEG_BIN")
+    if override and Path(override).exists():
+        return override
+    for candidate in ("/usr/bin/ffmpeg", "/usr/local/bin/ffmpeg"):
+        if Path(candidate).exists():
+            return candidate
     system = shutil.which("ffmpeg")
     if system:
         return system
