@@ -1,0 +1,58 @@
+/* ==========================================
+   K-RIDE 디자인 토큰 (GitHub issue #4 · Phase 1)
+   - 화면별 CSS는 색상/간격/라운드 값을 하드코딩하지 않고 이 토큰만 참조한다
+   - Phase 3에서 design_tokens 테이블 값이 ThemeProvider를 통해
+     :root에 런타임 주입되면 이 파일의 값은 폴백(fallback)이 된다
+   - React Native 마이그레이션 시 이 토큰 목록이 theme JSON 스키마의 원본
+   ========================================== */
+:root {
+    /* ── 브랜드 색상 ── */
+    --kride-primary: #E50914;
+    --kride-primary-dark: #8B0610;
+    --kride-primary-soft: rgba(229, 9, 20, 0.08);
+    --kride-gradient-primary: linear-gradient(135deg, #8B0610 0%, #E50914 100%);
+
+    /* ── 배경 ── */
+    --kride-bg-dark: #0A0A0A;
+    --kride-bg-dark-2: #1C1C1C;
+    --kride-bg-cream: #FDFBF7;
+    --kride-bg-cream-2: #EAE5D9;
+    --kride-bg-card: #FFFFFF;
+
+    /* ── 텍스트 ── */
+    --kride-text-strong: #111111;
+    --kride-text-main: #374151;
+    --kride-text-sub: #6B7280;
+    --kride-text-invert: #FFFFFF;
+
+    /* ── 보더 / 상태 ── */
+    --kride-border: #E5E7EB;
+    --kride-focus-ring: rgba(229, 9, 20, 0.18);
+    --kride-kakao: #FEE500;
+    --kride-kakao-text: #191919;
+
+    /* ── 간격 ── */
+    --kride-space-1: 4px;
+    --kride-space-2: 8px;
+    --kride-space-3: 12px;
+    --kride-space-4: 16px;
+    --kride-space-5: 20px;
+    --kride-space-6: 24px;
+    --kride-space-8: 32px;
+
+    /* ── 라운드 ── */
+    --kride-radius-sm: 8px;
+    --kride-radius-md: 12px;
+    --kride-radius-lg: 16px;
+    --kride-radius-xl: 20px;
+    --kride-radius-pill: 999px;
+
+    /* ── 그림자 ── */
+    --kride-shadow-card: 0 1px 4px rgba(0, 0, 0, 0.06);
+    --kride-shadow-float: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --kride-shadow-lift: 0 10px 28px rgba(15, 23, 42, 0.12);
+
+    /* ── 모바일 / 터치 ── */
+    --kride-touch-target: 48px;
+    --kride-safe-bottom: env(safe-area-inset-bottom, 0px);
+}

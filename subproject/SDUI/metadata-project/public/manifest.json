@@ -5,8 +5,8 @@
   "description": "AI 영어 학습 & 목표 관리 앱",
   "start_url": "/view/MAIN_PAGE",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4F46E5",
+  "background_color": "#FDFBF7",
+  "theme_color": "#E50914",
   "orientation": "portrait",
   "icons": [
     {

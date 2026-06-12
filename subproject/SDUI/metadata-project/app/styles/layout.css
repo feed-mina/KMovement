@@ -188,8 +188,8 @@
     transition: all 0.2s;
 }
 
-.logout_button { background-color: var(--error-red); color: white; }
-.logout_button:hover { background-color: #fbada9; }
+.logout_button { background-color: var(--kride-primary); color: var(--kride-text-invert); }
+.logout_button:hover { background-color: var(--kride-primary-dark); }
 
 .kakao_logout_button { background-color: var(--kakao-yellow); color: var(--text-dark); margin-top: 12px; }
 .kakao_logout_button:hover { opacity: 0.9; }

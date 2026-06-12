@@ -140,13 +140,13 @@
 .main-responsive-grid {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding: 20px;
+    gap: var(--kride-space-5);
+    padding: var(--kride-space-5);
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    background-color: #f9fafb;
-    /* 레퍼런스 느낌의 연한 배경 */
+    background-color: var(--kride-bg-cream);
+    /* K-RIDE 크림 배경 */
     box-sizing: border-box;
 }
 
@@ -178,20 +178,20 @@
 .card-title {
     font-size: 1.25rem;
     font-weight: 800;
-    color: #1f2937;
+    color: var(--kride-text-strong);
     text-align: center;
     /* 모바일: 중앙 */
     margin: 0;
 }
 
-/* 4. 버튼 공통 스타일 (레퍼런스 다크그린) */
+/* 4. 버튼 공통 스타일 (K-RIDE 레드) */
 .content-nav1,
 .content-btn-primary,
 .content-btn-secondary {
-    background-color: #007B65;
-    /* 레퍼런스 포인트 컬러 */
-    color: #ffffff;
-    border-radius: 50px;
+    background-color: var(--kride-primary);
+    /* K-RIDE 포인트 컬러 */
+    color: var(--kride-text-invert);
+    border-radius: var(--kride-radius-pill);
     padding: 12px 24px;
     font-weight: 700;
     font-size: 0.95rem;
@@ -290,9 +290,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(180deg, #ffe5f0, #ffffff);
-    padding: 20px;
+    min-height: 100dvh;
+    background: linear-gradient(180deg, var(--kride-bg-cream), var(--kride-bg-card));
+    padding: var(--kride-space-5);
+    padding-bottom: calc(var(--kride-space-5) + var(--kride-safe-bottom));
 }
 
 .login_form {
@@ -301,9 +302,9 @@
     width: 100%;
     max-width: 400px;
     padding: 2.5rem;
-    background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    background: var(--kride-bg-card);
+    border-radius: var(--kride-radius-xl);
+    box-shadow: var(--kride-shadow-float);
 }
 
 /* 입력 필드 레이블 */
@@ -312,8 +313,8 @@
     display: block;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #555;
-    margin-bottom: 8px;
+    color: var(--kride-text-main);
+    margin-bottom: var(--kride-space-2);
     text-align: left;
 }
 
@@ -328,11 +329,11 @@
     gap: 8px;
     width: 100%;
     min-width: 100px;
-    margin-bottom: 16px;
-    height: 48px;
-    border: 2px solid #eee;
-    border-radius: 10px;
-    padding: 0 12px;
+    margin-bottom: var(--kride-space-4);
+    height: var(--kride-touch-target);
+    border: 2px solid var(--kride-border);
+    border-radius: var(--kride-radius-md);
+    padding: 0 var(--kride-space-3);
     font-size: 1rem;
     transition: all 0.2s;
     flex: 1;
@@ -340,8 +341,8 @@
 
 .login_form-input input:focus {
     outline: none;
-    border-color: #FDBFBC;
-    box-shadow: 0 0 0 3px rgba(253, 191, 188, 0.2);
+    border-color: var(--kride-primary);
+    box-shadow: 0 0 0 3px var(--kride-focus-ring);
 }
 
 /* 이메일 상세 그룹 (찌그러짐 방지 핵심) */
@@ -373,7 +374,7 @@
 .group-EMAIL_SUB_GROUP span {
     flex-shrink: 0;
     font-weight: bold;
-    color: #888;
+    color: var(--kride-text-sub);
 }
 
 /* 로그인/카카오 버튼 */
@@ -393,19 +394,23 @@
 }
 
 .login_form_button {
-    background-color: #FDBFBC;
-    color: white;
+    background-color: var(--kride-primary);
+    color: var(--kride-text-invert);
     margin-top: 10px;
 }
 
 .login_form_button:hover {
-    background-color: #fbada9;
+    background-color: var(--kride-primary-dark);
+}
+
+.login_form_button:active {
+    transform: scale(0.98);
 }
 
 .kakao-button {
-    background-color: #FEE500;
-    color: #191919;
-    margin-top: 12px;
+    background-color: var(--kride-kakao);
+    color: var(--kride-kakao-text);
+    margin-top: var(--kride-space-3);
 }
 
 .kakao-button:hover {
@@ -420,12 +425,12 @@
     /*align-items: center;*/
     display: block;
     text-align: center;
-    margin-top: 12px;
-    border: 2px solid #FDBFBC;
+    margin-top: var(--kride-space-3);
+    border: 2px solid var(--kride-primary);
     /* 메인 테마색 활용 */
-    border-radius: 12px;
+    border-radius: var(--kride-radius-md);
     background-color: transparent;
-    color: #FDBFBC;
+    color: var(--kride-primary);
     font-size: 1rem;
     font-weight: bold;
     text-decoration: none;
@@ -434,8 +439,8 @@
 }
 
 .signup-nav:hover {
-    background-color: #FDBFBC;
-    color: white;
+    background-color: var(--kride-primary);
+    color: var(--kride-text-invert);
 }
 
 .pw_toggle_btn {
@@ -1895,18 +1900,18 @@ readonly 공통 레이아웃
 
 /* 강조 텍스트 */
 .setup-link {
-    color: #228be6;
-    /* 포인트 블루 컬러 */
+    color: var(--kride-primary);
+    /* K-RIDE 포인트 컬러 */
     font-size: 0.9rem;
     text-decoration: underline;
 }
 
 .setup-button {
-    color: #007B65;
+    color: var(--kride-primary);
     border-radius: 25px;
     padding: 10px;
     margin-bottom: 10px;
-    border: 2px solid #007B65;
+    border: 2px solid var(--kride-primary);
 }
 
 .header-loading {
@@ -1948,10 +1953,10 @@ readonly 공통 레이아웃
 .logout_button {
     width: 100%;
     height: 52px;
-    background-color: #FDBFBC;
-    color: white;
+    background-color: var(--kride-primary);
+    color: var(--kride-text-invert);
     border: none;
-    border-radius: 12px;
+    border-radius: var(--kride-radius-md);
     font-size: 1.1rem;
     font-weight: bold;
     cursor: pointer;
@@ -1960,7 +1965,7 @@ readonly 공통 레이아웃
 }
 
 .logout_button:hover {
-    background-color: #fbada9;
+    background-color: var(--kride-primary-dark);
 }
 
 .logout_button:active {
@@ -2307,11 +2312,20 @@ readonly 공통 레이아웃
     max-width: 500px;
     margin: 60px auto;
     padding: 40px;
-    background-color: #ffffff;
-    border: 1px solid #e1e1e1;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    background-color: var(--kride-bg-card);
+    border: 1px solid var(--kride-border);
+    border-radius: var(--kride-radius-md);
+    box-shadow: var(--kride-shadow-float);
     font-family: 'Pretendard', sans-serif;
+}
+
+/* 모바일: 카드 여백 축소 + 하단 safe-area 확보 */
+@media (max-width: 767px) {
+    .REG_CONTAINER {
+        margin: var(--kride-space-4);
+        padding: var(--kride-space-6) var(--kride-space-5);
+        margin-bottom: calc(var(--kride-space-4) + var(--kride-safe-bottom));
+    }
 }
 
 /* 섹션 및 간격 조절 */
@@ -2348,10 +2362,10 @@ input[type="password"],
 .reg_road_addr,
 .reg_detail_addr {
     width: 100%;
-    height: 48px;
-    padding: 0 16px;
-    border: 1px solid #dcdcdc;
-    border-radius: 6px;
+    height: var(--kride-touch-target);
+    padding: 0 var(--kride-space-4);
+    border: 1px solid var(--kride-border);
+    border-radius: var(--kride-radius-sm);
     font-size: 15px;
     transition: border-color 0.2s;
     box-sizing: border-box;
@@ -2359,12 +2373,13 @@ input[type="password"],
 
 input:focus {
     outline: none;
-    border-color: #0064ff;
+    border-color: var(--kride-primary);
+    box-shadow: 0 0 0 3px var(--kride-focus-ring);
 }
 
 input:read-only {
-    background-color: #f5f5f5;
-    color: #888;
+    background-color: var(--kride-bg-cream);
+    color: var(--kride-text-sub);
 }
 
 /* 버튼 공통 스타일 */
@@ -2380,24 +2395,28 @@ button:hover {
     opacity: 0.9;
 }
 
-/* 주소 검색 버튼 (검정색) */
+/* 주소 검색 버튼 (다크) */
 .reg_addr_btn {
-    background-color: #111;
-    color: #fff;
+    background-color: var(--kride-bg-dark);
+    color: var(--kride-text-invert);
     min-width: 100px;
-    height: 48px;
-    border-radius: 6px;
+    height: var(--kride-touch-target);
+    border-radius: var(--kride-radius-sm);
 }
 
-/* 회원가입 완료 버튼 (파란색 하단 버튼) */
+/* 회원가입 완료 버튼 (K-RIDE 레드 하단 버튼) */
 .reg_submit {
     width: 100%;
     height: 56px;
-    background-color: #0064ff;
-    color: #fff;
+    background: var(--kride-gradient-primary);
+    color: var(--kride-text-invert);
     border-radius: 28px;
     /* 둥근 형태 */
     font-size: 17px;
+}
+
+.reg_submit:active {
+    transform: scale(0.98);
 }
 
 /* ==========================================
@@ -2424,10 +2443,10 @@ button:hover {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: auto auto;
-    gap: 16px;
-    padding: 24px;
+    gap: var(--kride-space-4);
+    padding: var(--kride-space-6);
     box-sizing: border-box;
-    background: #f0fdf4;
+    background: var(--kride-bg-cream);
 }
 
 /* TIME_RECORD_WIDGET은 GROUP이 아닌 컴포넌트라서 css_class가 엔진에서 적용되지 않음.
@@ -2460,13 +2479,13 @@ button:hover {
 
 /* ── 카드 타입별 ── */
 .bento-card-appointment {
-    background: #ffffff;
-    border: 1.5px solid #e5e7eb;
+    background: var(--kride-bg-card);
+    border: 1.5px solid var(--kride-border);
 }
 
 .bento-card-no-goal {
-    background: linear-gradient(160deg, #f8fafc, #f0fdf4);
-    border: 1.5px solid #e2e8f0;
+    background: linear-gradient(160deg, var(--kride-bg-card), var(--kride-bg-cream));
+    border: 1.5px solid var(--kride-bg-cream-2);
     align-items: center;
     justify-content: center;
     text-align: center;
@@ -2474,36 +2493,36 @@ button:hover {
 }
 
 .bento-card-content {
-    background: linear-gradient(135deg, #166534, #15803d);
-    color: #fff;
+    background: var(--kride-gradient-primary);
+    color: var(--kride-text-invert);
     justify-content: space-between;
     cursor: pointer;
 }
 
 .bento-card-content:hover {
-    background: linear-gradient(135deg, #14532d, #166534);
+    background: linear-gradient(135deg, #6E0009 0%, #C00710 100%);
 }
 
 .bento-card-login {
-    background: #0f766e;
-    color: #fff;
+    background: var(--kride-primary-dark);
+    color: var(--kride-text-invert);
     justify-content: space-between;
     cursor: pointer;
 }
 
 .bento-card-login:hover {
-    background: #0d9488;
+    background: var(--kride-primary);
 }
 
 .bento-card-dark {
-    background: #1e293b;
-    color: #fff;
+    background: var(--kride-bg-dark);
+    color: var(--kride-text-invert);
     justify-content: space-between;
     cursor: pointer;
 }
 
 .bento-card-dark:hover {
-    background: #182030;
+    background: var(--kride-bg-dark-2);
 }
 
 .main-ai-chat-grid {
@@ -2516,25 +2535,25 @@ button:hover {
     min-height: 130px;
     justify-content: center;
     cursor: pointer;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid var(--kride-bg-cream-2);
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .bento-card-ai-en {
-    background: linear-gradient(145deg, #eff6ff, #ffffff);
-    color: #1e3a8a;
+    background: linear-gradient(145deg, var(--kride-bg-cream), var(--kride-bg-card));
+    color: var(--kride-bg-dark);
 }
 
 .bento-card-ai-ja {
-    background: linear-gradient(145deg, #fff1f2, #ffffff);
-    color: #be123c;
+    background: linear-gradient(145deg, #FFF1F2, var(--kride-bg-card));
+    color: var(--kride-primary-dark);
 }
 
 .bento-card-ai:hover,
 .bento-card-ai:focus-visible {
     transform: translateY(-3px);
     border-color: currentColor;
-    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+    box-shadow: var(--kride-shadow-lift);
     outline: none;
 }
 
@@ -2601,12 +2620,12 @@ button:hover {
     flex-direction: column;
     justify-content: space-between;
     /* bento-card 베이스 스타일 (css_class 미지원 대체) */
-    background: #ffffff;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 24px;
+    background: var(--kride-bg-card);
+    border: 1.5px solid var(--kride-border);
+    border-radius: var(--kride-radius-lg);
+    padding: var(--kride-space-6);
     min-height: 160px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
+    box-shadow: var(--kride-shadow-card);
     overflow: visible;
     box-sizing: border-box;
 }
@@ -2619,29 +2638,30 @@ button:hover {
     text-align: center;
     gap: 14px;
     /* bento-card 베이스 스타일 (css_class 미지원 대체) */
-    background: linear-gradient(160deg, #f8fafc, #f0fdf4) !important;
-    border: 1.5px solid #e2e8f0 !important;
-    border-radius: 16px;
-    padding: 24px;
+    background: linear-gradient(160deg, var(--kride-bg-card), var(--kride-bg-cream)) !important;
+    border: 1.5px solid var(--kride-bg-cream-2) !important;
+    border-radius: var(--kride-radius-lg);
+    padding: var(--kride-space-6);
     min-height: 160px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
+    box-shadow: var(--kride-shadow-card);
     box-sizing: border-box;
 }
 
-/* GUEST 카드 1: 시간 설정 버튼 → mock 초록 버튼 스타일 */
+/* GUEST 카드 1: 시간 설정 버튼 → K-RIDE 레드 버튼 스타일 */
 .main-bento .setup-button {
     padding: 10px 20px;
-    background: #16a34a;
-    color: #fff;
+    background: var(--kride-primary);
+    color: var(--kride-text-invert);
     border: none;
-    border-radius: 10px;
+    border-radius: var(--kride-radius-md);
     font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
+    min-height: 44px;
 }
 
 .main-bento .setup-button:hover {
-    background: #15803d;
+    background: var(--kride-primary-dark);
 }
 
 /* ── 모바일: 단일 열 ──
@@ -2649,8 +2669,9 @@ button:hover {
 @media (max-width: 999px) {
     .main-bento {
         grid-template-columns: 1fr;
-        padding: 16px;
-        gap: 12px;
+        padding: var(--kride-space-4);
+        padding-bottom: calc(var(--kride-space-4) + var(--kride-safe-bottom));
+        gap: var(--kride-space-3);
     }
 
     .main-bento> :first-child,
