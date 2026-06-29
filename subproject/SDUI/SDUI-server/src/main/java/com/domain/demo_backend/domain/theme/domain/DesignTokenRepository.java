@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface DesignTokenRepository extends JpaRepository<DesignToken, Long> {
     List<DesignToken> findByThemeIdOrderByTokenIdAsc(String themeId);
+
+    List<DesignToken> findAllByOrderByThemeIdAscCategoryAscTokenKeyAsc();
 }
