@@ -1,0 +1,71 @@
+name: Deploy FastAPI to Cloud Run
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "Dockerfile"
+      - ".gcloudignore"
+      - "src/api/**"
+      - "src/**"
+      - "dataset/data/raw_ml/road_scored.csv"
+      - "dataset/data/raw_ml/facility_clean.csv"
+      - "dataset/data/raw_ml/tour_poi.csv"
+      - "dataset/models/route_graph.pkl"
+      - "chroma_db/**"
+      - ".github/workflows/deploy-cloud-run.yml"
+  workflow_dispatch:
+
+env:
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'quartz-kiba' }}
+  GCP_REGION: ${{ vars.GCP_REGION || 'europe-west1' }}
+  CLOUD_RUN_SERVICE: ${{ vars.CLOUD_RUN_SERVICE || 'kmovement' }}
+  CLOUD_RUN_MEMORY: ${{ vars.CLOUD_RUN_MEMORY || '2Gi' }}
+  CLOUD_RUN_CPU: ${{ vars.CLOUD_RUN_CPU || '1' }}
+  CLOUD_RUN_TIMEOUT: ${{ vars.CLOUD_RUN_TIMEOUT || '300s' }}
+  CLOUD_RUN_CONCURRENCY: ${{ vars.CLOUD_RUN_CONCURRENCY || '10' }}
+  CLOUD_RUN_MIN_INSTANCES: ${{ vars.CLOUD_RUN_MIN_INSTANCES || '0' }}
+  CLOUD_RUN_MAX_INSTANCES: ${{ vars.CLOUD_RUN_MAX_INSTANCES || '3' }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy source to Cloud Run
+        run: |
+          gcloud run deploy "$CLOUD_RUN_SERVICE" \
+            --source . \
+            --region "$GCP_REGION" \
+            --project "$GCP_PROJECT_ID" \
+            --allow-unauthenticated \
+            --memory "$CLOUD_RUN_MEMORY" \
+            --cpu "$CLOUD_RUN_CPU" \
+            --timeout "$CLOUD_RUN_TIMEOUT" \
+            --concurrency "$CLOUD_RUN_CONCURRENCY" \
+            --min-instances "$CLOUD_RUN_MIN_INSTANCES" \
+            --max-instances "$CLOUD_RUN_MAX_INSTANCES" \
+            --set-env-vars "TORCHSERVE_ENABLED=false,TORCHSERVE_FALLBACK=true,CHROMA_MODE=persistent,CHROMA_PATH=/app/chroma_db,KRIDE_MODELS_DIR=/app/dataset/models,KRIDE_RAW_DATA_DIR=/app/dataset/data/raw_ml,HF_HOME=/tmp/hf_cache,TRANSFORMERS_CACHE=/tmp/hf_cache/hub"
+
+      - name: Smoke test Cloud Run health
+        run: |
+          URL="$(gcloud run services describe "$CLOUD_RUN_SERVICE" \
+            --region "$GCP_REGION" \
+            --project "$GCP_PROJECT_ID" \
+            --format='value(status.url)')"
+          echo "Cloud Run URL: $URL"
+          curl -fsS "$URL/api/health"

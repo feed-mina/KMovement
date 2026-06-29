@@ -7,6 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV KRIDE_MEDIA_DIR=/app/media
 ENV KRIDE_APP_MODE=cloud_preview_gateway
+ENV PORT=7860
 
 WORKDIR /app
 
@@ -24,5 +25,4 @@ RUN mkdir -p /app/media
 
 EXPOSE 7860
 
-CMD ["uvicorn", "deploy.cloud_gateway.app:app", "--host", "0.0.0.0", "--port", "7860"]
-
+CMD ["sh", "-c", "uvicorn deploy.cloud_gateway.app:app --host 0.0.0.0 --port ${PORT:-7860}"]

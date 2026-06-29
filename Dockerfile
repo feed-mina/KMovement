@@ -1,3 +1,6 @@
+# Cloud Run source builds look for a Dockerfile at the repository root.
+# The CI/GCP VM workflows still use their explicit Dockerfile paths.
+
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -26,8 +29,8 @@ ENV KRIDE_MODELS_DIR=/app/dataset/models \
     TORCHSERVE_FALLBACK=true \
     HF_HOME=/tmp/hf_cache \
     TRANSFORMERS_CACHE=/tmp/hf_cache/hub \
-    PORT=8000
+    PORT=8080
 
-EXPOSE 8000
+EXPOSE 8080
 
-CMD ["sh", "-c", "uvicorn src.api.fastapi_server:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uvicorn src.api.fastapi_server:app --host 0.0.0.0 --port ${PORT:-8080}"]
