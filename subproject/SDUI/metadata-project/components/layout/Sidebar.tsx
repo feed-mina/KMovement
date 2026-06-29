@@ -53,6 +53,10 @@ export default function Sidebar() {
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/admin/USER_LIST' })}>
                                     회원 관리
                                 </div>
+                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/admin/sdui' ? 'bg-gray-700 font-bold' : ''}`}
+                                    onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/admin/sdui' })}>
+                                    SDUI Console
+                                </div>
                             </nav>
                         ) : (
                             <nav className="sidebar-nav mt-4 flex flex-col gap-2 px-4">
