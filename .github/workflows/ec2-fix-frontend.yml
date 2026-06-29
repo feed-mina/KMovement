@@ -48,7 +48,7 @@ jobs:
               --network sdui-network \
               -e NODE_ENV=production \
               -e BACKEND_URL=http://sdui-backend:8080 \
-              -e FASTAPI_URL=http://34.64.221.240:8000 \
+              -e FASTAPI_URL=https://kmovement-46122739597.europe-west1.run.app \
               --restart unless-stopped \
               ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
 
@@ -83,10 +83,10 @@ jobs:
               -e MOBILE_URL=https://yerin.duckdns.org \
               -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
               -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
-              -e FASTAPI_URL=http://34.64.221.240:8000 \
+              -e FASTAPI_URL=https://kmovement-46122739597.europe-west1.run.app \
               -e FASTAPI_INTERNAL_API_KEY=${{ secrets.FASTAPI_INTERNAL_API_KEY }} \
-              -e KRIDE_FASTAPI_URL=http://34.64.221.240:8000 \
-              -e KRIDE_CHATBOT_URL=http://34.64.221.240:8000 \
+              -e KRIDE_FASTAPI_URL=https://kmovement-46122739597.europe-west1.run.app \
+              -e KRIDE_CHATBOT_URL=https://kmovement-46122739597.europe-west1.run.app \
               -e GCP_PROJECT_ID=kdeliver \
               -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
               -e GCP_CREDENTIALS_PATH=/app/gcp-credentials.json \

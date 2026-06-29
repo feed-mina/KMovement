@@ -54,7 +54,7 @@ jobs:
               --network sdui-network \
               -e NODE_ENV=production \
               -e BACKEND_URL=http://sdui-backend:8080 \
-              -e FASTAPI_URL=http://34.64.221.240:8000 \
+              -e FASTAPI_URL=https://kmovement-46122739597.europe-west1.run.app \
               --restart unless-stopped \
               ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
 

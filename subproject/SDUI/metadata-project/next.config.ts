@@ -11,7 +11,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const BACKEND_URL = isProd
     ? (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://yerin.duckdns.org')
     : 'http://localhost:8080';
-const FASTAPI_URL = process.env.FASTAPI_URL || (isProd ? process.env.GCP_FASTAPI_URL || 'http://34.64.221.240:8000' : 'http://localhost:8000');
+const FASTAPI_URL = process.env.FASTAPI_URL || (isProd ? process.env.GCP_FASTAPI_URL || 'https://kmovement-46122739597.europe-west1.run.app' : 'http://localhost:8000');
 
 const connectSrc = [
     "'self'",
@@ -19,7 +19,7 @@ const connectSrc = [
     'http://localhost:8000',
     'http://43.201.237.68:8081',
     'https://yerin.duckdns.org',
-    'http://34.64.221.240:8000',
+    'https://kmovement-46122739597.europe-west1.run.app',
     BACKEND_URL,
     FASTAPI_URL,
     'https://kauth.kakao.com',

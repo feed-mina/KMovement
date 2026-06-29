@@ -33,13 +33,13 @@ kakao:
   redirect-uri: ${KAKAO_REDIRECT_URI}
 
 fastapi:
-  url: ${FASTAPI_URL:http://34.64.221.240:8000}
+  url: ${FASTAPI_URL:https://kmovement-46122739597.europe-west1.run.app}
   internal-api-key: ${FASTAPI_INTERNAL_API_KEY:sdui-internal-dev-key}
 
 kride:
   fastapi:
-    url: ${KRIDE_FASTAPI_URL:http://34.64.221.240:8000}
-    chatbot-url: ${KRIDE_CHATBOT_URL:http://34.64.221.240:8000}
+    url: ${KRIDE_FASTAPI_URL:https://kmovement-46122739597.europe-west1.run.app}
+    chatbot-url: ${KRIDE_CHATBOT_URL:https://kmovement-46122739597.europe-west1.run.app}
 
 cloud:
   aws:

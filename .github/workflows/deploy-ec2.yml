@@ -10,6 +10,9 @@ on:
       - ".github/workflows/deploy-ec2.yml"
   workflow_dispatch:
 
+env:
+  KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL || 'https://kmovement-46122739597.europe-west1.run.app' }}
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -188,8 +191,10 @@ jobs:
 
               # ── GCP FastAPI (KRIDE AI) ──
               location /kride-api/ {
-                  proxy_pass http://34.64.221.240:8000/api/;
-                  proxy_set_header Host $host;
+                  proxy_pass https://kmovement-46122739597.europe-west1.run.app/api/;
+                  proxy_ssl_server_name on;
+                  proxy_set_header Host kmovement-46122739597.europe-west1.run.app;
+                  proxy_set_header X-Forwarded-Host $host;
                   proxy_set_header X-Real-IP $remote_addr;
                   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                   proxy_set_header X-Forwarded-Proto $scheme;
@@ -324,7 +329,7 @@ jobs:
           sed -i "s|__WEB_URL__|${{ secrets.WEB_URL }}|g" /tmp/deploy.sh
           sed -i "s|__S3_ACCESS_KEY__|${{ secrets.AWS_ACCESS_KEY }}|g" /tmp/deploy.sh
           sed -i "s|__S3_SECRET_KEY__|${{ secrets.AWS_SECRET_KEY }}|g" /tmp/deploy.sh
-          sed -i "s|__GCP_FASTAPI_URL__|${{ secrets.GCP_FASTAPI_URL }}|g" /tmp/deploy.sh
+          sed -i "s|__GCP_FASTAPI_URL__|${{ env.KRIDE_FASTAPI_URL }}|g" /tmp/deploy.sh
           sed -i "s|__FASTAPI_INTERNAL_API_KEY__|${{ secrets.FASTAPI_INTERNAL_API_KEY }}|g" /tmp/deploy.sh
           sed -i "s|__GCP_PROJECT_ID__|${{ secrets.GCP_PROJECT_ID }}|g" /tmp/deploy.sh
           sed -i "s|__SLACK_WEBHOOK_URL__|${{ secrets.SLACK_WEBHOOK_URL }}|g" /tmp/deploy.sh
