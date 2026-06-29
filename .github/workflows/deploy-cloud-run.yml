@@ -20,6 +20,7 @@ env:
   GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'quartz-kiba' }}
   GCP_REGION: ${{ vars.GCP_REGION || 'europe-west1' }}
   CLOUD_RUN_SERVICE: ${{ vars.CLOUD_RUN_SERVICE || 'kmovement' }}
+  GAR_REPO: ${{ vars.GAR_REPO || 'kmovement' }}
   CLOUD_RUN_MEMORY: ${{ vars.CLOUD_RUN_MEMORY || '2Gi' }}
   CLOUD_RUN_CPU: ${{ vars.CLOUD_RUN_CPU || '1' }}
   CLOUD_RUN_TIMEOUT: ${{ vars.CLOUD_RUN_TIMEOUT || '300s' }}
@@ -46,10 +47,33 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Deploy source to Cloud Run
+      - name: Ensure Artifact Registry repository
+        run: |
+          gcloud artifacts repositories describe "$GAR_REPO" \
+            --location "$GCP_REGION" \
+            --project "$GCP_PROJECT_ID" >/dev/null 2>&1 || \
+          gcloud artifacts repositories create "$GAR_REPO" \
+            --repository-format docker \
+            --location "$GCP_REGION" \
+            --description "KMovement Cloud Run images" \
+            --project "$GCP_PROJECT_ID"
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "$GCP_REGION-docker.pkg.dev" --quiet
+
+      - name: Build and push image
+        run: |
+          IMAGE="$GCP_REGION-docker.pkg.dev/$GCP_PROJECT_ID/$GAR_REPO/$CLOUD_RUN_SERVICE:$GITHUB_SHA"
+          LATEST_IMAGE="$GCP_REGION-docker.pkg.dev/$GCP_PROJECT_ID/$GAR_REPO/$CLOUD_RUN_SERVICE:latest"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          docker build -t "$IMAGE" -t "$LATEST_IMAGE" .
+          docker push "$IMAGE"
+          docker push "$LATEST_IMAGE"
+
+      - name: Deploy image to Cloud Run
         run: |
           gcloud run deploy "$CLOUD_RUN_SERVICE" \
-            --source . \
+            --image "$IMAGE" \
             --region "$GCP_REGION" \
             --project "$GCP_PROJECT_ID" \
             --allow-unauthenticated \

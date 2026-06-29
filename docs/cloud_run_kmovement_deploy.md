@@ -129,12 +129,18 @@ Workflow:
 .github/workflows/deploy-cloud-run.yml
 ```
 
+The workflow builds the Docker image on the GitHub runner, pushes it to
+Artifact Registry, then deploys that image to Cloud Run. This avoids the
+`gcloud run deploy --source .` source-upload path that requires permission to
+create a temporary Cloud Storage bucket.
+
 Defaults:
 
 ```text
 GCP_PROJECT_ID=quartz-kiba
 GCP_REGION=europe-west1
 CLOUD_RUN_SERVICE=kmovement
+GAR_REPO=kmovement
 CLOUD_RUN_MEMORY=2Gi
 CLOUD_RUN_CPU=1
 CLOUD_RUN_TIMEOUT=300s
@@ -150,6 +156,7 @@ project. Optional repository variables can override the defaults above:
 GCP_PROJECT_ID
 GCP_REGION
 CLOUD_RUN_SERVICE
+GAR_REPO
 CLOUD_RUN_MEMORY
 CLOUD_RUN_CPU
 CLOUD_RUN_TIMEOUT
@@ -161,6 +168,17 @@ CLOUD_RUN_MAX_INSTANCES
 Run the workflow manually from GitHub Actions, or push changes to `main` that
 touch the FastAPI app, root Dockerfile, required dataset files, or
 `.github/workflows/deploy-cloud-run.yml`.
+
+Minimum roles for the GitHub deploy service account:
+
+```text
+roles/run.admin
+roles/artifactregistry.admin
+roles/iam.serviceAccountUser
+```
+
+`roles/cloudbuild.builds.editor` is only needed if you switch back to Cloud
+Run source builds.
 
 ## EC2 Proxy Follow-up
 
