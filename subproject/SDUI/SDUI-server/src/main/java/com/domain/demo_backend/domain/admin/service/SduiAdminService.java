@@ -91,17 +91,13 @@ public class SduiAdminService {
 
         List<String> componentTypes = items.stream()
                 .map(UiMetadata::getComponentType)
-                .filter(value -> value != null && !value.isBlank())
-                .collect(LinkedHashSet::new, LinkedHashSet::add, LinkedHashSet::addAll)
-                .stream()
-                .toList();
+                .collect(this::newStringSet, this::addNonBlank, LinkedHashSet::addAll)
+                .stream().toList();
 
         List<String> dataSqlKeys = items.stream()
                 .map(UiMetadata::getDataSqlKey)
-                .filter(value -> value != null && !value.isBlank())
-                .collect(LinkedHashSet::new, LinkedHashSet::add, LinkedHashSet::addAll)
-                .stream()
-                .toList();
+                .collect(this::newStringSet, this::addNonBlank, LinkedHashSet::addAll)
+                .stream().toList();
 
         return new SduiScreenSummaryResponse(
                 screenId,
@@ -141,12 +137,20 @@ public class SduiAdminService {
 
         List<String> categories = tokens.stream()
                 .map(DesignToken::getCategory)
-                .filter(value -> value != null && !value.isBlank())
-                .collect(LinkedHashSet::new, LinkedHashSet::add, LinkedHashSet::addAll)
-                .stream()
-                .toList();
+                .collect(this::newStringSet, this::addNonBlank, LinkedHashSet::addAll)
+                .stream().toList();
 
         return new SduiThemeSummaryResponse(themeId, tokens.size(), lastUpdatedAt, categories);
+    }
+
+    private LinkedHashSet<String> newStringSet() {
+        return new LinkedHashSet<>();
+    }
+
+    private void addNonBlank(LinkedHashSet<String> values, String value) {
+        if (value != null && !value.isBlank()) {
+            values.add(value);
+        }
     }
 
     private SduiQueryMasterResponse toQueryMasterResponse(QueryMaster queryMaster) {
