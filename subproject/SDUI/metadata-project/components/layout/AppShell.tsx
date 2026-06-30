@@ -12,8 +12,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     const { isMobile, deviceClass } = useDeviceType();
     const isPc = !isMobile;
     const pathname = usePathname();
+    const isAdminToolPath = pathname?.startsWith('/admin');
     const isKrideScreen = KRIDE_PATHS.some(p => pathname?.includes(p));
     const isFocusScreen = pathname?.includes('/FOCUS');
+
+    if (isAdminToolPath) {
+        return <>{children}</>;
+    }
 
     return (
         <div className={`app-wrapper ${deviceClass} ${isKrideScreen ? 'kride-fullscreen' : ''}`}>
