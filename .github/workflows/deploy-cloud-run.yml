@@ -71,6 +71,14 @@ jobs:
           docker push "$LATEST_IMAGE"
 
       - name: Deploy image to Cloud Run
+        env:
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USERNAME: ${{ secrets.NEO4J_USERNAME }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          NEO4J_DATABASE: ${{ secrets.NEO4J_DATABASE }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           gcloud run deploy "$CLOUD_RUN_SERVICE" \
             --image "$IMAGE" \
@@ -83,7 +91,7 @@ jobs:
             --concurrency "$CLOUD_RUN_CONCURRENCY" \
             --min-instances "$CLOUD_RUN_MIN_INSTANCES" \
             --max-instances "$CLOUD_RUN_MAX_INSTANCES" \
-            --set-env-vars "TORCHSERVE_ENABLED=false,TORCHSERVE_FALLBACK=true,CHROMA_MODE=persistent,CHROMA_PATH=/app/chroma_db,KRIDE_MODELS_DIR=/app/dataset/models,KRIDE_RAW_DATA_DIR=/app/dataset/data/raw_ml,HF_HOME=/tmp/hf_cache,TRANSFORMERS_CACHE=/tmp/hf_cache/hub"
+            --set-env-vars "^|^TORCHSERVE_ENABLED=false|TORCHSERVE_FALLBACK=true|CHROMA_MODE=persistent|CHROMA_PATH=/app/chroma_db|KRIDE_MODELS_DIR=/app/dataset/models|KRIDE_RAW_DATA_DIR=/app/dataset/data/raw_ml|HF_HOME=/tmp/hf_cache|TRANSFORMERS_CACHE=/tmp/hf_cache/hub|NEO4J_URI=$NEO4J_URI|NEO4J_USERNAME=$NEO4J_USERNAME|NEO4J_PASSWORD=$NEO4J_PASSWORD|NEO4J_DATABASE=$NEO4J_DATABASE|GROQ_API_KEY=$GROQ_API_KEY|SUPABASE_URL=$SUPABASE_URL|SUPABASE_KEY=$SUPABASE_KEY"
 
       - name: Smoke test Cloud Run health
         run: |
