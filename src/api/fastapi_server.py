@@ -869,15 +869,87 @@ _KNOWN_PURPOSES = [
     "데이트", "가족", "혼자", "친구",
 ]
 
+_PURPOSE_LABEL_TO_KEY = {
+    "kculture": "kculture",
+    "k-culture": "kculture",
+    "k culture": "kculture",
+    "k컬처": "kculture",
+    "k-컬처": "kculture",
+    "케이컬처": "kculture",
+    "케이 컬처": "kculture",
+    "한류": "kculture",
+    "관광": "kculture",
+    "관광지": "kculture",
+    "명소": "kculture",
+    "촬영지": "kculture",
+    "문화": "kculture",
+    "액티비티": "kculture",
+    "야경": "kculture",
+    "데이트": "kculture",
+    "food": "food",
+    "restaurant": "food",
+    "restaurants": "food",
+    "cafe": "food",
+    "맛집": "food",
+    "음식": "food",
+    "식당": "food",
+    "레스토랑": "food",
+    "카페": "food",
+    "nature": "nature",
+    "natural": "nature",
+    "rest": "nature",
+    "자연": "nature",
+    "힐링": "nature",
+    "산책": "nature",
+    "풍경": "nature",
+    "history": "history",
+    "historic": "history",
+    "historical": "history",
+    "역사": "history",
+    "전통": "history",
+    "궁궐": "history",
+    "한옥": "history",
+    "박물관": "history",
+    "shopping": "shopping",
+    "쇼핑": "shopping",
+}
+
 def _extract_from_message(message: str, regions: list[str], purposes: list[str]):
     """채팅 메시지에서 지역/목적 키워드를 추출하여 기존 폼 데이터에 병합"""
     if not message:
         return regions, purposes
     msg_regions = [r for r in _KNOWN_REGIONS if r in message]
     msg_purposes = [p for p in _KNOWN_PURPOSES if p in message]
+    for label in _PURPOSE_LABEL_TO_KEY:
+        if label in message and label not in msg_purposes:
+            msg_purposes.append(label)
     merged_regions = list(dict.fromkeys(msg_regions if msg_regions else regions))
     merged_purposes = list(dict.fromkeys(msg_purposes + purposes))
     return merged_regions, merged_purposes
+
+def _normalize_purpose_keys(purposes: list[str]) -> list[str]:
+    """Map request/display purpose labels to the Chroma collection keys."""
+    keys: list[str] = []
+    for purpose in purposes or []:
+        raw = str(purpose).strip()
+        if not raw:
+            continue
+        normalized = raw.lower()
+        key = (
+            _PURPOSE_LABEL_TO_KEY.get(raw)
+            or _PURPOSE_LABEL_TO_KEY.get(normalized)
+            or normalized
+        )
+        if key not in keys:
+            keys.append(key)
+    return keys
+
+def _matches_any_region(poi: dict, regions: list[str]) -> bool:
+    haystack = " ".join(
+        str(poi.get(field) or "")
+        for field in ("address", "sido", "region")
+    )
+    return any(region and region in haystack for region in regions)
 
 class ChatStreamRequest(BaseModel):
     message: str = ""
@@ -994,7 +1066,8 @@ def recommend_ai(req: RecommendAIRequest):
 
     # 0. 메시지에서 지역/목적 추출하여 폼 데이터 보강
     regions, purposes = _extract_from_message(req.message, req.regions, req.purposes)
-    print(f"[K-Ride] recommend/ai message='{req.message}' regions={regions} purposes={purposes}")
+    purpose_keys = _normalize_purpose_keys(purposes)
+    print(f"[K-Ride] recommend/ai message='{req.message}' regions={regions} purposes={purposes} purpose_keys={purpose_keys}")
 
     # 1. Neo4j — 아티스트 촬영지 POI
     neo4j_pois = []
@@ -1007,16 +1080,26 @@ def recommend_ai(req: RecommendAIRequest):
         except Exception:
             pass
 
-    # 2. ChromaDB — 목적 기반 유사 POI
-    chroma_pois = []
-    if purposes:
-        query_text = " ".join(purposes + regions)
+    # 2. Neo4j — 지역 기반 POI
+    region_pois = []
+    if regions:
         try:
-            chroma_pois = search_pois_by_purpose(req.purposes, query_text, top_k=5)
-        except Exception:
-            pass
+            region_pois = get_region_pois(regions, limit=15)
+            print(f"[K-Ride] recommend/ai region_pois: {len(region_pois)}건 (regions={regions})")
+        except Exception as e:
+            print(f"[K-Ride] recommend/ai region_pois fallback: {e}")
 
-    # 2.5 GraphRAG — 2-hop + community 기반 POI 확장
+    # 3. ChromaDB — 목적 기반 유사 POI
+    chroma_pois = []
+    if purpose_keys:
+        query_text = " ".join(list(dict.fromkeys(purposes + purpose_keys + regions)))
+        try:
+            chroma_pois = search_pois_by_purpose(purpose_keys, query_text, top_k=8)
+            print(f"[K-Ride] recommend/ai chroma_pois: {len(chroma_pois)}건 (purpose_keys={purpose_keys})")
+        except Exception as e:
+            print(f"[K-Ride] recommend/ai chroma fallback: {e}")
+
+    # 3.5 GraphRAG — 2-hop + community 기반 POI 확장
     graphrag_pois = []
     if HAS_GRAPHRAG and req.artists:
         try:
@@ -1024,23 +1107,29 @@ def recommend_ai(req: RecommendAIRequest):
                 req.artists + [ARTIST_NAME_MAP.get(a, a) for a in req.artists]
             ))
             artist_ids = search_artists_by_name(search_names)
-            existing_ids = {p.get("poi_id") or p.get("name", "") for p in neo4j_pois + chroma_pois}
+            existing_ids = {p.get("poi_id") or p.get("name", "") for p in neo4j_pois + region_pois + chroma_pois}
             if artist_ids:
                 graphrag_pois = get_graphrag_pois(artist_ids, existing_ids, max_pois=10)
                 print(f"[K-Ride] recommend/ai graphrag_pois: {len(graphrag_pois)}건")
         except Exception as e:
             print(f"[K-Ride] recommend/ai graphrag fallback: {e}")
 
-    # 3. 합산 + 중복 제거
+    # 4. 선택 지역이 있으면 보강 후보도 같은 지역으로 제한
+    if regions:
+        neo4j_pois = [p for p in neo4j_pois if _matches_any_region(p, regions)]
+        chroma_pois = [p for p in chroma_pois if _matches_any_region(p, regions)]
+        graphrag_pois = [p for p in graphrag_pois if _matches_any_region(p, regions)]
+
+    # 5. 합산 + 중복 제거
     merged: dict[str, dict] = {}
-    for p in neo4j_pois + chroma_pois + graphrag_pois:
+    for p in neo4j_pois + chroma_pois + region_pois + graphrag_pois:
         key = p.get("poi_id") or p.get("name", "")
         if key not in merged:
             merged[key] = p
 
     pois = list(merged.values())
 
-    # 4. 예산 필터링 (avg_cost 필드 있을 때만)
+    # 6. 예산 필터링 (avg_cost 필드 있을 때만)
     if req.budget:
         pois = [
             p for p in pois
@@ -1048,7 +1137,7 @@ def recommend_ai(req: RecommendAIRequest):
             or req.budget.min <= p.get("avg_cost", 0) <= req.budget.max
         ]
 
-    # 5. Groq — 추천 이유 텍스트
+    # 7. Groq — 추천 이유 텍스트
     rec_text = ""
     if pois:
         try:

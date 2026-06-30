@@ -107,6 +107,47 @@ def test_recommend_ai_endpoint_returns_pois_text_and_count(monkeypatch):
     assert body["recommendation_text"] == "Recommended K-Ride POI"
 
 
+def test_recommend_ai_supports_region_and_korean_purpose_only(monkeypatch):
+    captured = {}
+    region_poi = {
+        **MOCK_POIS[0],
+        "poi_id": "poi_region",
+        "address": "서울 종로구",
+        "sido": "서울",
+    }
+
+    def fake_search(purposes, query_text, top_k=5):
+        captured["purposes"] = purposes
+        captured["query_text"] = query_text
+        return []
+
+    monkeypatch.setattr(server, "HAS_AI", True)
+    monkeypatch.setattr(server, "get_artist_pois", lambda *args, **kwargs: [])
+    monkeypatch.setattr(server, "get_region_pois", lambda *args, **kwargs: [region_poi])
+    monkeypatch.setattr(server, "search_pois_by_purpose", fake_search)
+    monkeypatch.setattr(
+        server,
+        "generate_recommendation_text",
+        lambda *args, **kwargs: "Recommended Seoul POI",
+    )
+
+    response = client.post(
+        "/api/recommend/ai",
+        json={
+            "artists": [],
+            "regions": ["서울"],
+            "purposes": ["관광지"],
+            "budget": {"min": 0, "max": 500000},
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["count"] == 1
+    assert body["pois"][0]["poi_id"] == "poi_region"
+    assert captured["purposes"] == ["kculture"]
+
+
 def test_recommend_itinerary_endpoint_accepts_spring_duration_and_returns_map(monkeypatch):
     monkeypatch.setattr(server, "HAS_AI", True)
     monkeypatch.setattr(server, "HAS_ENSEMBLE", False)
