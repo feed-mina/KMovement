@@ -5,7 +5,6 @@ import com.domain.demo_backend.domain.interview.domain.InterviewSchedule;
 import com.domain.demo_backend.domain.leetcode.domain.LeetcodeProblem;
 import com.domain.demo_backend.domain.time.domain.GoalSetting;
 import com.domain.demo_backend.domain.time.domain.GoalSettingRepository;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,20 +27,25 @@ import java.util.Map;
  * slack.webhook-url 미설정 시 자동으로 skip (개발/테스트 환경 안전).
  */
 @Service
-@RequiredArgsConstructor
 public class SlackNotificationService {
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
     private final Logger log = LoggerFactory.getLogger(SlackNotificationService.class);
 
     private final GoalSettingRepository goalSettingRepo;
-    private final WebClient webClient = WebClient.create();
+    private final WebClient webClient;
 
     @Value("${slack.webhook-url:}")
     private String webhookUrl;
 
     @Value("${slack.target-user-id:U0AM4840JFR}")
     private String targetUserId;
+
+    public SlackNotificationService(GoalSettingRepository goalSettingRepo,
+                                    WebClient.Builder webClientBuilder) {
+        this.goalSettingRepo = goalSettingRepo;
+        this.webClient = webClientBuilder.build();
+    }
 
     /**
      * 약속 시간 전 슬랙 알림(Block Kit)을 발송한다.

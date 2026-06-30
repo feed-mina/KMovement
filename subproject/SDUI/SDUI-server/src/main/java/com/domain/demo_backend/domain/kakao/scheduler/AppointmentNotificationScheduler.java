@@ -63,9 +63,25 @@ public class AppointmentNotificationScheduler {
     }
 
     private void sendAndMark(User user, GoalSetting goal, int minutesBefore) {
+        boolean kakaoOk = false;
         try {
             notifService.sendReminder(user, goal, minutesBefore);
-            slackNotifService.sendReminder(goal, minutesBefore); // Slack은 내부 예외 처리, 실패해도 mark 진행
+            kakaoOk = true;
+        } catch (Exception e) {
+            log.error("AppointmentScheduler-카카오 알림 실패. userId={}, minutesBefore={}",
+                    user.getUserId(), minutesBefore, e);
+        }
+
+        // Slack 알림은 카카오 결과와 무관하게 독립 실행
+        try {
+            slackNotifService.sendReminder(goal, minutesBefore);
+        } catch (Exception e) {
+            log.error("AppointmentScheduler-Slack 알림 실패. userId={}, minutesBefore={}",
+                    user.getUserId(), minutesBefore, e);
+        }
+
+        // 카카오 성공 시에만 notifSent 플래그 저장
+        if (kakaoOk) {
             switch (minutesBefore) {
                 case 30  -> goal.setNotifSent30min(true);
                 case 90  -> goal.setNotifSent90min(true);
@@ -74,9 +90,6 @@ public class AppointmentNotificationScheduler {
             goalRepo.save(goal);
             log.info("AppointmentScheduler-알림 발송 완료. userId={}, minutesBefore={}",
                     user.getUserId(), minutesBefore);
-        } catch (Exception e) {
-            log.error("AppointmentScheduler-알림 발송 실패. userId={}, minutesBefore={}",
-                    user.getUserId(), minutesBefore, e);
         }
     }
 }

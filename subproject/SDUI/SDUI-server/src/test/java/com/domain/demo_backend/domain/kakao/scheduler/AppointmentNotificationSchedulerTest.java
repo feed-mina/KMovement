@@ -196,7 +196,7 @@ class AppointmentNotificationSchedulerTest {
     // ── 예외 처리 케이스 ────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("sendReminder 예외 발생 시 notifSent 플래그를 저장하지 않아야 함")
+    @DisplayName("Kakao sendReminder 예외 발생 시 notifSent 플래그를 저장하지 않아야 함")
     void checkAndSend_serviceThrows_shouldNotSaveFlag() {
         GoalSetting goal = goalAtMinutesFromNow(30);
 
@@ -210,6 +210,23 @@ class AppointmentNotificationSchedulerTest {
 
         verify(goalRepo, never()).save(any());
         assertThat(goal.isNotifSent30min()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Kakao 실패 시에도 Slack sendReminder 는 호출되어야 함 (독립 실행)")
+    void checkAndSend_kakaoFails_slackShouldStillRun() {
+        GoalSetting goal = goalAtMinutesFromNow(30);
+
+        when(goalRepo.findAllPendingNotifications(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of(goal));
+        when(userRepo.findById(1L)).thenReturn(Optional.of(mockUser));
+        doThrow(new RuntimeException("Kakao API error"))
+                .when(notifService).sendReminder(any(), any(), anyInt());
+
+        scheduler.checkAndSendNotifications();
+
+        // Kakao 실패에도 불구하고 Slack 은 반드시 호출되어야 함
+        verify(slackNotifService, times(1)).sendReminder(goal, 30);
     }
 
     @Test

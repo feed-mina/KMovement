@@ -11,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -60,14 +64,17 @@ public class GoogleOAuthService {
 
     @Transactional
     public void exchangeCode(String code, Long userSqno) {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("code", code);
+        formData.add("client_id", clientId);
+        formData.add("client_secret", clientSecret);
+        formData.add("redirect_uri", redirectUri);
+        formData.add("grant_type", "authorization_code");
+
         Map<?, ?> response = webClient.post()
                 .uri(TOKEN_URL)
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .bodyValue("code=" + code
-                        + "&client_id=" + clientId
-                        + "&client_secret=" + clientSecret
-                        + "&redirect_uri=" + redirectUri
-                        + "&grant_type=authorization_code")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .bodyValue(formData)
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
@@ -110,13 +117,16 @@ public class GoogleOAuthService {
 
     @Transactional
     public String refreshAccessToken(Long userSqno, GoogleOAuthToken token) {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("refresh_token", token.getRefreshToken());
+        formData.add("client_id", clientId);
+        formData.add("client_secret", clientSecret);
+        formData.add("grant_type", "refresh_token");
+
         Map<?, ?> response = webClient.post()
                 .uri(TOKEN_URL)
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .bodyValue("refresh_token=" + token.getRefreshToken()
-                        + "&client_id=" + clientId
-                        + "&client_secret=" + clientSecret
-                        + "&grant_type=refresh_token")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .bodyValue(formData)
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
