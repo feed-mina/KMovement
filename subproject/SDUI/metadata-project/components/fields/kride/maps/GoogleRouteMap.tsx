@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { buildMarkerInfoHtml, RouteMapData, RouteMapMarker } from './mapTypes';
+import LeafletFallbackMap from './LeafletFallbackMap';
 import { loadGoogleMaps } from './loadGoogleMaps';
 
 type Props = {
@@ -21,6 +22,7 @@ export default function GoogleRouteMap({ apiKey, data, selectedMarkerId, onMarke
   useEffect(() => {
     let cancelled = false;
     const overlays: any[] = [];
+    let renderCheckTimer: number | null = null;
 
     setError('');
     loadGoogleMaps(apiKey)
@@ -81,6 +83,16 @@ export default function GoogleRouteMap({ apiKey, data, selectedMarkerId, onMarke
         if (path.length > 0) {
           map.fitBounds(bounds);
         }
+
+        renderCheckTimer = window.setTimeout(() => {
+          if (cancelled || !containerRef.current) return;
+          const googleError = containerRef.current.querySelector(
+            '.gm-err-container, .gm-err-title, .gm-err-message'
+          );
+          if (googleError) {
+            setError('Google Maps failed to render.');
+          }
+        }, 1500);
       })
       .catch((loadError) => {
         if (!cancelled) setError(loadError?.message ?? 'Google Maps load failed.');
@@ -88,6 +100,7 @@ export default function GoogleRouteMap({ apiKey, data, selectedMarkerId, onMarke
 
     return () => {
       cancelled = true;
+      if (renderCheckTimer) window.clearTimeout(renderCheckTimer);
       overlays.forEach((overlay) => overlay?.setMap?.(null));
       mapRef.current = null;
       markerRefs.current = {};
@@ -108,7 +121,14 @@ export default function GoogleRouteMap({ apiKey, data, selectedMarkerId, onMarke
   }, [data.markers, data.zoom, selectedMarkerId]);
 
   if (error) {
-    return <div className="route-map__state">{error}</div>;
+    return (
+      <>
+        <LeafletFallbackMap data={data} selectedMarkerId={selectedMarkerId} />
+        <div className="route-map__fallback-notice" role="status">
+          Google Maps is unavailable. Showing the fallback map.
+        </div>
+      </>
+    );
   }
 
   return <div ref={containerRef} className="route-map__canvas" />;
