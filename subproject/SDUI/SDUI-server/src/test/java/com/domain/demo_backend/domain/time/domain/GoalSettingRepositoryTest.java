@@ -279,7 +279,7 @@ class GoalSettingRepositoryTest {
         save(1L, inMonth, "success", false, false, false);
         save(1L, inMonth, "fail",    false, false, false);
         save(1L, inMonth, null,      false, false, false); // 제외 대상
-        save(1L, monthEnd, "success", false, false, false); // 경계 제외 (< monthEnd)
+        save(1L, monthEnd, "success", false, false, false); // 제외 대상 (monthEnd 경계 초과 불포함)
 
         long total = goalSettingRepository.countMonthlyTotal(1L, monthStart, monthEnd);
 
