@@ -5,6 +5,7 @@ import com.domain.demo_backend.domain.google.service.GoogleOAuthService;
 import com.domain.demo_backend.domain.query.service.QueryMasterService;
 import com.domain.demo_backend.domain.time.domain.GoalSetting;
 import com.domain.demo_backend.domain.time.domain.GoalSettingRepository;
+import com.domain.demo_backend.domain.time.dto.GoalMonthlyStatsResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /*
  * @@@@ 2026-01-26 생성
@@ -158,5 +162,50 @@ public class GoalTimeQueryService {
         } else {
             log.debug("업데이트 대상이 없습니다. 이미 처리되었거나 목표가 없음");
         }
+    }
+
+    /**
+     * 월별 목표 달성률 통계를 조회한다.
+     *
+     * @param userSqno 사용자 일련번호
+     * @param year     조회 년도 (예: 2026)
+     * @param month    조회 월 (1~12)
+     * @return 월별 달성률 통계 DTO
+     */
+    @Transactional(readOnly = true)
+    public GoalMonthlyStatsResponse getMonthlyStats(Long userSqno, int year, int month) {
+        YearMonth ym = YearMonth.of(year, month);
+        LocalDateTime monthStart = ym.atDay(1).atStartOfDay();
+        LocalDateTime monthEnd   = ym.plusMonths(1).atDay(1).atStartOfDay();
+
+        long totalCount   = goalSettingRepository.countMonthlyTotal(userSqno, monthStart, monthEnd);
+        long successCount = goalSettingRepository.countMonthlySuccess(userSqno, monthStart, monthEnd);
+        long failCount    = totalCount - successCount;
+
+        Double achievementRate = (totalCount == 0) ? null
+                : Math.round((successCount * 1000.0 / totalCount)) / 10.0;
+
+        List<GoalSetting> goals = goalSettingRepository.findMonthlyGoals(userSqno, monthStart, monthEnd);
+
+        DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm");
+
+        List<GoalMonthlyStatsResponse.DailyGoalResult> dailyResults = goals.stream()
+                .map(g -> GoalMonthlyStatsResponse.DailyGoalResult.builder()
+                        .date(g.getTargetTime().format(dateFmt))
+                        .targetTime(g.getTargetTime().format(timeFmt))
+                        .status(g.getStatus())
+                        .build())
+                .collect(Collectors.toList());
+
+        return GoalMonthlyStatsResponse.builder()
+                .year(year)
+                .month(month)
+                .totalCount(totalCount)
+                .successCount(successCount)
+                .failCount(failCount)
+                .achievementRate(achievementRate)
+                .dailyResults(dailyResults)
+                .build();
     }
 }

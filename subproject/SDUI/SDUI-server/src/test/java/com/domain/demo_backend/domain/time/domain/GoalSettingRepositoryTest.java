@@ -267,6 +267,76 @@ class GoalSettingRepositoryTest {
         assertThat(success).isZero();
     }
 
+    // ── countMonthlyTotal / countMonthlySuccess / findMonthlyGoals ───────────
+
+    @Test
+    @DisplayName("특정 월 완료 goal 수 (status IS NOT NULL) 를 올바르게 계산해야 함")
+    void countMonthlyTotal_shouldCountNonNullStatus() {
+        LocalDateTime monthStart = LocalDateTime.of(2026, 6, 1, 0, 0);
+        LocalDateTime monthEnd   = LocalDateTime.of(2026, 7, 1, 0, 0);
+        LocalDateTime inMonth    = LocalDateTime.of(2026, 6, 15, 10, 0);
+
+        save(1L, inMonth, "success", false, false, false);
+        save(1L, inMonth, "fail",    false, false, false);
+        save(1L, inMonth, null,      false, false, false); // 제외 대상
+        save(1L, monthEnd, "success", false, false, false); // 경계 제외 (< monthEnd)
+
+        long total = goalSettingRepository.countMonthlyTotal(1L, monthStart, monthEnd);
+
+        assertThat(total).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("특정 월 성공 goal 수 (success/safe) 를 올바르게 계산해야 함")
+    void countMonthlySuccess_shouldCountOnlySuccessAndSafe() {
+        LocalDateTime monthStart = LocalDateTime.of(2026, 6, 1, 0, 0);
+        LocalDateTime monthEnd   = LocalDateTime.of(2026, 7, 1, 0, 0);
+        LocalDateTime inMonth    = LocalDateTime.of(2026, 6, 20, 9, 0);
+
+        save(1L, inMonth, "success", false, false, false);
+        save(1L, inMonth, "safe",    false, false, false);
+        save(1L, inMonth, "fail",    false, false, false); // 제외
+        save(1L, inMonth, null,      false, false, false); // 제외
+
+        long success = goalSettingRepository.countMonthlySuccess(1L, monthStart, monthEnd);
+
+        assertThat(success).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("monthStart 이전 / monthEnd 이후 goal 은 월별 집계에서 제외되어야 함")
+    void countMonthly_outOfRangeGoals_shouldBeExcluded() {
+        LocalDateTime monthStart = LocalDateTime.of(2026, 6, 1, 0, 0);
+        LocalDateTime monthEnd   = LocalDateTime.of(2026, 7, 1, 0, 0);
+
+        save(1L, monthStart.minusDays(1), "success", false, false, false); // 이전 월
+        save(1L, monthEnd, "success",               false, false, false); // 다음 월 첫날 경계 제외
+
+        long total   = goalSettingRepository.countMonthlyTotal(1L, monthStart, monthEnd);
+        long success = goalSettingRepository.countMonthlySuccess(1L, monthStart, monthEnd);
+
+        assertThat(total).isZero();
+        assertThat(success).isZero();
+    }
+
+    @Test
+    @DisplayName("findMonthlyGoals — 해당 월 goal 목록이 targetTime 오름차순으로 반환되어야 함")
+    void findMonthlyGoals_shouldReturnOrderedByTargetTime() {
+        LocalDateTime monthStart = LocalDateTime.of(2026, 6, 1, 0, 0);
+        LocalDateTime monthEnd   = LocalDateTime.of(2026, 7, 1, 0, 0);
+
+        save(1L, LocalDateTime.of(2026, 6, 20, 9, 0),  "success", false, false, false);
+        save(1L, LocalDateTime.of(2026, 6, 5, 14, 0),  "fail",    false, false, false);
+        save(1L, LocalDateTime.of(2026, 6, 15, 8, 30), "safe",    false, false, false);
+        save(1L, LocalDateTime.of(2026, 5, 31, 23, 59), "success", false, false, false); // 제외
+
+        List<GoalSetting> results = goalSettingRepository.findMonthlyGoals(1L, monthStart, monthEnd);
+
+        assertThat(results).hasSize(3);
+        assertThat(results.get(0).getTargetTime()).isBefore(results.get(1).getTargetTime());
+        assertThat(results.get(1).getTargetTime()).isBefore(results.get(2).getTargetTime());
+    }
+
     // ── 헬퍼 ────────────────────────────────────────────────────────────────────
 
     /** ±2분 창으로 findAllPendingNotifications 호출 (실제 스케줄러와 동일한 윈도우) */

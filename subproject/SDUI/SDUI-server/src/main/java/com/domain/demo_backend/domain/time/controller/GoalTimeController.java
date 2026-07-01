@@ -2,6 +2,7 @@ package com.domain.demo_backend.domain.time.controller;
 
 
 import com.domain.demo_backend.domain.time.domain.GoalArrivalRequest;
+import com.domain.demo_backend.domain.time.dto.GoalMonthlyStatsResponse;
 import com.domain.demo_backend.domain.time.service.GoalTimeQueryService;
 import com.domain.demo_backend.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -113,5 +114,29 @@ public class GoalTimeController {
 
         goalTimeQueryService.updateGoalResult(userSqno, status, recordedTime);
         return ResponseEntity.ok("저장완료");
+    }
+
+    /**
+     * 월별 목표 달성률 조회
+     * GET /api/goalTime/stats/monthly?year=2026&month=6
+     */
+    @GetMapping("/stats/monthly")
+    public ResponseEntity<GoalMonthlyStatsResponse> getMonthlyStats(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int month) {
+
+        Long userSqno = (userDetails != null) ? userDetails.getUserSqno() : null;
+        if (userSqno == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        // year/month 미입력 시 현재 월 사용
+        java.time.YearMonth ym = (year > 0 && month > 0)
+                ? java.time.YearMonth.of(year, month)
+                : java.time.YearMonth.now(java.time.ZoneId.of("Asia/Seoul"));
+
+        GoalMonthlyStatsResponse stats = goalTimeQueryService.getMonthlyStats(userSqno, ym.getYear(), ym.getMonthValue());
+        return ResponseEntity.ok(stats);
     }
 }

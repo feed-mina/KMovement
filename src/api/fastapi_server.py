@@ -37,6 +37,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 try:
+    from src.api.route_history import save_route_history as _save_route_history
+except ImportError:
+    def _save_route_history(**kwargs):  # type: ignore[misc]
+        return False
+
+try:
     from src.api.neo4j_client import get_artist_pois, get_region_pois, get_regions
     from src.api.rag_client import (
         generate_chat_answer,
@@ -376,6 +382,8 @@ class RecommendRequest(BaseModel):
     w_safety: float = 0.6
     w_tourism: float = 0.4
     top_n: int = 10
+    user_sqno: Optional[int] = None
+    user_id: Optional[str] = None
 
 # # [메모] radius_km 이라는건 구역은 radius_km을 사용해서 원구로 인식하나요 ? 혹시 나중에 이 범위를 3,5,10으로 바꿀 수 있나요 
 
@@ -387,6 +395,8 @@ class RouteRequest(BaseModel):
     w_safety: float = 0.6
     w_tourism: float = 0.4
     travel_date: Optional[str] = None   # Phase 3-8에서 활용
+    user_sqno: Optional[int] = None
+    user_id: Optional[str] = None
 
 
 class CourseRequest(BaseModel):
@@ -395,6 +405,8 @@ class CourseRequest(BaseModel):
     distance_km: float = 20.0
     w_safety: float = 0.6
     w_tourism: float = 0.4
+    user_sqno: Optional[int] = None
+    user_id: Optional[str] = None
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -501,6 +513,19 @@ def find_route(req: RouteRequest):
         result["travel_date"] = req.travel_date
         result["predicted_weather"] = "예측 모델 준비 중 (Phase 3-8)"
 
+    # 사용자 이력 저장 (best-effort, 실패해도 응답에 영향 없음)
+    poi_summary = [{"name": p.get("title", ""), "lat": p.get("lat"), "lon": p.get("lon")} for p in pois[:10]]
+    _save_route_history(
+        user_sqno=req.user_sqno,
+        user_id=req.user_id,
+        request_type="route",
+        distance_km=round(total_dist, 3),
+        safety_score=round(avg_safety, 4),
+        tourism_score=round(avg_tourism, 4),
+        regions=[],
+        recommended_pois=poi_summary,
+    )
+
     return result
 
 
@@ -559,6 +584,16 @@ def generate_course(req: CourseRequest):
     course_coords = [{"lat": n[0], "lon": n[1]} for n in best_course]
     facilities    = get_nearby_facilities([(c["lat"], c["lon"]) for c in course_coords])
     pois          = get_nearby_pois([(c["lat"], c["lon"]) for c in course_coords])
+
+    # 사용자 이력 저장 (best-effort)
+    poi_summary = [{"name": p.get("title", ""), "lat": p.get("lat"), "lon": p.get("lon")} for p in pois[:10]]
+    _save_route_history(
+        user_sqno=req.user_sqno,
+        user_id=req.user_id,
+        request_type="course",
+        distance_km=round(best_dist, 3),
+        recommended_pois=poi_summary,
+    )
 
     return {
         "course": course_coords,
@@ -840,6 +875,8 @@ class RecommendAIRequest(BaseModel):
     regions:  list[str] = Field(default_factory=list)
     purposes: list[str] = Field(default_factory=list)
     budget:   BudgetSchema = Field(default_factory=BudgetSchema)
+    user_sqno: Optional[int] = None
+    user_id:  Optional[str] = None
 
 class ItineraryRequest(BaseModel):
     message:  str = ""
@@ -848,6 +885,8 @@ class ItineraryRequest(BaseModel):
     regions:  list[str] = Field(default_factory=list)
     purposes: list[str] = Field(default_factory=list)
     budget:   BudgetSchema = Field(default_factory=BudgetSchema)
+    user_sqno: Optional[int] = None
+    user_id:  Optional[str] = None
 
 # 채팅 메시지에서 지역명/목적 키워드 추출
 _KNOWN_REGIONS = [
@@ -1369,6 +1408,19 @@ async def recommend_itinerary(req: ItineraryRequest):
             print(f"[K-Ride] 지오코딩 마커 {len(markers)}개 생성")
         except Exception as e:
             print(f"[K-Ride] 지오코딩 실패: {e}")
+
+    # 사용자 이력 저장 (best-effort)
+    poi_summary = [
+        {"name": p.get("name", ""), "lat": p.get("lat"), "lon": p.get("lon")}
+        for p in all_pois[:15]
+    ]
+    _save_route_history(
+        user_sqno=req.user_sqno,
+        user_id=req.user_id,
+        request_type="itinerary",
+        regions=regions,
+        recommended_pois=poi_summary,
+    )
 
     return {
         **itinerary_result,

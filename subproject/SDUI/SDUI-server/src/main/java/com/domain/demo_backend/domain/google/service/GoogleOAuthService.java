@@ -6,8 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -60,14 +64,18 @@ public class GoogleOAuthService {
 
     @Transactional
     public void exchangeCode(String code, Long userSqno) {
+        // MultiValueMap을 사용하여 파라미터를 올바르게 URL 인코딩
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("code", code);
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("redirect_uri", redirectUri);
+        params.add("grant_type", "authorization_code");
+
         Map<?, ?> response = webClient.post()
                 .uri(TOKEN_URL)
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .bodyValue("code=" + code
-                        + "&client_id=" + clientId
-                        + "&client_secret=" + clientSecret
-                        + "&redirect_uri=" + redirectUri
-                        + "&grant_type=authorization_code")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(params))
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
@@ -110,13 +118,17 @@ public class GoogleOAuthService {
 
     @Transactional
     public String refreshAccessToken(Long userSqno, GoogleOAuthToken token) {
+        // MultiValueMap을 사용하여 파라미터를 올바르게 URL 인코딩
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("refresh_token", token.getRefreshToken());
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("grant_type", "refresh_token");
+
         Map<?, ?> response = webClient.post()
                 .uri(TOKEN_URL)
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .bodyValue("refresh_token=" + token.getRefreshToken()
-                        + "&client_id=" + clientId
-                        + "&client_secret=" + clientSecret
-                        + "&grant_type=refresh_token")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(params))
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
