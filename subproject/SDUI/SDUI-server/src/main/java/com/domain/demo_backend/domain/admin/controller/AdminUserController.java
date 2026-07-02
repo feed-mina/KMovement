@@ -1,8 +1,11 @@
 package com.domain.demo_backend.domain.admin.controller;
 
 import com.domain.demo_backend.domain.admin.dto.AdminUserResponse;
+import com.domain.demo_backend.domain.admin.dto.AdminUsageStatsResponse;
+import com.domain.demo_backend.domain.admin.dto.CommunityStatsResponse;
 import com.domain.demo_backend.domain.admin.dto.UpdateUserRoleRequest;
 import com.domain.demo_backend.domain.admin.service.AdminUserService;
+import com.domain.demo_backend.domain.admin.service.AdminUsageStatsService;
 import com.domain.demo_backend.domain.kakao.service.SlackNotificationService;
 import com.domain.demo_backend.domain.leetcode.scheduler.DailyLeetcodeScheduler;
 import com.domain.demo_backend.domain.study.scheduler.DailyStudyScheduler;
@@ -21,12 +24,18 @@ public class AdminUserController {
 
     private static final Logger log = LoggerFactory.getLogger(AdminUserController.class);
     private final AdminUserService adminUserService;
+    private final AdminUsageStatsService adminUsageStatsService;
     private final SlackNotificationService slackNotificationService;
     private final DailyLeetcodeScheduler dailyLeetcodeScheduler;
     private final DailyStudyScheduler dailyStudyScheduler;
 
-    public AdminUserController(AdminUserService adminUserService, SlackNotificationService slackNotificationService, DailyLeetcodeScheduler dailyLeetcodeScheduler, DailyStudyScheduler dailyStudyScheduler) {
+    public AdminUserController(AdminUserService adminUserService,
+                               AdminUsageStatsService adminUsageStatsService,
+                               SlackNotificationService slackNotificationService,
+                               DailyLeetcodeScheduler dailyLeetcodeScheduler,
+                               DailyStudyScheduler dailyStudyScheduler) {
         this.adminUserService = adminUserService;
+        this.adminUsageStatsService = adminUsageStatsService;
         this.slackNotificationService = slackNotificationService;
         this.dailyLeetcodeScheduler = dailyLeetcodeScheduler;
         this.dailyStudyScheduler = dailyStudyScheduler;
@@ -86,6 +95,32 @@ public class AdminUserController {
             log.error("권한 변경 오류: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "권한 변경 중 오류가 발생했습니다."));
+        }
+    }
+
+    // 어드민 이용 통계 (K-Ride 경로 탐색 수, 인기 지역, 사용자 증가량 등)
+    @GetMapping("/stats")
+    public ResponseEntity<?> getUsageStats() {
+        try {
+            AdminUsageStatsResponse stats = adminUsageStatsService.getUsageStats();
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            log.error("이용 통계 조회 오류: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "이용 통계 조회 중 오류가 발생했습니다."));
+        }
+    }
+
+    // 커뮤니티 통계 (인기 게시글, 좋아요/팔로우 수, 주간 활동량 등)
+    @GetMapping("/stats/community")
+    public ResponseEntity<?> getCommunityStats() {
+        try {
+            CommunityStatsResponse stats = adminUsageStatsService.getCommunityStats();
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            log.error("커뮤니티 통계 조회 오류: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "커뮤니티 통계 조회 중 오류가 발생했습니다."));
         }
     }
 }

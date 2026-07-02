@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import jakarta.persistence.LockModeType;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface CommunityPostRepository extends JpaRepository<CommunityPost, Long> {
@@ -27,4 +28,12 @@ public interface CommunityPostRepository extends JpaRepository<CommunityPost, Lo
     @EntityGraph(attributePaths = {"author"})
     Page<CommunityPost> findByAuthorSqnoAndDelYnOrderByCreatedAtDesc(
             Long authorSqno, String delYn, Pageable pageable);
+
+    // 어드민 통계용
+    long countByDelYn(String delYn);
+
+    long countByDelYnAndCreatedAtAfter(String delYn, LocalDateTime after);
+
+    @EntityGraph(attributePaths = {"author"})
+    Page<CommunityPost> findByDelYnOrderByLikeCountDesc(String delYn, Pageable pageable);
 }

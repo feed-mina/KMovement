@@ -6,6 +6,7 @@ import { usePageHook } from "@/engine/hooks/usePageHook";
 import { useUiScreen } from "@/engine/hooks/useUiScreen";
 import { SCREEN_IDS } from "@/engine/screenMap";
 import { useOnboardingStore } from "@/store/onboarding-store";
+import OnboardingPageShell from "@/components/kride/OnboardingPageShell";
 
 // const ARTIST_LIST = [
 //   { id: 1,  name: "BTS",        imageUrl: "https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" },
@@ -45,34 +46,34 @@ export default function MoviesPage() {
   const { formData, handleChange, handleAction } = usePageHook(SCREEN_IDS.INTRO2, metadata, {});
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
-      <div className="flex-1">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-white">로딩 중...</div>
-          </div>
-        ) : (
-          <DynamicEngine
-            metadata={metadata}
-            screenId={SCREEN_IDS.INTRO2}
-            pageData={{ artistList: artistList }}
-            formData={formData}
-            onChange={handleChange}
-            onAction={handleAction}
-          />
-        )}
-      </div>
-
-      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 px-6 py-4 flex items-center justify-between z-50">
-        <span className="text-gray-400 text-sm">{selectedArtists.length} / 5 선택됨</span>
-        <button
-          onClick={() => router.push("/latest")}
-          disabled={selectedArtists.length < 1}
-          className="px-8 py-3 bg-red-600 text-white font-bold rounded-full disabled:opacity-40 disabled:cursor-not-allowed hover:bg-red-700 transition-colors"
-        >
-          다음 →
-        </button>
-      </div>
-    </div>
+    <OnboardingPageShell
+      bottomBar={
+        <div className="flex items-center justify-between">
+          <span className="text-gray-400 text-sm">{selectedArtists.length} / 5 선택됨</span>
+          <button
+            onClick={() => router.push("/latest")}
+            disabled={selectedArtists.length < 1}
+            className="px-8 py-3 bg-red-600 text-white font-bold rounded-full disabled:opacity-40 disabled:cursor-not-allowed hover:bg-red-700 transition-colors"
+          >
+            다음 →
+          </button>
+        </div>
+      }
+    >
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-white">로딩 중...</div>
+        </div>
+      ) : (
+        <DynamicEngine
+          metadata={metadata}
+          screenId={SCREEN_IDS.INTRO2}
+          pageData={{ artistList: artistList }}
+          formData={formData}
+          onChange={handleChange}
+          onAction={handleAction}
+        />
+      )}
+    </OnboardingPageShell>
   );
 }
