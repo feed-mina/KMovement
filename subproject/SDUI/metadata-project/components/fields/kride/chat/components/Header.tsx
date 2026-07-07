@@ -1,8 +1,15 @@
 // Header.tsx
 'use client';
 import React from 'react';
+import Rai, { type RaiState } from '../../atoms/Rai';
 
 type Status = 'idle' | 'thinking' | 'streaming';
+
+const STATUS_TO_RAI: Record<Status, RaiState> = {
+  idle: 'greeting',
+  thinking: 'thinking',
+  streaming: 'success',
+};
 
 interface Props {
   title: string;
@@ -20,7 +27,7 @@ export default function Header({ title, status = 'idle', variant = 'full', onClo
   return (
     <div className="kride-chat-header" data-variant={variant}>
       <div className="kride-chat-header__brand">
-        <div className="kride-chat-header__logo">K</div>
+        <Rai state={STATUS_TO_RAI[status]} size={36} className="kride-chat-header__mascot" />
         <div>
           <div className="kride-chat-header__title">{title}</div>
           <div
