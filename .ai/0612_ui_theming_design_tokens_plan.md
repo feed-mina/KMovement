@@ -185,6 +185,38 @@
 - 프론트: `tests/components/ThemeProvider.test.tsx` 3건 (변수 주입, 실패 폴백, themeId prop)
 
 ### 남은 작업 (Phase 4 잔여 + Phase 5)
-- THEME_SETTINGS 관리 화면 (COLOR_PICKER 컴포넌트 + ui_metadata 행 추가)
+- THEME_SETTINGS 관리 화면 (COLOR_PICKER 컴포넌트 + ui_metadata 행 추가) → [완료] 별첨3
 - RN 마이그레이션 매핑 가이드 문서
 - 배포 시 Flyway V68 자동 적용 확인 (EC2 백엔드 재기동)
+
+---
+
+## [별첨3] 2026-06-12 — INTRO5 슬라이더 버그 수정 + THEME_SETTINGS 관리 화면 [완료]
+
+### 1. INTRO5 예산 슬라이더 라벨 겹침/가림 버그
+스크린샷 증상: ① 상단 "₩30,000 ~ ₩300,000" 요약이 좌측 잘림("0,000 ~ …"), ② min/max 알약 라벨이 겹쳐 "₩3₩300,000"처럼 보임, ③ 라벨 클릭 시 편집 input이 다른 라벨에 가려짐.
+
+원인 (`components/fields/kride/DualRangeSlider.tsx`):
+- 요약 라벨이 `left: {midPercent}%` 절대배치 + `-translate-x-1/2` → 두 썸이 왼쪽에 몰리면 컨테이너 밖으로 잘림
+- min/max 알약이 둘 다 `-top-7`에 썸 위치 절대배치 → 썸이 가까우면 겹침, z-index 없어 편집 input이 뒤로 감
+
+수정:
+- 요약 라벨: 절대배치 제거 → `text-center` 정적 중앙 정렬
+- 라벨 충돌 감지(`maxPercent - minPercent < 22`) 시 max 라벨을 트랙 아래(`top-9`)로 내림 + 컨테이너 `mb-8` 여백 보정
+- 편집 중인 라벨은 `z-30`(평소 `z-10`)으로 최상위 보장
+
+### 2. THEME_SETTINGS 관리 화면
+| 파일 | 내용 |
+|---|---|
+| `components/fields/theme/ThemeSettingsEditor.tsx` (신설) | 토큰 조회(ThemeProvider와 queryKey 공유) → 카테고리별 렌더(hex값은 컬러피커+텍스트, 그 외 텍스트) → 변경 즉시 :root 미리보기 → 저장 시 **변경분만** PUT → invalidateQueries로 전 화면 반영. 401/403 시 관리자 안내, 되돌리기 지원 |
+| `components/constants/componentMap.tsx` | `THEME_EDITOR` 등록 |
+| `components/constants/screenMap.ts` | `/THEME_SETTINGS` 라우트 |
+| `app/view/[...slug]/page.tsx` | `PROTECTED_SCREENS`에 THEME_SETTINGS 추가 (로그인 필수) |
+| `app/styles/pages.css` | `.theme-settings-*` 스타일 (토큰만 참조, sticky 저장바 + safe-area, 모바일 세로 배치) |
+| `V69__theme_settings_screen.sql` | ui_metadata 4행 (THEME_ROOT GROUP / 제목 / 설명 / THEME_EDITOR), 전부 `allowed_roles='ROLE_ADMIN'` |
+
+접근 경로: `/view/THEME_SETTINGS` (관리자 로그인 필요 — 비관리자는 RBAC 필터로 빈 화면)
+
+### 테스트
+- `DualRangeSlider.test.tsx` 4건 (요약 중앙정렬, 충돌 시 라벨 분리, 비충돌 위치, 편집 z-30)
+- `ThemeSettingsEditor.test.tsx` 5건 (렌더, 미리보기+버튼 활성화, 변경분만 PUT, 403 안내, 되돌리기)

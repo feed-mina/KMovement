@@ -163,6 +163,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libmecab-dev mecab && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir mecab-python3 mecab-ko-dic bigvgan julius \
     || echo "WARN: GPT-SoVITS deps partial install"
+# GPT-SoVITS's own requirements (jieba, transformers, pypinyin, ...). Without these
+# the inference entry fails at runtime (ModuleNotFoundError: jieba). The torch guard
+# below re-pins torch 2.7.1 afterwards, undoing any version drift from this install.
+RUN pip install --no-cache-dir -r /app/GPT-SoVITS/requirements.txt \
+    || echo "WARN: GPT-SoVITS requirements partial install"
 
 # sentencepiece — required by MarianMT (BLIP-2 caption translation)
 RUN pip install --no-cache-dir sentencepiece
