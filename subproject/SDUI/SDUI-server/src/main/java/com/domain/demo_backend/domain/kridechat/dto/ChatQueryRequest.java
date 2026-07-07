@@ -11,6 +11,8 @@ import java.util.Map;
 @Setter
 @NoArgsConstructor
 public class ChatQueryRequest {
+    private Long userSqno;
+    private String userId;
     private String message;
     private String intent;
     private List<String> artists;

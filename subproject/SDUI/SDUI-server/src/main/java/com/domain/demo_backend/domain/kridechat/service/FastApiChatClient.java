@@ -34,11 +34,18 @@ public class FastApiChatClient {
 
     public Mono<Map<String, Object>> recommendAi(
             String message, List<String> artists, List<String> regions, List<String> purposes, Map<String, Integer> budget) {
+        return recommendAi(message, artists, regions, purposes, budget, null, null);
+    }
+
+    public Mono<Map<String, Object>> recommendAi(
+            String message, List<String> artists, List<String> regions, List<String> purposes,
+            Map<String, Integer> budget, Long userSqno, String userId) {
         java.util.Map<String, Object> body = new java.util.HashMap<>();
         body.put("message", message != null ? message : "");
         body.put("artists", artists != null ? artists : List.of());
         body.put("regions", regions != null ? regions : List.of());
         body.put("purposes", purposes != null ? purposes : List.of());
+        putUserContext(body, userSqno, userId);
         if (budget != null) {
             body.put("budget", budget);
         }
@@ -56,12 +63,19 @@ public class FastApiChatClient {
 
     public Mono<Map<String, Object>> generateItinerary(
             String message, List<String> artists, List<String> regions, List<String> purposes, int duration, Map<String, Integer> budget) {
+        return generateItinerary(message, artists, regions, purposes, duration, budget, null, null);
+    }
+
+    public Mono<Map<String, Object>> generateItinerary(
+            String message, List<String> artists, List<String> regions, List<String> purposes,
+            int duration, Map<String, Integer> budget, Long userSqno, String userId) {
         java.util.Map<String, Object> body = new java.util.HashMap<>();
         body.put("message", message != null ? message : "");
         body.put("artists", artists != null ? artists : List.of());
         body.put("regions", regions != null ? regions : List.of());
         body.put("purposes", purposes != null ? purposes : List.of());
         body.put("duration", toDurationLabel(duration));
+        putUserContext(body, userSqno, userId);
         if (budget != null) {
             body.put("budget", budget);
         }
@@ -100,5 +114,14 @@ public class FastApiChatClient {
         if (result == null) return "답변을 가져올 수 없습니다.";
         Object reply = result.get("reply");
         return reply != null ? reply.toString() : "답변을 가져올 수 없습니다.";
+    }
+
+    private void putUserContext(Map<String, Object> body, Long userSqno, String userId) {
+        if (userSqno != null) {
+            body.put("user_sqno", userSqno);
+        }
+        if (userId != null && !userId.isBlank()) {
+            body.put("user_id", userId);
+        }
     }
 }

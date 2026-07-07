@@ -80,7 +80,7 @@ public class KrideChatService {
         try {
             Map<String, Object> result = fastApiClient.recommendAi(
                     request.getMessage(), request.getArtists(), request.getRegions(), request.getPurposes(),
-                    request.getBudget()
+                    request.getBudget(), request.getUserSqno(), request.getUserId()
             ).block();
 
             if (result == null) {
@@ -108,7 +108,7 @@ public class KrideChatService {
             int duration = request.getDuration() != null ? request.getDuration() : 2;
             Map<String, Object> result = fastApiClient.generateItinerary(
                     request.getMessage(), request.getArtists(), request.getRegions(), request.getPurposes(), duration,
-                    request.getBudget()
+                    request.getBudget(), request.getUserSqno(), request.getUserId()
             ).block();
 
             if (result == null) {

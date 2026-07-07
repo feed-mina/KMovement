@@ -36,6 +36,8 @@ from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 load_dotenv()
 
+from src.api.route_history import save_user_route_history
+
 try:
     from src.api.neo4j_client import get_artist_pois, get_region_pois, get_regions
     from src.api.rag_client import (
@@ -370,6 +372,8 @@ def reweight_graph(graph: nx.Graph, w_safety: float, w_tourism: float) -> None:
 # 요청/응답 스키마
 # ══════════════════════════════════════════════════════════════════════════════
 class RecommendRequest(BaseModel):
+    user_id: Optional[str] = None
+    user_sqno: Optional[int] = None
     lat: float
     lon: float
     radius_km: float = 5.0
@@ -380,6 +384,8 @@ class RecommendRequest(BaseModel):
 # # [메모] radius_km 이라는건 구역은 radius_km을 사용해서 원구로 인식하나요 ? 혹시 나중에 이 범위를 3,5,10으로 바꿀 수 있나요 
 
 class RouteRequest(BaseModel):
+    user_id: Optional[str] = None
+    user_sqno: Optional[int] = None
     start_lat: float
     start_lon: float
     end_lat: float
@@ -390,6 +396,8 @@ class RouteRequest(BaseModel):
 
 
 class CourseRequest(BaseModel):
+    user_id: Optional[str] = None
+    user_sqno: Optional[int] = None
     start_lat: float
     start_lon: float
     distance_km: float = 20.0
@@ -435,11 +443,13 @@ def recommend(req: RecommendRequest):
     nearby["_score"] = nearby["safety_score"] * w_s + nearby["tourism_score"] * w_t
 
     top = nearby.nlargest(req.top_n, "_score")
-    return {
+    result = {
         "segments": top[["start_lat", "start_lon", "end_lat", "end_lon",
                           "safety_score", "tourism_score", "_score", "length_km"]
                         ].rename(columns={"_score": "final_score"}).to_dict(orient="records")
     }
+    save_user_route_history("segment_recommendation", req, result)
+    return result
 
 
 # ─────────────────────────────────────────────
@@ -495,6 +505,17 @@ def find_route(req: RouteRequest):
         "facilities_on_route": facilities,
         "pois_on_route": pois,
     }
+
+    save_user_route_history(
+        "route",
+        req,
+        result,
+        route_metrics={
+            "distance_km": round(total_dist, 3),
+            "safety_score": round(avg_safety, 4),
+            "tourism_score": round(avg_tourism, 4),
+        },
+    )
 
     # Phase 3-8: travel_date가 있으면 날씨 예측 placeholder
     if req.travel_date:
@@ -835,6 +856,8 @@ class BudgetSchema(BaseModel):
     max: int = 2000000
 
 class RecommendAIRequest(BaseModel):
+    user_id: Optional[str] = None
+    user_sqno: Optional[int] = None
     message:  str = ""
     artists:  list[str] = Field(default_factory=list)
     regions:  list[str] = Field(default_factory=list)
@@ -842,6 +865,8 @@ class RecommendAIRequest(BaseModel):
     budget:   BudgetSchema = Field(default_factory=BudgetSchema)
 
 class ItineraryRequest(BaseModel):
+    user_id: Optional[str] = None
+    user_sqno: Optional[int] = None
     message:  str = ""
     duration: str | int = "당일치기"   # 당일치기 | 1박2일 | 2박3일
     artists:  list[str] = Field(default_factory=list)
@@ -955,7 +980,7 @@ class ChatStreamRequest(BaseModel):
     message: str = ""
 
 
-_REQUEST_MODEL_TYPES = {"BudgetSchema": BudgetSchema}
+_REQUEST_MODEL_TYPES = {"BudgetSchema": BudgetSchema, "Optional": Optional}
 RecommendAIRequest.model_rebuild(_types_namespace=_REQUEST_MODEL_TYPES)
 ItineraryRequest.model_rebuild(_types_namespace=_REQUEST_MODEL_TYPES)
 
@@ -1147,11 +1172,18 @@ def recommend_ai(req: RecommendAIRequest):
         except Exception as e:
             rec_text = f"추천 텍스트 생성 실패: {e}"
 
-    return {
+    result = {
         "pois": pois[:10],
         "recommendation_text": rec_text,
         "count": len(pois),
     }
+    save_user_route_history(
+        "poi_recommendation",
+        req,
+        result,
+        resolved_regions=regions,
+    )
+    return result
 
 
 # ─────────────────────────────────────────────
@@ -1249,7 +1281,7 @@ async def recommend_itinerary(req: ItineraryRequest):
                 artists=req.artists,
                 regions=regions,
                 purposes=purposes,
-                budget=req.budget.dict(),
+                budget=req.budget.model_dump(),
                 top_k=dynamic_top_k,
             )
             print(f"[K-Ride] 앙상블 랭킹: {len(all_pois)}건 (neo4j={len(neo4j_pois)} + chroma={len(chroma_pois)} + graphrag={len(graphrag_pois)}, top_k={dynamic_top_k})")
@@ -1331,7 +1363,7 @@ async def recommend_itinerary(req: ItineraryRequest):
             artists=req.artists,
             regions=regions,
             purposes=purposes,
-            budget=req.budget.dict(),
+            budget=req.budget.model_dump(),
             pois=all_pois,
         )
     except TypeError:
@@ -1370,11 +1402,18 @@ async def recommend_itinerary(req: ItineraryRequest):
         except Exception as e:
             print(f"[K-Ride] 지오코딩 실패: {e}")
 
-    return {
+    result = {
         **itinerary_result,
         "mapData": {"markers": markers},
         "source_pois": all_pois[:15],
     }
+    save_user_route_history(
+        "itinerary",
+        req,
+        result,
+        resolved_regions=regions,
+    )
+    return result
 
 
 def _build_graphrag_chat_context(message: str) -> str:

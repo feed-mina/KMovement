@@ -267,3 +267,17 @@ class TestRecommendAI:
     def test_empty_request_still_200(self):
         res = client.post("/api/recommend/ai", json={})
         assert res.status_code == 200
+
+    def test_route_history_save_called_with_user_context(self):
+        calls = []
+        original = _module.save_user_route_history
+        _module.save_user_route_history = lambda *args, **kwargs: calls.append((args, kwargs))
+        try:
+            res = client.post("/api/recommend/ai", json={**self._valid_payload, "user_sqno": 7, "user_id": "tester"})
+        finally:
+            _module.save_user_route_history = original
+
+        assert res.status_code == 200
+        assert calls
+        assert calls[0][0][0] == "poi_recommendation"
+        assert calls[0][0][1].user_sqno == 7

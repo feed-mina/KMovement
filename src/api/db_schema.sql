@@ -50,3 +50,39 @@ CREATE TABLE bicycle_routes (
 
 -- 공간 인덱스 (위치 기반 조회 속도 향상)
 CREATE INDEX idx_bicycle_routes_geom ON bicycle_routes USING GIST (geom_start);
+
+-- K-Ride user route/recommendation activity history.
+-- FastAPI writes here best-effort when SUPABASE_URL/SUPABASE_KEY are configured.
+--
+-- IMPORTANT: This table lives in the FastAPI *Supabase* database, NOT the SDUI
+-- Spring/PostgreSQL DB. It is therefore NOT managed by Flyway (db/migration/V*.sql)
+-- and the Supabase PostgREST client used by src/api/route_history.py cannot run DDL.
+-- Apply this block manually once via the Supabase SQL editor (or psql on the
+-- Supabase connection). Until it exists, save_user_route_history() logs a
+-- "relation does not exist" hint and the API keeps working (best-effort, no error).
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE IF NOT EXISTS user_route_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_sqno BIGINT,
+    user_id TEXT,
+    activity_type VARCHAR(40) NOT NULL,
+    activity_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    distance_km NUMERIC(10, 3),
+    safety_score NUMERIC(6, 4),
+    tourism_score NUMERIC(6, 4),
+    visited_regions TEXT[] NOT NULL DEFAULT '{}',
+    recommended_pois JSONB NOT NULL DEFAULT '[]'::jsonb,
+    request_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+    response_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_route_history_user_date
+    ON user_route_history (user_sqno, activity_date DESC);
+
+CREATE INDEX IF NOT EXISTS idx_user_route_history_activity_date
+    ON user_route_history (activity_type, activity_date DESC);
+
+CREATE INDEX IF NOT EXISTS idx_user_route_history_regions
+    ON user_route_history USING GIN (visited_regions);
