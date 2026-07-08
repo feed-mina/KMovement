@@ -1,6 +1,8 @@
 'use client';
 
 import { useMemo } from "react";
+import { KrideSkeleton } from "@/components/fields/kride/atoms/KridePrimitives";
+import Rai from "@/components/fields/kride/atoms/Rai";
 import { readLabel, readMetaProps, type AnyRecord } from "@/components/fields/stats/statsUtils";
 
 function readValue(item: AnyRecord, keys: string[]): string {
@@ -42,6 +44,29 @@ function formatMetric(value: unknown, suffix: string) {
   return `${new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 1 }).format(numeric)}${suffix}`;
 }
 
+function HistorySkeleton({ id, title }: { id?: string; title: string }) {
+  return (
+    <section id={id} className="history-list is-loading" aria-label={title} aria-busy="true">
+      <div className="history-list__header">
+        <KrideSkeleton width="46%" height={18} />
+        <KrideSkeleton width={28} height={24} />
+      </div>
+      <div className="history-list__items">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className="history-list__item is-skeleton">
+            <KrideSkeleton width="70%" height={12} />
+            <div className="history-list__body">
+              <KrideSkeleton width="64%" height={16} />
+              <KrideSkeleton width="88%" height={12} />
+              <KrideSkeleton width="48%" height={22} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function HistoryList({ id, meta, data }: any) {
   const props = readMetaProps(meta);
   const title = readLabel(meta, String(props.title ?? "Travel history"));
@@ -49,6 +74,10 @@ export default function HistoryList({ id, meta, data }: any) {
   const actionText = String(props.actionText ?? props.action_text ?? "Recommend again");
   const actionUrl = String(props.actionUrl ?? props.action_url ?? "/view/INTRO1");
   const items = useMemo(() => toItems(data), [data]);
+
+  if (data === undefined) {
+    return <HistorySkeleton id={id} title={title} />;
+  }
 
   return (
     <section id={id} className="history-list" aria-label={title}>
@@ -58,7 +87,11 @@ export default function HistoryList({ id, meta, data }: any) {
       </div>
 
       {items.length === 0 ? (
-        <div className="history-list__empty" role="status">{emptyText}</div>
+        <div className="history-list__empty" role="status">
+          <Rai state="greeting" size={42} />
+          <strong>{emptyText}</strong>
+          <p>추천을 다시 시작하면 다음 여정이 여기에 기록돼요.</p>
+        </div>
       ) : (
         <ol className="history-list__items">
           {items.map((item, index) => {

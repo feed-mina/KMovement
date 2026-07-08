@@ -24,6 +24,10 @@ export const useDynamicEngine = (metadata: Metadata[], pageData: any, formData: 
             return pageData[refId];
         }
 
+        if (refId) {
+            return undefined;
+        }
+
         return pageData || {};
     }, [formData, pageData]);
 

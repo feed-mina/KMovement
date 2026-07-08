@@ -20,12 +20,28 @@ function RefProbe() {
     return <span data-testid="rate">{data.attainment_rate}</span>;
 }
 
+function MissingRefProbe() {
+    const { getComponentData } = useDynamicEngine([], {}, {});
+    const data = getComponentData({
+        componentId: "waiting",
+        componentType: "STAT_CARD",
+        refDataId: "missing_source",
+    }, null);
+
+    return <span data-testid="missing">{String(data === undefined)}</span>;
+}
+
 describe("MY_PAGE SDUI config helpers", () => {
     it("maps MY_PAGE and returns object ref data directly", () => {
         expect(SCREEN_MAP["/MY_PAGE"]).toBe("MY_PAGE");
 
         render(<RefProbe />);
         expect(screen.getByTestId("rate")).toHaveTextContent("82");
+    });
+
+    it("returns undefined for missing ref data so leaf widgets can show skeletons", () => {
+        render(<MissingRefProbe />);
+        expect(screen.getByTestId("missing")).toHaveTextContent("true");
     });
 
     it("builds chart points from object series props", () => {
@@ -72,6 +88,19 @@ describe("MY_PAGE SDUI config helpers", () => {
         );
     });
 
+    it("renders gallery skeleton while direct API data is pending", () => {
+        const { container } = render(
+            <GalleryGrid
+                id="memories"
+                meta={{ labelText: "Memory gallery" }}
+                data={undefined}
+            />
+        );
+
+        expect(container.querySelector(".gallery-grid.is-loading")).toBeInTheDocument();
+        expect(screen.getByLabelText("Memory gallery")).toHaveAttribute("aria-busy", "true");
+    });
+
     it("resolves direct API URL templates with logged-in user params", () => {
         expect(resolveDataApiUrl("/kride-api/users/{userSqno}/summary", { userSqno: 77 })).toBe(
             "/kride-api/users/77/summary"
@@ -104,5 +133,18 @@ describe("MY_PAGE SDUI config helpers", () => {
         expect(screen.getByText("Route planning: Seoul")).toBeInTheDocument();
         expect(screen.getByText("Seoul")).toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Recommend again" })).toHaveAttribute("href", "/view/INTRO1");
+    });
+
+    it("renders a friendly empty state for missing travel history", () => {
+        render(
+            <HistoryList
+                id="history"
+                meta={{ labelText: "Travel history", componentProps: { emptyText: "No routes yet" } }}
+                data={[]}
+            />
+        );
+
+        expect(screen.getByText("No routes yet")).toBeInTheDocument();
+        expect(screen.getByText(/추천을 다시 시작하면/)).toBeInTheDocument();
     });
 });

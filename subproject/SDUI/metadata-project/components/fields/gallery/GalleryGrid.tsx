@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useMemo, useState } from "react";
+import { KrideSkeleton } from "@/components/fields/kride/atoms/KridePrimitives";
+import Rai from "@/components/fields/kride/atoms/Rai";
 import { readLabel, readMetaProps, type AnyRecord } from "@/components/fields/stats/statsUtils";
 
 const VIDEO_RE = /\.(mp4|webm|mov|m4v)(\?|#|$)/i;
@@ -25,6 +27,26 @@ function mediaKind(url: string) {
   return VIDEO_RE.test(url) ? "video" : "image";
 }
 
+function GallerySkeleton({ id, title }: { id?: string; title: string }) {
+  return (
+    <section id={id} className="gallery-grid is-loading" aria-label={title} aria-busy="true">
+      <div className="gallery-grid__header">
+        <KrideSkeleton width="44%" height={18} />
+        <KrideSkeleton width={28} height={24} />
+      </div>
+      <div className="gallery-grid__items">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="gallery-grid__item is-skeleton">
+            <KrideSkeleton height={76} />
+            <KrideSkeleton width="72%" height={12} />
+            <KrideSkeleton width="44%" height={10} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function GalleryGrid({ id, meta, data }: any) {
   const props = readMetaProps(meta);
   const title = readLabel(meta, String(props.title ?? "Memory gallery"));
@@ -35,6 +57,10 @@ export default function GalleryGrid({ id, meta, data }: any) {
   const activeUrl = active ? readValue(active, ["resultUrl", "result_url", "mediaUrl", "media_url"]) : "";
   const activeKind = mediaKind(activeUrl);
 
+  if (data === undefined) {
+    return <GallerySkeleton id={id} title={title} />;
+  }
+
   return (
     <section id={id} className="gallery-grid" aria-label={title}>
       <div className="gallery-grid__header">
@@ -43,7 +69,11 @@ export default function GalleryGrid({ id, meta, data }: any) {
       </div>
 
       {items.length === 0 ? (
-        <div className="gallery-grid__empty" role="status">{emptyText}</div>
+        <div className="gallery-grid__empty" role="status">
+          <Rai state="sad" size={42} />
+          <strong>{emptyText}</strong>
+          <p>영상을 만들면 이곳에 여행 기억이 차곡차곡 모여요.</p>
+        </div>
       ) : (
         <>
           <div className="gallery-grid__items">
