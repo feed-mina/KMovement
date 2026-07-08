@@ -35,6 +35,24 @@ export function firstRecord(data: unknown): AnyRecord {
   return data && typeof data === "object" ? data as AnyRecord : {};
 }
 
+export function selectDataPath(data: unknown, props: AnyRecord): unknown {
+  const rawPath = props.dataPath ?? props.data_path ?? props.seriesKey ?? props.series_key;
+  if (typeof rawPath !== "string" || !rawPath.trim()) return data;
+
+  const selected = rawPath.split(".").reduce<unknown>((current, key) => {
+    if (Array.isArray(current)) {
+      const index = Number(key);
+      return Number.isInteger(index) ? current[index] : undefined;
+    }
+    if (current && typeof current === "object") {
+      return (current as AnyRecord)[key];
+    }
+    return undefined;
+  }, data);
+
+  return selected ?? [];
+}
+
 export function toNumber(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.trim()) {

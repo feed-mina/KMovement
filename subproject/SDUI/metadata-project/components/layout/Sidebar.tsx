@@ -45,11 +45,11 @@ export default function Sidebar() {
                     logoutMeta ? (
                         isAdmin ? (
                             <nav className="sidebar-nav mt-4 flex flex-col gap-2 px-4">
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/admin/MAIN_PAGE' ? 'bg-gray-700 font-bold' : ''}`}
-                                    onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/admin/MAIN_PAGE' })}>
+                                <div className={`nav-item admin-nav-dashboard p-2 rounded cursor-pointer ${pathname === '/view/admin/ADMIN_DASHBOARD' ? 'bg-gray-700 font-bold' : ''}`}
+                                    onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/admin/ADMIN_DASHBOARD' })}>
                                     대시보드
                                 </div>
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/admin/USER_LIST' ? 'bg-gray-700 font-bold' : ''}`}
+                                <div className={`nav-item admin-nav-users p-2 rounded cursor-pointer ${pathname === '/view/admin/USER_LIST' ? 'bg-gray-700 font-bold' : ''}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/admin/USER_LIST' })}>
                                     회원 관리
                                 </div>
