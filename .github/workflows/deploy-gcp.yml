@@ -1,14 +1,6 @@
 name: Deploy AI Services to GCP
 
 on:
-  push:
-    branches: ["main", "refactor/krider_backup"]
-    paths:
-      - "src/api/**"
-      - "torchserve/**"
-      - "Dockerfile.worker"
-      - "docker-compose.gpu.yml"
-      - ".github/workflows/deploy-gcp.yml"
   workflow_dispatch:
 
 env:

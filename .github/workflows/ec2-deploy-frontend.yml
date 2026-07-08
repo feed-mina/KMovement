@@ -1,11 +1,6 @@
 name: Deploy Frontend to EC2
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - "subproject/SDUI/metadata-project/**"
-      - ".github/workflows/ec2-deploy-frontend.yml"
   workflow_dispatch:
 
 concurrency:
@@ -13,7 +8,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL || secrets.KRIDE_FASTAPI_URL || secrets.GCP_FASTAPI_URL || secrets.FASTAPI_URL }}
+  KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL || 'http://kride-fastapi:8000' }}
 
 jobs:
   build-and-deploy:
@@ -25,11 +20,11 @@ jobs:
       - name: Validate FastAPI endpoint config
         run: |
           if [ -z "$KRIDE_FASTAPI_URL" ]; then
-            echo "::error::Set repository variable KRIDE_FASTAPI_URL to the new Cloud Run FastAPI URL."
+            echo "::error::Set KRIDE_FASTAPI_URL or use the default AWS internal FastAPI URL."
             exit 1
           fi
           if [ "$KRIDE_FASTAPI_URL" = "https://kmovement-46122739597.europe-west1.run.app" ]; then
-            echo "::error::KRIDE_FASTAPI_URL still points at the legacy Cloud Run service."
+            echo "::error::KRIDE_FASTAPI_URL still points at the legacy Cloud Run service. Use AWS internal FastAPI."
             exit 1
           fi
 

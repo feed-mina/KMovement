@@ -6,6 +6,12 @@ on:
     paths:
       - "subproject/SDUI/SDUI-server/**"
       - "subproject/SDUI/metadata-project/**"
+      - "src/api/**"
+      - "dataset/data/raw_ml/road_scored.csv"
+      - "dataset/data/raw_ml/facility_clean.csv"
+      - "dataset/data/raw_ml/tour_poi.csv"
+      - "dataset/models/route_graph.pkl"
+      - "chroma_db/**"
       - ".dockerignore"
       - ".github/workflows/deploy-ec2.yml"
   workflow_dispatch:
@@ -15,7 +21,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL || secrets.KRIDE_FASTAPI_URL || secrets.GCP_FASTAPI_URL || secrets.FASTAPI_URL }}
+  KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL || 'http://kride-fastapi:8000' }}
+  KRIDE_FASTAPI_HOST_URL: ${{ vars.KRIDE_FASTAPI_HOST_URL || 'http://127.0.0.1:8000' }}
 
 jobs:
   build-and-deploy:
@@ -29,11 +36,15 @@ jobs:
       - name: Validate FastAPI endpoint config
         run: |
           if [ -z "$KRIDE_FASTAPI_URL" ]; then
-            echo "::error::Set repository variable KRIDE_FASTAPI_URL to the new Cloud Run FastAPI URL."
+            echo "::error::Set KRIDE_FASTAPI_URL or use the default AWS internal FastAPI URL."
             exit 1
           fi
           if [ "$KRIDE_FASTAPI_URL" = "https://kmovement-46122739597.europe-west1.run.app" ]; then
-            echo "::error::KRIDE_FASTAPI_URL still points at the legacy Cloud Run service."
+            echo "::error::KRIDE_FASTAPI_URL still points at the legacy Cloud Run service. Use AWS internal FastAPI."
+            exit 1
+          fi
+          if [ -z "$KRIDE_FASTAPI_HOST_URL" ]; then
+            echo "::error::Set KRIDE_FASTAPI_HOST_URL or use the default http://127.0.0.1:8000."
             exit 1
           fi
 
@@ -43,17 +54,22 @@ jobs:
         run: |
           DEPLOY_BACKEND="false"
           DEPLOY_FRONTEND="false"
+          DEPLOY_FASTAPI="false"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             DEPLOY_BACKEND="true"
             DEPLOY_FRONTEND="true"
+            DEPLOY_FASTAPI="true"
           else
             CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} || echo "")
             echo "$CHANGED" | grep -q '^subproject/SDUI/SDUI-server/' && DEPLOY_BACKEND="true"
             echo "$CHANGED" | grep -q '^subproject/SDUI/metadata-project/' && DEPLOY_FRONTEND="true"
-            echo "$CHANGED" | grep -q '^\.github/workflows/deploy-ec2\.yml' && { DEPLOY_BACKEND="true"; DEPLOY_FRONTEND="true"; }
+            echo "$CHANGED" | grep -q '^src/api/' && DEPLOY_FASTAPI="true"
+            echo "$CHANGED" | grep -Eq '^(dataset/data/raw_ml/(road_scored|facility_clean|tour_poi)\.csv|dataset/models/route_graph\.pkl|chroma_db/|\.dockerignore)' && DEPLOY_FASTAPI="true"
+            echo "$CHANGED" | grep -q '^\.github/workflows/deploy-ec2\.yml' && { DEPLOY_BACKEND="true"; DEPLOY_FRONTEND="true"; DEPLOY_FASTAPI="true"; }
           fi
           echo "backend=$DEPLOY_BACKEND"  >> $GITHUB_OUTPUT
           echo "frontend=$DEPLOY_FRONTEND" >> $GITHUB_OUTPUT
+          echo "fastapi=$DEPLOY_FASTAPI" >> $GITHUB_OUTPUT
 
       # ── Backend build ──
       - name: Set up JDK 17
@@ -87,6 +103,7 @@ jobs:
           echo "BRANCH_TAG=$CLEAN_BRANCH" >> $GITHUB_ENV
           echo "SDUI_IMAGE=${{ secrets.DOCKER_USERNAME }}/sdui-app" >> $GITHUB_ENV
           echo "FRONTEND_IMAGE=${{ secrets.DOCKER_USERNAME }}/sdui-frontend" >> $GITHUB_ENV
+          echo "KRIDE_FASTAPI_IMAGE=${{ secrets.DOCKER_USERNAME }}/kride-fastapi" >> $GITHUB_ENV
           if [ "${{ github.ref_name }}" = "main" ]; then
             echo "TARGET_PORT=8080" >> $GITHUB_ENV
             echo "CONTAINER_NAME=sdui-backend" >> $GITHUB_ENV
@@ -99,6 +116,16 @@ jobs:
 
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and push K-Ride FastAPI image
+        if: steps.changes.outputs.fastapi == 'true'
+        run: |
+          docker build -f src/api/Dockerfile \
+            -t $KRIDE_FASTAPI_IMAGE:${{ env.BRANCH_TAG }} \
+            -t $KRIDE_FASTAPI_IMAGE:latest \
+            .
+          docker push $KRIDE_FASTAPI_IMAGE:${{ env.BRANCH_TAG }}
+          docker push $KRIDE_FASTAPI_IMAGE:latest
 
       # ── Build & push backend image ──
       - name: Build and push Spring Boot image
@@ -205,11 +232,11 @@ jobs:
                   chunked_transfer_encoding on;
               }
 
-              # ── GCP FastAPI (KRIDE AI) ──
+              # AWS internal FastAPI (KRIDE AI)
               location /kride-api/ {
-                  proxy_pass ${{ env.KRIDE_FASTAPI_URL }}/api/;
-                  proxy_ssl_server_name on;
-                  proxy_set_header Host $proxy_host;
+                  proxy_pass ${{ env.KRIDE_FASTAPI_HOST_URL }}/api/;
+                  proxy_http_version 1.1;
+                  proxy_set_header Host $host;
                   proxy_set_header X-Forwarded-Host $host;
                   proxy_set_header X-Real-IP $remote_addr;
                   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -256,11 +283,61 @@ jobs:
           if [ "__DEPLOY_FRONTEND__" = "true" ]; then
             docker pull __FRONTEND_IMAGE__:__BRANCH_TAG__
           fi
+          if [ "__DEPLOY_FASTAPI__" = "true" ]; then
+            docker pull __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__
+          fi
 
           docker image prune -af --filter "until=24h" || true
 
           # ── Redis ──
           docker inspect sdui-redis >/dev/null 2>&1 || docker run -d --name sdui-redis --network sdui-network redis:7-alpine
+
+          # K-Ride FastAPI
+          if [ "__DEPLOY_FASTAPI__" = "true" ]; then
+            remove_container kride-fastapi
+            docker run -d --name kride-fastapi \
+              -p 8000:8000 \
+              --network sdui-network \
+              --restart unless-stopped \
+              -e PORT=8000 \
+              -e TORCHSERVE_ENABLED=false \
+              -e TORCHSERVE_FALLBACK=true \
+              -e CELERY_BROKER_URL=redis://sdui-redis:6379/1 \
+              -e CELERY_RESULT_BACKEND=redis://sdui-redis:6379/1 \
+              -e CHROMA_MODE=persistent \
+              -e CHROMA_PATH=/app/chroma_db \
+              -e KRIDE_MODELS_DIR=/app/dataset/models \
+              -e KRIDE_RAW_DATA_DIR=/app/dataset/data/raw_ml \
+              -e HF_HOME=/tmp/hf_cache \
+              -e TRANSFORMERS_CACHE=/tmp/hf_cache/hub \
+              -e NEO4J_URI=__NEO4J_URI__ \
+              -e NEO4J_USERNAME=__NEO4J_USERNAME__ \
+              -e NEO4J_PASSWORD=__NEO4J_PASSWORD__ \
+              -e NEO4J_DATABASE=__NEO4J_DATABASE__ \
+              -e SUPABASE_URL=__SUPABASE_URL__ \
+              -e SUPABASE_KEY=__SUPABASE_KEY__ \
+              -e GROQ_API_KEY=__GROQ_API_KEY__ \
+              -e RUNPOD_API_KEY=__RUNPOD_API_KEY__ \
+              -e RUNPOD_ENDPOINT_ID=__RUNPOD_ENDPOINT_ID__ \
+              -e RUNPOD_MEDIA_ENDPOINT_ID=__RUNPOD_MEDIA_ENDPOINT_ID__ \
+              -e RUNPOD_TORA_ENDPOINT_ID=__RUNPOD_TORA_ENDPOINT_ID__ \
+              -e FASTAPI_INTERNAL_API_KEY=__FASTAPI_INTERNAL_API_KEY__ \
+              __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__
+
+            echo "Waiting for K-Ride FastAPI..."
+            sleep 25
+            docker logs --tail 80 kride-fastapi
+            for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+              if curl -fsS http://localhost:8000/api/health; then
+                break
+              fi
+              if [ "$i" = "12" ]; then
+                echo "K-Ride FastAPI health check failed."
+                exit 1
+              fi
+              sleep 5
+            done
+          fi
 
           # ── Backend ──
           if [ "__DEPLOY_BACKEND__" = "true" ]; then
@@ -281,8 +358,8 @@ jobs:
               -e WEB_URL=__WEB_URL__ \
               -e AWS_ACCESS_KEY=__S3_ACCESS_KEY__ \
               -e AWS_SECRET_KEY=__S3_SECRET_KEY__ \
-              -e FASTAPI_URL=__GCP_FASTAPI_URL__ \
-              -e KRIDE_FASTAPI_URL=__GCP_FASTAPI_URL__ \
+              -e FASTAPI_URL=__KRIDE_FASTAPI_URL__ \
+              -e KRIDE_FASTAPI_URL=__KRIDE_FASTAPI_URL__ \
               -e FASTAPI_INTERNAL_API_KEY=__FASTAPI_INTERNAL_API_KEY__ \
               -e GCP_PROJECT_ID=__GCP_PROJECT_ID__ \
               -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
@@ -313,7 +390,7 @@ jobs:
               --network sdui-network \
               -p 3000:3000 \
               -e HOSTNAME=0.0.0.0 \
-              -e FASTAPI_URL=__GCP_FASTAPI_URL__ \
+              -e FASTAPI_URL=__KRIDE_FASTAPI_URL__ \
               __FRONTEND_IMAGE__:__BRANCH_TAG__
 
             echo "Waiting for Next.js..."
@@ -331,6 +408,8 @@ jobs:
           sudo rm -f /etc/nginx/sites-enabled/default
           sudo nginx -t
           sudo systemctl restart nginx
+          curl -fsS http://localhost:8000/api/health >/dev/null
+          curl -kfsS --resolve yerin.duckdns.org:443:127.0.0.1 https://yerin.duckdns.org/kride-api/health >/dev/null
 
           echo "=== Deployment complete ==="
           docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
@@ -338,6 +417,7 @@ jobs:
 
           sed -i "s|__SDUI_IMAGE__|${{ env.SDUI_IMAGE }}|g" /tmp/deploy.sh
           sed -i "s|__FRONTEND_IMAGE__|${{ env.FRONTEND_IMAGE }}|g" /tmp/deploy.sh
+          sed -i "s|__KRIDE_FASTAPI_IMAGE__|${{ env.KRIDE_FASTAPI_IMAGE }}|g" /tmp/deploy.sh
           sed -i "s|__BRANCH_TAG__|${{ env.BRANCH_TAG }}|g" /tmp/deploy.sh
           sed -i "s|__CONTAINER_NAME__|${{ env.CONTAINER_NAME }}|g" /tmp/deploy.sh
           sed -i "s|__TARGET_PORT__|${{ env.TARGET_PORT }}|g" /tmp/deploy.sh
@@ -352,8 +432,17 @@ jobs:
           sed -i "s|__WEB_URL__|${{ secrets.WEB_URL }}|g" /tmp/deploy.sh
           sed -i "s|__S3_ACCESS_KEY__|${{ secrets.AWS_ACCESS_KEY }}|g" /tmp/deploy.sh
           sed -i "s|__S3_SECRET_KEY__|${{ secrets.AWS_SECRET_KEY }}|g" /tmp/deploy.sh
-          sed -i "s|__GCP_FASTAPI_URL__|${{ env.KRIDE_FASTAPI_URL }}|g" /tmp/deploy.sh
+          sed -i "s|__KRIDE_FASTAPI_URL__|${{ env.KRIDE_FASTAPI_URL }}|g" /tmp/deploy.sh
           sed -i "s|__FASTAPI_INTERNAL_API_KEY__|${{ secrets.FASTAPI_INTERNAL_API_KEY }}|g" /tmp/deploy.sh
+          sed -i "s|__NEO4J_URI__|${{ secrets.NEO4J_URI }}|g" /tmp/deploy.sh
+          sed -i "s|__NEO4J_USERNAME__|${{ secrets.NEO4J_USERNAME }}|g" /tmp/deploy.sh
+          sed -i "s|__NEO4J_PASSWORD__|${{ secrets.NEO4J_PASSWORD }}|g" /tmp/deploy.sh
+          sed -i "s|__NEO4J_DATABASE__|${{ secrets.NEO4J_DATABASE }}|g" /tmp/deploy.sh
+          sed -i "s|__GROQ_API_KEY__|${{ secrets.GROQ_API_KEY }}|g" /tmp/deploy.sh
+          sed -i "s|__RUNPOD_API_KEY__|${{ secrets.RUNPOD_API_KEY }}|g" /tmp/deploy.sh
+          sed -i "s|__RUNPOD_ENDPOINT_ID__|${{ secrets.RUNPOD_ENDPOINT_ID }}|g" /tmp/deploy.sh
+          sed -i "s|__RUNPOD_MEDIA_ENDPOINT_ID__|${{ secrets.RUNPOD_MEDIA_ENDPOINT_ID }}|g" /tmp/deploy.sh
+          sed -i "s|__RUNPOD_TORA_ENDPOINT_ID__|${{ secrets.RUNPOD_TORA_ENDPOINT_ID }}|g" /tmp/deploy.sh
           sed -i "s|__GCP_PROJECT_ID__|${{ secrets.GCP_PROJECT_ID }}|g" /tmp/deploy.sh
           sed -i "s|__SLACK_WEBHOOK_URL__|${{ secrets.SLACK_WEBHOOK_URL }}|g" /tmp/deploy.sh
           sed -i "s|__SLACK_BOT_TOKEN__|${{ secrets.SLACK_BOT_TOKEN }}|g" /tmp/deploy.sh
@@ -365,6 +454,7 @@ jobs:
           sed -i "s|__SUPABASE_KEY__|${{ secrets.SUPABASE_KEY }}|g" /tmp/deploy.sh
           sed -i "s|__DEPLOY_BACKEND__|${{ steps.changes.outputs.backend }}|g" /tmp/deploy.sh
           sed -i "s|__DEPLOY_FRONTEND__|${{ steps.changes.outputs.frontend }}|g" /tmp/deploy.sh
+          sed -i "s|__DEPLOY_FASTAPI__|${{ steps.changes.outputs.fastapi }}|g" /tmp/deploy.sh
 
       - name: Deploy to EC2
         run: |
