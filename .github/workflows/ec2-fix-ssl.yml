@@ -3,6 +3,10 @@ name: EC2 Fix SSL (DuckDNS + Certbot)
 on:
   workflow_dispatch:
 
+concurrency:
+  group: ec2-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL || secrets.KRIDE_FASTAPI_URL || secrets.GCP_FASTAPI_URL || secrets.FASTAPI_URL }}
 

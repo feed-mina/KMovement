@@ -3,6 +3,10 @@ name: EC2 Fix Frontend + Backend Env
 on:
   workflow_dispatch:
 
+concurrency:
+  group: ec2-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL || secrets.KRIDE_FASTAPI_URL || secrets.GCP_FASTAPI_URL || secrets.FASTAPI_URL }}
 
@@ -54,8 +58,10 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
 
             echo "Removing old frontend container..."
-            docker stop sdui-frontend || true
-            docker rm sdui-frontend || true
+            FRONTEND_CONTAINER_ID="$(docker ps -aq --filter "name=^/sdui-frontend$" | head -n 1)"
+            if [ -n "$FRONTEND_CONTAINER_ID" ]; then
+              docker rm -f "$FRONTEND_CONTAINER_ID" || true
+            fi
             echo "Old frontend container removed."
 
             docker run -d --name sdui-frontend \

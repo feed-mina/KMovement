@@ -8,6 +8,10 @@ on:
       - ".github/workflows/ec2-deploy-frontend.yml"
   workflow_dispatch:
 
+concurrency:
+  group: ec2-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL || secrets.KRIDE_FASTAPI_URL || secrets.GCP_FASTAPI_URL || secrets.FASTAPI_URL }}
 
@@ -61,7 +65,10 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
 
             # Stop and remove old frontend container
-            docker rm -f sdui-frontend 2>/dev/null || true
+            FRONTEND_CONTAINER_ID="$(docker ps -aq --filter "name=^/sdui-frontend$" | head -n 1)"
+            if [ -n "$FRONTEND_CONTAINER_ID" ]; then
+              docker rm -f "$FRONTEND_CONTAINER_ID" || true
+            fi
 
             # Run frontend with port 3000 exposed to host
             docker run -d --name sdui-frontend \

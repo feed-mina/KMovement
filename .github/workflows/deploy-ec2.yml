@@ -10,6 +10,10 @@ on:
       - ".github/workflows/deploy-ec2.yml"
   workflow_dispatch:
 
+concurrency:
+  group: ec2-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL || secrets.KRIDE_FASTAPI_URL || secrets.GCP_FASTAPI_URL || secrets.FASTAPI_URL }}
 
@@ -238,6 +242,13 @@ jobs:
 
           docker network inspect sdui-network >/dev/null 2>&1 || docker network create sdui-network
 
+          remove_container() {
+            CONTAINER_ID="$(docker ps -aq --filter "name=^/$1$" | head -n 1)"
+            if [ -n "$CONTAINER_ID" ]; then
+              docker rm -f "$CONTAINER_ID" || true
+            fi
+          }
+
           # ── Pull images ──
           if [ "__DEPLOY_BACKEND__" = "true" ]; then
             docker pull __SDUI_IMAGE__:__BRANCH_TAG__
@@ -253,7 +264,7 @@ jobs:
 
           # ── Backend ──
           if [ "__DEPLOY_BACKEND__" = "true" ]; then
-            docker rm -f __CONTAINER_NAME__ || true
+            remove_container __CONTAINER_NAME__
             docker run -d --name __CONTAINER_NAME__ \
               -p __TARGET_PORT__:8080 \
               --network sdui-network \
@@ -297,7 +308,7 @@ jobs:
 
           # ── Frontend ──
           if [ "__DEPLOY_FRONTEND__" = "true" ]; then
-            docker rm -f sdui-frontend || true
+            remove_container sdui-frontend
             docker run -d --name sdui-frontend \
               --network sdui-network \
               -p 3000:3000 \
