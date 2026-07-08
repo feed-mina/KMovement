@@ -153,3 +153,35 @@
 - 라운드 상향(카드 12→16, 버튼 10→12, 칩/아바타 pill).
 - 큰 면적은 `--kride-primary-soft`(8% 틴트)·크림, 풀 레드는 CTA/강조에만.
 - outline 아이콘 통일.
+
+---
+
+## 7. 적용 범위 결정 (2026-07-07)
+
+- **통일 디자인(색·간격·톤): 전 화면 모두 적용.**
+- **마스코트 라이: 앱 전체 대표 캐릭터** (메인 포함 모든 화면·모든 AI 채팅에 공통 등장).
+
+### 7.1 현재 파편화 (근거)
+기능마다 별도 컴포넌트 + 별도 CSS + 별도 헤더:
+| 화면 | 컴포넌트 | CSS | 헤더 |
+|---|---|---|---|
+| KRIDE 여행 챗봇 | `kride/chat/*` | KRIDE_CHAT.css | `kride/chat/Header`(라이 적용됨) |
+| AI 채팅(일/영) | `AIChatComponent(V2)` | AI_CHAT.css · AI_JAPANESE.css | `ai/AIChatHeader`(라이 없음) |
+| AI 인터뷰 | `AIInterviewComponent` | AI_INTERVIEW.css | `ai/AIChatHeader` |
+| 콘텐츠 생성 | SDUI(`useBusinessActions`) | — | SDUI |
+| 시간 설정 | `RecordTimeComponent`·`TimeSelect`·`DateTimePicker` | — | — |
+| 메인 | SDUI `MAIN_PAGE`(`DynamicEngine`) | KRIDE.css 등 | SDUI |
+
+### 7.2 확산 전략
+1. **토큰 선행(#20)** — 색/간격/톤 통일의 전제. 이후 화면 단위로 토큰 참조 전환.
+2. **공용 헤더/마스코트 추출** — `ai/AIChatHeader`와 `kride/chat/Header`가 중복 → 공통 `ChatHeader`(+`<Rai>`)로 통합해 모든 채팅에 라이 등장.
+3. **메인/SDUI 화면** — `ui_metadata` css_class를 토큰 유틸로 치환, 메인 히어로/온보딩에 라이 배치.
+4. **화면별 점진 마이그레이션**(일괄 금지): 메인 → 챗봇(전체) → 콘텐츠 생성 → 시간 설정 순.
+
+### 7.3 화면별 체크리스트
+- [ ] 메인(`MAIN_PAGE`): 토큰 전환 + 히어로/온보딩 라이
+- [ ] AI 채팅(일/영, `AIChatComponent(V2)`): 토큰 전환 + 공용 헤더 라이
+- [ ] AI 인터뷰(`AIInterviewComponent`): 동일
+- [ ] 콘텐츠 생성(SDUI): 토큰 전환 + 로딩/빈상태 라이
+- [ ] 시간 설정(`RecordTimeComponent` 등): 토큰 전환
+- [ ] 공용 `ChatHeader` 추출로 헤더 중복 제거
