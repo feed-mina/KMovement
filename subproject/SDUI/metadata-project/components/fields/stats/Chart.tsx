@@ -1,6 +1,6 @@
 'use client';
 
-import { formatMetric, normalizeChartData, readClassName, readLabel, readMetaProps } from "./statsUtils";
+import { formatMetric, normalizeChartData, readClassName, readLabel, readMetaProps, selectDataPath } from "./statsUtils";
 
 const PALETTE = ["#e11d48", "#0f9f6e", "#2563eb", "#f59e0b", "#7c3aed", "#0891b2"];
 
@@ -142,7 +142,7 @@ export default function Chart({ id, meta, data }: any) {
   const metaClass = readClassName(meta);
   const type = chartTypeFrom(metaClass, props.type ?? props.chartType ?? props.chart_type);
   const title = readLabel(meta, String(props.title ?? "통계"));
-  const points = normalizeChartData(data, props).slice(0, Number(props.limit ?? 12));
+  const points = normalizeChartData(selectDataPath(data, props), props).slice(0, Number(props.limit ?? 12));
   const caption = props.caption === undefined || props.caption === null ? "" : String(props.caption);
   const className = ["stats-chart", `stats-chart--${type}`, metaClass].filter(Boolean).join(" ");
 

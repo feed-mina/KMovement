@@ -21,7 +21,8 @@ import { KrideButton, RaiStatePanel } from "@/components/fields/kride/atoms/Krid
 
 
 //  보호가 필요한 스크린 ID 목록 정의
-const PROTECTED_SCREENS = ["MY_PAGE", "CONTENT_LIST", "CONTENT_WRITE", "CONTENT_DETAIL", "CONTENT_MODIFY", "USER_LIST", "AI_ENGLISH_CHAT_PAGE", "AI_JAPANESE_CHAT_PAGE", "AI_KOREAN_CHAT_PAGE", "KRIDE_MY_LIST", "KRIDE_CHAT", "THEME_SETTINGS"];
+const PROTECTED_SCREENS = ["MY_PAGE", "CONTENT_LIST", "CONTENT_WRITE", "CONTENT_DETAIL", "CONTENT_MODIFY", "USER_LIST", "AI_ENGLISH_CHAT_PAGE", "AI_JAPANESE_CHAT_PAGE", "AI_KOREAN_CHAT_PAGE", "KRIDE_MY_LIST", "KRIDE_CHAT", "ADMIN_DASHBOARD", "THEME_SETTINGS"];
+const ADMIN_ONLY_SCREENS = ["ADMIN_DASHBOARD", "USER_LIST", "THEME_SETTINGS"];
 
 function shouldShowRaiAccent(screenId: string) {
     return screenId === "MAIN_PAGE" || screenId.startsWith("CONTENT_") || screenId.includes("TIME");
@@ -57,7 +58,7 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
     const router = useRouter();
     const searchParams = useSearchParams();
     // 인증 상태 가져오기
-    const { isLoggedIn, isLoading } = useAuth();
+    const { user, isLoggedIn, isLoading } = useAuth();
     // * 상태 선언(useState)를 훅 호출보다 위로 올림
     const [currentPage, setCurrentPage] = useState(1);
     const [isOnlyMine, setIsOnlyMine] = useState(false);
@@ -105,9 +106,14 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
                     alert("로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.");
                 }
                 router.replace("/view/LOGIN_PAGE");
+                return;
+            }
+
+            if (ADMIN_ONLY_SCREENS.includes(screenId) && isLoggedIn && user?.role !== "ROLE_ADMIN") {
+                router.replace("/view/MAIN_PAGE");
             }
         }
-    }, [isLoading, isLoggedIn, screenId, router]);
+    }, [isLoading, isLoggedIn, screenId, router, user]);
 
 
     // @@@@ 2026-02-07 추가 서버 데이터(pageData)와 사용자 입력 데이터(formData)를 합친다. 사용자 입력값이 있을 경우 formData를 우선하고 없으면 초기값을 쓴다
@@ -189,7 +195,11 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
     }
 
     // @@@@ 2026-02-04 스켈레톤 UI로 바꿈
-    if (isLoading || (PROTECTED_SCREENS.includes(screenId) && !isLoggedIn) ) {
+    if (
+        isLoading ||
+        (PROTECTED_SCREENS.includes(screenId) && !isLoggedIn) ||
+        (ADMIN_ONLY_SCREENS.includes(screenId) && isLoggedIn && user?.role !== "ROLE_ADMIN")
+    ) {
         return <Skeleton/>
     }
 

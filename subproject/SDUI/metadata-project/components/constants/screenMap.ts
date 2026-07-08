@@ -27,6 +27,7 @@ export const SCREEN_MAP: Record<string, string> = {
     "/MY_LIST": "KRIDE_MY_LIST",
     "/FOCUS": "KRIDE_FOCUS",
     "/CHAT": "KRIDE_CHAT",
+    "/ADMIN_DASHBOARD": "ADMIN_DASHBOARD",
     "/THEME_SETTINGS": "THEME_SETTINGS",
 };
 

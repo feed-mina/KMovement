@@ -137,22 +137,27 @@ export const usePageMetadata = (
                     const type = item.componentType || item.component_type;
                     const actionType = item.actionType || item.action_type;
                     const sqlKey = item.dataSqlKey || item.data_sql_key;
+                    const apiUrl = item.dataApiUrl || item.data_api_url;
                     const refId = item.refDataId || item.ref_data_id;
                     const isDataSource = type === "DATA_SOURCE";
-                    const isBoundGroupSource = type === "GROUP" && !!refId && !!sqlKey;
-                    return (isDataSource && actionType === "AUTO_FETCH") || isBoundGroupSource;
+                    const isBoundGroupSource = type === "GROUP" && !!refId && (!!sqlKey || !!apiUrl);
+                    return (isDataSource && actionType === "AUTO_FETCH" && (!!sqlKey || !!apiUrl)) || isBoundGroupSource;
                 });
                 // * 메타데이터에 dataSqlKey가 있다면 /api/execute/{key} 형태로 주소를 보낸다
 
                 // dataPromises : 
                 const dataPromises = sources.map(async (source: any) => {
+                    const sqlKey = source.dataSqlKey || source.data_sql_key;
+                    const directApiUrl = source.dataApiUrl || source.data_api_url;
                     let apiUrl;
                     //  apiUrl에 sqlKey 기반 URL만 유지
-                    if (source.dataSqlKey || source.data_sql_key) {
-                        apiUrl = `/api/execute/${source.dataSqlKey || source.data_sql_key}`;
+                    if (sqlKey) {
+                        apiUrl = `/api/execute/${sqlKey}`;
+                    } else if (directApiUrl) {
+                        apiUrl = directApiUrl;
                     }
                     //  * 서버로 보낼 execute가 없다면 [] 로 빈 배열값이 나온다.
-                    if (!apiUrl) return { id: source.componentId, data: [] };
+                    if (!apiUrl) return { id: source.refDataId || source.ref_data_id || source.componentId || source.component_id, data: [] };
 
                     // * 메타데이터 중 data_params 는 jsonb 타입이다.
                     //  rawParams : dataParams 또는 data_params 값을 가져온다.
@@ -175,7 +180,10 @@ export const usePageMetadata = (
                     let res;
 
                     //** 로직4: 데이터 가공 및 바인딩 : screenId(페이지 파라미터 기준) 조건으로get을 사용하는지 post를 방식 결정한다. 서버에서 받아온 rawData를 화면에 쓰기 편하게 가공한다
-                    if (finalScreenId?.includes("CONTENT_DETAIL") || finalScreenId?.includes("CONTENT_MODIFY") || isOnlyMine) {
+                    const usesDirectApi = !sqlKey && !!directApiUrl;
+                    if (usesDirectApi) {
+                        res = await axios.get(apiUrl, { params: finalParams });
+                    } else if (finalScreenId?.includes("CONTENT_DETAIL") || finalScreenId?.includes("CONTENT_MODIFY") || isOnlyMine) {
                         // 상세 조회나 수정 하기 전에 보이는 부분, 내 글 목록은 GET 방식 사용
                         res = await axios.get(apiUrl, { params: finalParams });
                     } else {
@@ -231,7 +239,12 @@ export const usePageMetadata = (
                         // 2. 목록 페이지 데이터 처리 (리스트 데이터)
                         else {
                             // realList : 
-                            const realList = Array.isArray(rawResponse) ? rawResponse : (rawResponse.list || rawResponse.data || []);
+                            const nestedList = rawResponse.list || rawResponse.data;
+                            if (!Array.isArray(rawResponse) && typeof rawResponse === "object" && !Array.isArray(nestedList)) {
+                                combinedData[res.id] = parseJsonbFields(rawResponse);
+                                return;
+                            }
+                            const realList = Array.isArray(rawResponse) ? rawResponse : (nestedList || []);
 
                             const unifiedList = realList.map((item: any) => {
                                 // parsedItem : 리스트 내부의 각 아이템들도 jsonb 파싱 적용 (나중에 목록에서 필요할 수 있으니까)
