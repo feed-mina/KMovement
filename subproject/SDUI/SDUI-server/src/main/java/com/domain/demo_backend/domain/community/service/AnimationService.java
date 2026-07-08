@@ -424,6 +424,9 @@ public class AnimationService {
                 job.setProcessedImages(job.getTotalImages());
             }
             job.setActualModel(parsed.actualModel());
+            job.setActualModelExecuted(parsed.actualModelExecuted());
+            job.setFallbackType(parsed.fallbackType());
+            job.setFallbackReason(parsed.fallbackReason());
             job.setFailedImageIndexes(parsed.failedImageIndexes());
             return;
         }

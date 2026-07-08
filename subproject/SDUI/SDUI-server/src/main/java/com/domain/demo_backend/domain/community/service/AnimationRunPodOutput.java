@@ -48,11 +48,28 @@ final class AnimationRunPodOutput {
                 ? value
                 : Map.of();
         Integer processedImages = integerValue(metadata.get("processed_images"));
+        Boolean actualModelExecuted = booleanValue(metadata.get("actual_model_executed"));
         String actualModel = firstNonBlank(
                 nonBlank(metadata.get("actual_model")),
                 nonBlank(metadata.get("model_id")),
                 nonBlank(metadata.get("route"))
         );
+        String fallbackType = firstNonBlank(
+                nonBlank(metadata.get("fallback_type")),
+                nonBlank(outputMap.get("fallback_type"))
+        );
+        boolean fallbackUsed = "fallback_used".equalsIgnoreCase(outputStatus)
+                || Boolean.FALSE.equals(actualModelExecuted)
+                || fallbackType != null;
+        String fallbackReason = fallbackUsed
+                ? truncate(firstNonBlank(
+                        nonBlank(metadata.get("fallback_reason")),
+                        nonBlank(outputMap.get("fallback_reason")),
+                        nonBlank(metadata.get("real_model_error")),
+                        nonBlank(metadata.get("tora_error")),
+                        "Worker completed with a fallback route."
+                ))
+                : null;
         String failedImageIndexes = jsonValue(metadata.get("failed_image_indexes"));
 
         return new Parsed(
@@ -60,6 +77,9 @@ final class AnimationRunPodOutput {
                 null,
                 processedImages,
                 actualModel,
+                actualModelExecuted,
+                fallbackType,
+                fallbackReason,
                 failedImageIndexes
         );
     }
@@ -120,6 +140,30 @@ final class AnimationRunPodOutput {
         }
     }
 
+    private static Boolean booleanValue(Object value) {
+        if (value instanceof Boolean bool) {
+            return bool;
+        }
+        if (value == null) {
+            return null;
+        }
+        String text = String.valueOf(value).trim();
+        if ("true".equalsIgnoreCase(text)) {
+            return true;
+        }
+        if ("false".equalsIgnoreCase(text)) {
+            return false;
+        }
+        return null;
+    }
+
+    private static String truncate(String value) {
+        if (value == null || value.length() <= 500) {
+            return value;
+        }
+        return value.substring(0, 500);
+    }
+
     private static String jsonValue(Object value) {
         if (value == null) {
             return null;
@@ -139,10 +183,13 @@ final class AnimationRunPodOutput {
             String errorMessage,
             Integer processedImages,
             String actualModel,
+            Boolean actualModelExecuted,
+            String fallbackType,
+            String fallbackReason,
             String failedImageIndexes
     ) {
         static Parsed failure(String errorMessage) {
-            return new Parsed(null, errorMessage, null, null, null);
+            return new Parsed(null, errorMessage, null, null, null, null, null, null);
         }
 
         boolean succeeded() {
