@@ -285,20 +285,35 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
                 days: rawIt.days ?? (rawIt as Record<string, unknown>).itinerary as KrideItinerary['days'],
               }
             : undefined;
+          const itineraryMarkers = readItineraryMarkers(normalizedItinerary);
+          const hasItineraryResult = normalizedItinerary
+            ? hasPlaces(normalizedItinerary) || itineraryMarkers.length > 0
+            : false;
+          const hasPoiResult = (payload.pois?.length ?? 0) > 0;
+          const emptyResultMessage = '코스를 못 찾았어요. 조건을 바꿔볼까요?';
+          const emptyResultError =
+            (req.intent === 'itinerary' && Boolean(normalizedItinerary) && !hasItineraryResult) ||
+            (req.intent === 'recommend' && Array.isArray(payload.pois) && !hasPoiResult)
+              ? emptyResultMessage
+              : undefined;
+
+          if (emptyResultError) {
+            setError(emptyResultError);
+          }
 
           updateLast({
-            text: payload.reply ?? payload.recommendationText ?? '',
+            text: emptyResultError ?? payload.reply ?? payload.recommendationText ?? '',
             pois: payload.pois,
             itinerary: normalizedItinerary,
             streaming: false,
+            error: emptyResultError,
           });
 
           // AI가 생성한 일정을 전역 상태(페이지)로 전달하여 지도와 패널이 업데이트되도록 이벤트 발생
           if (typeof window !== 'undefined' && (normalizedItinerary || payload.pois)) {
-            const itineraryMarkers = readItineraryMarkers(normalizedItinerary);
-            const markers = payload.pois?.length ? payload.pois : itineraryMarkers;
+            const markers = hasPoiResult ? payload.pois ?? [] : itineraryMarkers;
             const shouldPublishItinerary = normalizedItinerary && (
-              hasPlaces(normalizedItinerary) || itineraryMarkers.length > 0
+              hasItineraryResult
             );
 
             window.dispatchEvent(

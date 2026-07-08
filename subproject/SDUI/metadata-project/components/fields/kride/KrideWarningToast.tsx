@@ -1,12 +1,12 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
 
-// KRIDE_WARNING: SelectionCard에서 kride-warning 커스텀 이벤트 수신 → 하단 토스트 표시
+import { useCallback, useEffect, useState } from 'react';
+
 export default function KrideWarningToast() {
   const [message, setMessage] = useState<string | null>(null);
 
-  const handleWarning = useCallback((e: Event) => {
-    const msg = (e as CustomEvent<{ msg: string }>).detail?.msg ?? "선택 한도를 초과했습니다";
+  const handleWarning = useCallback((event: Event) => {
+    const msg = (event as CustomEvent<{ msg: string }>).detail?.msg ?? '선택 조건을 조금 줄여볼까요?';
     setMessage(msg);
     setTimeout(() => setMessage(null), 2500);
   }, []);
@@ -19,7 +19,7 @@ export default function KrideWarningToast() {
   if (!message) return null;
 
   return (
-    <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 bg-zinc-800 text-white text-sm px-5 py-3 rounded-full shadow-lg whitespace-nowrap pointer-events-none">
+    <div className="kride-toast" role="status" aria-live="polite">
       {message}
     </div>
   );

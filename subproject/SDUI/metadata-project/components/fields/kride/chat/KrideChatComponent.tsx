@@ -16,11 +16,12 @@
 import React from 'react';
 import { useKrideChatStream } from '@/lib/hooks/useKrideChatStream';
 import type { KrideForm } from '@/lib/types/krideChat';
-import Header from './components/Header';
+import Header, { type Status as HeaderStatus } from './components/Header';
 import Thread from './components/Thread';
 import EmptyState from './components/EmptyState';
 import Suggestions from './components/Suggestions';
 import Composer from './components/Composer';
+import { RaiLoadingState } from '../atoms/KridePrimitives';
 
 interface KrideChatComponentProps {
   meta: {
@@ -53,7 +54,7 @@ export default function KrideChatComponent({ meta, data, onCloseModal }: KrideCh
   const title = meta?.labelText || meta?.label_text || 'K-RIDE 여행봇';
   const suggestions = data?.suggestions ?? DEFAULT_SUGGESTIONS;
 
-  const { messages, isLoading, send, abort, reset } = useKrideChatStream({
+  const { messages, isLoading, error, send, abort, reset } = useKrideChatStream({
     contextOverride: data?.contextOverride,
   });
 
@@ -70,11 +71,14 @@ export default function KrideChatComponent({ meta, data, onCloseModal }: KrideCh
   }, [data?.contextOverride]);
 
   const isEmpty = messages.length === 0;
-  const status = isLoading
+  const latestAssistantMessage = [...messages].reverse().find((message) => message.role === 'assistant');
+  const hasChatError = Boolean(error || latestAssistantMessage?.error);
+  const activeStatus: HeaderStatus = isLoading
     ? messages[messages.length - 1]?.streaming
       ? 'streaming'
       : 'thinking'
     : 'idle';
+  const status: HeaderStatus = hasChatError ? 'error' : activeStatus;
 
   return (
     <div className={`kride-chat-container ${containerClass}`}>
@@ -90,8 +94,14 @@ export default function KrideChatComponent({ meta, data, onCloseModal }: KrideCh
 
       {isEmpty ? (
         <div className="kride-chat-empty">
-          <EmptyState context={context} />
-          <Suggestions items={suggestions} onPick={(s) => void send(s)} />
+          {isLoading ? (
+            <RaiLoadingState />
+          ) : (
+            <>
+              <EmptyState context={context} />
+              <Suggestions items={suggestions} onPick={(s) => void send(s)} />
+            </>
+          )}
         </div>
       ) : (
         <Thread messages={messages} />

@@ -1,11 +1,10 @@
-// Composer.tsx — 입력창 + 음성 버튼 + 전송
 'use client';
+
 import React, { useState } from 'react';
 
 interface Props {
   onSend: (text: string) => void;
   disabled?: boolean;
-  /** 진행 중인 응답 취소 — disabled 일 때 표시 가능 */
   onAbort?: () => void;
 }
 
@@ -32,19 +31,15 @@ export default function Composer({ onSend, disabled, onAbort }: Props) {
               submit();
             }
           }}
-          placeholder="어디 가고 싶으세요?"
+          placeholder="어디로 떠나볼까요?"
           disabled={disabled && !onAbort}
         />
         <button
           type="button"
           aria-label="음성 입력"
-          style={{
-            width: 34, height: 34, borderRadius: '50%', border: 'none', cursor: 'pointer',
-            background: 'transparent', color: 'rgba(10,10,10,0.5)', fontSize: 16,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}
+          className="kride-chat-composer__voice"
         >
-          🎙
+          음성
         </button>
       </div>
       {disabled && onAbort ? (
@@ -52,9 +47,9 @@ export default function Composer({ onSend, disabled, onAbort }: Props) {
           type="button"
           className="kride-chat-composer__send"
           onClick={onAbort}
-          aria-label="응답 중단"
+          aria-label="답변 중지"
         >
-          ◻
+          중지
         </button>
       ) : (
         <button
@@ -64,7 +59,7 @@ export default function Composer({ onSend, disabled, onAbort }: Props) {
           disabled={!val.trim()}
           aria-label="전송"
         >
-          ↑
+          전송
         </button>
       )}
     </div>

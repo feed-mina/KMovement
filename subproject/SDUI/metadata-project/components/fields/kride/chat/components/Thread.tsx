@@ -1,5 +1,5 @@
-// Thread.tsx — 자동 스크롤 메시지 리스트
 'use client';
+
 import React, { useEffect, useRef } from 'react';
 import Bubble from './Bubble';
 import PoiCard from './PoiCard';
@@ -22,33 +22,32 @@ export default function Thread({ messages, onPoiView, onPoiAdd, onApplyItinerary
 
   return (
     <div ref={ref} className="kride-chat-thread">
-      {messages.map((m, i) => (
-        <Bubble key={m.id ?? i} role={m.role} streaming={m.streaming}>
-          {m.text && <div>{m.text}</div>}
+      {messages.map((message, index) => (
+        <Bubble
+          key={message.id ?? index}
+          role={message.role}
+          streaming={message.streaming}
+          error={Boolean(message.error)}
+        >
+          {message.text && <div>{message.text}</div>}
 
-          {m.pois && m.pois.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: m.text ? 10 : 0 }}>
-              {m.pois.map((p, j) => (
-                <PoiCard key={p.id ?? j} poi={p} onView={onPoiView} onAdd={onPoiAdd} />
+          {message.pois && message.pois.length > 0 && (
+            <div className="kride-chat-bubble__stack">
+              {message.pois.map((poi, poiIndex) => (
+                <PoiCard key={poi.id ?? poiIndex} poi={poi} onView={onPoiView} onAdd={onPoiAdd} />
               ))}
             </div>
           )}
 
-          {m.itinerary && (
-            <div style={{ marginTop: m.text ? 10 : 0 }}>
-              <ItineraryCard itinerary={m.itinerary} onApply={onApplyItinerary} />
+          {message.itinerary && (
+            <div className="kride-chat-bubble__stack">
+              <ItineraryCard itinerary={message.itinerary} onApply={onApplyItinerary} />
             </div>
           )}
 
-          {m.error && (
-            <div
-              style={{
-                marginTop: 8, padding: '6px 10px', borderRadius: 8,
-                background: 'rgba(229,9,20,0.08)', border: '1px solid rgba(229,9,20,0.3)',
-                fontSize: 11.5, color: '#FCA5A5',
-              }}
-            >
-              {m.error}
+          {message.error && (
+            <div className="kride-chat-bubble__error">
+              {message.error}
             </div>
           )}
         </Bubble>
