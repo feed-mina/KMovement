@@ -2,9 +2,9 @@
 
 import React, { useEffect, useRef } from 'react';
 import { ChatMessage } from '@/lib/types/ai';
-import RobotIcon from '@/components/assets/icons/ai/RobotIcon';
 import UserIcon from '@/components/assets/icons/ai/UserIcon';
 import SpeakerIcon from '@/components/assets/icons/ai/SpeakerIcon';
+import Rai from '@/components/fields/kride/atoms/Rai';
 
 interface ConversationPanelProps {
     messages: ChatMessage[];
@@ -133,7 +133,7 @@ export default function ConversationPanelV2({ messages, isStreaming, language }:
                                 <div className="ai-message-avatar">
                                     {isUser
                                         ? <UserIcon width="28px" height="28px" color="#6366F1" />
-                                        : <RobotIcon width="32px" height="32px" />}
+                                        : <Rai state={isStreaming && i === visibleMessages.length - 1 ? 'thinking' : 'success'} size={32} />}
                                 </div>
 
                                 <div className="ai-message-body">

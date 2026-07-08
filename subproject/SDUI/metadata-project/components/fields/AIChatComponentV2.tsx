@@ -77,7 +77,11 @@ export default function AIChatComponentV2({ meta, data }: AIChatComponentProps) 
     
     const renderMain = () => (
         <>
-            <AIChatHeader title={title} userMessageCount={userMessageCount} />
+            <AIChatHeader
+                title={title}
+                userMessageCount={userMessageCount}
+                isStreaming={isStreaming}
+            />
             
             <div className="ai-chat-main-content">
                 <ConversationPanelV2

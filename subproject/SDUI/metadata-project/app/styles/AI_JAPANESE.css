@@ -19,7 +19,7 @@
 
 .ai-japanese-theme .ai-intro-title {
     color: var(--v2-primary);
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
 }
 
 /* Chat Header: cherry blossom pink accent */

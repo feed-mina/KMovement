@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import IntroBotIcon from '@/components/assets/icons/ai/IntroBotIcon';
 import MicIcon from '@/components/assets/icons/ai/MicIcon';
+import Rai from '@/components/fields/kride/atoms/Rai';
 
 interface AIChatIntroProps {
     title: string;
@@ -14,7 +14,7 @@ export default function AIChatIntro({ title, subtitle = 'Elevate your English wi
     return (
         <div className="ai-intro-container">
             <div className="ai-intro-icon-box">
-                <IntroBotIcon />
+                <Rai state="greeting" size={108} />
             </div>
             
             <div className="ai-intro-header">

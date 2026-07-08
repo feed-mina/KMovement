@@ -3,8 +3,9 @@
 .time-select-wrapper {
     position: relative;
     padding: 1.5rem 1rem;
-    background-color: #f9fafb;
-    border-radius: 1rem;
+    background-color: var(--surface-card, #ffffff);
+    border: 1px solid var(--border-hair, #e5e7eb);
+    border-radius: var(--kride-radius-lg, 16px);
     min-width: 0;
     width: 100%;
     max-width: 100%;
@@ -15,7 +16,7 @@
 .time-select-title {
     font-size: 0.875rem;
     font-weight: 700;
-    color: #9ca3af; /* gray-400 */
+    color: var(--text-muted, #6b7280);
     margin-bottom: 1rem;
     margin-left: 0.5rem;
     text-transform: uppercase;
@@ -47,20 +48,20 @@
 
 /* 선택되지 않았을 때 */
 .time-button.default {
-    background-color: #ffffff;
-    color: #4b5563; /* gray-600 */
+    background-color: var(--surface-card, #ffffff);
+    color: var(--text-body, #374151);
 }
 
 .time-button.default:hover {
-    background-color: #f3f4f6; /* gray-100 */
+    background-color: var(--semantic-accent-soft, rgba(229, 9, 20, 0.08));
 }
 
 /* 선택되었을 때 */
 .time-button.active {
-    background-color: #4f46e5; /* indigo-600 */
+    background-color: var(--semantic-accent, #E50914);
     color: #ffffff;
     transform: scale(1.1);
-    box-shadow: 0 10px 15px -3px rgba(199, 210, 254, 0.5); /* indigo-200 shadow */
+    box-shadow: 0 10px 15px -3px rgba(229, 9, 20, 0.22);
 }
 
 .swiper-nav-btn {
@@ -96,7 +97,7 @@
 }
 
 .color-box.wake { background-color: #fef9c3; } /* yellow-100 */
-.color-box.sleep { background-color: #a855f7; } /* purple-500 */
+.color-box.sleep { background-color: var(--semantic-accent, #E50914); } /* purple-500 */
 
 
 /* 읽기 전용일 때 버튼 스타일 (회색 처리 및 클릭 방지) */
@@ -108,49 +109,49 @@
 
 /* 선택된(active) 항목은 강조하되, 선택 안 된 항목은 더 투명하게 */
 .time-button.readonly.default {
-    background-color: #f3f4f6;
-    color: #d1d5db;
+    background-color: var(--surface-subtle, #f3f4f6);
+    color: var(--text-muted, #6b7280);
 }
 
 .time-button.readonly.active {
-    background-color: #4f46e5;
+    background-color: var(--semantic-accent, #E50914);
     color: #ffffff;
     box-shadow: none;
 }
 
 .color-box.default-bg { background-color: #ffffff; border: 1px solid #d1d5db; }
-.color-box.active-bg { background-color: #4f46e5; }
+.color-box.active-bg { background-color: var(--semantic-accent, #E50914); }
 
 .color-box.default-bg { background-color: #ffffff; border: 1px solid #d1d5db; } /* wake 대신 */
-.color-box.active-bg { background-color: #a855f7; } /* sleep 대신 */
+.color-box.active-bg { background-color: var(--semantic-accent, #E50914); } /* sleep 대신 */
 
 
 /* TimeSelect.css 또는 통합 CSS */
 
 /* 활성화된 시간 (보라색) */
 .time-button.active {
-    background-color: #8b5cf6 !important; /* 보라색 (Violet 500) */
+    background-color: var(--semantic-accent, #E50914) !important;
     color: #ffffff !important;
-    border-color: #7c3aed !important;
+    border-color: var(--semantic-accent-strong, #8B0610) !important;
     font-weight: bold;
 }
 
 /* 읽기 전용일 때의 활성 상태 (약간 흐린 보라색) */
 .is-readonly .time-button.active {
-    background-color: #ddd6fe !important;
-    color: #5b21b6;
+    background-color: var(--semantic-accent-soft, rgba(229, 9, 20, 0.08)) !important;
+    color: var(--semantic-accent-strong, #8B0610);
     border: none;
 }
 
 /* 범례(Legend) 색상 일치 */
 .color-box.active-bg {
-    background-color: #8b5cf6;
+    background-color: var(--semantic-accent, #E50914);
 }
 
 /* 읽기 전용일 때도 선택된 값(보라색)은 유지 */
 .time-button.active.readonly-style {
-    background-color: #ddd6fe !important;
-    color: #5b21b6;
+    background-color: var(--semantic-accent-soft, rgba(229, 9, 20, 0.08)) !important;
+    color: var(--semantic-accent-strong, #8B0610);
     opacity: 1;
 }
 
@@ -159,11 +160,11 @@
 
 /* 활성화 상태 (Swap 기능으로 선택된 시간 - 보라색) */
 .time-button.active {
-    background-color: #8b5cf6 !important; /* Violet 500 */
+    background-color: var(--semantic-accent, #E50914) !important;
     color: #ffffff !important;
-    border: 1px solid #7c3aed !important;
+    border: 1px solid var(--semantic-accent-strong, #8B0610) !important;
     transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
+    box-shadow: 0 4px 12px rgba(229, 9, 20, 0.24) !important;
 }
 
 /* 상세페이지(readonly)에서의 스타일 */
@@ -175,20 +176,20 @@
 
 /* 상세페이지에서 선택된 시간 (연한 보라색으로 가독성 확보) */
 .time-button.active.readonly-style {
-    background-color: #ddd6fe !important;
-    color: #5b21b6 !important;
+    background-color: var(--semantic-accent-soft, rgba(229, 9, 20, 0.08)) !important;
+    color: var(--semantic-accent-strong, #8B0610) !important;
     box-shadow: none !important;
     border: none !important;
 }
 
 .color-box.active-bg {
-    background-color: #8b5cf6 !important;
+    background-color: var(--semantic-accent, #E50914) !important;
 }
 
 /* 읽기 전용 상태일 때의 active 스타일 */
 .time-button.readonly.active {
-    background-color: #ddd6fe !important; /* 연보라 */
-    color: #5b21b6 !important;
+    background-color: var(--semantic-accent-soft, rgba(229, 9, 20, 0.08)) !important;
+    color: var(--semantic-accent-strong, #8B0610) !important;
     opacity: 1;
 }
 
@@ -197,17 +198,17 @@
 
 /* 1. 활성화 버튼 (보라색) */
 .time-button.active {
-    background-color: #8b5cf6 !important; /* 요구하신 보라색 */
+    background-color: var(--semantic-accent, #E50914) !important;
     color: #ffffff !important;
-    border: 1px solid #7c3aed !important;
+    border: 1px solid var(--semantic-accent-strong, #8B0610) !important;
     transform: scale(1.1);
-    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 4px 10px rgba(229, 9, 20, 0.24);
 }
 
 /* 2. 읽기 전용 상태에서 선택된 시간 (연보라색으로 유지) */
 .time-button.readonly.active {
-    background-color: #ddd6fe !important; /* 연한 보라색 */
-    color: #5b21b6 !important;
+    background-color: var(--semantic-accent-soft, rgba(229, 9, 20, 0.08)) !important;
+    color: var(--semantic-accent-strong, #8B0610) !important;
     opacity: 1; /* 읽기 전용이어도 선택된 값은 선명하게 */
 }
 
@@ -220,7 +221,7 @@
 
 /* 4. 범례 색상 보정 */
 .color-box.active-bg {
-    background-color: #8b5cf6 !important;
+    background-color: var(--semantic-accent, #E50914) !important;
 }
 
 @media (min-width: 800px) {

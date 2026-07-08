@@ -7,6 +7,7 @@ import { useAudioRecorder } from '@/lib/hooks/useAudioRecorder';
 import ConversationPanel from '@/components/fields/ai/ConversationPanel';
 import AudioRecorder from '@/components/fields/ai/AudioRecorder';
 import MembershipUpgradeModal from '@/components/fields/ai/MembershipUpgradeModal';
+import AIChatHeader from '@/components/fields/ai/AIChatHeader';
 import api from '@/services/axios';
 
 // DynamicEngine이 전달하는 표준 props
@@ -146,20 +147,16 @@ export default function AIChatComponent({ meta, data }: AIChatComponentProps) {
 
     return (
         <div className={`ai-chat-container ${containerClass}`}>
-            <div className="ai-chat-header">
-                <div className="ai-header-info">
-                    <h2 className="ai-chat-title">{title}</h2>
-                    <div className="ai-status-tag">
-                        <span className="ai-status-dot"></span>
-                        AI Live
-                    </div>
-                </div>
-                {messages.length > 0 && (
+            <AIChatHeader
+                title={title}
+                userMessageCount={messages.filter(message => message.role === 'user').length}
+                isStreaming={isStreaming}
+                actions={messages.length > 0 ? (
                     <button className="ai-end-btn admin-back-btn" onClick={handleEnd}>
                         {endBtnLabel}
                     </button>
-                )}
-            </div>
+                ) : null}
+            />
 
             <ConversationPanel messages={messages} isStreaming={isStreaming} />
 

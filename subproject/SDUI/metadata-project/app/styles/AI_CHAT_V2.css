@@ -1,20 +1,21 @@
 /* ============================================
-   AI Chat V2 - Project Brand Theme (Navy/Indigo)
+   AI Chat V2 - K-RIDE Brand Theme
    ============================================ */
 
 :root {
-    --v2-primary: #3F51B5;     /* Indigo */
-    --v2-secondary: #1A237E;   /* Deep Navy */
-    --v2-bg-light: #F5F7FA;
-    --v2-border: #E0E4E8;
-    --v2-text-main: #2C3E50;
-    --v2-text-sub: #7F8C8D;
-    --v2-white: #FFFFFF;
+    --v2-primary: var(--semantic-accent, #E50914);
+    --v2-secondary: var(--semantic-accent-strong, #8B0610);
+    --v2-bg-light: var(--surface-page, #FDFBF7);
+    --v2-border: var(--border-hair, #E5E7EB);
+    --v2-text-main: var(--text-body, #374151);
+    --v2-text-sub: var(--text-muted, #6B7280);
+    --v2-white: var(--surface-card, #FFFFFF);
+    --v2-soft: var(--semantic-accent-soft, rgba(229, 9, 20, 0.08));
 }
 
 .ai-chat-standalone-container {
     background-color: var(--v2-bg-light);
-    font-family: 'Outfit', -apple-system, sans-serif;
+    font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -35,6 +36,7 @@
     width: 100%;
     background: var(--v2-white);
     border-top: 1px solid var(--v2-border);
+    box-shadow: 0 -10px 24px rgba(15, 23, 42, 0.06);
 }
 
 .ai-chat-input-wrapper {
@@ -51,8 +53,8 @@
 .ai-session-end-btn {
     width: 100%;
     background: transparent;
-    border: 1.5px solid #EF4444;
-    color: #EF4444;
+    border: 1.5px solid var(--v2-primary);
+    color: var(--v2-primary);
     padding: 16px;
     border-radius: 12px;
     font-weight: 700;
@@ -62,9 +64,9 @@
 }
 
 .ai-session-end-btn:hover {
-    background: #FFF5F5;
-    border-color: #DC2626;
-    color: #DC2626;
+    background: var(--v2-soft);
+    border-color: var(--v2-secondary);
+    color: var(--v2-secondary);
 }
 
 /* ── 1. Intro / Permission Screen ── */
@@ -77,14 +79,14 @@
     min-height: 600px;
     padding: 60px 20px;
     text-align: center;
-    background: #fff;
+    background: radial-gradient(circle at 50% 18%, var(--v2-soft), transparent 32%), var(--v2-white);
 }
 
 .ai-intro-icon-box {
     width: 140px;
     height: 140px;
     background: transparent;
-    border-radius: 50%;
+    border-radius: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -99,9 +101,9 @@
 }
 
 .ai-permission-card {
-    background: #fff;
+    background: var(--v2-white);
     border: 1px solid var(--v2-border);
-    border-radius: 20px;
+    border-radius: 16px;
     padding: 32px;
     max-width: 440px;
     width: 100%;
@@ -123,18 +125,18 @@
     font-size: 1.1rem;
     transition: all 0.2s;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(63, 81, 181, 0.2);
+    box-shadow: 0 10px 24px rgba(229, 9, 20, 0.18);
 }
 
 .ai-start-btn:hover {
     background: var(--v2-secondary);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(26, 35, 126, 0.3);
+    box-shadow: 0 14px 28px rgba(139, 6, 16, 0.22);
 }
 
 /* ── 2. Chat Header ── */
 .ai-chat-header {
-    background: #fff;
+    background: rgba(255, 255, 255, 0.94);
     border-bottom: 1px solid var(--v2-border);
     padding: 16px 20px;
     width: 100%;
@@ -142,17 +144,41 @@
 }
 
 .ai-header-content {
-    max-width: 400px;
+    max-width: 900px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
 }
 
 .ai-header-title-row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     margin-bottom: 12px;
+}
+
+.ai-header-rai {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    background: var(--v2-soft);
+    border: 1px solid rgba(229, 9, 20, 0.16);
+}
+
+.ai-header-title-group {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.ai-header-actions {
+    flex: 0 0 auto;
 }
 
 .ai-header-title {
@@ -163,13 +189,13 @@
 }
 
 .ai-status-tag {
-    margin-left: 12px;
     font-size: 0.75rem;
     color: var(--v2-text-sub);
-    background: var(--v2-bg-light);
-    padding: 2px 8px;
+    background: var(--v2-soft);
+    padding: 4px 8px;
     border-radius: 9999px;
     font-weight: 600;
+    width: fit-content;
 }
 
 .ai-gauge-wrapper {
@@ -179,14 +205,14 @@
 .ai-gauge-container {
     width: 100%;
     height: 6px;
-    background: #E8EAF6;
+    background: var(--v2-soft);
     border-radius: 3px;
     overflow: hidden;
 }
 
 .ai-gauge-fill {
     height: 100%;
-    background: linear-gradient(90deg, #3949AB, #5C6BC0);
+    background: linear-gradient(90deg, var(--v2-secondary), var(--v2-primary));
     transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -246,11 +272,11 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: #EEF2FF;
+    background: var(--v2-soft);
 }
 
 .user-bubble .ai-message-avatar {
-    background: #EDE9FE;
+    background: #F5F1EA;
 }
 
 .ai-message-body {
@@ -268,9 +294,9 @@
 }
 
 .assistant-bubble .ai-message-body {
-    background: #EEF2FF;
+    background: var(--v2-white);
     color: var(--v2-text-main);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    border: 1px solid rgba(229, 9, 20, 0.16);
     border-top-left-radius: 0;
 }
 
@@ -349,8 +375,8 @@
 .ai-original-text-label {
     font-size: 0.7rem;
     font-weight: 700;
-    color: #303F9F;
-    background: #E8EAF6;
+    color: var(--v2-secondary);
+    background: var(--v2-soft);
     padding: 1px 5px;
     border-radius: 4px;
     letter-spacing: 0.04em;
@@ -456,15 +482,15 @@
 /* Korean outlined circle override */
 .ko-mic-circle {
     background: var(--v2-white) !important;
-    border: 2px solid #1A237E !important;
-    box-shadow: 0 4px 15px rgba(26, 35, 126, 0.15) !important;
+    border: 2px solid var(--v2-secondary) !important;
+    box-shadow: 0 4px 15px rgba(139, 6, 16, 0.15) !important;
     filter: none !important;
 }
 
 .ko-mic-circle:hover:not(:disabled) {
-    background: #EEF2FF !important;
-    border-color: #3F51B5 !important;
-    box-shadow: 0 10px 25px rgba(63, 81, 181, 0.25) !important;
+    background: var(--v2-soft) !important;
+    border-color: var(--v2-primary) !important;
+    box-shadow: 0 10px 25px rgba(229, 9, 20, 0.2) !important;
     filter: none !important;
 }
 
@@ -496,7 +522,7 @@
 }
 
 .ai-recorder-mode-label.en-label { color: var(--v2-primary); }
-.ai-recorder-mode-label.ko-label { color: #303F9F; }
+.ai-recorder-mode-label.ko-label { color: var(--v2-secondary); }
 
 .ai-ko-mic-content {
     display: flex;
@@ -504,8 +530,8 @@
     align-items: center;
 }
 
-.ai-ko-kr { font-size: 1.25rem; font-weight: 900; color: #1A237E; line-height: 1; margin-bottom: 3px; }
-.ai-ko-text { font-size: 0.6rem; font-weight: 900; color: #303F9F; letter-spacing: 0.08em; }
+.ai-ko-kr { font-size: 1.25rem; font-weight: 900; color: var(--v2-secondary); line-height: 1; margin-bottom: 3px; }
+.ai-ko-text { font-size: 0.6rem; font-weight: 900; color: var(--v2-secondary); letter-spacing: 0.08em; }
 
 .ai-recorder-active {
     display: flex;

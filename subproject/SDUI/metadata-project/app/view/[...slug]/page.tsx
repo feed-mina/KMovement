@@ -15,11 +15,26 @@ import {useKrideItinerary} from "@/components/DynamicEngine/hook/useKrideItinera
 import {useMetadata} from "@/components/providers/MetadataProvider";
 import axios from "@/services/axios";
 import CommunityPage from "@/components/community/CommunityPage";
+import Rai from "@/components/fields/kride/atoms/Rai";
+import { KrideButton, RaiStatePanel } from "@/components/fields/kride/atoms/KridePrimitives";
 
 
 
 //  보호가 필요한 스크린 ID 목록 정의
 const PROTECTED_SCREENS = ["MY_PAGE", "CONTENT_LIST", "CONTENT_WRITE", "CONTENT_DETAIL", "CONTENT_MODIFY", "USER_LIST", "AI_ENGLISH_CHAT_PAGE", "AI_JAPANESE_CHAT_PAGE", "AI_KOREAN_CHAT_PAGE", "KRIDE_MY_LIST", "KRIDE_CHAT", "THEME_SETTINGS"];
+
+function shouldShowRaiAccent(screenId: string) {
+    return screenId === "MAIN_PAGE" || screenId.startsWith("CONTENT_") || screenId.includes("TIME");
+}
+
+function RaiScreenAccent({ screenId }: { screenId: string }) {
+    if (!shouldShowRaiAccent(screenId)) return null;
+    return (
+        <div className="rai-screen-accent" aria-hidden="true">
+            <Rai state="greeting" size={54} />
+        </div>
+    );
+}
 
 
 import KrideChatComponent from "@/components/fields/kride/chat/KrideChatComponent";
@@ -181,31 +196,37 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
     // KRIDE FOCUS 로딩/에러 표시
     if (screenId === "KRIDE_FOCUS" && krideItinerary.isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white gap-4">
-                <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
-                <p className="text-lg font-medium">AI가 여행 일정을 만들고 있어요...</p>
-                <p className="text-sm text-gray-400">잠시만 기다려주세요</p>
+            <div className="page-wrap KRIDE_FOCUS kride-focus-state-page">
+                <RaiStatePanel
+                    state="thinking"
+                    eyebrow="K-RIDE AI"
+                    title="라이가 여행 코스를 그리고 있어요"
+                    description="잠시만 기다려 주세요."
+                />
             </div>
         );
     }
 
     if (screenId === "KRIDE_FOCUS" && krideItinerary.error) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white gap-4">
-                <p className="text-lg font-medium">일정 생성에 실패했어요</p>
-                <p className="text-sm text-gray-400">{krideItinerary.error}</p>
-                <button
-                    className="mt-4 px-6 py-3 bg-red-600 rounded-full text-white font-bold"
-                    onClick={() => window.location.reload()}
+            <div className="page-wrap KRIDE_FOCUS kride-focus-state-page">
+                <RaiStatePanel
+                    state="sad"
+                    eyebrow="K-RIDE AI"
+                    title="코스를 못 찾았어요"
+                    description={krideItinerary.error}
                 >
-                    다시 시도
-                </button>
+                    <KrideButton onClick={() => window.location.reload()}>
+                        다시 시도
+                    </KrideButton>
+                </RaiStatePanel>
             </div>
         );
     }
 
     return (
         <div className={`page-wrap ${screenId}`}>
+            <RaiScreenAccent screenId={screenId} />
             {/* 리스트 페이지용 컴포넌트 */}
             {screenId === "CONTENT_LIST" && (
                 <FilterToggle isOnlyMine={isOnlyMine} onToggle={handleToggleMine}/>

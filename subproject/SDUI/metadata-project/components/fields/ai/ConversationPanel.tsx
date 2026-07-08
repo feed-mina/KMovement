@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { ChatMessage } from '@/lib/types/ai';
+import Rai from '@/components/fields/kride/atoms/Rai';
 
 interface ConversationPanelProps {
     messages: ChatMessage[];
@@ -51,7 +52,9 @@ export default function ConversationPanel({ messages, isStreaming }: Conversatio
             {messages.map((msg, i) => (
                 <div key={i} className={`message-bubble message-${msg.role}`}>
                     <span className="message-avatar">
-                        {msg.role === 'assistant' ? '🤖' : '👤'}
+                        {msg.role === 'assistant'
+                            ? <Rai state={isStreaming && i === messages.length - 1 ? 'thinking' : 'success'} size={28} />
+                            : '나'}
                     </span>
                     <div className="message-container">
                         <div className="message-content">

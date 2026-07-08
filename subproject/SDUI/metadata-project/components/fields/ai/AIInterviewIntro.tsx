@@ -2,7 +2,7 @@
 
 import { useState, useRef, ChangeEvent } from 'react';
 import { ResumeInputType } from '@/lib/types/ai';
-import InterviewIcon from '@/components/assets/icons/ai/InterviewIcon';
+import Rai from '@/components/fields/kride/atoms/Rai';
 import api from '@/services/axios';
 
 interface AIInterviewIntroProps {
@@ -98,7 +98,7 @@ export default function AIInterviewIntro({
     return (
         <div className="ai-intro-container">
             <div className="ai-intro-icon-box">
-                <InterviewIcon />
+                <Rai state={isLoading ? 'thinking' : 'greeting'} size={108} />
             </div>
 
             <div className="ai-intro-header">

@@ -76,6 +76,8 @@ export default function AIInterviewComponent({ meta, data }: AIChatComponentProp
             <AIChatHeader
                 title={title}
                 userMessageCount={messages.filter(m => m.role === 'user').length}
+                isStreaming={isStreaming}
+                statusLabel={isStreaming ? '라이가 답변을 정리하고 있어요' : '라이가 면접 흐름을 보고 있어요'}
             />
 
             <div className="ai-chat-main-content">

@@ -3,10 +3,10 @@
    ============================================ */
 
 :root {
-    --ai-primary: #4A90E2;
-    --ai-primary-glow: rgba(74, 144, 226, 0.4);
-    --ai-secondary: #8E44AD;
-    --ai-bg-glass: rgba(255, 255, 255, 0.75);
+    --ai-primary: var(--semantic-accent, #E50914);
+    --ai-primary-glow: rgba(229, 9, 20, 0.28);
+    --ai-secondary: var(--semantic-accent-strong, #8B0610);
+    --ai-bg-glass: rgba(255, 255, 255, 0.82);
     --ai-border-glass: rgba(255, 255, 255, 0.3);
     --ai-shadow-premium: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
 }
@@ -32,9 +32,9 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: radial-gradient(circle at top right, rgba(74, 144, 226, 0.08), transparent),
-                radial-gradient(circle at bottom left, rgba(142, 68, 173, 0.08), transparent);
-    font-family: 'Inter', sans-serif;
+    background: radial-gradient(circle at top right, rgba(229, 9, 20, 0.08), transparent),
+                radial-gradient(circle at bottom left, rgba(139, 6, 16, 0.08), transparent);
+    font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* ── 헤더 ── */
@@ -58,7 +58,7 @@
     font-weight: 700;
     margin: 0;
     color: var(--text-main);
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
 }
 
 .ai-status-tag {
@@ -190,10 +190,10 @@
 }
 
 .message-bubble.message-user .message-content {
-    background: linear-gradient(135deg, #4A90E2, #357ABD);
+    background: linear-gradient(135deg, var(--ai-secondary), var(--ai-primary));
     color: #fff;
     border: none;
-    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+    box-shadow: 0 4px 15px rgba(229, 9, 20, 0.22);
 }
 
 .message-actions {
@@ -217,7 +217,7 @@
 }
 
 .play-btn:hover {
-    background: rgba(74, 144, 226, 0.1);
+    background: rgba(229, 9, 20, 0.1);
 }
 
 .play-btn.playing {
@@ -225,10 +225,10 @@
 }
 
 .message-bubble.message-user .message-content {
-    background: linear-gradient(135deg, #4A90E2, #357ABD);
+    background: linear-gradient(135deg, var(--ai-secondary), var(--ai-primary));
     color: #fff;
     border: none;
-    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+    box-shadow: 0 4px 15px rgba(229, 9, 20, 0.22);
 }
 
 /* 스트리밍 커서 */
@@ -270,7 +270,7 @@
     height: 72px;
     border-radius: 50%;
     border: none;
-    background: linear-gradient(135deg, var(--ai-primary), #357ABD);
+    background: linear-gradient(135deg, var(--ai-secondary), var(--ai-primary));
     color: #fff;
     font-size: 2rem;
     cursor: pointer;
