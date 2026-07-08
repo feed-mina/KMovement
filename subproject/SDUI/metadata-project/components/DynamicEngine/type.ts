@@ -1,40 +1,68 @@
-// @@@@ 2026-02-07 Metadata 인인터페이스 타입 정의
-
 export interface Metadata {
-    componentId: string;
-    component_id: string;
-    componentType: string;
+    componentId?: string;
+    component_id?: string;
+    componentType?: string;
     component_type?: string;
     parentGroupId?: string | null;
     parent_group_id?: string | null;
     groupId?: string | null;
-    group_id?: string | null; // 추가
+    group_id?: string | null;
     refDataId?: string;
-    ref_data_id?: string; //
+    ref_data_id?: string;
     isVisible?: boolean | string;
     is_visible?: boolean | string;
     groupDirection?: "ROW" | "COLUMN";
+    group_direction?: "ROW" | "COLUMN";
     cssClass?: string;
     css_class?: string;
     inlineStyle?: any;
+    inline_style?: any;
     actionType?: string;
     action_type?: string;
     placeholder?: string;
     uiId?: string;
+    ui_id?: string;
     labelText?: string;
+    label_text?: string;
     isReadonly?: boolean | string;
     is_readonly?: boolean | string;
+    dataSqlKey?: string;
+    data_sql_key?: string;
+    dataParams?: any;
+    data_params?: any;
     children?: Metadata[] | null;
+    [key: string]: any;
+}
+
+export interface NormalizedNode {
+    componentId?: string;
+    componentType?: string;
+    parentGroupId?: string | null;
+    groupId?: string | null;
+    refDataId?: string;
+    isVisible?: boolean | string;
+    groupDirection?: "ROW" | "COLUMN";
+    cssClass?: string;
+    inlineStyle?: any;
+    actionType?: string;
+    placeholder?: string;
+    uiId?: string;
+    labelText?: string;
+    isReadonly?: boolean | string;
+    dataSqlKey?: string;
+    dataParams?: any;
+    children?: NormalizedNode[] | null;
+    [key: string]: any;
 }
 
 export interface DynamicEngineProps {
-    metadata: Metadata[];   // 트리 구조로 분석되기 전의 원본 메타데이터 배열
-    screenId: string;       // @@@@ 현재 화면의 고유 식별자 추가
-    pageData: any;          // 서버에서 가져온 실제 비즈니스 데이터
-    formData: any;          // 사용자가 입력 중인 폼 데이터
-    setFormData?: (value: any | ((prev: any) => any)) => void; // formData 업데이트 함수
+    metadata: Metadata[];
+    screenId: string;
+    pageData: any;
+    formData: any;
+    setFormData?: (value: any | ((prev: any) => any)) => void;
     onChange: (id: string, value: any) => void;
-    onAction: (meta: Metadata, data?: any) => void;// [추가] 모달 관련 프로퍼티 정의
+    onAction: (meta: NormalizedNode, data?: any) => void;
     activeModal?: string | null;
     closeModal?: () => void;
     onConfirmModal?: () => void;
