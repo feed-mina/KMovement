@@ -1065,6 +1065,12 @@
     font-weight: 700;
 }
 
+.community-animation-meta .community-animation-meta-warning {
+    border-color: #fed7aa;
+    background: #fff7ed;
+    color: #c2410c;
+}
+
 .community-sketch-backdrop {
     position: fixed;
     inset: 0;

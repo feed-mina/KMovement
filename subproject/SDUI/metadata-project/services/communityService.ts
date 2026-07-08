@@ -59,6 +59,10 @@ export interface AnimationStatusResponse {
     totalImages?: number;
     processedImages?: number;
     actualModel?: string;
+    actualModelExecuted?: boolean | null;
+    fallbackUsed?: boolean;
+    fallbackType?: string;
+    fallbackReason?: string;
     failedImageIndexes?: string;
 }
 

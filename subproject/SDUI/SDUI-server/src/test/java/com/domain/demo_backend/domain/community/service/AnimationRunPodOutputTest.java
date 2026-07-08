@@ -73,4 +73,26 @@ class AnimationRunPodOutputTest {
                 .isEqualTo("mixed:animated_drawings_worker,cogvideox_real");
         assertThat(parsed.failedImageIndexes()).isEqualTo("[1]");
     }
+
+    @Test
+    void parsesFallbackMetadataWithoutTreatingResultAsFailure() {
+        AnimationRunPodOutput.Parsed parsed = AnimationRunPodOutput.parse(
+                Map.of(
+                        "status", "fallback_used",
+                        "result_url", "https://cdn.example/fallback.mp4",
+                        "metadata", Map.of(
+                                "actual_model", "3d_photo_light",
+                                "actual_model_executed", false,
+                                "fallback_type", "photo_motion_video",
+                                "fallback_reason", "AnimatedDrawings was unavailable"
+                        )
+                )
+        );
+
+        assertThat(parsed.succeeded()).isTrue();
+        assertThat(parsed.actualModel()).isEqualTo("3d_photo_light");
+        assertThat(parsed.actualModelExecuted()).isFalse();
+        assertThat(parsed.fallbackType()).isEqualTo("photo_motion_video");
+        assertThat(parsed.fallbackReason()).isEqualTo("AnimatedDrawings was unavailable");
+    }
 }

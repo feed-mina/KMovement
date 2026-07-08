@@ -51,6 +51,15 @@ public class AnimationJob {
     @Column(name = "actual_model", length = 100)
     private String actualModel;
 
+    @Column(name = "actual_model_executed")
+    private Boolean actualModelExecuted;
+
+    @Column(name = "fallback_type", length = 100)
+    private String fallbackType;
+
+    @Column(name = "fallback_reason", columnDefinition = "TEXT")
+    private String fallbackReason;
+
     @Column(name = "failed_image_indexes", columnDefinition = "TEXT")
     private String failedImageIndexes;
 

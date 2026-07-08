@@ -863,6 +863,10 @@ function CommunityDetail({ postId }: { postId: number }) {
                 totalImages: result.totalImages,
                 processedImages: 0,
                 actualModel: '',
+                actualModelExecuted: null,
+                fallbackUsed: false,
+                fallbackType: '',
+                fallbackReason: '',
                 failedImageIndexes: '',
             });
             setBatchModal(false);
@@ -952,6 +956,9 @@ function CommunityDetail({ postId }: { postId: number }) {
 
     const animRouteText = animationRouteLabel(animStatus?.route);
     const failedImageText = formatFailedImageIndexes(animStatus?.failedImageIndexes);
+    const fallbackNotice = animStatus?.fallbackUsed
+        ? animStatus.fallbackReason || animStatus.fallbackType || '실제 모델 대신 폴백 경로가 사용되었습니다.'
+        : '';
     const hasBatchProgress =
         typeof animStatus?.totalImages === 'number' && animStatus.totalImages > 1;
 
@@ -1015,6 +1022,11 @@ function CommunityDetail({ postId }: { postId: number }) {
                                     </span>
                                 )}
                                 {animStatus.actualModel && <span>실행 모델 {animStatus.actualModel}</span>}
+                                {fallbackNotice && (
+                                    <span className="community-animation-meta-warning">
+                                        폴백 실행: {fallbackNotice}
+                                    </span>
+                                )}
                                 {failedImageText && <span>실패 이미지 {failedImageText}</span>}
                             </div>
                         </div>

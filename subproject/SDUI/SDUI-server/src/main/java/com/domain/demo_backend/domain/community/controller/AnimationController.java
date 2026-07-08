@@ -88,6 +88,10 @@ public class AnimationController {
             result.put("processedImages", job.getProcessedImages() != null ? job.getProcessedImages() : 0);
             result.put("route", job.getRoute() != null ? job.getRoute() : "");
             result.put("actualModel", job.getActualModel() != null ? job.getActualModel() : "");
+            result.put("actualModelExecuted", job.getActualModelExecuted());
+            result.put("fallbackUsed", fallbackUsed(job));
+            result.put("fallbackType", job.getFallbackType() != null ? job.getFallbackType() : "");
+            result.put("fallbackReason", job.getFallbackReason() != null ? job.getFallbackReason() : "");
             result.put(
                     "failedImageIndexes",
                     job.getFailedImageIndexes() != null ? job.getFailedImageIndexes() : ""
@@ -124,5 +128,11 @@ public class AnimationController {
         ));
         result.put("route", job.getRoute() != null ? job.getRoute() : "");
         return result;
+    }
+
+    private boolean fallbackUsed(AnimationJob job) {
+        return Boolean.FALSE.equals(job.getActualModelExecuted())
+                || (job.getFallbackType() != null && !job.getFallbackType().isBlank())
+                || (job.getFallbackReason() != null && !job.getFallbackReason().isBlank());
     }
 }
