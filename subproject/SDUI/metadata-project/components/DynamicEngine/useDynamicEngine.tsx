@@ -16,12 +16,12 @@ export const useDynamicEngine = (metadata: Metadata[], pageData: any, formData: 
             return rowData;
         }
 
-        if (refId && pageData && pageData[refId]) {
+        if (refId && pageData && pageData[refId] !== undefined) {
             const isRepeater = node.children && node.children.length > 0;
             if (!isRepeater && Array.isArray(pageData[refId])) {
                 return pageData[refId][0] || {};
             }
-            return isRepeater ? pageData[refId] : pageData;
+            return pageData[refId];
         }
 
         return pageData || {};
