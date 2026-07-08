@@ -85,6 +85,25 @@ export function normalizeChartData(data: unknown, props: AnyRecord): ChartDatum[
   const valueKey = String(props.valueKey ?? props.value_key ?? "value");
   const colorKey = String(props.colorKey ?? props.color_key ?? "color");
 
+  if (data && typeof data === "object" && !Array.isArray(data) && Array.isArray(props.series)) {
+    const record = data as AnyRecord;
+    return (props.series as unknown[])
+      .map((entry) => {
+        if (!entry || typeof entry !== "object") return null;
+        const item = entry as AnyRecord;
+        const key = String(item.key ?? item.valueKey ?? item.value_key ?? "");
+        if (!key) return null;
+        const value = readNumber(record, [key]);
+        if (value === null) return null;
+        return {
+          label: String(item.label ?? key),
+          value,
+          color: typeof item.color === "string" ? String(item.color) : undefined,
+        };
+      })
+      .filter(Boolean) as ChartDatum[];
+  }
+
   const source: unknown[] | null = Array.isArray(data)
     ? data
     : Array.isArray((data as AnyRecord)?.items)
