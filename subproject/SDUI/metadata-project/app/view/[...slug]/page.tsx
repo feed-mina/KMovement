@@ -15,7 +15,6 @@ import {useKrideItinerary} from "@/components/DynamicEngine/hook/useKrideItinera
 import {useMetadata} from "@/components/providers/MetadataProvider";
 import axios from "@/services/axios";
 import CommunityPage from "@/components/community/CommunityPage";
-import Rai from "@/components/fields/kride/atoms/Rai";
 import { KrideButton, RaiStatePanel } from "@/components/fields/kride/atoms/KridePrimitives";
 
 
@@ -23,20 +22,6 @@ import { KrideButton, RaiStatePanel } from "@/components/fields/kride/atoms/Krid
 //  보호가 필요한 스크린 ID 목록 정의
 const PROTECTED_SCREENS = ["MY_PAGE", "CONTENT_LIST", "CONTENT_WRITE", "CONTENT_DETAIL", "CONTENT_MODIFY", "USER_LIST", "AI_ENGLISH_CHAT_PAGE", "AI_JAPANESE_CHAT_PAGE", "AI_KOREAN_CHAT_PAGE", "KRIDE_MY_LIST", "KRIDE_CHAT", "ADMIN_DASHBOARD", "THEME_SETTINGS"];
 const ADMIN_ONLY_SCREENS = ["ADMIN_DASHBOARD", "USER_LIST", "THEME_SETTINGS"];
-
-function shouldShowRaiAccent(screenId: string) {
-    return screenId === "MAIN_PAGE" || screenId.startsWith("CONTENT_") || screenId.includes("TIME");
-}
-
-function RaiScreenAccent({ screenId }: { screenId: string }) {
-    if (!shouldShowRaiAccent(screenId)) return null;
-    return (
-        <div className="rai-screen-accent" aria-hidden="true">
-            <Rai state="greeting" size={54} />
-        </div>
-    );
-}
-
 
 import KrideChatComponent from "@/components/fields/kride/chat/KrideChatComponent";
 
@@ -236,7 +221,6 @@ function SduiPage({ screenId, refId }: { screenId: string; refId: string | numbe
 
     return (
         <div className={`page-wrap ${screenId}`}>
-            <RaiScreenAccent screenId={screenId} />
             {/* 리스트 페이지용 컴포넌트 */}
             {screenId === "CONTENT_LIST" && (
                 <FilterToggle isOnlyMine={isOnlyMine} onToggle={handleToggleMine}/>

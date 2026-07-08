@@ -10,32 +10,6 @@
     position: relative;
 }
 
-.rai-screen-accent {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    z-index: 2;
-    width: 64px;
-    height: 64px;
-    display: grid;
-    place-items: center;
-    border-radius: var(--kride-radius-lg, 16px);
-    border: 1px solid rgba(229, 9, 20, 0.16);
-    background: var(--semantic-accent-soft, rgba(229, 9, 20, 0.08));
-    box-shadow: var(--kride-shadow-card, 0 1px 4px rgba(0, 0, 0, 0.06));
-    pointer-events: none;
-}
-
-@media (max-width: 640px) {
-    .rai-screen-accent {
-        top: 10px;
-        right: 10px;
-        width: 52px;
-        height: 52px;
-        opacity: 0.92;
-    }
-}
-
 /* 하단 콘텐츠: 2열 그리드 */
 .engine-container.is-desktop .content-area {
     display: block;

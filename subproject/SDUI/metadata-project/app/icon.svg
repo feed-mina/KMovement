@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <!-- K-RIDE Rai mascot icon -->
+  <circle cx="22" cy="20" r="8" fill="#FFD29B" />
+  <circle cx="58" cy="20" r="8" fill="#FFD29B" />
+  <circle cx="22" cy="20" r="4" fill="#F4A29A" />
+  <circle cx="58" cy="20" r="4" fill="#F4A29A" />
+  <circle cx="40" cy="44" r="27" fill="#FFD29B" />
+  <path d="M14 42 A27 23 0 0 1 66 42 Z" fill="#E50914" />
+  <rect x="13" y="38" width="54" height="6" rx="3" fill="#B00710" />
+  <circle cx="26" cy="52" r="4" fill="#FF9AA2" opacity="0.75" />
+  <circle cx="54" cy="52" r="4" fill="#FF9AA2" opacity="0.75" />
+  <circle cx="31" cy="47" r="4.2" fill="#3A2A22" />
+  <circle cx="49" cy="47" r="4.2" fill="#3A2A22" />
+  <circle cx="32.5" cy="45.5" r="1.4" fill="#FFFFFF" />
+  <circle cx="50.5" cy="45.5" r="1.4" fill="#FFFFFF" />
+  <path d="M37 50 h6 l-3 4 z" fill="#C25A5A" />
+  <path d="M35 57 Q40 62 45 57" stroke="#8A4B3A" stroke-width="2" fill="none" stroke-linecap="round" />
+  <path d="M62 30 l2 2 M64 28 l0 3" stroke="#F6B93B" stroke-width="1.6" stroke-linecap="round" />
+</svg>
