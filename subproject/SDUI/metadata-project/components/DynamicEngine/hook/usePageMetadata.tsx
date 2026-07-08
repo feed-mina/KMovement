@@ -7,6 +7,24 @@ import { parseJsonbFields } from "@/components/utils/dataParser";
 
 
 //  @@@@ usePageMetadata 역할 : 데이터 관리자 역할이다. 메타데이터가져오기 , 원본 데이터 가져오기 , 가져온 데이터를 pageData로 담아줌, 로딩중인지 전체 개수가 몇개인지 같은 페이지의 전역 상태를 관리
+export function resolveDataApiUrl(
+    template: string,
+    params: Record<string, unknown>
+): string | null {
+    let missingValue = false;
+    const resolved = template.replace(/\{([A-Za-z0-9_]+)\}|:([A-Za-z][A-Za-z0-9_]*)/g, (_match, bracedKey, colonKey) => {
+        const key = bracedKey || colonKey;
+        const value = params[key];
+        if (value === undefined || value === null || value === "") {
+            missingValue = true;
+            return "";
+        }
+        return encodeURIComponent(String(value));
+    });
+
+    return missingValue ? null : resolved;
+}
+
 export const usePageMetadata = (
     screenId: string,
     currentPage: number,
@@ -176,6 +194,14 @@ export const usePageMetadata = (
                         userSqno: user?.userSqno,
                         contentId: refId || null //  (백엔드 :contentId와 매핑)
                     };
+
+                    if (!sqlKey && directApiUrl) {
+                        const resolvedApiUrl = resolveDataApiUrl(String(directApiUrl), finalParams);
+                        if (!resolvedApiUrl) {
+                            return { id: source.refDataId || source.ref_data_id || source.componentId || source.component_id, data: [] };
+                        }
+                        apiUrl = resolvedApiUrl;
+                    }
 
                     let res;
 

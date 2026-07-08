@@ -3075,7 +3075,7 @@ button:hover {
 
 .mypage-stats {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
 }
 
@@ -3095,6 +3095,7 @@ button:hover {
 .mypage-card.stat-card,
 .mypage-card.stats-chart,
 .mypage-card.gallery-grid,
+.mypage-card.history-list,
 .mypage-activity {
     border-color: #e5e7eb;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
