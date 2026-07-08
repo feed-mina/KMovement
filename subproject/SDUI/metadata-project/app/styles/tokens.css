@@ -55,4 +55,39 @@
     /* ── 모바일 / 터치 ── */
     --kride-touch-target: 48px;
     --kride-safe-bottom: env(safe-area-inset-bottom, 0px);
+
+    /* Semantic layer */
+    --semantic-accent: var(--kride-primary);
+    --semantic-accent-strong: var(--kride-primary-dark);
+    --semantic-accent-soft: var(--kride-primary-soft);
+    --surface-page: var(--kride-bg-cream);
+    --surface-card: var(--kride-bg-card);
+    --surface-subtle: #F5F1EA;
+    --surface-track: #F3F4F6;
+    --text-strong: var(--kride-text-strong);
+    --text-body: var(--kride-text-main);
+    --text-muted: var(--kride-text-sub);
+    --text-invert: var(--kride-text-invert);
+    --border-hair: var(--kride-border);
+    --danger: var(--kride-primary);
+    --danger-soft: rgba(229, 9, 20, 0.10);
+    --danger-strong: var(--kride-primary-dark);
+    --success: #16A34A;
+    --success-soft: rgba(22, 163, 74, 0.12);
+    --success-strong: #166534;
+    --info: #0EA5E9;
+    --info-soft: rgba(14, 165, 233, 0.12);
+    --info-strong: #0369A1;
+    --warning: #D97706;
+}
+
+:root[data-theme="dark"], .dark {
+    --surface-page: var(--kride-bg-dark);
+    --surface-card: var(--kride-bg-dark-2);
+    --surface-subtle: #171717;
+    --surface-track: #262626;
+    --text-strong: #FFFFFF;
+    --text-body: #E5E7EB;
+    --text-muted: #A3A3A3;
+    --border-hair: #2A2A2A;
 }

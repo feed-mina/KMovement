@@ -103,12 +103,12 @@ export default function GoalDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 px-4 py-6 md:px-8">
+      <div className="min-h-screen bg-page px-4 py-6 md:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="h-8 w-56 rounded bg-gray-200" />
+          <div className="h-8 w-56 rounded bg-track" />
           <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-4">
             {[0, 1, 2, 3].map((item) => (
-              <div key={item} className="h-28 rounded-lg border border-gray-200 bg-white" />
+              <div key={item} className="h-28 rounded-card border border-hair bg-surface" />
             ))}
           </div>
         </div>
@@ -125,16 +125,16 @@ export default function GoalDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-5 text-gray-950 md:px-8 md:py-8">
+    <div className="min-h-screen bg-page px-4 py-5 text-ink md:px-8 md:py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-5">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Operations</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Operations</p>
             <h1 className="mt-2 text-3xl font-semibold leading-tight">Goal Dashboard</h1>
           </div>
           <button
             type="button"
-            className="inline-flex h-10 items-center justify-center rounded-md border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 disabled:cursor-wait disabled:opacity-60"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-hair bg-surface px-4 text-sm font-semibold text-ink shadow-sm hover:bg-track disabled:cursor-wait disabled:opacity-60"
             onClick={() => void loadDashboard()}
             disabled={isFetching}
           >
@@ -143,7 +143,7 @@ export default function GoalDashboardPage() {
         </div>
 
         {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          <div className="rounded-md border border-danger-soft bg-danger-soft px-4 py-3 text-sm font-medium text-danger-strong">
             {error}
           </div>
         )}
@@ -156,18 +156,18 @@ export default function GoalDashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+          <section className="rounded-card border border-hair bg-surface p-4 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <h2 className="text-lg font-semibold">Monthly Attainment</h2>
-              <span className="text-xs font-medium text-gray-500">{dashboard?.generatedAt ? compactDate(dashboard.generatedAt) : '-'}</span>
+              <span className="text-xs font-medium text-muted">{dashboard?.generatedAt ? compactDate(dashboard.generatedAt) : '-'}</span>
             </div>
             <div className="mt-5 flex flex-col gap-3">
               {(dashboard?.monthly ?? []).map((item) => (
                 <div key={item.month} className="grid grid-cols-[84px_minmax(0,1fr)_72px] items-center gap-3 text-sm">
-                  <div className="font-medium text-gray-700">{item.month}</div>
-                  <div className="h-8 overflow-hidden rounded bg-gray-100">
+                  <div className="font-medium text-body">{item.month}</div>
+                  <div className="h-8 overflow-hidden rounded bg-track">
                     <div
-                      className="h-full rounded bg-emerald-500"
+                      className="h-full rounded bg-success"
                       style={{ width: `${Math.max(2, Math.min(item.attainmentRate, 100))}%` }}
                     />
                   </div>
@@ -178,7 +178,7 @@ export default function GoalDashboardPage() {
             </div>
           </section>
 
-          <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+          <section className="rounded-card border border-hair bg-surface p-4 shadow-sm">
             <h2 className="text-lg font-semibold">Success / Failure Trend</h2>
             <div className="mt-5 flex h-64 items-end gap-2">
               {(dashboard?.trend ?? []).map((item) => {
@@ -187,10 +187,10 @@ export default function GoalDashboardPage() {
                 return (
                   <div key={item.date} className="flex min-w-0 flex-1 flex-col items-center gap-2">
                     <div className="flex h-48 w-full max-w-8 items-end justify-center gap-1">
-                      <div className="w-3 rounded-t bg-emerald-500" style={{ height: `${Math.max(4, successHeight)}%` }} />
-                      <div className="w-3 rounded-t bg-rose-500" style={{ height: `${Math.max(4, failureHeight)}%` }} />
+                      <div className="w-3 rounded-t bg-success" style={{ height: `${Math.max(4, successHeight)}%` }} />
+                      <div className="w-3 rounded-t bg-danger" style={{ height: `${Math.max(4, failureHeight)}%` }} />
                     </div>
-                    <div className="truncate text-[11px] font-medium text-gray-500">{compactDate(item.date)}</div>
+                    <div className="truncate text-[11px] font-medium text-muted">{compactDate(item.date)}</div>
                   </div>
                 );
               })}
@@ -203,16 +203,16 @@ export default function GoalDashboardPage() {
           <h2 className="text-lg font-semibold">User Goal Status</h2>
           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             {(dashboard?.users ?? []).map((item) => (
-              <article key={item.userSqno} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+              <article key={item.userSqno} className="rounded-card border border-hair bg-surface p-4 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h3 className="truncate text-base font-semibold">{item.displayName}</h3>
-                    <p className="mt-1 truncate text-xs text-gray-500">{item.userId || `#${item.userSqno}`}</p>
+                    <p className="mt-1 truncate text-xs text-muted">{item.userId || `#${item.userSqno}`}</p>
                   </div>
-                  <span className="rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700">{pct(item.attainmentRate)}</span>
+                  <span className="rounded bg-track px-2 py-1 text-xs font-semibold text-body">{pct(item.attainmentRate)}</span>
                 </div>
-                <div className="mt-4 h-2 overflow-hidden rounded bg-gray-100">
-                  <div className="h-full rounded bg-sky-500" style={{ width: `${Math.max(2, Math.min(item.attainmentRate, 100))}%` }} />
+                <div className="mt-4 h-2 overflow-hidden rounded bg-track">
+                  <div className="h-full rounded bg-info" style={{ width: `${Math.max(2, Math.min(item.attainmentRate, 100))}%` }} />
                 </div>
                 <dl className="mt-4 grid grid-cols-4 gap-2 text-center text-xs">
                   <MiniStat label="Total" value={item.totalCount} />
@@ -232,10 +232,10 @@ export default function GoalDashboardPage() {
 
 function AccessPanel({ title, detail, action }: { title: string; detail?: string; action?: ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="max-w-xl rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-950">{title}</h1>
-        {detail && <p className="mt-3 text-sm text-gray-600">{detail}</p>}
+    <div className="min-h-screen bg-page px-6 py-10">
+      <div className="max-w-xl rounded-card border border-hair bg-surface p-6 shadow-sm">
+        <h1 className="text-2xl font-semibold text-ink">{title}</h1>
+        {detail && <p className="mt-3 text-sm text-body">{detail}</p>}
         {action && <div className="mt-5">{action}</div>}
       </div>
     </div>
@@ -244,7 +244,7 @@ function AccessPanel({ title, detail, action }: { title: string; detail?: string
 
 function LinkButton({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link className="inline-flex h-10 items-center rounded-md bg-gray-950 px-4 text-sm font-semibold text-white" href={href}>
+    <Link className="inline-flex h-10 items-center rounded-md bg-ink px-4 text-sm font-semibold text-invert" href={href}>
       {children}
     </Link>
   );
@@ -252,15 +252,15 @@ function LinkButton({ href, children }: { href: string; children: ReactNode }) {
 
 function Metric({ label, value, tone = 'neutral' }: { label: string; value: string; tone?: 'neutral' | 'success' | 'danger' | 'info' }) {
   const toneClass = {
-    neutral: 'text-gray-950',
-    success: 'text-emerald-700',
-    danger: 'text-rose-700',
-    info: 'text-sky-700',
+    neutral: 'text-ink',
+    success: 'text-success-strong',
+    danger: 'text-danger-strong',
+    info: 'text-info-strong',
   }[tone];
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">{label}</div>
+    <div className="rounded-card border border-hair bg-surface p-4 shadow-sm">
+      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">{label}</div>
       <div className={`mt-2 text-3xl font-semibold ${toneClass}`}>{value}</div>
     </div>
   );
@@ -269,15 +269,15 @@ function Metric({ label, value, tone = 'neutral' }: { label: string; value: stri
 function MiniStat({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      <dt className="font-medium text-gray-500">{label}</dt>
-      <dd className="mt-1 text-base font-semibold text-gray-950">{value.toLocaleString()}</dd>
+      <dt className="font-medium text-muted">{label}</dt>
+      <dd className="mt-1 text-base font-semibold text-ink">{value.toLocaleString()}</dd>
     </div>
   );
 }
 
 function EmptyState({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-28 w-full items-center justify-center rounded-lg border border-dashed border-gray-300 px-4 text-sm font-medium text-gray-500">
+    <div className="flex min-h-28 w-full items-center justify-center rounded-card border border-dashed border-hair px-4 text-sm font-medium text-muted">
       {children}
     </div>
   );

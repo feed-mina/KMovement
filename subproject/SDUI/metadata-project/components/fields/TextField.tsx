@@ -3,6 +3,7 @@
 import React, { memo } from "react";
 import Image from "next/image";
 import { cn } from "@/components/utils/cn";
+import { normalizeDisplayText } from "@/components/utils/displayText";
 
 interface TextFieldProps {
     meta: {
@@ -65,6 +66,9 @@ const TextField = memo(({ meta, data, value, ...rest }: TextFieldProps) => {
     // DB에서 오는 리터럴 \n → 실제 줄바꿈 변환
     if (typeof finalValue === 'string' && finalValue.includes('\\n')) {
         finalValue = finalValue.replace(/\\n/g, '\n');
+    }
+    if (typeof finalValue === 'string') {
+        finalValue = normalizeDisplayText(finalValue);
     }
 
     let parsedStyle = {};

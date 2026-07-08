@@ -109,6 +109,22 @@ KRIDE_APP_MODE=cloud_preview_gateway
 KRIDE_MODEL_GENERATION_ENABLED=false
 ```
 
+RunPod proxy environment for production media generation:
+
+```text
+RUNPOD_API_KEY=...
+RUNPOD_MEDIA_ENDPOINT_ID=...  # AnimatedDrawings, batch_video, CogVideoX, 3D photo
+RUNPOD_TORA_ENDPOINT_ID=...   # Tora photo I2V only
+RUNPOD_ENDPOINT_ID=...        # legacy fallback if the split values are not set
+FASTAPI_INTERNAL_API_KEY=...
+```
+
+Routing policy:
+
+- `tora_cogvideox_i2v` goes to `RUNPOD_TORA_ENDPOINT_ID`.
+- `animated_drawings_worker`, `batch_video`, `cogvideox_real`, and 3D photo routes go to `RUNPOD_MEDIA_ENDPOINT_ID`.
+- Doodle/sketch inputs should use the media endpoint. The Tora endpoint stays focused on photo I2V.
+
 For a small demo, commit the MP4/WAV artifacts into a deployable media folder. For larger media, mount a volume or download artifacts at startup from object storage/DagsHub.
 
 Note: the repository root `.dockerignore` excludes `report/`, so Docker images should use a mounted media folder or a prepared folder such as `deploy/cloud_gateway/media`.

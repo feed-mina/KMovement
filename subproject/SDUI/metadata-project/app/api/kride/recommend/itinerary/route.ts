@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const FASTAPI_URL = process.env.FASTAPI_URL ?? "https://kmovement-46122739597.europe-west1.run.app";
+const FASTAPI_URL = process.env.FASTAPI_URL ?? process.env.KRIDE_FASTAPI_URL ?? process.env.GCP_FASTAPI_URL;
 
 /**
  * FastAPI /api/recommend/itinerary 프록시
@@ -8,6 +8,13 @@ const FASTAPI_URL = process.env.FASTAPI_URL ?? "https://kmovement-46122739597.eu
  */
 export async function POST(request: NextRequest) {
   try {
+    if (!FASTAPI_URL) {
+      return NextResponse.json(
+        { error: "FASTAPI_URL is not configured" },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
 
     const controller = new AbortController();

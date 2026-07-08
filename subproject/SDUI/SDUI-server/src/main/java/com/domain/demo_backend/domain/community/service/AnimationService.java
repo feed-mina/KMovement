@@ -56,14 +56,6 @@ public class AnimationService {
     private static final int MAX_DAILY_JOBS_PER_USER = 10;
     private static final long MAX_IMAGE_SIZE = 10L * 1024 * 1024;
     private static final long MAX_JOB_IMAGE_SIZE = 50L * 1024 * 1024;
-    private static final Set<String> ALLOWED_OVERLAY_POSITIONS = Set.of(
-            "main_w-overlay_w-10:main_h-overlay_h-10",
-            "10:10",
-            "main_w-overlay_w-10:10",
-            "10:main_h-overlay_h-10",
-            "(main_w-overlay_w)/2:(main_h-overlay_h)/2"
-    );
-
     private final AnimationJobRepository animationJobRepository;
     private final CommunityPostRepository postRepository;
     private final PostImageRepository imageRepository;
@@ -116,35 +108,20 @@ public class AnimationService {
         payload.put("bgm_key", "bright_travel");
         payload.put("allow_fallback", !"tora_cogvideox_i2v".equals(route));
 
-        // Tora is trajectory-controlled: without a trajectory the worker hard-fails
-        // and silently falls back to cogvideox_real. Always forward a preset
-        // (the user's choice, or a sensible default) so real Tora runs.
+        // Tora is photo I2V only. Sketch/doodle inputs are routed to the media
+        // endpoint through animated_drawings_worker or batch_video.
         if ("tora_cogvideox_i2v".equals(route)) {
+            if (request.getOverlayPostImageId() != null) {
+                throw new BusinessException(
+                        "Tora는 사진 I2V 전용입니다. 낙서/스케치는 미디어 애니메이션으로 실행해주세요.",
+                        HttpStatus.BAD_REQUEST
+                );
+            }
             String preset = request.getTrajectoryPreset();
             payload.put(
                     "trajectory_preset",
                     preset != null && !preset.isBlank() ? preset.trim() : "object_pan_right"
             );
-            if (request.getOverlayPostImageId() != null) {
-                PostImage overlayImage = resolvePostImage(
-                        postId,
-                        request.getOverlayPostImageId()
-                );
-                if (overlayImage.getPostImageId().equals(image.getPostImageId())) {
-                    throw new BusinessException(
-                            "배경 사진과 낙서 이미지는 서로 달라야 합니다.",
-                            HttpStatus.BAD_REQUEST
-                    );
-                }
-                payload.put("overlay_image_url", overlayImage.getStorageUrl());
-                payload.put(
-                        "overlay_position",
-                        validatedOverlayPosition(request.getOverlayPosition())
-                );
-                payload.put("overlay_alpha", boundedOverlayAlpha(request.getOverlayAlpha()));
-                payload.put("overlay_speed", boundedOverlaySpeed(request.getOverlaySpeed()));
-                payload.put("overlay_scale_ratio", 0.2);
-            }
         }
 
         return submitToGateway(post, route, 1, "/jobs/runpod", payload);
@@ -474,42 +451,6 @@ public class AnimationService {
 
     private String uniqueCaseId(String prefix) {
         return prefix + "_" + System.currentTimeMillis();
-    }
-
-    private String validatedOverlayPosition(String position) {
-        if (position == null || position.isBlank()) {
-            return "main_w-overlay_w-10:main_h-overlay_h-10";
-        }
-        String value = position.trim();
-        if (!ALLOWED_OVERLAY_POSITIONS.contains(value)) {
-            throw new BusinessException(
-                    "지원하지 않는 GIF 배치 위치입니다.",
-                    HttpStatus.BAD_REQUEST
-            );
-        }
-        return value;
-    }
-
-    private double boundedOverlayAlpha(Double alpha) {
-        double value = alpha == null ? 1.0 : alpha;
-        if (value < 0.1 || value > 1.0) {
-            throw new BusinessException(
-                    "GIF 투명도는 0.1에서 1.0 사이여야 합니다.",
-                    HttpStatus.BAD_REQUEST
-            );
-        }
-        return value;
-    }
-
-    private double boundedOverlaySpeed(Double speed) {
-        double value = speed == null ? 1.0 : speed;
-        if (value < 0.5 || value > 2.0) {
-            throw new BusinessException(
-                    "GIF 재생 속도는 0.5에서 2.0 사이여야 합니다.",
-                    HttpStatus.BAD_REQUEST
-            );
-        }
-        return value;
     }
 
     private String text(Object value) {

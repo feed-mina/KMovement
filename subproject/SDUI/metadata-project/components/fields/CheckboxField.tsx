@@ -2,6 +2,7 @@
 
 import React, { memo } from 'react';
 import { cn } from "@/components/utils/cn";
+import { normalizeDisplayText } from "@/components/utils/displayText";
 
 const CheckboxField = memo(({ id, meta, data, onChange }: any) => {
     const targetKey = meta?.ref_data_id || meta?.refDataId || id;
@@ -12,7 +13,7 @@ const CheckboxField = memo(({ id, meta, data, onChange }: any) => {
     const isReadOnly = meta?.isReadonly === true || meta?.isReadonly === "true" ||
         meta?.is_readonly === true || meta?.is_readonly === "true";
 
-    const label = meta?.labelText || meta?.label_text || '';
+    const label = normalizeDisplayText(meta?.labelText || meta?.label_text || '');
 
     const containerClass = cn(
         "checkbox-field-container",

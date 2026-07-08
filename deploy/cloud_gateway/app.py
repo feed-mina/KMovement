@@ -18,6 +18,8 @@ from pydantic import BaseModel, Field
 
 RUNPOD_API_KEY = os.environ.get("RUNPOD_API_KEY", "")
 RUNPOD_ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID", "")
+RUNPOD_MEDIA_ENDPOINT_ID = os.environ.get("RUNPOD_MEDIA_ENDPOINT_ID", "") or RUNPOD_ENDPOINT_ID
+RUNPOD_TORA_ENDPOINT_ID = os.environ.get("RUNPOD_TORA_ENDPOINT_ID", "") or RUNPOD_ENDPOINT_ID
 FASTAPI_INTERNAL_API_KEY = (
     os.environ.get("FASTAPI_INTERNAL_API_KEY", "").strip()
     or "sdui-internal-dev-key"
@@ -53,6 +55,22 @@ WORKER_ROUTES = {
     "meta_animation",
     "tora_cogvideox_i2v",
 }
+TORA_ROUTES = {"tora_cogvideox_i2v"}
+
+
+def _runpod_endpoint_for_route(route: str) -> str:
+    if route in TORA_ROUTES:
+        return RUNPOD_TORA_ENDPOINT_ID
+    return RUNPOD_MEDIA_ENDPOINT_ID
+
+
+def _configured_runpod_endpoint_ids() -> list[str]:
+    endpoint_ids = [
+        RUNPOD_TORA_ENDPOINT_ID,
+        RUNPOD_MEDIA_ENDPOINT_ID,
+        RUNPOD_ENDPOINT_ID,
+    ]
+    return list(dict.fromkeys(endpoint_id for endpoint_id in endpoint_ids if endpoint_id))
 
 
 class GenerateJobRequest(BaseModel):
@@ -207,6 +225,9 @@ def health() -> dict[str, Any]:
         "counts": manifest["counts"],
         "worker_routes": manifest["worker_routes"],
         "worker_output_dir": manifest["worker_output_dir"],
+        "runpod_endpoint_mode": "split" if RUNPOD_MEDIA_ENDPOINT_ID != RUNPOD_TORA_ENDPOINT_ID else "single",
+        "runpod_media_endpoint_configured": bool(RUNPOD_MEDIA_ENDPOINT_ID),
+        "runpod_tora_endpoint_configured": bool(RUNPOD_TORA_ENDPOINT_ID),
     }
 
 
@@ -308,7 +329,7 @@ def media(asset_id: str) -> FileResponse:
 
 class RunPodJobRequest(BaseModel):
     """RunPod serverless proxy request."""
-    route: str = Field(..., description="cogvideox_real, 3d_photo_light, cogvideo_fallback, gpt_sovits_tts, musicgen, tora_cogvideox_i2v")
+    route: str = Field(..., description="cogvideox_real, 3d_photo_light, cogvideo_fallback, gpt_sovits_tts, musicgen, animated_drawings_worker, tora_cogvideox_i2v")
     case_id: str = "travel_case"
     place: str = "Travel Place"
     image_url: str = Field(..., min_length=1)
@@ -335,22 +356,28 @@ def runpod_proxy(
     _: None = Depends(_require_internal_api_key),
 ) -> JSONResponse:
     """Proxy job to RunPod Serverless endpoint."""
-    if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
+    endpoint_id = _runpod_endpoint_for_route(request.route)
+    if not RUNPOD_API_KEY or not endpoint_id:
         return JSONResponse(
             status_code=501,
-            content={"ok": False, "message": "RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID are required."},
+            content={
+                "ok": False,
+                "message": "RUNPOD_API_KEY and the route endpoint env are required.",
+                "route": request.route,
+                "endpoint_env": "RUNPOD_TORA_ENDPOINT_ID" if request.route in TORA_ROUTES else "RUNPOD_MEDIA_ENDPOINT_ID",
+            },
         )
 
     import httpx
 
     headers = {"Authorization": f"Bearer {RUNPOD_API_KEY}", "Content-Type": "application/json"}
     payload = {"input": request.model_dump()}
-    url = f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/run"
+    url = f"https://api.runpod.ai/v2/{endpoint_id}/run"
 
     try:
         resp = httpx.post(url, headers=headers, json=payload, timeout=30)
         resp.raise_for_status()
-        return JSONResponse(content={"ok": True, **resp.json()})
+        return JSONResponse(content={"ok": True, "endpoint_id": endpoint_id, **resp.json()})
     except Exception as exc:
         return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
 
@@ -361,20 +388,31 @@ def runpod_status(
     _: None = Depends(_require_internal_api_key),
 ) -> JSONResponse:
     """Check RunPod job status."""
-    if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
+    endpoint_ids = _configured_runpod_endpoint_ids()
+    if not RUNPOD_API_KEY or not endpoint_ids:
         return JSONResponse(status_code=501, content={"ok": False, "message": "RunPod not configured."})
 
     import httpx
 
     headers = {"Authorization": f"Bearer {RUNPOD_API_KEY}"}
-    url = f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/status/{job_id}"
+    errors: list[str] = []
 
-    try:
-        resp = httpx.get(url, headers=headers, timeout=30)
-        resp.raise_for_status()
-        return JSONResponse(content={"ok": True, **resp.json()})
-    except Exception as exc:
-        return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
+    for endpoint_id in endpoint_ids:
+        url = f"https://api.runpod.ai/v2/{endpoint_id}/status/{job_id}"
+        try:
+            resp = httpx.get(url, headers=headers, timeout=30)
+            if resp.status_code == 404:
+                errors.append(f"{endpoint_id}: 404")
+                continue
+            resp.raise_for_status()
+            return JSONResponse(content={"ok": True, "endpoint_id": endpoint_id, **resp.json()})
+        except Exception as exc:
+            errors.append(f"{endpoint_id}: {str(exc)[:500]}")
+
+    return JSONResponse(
+        status_code=502,
+        content={"ok": False, "error": "RunPod status lookup failed.", "endpoint_errors": errors},
+    )
 
 
 class BatchImageInput(BaseModel):
@@ -402,10 +440,11 @@ def runpod_batch_proxy(
     _: None = Depends(_require_internal_api_key),
 ) -> JSONResponse:
     """Proxy batch video job to RunPod Serverless endpoint."""
-    if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
+    endpoint_id = RUNPOD_MEDIA_ENDPOINT_ID
+    if not RUNPOD_API_KEY or not endpoint_id:
         return JSONResponse(
             status_code=501,
-            content={"ok": False, "message": "RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID are required."},
+            content={"ok": False, "message": "RUNPOD_API_KEY and RUNPOD_MEDIA_ENDPOINT_ID are required."},
         )
 
     import httpx
@@ -424,12 +463,12 @@ def runpod_batch_proxy(
         }
     }
     headers = {"Authorization": f"Bearer {RUNPOD_API_KEY}", "Content-Type": "application/json"}
-    url = f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/run"
+    url = f"https://api.runpod.ai/v2/{endpoint_id}/run"
 
     try:
         resp = httpx.post(url, headers=headers, json=payload, timeout=30)
         resp.raise_for_status()
-        return JSONResponse(content={"ok": True, **resp.json()})
+        return JSONResponse(content={"ok": True, "endpoint_id": endpoint_id, **resp.json()})
     except Exception as exc:
         return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
 

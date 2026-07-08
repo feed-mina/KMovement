@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 env:
-  KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL || 'https://kmovement-46122739597.europe-west1.run.app' }}
+  KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL }}
 
 jobs:
   build-and-deploy:
@@ -21,6 +21,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+
+      - name: Validate FastAPI endpoint config
+        run: |
+          if [ -z "$KRIDE_FASTAPI_URL" ]; then
+            echo "::error::Set repository variable KRIDE_FASTAPI_URL to the new Cloud Run FastAPI URL."
+            exit 1
+          fi
+          if [ "$KRIDE_FASTAPI_URL" = "https://kmovement-46122739597.europe-west1.run.app" ]; then
+            echo "::error::KRIDE_FASTAPI_URL still points at the legacy Cloud Run service."
+            exit 1
+          fi
 
       # ── Detect what changed ──
       - name: Detect changed paths
@@ -99,6 +110,7 @@ jobs:
         run: |
           docker build \
             --build-arg NEXT_PUBLIC_BACKEND_URL=http://sdui-backend:8080 \
+            --build-arg FASTAPI_URL="${{ env.KRIDE_FASTAPI_URL }}" \
             --build-arg NEXT_PUBLIC_KAKAO_MAP_APP_KEY="${{ secrets.NEXT_PUBLIC_KAKAO_MAP_APP_KEY }}" \
             --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}" \
             --build-arg NEXT_PUBLIC_FIREBASE_API_KEY="${{ secrets.FIREBASE_API_KEY }}" \
@@ -191,9 +203,9 @@ jobs:
 
               # ── GCP FastAPI (KRIDE AI) ──
               location /kride-api/ {
-                  proxy_pass https://kmovement-46122739597.europe-west1.run.app/api/;
+                  proxy_pass ${{ env.KRIDE_FASTAPI_URL }}/api/;
                   proxy_ssl_server_name on;
-                  proxy_set_header Host kmovement-46122739597.europe-west1.run.app;
+                  proxy_set_header Host $proxy_host;
                   proxy_set_header X-Forwarded-Host $host;
                   proxy_set_header X-Real-IP $remote_addr;
                   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

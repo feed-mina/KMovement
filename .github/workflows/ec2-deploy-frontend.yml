@@ -8,12 +8,26 @@ on:
       - ".github/workflows/ec2-deploy-frontend.yml"
   workflow_dispatch:
 
+env:
+  KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL }}
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Validate FastAPI endpoint config
+        run: |
+          if [ -z "$KRIDE_FASTAPI_URL" ]; then
+            echo "::error::Set repository variable KRIDE_FASTAPI_URL to the new Cloud Run FastAPI URL."
+            exit 1
+          fi
+          if [ "$KRIDE_FASTAPI_URL" = "https://kmovement-46122739597.europe-west1.run.app" ]; then
+            echo "::error::KRIDE_FASTAPI_URL still points at the legacy Cloud Run service."
+            exit 1
+          fi
 
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -22,6 +36,7 @@ jobs:
         run: |
           docker build \
             --build-arg NEXT_PUBLIC_BACKEND_URL=https://yerin.duckdns.org \
+            --build-arg FASTAPI_URL="${{ env.KRIDE_FASTAPI_URL }}" \
             --build-arg NEXT_PUBLIC_KAKAO_MAP_APP_KEY="${{ secrets.NEXT_PUBLIC_KAKAO_MAP_APP_KEY }}" \
             --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}" \
             -t ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest \
@@ -54,7 +69,7 @@ jobs:
               --network sdui-network \
               -e NODE_ENV=production \
               -e BACKEND_URL=http://sdui-backend:8080 \
-              -e FASTAPI_URL=https://kmovement-46122739597.europe-west1.run.app \
+              -e FASTAPI_URL=${{ env.KRIDE_FASTAPI_URL }} \
               --restart unless-stopped \
               ${{ secrets.DOCKER_USERNAME }}/sdui-frontend:latest
 

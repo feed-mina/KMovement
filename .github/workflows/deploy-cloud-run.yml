@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 env:
-  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'quartz-kiba' }}
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
   GCP_REGION: ${{ vars.GCP_REGION || 'europe-west1' }}
   CLOUD_RUN_SERVICE: ${{ vars.CLOUD_RUN_SERVICE || 'kmovement' }}
   GAR_REPO: ${{ vars.GAR_REPO || 'kmovement' }}
@@ -38,6 +38,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Validate new GCP project config
+        run: |
+          if [ -z "$GCP_PROJECT_ID" ]; then
+            echo "::error::Set repository variable GCP_PROJECT_ID to the new GCP project id."
+            exit 1
+          fi
+          if [ "$GCP_PROJECT_ID" = "quartz-kiba" ]; then
+            echo "::error::quartz-kiba is the legacy suspended project. Set GCP_PROJECT_ID to the new project."
+            exit 1
+          fi
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2

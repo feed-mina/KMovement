@@ -1481,8 +1481,9 @@ def chat_qa(req: ChatStreamRequest):
 # RunPod Serverless Proxy — 커뮤니티 영상 생성
 # ─────────────────────────────────────────────────────────────────────────────
 RUNPOD_API_KEY = os.environ.get("RUNPOD_API_KEY", "")
-RUNPOD_ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID", "")          # A타입: Media Worker
-RUNPOD_TORA_ENDPOINT_ID = os.environ.get("RUNPOD_TORA_ENDPOINT_ID", "")  # B타입: Tora Worker
+RUNPOD_ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID", "")
+RUNPOD_MEDIA_ENDPOINT_ID = os.environ.get("RUNPOD_MEDIA_ENDPOINT_ID", "") or RUNPOD_ENDPOINT_ID
+RUNPOD_TORA_ENDPOINT_ID = os.environ.get("RUNPOD_TORA_ENDPOINT_ID", "") or RUNPOD_ENDPOINT_ID
 FASTAPI_INTERNAL_API_KEY = (
     os.environ.get("FASTAPI_INTERNAL_API_KEY", "").strip()
     or "sdui-internal-dev-key"
@@ -1494,9 +1495,17 @@ _TORA_ROUTES = {"tora_cogvideox_i2v"}
 
 def _resolve_endpoint_id(route: str) -> str:
     """라우트에 따라 적절한 RunPod 엔드포인트 ID를 반환한다."""
-    if route in _TORA_ROUTES and RUNPOD_TORA_ENDPOINT_ID:
+    if route in _TORA_ROUTES:
         return RUNPOD_TORA_ENDPOINT_ID
-    return RUNPOD_ENDPOINT_ID
+    return RUNPOD_MEDIA_ENDPOINT_ID
+
+
+def _configured_runpod_endpoint_ids() -> list[str]:
+    endpoint_ids: list[str] = []
+    for endpoint_id in (RUNPOD_MEDIA_ENDPOINT_ID, RUNPOD_TORA_ENDPOINT_ID, RUNPOD_ENDPOINT_ID):
+        if endpoint_id and endpoint_id not in endpoint_ids:
+            endpoint_ids.append(endpoint_id)
+    return endpoint_ids
 
 
 def _require_internal_api_key(
@@ -1552,10 +1561,11 @@ def runpod_batch_proxy(
     _: None = Depends(_require_internal_api_key),
 ):
     """Proxy batch video job to RunPod Serverless endpoint."""
-    if not RUNPOD_API_KEY or not RUNPOD_ENDPOINT_ID:
+    endpoint_id = RUNPOD_MEDIA_ENDPOINT_ID
+    if not RUNPOD_API_KEY or not endpoint_id:
         return JSONResponse(
             status_code=501,
-            content={"ok": False, "message": "RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID are required."},
+            content={"ok": False, "message": "RUNPOD_API_KEY and RUNPOD_MEDIA_ENDPOINT_ID are required."},
         )
 
     payload = {
@@ -1573,12 +1583,12 @@ def runpod_batch_proxy(
         }
     }
     headers = {"Authorization": f"Bearer {RUNPOD_API_KEY}", "Content-Type": "application/json"}
-    url = f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/run"
+    url = f"https://api.runpod.ai/v2/{endpoint_id}/run"
 
     try:
         resp = httpx.post(url, headers=headers, json=payload, timeout=30)
         resp.raise_for_status()
-        return JSONResponse(content={"ok": True, **resp.json()})
+        return JSONResponse(content={"ok": True, "endpoint": endpoint_id, "endpoint_id": endpoint_id, **resp.json()})
     except Exception as exc:
         return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
 
@@ -1602,7 +1612,7 @@ def runpod_proxy(
     try:
         resp = httpx.post(url, headers=headers, json=payload, timeout=30)
         resp.raise_for_status()
-        return JSONResponse(content={"ok": True, "endpoint": endpoint_id, **resp.json()})
+        return JSONResponse(content={"ok": True, "endpoint": endpoint_id, "endpoint_id": endpoint_id, **resp.json()})
     except Exception as exc:
         return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
 
@@ -1629,12 +1639,12 @@ def runpod_status(
         try:
             resp = httpx.get(url, headers=headers, timeout=30)
             resp.raise_for_status()
-            return JSONResponse(content={"ok": True, "endpoint": endpoint, **resp.json()})
+            return JSONResponse(content={"ok": True, "endpoint": endpoint, "endpoint_id": endpoint, **resp.json()})
         except Exception as exc:
             return JSONResponse(status_code=502, content={"ok": False, "error": str(exc)[:2000]})
 
     # 미지정 시 Media → Tora 순서로 시도
-    endpoints_to_try = [eid for eid in [RUNPOD_ENDPOINT_ID, RUNPOD_TORA_ENDPOINT_ID] if eid]
+    endpoints_to_try = _configured_runpod_endpoint_ids()
     if not endpoints_to_try:
         return JSONResponse(status_code=501, content={"ok": False, "message": "No RunPod endpoint configured."})
 
@@ -1646,7 +1656,7 @@ def runpod_status(
             if resp.status_code == 404:
                 continue
             resp.raise_for_status()
-            return JSONResponse(content={"ok": True, "endpoint": eid, **resp.json()})
+            return JSONResponse(content={"ok": True, "endpoint": eid, "endpoint_id": eid, **resp.json()})
         except Exception as exc:
             last_exc = exc
 

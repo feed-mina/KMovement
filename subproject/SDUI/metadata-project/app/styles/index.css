@@ -3,6 +3,32 @@
 /* SDUI 동적 클래스 safelist — DB에서 런타임으로 주입되는 클래스 */
 @source inline("grid grid-cols-1 grid-cols-2 grid-cols-3 grid-cols-4 grid-cols-5 grid-cols-6 gap-1 gap-2 gap-3 gap-4 gap-5 gap-6 gap-8 mb-2 mb-6 mb-8 mt-4 pb-4 pb-6 pb-8 pb-10 pb-12 pb-24 pb-28 pt-4 pt-6 pt-8 pt-10 pt-12 p-6 place-items-center sticky top-0 z-10 z-50 aspect-square object-cover object-contain fixed bottom-0 left-0 right-0 bottom-6 right-6 bg-gradient-to-t from-black to-transparent bg-red-600 bg-gray-900 rounded-full rounded-t-3xl min-h-screen h-[50vh] flex-1 bg-black flex flex-col flex-wrap px-6 py-3 py-4 text-xl text-lg text-sm text-2xl font-bold text-white text-gray-300 text-gray-400 w-full");
 
+@theme inline {
+    --color-accent: var(--semantic-accent);
+    --color-accent-strong: var(--semantic-accent-strong);
+    --color-accent-soft: var(--semantic-accent-soft);
+    --color-page: var(--surface-page);
+    --color-surface: var(--surface-card);
+    --color-subtle: var(--surface-subtle);
+    --color-track: var(--surface-track);
+    --color-ink: var(--text-strong);
+    --color-body: var(--text-body);
+    --color-muted: var(--text-muted);
+    --color-invert: var(--text-invert);
+    --color-hair: var(--border-hair);
+    --color-danger: var(--danger);
+    --color-danger-soft: var(--danger-soft);
+    --color-danger-strong: var(--danger-strong);
+    --color-success: var(--success);
+    --color-success-soft: var(--success-soft);
+    --color-success-strong: var(--success-strong);
+    --color-info: var(--info);
+    --color-info-soft: var(--info-soft);
+    --color-info-strong: var(--info-strong);
+    --radius-card: var(--kride-radius-md);
+    --radius-pill: var(--kride-radius-pill);
+}
+
 @import "./tokens.css";
 @import "./common.css";
 @import "./layout.css";

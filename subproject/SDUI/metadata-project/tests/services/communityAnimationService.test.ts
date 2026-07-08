@@ -33,16 +33,12 @@ describe('community animation requests', () => {
             .not.toContain('base64');
     });
 
-    it('submits a separate doodle image and overlay settings for Tora', async () => {
+    it('submits Tora as photo I2V with a trajectory preset only', async () => {
         await communityService.submitAnimation(
             7,
             42,
             'tora_cogvideox_i2v',
             'object_pan_right',
-            '10:10',
-            0.6,
-            1.4,
-            43,
         );
 
         expect(api.post).toHaveBeenCalledWith(
@@ -51,10 +47,6 @@ describe('community animation requests', () => {
                 postImageId: 42,
                 route: 'tora_cogvideox_i2v',
                 trajectoryPreset: 'object_pan_right',
-                overlayPosition: '10:10',
-                overlayAlpha: 0.6,
-                overlaySpeed: 1.4,
-                overlayPostImageId: 43,
             },
         );
     });

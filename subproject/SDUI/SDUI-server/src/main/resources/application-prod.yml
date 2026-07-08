@@ -33,13 +33,13 @@ kakao:
   redirect-uri: ${KAKAO_REDIRECT_URI}
 
 fastapi:
-  url: ${FASTAPI_URL:https://kmovement-46122739597.europe-west1.run.app}
+  url: ${FASTAPI_URL}
   internal-api-key: ${FASTAPI_INTERNAL_API_KEY:sdui-internal-dev-key}
 
 kride:
   fastapi:
-    url: ${KRIDE_FASTAPI_URL:https://kmovement-46122739597.europe-west1.run.app}
-    chatbot-url: ${KRIDE_CHATBOT_URL:https://kmovement-46122739597.europe-west1.run.app}
+    url: ${KRIDE_FASTAPI_URL:${FASTAPI_URL}}
+    chatbot-url: ${KRIDE_CHATBOT_URL:${KRIDE_FASTAPI_URL:${FASTAPI_URL}}}
 
 cloud:
   aws:
@@ -51,7 +51,7 @@ cloud:
       secret-key: ${AWS_SECRET_KEY}
   gcp:
     document-ai:
-      project-id: ${GCP_PROJECT_ID:kdeliver}
+      project-id: ${GCP_PROJECT_ID}
       location: us
       processor-id: ${GCP_PROCESSOR_ID:6ed87cfefab39a91}
       credentials-path: ${GCP_CREDENTIALS_PATH:/app/gcp-credentials.json}

@@ -107,6 +107,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
           RUNPOD_ENDPOINT_ID: ${{ secrets.RUNPOD_ENDPOINT_ID }}
+          RUNPOD_MEDIA_ENDPOINT_ID: ${{ secrets.RUNPOD_MEDIA_ENDPOINT_ID }}
           RUNPOD_TORA_ENDPOINT_ID: ${{ secrets.RUNPOD_TORA_ENDPOINT_ID }}
           FASTAPI_INTERNAL_API_KEY: ${{ secrets.FASTAPI_INTERNAL_API_KEY }}
         run: |
@@ -160,6 +161,7 @@ jobs:
                 - GROQ_API_KEY=${GROQ_API_KEY}
                 - RUNPOD_API_KEY=${RUNPOD_API_KEY}
                 - RUNPOD_ENDPOINT_ID=${RUNPOD_ENDPOINT_ID}
+                - RUNPOD_MEDIA_ENDPOINT_ID=${RUNPOD_MEDIA_ENDPOINT_ID}
                 - RUNPOD_TORA_ENDPOINT_ID=${RUNPOD_TORA_ENDPOINT_ID}
                 - FASTAPI_INTERNAL_API_KEY=${FASTAPI_INTERNAL_API_KEY}
               restart: unless-stopped
@@ -238,6 +240,7 @@ jobs:
           GROQ_API_KEY=__GROQ_API_KEY__
           RUNPOD_API_KEY=__RUNPOD_API_KEY__
           RUNPOD_ENDPOINT_ID=__RUNPOD_ENDPOINT_ID__
+          RUNPOD_MEDIA_ENDPOINT_ID=__RUNPOD_MEDIA_ENDPOINT_ID__
           RUNPOD_TORA_ENDPOINT_ID=__RUNPOD_TORA_ENDPOINT_ID__
           FASTAPI_INTERNAL_API_KEY=__FASTAPI_INTERNAL_API_KEY__
           ENV_EOF
@@ -279,6 +282,7 @@ jobs:
           sed -i "s|__GROQ_API_KEY__|${GROQ_API_KEY}|g" /tmp/deploy.sh
           sed -i "s|__RUNPOD_API_KEY__|${RUNPOD_API_KEY}|g" /tmp/deploy.sh
           sed -i "s|__RUNPOD_ENDPOINT_ID__|${RUNPOD_ENDPOINT_ID}|g" /tmp/deploy.sh
+          sed -i "s|__RUNPOD_MEDIA_ENDPOINT_ID__|${RUNPOD_MEDIA_ENDPOINT_ID}|g" /tmp/deploy.sh
           sed -i "s|__RUNPOD_TORA_ENDPOINT_ID__|${RUNPOD_TORA_ENDPOINT_ID}|g" /tmp/deploy.sh
           sed -i "s|__FASTAPI_INTERNAL_API_KEY__|${FASTAPI_INTERNAL_API_KEY}|g" /tmp/deploy.sh
 

@@ -1,15 +1,17 @@
 # KMovement Cloud Run Deployment Notes
 
-## Current Target
+## Migration Target
 
-Cloud Run service:
+Use a Cloud Run service in the new GCP project. Do not deploy new revisions to
+the legacy suspended project (`quartz-kiba`).
 
 ```text
-https://kmovement-46122739597.europe-west1.run.app/
+https://<new-cloud-run-service-url>/
 ```
 
-As of 2026-06-29 this URL responds with the default Cloud Run placeholder page,
-so the service exists but the KMovement app is not deployed to it yet.
+After the first deployment, copy the generated service URL into repository
+variable `KRIDE_FASTAPI_URL` so EC2, Next.js rewrites, and Spring prod config
+all point at the new FastAPI gateway.
 
 ## Recommended Scope
 
@@ -23,7 +25,8 @@ Keep heavy GPU generation on RunPod or another GPU runtime:
 - AnimatedDrawings / TorchServe GPU
 
 The FastAPI app can call those services through `RUNPOD_API_KEY`,
-`RUNPOD_ENDPOINT_ID`, and `RUNPOD_TORA_ENDPOINT_ID`.
+`RUNPOD_MEDIA_ENDPOINT_ID`, and `RUNPOD_TORA_ENDPOINT_ID`. The legacy
+`RUNPOD_ENDPOINT_ID` remains only as a compatibility fallback.
 
 ## FastAPI Container
 
@@ -48,7 +51,7 @@ Health check path:
 Expected public health URL after a successful deployment:
 
 ```text
-https://kmovement-46122739597.europe-west1.run.app/api/health
+https://<new-cloud-run-service-url>/api/health
 ```
 
 ## Required Environment Variables
@@ -77,7 +80,7 @@ SUPABASE_URL
 SUPABASE_KEY
 GROQ_API_KEY
 RUNPOD_API_KEY
-RUNPOD_ENDPOINT_ID
+RUNPOD_MEDIA_ENDPOINT_ID
 RUNPOD_TORA_ENDPOINT_ID
 FASTAPI_INTERNAL_API_KEY
 ```
@@ -134,10 +137,15 @@ Artifact Registry, then deploys that image to Cloud Run. This avoids the
 `gcloud run deploy --source .` source-upload path that requires permission to
 create a temporary Cloud Storage bucket.
 
+Required repository variable:
+
+```text
+GCP_PROJECT_ID=<new-gcp-project-id>
+```
+
 Defaults:
 
 ```text
-GCP_PROJECT_ID=quartz-kiba
 GCP_REGION=europe-west1
 CLOUD_RUN_SERVICE=kmovement
 GAR_REPO=kmovement
@@ -149,8 +157,8 @@ CLOUD_RUN_MIN_INSTANCES=0
 CLOUD_RUN_MAX_INSTANCES=3
 ```
 
-Set `GCP_SA_KEY` as a GitHub Actions secret for the active `quartz-kiba`
-project. Optional repository variables can override the defaults above:
+Set `GCP_SA_KEY` as a GitHub Actions secret for the new project. Optional
+repository variables can override the defaults above:
 
 ```text
 GCP_PROJECT_ID
@@ -182,21 +190,15 @@ Run source builds.
 
 ## EC2 Proxy Follow-up
 
-If this Cloud Run service replaces the old GCP VM FastAPI endpoint, update EC2
-Nginx and frontend/Spring env vars from:
+After the new Cloud Run service is live, set the repository variable:
 
 ```text
-http://34.64.221.240:8000
+KRIDE_FASTAPI_URL=https://<new-cloud-run-service-url>
 ```
 
-to:
+Then EC2 Nginx and frontend/Spring env vars should route
+`https://yerin.duckdns.org/kride-api/health` to:
 
 ```text
-https://kmovement-46122739597.europe-west1.run.app
-```
-
-Then `https://yerin.duckdns.org/kride-api/health` should proxy to:
-
-```text
-https://kmovement-46122739597.europe-west1.run.app/api/health
+https://<new-cloud-run-service-url>/api/health
 ```

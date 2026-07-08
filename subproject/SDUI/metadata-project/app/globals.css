@@ -13,21 +13,20 @@
 
 
 :root {
-    --background: #ffffff;
-    --foreground: #171717;
-    --primary: #4A90E2;
-    --bg-gray: #f8f9fa;
-    --border: #dee2e6;
-    --text-main: #212529;
-    --text-sub: #6c757d;
+    --background: var(--surface-page, #FDFBF7);
+    --foreground: var(--text-strong, #111111);
+    --bg-gray: var(--surface-subtle, #F5F1EA);
+    --border: var(--border-hair, #E5E7EB);
+    --text-main: var(--text-body, #374151);
+    --text-sub: var(--text-muted, #6B7280);
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --background: #0a0a0a;
-        --foreground: #ededed;
-        --bg-gray: #1a1a1a;
-        --border: #333;
+        --background: var(--surface-page, #0A0A0A);
+        --foreground: var(--text-strong, #FFFFFF);
+        --bg-gray: var(--surface-subtle, #171717);
+        --border: var(--border-hair, #2A2A2A);
     }
 }
 

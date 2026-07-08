@@ -701,9 +701,6 @@ function CommunityDetail({ postId }: { postId: number }) {
     const [animStatus, setAnimStatus] = useState<AnimationStatusResponse | null>(null);
     const [animSubmitting, setAnimSubmitting] = useState(false);
     const [animRouteModal, setAnimRouteModal] = useState(false);
-    const [overlayPosition, setOverlayPosition] = useState('main_w-overlay_w-10:main_h-overlay_h-10');
-    const [overlayAlpha, setOverlayAlpha] = useState(1.0);
-    const [overlaySpeed, setOverlaySpeed] = useState(1.0);
     const [trajectoryPreset, setTrajectoryPreset] = useState('object_pan_right');
     const [batchModal, setBatchModal] = useState(false);
     const [batchTtsTexts, setBatchTtsTexts] = useState<string[]>([]);
@@ -807,17 +804,12 @@ function CommunityDetail({ postId }: { postId: number }) {
 
         setAnimRouteModal(false);
         setAnimSubmitting(true);
-        const usesOverlay = route === 'tora_cogvideox_i2v' && Boolean(doodleImage);
         try {
             const result = await communityService.submitAnimation(
                 postId,
                 postImageId,
                 route,
                 route === 'tora_cogvideox_i2v' ? trajectoryPreset : '',
-                usesOverlay ? overlayPosition : undefined,
-                usesOverlay ? overlayAlpha : undefined,
-                usesOverlay ? overlaySpeed : undefined,
-                usesOverlay ? doodleImage?.postImageId : undefined,
             );
             setAnimStatus(result);
             startAnimPolling();
@@ -1091,52 +1083,6 @@ function CommunityDetail({ postId }: { postId: number }) {
                                     </button>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '16px 0' }}>
-                                    <div className="community-panel community-panel-secondary">
-                                        <h3>GIF 오버레이 설정</h3>
-                                        <div style={{ display: 'grid', gap: 12 }}>
-                                            <label className="community-input-label">
-                                                위치
-                                                <select
-                                                    className="community-input"
-                                                    value={overlayPosition}
-                                                    onChange={(e) => setOverlayPosition(e.target.value)}
-                                                >
-                                                    <option value="main_w-overlay_w-10:main_h-overlay_h-10">우측 하단</option>
-                                                    <option value="10:10">좌측 상단</option>
-                                                    <option value="main_w-overlay_w-10:10">우측 상단</option>
-                                                    <option value="10:main_h-overlay_h-10">좌측 하단</option>
-                                                    <option value="(main_w-overlay_w)/2:(main_h-overlay_h)/2">가운데</option>
-                                                </select>
-                                            </label>
-                                            <label className="community-input-label">
-                                                투명도 {overlayAlpha.toFixed(2)}
-                                                <input
-                                                    className="community-input"
-                                                    type="range"
-                                                    min={0.1}
-                                                    max={1.0}
-                                                    step={0.05}
-                                                    value={overlayAlpha}
-                                                    onChange={(e) => setOverlayAlpha(Number(e.target.value))}
-                                                />
-                                            </label>
-                                            <label className="community-input-label">
-                                                재생 속도 {overlaySpeed.toFixed(2)}x
-                                                <input
-                                                    className="community-input"
-                                                    type="range"
-                                                    min={0.5}
-                                                    max={2.0}
-                                                    step={0.1}
-                                                    value={overlaySpeed}
-                                                    onChange={(e) => setOverlaySpeed(Number(e.target.value))}
-                                                />
-                                            </label>
-                                            <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
-                                                Tora 영상 위에 마지막 낙서를 원본 사진 너비의 1/5 크기로 투명 합성합니다. 위치, 투명도, 재생 속도를 조절할 수 있습니다.
-                                            </p>
-                                        </div>
-                                    </div>
                                     <button
                                         className="community-primary-btn"
                                         type="button"
@@ -1171,13 +1117,12 @@ function CommunityDetail({ postId }: { postId: number }) {
                                         className="community-primary-btn"
                                         type="button"
                                         disabled={
-                                            !post?.images?.some((image) => !isDoodleImage(image)) ||
-                                            !post.images.some(isDoodleImage)
+                                            !post?.images?.some((image) => !isDoodleImage(image))
                                         }
                                         onClick={() => submitAnimation('tora_cogvideox_i2v')}
                                     >
-                                        사진 Tora + 낙서 GIF
-                                        <br /><small>첫 사진에 경로 제어를 적용하고 마지막 낙서를 1/5 크기로 합성</small>
+                                        <span>사진 Tora 경로 제어</span>
+                                        <br /><small>사진 전용 I2V입니다. 낙서/스케치는 미디어 애니메이션으로 실행됩니다.</small>
                                     </button>
                                     <button
                                         className="community-primary-btn"
