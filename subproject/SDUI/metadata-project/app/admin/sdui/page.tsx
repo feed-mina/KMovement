@@ -110,6 +110,7 @@ export default function SduiAdminPage() {
     const [isFetching, setIsFetching] = useState(false);
     const [detailLoading, setDetailLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [copyStatus, setCopyStatus] = useState('');
 
     const loadInventory = useCallback(async () => {
         if (!isLoggedIn || !isAdmin) return;
@@ -147,6 +148,7 @@ export default function SduiAdminPage() {
 
         let ignore = false;
         setDetailLoading(true);
+        setCopyStatus('');
         api.get<ApiEnvelope<SduiScreenDetail> | SduiScreenDetail>(`/api/admin/sdui/screens/${encodeURIComponent(selectedScreenId)}`)
             .then((res) => {
                 if (!ignore) setScreenDetail(unwrap<SduiScreenDetail>(res.data));
@@ -196,6 +198,20 @@ export default function SduiAdminPage() {
         () => screens.reduce((sum, screen) => sum + screen.componentCount, 0),
         [screens],
     );
+
+    const selectedPreviewHref = selectedScreenId
+        ? `/view/${encodeURIComponent(selectedScreenId)}`
+        : '#';
+
+    const copyScreenMetadata = useCallback(async () => {
+        if (!screenDetail) return;
+        try {
+            await navigator.clipboard.writeText(JSON.stringify(screenDetail, null, 2));
+            setCopyStatus('Copied');
+        } catch {
+            setCopyStatus('Copy failed');
+        }
+    }, [screenDetail]);
 
     if (isLoading) {
         return (
@@ -321,9 +337,29 @@ export default function SduiAdminPage() {
                         </section>
 
                         <section className="rounded-lg border border-gray-200 bg-white shadow-sm">
-                            <div className="border-b border-gray-200 px-4 py-4">
-                                <div className="text-sm font-semibold text-gray-500">Selected screen</div>
-                                <div className="mt-1 break-words text-xl font-semibold">{selectedScreenId || '-'}</div>
+                            <div className="flex flex-col gap-3 border-b border-gray-200 px-4 py-4 md:flex-row md:items-center md:justify-between">
+                                <div>
+                                    <div className="text-sm font-semibold text-gray-500">Selected screen</div>
+                                    <div className="mt-1 break-words text-xl font-semibold">{selectedScreenId || '-'}</div>
+                                    {copyStatus && <div className="mt-1 text-xs font-semibold text-gray-500">{copyStatus}</div>}
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    <Link
+                                        className={`inline-flex h-9 items-center rounded-md border px-3 text-sm font-semibold ${selectedScreenId ? 'border-gray-300 bg-white text-gray-900 hover:bg-gray-100' : 'pointer-events-none border-gray-200 bg-gray-100 text-gray-400'}`}
+                                        href={selectedPreviewHref}
+                                        target="_blank"
+                                    >
+                                        Open preview
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        className="inline-flex h-9 items-center rounded-md border border-gray-300 bg-white px-3 text-sm font-semibold text-gray-900 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                        onClick={() => void copyScreenMetadata()}
+                                        disabled={!screenDetail}
+                                    >
+                                        Copy JSON
+                                    </button>
+                                </div>
                             </div>
                             <div className="max-h-[680px] overflow-auto">
                                 {detailLoading ? (
