@@ -31,6 +31,8 @@ import KrideWarningToast from "@/components/fields/kride/KrideWarningToast";
 import TypewriterText from "@/components/fields/kride/TypewriterText";
 import KrideChatComponent from "@/components/fields/kride/chat/KrideChatComponent";
 import ThemeSettingsEditor from "@/components/fields/theme/ThemeSettingsEditor";
+import StatCard from "@/components/fields/stats/StatCard";
+import Chart from "@/components/fields/stats/Chart";
 
 const GroupComponent: React.FC<any> = ({ children }) => <>{children}</>;
 
@@ -69,4 +71,6 @@ export const componentMap: Record<string, React.FC<any>> = {
     TYPEWRITER_TEXT: withRenderTrack(TypewriterText, "TypewriterText"),
     KRIDE_CHAT: withRenderTrack(KrideChatComponent, "KrideChatComponent"),
     THEME_EDITOR: withRenderTrack(ThemeSettingsEditor, "ThemeSettingsEditor"),
+    STAT_CARD: withRenderTrack(StatCard, "StatCard"),
+    CHART: withRenderTrack(Chart, "Chart"),
 };
