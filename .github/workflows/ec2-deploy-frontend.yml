@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL }}
+  KRIDE_FASTAPI_URL: ${{ vars.KRIDE_FASTAPI_URL || secrets.KRIDE_FASTAPI_URL || secrets.GCP_FASTAPI_URL || secrets.FASTAPI_URL }}
 
 jobs:
   build-and-deploy:

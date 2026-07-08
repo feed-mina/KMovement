@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 env:
-  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}
   GCP_REGION: ${{ vars.GCP_REGION || 'europe-west1' }}
   CLOUD_RUN_SERVICE: ${{ vars.CLOUD_RUN_SERVICE || 'kmovement' }}
   GAR_REPO: ${{ vars.GAR_REPO || 'kmovement' }}
