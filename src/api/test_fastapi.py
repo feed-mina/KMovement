@@ -281,3 +281,53 @@ class TestRecommendAI:
         assert calls
         assert calls[0][0][0] == "poi_recommendation"
         assert calls[0][0][1].user_sqno == 7
+
+
+class TestRouteHistoryAnalytics:
+    def test_route_history_endpoint_returns_timeline_items(self):
+        original = _module.fetch_user_route_history
+        _module.fetch_user_route_history = lambda user_id, limit=20, offset=0: [
+            {"id": "h1", "title": f"Route for {user_id}", "activity_date": "2026-07-08"}
+        ]
+        try:
+            res = client.get("/api/users/7/route-history?limit=3&offset=1")
+        finally:
+            _module.fetch_user_route_history = original
+
+        assert res.status_code == 200
+        body = res.json()
+        assert body[0]["id"] == "h1"
+        assert body[0]["title"] == "Route for 7"
+
+    def test_route_summary_endpoint_returns_aggregate_object(self):
+        original = _module.fetch_user_route_summary
+        _module.fetch_user_route_summary = lambda user_id: {
+            "total_routes": 2,
+            "visited_regions": [{"label": "Seoul", "value": 2}],
+            "preferred_artists": [{"label": "BTS", "value": 1}],
+        }
+        try:
+            res = client.get("/api/users/7/summary")
+        finally:
+            _module.fetch_user_route_summary = original
+
+        assert res.status_code == 200
+        body = res.json()
+        assert body["total_routes"] == 2
+        assert body["visited_regions"][0]["label"] == "Seoul"
+
+    def test_travel_trends_endpoint_returns_admin_chart_series(self):
+        original = _module.fetch_travel_trends
+        _module.fetch_travel_trends = lambda limit=10: {
+            "regions": [{"label": "Seoul", "value": limit}],
+            "artists": [{"label": "BTS", "value": 3}],
+        }
+        try:
+            res = client.get("/api/stats/travel-trends?limit=5")
+        finally:
+            _module.fetch_travel_trends = original
+
+        assert res.status_code == 200
+        body = res.json()
+        assert body["regions"][0]["value"] == 5
+        assert body["artists"][0]["label"] == "BTS"

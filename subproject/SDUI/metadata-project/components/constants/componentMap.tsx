@@ -34,6 +34,7 @@ import ThemeSettingsEditor from "@/components/fields/theme/ThemeSettingsEditor";
 import StatCard from "@/components/fields/stats/StatCard";
 import Chart from "@/components/fields/stats/Chart";
 import GalleryGrid from "@/components/fields/gallery/GalleryGrid";
+import HistoryList from "@/components/fields/history/HistoryList";
 
 const GroupComponent: React.FC<any> = ({ children }) => <>{children}</>;
 
@@ -90,6 +91,7 @@ export const componentRegistry: Record<string, ComponentRegistryEntry> = {
     STAT_CARD: register(StatCard),
     CHART: register(Chart),
     GALLERY_GRID: register(GalleryGrid),
+    HISTORY_LIST: register(HistoryList),
 };
 
 export const componentMap: Record<string, React.FC<any>> = Object.fromEntries(

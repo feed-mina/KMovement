@@ -36,7 +36,12 @@ from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 load_dotenv()
 
-from src.api.route_history import save_user_route_history
+from src.api.route_history import (
+    fetch_travel_trends,
+    fetch_user_route_history,
+    fetch_user_route_summary,
+    save_user_route_history,
+)
 
 try:
     from src.api.neo4j_client import get_artist_pois, get_region_pois, get_regions
@@ -422,6 +427,25 @@ def health():
 # ─────────────────────────────────────────────
 # POST /api/recommend
 # ─────────────────────────────────────────────
+@app.get("/api/users/{user_id}/route-history")
+def user_route_history(
+    user_id: str,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+):
+    return fetch_user_route_history(user_id, limit=limit, offset=offset)
+
+
+@app.get("/api/users/{user_id}/summary")
+def user_route_summary(user_id: str):
+    return fetch_user_route_summary(user_id)
+
+
+@app.get("/api/stats/travel-trends")
+def travel_trends(limit: int = Query(10, ge=1, le=20)):
+    return fetch_travel_trends(limit=limit)
+
+
 @app.post("/api/recommend")
 def recommend(req: RecommendRequest):
     """반경 내 상위 N개 세그먼트 반환"""

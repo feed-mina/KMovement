@@ -20,4 +20,22 @@ describe("ADMIN_DASHBOARD SDUI config helpers", () => {
             { label: "2026-07", value: 82, color: undefined },
         ]);
     });
+
+    it("selects travel trend regions from FastAPI aggregate responses", () => {
+        const apiResponse = {
+            regions: [
+                { label: "Seoul", value: 9 },
+                { label: "Busan", value: 4 },
+            ],
+            artists: [
+                { label: "BTS", value: 7 },
+            ],
+        };
+
+        const selected = selectDataPath(apiResponse, { dataPath: "regions" });
+        expect(normalizeChartData(selected, { labelKey: "label", valueKey: "value" })).toEqual([
+            { label: "Seoul", value: 9, color: undefined },
+            { label: "Busan", value: 4, color: undefined },
+        ]);
+    });
 });
