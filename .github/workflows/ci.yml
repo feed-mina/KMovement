@@ -52,6 +52,7 @@ jobs:
         working-directory: ./subproject/SDUI/metadata-project
         env:
           NEXT_PUBLIC_API_URL: http://localhost:8080
+          FASTAPI_URL: http://localhost:8000
 
   # ── FastAPI (K-Ride AI) ────────────────────────────────────────────────────
   fastapi:
