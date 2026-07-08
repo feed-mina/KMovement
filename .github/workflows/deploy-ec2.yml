@@ -277,11 +277,11 @@ jobs:
           }
 
           # ── Pull images ──
-          # Free space before pulling large service images. Volumes are intentionally preserved.
+          # Free space before pulling large service images. Volumes and running containers are intentionally preserved.
           docker system df || true
           docker container prune -f --filter "until=24h" || true
-          docker image prune -af --filter "until=24h" || true
-          docker builder prune -af --filter "until=24h" || true
+          docker image prune -af || true
+          docker builder prune -af || true
           docker system df || true
 
           if [ "__DEPLOY_BACKEND__" = "true" ]; then
@@ -294,7 +294,7 @@ jobs:
             docker pull __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__
           fi
 
-          docker image prune -af --filter "until=24h" || true
+          docker image prune -af || true
 
           # ── Redis ──
           docker inspect sdui-redis >/dev/null 2>&1 || docker run -d --name sdui-redis --network sdui-network redis:7-alpine
