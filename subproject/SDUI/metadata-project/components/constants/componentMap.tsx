@@ -36,41 +36,60 @@ import Chart from "@/components/fields/stats/Chart";
 
 const GroupComponent: React.FC<any> = ({ children }) => <>{children}</>;
 
-export const componentMap: Record<string, React.FC<any>> = {
-    MODAL: withRenderTrack(Modal, "Modal"),
-    INPUT: withRenderTrack(InputField, "InputField"),
-    TEXT: withRenderTrack(TextField, "TextField"),
-    PASSWORD: withRenderTrack(PasswordField, "PasswordField"),
-    BUTTON: withRenderTrack(ButtonField, "ButtonField"),
-    SNS_BUTTON: withRenderTrack(ButtonField, "ButtonField"),
-    LINK_BUTTON: withRenderTrack(ButtonField, "ButtonField"),
-    IMAGE: withRenderTrack(ImageField, "ImageField"),
-    EMAIL_SELECT: withRenderTrack(EmailSelectField, "EmailSelectField"),
-    EMOTION_SELECT: withRenderTrack(EmotionSelectField, "EmotionSelectField"),
-    SELECT: withRenderTrack(SelectField, "SelectField"),
-    TEXTAREA: withRenderTrack(TextAreaField, "TextAreaField"),
-    TIME_RECORD_WIDGET: withRenderTrack(RecordTimeComponent, "RecordTimeComponent"),
-    DATETIME_PICKER: withRenderTrack(DateTimePicker, "DateTimePicker"),
-    TIME_SELECT: withRenderTrack(TimeSelect, "TimeSelect"),
-    TIME_SLOT_RECORD: withRenderTrack(TimeSlotRecord, "TimeSlotRecord"),
-    ADDRESS_SEARCH_GROUP: withRenderTrack(AddressSearchGroup, "AddressSearchGroup"),
-    GROUP: withRenderTrack(GroupComponent, "GroupField"),
-    ADMIN_USER_TABLE: withRenderTrack(AdminUserTable, "AdminUserTable"),
-    AI_CHAT: withRenderTrack(AIChatComponent, "AIChatComponent"),
-    AI_CHAT_V2: withRenderTrack(AIChatComponentV2, "AIChatComponentV2"),
-    AI_INTERVIEW: withRenderTrack(AIInterviewComponent, "AIInterviewComponent"),
-    CHECKBOX: withRenderTrack(CheckboxField, "CheckboxField"),
-    DURATION_BUTTON: withRenderTrack(DurationButton, "DurationButton"),
-    SELECTION_CARD: withRenderTrack(SelectionCard, "SelectionCard"),
-    PURPOSE_CARD: withRenderTrack(PurposeCard, "PurposeCard"),
-    DUAL_RANGE_SLIDER: withRenderTrack(DualRangeSlider, "DualRangeSlider"),
-    MAP_VIEW: withRenderTrack(KrideMapView, "KrideMapView"),
-    ITINERARY_PANEL: withRenderTrack(ItineraryPanel, "ItineraryPanel"),
-    KRIDE_NEXT_BTN: withRenderTrack(KrideNextButton, "KrideNextButton"),
-    KRIDE_WARNING: withRenderTrack(KrideWarningToast, "KrideWarningToast"),
-    TYPEWRITER_TEXT: withRenderTrack(TypewriterText, "TypewriterText"),
-    KRIDE_CHAT: withRenderTrack(KrideChatComponent, "KrideChatComponent"),
-    THEME_EDITOR: withRenderTrack(ThemeSettingsEditor, "ThemeSettingsEditor"),
-    STAT_CARD: withRenderTrack(StatCard, "StatCard"),
-    CHART: withRenderTrack(Chart, "Chart"),
+export interface ComponentRegistryEntry {
+    component: React.FC<any>;
+    needsFormData?: boolean;
+    needsSetFormData?: boolean;
+    renderAsModal?: boolean;
+}
+
+const register = (
+    Component: React.FC<any>,
+    traits: Omit<ComponentRegistryEntry, "component"> = {}
+): ComponentRegistryEntry => ({
+    component: withRenderTrack(Component, Component.displayName || Component.name || "Field"),
+    ...traits,
+});
+
+export const componentRegistry: Record<string, ComponentRegistryEntry> = {
+    MODAL: register(Modal, { renderAsModal: true }),
+    INPUT: register(InputField),
+    TEXT: register(TextField),
+    PASSWORD: register(PasswordField),
+    BUTTON: register(ButtonField),
+    SNS_BUTTON: register(ButtonField),
+    LINK_BUTTON: register(ButtonField),
+    IMAGE: register(ImageField),
+    EMAIL_SELECT: register(EmailSelectField),
+    EMOTION_SELECT: register(EmotionSelectField),
+    SELECT: register(SelectField),
+    TEXTAREA: register(TextAreaField),
+    TIME_RECORD_WIDGET: register(RecordTimeComponent),
+    DATETIME_PICKER: register(DateTimePicker),
+    TIME_SELECT: register(TimeSelect),
+    TIME_SLOT_RECORD: register(TimeSlotRecord),
+    ADDRESS_SEARCH_GROUP: register(AddressSearchGroup, { needsFormData: true, needsSetFormData: true }),
+    GROUP: register(GroupComponent),
+    ADMIN_USER_TABLE: register(AdminUserTable),
+    AI_CHAT: register(AIChatComponent),
+    AI_CHAT_V2: register(AIChatComponentV2),
+    AI_INTERVIEW: register(AIInterviewComponent),
+    CHECKBOX: register(CheckboxField),
+    DURATION_BUTTON: register(DurationButton),
+    SELECTION_CARD: register(SelectionCard, { needsFormData: true }),
+    PURPOSE_CARD: register(PurposeCard, { needsFormData: true }),
+    DUAL_RANGE_SLIDER: register(DualRangeSlider, { needsFormData: true }),
+    MAP_VIEW: register(KrideMapView),
+    ITINERARY_PANEL: register(ItineraryPanel),
+    KRIDE_NEXT_BTN: register(KrideNextButton, { needsFormData: true }),
+    KRIDE_WARNING: register(KrideWarningToast),
+    TYPEWRITER_TEXT: register(TypewriterText),
+    KRIDE_CHAT: register(KrideChatComponent),
+    THEME_EDITOR: register(ThemeSettingsEditor),
+    STAT_CARD: register(StatCard),
+    CHART: register(Chart),
 };
+
+export const componentMap: Record<string, React.FC<any>> = Object.fromEntries(
+    Object.entries(componentRegistry).map(([type, entry]) => [type, entry.component])
+) as Record<string, React.FC<any>>;
