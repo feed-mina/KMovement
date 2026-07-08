@@ -1,8 +1,9 @@
 'use client';
 
+import { KrideSkeleton } from "@/components/fields/kride/atoms/KridePrimitives";
 import { formatMetric, normalizeChartData, readClassName, readLabel, readMetaProps, selectDataPath } from "./statsUtils";
 
-const PALETTE = ["#e11d48", "#0f9f6e", "#2563eb", "#f59e0b", "#7c3aed", "#0891b2"];
+const PALETTE = ["var(--danger)", "var(--success)", "var(--info)", "var(--warning)", "#7c3aed", "#0891b2"];
 
 function chartTypeFrom(metaClass: string, explicitType?: unknown) {
   const type = String(explicitType ?? "").toLowerCase();
@@ -15,8 +16,28 @@ function chartTypeFrom(metaClass: string, explicitType?: unknown) {
 function EmptyChart({ title }: { title: string }) {
   return (
     <div className="stats-chart__empty" role="status">
-      <span>{title || "차트"}</span>
+      <span className="stats-empty-illustration" aria-hidden="true" />
+      <strong>{title || "Chart"}</strong>
+      <p>데이터가 쌓이면 라이와 함께 흐름을 보여드릴게요.</p>
     </div>
+  );
+}
+
+function ChartSkeleton({ id, title }: { id?: string; title: string }) {
+  return (
+    <section id={id} className="stats-chart is-loading" aria-label={title} aria-busy="true">
+      <div className="stats-chart__header">
+        <KrideSkeleton width="42%" height={18} />
+        <KrideSkeleton width="58%" height={12} />
+      </div>
+      <div className="stats-chart__skeleton-bars">
+        <KrideSkeleton height="38%" />
+        <KrideSkeleton height="62%" />
+        <KrideSkeleton height="48%" />
+        <KrideSkeleton height="76%" />
+        <KrideSkeleton height="55%" />
+      </div>
+    </section>
   );
 }
 
@@ -36,12 +57,14 @@ function BarChart({ points }: { points: ReturnType<typeof normalizeChartData> })
         return (
           <g key={`${item.label}-${index}`}>
             <rect
+              className="stats-chart__bar"
               x={x}
               y={y}
               width={barWidth}
               height={barHeight}
               rx="4"
               fill={item.color ?? PALETTE[index % PALETTE.length]}
+              style={{ animationDelay: `${index * 55}ms` }}
             />
             <text x={x + barWidth / 2} y="154" textAnchor="middle" className="stats-chart__axis">
               {item.label.slice(0, 7)}
@@ -70,7 +93,18 @@ function LineChart({ points }: { points: ReturnType<typeof normalizeChartData> }
 
   return (
     <svg className="stats-chart__svg" viewBox={`0 0 ${width} ${height}`} role="img">
-      <polyline points={path} fill="none" stroke="#e11d48" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline
+        className="stats-chart__line-path"
+        points={path}
+        fill="none"
+        stroke="var(--danger)"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        pathLength={1}
+        strokeDasharray="1"
+        strokeDashoffset="1"
+      />
       {coords.map((item, index) => (
         <g key={`${item.label}-${index}`}>
           <circle cx={item.x} cy={item.y} r="5" fill={item.color ?? PALETTE[index % PALETTE.length]} />
@@ -101,6 +135,7 @@ function DonutChart({ points }: { points: ReturnType<typeof normalizeChartData> 
           const dash = `${length} ${circumference - length}`;
           const segment = (
             <circle
+              className="stats-chart__donut-segment"
               key={`${item.label}-${index}`}
               cx="60"
               cy="60"
@@ -112,6 +147,7 @@ function DonutChart({ points }: { points: ReturnType<typeof normalizeChartData> 
               strokeDashoffset={offset}
               strokeLinecap="round"
               transform="rotate(-90 60 60)"
+              style={{ animationDelay: `${index * 70}ms` }}
             />
           );
           offset -= length;
@@ -145,6 +181,10 @@ export default function Chart({ id, meta, data }: any) {
   const points = normalizeChartData(selectDataPath(data, props), props).slice(0, Number(props.limit ?? 12));
   const caption = props.caption === undefined || props.caption === null ? "" : String(props.caption);
   const className = ["stats-chart", `stats-chart--${type}`, metaClass].filter(Boolean).join(" ");
+
+  if (data === undefined) {
+    return <ChartSkeleton id={id} title={title} />;
+  }
 
   return (
     <section id={id} className={className} aria-label={title}>

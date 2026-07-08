@@ -277,6 +277,13 @@ jobs:
           }
 
           # ── Pull images ──
+          # Free space before pulling large service images. Volumes are intentionally preserved.
+          docker system df || true
+          docker container prune -f --filter "until=24h" || true
+          docker image prune -af --filter "until=24h" || true
+          docker builder prune -af --filter "until=24h" || true
+          docker system df || true
+
           if [ "__DEPLOY_BACKEND__" = "true" ]; then
             docker pull __SDUI_IMAGE__:__BRANCH_TAG__
           fi
