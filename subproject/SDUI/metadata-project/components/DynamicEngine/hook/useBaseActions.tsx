@@ -3,12 +3,12 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { flattenMetadata } from "../..//utils/metadataUtils";
 import { useAuth } from "@/context/AuthContext";
+import { getFormPersistence } from "@/components/screens/persistence";
 
 // @@@@ useBaseActions 역할 : 모든 페이지에서 공통으로 쓰는 기능, 화면의 기억과 상태 관리 : 화면에 보이는 이벽창에 사용자가 무엇을 적었는지 혹은 서버에서 가져온 데이터를 어떻게 보관할지 담당한다, 데이터의 초기화외 동기화
 // * initialData(조회데이터) 가 오면 그걸 현재 입력 폼(formData) 에 넣는다. (ex 수정화면에서 기존 내용을 볼수있다)
 
-const KRIDE_STORAGE_KEY = 'kride_form';
-const isKrideScreen = (id: string) => id.startsWith('KRIDE_');
+// 폼 영속화 여부는 도메인이 아니라 persistence 레지스트리가 결정한다(코어 탈도메인화).
 
 // screenId를 인자에 추가해서 어떤 페이지인지 알 수 있게 해
 export const useBaseActions = (screenId: string, metadata: any[] = [], initialData: any = {}) => {
@@ -21,9 +21,10 @@ export const useBaseActions = (screenId: string, metadata: any[] = [], initialDa
                 email: params.get("email") || "",
                 code: params.get("code") || ""
             };
-            if (isKrideScreen(screenId)) {
+            const persist = getFormPersistence(screenId);
+            if (persist) {
                 try {
-                    const saved = localStorage.getItem(KRIDE_STORAGE_KEY);
+                    const saved = localStorage.getItem(persist.storageKey);
                     if (saved) return { ...base, ...JSON.parse(saved) };
                 } catch {}
             }
@@ -40,8 +41,8 @@ export const useBaseActions = (screenId: string, metadata: any[] = [], initialDa
     // 1. Metadata가 바뀌면 (화면 이동 시) 폼 데이터 초기화
     if (metadata !== prevMetadata) {
         setPrevMetadata(metadata);
-        // KRIDE 화면은 localStorage에서 복원하므로 초기화하지 않음
-        if (!isKrideScreen(screenId)) {
+        // 영속화 대상 화면(예: 온보딩)은 localStorage에서 복원하므로 초기화하지 않음
+        if (!getFormPersistence(screenId)) {
             const params = new URLSearchParams(window.location.search);
             const urlEmail = params.get("email");
             const UrlCode = params.get("code");
@@ -73,8 +74,9 @@ export const useBaseActions = (screenId: string, metadata: any[] = [], initialDa
     const handleChange = useCallback((id: string, value: any) => {
         setFormData((prev: any) => {
             const updated = { ...prev, [id]: value };
-            if (isKrideScreen(screenId) && typeof window !== 'undefined') {
-                try { localStorage.setItem(KRIDE_STORAGE_KEY, JSON.stringify(updated)); } catch {}
+            const persist = getFormPersistence(screenId);
+            if (persist && typeof window !== 'undefined') {
+                try { localStorage.setItem(persist.storageKey, JSON.stringify(updated)); } catch {}
             }
             return updated;
         });
