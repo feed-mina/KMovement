@@ -6,12 +6,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 한국관광공사 TourAPI(국문 관광정보) 클라이언트.
@@ -54,21 +53,25 @@ public class TourApiClient {
             throw new IllegalStateException("TOUR_API_KEY가 설정되지 않았습니다.");
         }
 
-        UriComponentsBuilder ub = UriComponentsBuilder.fromPath("/areaBasedList2")
-                .queryParam("serviceKey", serviceKey)
-                .queryParam("MobileOS", "ETC")
-                .queryParam("MobileApp", mobileApp)
-                .queryParam("_type", "json")
-                .queryParam("arrange", "A")            // A=제목순, O=대표이미지+제목순
-                .queryParam("numOfRows", numOfRows)
-                .queryParam("pageNo", pageNo);
-        if (areaCode != null && !areaCode.isBlank()) ub.queryParam("areaCode", areaCode);
-        if (contentTypeId != null && !contentTypeId.isBlank()) ub.queryParam("contentTypeId", contentTypeId);
-
-        URI uri = ub.build(true).toUri(); // build(true): serviceKey 재인코딩 방지
+        // WebClient의 baseUrl과 결합하려면 uriBuilder(문자열 경로)를 써야 한다.
+        // URI 객체를 넘기면 baseUrl과 결합되지 않아 상대 URI로 요청이 실패한다.
+        // Decoded 서비스키는 DefaultUriBuilderFactory가 정확히 1회 인코딩한다.
+        Optional<String> area = Optional.ofNullable(areaCode).filter(s -> !s.isBlank());
+        Optional<String> type = Optional.ofNullable(contentTypeId).filter(s -> !s.isBlank());
 
         Map<String, Object> res = webClient.get()
-                .uri(uri)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/areaBasedList2")
+                        .queryParam("serviceKey", serviceKey)
+                        .queryParam("MobileOS", "ETC")
+                        .queryParam("MobileApp", mobileApp)
+                        .queryParam("_type", "json")
+                        .queryParam("arrange", "A")
+                        .queryParam("numOfRows", numOfRows)
+                        .queryParam("pageNo", pageNo)
+                        .queryParamIfPresent("areaCode", area)
+                        .queryParamIfPresent("contentTypeId", type)
+                        .build())
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                 .block();
