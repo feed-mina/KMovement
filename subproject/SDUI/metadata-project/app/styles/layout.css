@@ -2,7 +2,7 @@
    1. Global & Variables
    ========================================== */
 :root {
-    --primary-color: #73c234;
+    --primary-color: var(--kride-primary);
     --secondary-color: #007B65;
     --kakao-yellow: #FEE500;
     --error-red: #FDBFBC;
@@ -102,7 +102,7 @@
     /* 사이드바 내부 요소 */
     .sidebar-logo { font-size: 24px; font-weight: 900; color: var(--primary-color); margin-bottom: 40px; cursor: pointer; }
     .nav-item { padding: 12px 16px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; color: #555; transition: 0.2s; }
-    .nav-item.active { background: #f0f9eb; color: var(--primary-color); font-weight: bold; }
+    .nav-item.active { background: var(--semantic-accent-soft); color: var(--primary-color); font-weight: bold; }
 }
 
 /* ==========================================

@@ -60,19 +60,19 @@ export default function Sidebar() {
                             </nav>
                         ) : (
                             <nav className="sidebar-nav mt-4 flex flex-col gap-2 px-4">
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/CONTENT_LIST' ? 'bg-green-50 text-green-700 font-bold' : ''}`}
+                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/CONTENT_LIST' ? 'bg-accent-soft text-accent font-bold' : ''}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/CONTENT_LIST' })}>
                                     콘텐츠 리스트 보기
                                 </div>
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname?.startsWith('/view/COMMUNITY') ? 'bg-green-50 text-green-700 font-bold' : ''}`}
+                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname?.startsWith('/view/COMMUNITY') ? 'bg-accent-soft text-accent font-bold' : ''}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/COMMUNITY_LIST' })}>
                                     커뮤니티
                                 </div>
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/SET_TIME_PAGE' ? 'bg-green-50 text-green-700 font-bold' : ''}`}
+                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/SET_TIME_PAGE' ? 'bg-accent-soft text-accent font-bold' : ''}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/SET_TIME_PAGE' })}>
                                     약속 관리
                                 </div>
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/MY_PAGE' ? 'bg-green-50 text-green-700 font-bold' : ''}`}
+                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/MY_PAGE' ? 'bg-accent-soft text-accent font-bold' : ''}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/MY_PAGE' })}>
                                     마이페이지
                                 </div>
@@ -99,11 +99,11 @@ export default function Sidebar() {
                 ) : (
                     loginBtnMeta ? (
                         <nav className="sidebar-nav mt-4 flex flex-col gap-2 px-4">
-                            <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/MAIN_PAGE' ? 'bg-green-50 text-green-700 font-bold' : ''}`}
+                            <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/MAIN_PAGE' ? 'bg-accent-soft text-accent font-bold' : ''}`}
                                 onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/MAIN_PAGE' })}>
                                 홈
                             </div>
-                            <div className={`nav-item p-2 rounded cursor-pointer ${pathname?.startsWith('/view/COMMUNITY') ? 'bg-green-50 text-green-700 font-bold' : ''}`}
+                            <div className={`nav-item p-2 rounded cursor-pointer ${pathname?.startsWith('/view/COMMUNITY') ? 'bg-accent-soft text-accent font-bold' : ''}`}
                                 onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/COMMUNITY_LIST' })}>
                                 커뮤니티
                             </div>

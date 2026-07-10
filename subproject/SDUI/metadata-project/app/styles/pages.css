@@ -1271,8 +1271,8 @@
   1. 공통 변수 및 초기화 (상속 유도)
   ========================================== */
 :root {
-    --primary-color: #73c234;
-    --primary-soft: rgba(115, 194, 52, 0.15);
+    --primary-color: var(--kride-primary);
+    --primary-soft: var(--kride-primary-soft);
     --bg-soft: #f8fafc;
     --border-color: #e2e8f0;
     --btn-gradient: linear-gradient(135deg, #FDBFBC 0%, #fbada9 100%);
