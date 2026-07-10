@@ -19,16 +19,14 @@ export const SCREEN_MAP: Record<string, string> = {
     "/AI_KOREAN_CHAT_PAGE": "AI_KOREAN_CHAT_PAGE",
     "/MEMBERSHIP_SHOP_PAGE": "MEMBERSHIP_SHOP_PAGE",
     "/GOOGLE_CALLBACK": "GOOGLE_CALLBACK",
-    "/INTRO1": "KRIDE_INTRO1",
-    "/INTRO2": "KRIDE_INTRO2",
-    "/INTRO3": "KRIDE_INTRO3",
-    "/INTRO4": "KRIDE_INTRO4",
-    "/INTRO5": "KRIDE_INTRO5",
-    "/MY_LIST": "KRIDE_MY_LIST",
-    "/FOCUS": "KRIDE_FOCUS",
-    "/CHAT": "KRIDE_CHAT",
     "/ADMIN_DASHBOARD": "ADMIN_DASHBOARD",
     "/THEME_SETTINGS": "THEME_SETTINGS",
 };
+
+// 도메인 플러그인이 URL→screenId 매핑을 런타임 주입한다(코어 하드코딩 제거).
+// 라우트 청크 평가 시점(렌더 이전)에 호출되어 SCREEN_MAP에 병합된다.
+export function registerScreenPaths(paths: Record<string, string>): void {
+    Object.assign(SCREEN_MAP, paths);
+}
 
 export const DEFAULT_SCREEN_ID = "MAIN_PAGE";

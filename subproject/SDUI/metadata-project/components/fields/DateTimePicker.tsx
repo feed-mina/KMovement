@@ -219,19 +219,23 @@ const DateTimePicker = ({id, onChange, data}: DateTimePickerProps) => {
                 ) : (
                     <>
                         <div className="wheel-wrapper" ref={hourRef} onScroll={() => handleScroll('hour')}>
+                            <div className="wheel-spacer" aria-hidden="true" />
                             {hours.map((h) => (
                                 <div key={`h-${h}`} className="wheel-item">
                                     {h.toString().padStart(2, '0')}
                                 </div>
                             ))}
+                            <div className="wheel-spacer" aria-hidden="true" />
                         </div>
                         <span className="colon">:</span>
                         <div className="wheel-wrapper" ref={minuteRef} onScroll={() => handleScroll('minute')}>
+                            <div className="wheel-spacer" aria-hidden="true" />
                             {minutes.map((m) => (
                                 <div key={`m-${m}`} className="wheel-item">
                                     {m.toString().padStart(2, '0')}
                                 </div>
                             ))}
+                            <div className="wheel-spacer" aria-hidden="true" />
                         </div>
                     </>
                 )}
@@ -243,7 +247,7 @@ const DateTimePicker = ({id, onChange, data}: DateTimePickerProps) => {
                 <button type="button" onClick={() => addMinutes(60)}>+1시간</button>
             </div>
 
-            <p className="debug-text" style={{marginTop: '10px', color: '#666'}}>
+            <p className="picker-selected-label">
                 설정 시간: {date.getHours()}시 {date.getMinutes()}분
             </p>
 

@@ -20,16 +20,6 @@ import AIChatComponent from "@/components/fields/AIChatComponent";
 import AIChatComponentV2 from "@/components/fields/AIChatComponentV2";
 import AIInterviewComponent from "@/components/fields/AIInterviewComponent";
 import CheckboxField from "@/components/fields/CheckboxField";
-import DurationButton from "@/components/fields/kride/DurationButton";
-import SelectionCard from "@/components/fields/kride/SelectionCard";
-import PurposeCard from "@/components/fields/kride/PurposeCard";
-import DualRangeSlider from "@/components/fields/kride/DualRangeSlider";
-import KrideMapView from "@/components/fields/kride/MapView";
-import ItineraryPanel from "@/components/fields/kride/ItineraryPanel";
-import KrideNextButton from "@/components/fields/kride/KrideNextButton";
-import KrideWarningToast from "@/components/fields/kride/KrideWarningToast";
-import TypewriterText from "@/components/fields/kride/TypewriterText";
-import KrideChatComponent from "@/components/fields/kride/chat/KrideChatComponent";
 import ThemeSettingsEditor from "@/components/fields/theme/ThemeSettingsEditor";
 import StatCard from "@/components/fields/stats/StatCard";
 import Chart from "@/components/fields/stats/Chart";
@@ -77,16 +67,6 @@ export const componentRegistry: Record<string, ComponentRegistryEntry> = {
     AI_CHAT_V2: register(AIChatComponentV2),
     AI_INTERVIEW: register(AIInterviewComponent),
     CHECKBOX: register(CheckboxField),
-    DURATION_BUTTON: register(DurationButton),
-    SELECTION_CARD: register(SelectionCard, { needsFormData: true }),
-    PURPOSE_CARD: register(PurposeCard, { needsFormData: true }),
-    DUAL_RANGE_SLIDER: register(DualRangeSlider, { needsFormData: true }),
-    MAP_VIEW: register(KrideMapView),
-    ITINERARY_PANEL: register(ItineraryPanel),
-    KRIDE_NEXT_BTN: register(KrideNextButton, { needsFormData: true }),
-    KRIDE_WARNING: register(KrideWarningToast),
-    TYPEWRITER_TEXT: register(TypewriterText),
-    KRIDE_CHAT: register(KrideChatComponent),
     THEME_EDITOR: register(ThemeSettingsEditor),
     STAT_CARD: register(StatCard),
     CHART: register(Chart),
@@ -97,3 +77,15 @@ export const componentRegistry: Record<string, ComponentRegistryEntry> = {
 export const componentMap: Record<string, React.FC<any>> = Object.fromEntries(
     Object.entries(componentRegistry).map(([type, entry]) => [type, entry.component])
 ) as Record<string, React.FC<any>>;
+
+// 도메인 플러그인이 컴포넌트 타입을 런타임 주입한다(코어 하드코딩 제거).
+// 렌더 이전(bootstrap import 시점)에 호출되어 componentRegistry에 반영된다.
+export function registerComponent(
+    type: string,
+    Component: React.FC<any>,
+    traits: Omit<ComponentRegistryEntry, "component"> = {}
+): void {
+    const entry = register(Component, traits);
+    componentRegistry[type] = entry;
+    componentMap[type] = entry.component;
+}

@@ -1,6 +1,7 @@
 'use client';
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
+import BottomNav from "@/components/layout/BottomNav";
 import RecordTimeComponent from "@/components/fields/RecordTimeComponent";
 import {useDeviceType} from "@/hooks/useDeviceType";
 import { usePathname } from 'next/navigation';
@@ -21,7 +22,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div className={`app-wrapper ${deviceClass} ${isKrideScreen ? 'kride-fullscreen' : ''}`}>
+        <div className={`app-wrapper ${deviceClass} ${isKrideScreen ? 'kride-fullscreen' : ''}${!isPc && !isKrideScreen ? ' has-bottom-nav' : ''}`}>
 
             {!isKrideScreen && (isPc ? <Sidebar /> : <Header />)}
 
@@ -38,6 +39,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 
                 {isFocusScreen && <FocusFooterBar />}
             </main>
+
+            {!isKrideScreen && !isPc && <BottomNav />}
         </div>
     );
 }

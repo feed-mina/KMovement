@@ -5,6 +5,7 @@ package com.domain.demo_backend.domain.ai.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -45,6 +46,24 @@ public class OpenAiClientV2 {
             .connectTimeout(Duration.ofSeconds(30))
             .build();
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    /**
+     * 부팅 시 API 키 유효성 점검.
+     * 키가 없거나 과거 placeholder("dummy-local")로 남아 있으면, 조용히 401을 내다가
+     * 서킷이 열리는 대신 기동 시점에 눈에 띄는 경고를 남긴다. (로컬에서 AI 기능 미사용 시를 위해 fail-fast는 하지 않음)
+     */
+    @PostConstruct
+    void validateApiKey() {
+        if (apiKey == null || apiKey.isBlank() || "dummy-local".equals(apiKey)) {
+            log.error("[OpenAiClientV2] ⚠ OPENAI_API_KEY 미설정/placeholder 상태입니다. "
+                    + "AI 채팅·STT·TTS·번역이 모두 401로 실패합니다. 배포 환경에 OPENAI_API_KEY 시크릿을 주입하세요.");
+        } else {
+            String masked = apiKey.length() > 8
+                    ? apiKey.substring(0, 5) + "..." + apiKey.substring(apiKey.length() - 3)
+                    : "****";
+            log.info("[OpenAiClientV2] OpenAI API key 로드됨 (masked={}), model={}", masked, model);
+        }
+    }
 
     /**
      * STT V2: language=null이면 파라미터 전송 안 함 → Whisper 자동 감지
@@ -296,23 +315,49 @@ public class OpenAiClientV2 {
 
     // ── Resilience4j Fallback 메서드 ──
 
+    /**
+     * 실패 원인(HTTP 401/429, 레이트리밋, 타임아웃 등)에 따라 사용자용 문구를 분기한다.
+     * 원인 코드는 로그로 남기고, 사용자에게는 상황에 맞는 안내만 노출한다.
+     */
+    private String classifyFailureMessage(Throwable t, String service) {
+        String msg = t != null && t.getMessage() != null ? t.getMessage() : "";
+        String cause;
+        String userMsg;
+        if (msg.contains("HTTP 401") || msg.contains("HTTP 403")) {
+            cause = "AUTH";
+            userMsg = service + " 설정 오류로 응답을 생성할 수 없습니다. 관리자에게 문의해 주세요.";
+        } else if (msg.contains("HTTP 429") || msg.contains("insufficient_quota")) {
+            cause = "QUOTA_OR_RATE";
+            userMsg = service + " 사용량이 많아 일시적으로 응답이 지연되고 있습니다. 잠시 후 다시 시도해 주세요.";
+        } else if (t != null && "RequestNotPermitted".equals(t.getClass().getSimpleName())) {
+            cause = "LOCAL_RATE_LIMIT";
+            userMsg = "요청이 많아 잠시 후 다시 시도해 주세요.";
+        } else if (msg.contains("timeout") || msg.toLowerCase().contains("timed out")
+                || (t != null && t.getClass().getSimpleName().contains("Timeout"))) {
+            cause = "TIMEOUT";
+            userMsg = "AI 서버 연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.";
+        } else {
+            cause = "UNKNOWN";
+            userMsg = service + "가 일시적으로 이용 불가합니다. 잠시 후 다시 시도해주세요.";
+        }
+        log.warn("[CircuitBreaker-V2] {} fallback - cause={}, detail={}", service, cause, msg);
+        return userMsg;
+    }
+
     @SuppressWarnings("unused")
     private String transcribeFallback(MultipartFile audio, String language, Throwable t) {
-        log.warn("[CircuitBreaker-V2] STT fallback: {}", t.getMessage());
-        throw new IllegalStateException("AI 서비스가 일시적으로 이용 불가합니다. 잠시 후 다시 시도해주세요.");
+        throw new IllegalStateException(classifyFailureMessage(t, "AI 음성인식 서비스"));
     }
 
     @SuppressWarnings("unused")
     private void streamChatFallback(List<Map<String, String>> messages, Consumer<String> onChunk, Runnable onComplete, Throwable t) {
-        log.warn("[CircuitBreaker-V2] streamChat fallback: {}", t.getMessage());
-        onChunk.accept("AI 서비스가 일시적으로 이용 불가합니다. 잠시 후 다시 시도해주세요.");
+        onChunk.accept(classifyFailureMessage(t, "AI 서비스"));
         onComplete.run();
     }
 
     @SuppressWarnings("unused")
     private byte[] generateSpeechFallback(String text, String voice, Throwable t) {
-        log.warn("[CircuitBreaker-V2] TTS fallback: {}", t.getMessage());
-        throw new IllegalStateException("TTS 서비스가 일시적으로 이용 불가합니다.");
+        throw new IllegalStateException(classifyFailureMessage(t, "TTS 서비스"));
     }
 
     @SuppressWarnings("unused")

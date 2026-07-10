@@ -5,6 +5,7 @@ import { ChatMessage } from '@/lib/types/ai';
 import UserIcon from '@/components/assets/icons/ai/UserIcon';
 import SpeakerIcon from '@/components/assets/icons/ai/SpeakerIcon';
 import Rai from '@/components/fields/kride/atoms/Rai';
+import api from '@/services/axios';
 
 interface ConversationPanelProps {
     messages: ChatMessage[];
@@ -30,6 +31,10 @@ export default function ConversationPanelV2({ messages, isStreaming, language }:
     const [playingIdealIndex, setPlayingIdealIndex] = React.useState<number | null>(null);
     const idealAudioRef = useRef<HTMLAudioElement | null>(null);
     const [showTranslations, setShowTranslations] = React.useState<Record<number, boolean>>({});
+    // translation 필드가 없는 메시지(환영 메시지, JSON 미반환 응답)를 위한 지연 번역 캐시.
+    // 공유 messages 배열을 오염시키지 않도록 패널 로컬 상태로만 보관한다.
+    const [fetchedTranslations, setFetchedTranslations] = React.useState<Record<number, string>>({});
+    const [translatingIndex, setTranslatingIndex] = React.useState<number | null>(null);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -108,8 +113,33 @@ export default function ConversationPanelV2({ messages, isStreaming, language }:
         audio.play().catch(console.error);
     };
 
-    const toggleTranslation = (index: number) => {
-        setShowTranslations(prev => ({ ...prev, [index]: !prev[index] }));
+    const toggleTranslation = (index: number, text: string, existingTranslation?: string) => {
+        const willShow = !showTranslations[index];
+        setShowTranslations(prev => ({ ...prev, [index]: willShow }));
+
+        // 켜는 시점에 번역이 아직 없으면(환영 메시지 등) 그 자리에서 한국어 번역을 요청한다.
+        if (
+            willShow &&
+            !existingTranslation &&
+            fetchedTranslations[index] === undefined &&
+            translatingIndex !== index &&
+            text.trim()
+        ) {
+            setTranslatingIndex(index);
+            api.post('/api/ai/v2/chat/translate', { text, target: 'ko' })
+                .then(res => {
+                    const translated = res.data?.data;
+                    if (translated) {
+                        setFetchedTranslations(prev => ({ ...prev, [index]: translated }));
+                    } else {
+                        setFetchedTranslations(prev => ({ ...prev, [index]: '번역을 불러오지 못했습니다.' }));
+                    }
+                })
+                .catch(() => {
+                    setFetchedTranslations(prev => ({ ...prev, [index]: '번역을 불러오지 못했습니다.' }));
+                })
+                .finally(() => setTranslatingIndex(null));
+        }
     };
 
     const visibleMessages = messages.filter(msg => msg.role !== 'system');
@@ -159,9 +189,10 @@ export default function ConversationPanelV2({ messages, isStreaming, language }:
                                         </div>
                                     )}
 
-                                    {!isUser && msg.translation && showTranslations[i] && (
+                                    {!isUser && showTranslations[i] && (
                                         <div className="ai-translation-box">
-                                            {msg.translation}
+                                            {msg.translation || fetchedTranslations[i]
+                                                || (translatingIndex === i ? '번역 중…' : '번역을 불러오지 못했습니다.')}
                                         </div>
                                     )}
                                 </div>
@@ -181,7 +212,7 @@ export default function ConversationPanelV2({ messages, isStreaming, language }:
                                             <SpeakerIcon width="14px" height="14px" />
                                             {playingIndex === i ? 'Stop' : 'Listen AI'}
                                         </button>
-                                        <button className="ai-action-btn-text" onClick={() => toggleTranslation(i)}>
+                                        <button className="ai-action-btn-text" onClick={() => toggleTranslation(i, msg.content, msg.translation)}>
                                             {showTranslations[i] ? '번역 숨기기' : '한글 번역 보기'}
                                         </button>
                                     </>

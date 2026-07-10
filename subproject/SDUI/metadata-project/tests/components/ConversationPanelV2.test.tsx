@@ -1,10 +1,25 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ConversationPanelV2 from '@/components/fields/ai/ConversationPanelV2';
 import { ChatMessage } from '@/lib/types/ai';
+import api from '@/services/axios';
+
+jest.mock('@/services/axios', () => ({
+    __esModule: true,
+    default: {
+        post: jest.fn(() => Promise.resolve({ data: { data: '안녕하세요! 일본어 연습을 도와드릴게요.' } })),
+    },
+}));
+
+const mockedApi = api as unknown as { post: jest.Mock };
 
 // jsdom에서 scrollIntoView가 구현되어 있지 않아서 mock 처리
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
+
+beforeEach(() => {
+    mockedApi.post.mockClear();
+    mockedApi.post.mockResolvedValue({ data: { data: '안녕하세요! 일본어 연습을 도와드릴게요.' } });
+});
 
 describe('ConversationPanelV2', () => {
 
@@ -38,6 +53,64 @@ describe('ConversationPanelV2', () => {
         it('isStreaming이 false일 때 로딩 인디케이터를 표시하지 않아야 함', () => {
             render(<ConversationPanelV2 messages={[]} isStreaming={false} />);
             expect(screen.queryByText('AI가 생각 중입니다...')).not.toBeInTheDocument();
+        });
+    });
+
+    describe('한글 번역 보기 (지연 번역)', () => {
+        it('translation이 이미 있으면 클릭 시 API 호출 없이 즉시 표시해야 함', async () => {
+            const messages: ChatMessage[] = [
+                { role: 'assistant', content: 'Hello!', translation: '안녕하세요!' },
+            ];
+            render(<ConversationPanelV2 messages={messages} isStreaming={false} />);
+
+            fireEvent.click(screen.getByText('한글 번역 보기'));
+
+            expect(screen.getByText('안녕하세요!')).toBeInTheDocument();
+            expect(mockedApi.post).not.toHaveBeenCalled();
+        });
+
+        it('translation이 없는 환영 메시지는 클릭 시 translate API로 지연 번역해 표시해야 함', async () => {
+            const messages: ChatMessage[] = [
+                { role: 'assistant', content: 'こんにちは！日本語の練習をお手伝いします。' },
+            ];
+            render(<ConversationPanelV2 messages={messages} isStreaming={false} language="ja" />);
+
+            fireEvent.click(screen.getByText('한글 번역 보기'));
+
+            await waitFor(() => {
+                expect(screen.getByText('안녕하세요! 일본어 연습을 도와드릴게요.')).toBeInTheDocument();
+            });
+            expect(mockedApi.post).toHaveBeenCalledWith('/api/ai/v2/chat/translate', {
+                text: 'こんにちは！日本語の練習をお手伝いします。',
+                target: 'ko',
+            });
+        });
+
+        it('번역 API 실패 시 안내 문구를 표시해야 함', async () => {
+            mockedApi.post.mockRejectedValueOnce(new Error('network'));
+            const messages: ChatMessage[] = [
+                { role: 'assistant', content: 'Hello!' },
+            ];
+            render(<ConversationPanelV2 messages={messages} isStreaming={false} />);
+
+            fireEvent.click(screen.getByText('한글 번역 보기'));
+
+            await waitFor(() => {
+                expect(screen.getByText('번역을 불러오지 못했습니다.')).toBeInTheDocument();
+            });
+        });
+
+        it('번역 숨기기 클릭 시 번역 영역을 감춰야 함', async () => {
+            const messages: ChatMessage[] = [
+                { role: 'assistant', content: 'Hello!', translation: '안녕하세요!' },
+            ];
+            render(<ConversationPanelV2 messages={messages} isStreaming={false} />);
+
+            fireEvent.click(screen.getByText('한글 번역 보기'));
+            expect(screen.getByText('안녕하세요!')).toBeInTheDocument();
+
+            fireEvent.click(screen.getByText('번역 숨기기'));
+            expect(screen.queryByText('안녕하세요!')).not.toBeInTheDocument();
         });
     });
 

@@ -62,7 +62,7 @@ const TimeSelect: React.FC<any> = ({ id, meta, data, onChange }) => {
 
     return (
         <div className="time-select-wrapper">
-            <h3 className="time-select-title">{meta.label_text}</h3>
+            <h3 className="time-select-title">{meta.label_text || meta.labelText || '기상·취침 시간'}</h3>
 
             <div className="swiper-container-wrapper">
                 <Swiper

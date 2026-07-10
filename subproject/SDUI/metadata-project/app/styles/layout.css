@@ -2,7 +2,7 @@
    1. Global & Variables
    ========================================== */
 :root {
-    --primary-color: #73c234;
+    --primary-color: var(--kride-primary);
     --secondary-color: #007B65;
     --kakao-yellow: #FEE500;
     --error-red: #FDBFBC;
@@ -102,7 +102,7 @@
     /* 사이드바 내부 요소 */
     .sidebar-logo { font-size: 24px; font-weight: 900; color: var(--primary-color); margin-bottom: 40px; cursor: pointer; }
     .nav-item { padding: 12px 16px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; color: #555; transition: 0.2s; }
-    .nav-item.active { background: #f0f9eb; color: var(--primary-color); font-weight: bold; }
+    .nav-item.active { background: var(--semantic-accent-soft); color: var(--primary-color); font-weight: bold; }
 }
 
 /* ==========================================
@@ -313,4 +313,57 @@
 }
 .kride-fullscreen .content-area {
     min-height: 100vh;
+}
+
+/* ==========================================
+   모바일 하단 탭 네비게이션 (BottomNav)
+   ========================================== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    background: var(--surface-card);
+    border-top: 1px solid var(--border-hair);
+    padding-bottom: var(--kride-safe-bottom);
+    box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 2px;
+    min-height: 56px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.15s ease;
+}
+
+.bottom-nav-item.active {
+    color: var(--kride-primary);
+    font-weight: 600;
+}
+
+.bottom-nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bottom-nav-label {
+    font-size: 11px;
+    line-height: 1;
+}
+
+/* 하단 탭에 콘텐츠가 가리지 않도록 여백 확보 */
+.app-wrapper.has-bottom-nav .main-contents-area {
+    padding-bottom: calc(56px + var(--kride-safe-bottom));
 }

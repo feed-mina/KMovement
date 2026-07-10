@@ -360,6 +360,7 @@ jobs:
               -e SPRING_MAIL_PASSWORD=__MAIL_PASSWORD__ \
               -e JWT_SECRET_KEY=__JWT_SECRET_KEY__ \
               -e OPENAI_API_KEY=__OPENAI_API_KEY__ \
+              -e TOUR_API_KEY=__TOUR_API_KEY__ \
               -e KAKAO_CLIENT_ID=__KAKAO_CLIENT_ID__ \
               -e KAKAO_REDIRECT_URI=__KAKAO_REDIRECT_URI__ \
               -e WEB_URL=__WEB_URL__ \
@@ -434,6 +435,7 @@ jobs:
           sed -i "s|__MAIL_PASSWORD__|${{ secrets.MAIL_PASSWORD }}|g" /tmp/deploy.sh
           sed -i "s|__JWT_SECRET_KEY__|${{ secrets.JWT_SECRET_KEY }}|g" /tmp/deploy.sh
           sed -i "s|__OPENAI_API_KEY__|${{ secrets.OPENAI_API_KEY }}|g" /tmp/deploy.sh
+          sed -i "s|__TOUR_API_KEY__|${{ secrets.TOUR_API_KEY }}|g" /tmp/deploy.sh
           sed -i "s|__KAKAO_CLIENT_ID__|${{ secrets.KAKAO_CLIENT_ID }}|g" /tmp/deploy.sh
           sed -i "s|__KAKAO_REDIRECT_URI__|${{ secrets.KAKAO_REDIRECT_URI }}|g" /tmp/deploy.sh
           sed -i "s|__WEB_URL__|${{ secrets.WEB_URL }}|g" /tmp/deploy.sh

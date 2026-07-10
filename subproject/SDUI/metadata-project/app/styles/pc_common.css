@@ -97,7 +97,7 @@
 .sidebar-logo {
     font-size: 24px;
     font-weight: 900;
-    color: #73c234;
+    color: var(--kride-primary, #E50914);
     cursor: pointer;
     margin-bottom: 50px;
 }
@@ -112,8 +112,8 @@
 }
 
 .nav-item.active {
-    background: #f0f9eb;
-    color: #73c234;
+    background: var(--semantic-accent-soft, rgba(229, 9, 20, 0.08));
+    color: var(--kride-primary, #E50914);
     font-weight: bold;
 }
 
@@ -128,7 +128,7 @@
 }
 
 .sidebar-auth-btn.login {
-    background: #73c234;
+    background: var(--kride-primary, #E50914);
     color: #fff;
     border: none;
 }
