@@ -1,4 +1,4 @@
-import { tourPoisToRouteMapData } from '@/components/fields/kride/maps/tourToRouteMapData';
+import { tourPoisToRouteMapData, orderByNearestNeighbor } from '@/components/fields/kride/maps/tourToRouteMapData';
 import { DEFAULT_ROUTE_MAP_CENTER } from '@/components/fields/kride/maps/mapTypes';
 import { TourPoi } from '@/services/tourApi';
 
@@ -47,5 +47,35 @@ describe('tourPoisToRouteMapData — TourAPI → 지도 데이터 브리지', ()
     it('contentId가 없으면 index 기반 id를 부여해야 함', () => {
         const data = tourPoisToRouteMapData([poi({ contentId: undefined })]);
         expect(data.markers[0].id).toBe('poi-0');
+    });
+});
+
+describe('orderByNearestNeighbor — 하루 동선 정렬', () => {
+    const at = (id: string, lat: number, lng: number): TourPoi => ({
+        contentId: id, title: id, mapX: lng, mapY: lat,
+    });
+
+    it('첫 지점에서 가장 가까운 순으로 이어야 함', () => {
+        // 위도로 일렬 배치, 입력은 뒤섞음. A에서 시작 → B → C → D 기대
+        const A = at('A', 37.50, 127.0);
+        const B = at('B', 37.51, 127.0);
+        const C = at('C', 37.52, 127.0);
+        const D = at('D', 37.53, 127.0);
+        const ordered = orderByNearestNeighbor([A, D, B, C] as any);
+        expect(ordered.map((p) => p.contentId)).toEqual(['A', 'B', 'C', 'D']);
+    });
+
+    it('2개 이하는 그대로 반환', () => {
+        const A = at('A', 37.5, 127.0);
+        const B = at('B', 37.6, 127.1);
+        expect(orderByNearestNeighbor([A, B] as any).map((p) => p.contentId)).toEqual(['A', 'B']);
+    });
+
+    it('tourPoisToRouteMapData의 marker index가 동선 순서를 따라야 함', () => {
+        const data = tourPoisToRouteMapData([
+            at('A', 37.50, 127.0), at('D', 37.53, 127.0), at('B', 37.51, 127.0), at('C', 37.52, 127.0),
+        ]);
+        expect(data.markers.map((m) => m.id)).toEqual(['A', 'B', 'C', 'D']);
+        expect(data.markers.map((m) => m.index)).toEqual([0, 1, 2, 3]);
     });
 });
