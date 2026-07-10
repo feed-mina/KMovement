@@ -8,6 +8,8 @@ jest.mock('@/services/tourApi', () => ({
     fetchTourPois: jest.fn(),
 }));
 
+jest.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { socialType: 'K' }, isLoggedIn: true }) }));
+
 const mockedFetch = fetchTourPois as jest.Mock;
 
 const sample = [

@@ -22,10 +22,21 @@ const mockedFetch = jest.fn(() =>
 // @ts-expect-error jsdom global
 global.fetch = mockedFetch;
 
+let mockAuth: { user: { socialType?: string } | null; isLoggedIn: boolean } = { user: null, isLoggedIn: false };
+jest.mock('@/context/AuthContext', () => ({ useAuth: () => mockAuth }));
+
 describe('RouteScreen — [동선] 기본/AI 코스 토글', () => {
     beforeEach(() => {
         mockedFetch.mockClear();
         (fetchRestaurants as jest.Mock).mockClear();
+        mockAuth = { user: null, isLoggedIn: false };
+    });
+
+    it('카카오 로그인 사용자에게 공유 버튼을 표시한다', async () => {
+        mockAuth = { user: { socialType: 'K' }, isLoggedIn: true };
+        render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
+        await waitFor(() => expect(screen.getByTestId('route-map')).toBeInTheDocument());
+        expect(screen.getByLabelText('카카오톡으로 공유')).toBeInTheDocument();
     });
 
     it('기본은 tour 모드로 TourAPI POI를 불러와 지도를 그린다', async () => {

@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ScreenControllerProps } from '@/components/screens/types';
 import { fetchTourPois, TourPoi } from '@/services/tourApi';
 import { HOLY_SITES } from '@/lib/data/holySites';
+import { useAuth } from '@/context/AuthContext';
+import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
 
 // [탐색] 화면 컨트롤러 (여행 플러그인). TourAPI POI를 지역·카테고리·정렬로 탐색.
 // Epic #74 · #85 · 성지 #78.
@@ -40,6 +42,7 @@ function toHttps(url?: string): string | undefined {
 const RED = '#E50914';
 
 export default function TourExploreScreen(_props: ScreenControllerProps) {
+    const { user } = useAuth();
     const [category, setCategory] = useState('39');
     const [sigungu, setSigungu] = useState('');
     const [arrange, setArrange] = useState('A');
@@ -91,9 +94,12 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
 
     return (
         <div className="page-wrap TOUR_EXPLORE tour-explore" style={{ padding: '14px 16px' }}>
-            <header style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
-                <span style={{ fontSize: 20, fontWeight: 600, color: RED }}>탐색</span>
-                <span style={{ fontSize: 13, color: '#888' }}>오늘 어디로 덕질 갈까요?</span>
+            <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
+                <span style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                    <span style={{ fontSize: 20, fontWeight: 600, color: RED }}>탐색</span>
+                    <span style={{ fontSize: 13, color: '#888' }}>오늘 어디로 덕질 갈까요?</span>
+                </span>
+                {user?.socialType === 'K' && <KakaoShareButton text="Kride에서 K-컬처 여행지·맛집을 찾아보세요!" path="/view/TOUR_EXPLORE" />}
             </header>
 
             {/* 지역 필터 */}
