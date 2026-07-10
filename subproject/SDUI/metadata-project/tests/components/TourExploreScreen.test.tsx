@@ -82,4 +82,21 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         expect(link).toBeInTheDocument();
         expect(link.getAttribute('href')).toContain('37.5,127');
     });
+
+    it('성지 카테고리는 큐레이션 데이터를 fetch 없이 표시', async () => {
+        renderScreen();
+        await waitFor(() => expect(screen.getByText('가나돈까스의집')).toBeInTheDocument());
+        mockedFetch.mockClear();
+        fireEvent.click(screen.getByText('성지'));
+        await waitFor(() => expect(screen.getByText('서울숲')).toBeInTheDocument());
+        expect(mockedFetch).not.toHaveBeenCalled();
+    });
+
+    it('성지 카드 모달에 팬덤 발자취·추천 이유를 표시', async () => {
+        renderScreen();
+        fireEvent.click(await screen.findByText('성지'));
+        fireEvent.click(await screen.findByText('서울숲'));
+        expect(await screen.findByText('왜 추천하나요?')).toBeInTheDocument();
+        expect(screen.getByText('팬덤 발자취')).toBeInTheDocument();
+    });
 });

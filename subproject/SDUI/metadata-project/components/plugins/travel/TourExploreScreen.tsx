@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ScreenControllerProps } from '@/components/screens/types';
 import { fetchTourPois, TourPoi } from '@/services/tourApi';
+import { HOLY_SITES } from '@/lib/data/holySites';
 
 // [탐색] 화면 컨트롤러 (여행 플러그인). TourAPI POI를 지역·카테고리·정렬로 탐색.
-// Epic #74 · #85.
+// Epic #74 · #85 · 성지 #78.
 
 const CATEGORIES = [
+    { id: 'HOLY', label: '성지' },
     { id: '39', label: '맛집' },
     { id: '12', label: '관광지' },
     { id: '14', label: '문화시설' },
@@ -55,6 +57,13 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     }, []);
 
     useEffect(() => {
+        // 성지는 큐레이션 데이터셋(프론트) — TourAPI 미호출
+        if (category === 'HOLY') {
+            setPois(HOLY_SITES);
+            setLoading(false);
+            setError(null);
+            return;
+        }
         let alive = true;
         setLoading(true);
         setError(null);
@@ -134,10 +143,13 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 onClick={() => setSelected(p)}
                                 style={{ border: '0.5px solid #eee', borderRadius: 14, overflow: 'hidden', background: '#fff', cursor: 'pointer', position: 'relative' }}
                             >
-                                <div style={{ height: 100, background: '#f5f5f5', position: 'relative' }}>
-                                    {toHttps(p.firstImage) && (
+                                <div style={{ height: 100, background: '#f5f5f5', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {toHttps(p.firstImage)
                                         // eslint-disable-next-line @next/next/no-img-element
-                                        <img src={toHttps(p.firstImage)} alt={p.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ? <img src={toHttps(p.firstImage)} alt={p.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        : <span style={{ color: '#ccc', fontSize: 22 }}>♪</span>}
+                                    {p.contentTypeId === 'HOLY' && (
+                                        <span style={{ position: 'absolute', top: 6, left: 6, fontSize: 10, background: RED, color: '#fff', padding: '2px 7px', borderRadius: 20 }}>성지</span>
                                     )}
                                     <button
                                         type="button"
@@ -177,6 +189,22 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             <p style={{ margin: 0, fontSize: 17, fontWeight: 600 }}>{selected.title}</p>
                             {selected.addr && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#777' }}>{selected.addr}</p>}
                             {selected.tel && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#777' }}>☎ {selected.tel}</p>}
+
+                            {selected.recommendReason && (
+                                <div style={{ background: '#FCEBEB', borderRadius: 10, padding: '10px 12px', marginTop: 12 }}>
+                                    <div style={{ fontSize: 12, color: '#A32D2D', fontWeight: 500, marginBottom: 4 }}>왜 추천하나요?</div>
+                                    <p style={{ margin: 0, fontSize: 12, color: '#791F1F', lineHeight: 1.5 }}>{selected.recommendReason}</p>
+                                </div>
+                            )}
+                            {(selected.fandomInfo || selected.artist) && (
+                                <div style={{ marginTop: 12 }}>
+                                    <div style={{ fontSize: 12, color: '#777', fontWeight: 500, marginBottom: 6 }}>팬덤 발자취</div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                                        {selected.artist && <span style={{ fontSize: 11, background: '#f5f5f5', border: '0.5px solid #eee', borderRadius: 20, padding: '3px 10px' }}>{selected.artist}</span>}
+                                        {selected.fandomInfo && <span style={{ fontSize: 11, background: '#f5f5f5', border: '0.5px solid #eee', borderRadius: 20, padding: '3px 10px' }}>{selected.fandomInfo}</span>}
+                                    </div>
+                                </div>
+                            )}
 
                             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
                                 <a href={mapsUrl(selected)} target="_blank" rel="noreferrer" style={{ flex: 1, textAlign: 'center', fontSize: 13, fontWeight: 500, color: '#fff', background: RED, borderRadius: 10, padding: '11px 0', textDecoration: 'none' }}>

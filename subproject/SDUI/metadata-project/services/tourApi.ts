@@ -17,6 +17,10 @@ export interface TourPoi {
     cat2?: string;
     cat3?: string;
     areaCode?: string;
+    // 성지 큐레이션 전용(백엔드 아님, 프론트 데이터셋) — #78
+    artist?: string;
+    fandomInfo?: string;
+    recommendReason?: string;
 }
 
 interface TourQuery {
