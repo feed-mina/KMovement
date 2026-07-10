@@ -15,6 +15,7 @@ import KrideWarningToast from "@/components/fields/kride/KrideWarningToast";
 import TypewriterText from "@/components/fields/kride/TypewriterText";
 import KrideChatComponent from "@/components/fields/kride/chat/KrideChatComponent";
 import RouteScreen from "./RouteScreen";
+import TourExploreScreen from "./TourExploreScreen";
 
 // 여행(K-RIDE) 도메인 플러그인.
 // 엔진 오픈코어 추출 시: bootstrap.ts의 registerTravelPlugin() 호출 1줄 +
@@ -48,12 +49,15 @@ export function registerTravelPlugin(): void {
         "/FOCUS": "KRIDE_FOCUS",
         "/CHAT": "KRIDE_CHAT",
         "/ROUTE_PLANNER": "ROUTE_PLANNER",
+        "/TOUR_EXPLORE": "TOUR_EXPLORE",
     });
 
     // FOCUS 화면 컨트롤러
     registerScreen({ match: (id) => id === "KRIDE_FOCUS", controller: KrideFocusScreen });
     // [동선] 화면 컨트롤러 (TourAPI POI → 지도)
     registerScreen({ match: (id) => id === "ROUTE_PLANNER", controller: RouteScreen });
+    // [탐색] 화면 컨트롤러 (TourAPI POI 카드)
+    registerScreen({ match: (id) => id === "TOUR_EXPLORE", controller: TourExploreScreen });
 
     // 접근제어: 로그인 필요 + 리다이렉트 전 alert
     registerScreenAccess(

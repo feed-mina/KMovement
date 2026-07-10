@@ -60,8 +60,8 @@ export default function Sidebar() {
                             </nav>
                         ) : (
                             <nav className="sidebar-nav mt-4 flex flex-col gap-2 px-4">
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/CONTENT_LIST' ? 'bg-accent-soft text-accent font-bold' : ''}`}
-                                    onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/CONTENT_LIST' })}>
+                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/TOUR_EXPLORE' ? 'bg-accent-soft text-accent font-bold' : ''}`}
+                                    onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/TOUR_EXPLORE' })}>
                                     탐색
                                 </div>
                                 <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/ROUTE_PLANNER' ? 'bg-accent-soft text-accent font-bold' : ''}`}
