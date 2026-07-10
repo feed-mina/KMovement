@@ -636,7 +636,7 @@
 
 /* 글쓰기 버튼 스타일  */
 .write-btn {
-    background-color: #4A90E2;
+    background-color: var(--kride-primary);
     color: white;
     font-weight: bold;
     border: none;
@@ -648,7 +648,7 @@
 }
 
 .write-btn:hover {
-    background-color: #357abd;
+    background-color: var(--kride-primary-dark);
 }
 
 /* 리스트 상단 컨트롤 그룹 */
@@ -663,8 +663,8 @@
 /* 필터 버튼 (캡슐형 디자인) */
 .filter-btn {
     background: #fff;
-    border: 1px solid #4A90E2;
-    color: #4A90E2;
+    border: 1px solid var(--kride-primary);
+    color: var(--kride-primary);
     padding: 6px 16px;
     border-radius: 20px;
     font-size: 14px;
@@ -672,7 +672,7 @@
 }
 
 .filter-btn.active {
-    background: #4A90E2;
+    background: var(--kride-primary);
     color: #fff;
 }
 
@@ -898,7 +898,7 @@
 }
 
 .community-primary-btn {
-    background: #2563eb;
+    background: var(--kride-primary);
     color: #ffffff;
 }
 

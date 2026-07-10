@@ -72,6 +72,10 @@ export default function Sidebar() {
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/SET_TIME_PAGE' })}>
                                     약속 관리
                                 </div>
+                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/MY_PAGE' ? 'bg-green-50 text-green-700 font-bold' : ''}`}
+                                    onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/MY_PAGE' })}>
+                                    마이페이지
+                                </div>
                                 {!isAdmin && <div className="sidebar-ai-section">
                                     <span className="sidebar-ai-label">AI 채팅</span>
                                     <button
@@ -123,7 +127,7 @@ export default function Sidebar() {
                     )
                 ) : (
                     loginBtnMeta ? (
-                        <button className="sidebar-auth-btn login w-full p-2 bg-blue-500 text-white rounded text-center"
+                        <button className="sidebar-auth-btn login w-full p-2 bg-accent text-white rounded text-center"
                             onClick={() => handleAction(loginBtnMeta)}>
                             {getVal(loginBtnMeta, 'label_text', 'labelText')}
                         </button>

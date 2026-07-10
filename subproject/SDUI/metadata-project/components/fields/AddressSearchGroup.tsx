@@ -47,7 +47,7 @@ const AddressSearchGroup = ({ meta, formData = {}, setFormData, onAction }: any)
                 <button
                     type="button"
                     onClick={() => setIsPopupOpen(true)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                    className="bg-accent text-white px-4 py-2 rounded hover:bg-accent-strong transition-colors"
                 >
                     주소 찾기
                 </button>
