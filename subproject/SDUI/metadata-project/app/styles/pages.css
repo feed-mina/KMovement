@@ -1571,22 +1571,47 @@ readonly 공통 레이아웃
 }
 
 .picker-display {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    height: 50px;
+    height: 150px; /* 3칸(ITEM_HEIGHT 50px * 3) 노출 */
     overflow: hidden;
-    /* 선택된 느낌을 주기 위한 배경색 (옵션) */
-    background-color: #f4f6f8;
-    border-radius: 8px;
+    background-color: var(--surface-subtle, #f4f6f8);
+    border: 1px solid var(--border-hair, #e5e7eb);
+    border-radius: 12px;
     padding: 0 20px;
+    max-width: 260px;
+    margin: 0 auto;
+}
+
+/* 중앙 선택 표시 밴드 */
+.picker-display::before {
+    content: "";
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    top: 50px;
+    height: 50px;
+    border-top: 1px solid var(--semantic-accent, #E50914);
+    border-bottom: 1px solid var(--semantic-accent, #E50914);
+    background: var(--semantic-accent-soft, rgba(229, 9, 20, 0.06));
+    border-radius: 6px;
+    pointer-events: none;
+}
+
+/* 휠 위/아래 스페이서: 선택 항목이 중앙 밴드에 오도록 함 */
+.wheel-spacer {
+    height: 50px;
+    flex: 0 0 auto;
+    scroll-snap-align: none;
 }
 
 .wheel-wrapper {
     width: 70px;
-    height: 50px;
-    /* 아이템 높이와 동일 */
+    height: 150px;
+    /* 3칸 창 (ITEM_HEIGHT 50px * 3) */
     /* height: 150px; 50px * 3개 보이게 */
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
@@ -1608,7 +1633,7 @@ readonly 공통 레이아웃
 .wheel-wrapper {
     /* 기존 스타일 유지 */
     width: 60px;
-    height: 50px;
+    height: 150px;
     overflow-y: scroll;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -1679,11 +1704,19 @@ readonly 공통 레이아웃
     font-size: 24px;
     font-weight: bold;
     text-align: center;
-    border: 2px solid #0070f3;
+    border: 2px solid var(--semantic-accent, #E50914);
     border-radius: 8px;
     outline: none;
-    color: #333;
+    color: var(--text-strong, #333);
     margin-top: 10px;
+}
+
+/* 설정된 시간 라벨 (구 debug-text 정리) */
+.picker-selected-label {
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-body, #374151);
 }
 
 /* 날짜 변경 영역 정리 */
@@ -1695,7 +1728,7 @@ readonly 공통 레이아웃
 .date-change-btn {
     background: none;
     border: none;
-    color: #0070f3;
+    color: var(--semantic-accent, #E50914);
     font-weight: bold;
     cursor: pointer;
     font-size: 16px;
@@ -1775,8 +1808,8 @@ readonly 공통 레이아웃
     /* p 태그 기본 여백 제거 */
     font-size: 16px;
     font-weight: bold;
-    color: #0070f3;
-    /* 강조색 (파란색) 적용 */
+    color: var(--semantic-accent, #E50914);
+    /* 강조색 (브랜드) 적용 */
 }
 
 .date-input-box {
