@@ -16,7 +16,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
 
     useEffect(() => {
         let alive = true;
-        fetchRestaurants('1', 30)
+        fetchRestaurants('1', 12)
             .then((list) => { if (alive) setPois(list); })
             .catch(() => { if (alive) setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.'); })
             .finally(() => { if (alive) setLoading(false); });
