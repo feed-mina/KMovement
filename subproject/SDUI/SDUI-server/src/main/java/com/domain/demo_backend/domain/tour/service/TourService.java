@@ -24,14 +24,16 @@ public class TourService {
     /** 맛집(음식점, contentTypeId=39) 조회 편의 메서드. */
     public static final String CONTENT_TYPE_RESTAURANT = "39";
 
-    public List<TourPoiDto> getPois(String areaCode, String contentTypeId, int numOfRows, int pageNo) {
+    public List<TourPoiDto> getPois(String areaCode, String sigunguCode, String contentTypeId,
+                                    String arrange, int numOfRows, int pageNo) {
         int rows = numOfRows <= 0 ? 20 : Math.min(numOfRows, 100);
         int page = pageNo <= 0 ? 1 : pageNo;
-        log.info("[TourService] POI 조회 - area={}, type={}, rows={}, page={}", areaCode, contentTypeId, rows, page);
-        return tourApiClient.areaBasedList(areaCode, contentTypeId, rows, page);
+        log.info("[TourService] POI 조회 - area={}, sigungu={}, type={}, arrange={}, rows={}, page={}",
+                areaCode, sigunguCode, contentTypeId, arrange, rows, page);
+        return tourApiClient.areaBasedList(areaCode, sigunguCode, contentTypeId, arrange, rows, page);
     }
 
     public List<TourPoiDto> getRestaurants(String areaCode, int numOfRows, int pageNo) {
-        return getPois(areaCode, CONTENT_TYPE_RESTAURANT, numOfRows, pageNo);
+        return getPois(areaCode, null, CONTENT_TYPE_RESTAURANT, null, numOfRows, pageNo);
     }
 }

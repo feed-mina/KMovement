@@ -21,7 +21,9 @@ export interface TourPoi {
 
 interface TourQuery {
     areaCode?: string;
+    sigunguCode?: string;
     contentTypeId?: string;
+    arrange?: string; // A=제목순, C=수정일순
     numOfRows?: number;
     pageNo?: number;
 }
