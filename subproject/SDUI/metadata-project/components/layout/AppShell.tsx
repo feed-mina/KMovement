@@ -2,7 +2,7 @@
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import BottomNav from "@/components/layout/BottomNav";
-import RecordTimeComponent from "@/components/fields/RecordTimeComponent";
+import ServiceWorkerUpdater from "@/components/layout/ServiceWorkerUpdater";
 import {useDeviceType} from "@/hooks/useDeviceType";
 import { usePathname } from 'next/navigation';
 import FocusFooterBar from "@/components/layout/FocusFooterBar";
@@ -23,16 +23,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
     return (
         <div className={`app-wrapper ${deviceClass} ${isKrideScreen ? 'kride-fullscreen' : ''}${!isPc && !isKrideScreen ? ' has-bottom-nav' : ''}`}>
+            <ServiceWorkerUpdater />
 
             {!isKrideScreen && (isPc ? <Sidebar /> : <Header />)}
 
             <main className="main-contents-area">
-                {isPc && !isKrideScreen && (
-                    <div className="pc-top-utility">
-                        <RecordTimeComponent />
-                    </div>
-                )}
-
                 <section className="page-view-container">
                     {children}
                 </section>
