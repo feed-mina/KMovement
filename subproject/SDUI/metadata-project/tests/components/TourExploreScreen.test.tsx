@@ -55,4 +55,31 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         renderScreen();
         await waitFor(() => expect(screen.getByText(/불러오지 못했어요/)).toBeInTheDocument());
     });
+
+    it('지역(구) 선택 시 sigunguCode로 재조회해야 함', async () => {
+        renderScreen();
+        await waitFor(() => expect(screen.getByText('가담')).toBeInTheDocument());
+        fireEvent.click(screen.getByText('종로구'));
+        await waitFor(() =>
+            expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ sigunguCode: '23' })),
+        );
+    });
+
+    it('정렬(최신순) 선택 시 arrange=C로 재조회해야 함', async () => {
+        renderScreen();
+        await waitFor(() => expect(screen.getByText('가담')).toBeInTheDocument());
+        fireEvent.click(screen.getByText('최신순'));
+        await waitFor(() =>
+            expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ arrange: 'C' })),
+        );
+    });
+
+    it('카드 클릭 시 상세 모달(구글지도 링크)이 열려야 함', async () => {
+        renderScreen();
+        await waitFor(() => expect(screen.getByText('가나돈까스의집')).toBeInTheDocument());
+        fireEvent.click(screen.getByText('가나돈까스의집'));
+        const link = await screen.findByText('구글지도에서 보기') as HTMLAnchorElement;
+        expect(link).toBeInTheDocument();
+        expect(link.getAttribute('href')).toContain('37.5,127');
+    });
 });

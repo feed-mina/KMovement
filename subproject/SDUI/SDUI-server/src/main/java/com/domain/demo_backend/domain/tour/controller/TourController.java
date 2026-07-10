@@ -31,10 +31,12 @@ public class TourController {
     @GetMapping("/poi")
     public ApiResponse<List<TourPoiDto>> getPois(
             @RequestParam(required = false) String areaCode,
+            @RequestParam(required = false) String sigunguCode,
             @RequestParam(required = false) String contentTypeId,
+            @RequestParam(required = false) String arrange,
             @RequestParam(defaultValue = "20") int numOfRows,
             @RequestParam(defaultValue = "1") int pageNo) {
-        return ApiResponse.success(tourService.getPois(areaCode, contentTypeId, numOfRows, pageNo));
+        return ApiResponse.success(tourService.getPois(areaCode, sigunguCode, contentTypeId, arrange, numOfRows, pageNo));
     }
 
     /** GET /api/v1/tour/restaurants?areaCode=1 — 맛집(음식점) 조회 편의 엔드포인트. */

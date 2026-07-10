@@ -48,7 +48,8 @@ public class TourApiClient {
      * @param pageNo        페이지 번호(1-base)
      */
     @SuppressWarnings("unchecked")
-    public List<TourPoiDto> areaBasedList(String areaCode, String contentTypeId, int numOfRows, int pageNo) {
+    public List<TourPoiDto> areaBasedList(String areaCode, String sigunguCode, String contentTypeId,
+                                          String arrange, int numOfRows, int pageNo) {
         if (serviceKey == null || serviceKey.isBlank()) {
             throw new IllegalStateException("TOUR_API_KEY가 설정되지 않았습니다.");
         }
@@ -57,7 +58,10 @@ public class TourApiClient {
         // URI 객체를 넘기면 baseUrl과 결합되지 않아 상대 URI로 요청이 실패한다.
         // Decoded 서비스키는 DefaultUriBuilderFactory가 정확히 1회 인코딩한다.
         Optional<String> area = Optional.ofNullable(areaCode).filter(s -> !s.isBlank());
+        Optional<String> sigungu = Optional.ofNullable(sigunguCode).filter(s -> !s.isBlank());
         Optional<String> type = Optional.ofNullable(contentTypeId).filter(s -> !s.isBlank());
+        // arrange: A=제목순, C=수정일순, D=생성일순 (기본 A)
+        String arrangeCode = (arrange != null && !arrange.isBlank()) ? arrange : "A";
 
         Map<String, Object> res = webClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -66,10 +70,11 @@ public class TourApiClient {
                         .queryParam("MobileOS", "ETC")
                         .queryParam("MobileApp", mobileApp)
                         .queryParam("_type", "json")
-                        .queryParam("arrange", "A")
+                        .queryParam("arrange", arrangeCode)
                         .queryParam("numOfRows", numOfRows)
                         .queryParam("pageNo", pageNo)
                         .queryParamIfPresent("areaCode", area)
+                        .queryParamIfPresent("sigunguCode", sigungu)
                         .queryParamIfPresent("contentTypeId", type)
                         .build())
                 .retrieve()
