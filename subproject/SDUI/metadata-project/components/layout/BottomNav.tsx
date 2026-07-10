@@ -25,7 +25,7 @@ const iconProps = {
 
 const TABS: NavTab[] = [
     {
-        label: '콘텐츠',
+        label: '탐색',
         url: '/view/CONTENT_LIST',
         match: (p) => p.startsWith('/view/CONTENT'),
         icon: (<svg {...iconProps} aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>),
@@ -37,13 +37,13 @@ const TABS: NavTab[] = [
         icon: (<svg {...iconProps} aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>),
     },
     {
-        label: '약속',
-        url: '/view/SET_TIME_PAGE',
-        match: (p) => p === '/view/SET_TIME_PAGE',
-        icon: (<svg {...iconProps} aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>),
+        label: '동선',
+        url: '/view/ROUTE_PLANNER',
+        match: (p) => p === '/view/ROUTE_PLANNER',
+        icon: (<svg {...iconProps} aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>),
     },
     {
-        label: 'AI 채팅',
+        label: '통역',
         url: '/view/AI_ENGLISH_CHAT_PAGE',
         match: (p) => p.includes('AI_') && p.includes('CHAT'),
         icon: (<svg {...iconProps} aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /></svg>),

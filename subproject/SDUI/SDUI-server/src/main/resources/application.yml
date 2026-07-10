@@ -79,8 +79,15 @@ slack:
   target-user-id: ${SLACK_TARGET_USER_ID:U0AM4840JFR}
 
 openai:
-  api-key: ${OPENAI_API_KEY:dummy-local}
+  # 조용한 401을 방지하기 위해 placeholder 폴백 제거. 미설정 시 부팅 시 경고 로그가 남는다.
+  api-key: ${OPENAI_API_KEY:}
   model: gpt-4o-mini
+
+# 한국관광공사 TourAPI (Epic #74 Dev-2). 서비스키(Decoded)를 TOUR_API_KEY로 주입.
+tour:
+  base-url: ${TOUR_API_BASE_URL:https://apis.data.go.kr/B551011/KorService2}
+  api-key: ${TOUR_API_KEY:}
+  mobile-app: Kride
   whisper-model: whisper-1
 
 fastapi:
