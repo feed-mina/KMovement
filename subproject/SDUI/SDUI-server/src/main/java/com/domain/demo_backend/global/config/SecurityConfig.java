@@ -121,6 +121,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/community/**").authenticated()
                         // ── [추가] 관광 POI (공개 조회) — Epic #74 Dev-2 ──
                         .requestMatchers(HttpMethod.GET, "/api/v1/tour/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/tour/holy/submissions").authenticated()
                         // ── [추가] KRIDE ──
                         .requestMatchers("/api/v1/kride/chat/**").authenticated()
                         .requestMatchers("/api/kride/**").permitAll()

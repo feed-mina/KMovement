@@ -95,4 +95,46 @@ public class TourService {
         log.info("[TourService] 성지 검수 - poiSqno={}, status={}, reviewer={}", poiSqno, status, reviewer);
         return HolyReviewItemDto.from(saved);
     }
+
+    @Transactional
+    public HolyReviewItemDto submitHolyPoi(String title, String addr, Double mapX, Double mapY,
+                                            String artist, String recommendReason, String sourceUrl,
+                                            Long submitterSqno) {
+        String cleanTitle = required(title, "title", 255);
+        String cleanSourceUrl = required(sourceUrl, "sourceUrl", 1000);
+        if (!cleanSourceUrl.startsWith("https://") && !cleanSourceUrl.startsWith("http://")) {
+            throw new IllegalArgumentException("sourceUrl must be an http(s) URL");
+        }
+        if (mapX == null || mapY == null || mapX < 124 || mapX > 132 || mapY < 33 || mapY > 39) {
+            throw new IllegalArgumentException("Coordinates must be within South Korea");
+        }
+        tourPoiRepository.findFirstBySourceUrlAndReviewStatus(cleanSourceUrl, "PENDING")
+                .ifPresent(p -> { throw new IllegalArgumentException("This source URL is already pending review"); });
+        TourPoi poi = new TourPoi();
+        poi.setSource("UGC");
+        poi.setContentTypeId("HOLY");
+        poi.setTitle(cleanTitle);
+        poi.setAddr(optional(addr, 500));
+        poi.setMapX(mapX);
+        poi.setMapY(mapY);
+        poi.setArtist(optional(artist, 120));
+        poi.setRecommendReason(required(recommendReason, "recommendReason", 500));
+        poi.setSourceUrl(cleanSourceUrl);
+        poi.setReviewStatus("PENDING");
+        poi.setSubmittedBy(submitterSqno);
+        return HolyReviewItemDto.from(tourPoiRepository.save(poi));
+    }
+
+    private String required(String value, String field, int max) {
+        if (value == null || value.isBlank()) throw new IllegalArgumentException(field + " is required");
+        String clean = value.trim();
+        if (clean.length() > max) throw new IllegalArgumentException(field + " is too long");
+        return clean;
+    }
+    private String optional(String value, int max) {
+        if (value == null || value.isBlank()) return null;
+        String clean = value.trim();
+        if (clean.length() > max) throw new IllegalArgumentException("value is too long");
+        return clean;
+    }
 }

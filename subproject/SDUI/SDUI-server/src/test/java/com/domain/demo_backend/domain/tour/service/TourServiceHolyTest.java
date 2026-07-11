@@ -157,4 +157,45 @@ class TourServiceHolyTest {
 
         verify(tourPoiRepository, never()).save(any(TourPoi.class));
     }
+
+    @Test
+    @DisplayName("UGC 제보는 출처와 제출자를 보존한 PENDING 성지로 저장한다")
+    void ugcSubmissionCreatesPendingPoi() {
+        when(tourPoiRepository.findFirstBySourceUrlAndReviewStatus("https://example.com/fact", "PENDING"))
+                .thenReturn(Optional.empty());
+        when(tourPoiRepository.save(any(TourPoi.class))).thenAnswer(inv -> {
+            TourPoi poi = inv.getArgument(0);
+            poi.setPoiSqno(101L);
+            return poi;
+        });
+
+        HolyReviewItemDto result = tourService.submitHolyPoi("서울숲 촬영지", "서울 성동구", 127.04, 37.54,
+                "BTS", "공개 출처로 촬영 사실을 확인했습니다.", "https://example.com/fact", 7L);
+
+        assertThat(result.source()).isEqualTo("UGC");
+        assertThat(result.reviewStatus()).isEqualTo("PENDING");
+        verify(tourPoiRepository).save(any(TourPoi.class));
+    }
+
+    @Test
+    @DisplayName("동일 출처의 PENDING 제보는 중복 등록하지 않는다")
+    void duplicatePendingSourceIsRejected() {
+        when(tourPoiRepository.findFirstBySourceUrlAndReviewStatus("https://example.com/fact", "PENDING"))
+                .thenReturn(Optional.of(holy("old", "기존 제보", "BTS")));
+
+        assertThatThrownBy(() -> tourService.submitHolyPoi("서울숲", "서울", 127.04, 37.54,
+                "BTS", "확인된 사실", "https://example.com/fact", 7L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("already pending");
+        verify(tourPoiRepository, never()).save(any(TourPoi.class));
+    }
+
+    @Test
+    @DisplayName("출처 URL과 한국 좌표가 유효하지 않으면 UGC 제보를 거부한다")
+    void invalidUgcSubmissionIsRejected() {
+        assertThatThrownBy(() -> tourService.submitHolyPoi("서울숲", "서울", 10.0, 10.0,
+                "BTS", "확인된 사실", "not-a-url", 7L))
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(tourPoiRepository, never()).save(any(TourPoi.class));
+    }
 }
