@@ -1,13 +1,17 @@
 package com.domain.demo_backend.domain.tour.service;
 
 import com.domain.demo_backend.domain.tour.client.TourApiClient;
+import com.domain.demo_backend.domain.tour.domain.TourPoi;
 import com.domain.demo_backend.domain.tour.domain.TourPoiRepository;
 import com.domain.demo_backend.domain.tour.dto.HolyPoiDto;
+import com.domain.demo_backend.domain.tour.dto.HolyReviewItemDto;
 import com.domain.demo_backend.domain.tour.dto.TourPoiDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -56,5 +60,39 @@ public class TourService {
                 .toList();
         log.info("[TourService] 성지 POI 조회 - {}건", pois.size());
         return pois;
+    }
+
+    /** 검수 대기(PENDING) 성지 목록 — 어드민 검수 큐. Dev-4 2차. */
+    public List<HolyReviewItemDto> getPendingHolyPois() {
+        return tourPoiRepository
+                .findBySourceNotAndReviewStatusOrderByPoiSqnoAsc(SOURCE_TOURAPI, "PENDING")
+                .stream()
+                .map(HolyReviewItemDto::from)
+                .toList();
+    }
+
+    /**
+     * 성지 검수 처리 — APPROVE/REJECT. 공공(TOURAPI) 행은 검수 대상이 아니다.
+     *
+     * @throws IllegalArgumentException poiSqno 없음 / 잘못된 action / TOURAPI 행
+     */
+    @Transactional
+    public HolyReviewItemDto reviewHolyPoi(Long poiSqno, String action, String reviewer) {
+        TourPoi poi = tourPoiRepository.findById(poiSqno)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 POI: " + poiSqno));
+        if (SOURCE_TOURAPI.equals(poi.getSource())) {
+            throw new IllegalArgumentException("공공(TOURAPI) POI는 검수 대상이 아닙니다: " + poiSqno);
+        }
+        String status = switch (action == null ? "" : action.toUpperCase()) {
+            case "APPROVE" -> "APPROVED";
+            case "REJECT" -> "REJECTED";
+            default -> throw new IllegalArgumentException("action은 APPROVE 또는 REJECT여야 합니다: " + action);
+        };
+        poi.setReviewStatus(status);
+        poi.setReviewedBy(reviewer);
+        poi.setReviewedAt(LocalDateTime.now());
+        TourPoi saved = tourPoiRepository.save(poi);
+        log.info("[TourService] 성지 검수 - poiSqno={}, status={}, reviewer={}", poiSqno, status, reviewer);
+        return HolyReviewItemDto.from(saved);
     }
 }
