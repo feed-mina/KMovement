@@ -48,7 +48,14 @@ jobs:
         working-directory: ./subproject/SDUI/metadata-project
 
       - name: Run frontend tests
-        run: npx jest tests --runInBand --forceExit
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx jest tests --listTests | while IFS= read -r test_file; do
+            echo "::group::Jest ${test_file}"
+            npx jest "${test_file}" --runInBand --forceExit
+            echo "::endgroup::"
+          done
         working-directory: ./subproject/SDUI/metadata-project
 
       - name: Build Next.js
