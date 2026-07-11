@@ -8,15 +8,15 @@ import AppShell from "@/components/layout/AppShell";
 
 export const metadata: Metadata = {
     title: {
-        default: 'Kride',
-        template: '%s | Kride'
+        default: 'KRIDE',
+        template: '%s | KRIDE'
     },
-    description: '스마트한 일정 관리 앱',
+    description: 'AI가 짜주는 K-컬처 여행 동선',
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://yerin.duckdns.org'),
-    keywords: ["Kride", "K-컬처 여행", "여행 동선", "성지 탐색"],
-    authors: [{ name: "Kride" }],
-    creator: "Kride",
-    publisher: "Kride",
+    keywords: ["KRIDE", "K-컬처", "성지순례", "여행 동선", "K-POP 여행", "AI 여행 플래너"],
+    authors: [{ name: "KRIDE Team" }],
+    creator: "KRIDE Team",
+    publisher: "KRIDE",
     formatDetection: {
         email: false,
         address: false,
@@ -26,17 +26,17 @@ export const metadata: Metadata = {
         canonical: "/",
     },
     openGraph: {
-        title: 'Kride',
-        description: '스마트한 일정 관리 앱',
-        images: [{ url: '/icons/icon-512x512.png', width: 512, height: 512, alt: 'SDUI 아이콘' }],
+        title: 'KRIDE',
+        description: 'AI가 짜주는 K-컬처 여행 동선',
+        images: [{ url: '/icons/icon-512x512.png', width: 512, height: 512, alt: 'KRIDE 아이콘' }],
         type: 'website',
         locale: 'ko_KR',
-        siteName: 'Kride'
+        siteName: 'KRIDE'
     },
     twitter: {
         card: "summary_large_image",
-        title: 'Kride',
-        description: '스마트한 일정 관리 앱',
+        title: 'KRIDE',
+        description: 'AI가 짜주는 K-컬처 여행 동선',
         images: ['/icons/icon-512x512.png'],
     },
 };

@@ -1,5 +1,6 @@
 package com.domain.demo_backend.domain.tour.controller;
 
+import com.domain.demo_backend.domain.tour.dto.HolyPoiDto;
 import com.domain.demo_backend.domain.tour.dto.TourPoiDto;
 import com.domain.demo_backend.domain.tour.service.TourService;
 import com.domain.demo_backend.global.common.response.ApiResponse;
@@ -37,6 +38,12 @@ public class TourController {
             @RequestParam(defaultValue = "20") int numOfRows,
             @RequestParam(defaultValue = "1") int pageNo) {
         return ApiResponse.success(tourService.getPois(areaCode, sigunguCode, contentTypeId, arrange, numOfRows, pageNo));
+    }
+
+    /** GET /api/v1/tour/holy — 성지(K-컬처) POI 목록. 검수 승인분만 노출. Dev-4(#96-A). */
+    @GetMapping("/holy")
+    public ApiResponse<List<HolyPoiDto>> getHolyPois() {
+        return ApiResponse.success(tourService.getHolyPois());
     }
 
     /** GET /api/v1/tour/restaurants?areaCode=1 — 맛집(음식점) 조회 편의 엔드포인트. */

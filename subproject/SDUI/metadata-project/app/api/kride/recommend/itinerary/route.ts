@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const FASTAPI_URL = process.env.FASTAPI_URL ?? process.env.KRIDE_FASTAPI_URL ?? process.env.GCP_FASTAPI_URL;
-
 /**
  * FastAPI /api/recommend/itinerary 프록시
  * rewrites() 대신 API Route 사용 — 타임아웃 120초로 설정
  */
 export async function POST(request: NextRequest) {
   try {
+    const FASTAPI_URL = process.env.FASTAPI_URL ?? process.env.KRIDE_FASTAPI_URL ?? process.env.GCP_FASTAPI_URL;
     if (!FASTAPI_URL) {
       return NextResponse.json(
         { error: "FASTAPI_URL is not configured" },

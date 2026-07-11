@@ -5,7 +5,7 @@ let apiCallCount = 0;
 
 export const handlers = [
   // 인증 관련 핸들러
-  http.get('*/api/auth/me', () => {
+  http.get('http://localhost/api/auth/me', () => {
     return HttpResponse.json(
       {
         userId: 'testuser',
@@ -21,7 +21,7 @@ export const handlers = [
     );
   }),
 
-  http.post('*/api/auth/login', () => {
+  http.post('http://localhost/api/auth/login', () => {
     const body = {
       data: {
         accessToken: 'mock-access-token',
@@ -36,7 +36,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/api/auth/logout', () => {
+  http.post('http://localhost/api/auth/logout', () => {
     return HttpResponse.json(
       { message: 'Logged out successfully' },
       {
@@ -47,7 +47,7 @@ export const handlers = [
   }),
 
   // TC-S002: 401 → refresh → 재시도 성공 시나리오
-  http.post('*/api/execute/:sqlKey', ({ params }) => {
+  http.post('http://localhost/api/execute/:sqlKey', ({ params }) => {
     if (apiCallCount === 0) {
       apiCallCount++;
       return new HttpResponse(null, { status: 401 });
@@ -63,7 +63,7 @@ export const handlers = [
   }),
 
   // TC-S002: refresh 성공
-  http.post('*/api/auth/refresh', () => {
+  http.post('http://localhost/api/auth/refresh', () => {
     return HttpResponse.json(
       { data: { accessToken: 'new-access-token' } },
       {
@@ -74,12 +74,12 @@ export const handlers = [
   }),
 
   // TC-S003: refresh 실패 시나리오
-  http.post('*/api/auth/refresh-fail', () => {
+  http.post('http://localhost/api/auth/refresh-fail', () => {
     return new HttpResponse(null, { status: 401 });
   }),
 
   // 화면 메타데이터 핸들러
-  http.get('*/api/ui/:screenId', ({ params }) => {
+  http.get('http://localhost/api/ui/:screenId', ({ params }) => {
     const { screenId } = params;
     return HttpResponse.json({
       data: [

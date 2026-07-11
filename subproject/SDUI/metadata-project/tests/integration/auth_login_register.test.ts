@@ -1,18 +1,25 @@
 import api from '@/services/axios';
 import { server } from '../mocks/server';
 import { http, HttpResponse } from 'msw';
+import { createAuthAdapter, type AuthAdapterState } from '../mocks/authAdapter';
+
+const authState: AuthAdapterState = {};
+const originalAdapter = api.defaults.adapter;
 
 describe('로그인/회원가입 통합 테스트', () => {
-  beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
+  beforeEach(() => {
+    Object.keys(authState).forEach((key) => delete authState[key as keyof AuthAdapterState]);
+    api.defaults.adapter = createAuthAdapter(authState);
+  });
   afterEach(() => server.resetHandlers());
-  afterAll(() => server.close());
+  afterAll(() => { api.defaults.adapter = originalAdapter; });
 
   // ── 로그인 ──
 
   describe('POST /api/auth/login', () => {
     test('성공: 올바른 이메일+비밀번호 → 200 + 토큰 반환', async () => {
       server.use(
-        http.post('*/api/auth/login', async ({ request }) => {
+        http.post('http://localhost/api/auth/login', async ({ request }) => {
           const body = await request.json() as Record<string, string>;
           if (body.user_email === 'user@test.com' && body.user_pw === 'Pass123!') {
             return HttpResponse.json({
@@ -37,7 +44,7 @@ describe('로그인/회원가입 통합 테스트', () => {
 
     test('실패: 잘못된 비밀번호 → 401', async () => {
       server.use(
-        http.post('*/api/auth/login', () => {
+        http.post('http://localhost/api/auth/login', () => {
           return new HttpResponse('아이디 또는 비밀번호가 일치하지 않습니다.', { status: 401 });
         }),
       );
@@ -52,7 +59,7 @@ describe('로그인/회원가입 통합 테스트', () => {
 
     test('실패: 이메일 미인증 사용자 → 403', async () => {
       server.use(
-        http.post('*/api/auth/login', () => {
+        http.post('http://localhost/api/auth/login', () => {
           return new HttpResponse('이메일 인증이 완료되지 않았습니다.', { status: 403 });
         }),
       );
@@ -71,7 +78,7 @@ describe('로그인/회원가입 통합 테스트', () => {
   describe('POST /api/auth/register', () => {
     test('성공: 신규 사용자 가입 → 201', async () => {
       server.use(
-        http.post('*/api/auth/register', async ({ request }) => {
+        http.post('http://localhost/api/auth/register', async ({ request }) => {
           const body = await request.json() as Record<string, string>;
           if (body.email && body.password && body.zipCode && body.roadAddress) {
             return new HttpResponse('User registred successfully!', { status: 201 });
@@ -94,7 +101,7 @@ describe('로그인/회원가입 통합 테스트', () => {
 
     test('실패: 이미 존재하는 이메일 → 409', async () => {
       server.use(
-        http.post('*/api/auth/register', () => {
+        http.post('http://localhost/api/auth/register', () => {
           return new HttpResponse('이미 존재하는 이메일입니다.', { status: 409 });
         }),
       );
@@ -113,7 +120,7 @@ describe('로그인/회원가입 통합 테스트', () => {
 
     test('실패: 주소 정보 누락 → 400', async () => {
       server.use(
-        http.post('*/api/auth/register', () => {
+        http.post('http://localhost/api/auth/register', () => {
           return new HttpResponse('주소 정보는 필수입니다.', { status: 400 });
         }),
       );
@@ -134,7 +141,7 @@ describe('로그인/회원가입 통합 테스트', () => {
   describe('POST /api/auth/verify-code', () => {
     test('성공: 올바른 코드 → 200', async () => {
       server.use(
-        http.post('*/api/auth/verify-code', async ({ request }) => {
+        http.post('http://localhost/api/auth/verify-code', async ({ request }) => {
           const body = await request.json() as Record<string, string>;
           if (body.email && body.code === '1234567') {
             return new HttpResponse('인증 성공!', { status: 200 });
@@ -153,7 +160,7 @@ describe('로그인/회원가입 통합 테스트', () => {
 
     test('실패: 잘못된 코드 → 400', async () => {
       server.use(
-        http.post('*/api/auth/verify-code', () => {
+        http.post('http://localhost/api/auth/verify-code', () => {
           return new HttpResponse('인증 실패! 코드를 다시 확인해주세요.', { status: 400 });
         }),
       );
@@ -180,8 +187,9 @@ describe('로그인/회원가입 통합 테스트', () => {
     });
 
     test('미인증 사용자 → isLoggedIn=false', async () => {
+      authState.guest = true;
       server.use(
-        http.get('*/api/auth/me', () => {
+        http.get('http://localhost/api/auth/me', () => {
           return HttpResponse.json({
             isLoggedIn: false,
             role: 'GUEST',
@@ -214,7 +222,7 @@ describe('로그인/회원가입 통합 테스트', () => {
 
       // 1. 회원가입
       server.use(
-        http.post('*/api/auth/register', () => {
+        http.post('http://localhost/api/auth/register', () => {
           return new HttpResponse('User registred successfully!', { status: 201 });
         }),
       );
@@ -231,7 +239,7 @@ describe('로그인/회원가입 통합 테스트', () => {
 
       // 2. 인증 코드 전송
       server.use(
-        http.post('*/api/auth/signup', () => {
+        http.post('http://localhost/api/auth/signup', () => {
           return HttpResponse.json({
             message: '인증 코드가 이메일로 전송되었습니다.',
             email: testEmail,
@@ -246,7 +254,7 @@ describe('로그인/회원가입 통합 테스트', () => {
 
       // 3. 인증 코드 확인
       server.use(
-        http.post('*/api/auth/verify-code', () => {
+        http.post('http://localhost/api/auth/verify-code', () => {
           return new HttpResponse('인증 성공!', { status: 200 });
         }),
       );
@@ -259,7 +267,7 @@ describe('로그인/회원가입 통합 테스트', () => {
 
       // 4. 로그인
       server.use(
-        http.post('*/api/auth/login', () => {
+        http.post('http://localhost/api/auth/login', () => {
           return HttpResponse.json({
             accessToken: 'flow-access-token',
             refreshToken: 'flow-refresh-token',

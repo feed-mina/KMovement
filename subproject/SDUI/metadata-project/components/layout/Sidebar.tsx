@@ -38,7 +38,7 @@ export default function Sidebar() {
             <div className="sidebar-top flex-1">
                 <div className="sidebar-logo p-4 font-bold text-xl cursor-pointer"
                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/MAIN_PAGE' })}>
-                    Kride
+                    KRIDE
                 </div>
 
                 {isRealLoggedIn ? (

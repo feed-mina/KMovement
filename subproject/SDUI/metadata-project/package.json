@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "unitTest": "nyc jest test/",
-    "test": "nyc jest tests/"
+    "test": "jest tests --runInBand --forceExit"
   },
   "dependencies": {
     "@stomp/stompjs": "^7.3.0",
