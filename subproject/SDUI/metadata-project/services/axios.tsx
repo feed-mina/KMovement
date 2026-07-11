@@ -27,6 +27,9 @@ const api: AxiosInstance = axios.create({
     baseURL: '',
     withCredentials: true,
     timeout: 15000,
+    // MSW v2 intercepts fetch reliably in Jest/JSDOM. The XHR adapter can
+    // leave libuv handles active after the suite and abort the Node process.
+    adapter: isTestEnv ? 'fetch' : undefined,
 });
 
 let refreshRequest: Promise<void> | null = null;
@@ -38,6 +41,7 @@ export function refreshSession(): Promise<void> {
             .post(REFRESH_ENDPOINT, {}, {
                 withCredentials: true,
                 timeout: 15000,
+                adapter: isTestEnv ? 'fetch' : undefined,
             })
             .then(() => undefined)
             .finally(() => {
