@@ -1,11 +1,19 @@
 import api from '@/services/axios';
 import { server } from '../mocks/server';
 import { http, HttpResponse } from 'msw';
+import { createAuthAdapter, type AuthAdapterState } from '../mocks/authAdapter';
+
+const authState: AuthAdapterState = {};
+const originalAdapter = api.defaults.adapter;
 
 describe('로그인/회원가입 통합 테스트', () => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
+  beforeEach(() => {
+    Object.keys(authState).forEach((key) => delete authState[key as keyof AuthAdapterState]);
+    api.defaults.adapter = createAuthAdapter(authState);
+  });
   afterEach(() => server.resetHandlers());
-  afterAll(() => server.close());
+  afterAll(() => { api.defaults.adapter = originalAdapter; server.close(); });
 
   // ── 로그인 ──
 
@@ -180,6 +188,7 @@ describe('로그인/회원가입 통합 테스트', () => {
     });
 
     test('미인증 사용자 → isLoggedIn=false', async () => {
+      authState.guest = true;
       server.use(
         http.get('http://localhost/api/auth/me', () => {
           return HttpResponse.json({

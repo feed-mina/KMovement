@@ -18,10 +18,12 @@ describe('POST /api/kride/recommend/itinerary', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.FASTAPI_URL = 'http://localhost:8000';
     global.fetch = jest.fn() as jest.Mock;
   });
 
   afterAll(() => {
+    delete process.env.FASTAPI_URL;
     global.fetch = originalFetch;
   });
 

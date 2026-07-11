@@ -4,6 +4,10 @@ import api from '@/services/axios';
 import { server } from '../mocks/server';
 import { http, HttpResponse } from 'msw';
 import { resetApiCallCount } from '../mocks/handlers';
+import { createAuthAdapter, type AuthAdapterState } from '../mocks/authAdapter';
+
+const authState: AuthAdapterState = {};
+const originalAdapter = api.defaults.adapter;
 
 describe('인증 보안 — API 보호 엔드포인트', () => {
   // MSW 서버 설정
@@ -18,12 +22,15 @@ describe('인증 보안 — API 보호 엔드포인트', () => {
   afterEach(() => server.resetHandlers());
 
   afterAll(() => {
+    api.defaults.adapter = originalAdapter;
     server.close();
   });
 
   beforeEach(() => {
     // 각 테스트 전 카운터 리셋
     resetApiCallCount();
+    Object.keys(authState).forEach((key) => delete authState[key as keyof AuthAdapterState]);
+    api.defaults.adapter = createAuthAdapter(authState);
   });
 
   // TC-S002: 401 자동 갱신 → 성공 시 원래 요청 재시도
@@ -40,6 +47,7 @@ describe('인증 보안 — API 보호 엔드포인트', () => {
 
   // TC-S003: 401 자동 갱신 → 실패 시 로그아웃 처리
   test('TC-S003: refresh 실패 시 에러 처리', async () => {
+    authState.refreshFails = true;
     // Given: refresh 실패하는 핸들러로 오버라이드
     server.use(
       http.post('http://localhost/api/execute/testQuery', () => {
