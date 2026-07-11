@@ -3,6 +3,9 @@ import { fireEvent, screen } from '@testing-library/react';
 
 import DynamicEngine from '@/components/DynamicEngine/DynamicEngine';
 import { renderWithProviders } from '@/tests/test-utils';
+jest.mock('@/components/providers/MetadataProvider', () => ({
+    useMetadata: () => ({ screenId: 'MAIN_PAGE', metadata: [], pageData: {} }),
+}));
 
 
 describe('MAIN_PAGE AI chat cards', () => {
