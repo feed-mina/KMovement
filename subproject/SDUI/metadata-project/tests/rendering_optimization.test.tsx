@@ -28,6 +28,7 @@ const mockPageData: Record<string, any> = {
 
 // 2. 동적 MSW 서버 설정
 const server = setupServer(
+    http.get('/api/auth/me', () => HttpResponse.json({ isLoggedIn: false, role: 'GUEST' })),
     http.get('/api/ui/:screenId', ({params}) => {
         const {screenId} = params;
         const data = allMockData[screenId as string];
