@@ -101,6 +101,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/editPassword", "/api/auth/non-user", "/api/auth/update-profile")
                         .authenticated()
                         .requestMatchers("/api/content/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/b2b/slots/*/events").permitAll()
+                        .requestMatchers("/api/partner/**").hasAnyRole("PARTNER", "ADMIN")
                         // ADMIN ONLY
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // AI API (인증 필요)
