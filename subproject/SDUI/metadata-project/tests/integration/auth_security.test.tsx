@@ -42,10 +42,10 @@ describe('인증 보안 — API 보호 엔드포인트', () => {
   test('TC-S003: refresh 실패 시 에러 처리', async () => {
     // Given: refresh 실패하는 핸들러로 오버라이드
     server.use(
-      http.post('*/api/execute/testQuery', () => {
+      http.post('http://localhost/api/execute/testQuery', () => {
         return new HttpResponse(null, { status: 401 });
       }),
-      http.post('*/api/auth/refresh', () => {
+      http.post('http://localhost/api/auth/refresh', () => {
         return new HttpResponse(null, { status: 401 });
       })
     );
