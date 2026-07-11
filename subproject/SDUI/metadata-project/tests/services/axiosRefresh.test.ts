@@ -33,6 +33,10 @@ describe('axios refresh handling', () => {
 
     api.defaults.adapter = (async (config: InternalAxiosRequestConfig) => {
       const url = config.url ?? '';
+      if (url === '/api/auth/refresh') {
+        refreshCallCount++;
+        return { data: {}, status: 200, statusText: 'OK', headers: {}, config };
+      }
       const count = (attempts.get(url) ?? 0) + 1;
       attempts.set(url, count);
 
@@ -49,12 +53,6 @@ describe('axios refresh handling', () => {
       };
     }) as AxiosAdapter;
 
-    jest.spyOn(axios, 'post').mockImplementation(async () => {
-      refreshCallCount++;
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      return {} as AxiosResponse;
-    });
-
     const [first, second] = await Promise.all([
       api.get('/api/protected/first'),
       api.get('/api/protected/second'),
@@ -66,13 +64,16 @@ describe('axios refresh handling', () => {
   });
 
   test('does not recursively retry when refresh fails', async () => {
-    api.defaults.adapter = ((config: InternalAxiosRequestConfig) =>
-      unauthorized(config)) as AxiosAdapter;
-    const refreshSpy = jest.spyOn(axios, 'post').mockRejectedValue(
-      new AxiosError('Refresh failed', 'ERR_BAD_REQUEST')
-    );
+    let refreshCallCount = 0;
+    api.defaults.adapter = ((config: InternalAxiosRequestConfig) => {
+      if (config.url === '/api/auth/refresh') {
+        refreshCallCount++;
+        return Promise.reject(new AxiosError('Refresh failed', 'ERR_BAD_REQUEST', config));
+      }
+      return unauthorized(config);
+    }) as AxiosAdapter;
 
     await expect(api.get('/api/protected')).rejects.toThrow('Refresh failed');
-    expect(refreshSpy).toHaveBeenCalledTimes(1);
+    expect(refreshCallCount).toBe(1);
   });
 });

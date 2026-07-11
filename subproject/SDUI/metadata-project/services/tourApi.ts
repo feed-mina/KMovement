@@ -17,10 +17,11 @@ export interface TourPoi {
     cat2?: string;
     cat3?: string;
     areaCode?: string;
-    // 성지 큐레이션 전용(백엔드 아님, 프론트 데이터셋) — #78
+    // 성지 큐레이션 확장 — V76 tour_poi 컬럼(HolyPoiDto)과 정합. #96-A(구 #78)
     artist?: string;
     fandomInfo?: string;
     recommendReason?: string;
+    sourceUrl?: string;
 }
 
 interface TourQuery {
@@ -41,5 +42,11 @@ export async function fetchTourPois(params: TourQuery = {}): Promise<TourPoi[]> 
 /** 맛집(음식점, contentTypeId=39) 편의 조회. */
 export async function fetchRestaurants(areaCode?: string, numOfRows = 20): Promise<TourPoi[]> {
     const res = await api.get('/api/v1/tour/restaurants', { params: { areaCode, numOfRows } });
+    return res.data?.data ?? [];
+}
+
+/** 성지(K-컬처) POI 조회 — tour_poi 검수 승인분(V76 파이프라인). #96-A */
+export async function fetchHolyPois(): Promise<TourPoi[]> {
+    const res = await api.get('/api/v1/tour/holy');
     return res.data?.data ?? [];
 }
