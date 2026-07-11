@@ -56,7 +56,7 @@ export default function Header() {
             <div className="header-container">
                 <div className="header-top-row">
                     <div className="logo" onClick={() => handleAction({actionType: 'ROUTE', actionUrl: '/view/MAIN_PAGE'})}>
-                        SDUI Project
+                        KRIDE
                     </div>
                     <div className="auth-actions">
                         {isRealLoggedIn ? (
