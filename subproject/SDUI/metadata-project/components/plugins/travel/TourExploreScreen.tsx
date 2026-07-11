@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { ScreenControllerProps } from '@/components/screens/types';
-import { fetchTourPois, TourPoi } from '@/services/tourApi';
+import { fetchHolyPois, fetchTourPois, TourPoi } from '@/services/tourApi';
 import { HOLY_SITES } from '@/lib/data/holySites';
 import { useAuth } from '@/context/AuthContext';
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
@@ -60,12 +60,16 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     }, []);
 
     useEffect(() => {
-        // 성지는 큐레이션 데이터셋(프론트) — TourAPI 미호출
+        // 성지는 검수 파이프라인 API(V76 tour_poi) — 빈 결과/실패 시 시드 폴백. #96-A
         if (category === 'HOLY') {
-            setPois(HOLY_SITES);
-            setLoading(false);
+            let holyAlive = true;
+            setLoading(true);
             setError(null);
-            return;
+            fetchHolyPois()
+                .then((list) => { if (holyAlive) setPois(list.length > 0 ? list : HOLY_SITES); })
+                .catch(() => { if (holyAlive) setPois(HOLY_SITES); })
+                .finally(() => { if (holyAlive) setLoading(false); });
+            return () => { holyAlive = false; };
         }
         let alive = true;
         setLoading(true);
