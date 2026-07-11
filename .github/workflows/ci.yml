@@ -48,7 +48,7 @@ jobs:
         working-directory: ./subproject/SDUI/metadata-project
 
       - name: Run frontend tests
-        run: npx jest tests --runInBand
+        run: npx jest tests --runInBand --forceExit
         working-directory: ./subproject/SDUI/metadata-project
 
       - name: Build Next.js
