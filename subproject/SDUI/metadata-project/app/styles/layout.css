@@ -3,7 +3,7 @@
    ========================================== */
 :root {
     --primary-color: var(--kride-primary);
-    --secondary-color: #007B65;
+    --secondary-color: var(--kride-primary);
     --kakao-yellow: #FEE500;
     --error-red: #FDBFBC;
     --border-color: #eaeaea;

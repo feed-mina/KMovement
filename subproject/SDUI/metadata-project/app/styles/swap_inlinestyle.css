@@ -62,7 +62,7 @@
 
 
 #messageInput {
-    border: 2px solid #007B65;
+    border: 2px solid var(--kride-primary);
     border-radius: 5px;
     flex: 1;
     padding: 10px;
