@@ -1,16 +1,18 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import TourExploreScreen from '@/components/plugins/travel/TourExploreScreen';
-import { fetchTourPois } from '@/services/tourApi';
+import { fetchHolyPois, fetchTourPois } from '@/services/tourApi';
 
 jest.mock('@/services/tourApi', () => ({
     __esModule: true,
     fetchTourPois: jest.fn(),
+    fetchHolyPois: jest.fn(),
 }));
 
 jest.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { socialType: 'K' }, isLoggedIn: true }) }));
 
 const mockedFetch = fetchTourPois as jest.Mock;
+const mockedHolyFetch = fetchHolyPois as jest.Mock;
 
 const sample = [
     { contentId: '1', title: '가나돈까스의집', addr: '서울 강남구', firstImage: 'http://img/a.jpg', mapX: 127, mapY: 37.5 },
@@ -21,6 +23,9 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
     beforeEach(() => {
         mockedFetch.mockReset();
         mockedFetch.mockResolvedValue(sample);
+        // 기본: 성지 API는 빈 결과 → 시드(HOLY_SITES) 폴백 경로
+        mockedHolyFetch.mockReset();
+        mockedHolyFetch.mockResolvedValue([]);
     });
 
     const renderScreen = () => render(<TourExploreScreen screenId="TOUR_EXPLORE" refId={null} />);
@@ -85,13 +90,29 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         expect(link.getAttribute('href')).toContain('37.5,127');
     });
 
-    it('성지 카테고리는 큐레이션 데이터를 fetch 없이 표시', async () => {
+    it('성지 카테고리는 TourAPI 대신 성지 API를 호출한다 (#96-A)', async () => {
         renderScreen();
         await waitFor(() => expect(screen.getByText('가나돈까스의집')).toBeInTheDocument());
         mockedFetch.mockClear();
         fireEvent.click(screen.getByText('성지'));
-        await waitFor(() => expect(screen.getByText('서울숲')).toBeInTheDocument());
+        await waitFor(() => expect(mockedHolyFetch).toHaveBeenCalled());
         expect(mockedFetch).not.toHaveBeenCalled();
+    });
+
+    it('성지 API 결과가 있으면 그대로 표시한다', async () => {
+        mockedHolyFetch.mockResolvedValue([
+            { contentId: 'holy-db-1', title: 'DB성지', addr: '서울', mapX: 127, mapY: 37.5, contentTypeId: 'HOLY', artist: 'BTS' },
+        ]);
+        renderScreen();
+        fireEvent.click(await screen.findByText('성지'));
+        await waitFor(() => expect(screen.getByText('DB성지')).toBeInTheDocument());
+    });
+
+    it('성지 API가 비었거나 실패하면 시드 큐레이션으로 폴백한다', async () => {
+        mockedHolyFetch.mockRejectedValueOnce(new Error('network'));
+        renderScreen();
+        fireEvent.click(await screen.findByText('성지'));
+        await waitFor(() => expect(screen.getByText('서울숲')).toBeInTheDocument());
     });
 
     it('성지 카드 모달에 팬덤 발자취·추천 이유를 표시', async () => {
