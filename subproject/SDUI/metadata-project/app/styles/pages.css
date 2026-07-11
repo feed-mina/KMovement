@@ -1421,6 +1421,120 @@
     /* 사이드바 너비에 맞춤 */
 }
 
+/* CONTENT_WRITE: wide card workspace inspired by the content manager UI. */
+.page-wrap.CONTENT_WRITE {
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 32px;
+}
+
+.page-wrap.CONTENT_WRITE .content-area {
+    width: 100%;
+}
+
+.page-wrap.CONTENT_WRITE .write_section1 {
+    position: relative;
+    padding: 112px 36px 36px !important;
+    border: 1px solid #dfe5ee;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.07);
+}
+
+.page-wrap.CONTENT_WRITE .write_section1::before {
+    content: "콘텐츠 작성";
+    position: absolute;
+    top: 32px;
+    left: 36px;
+    right: 36px;
+    padding-bottom: 22px;
+    border-bottom: 2px solid #e2e8f0;
+    color: #0f172a;
+    font-size: clamp(1.7rem, 2.5vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+}
+
+.page-wrap.CONTENT_WRITE .write_section1 > div,
+.page-wrap.CONTENT_WRITE .write_sub_group,
+.page-wrap.CONTENT_WRITE .time-slot-container {
+    min-width: 0;
+}
+
+.page-wrap.CONTENT_WRITE .content-label,
+.page-wrap.CONTENT_WRITE .diary-label,
+.page-wrap.CONTENT_WRITE .time-slot-title {
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.page-wrap.CONTENT_WRITE .contentInput,
+.page-wrap.CONTENT_WRITE .diaryInput,
+.page-wrap.CONTENT_WRITE .contentTextarea,
+.page-wrap.CONTENT_WRITE .diaryTextarea,
+.page-wrap.CONTENT_WRITE .time-slot-input,
+.page-wrap.CONTENT_WRITE .emotion-select-element {
+    border: 1px solid #dbe3ee;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: none;
+}
+
+.page-wrap.CONTENT_WRITE .contentInput:focus,
+.page-wrap.CONTENT_WRITE .diaryInput:focus,
+.page-wrap.CONTENT_WRITE .contentTextarea:focus,
+.page-wrap.CONTENT_WRITE .diaryTextarea:focus,
+.page-wrap.CONTENT_WRITE .time-slot-input:focus,
+.page-wrap.CONTENT_WRITE .emotion-select-element:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.13);
+}
+
+.page-wrap.CONTENT_WRITE .time-slot-container,
+.page-wrap.CONTENT_WRITE .write_sub_group {
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #fbfdff;
+}
+
+.page-wrap.CONTENT_WRITE .save-button,
+.page-wrap.CONTENT_WRITE .go_modify_btn,
+.page-wrap.CONTENT_WRITE .go_list_btn {
+    min-height: 52px;
+    border: 0;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #4f46e5, #0f8f83);
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 10px 24px rgba(79, 70, 229, 0.2);
+}
+
+@media (max-width: 999px) {
+    .page-wrap.CONTENT_WRITE {
+        padding: 16px 14px 96px;
+    }
+
+    .page-wrap.CONTENT_WRITE .write_section1 {
+        gap: 20px;
+        padding: 92px 18px 24px !important;
+        border-radius: 16px;
+    }
+
+    .page-wrap.CONTENT_WRITE .write_section1::before {
+        top: 25px;
+        left: 18px;
+        right: 18px;
+        padding-bottom: 17px;
+    }
+
+    .page-wrap.CONTENT_WRITE .contentTextarea,
+    .page-wrap.CONTENT_WRITE .diaryTextarea {
+        min-height: 240px;
+    }
+}
+
 /* 범용 중앙 정렬 유틸리티 클래스 */
 .align-center {
     align-self: center !important;

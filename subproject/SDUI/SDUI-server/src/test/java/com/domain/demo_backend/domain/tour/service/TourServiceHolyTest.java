@@ -4,14 +4,19 @@ import com.domain.demo_backend.domain.tour.client.TourApiClient;
 import com.domain.demo_backend.domain.tour.domain.TourPoi;
 import com.domain.demo_backend.domain.tour.domain.TourPoiRepository;
 import com.domain.demo_backend.domain.tour.dto.HolyPoiDto;
+import com.domain.demo_backend.domain.tour.dto.HolyReviewItemDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -85,5 +90,71 @@ class TourServiceHolyTest {
                 .thenReturn(List.of());
 
         assertThat(tourService.getHolyPois()).isEmpty();
+    }
+
+    // ── 검수(2차) ──
+
+    @Test
+    @DisplayName("검수 대기 큐는 PENDING 상태만 조회한다")
+    void pendingQueueQueriesPendingOnly() {
+        when(tourPoiRepository.findBySourceNotAndReviewStatusOrderByPoiSqnoAsc("TOURAPI", "PENDING"))
+                .thenReturn(List.of(holy("holy-p", "대기성지", "IVE")));
+
+        List<HolyReviewItemDto> queue = tourService.getPendingHolyPois();
+
+        assertThat(queue).hasSize(1);
+        assertThat(queue.get(0).title()).isEqualTo("대기성지");
+        verify(tourPoiRepository).findBySourceNotAndReviewStatusOrderByPoiSqnoAsc("TOURAPI", "PENDING");
+    }
+
+    @Test
+    @DisplayName("APPROVE 액션은 APPROVED로 저장하고 검수자·시각을 기록한다")
+    void approveSetsApprovedWithReviewer() {
+        TourPoi pending = holy("holy-p", "대기성지", "IVE");
+        pending.setPoiSqno(10L);
+        pending.setReviewStatus("PENDING");
+        when(tourPoiRepository.findById(10L)).thenReturn(Optional.of(pending));
+        when(tourPoiRepository.save(any(TourPoi.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        HolyReviewItemDto result = tourService.reviewHolyPoi(10L, "APPROVE", "adminUser");
+
+        assertThat(result.reviewStatus()).isEqualTo("APPROVED");
+        assertThat(result.reviewedBy()).isEqualTo("adminUser");
+        assertThat(result.reviewedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("REJECT 액션은 REJECTED로 저장한다")
+    void rejectSetsRejected() {
+        TourPoi pending = holy("holy-r", "반려성지", "다수");
+        pending.setPoiSqno(11L);
+        when(tourPoiRepository.findById(11L)).thenReturn(Optional.of(pending));
+        when(tourPoiRepository.save(any(TourPoi.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        assertThat(tourService.reviewHolyPoi(11L, "reject", "adminUser").reviewStatus())
+                .isEqualTo("REJECTED");
+    }
+
+    @Test
+    @DisplayName("잘못된 action·없는 poiSqno·공공(TOURAPI) 행은 IllegalArgumentException")
+    void invalidReviewRequestsThrow() {
+        TourPoi pending = holy("holy-x", "성지X", "다수");
+        pending.setPoiSqno(12L);
+        when(tourPoiRepository.findById(12L)).thenReturn(Optional.of(pending));
+        when(tourPoiRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> tourService.reviewHolyPoi(12L, "DELETE", "admin"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> tourService.reviewHolyPoi(99L, "APPROVE", "admin"))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        TourPoi publicPoi = holy("tourapi-1", "공공POI", null);
+        publicPoi.setPoiSqno(13L);
+        publicPoi.setSource("TOURAPI");
+        when(tourPoiRepository.findById(13L)).thenReturn(Optional.of(publicPoi));
+        assertThatThrownBy(() -> tourService.reviewHolyPoi(13L, "APPROVE", "admin"))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        verify(tourPoiRepository, never()).save(any(TourPoi.class));
     }
 }
