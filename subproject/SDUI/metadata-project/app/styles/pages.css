@@ -60,20 +60,22 @@
 }
 
 .logo {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     font-weight: 800;
-    color: #2ecc71;
-    /* 포인트 컬러 (초록색) */
+    color: var(--kride-primary, #E50914);
+    /* 포인트 컬러 (브랜드) */
     letter-spacing: -0.5px;
     cursor: pointer;
+    white-space: nowrap; /* 로고 줄바꿈 방지 */
 }
 
 /* 로그인/로그아웃 버튼 공통 */
 .mobile-auth-btn {
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.875rem;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 0.75rem;
     font-weight: 600;
+    white-space: nowrap;
     transition: all 0.2s;
 }
 

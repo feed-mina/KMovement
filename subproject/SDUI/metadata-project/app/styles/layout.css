@@ -253,44 +253,7 @@
 .sidebar-ai-btn.ja .ai-badge { background: #ede9fe; color: #7c3aed; }
 .sidebar-ai-btn.en .ai-badge { background: #d1fae5; color: #065f46; }
 
-/* ==========================================
-   AI 채팅 버튼 — 헤더 (Mobile)
-   ========================================== */
-.header-ai-shortcuts {
-    display: flex;
-    gap: 8px;
-    padding: 8px 20px 10px;
-    border-top: 1px solid #f3f4f6;
-}
-
-.header-ai-btn {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 700;
-    transition: all 0.18s ease;
-    background: transparent;
-}
-
-.header-ai-btn .ai-badge {
-    font-size: 9px;
-    font-weight: 800;
-    padding: 1px 5px;
-    border-radius: 4px;
-}
-
-.header-ai-btn.ja { background: #ede9fe; color: #7c3aed; }
-.header-ai-btn.ja:hover, .header-ai-btn.ja.active { background: #ddd6fe; }
-.header-ai-btn.ja .ai-badge { background: #7c3aed; color: white; }
-
-.header-ai-btn.en { background: #d1fae5; color: #065f46; }
-.header-ai-btn.en:hover, .header-ai-btn.en.active { background: #a7f3d0; }
-.header-ai-btn.en .ai-badge { background: #065f46; color: white; }
+/* 헤더(Mobile) AI 채팅 단축은 하단 탭 네비 [통역]으로 대체되어 제거됨 */
 
 /* ==========================================
    KRIDE 전체화면 모드 (온보딩 + 지도 화면)

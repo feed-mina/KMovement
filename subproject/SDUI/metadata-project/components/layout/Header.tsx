@@ -74,22 +74,7 @@ export default function Header() {
                         )}
                     </div>
                 </div>
-                {isRealLoggedIn && !isAdmin && (
-                    <div className="header-ai-shortcuts">
-                        <button
-                            className={`header-ai-btn ja${pathname === '/view/AI_JAPANESE_CHAT_PAGE' ? ' active' : ''}`}
-                            onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/AI_JAPANESE_CHAT_PAGE' })}>
-                            <span className="ai-badge">AI</span>
-                            일본어 채팅
-                        </button>
-                        <button
-                            className={`header-ai-btn en${pathname === '/view/AI_ENGLISH_CHAT_PAGE' ? ' active' : ''}`}
-                            onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/AI_ENGLISH_CHAT_PAGE' })}>
-                            <span className="ai-badge">AI</span>
-                            영어 채팅
-                        </button>
-                    </div>
-                )}
+                {/* AI 통역 단축은 하단 탭 네비 [통역]으로 대체 — 헤더 중복 제거 */}
                 {pathname !== '/view/MAIN_PAGE' && (
                     <div className="header-bottom-row">
                         <div className="time-card">
