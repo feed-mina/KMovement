@@ -33,8 +33,9 @@ let refreshRequest: Promise<void> | null = null;
 
 export function refreshSession(): Promise<void> {
     if (!refreshRequest) {
-        // Use the base axios client so a failed refresh cannot enter this interceptor again.
-        refreshRequest = axios
+        // The refresh endpoint is explicitly excluded by shouldSkipRefresh, so
+        // using the shared instance is recursion-safe and keeps its adapter contract.
+        refreshRequest = api
             .post(REFRESH_ENDPOINT, {}, {
                 withCredentials: true,
                 timeout: 15000,

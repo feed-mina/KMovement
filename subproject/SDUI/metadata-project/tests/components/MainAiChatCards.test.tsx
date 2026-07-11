@@ -3,7 +3,9 @@ import { fireEvent, screen } from '@testing-library/react';
 
 import DynamicEngine from '@/components/DynamicEngine/DynamicEngine';
 import { renderWithProviders } from '@/tests/test-utils';
-import { MetadataProvider } from '@/components/providers/MetadataProvider';
+jest.mock('@/components/providers/MetadataProvider', () => ({
+    useMetadata: () => ({ screenId: 'MAIN_PAGE', metadata: [], pageData: {} }),
+}));
 
 
 describe('MAIN_PAGE AI chat cards', () => {
@@ -50,16 +52,14 @@ describe('MAIN_PAGE AI chat cards', () => {
 
     function renderCards(onAction: jest.Mock) {
         renderWithProviders(
-            <MetadataProvider screenId="MAIN_PAGE">
-                <DynamicEngine
-                    metadata={metadata}
-                    screenId="MAIN_PAGE"
-                    pageData={{}}
-                    formData={{}}
-                    onChange={jest.fn()}
-                    onAction={onAction}
-                />
-            </MetadataProvider>,
+            <DynamicEngine
+                metadata={metadata}
+                screenId="MAIN_PAGE"
+                pageData={{}}
+                formData={{}}
+                onChange={jest.fn()}
+                onAction={onAction}
+            />,
         );
     }
 

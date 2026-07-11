@@ -10,20 +10,10 @@ const authState: AuthAdapterState = {};
 const originalAdapter = api.defaults.adapter;
 
 describe('인증 보안 — API 보호 엔드포인트', () => {
-  // MSW 서버 설정
-  beforeAll(() => {
-    server.listen({
-      onUnhandledRequest: (req) => {
-        console.log('Unhandled request:', req.method, req.url);
-      }
-    });
-  });
-
   afterEach(() => server.resetHandlers());
 
   afterAll(() => {
     api.defaults.adapter = originalAdapter;
-    server.close();
   });
 
   beforeEach(() => {
