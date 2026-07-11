@@ -33,6 +33,10 @@ describe('axios refresh handling', () => {
 
     api.defaults.adapter = (async (config: InternalAxiosRequestConfig) => {
       const url = config.url ?? '';
+      if (url === '/api/auth/refresh') {
+        refreshCallCount++;
+        return { data: {}, status: 200, statusText: 'OK', headers: {}, config };
+      }
       const count = (attempts.get(url) ?? 0) + 1;
       attempts.set(url, count);
 
@@ -48,12 +52,6 @@ describe('axios refresh handling', () => {
         config,
       };
     }) as AxiosAdapter;
-
-    jest.spyOn(axios, 'post').mockImplementation(async () => {
-      refreshCallCount++;
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      return {} as AxiosResponse;
-    });
 
     const [first, second] = await Promise.all([
       api.get('/api/protected/first'),
