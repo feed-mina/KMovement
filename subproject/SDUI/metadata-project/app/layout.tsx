@@ -8,15 +8,15 @@ import AppShell from "@/components/layout/AppShell";
 
 export const metadata: Metadata = {
     title: {
-        default: 'SDUI',
-        template: '%s | SDUI'
+        default: 'Kride',
+        template: '%s | Kride'
     },
     description: '스마트한 일정 관리 앱',
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://yerin.duckdns.org'),
-    keywords: ["SDUI", "일정 관리", "스마트 캘린더", "할일 관리", "투두 리스트"],
-    authors: [{ name: "SDUI Team" }],
-    creator: "SDUI Team",
-    publisher: "SDUI",
+    keywords: ["Kride", "K-컬처 여행", "여행 동선", "성지 탐색"],
+    authors: [{ name: "Kride" }],
+    creator: "Kride",
+    publisher: "Kride",
     formatDetection: {
         email: false,
         address: false,
@@ -26,16 +26,16 @@ export const metadata: Metadata = {
         canonical: "/",
     },
     openGraph: {
-        title: 'SDUI',
+        title: 'Kride',
         description: '스마트한 일정 관리 앱',
         images: [{ url: '/icons/icon-512x512.png', width: 512, height: 512, alt: 'SDUI 아이콘' }],
         type: 'website',
         locale: 'ko_KR',
-        siteName: 'SDUI'
+        siteName: 'Kride'
     },
     twitter: {
         card: "summary_large_image",
-        title: 'SDUI',
+        title: 'Kride',
         description: '스마트한 일정 관리 앱',
         images: ['/icons/icon-512x512.png'],
     },
