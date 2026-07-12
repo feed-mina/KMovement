@@ -3,6 +3,7 @@ import React from "react";
 import { componentMap } from "./componentMap";
 import { useDynamicEngine } from "./useDynamicEngine";
 import { DynamicEngineProps, Metadata } from "./type";
+import { webPrimitives } from "./primitives";
 
 const DynamicEngine: React.FC<DynamicEngineProps> = (props) => {
   const {
@@ -15,6 +16,7 @@ const DynamicEngine: React.FC<DynamicEngineProps> = (props) => {
     onAction,
     closeModal,
     activeModal,
+    primitives = webPrimitives,
     ...rest
   } = props;
 
@@ -68,28 +70,26 @@ const DynamicEngine: React.FC<DynamicEngineProps> = (props) => {
           return list.map((item: any, idx: number) => {
             const handleClick = hasAction ? () => onAction(node, item) : undefined;
             return (
-              <div
+              <primitives.Box
                 key={`${uId}-${idx}`}
                 className={combinedClassName}
-                style={{ cursor: hasAction ? "pointer" : "default" }}
-                onClick={handleClick}
+                onPress={handleClick}
               >
                 {renderNodes(node.children, item)}
-              </div>
+              </primitives.Box>
             );
           });
         }
 
         const handleGroupClick = hasAction ? () => onAction(node, rowData) : undefined;
         return (
-          <div
+          <primitives.Box
             key={uId}
             className={combinedClassName}
-            style={{ cursor: hasAction ? "pointer" : "default" }}
-            onClick={handleGroupClick}
+            onPress={handleGroupClick}
           >
             {renderNodes(node.children, rowData)}
-          </div>
+          </primitives.Box>
         );
       }
 
@@ -135,10 +135,10 @@ const DynamicEngine: React.FC<DynamicEngineProps> = (props) => {
   };
 
   return (
-    <div className="engine-container">
-      <div className="content-area">{renderNodes(treeData)}</div>
+    <primitives.Box className="engine-container">
+      <primitives.Box className="content-area">{renderNodes(treeData)}</primitives.Box>
       {renderModals(treeData)}
-    </div>
+    </primitives.Box>
   );
 };
 
