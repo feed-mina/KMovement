@@ -91,6 +91,33 @@
     border: 1px solid #ffa39e;
 }
 
+/* Keep the full mobile header while making its auth row compact. */
+.mobile-header--compact-auth {
+    padding: 4px 12px;
+}
+
+.header-container--compact-auth {
+    max-width: none;
+}
+
+.mobile-header--compact-auth .header-top-row {
+    height: 32px;
+    justify-content: flex-end;
+    padding: 0;
+}
+
+.mobile-header--compact-auth .auth-actions {
+    width: auto;
+    justify-content: flex-end;
+}
+
+.mobile-header--compact-auth .mobile-auth-btn {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    line-height: 1.25;
+}
+
 /* 시간 설정 컴포넌트 영역 */
 .header-bottom-row {
     margin-top: 16px;
@@ -731,14 +758,14 @@
 /* 마우스를 올렸을 때 (Hover) */
 .pagination-container button:hover:not(:disabled) {
     background-color: #f8f9fa;
-    border-color: #007bff;
-    color: #007bff;
+    border-color: var(--kride-primary);
+    color: var(--kride-primary);
 }
 
 /* 활성화된 페이지 번호 (Active) */
 .pagination-container button.active {
-    background-color: #007bff;
-    border-color: #007bff;
+    background-color: var(--kride-primary);
+    border-color: var(--kride-primary);
     color: #ffffff;
     font-weight: bold;
 }
@@ -2156,10 +2183,10 @@ readonly 공통 레이아웃
 /* [+ 시간 추가] 텍스트 버튼 스타일 */
 .add-time-btn {
     background: none;
-    border: 2px solid #007bff;
+    border: 2px solid var(--kride-primary);
     cursor: pointer;
     font-size: 15px;
-    color: #007bff;
+    color: var(--kride-primary);
     /* 파란색 텍스트 */
     font-weight: 600;
     padding: 5px 10px;
@@ -2342,7 +2369,7 @@ readonly 공통 레이아웃
 
 /* 도착 완료 버튼 */
 .arrival-button {
-    background-color: #007bff;
+    background-color: var(--kride-primary);
     color: white;
     border: none;
     border-radius: 8px;

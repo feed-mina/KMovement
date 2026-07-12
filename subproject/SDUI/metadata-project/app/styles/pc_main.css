@@ -38,7 +38,7 @@
     }
     /* 공통 버튼 스타일 */
     .diary-btn-primary, .sidebar-auth-btn.login {
-        background-color: #007B65;
+        background-color: var(--kride-primary);
         color: white;
         padding: 12px 24px;
         border-radius: 25px;

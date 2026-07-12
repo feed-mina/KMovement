@@ -70,7 +70,7 @@
 }
 
 .modalButton {
-    background-color: #0052cc;
+    background-color: var(--kride-primary);
     color: white;
     padding: 12px 30px;
     border: none;

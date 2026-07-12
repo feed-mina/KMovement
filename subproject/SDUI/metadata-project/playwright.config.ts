@@ -13,7 +13,7 @@ export default defineConfig({
 
     use: {
         /* 프론트엔드 기본 URL 설정 [cite: 2026-02-17] */
-        baseURL: 'http://localhost:3000',
+        baseURL: process.env.BASE_URL || 'http://localhost:3000',
         /* 테스트 실패 시 스크린샷 캡처  */
         screenshot: 'only-on-failure',
         /* 테스트 실패 시 비디오 녹화  */

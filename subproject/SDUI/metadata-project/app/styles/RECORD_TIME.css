@@ -2,10 +2,10 @@
 /* [+ 시간 추가] 텍스트 버튼 스타일 */
 .add-time-btn {
     background: none;
-    border: 2px solid #007bff;
+    border: 2px solid var(--kride-primary);
     cursor: pointer;
     font-size: 15px;
-    color: #007bff; /* 파란색 텍스트 */
+    color: var(--kride-primary);
     font-weight: 600;
     padding: 5px 10px;
     border-radius: 5px;
@@ -187,7 +187,7 @@
 
 /* 도착 완료 버튼 */
 .arrival-button {
-    background-color: #007bff;
+    background-color: var(--kride-primary);
     color: white;
     border: none;
     border-radius: 8px;
