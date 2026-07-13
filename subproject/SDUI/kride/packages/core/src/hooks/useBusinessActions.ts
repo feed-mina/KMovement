@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useBaseActions } from "./useBaseActions";
-import { useOnboardingStore } from "@/store/onboarding-store";
+import { useOnboardingStore } from "../store/onboarding-store";
 
 export const useBusinessActions = (
   screenId: string,
