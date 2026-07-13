@@ -1,6 +1,15 @@
 import { View } from 'react-native';
 import type { ComponentRegistry, SduiLeafProps } from '@kride/core';
 import KrideMap from './components/KrideMap';
+import {
+  CardImageLeaf,
+  CardLabelLeaf,
+  CheckIndicatorLeaf,
+  DurationLabelLeaf,
+  PurposeIconLeaf,
+  RangeLabelLeaf,
+  RouteNodeLeaf,
+} from './leaves';
 
 /** MAP_VIEW leaf — leaflet MapView on web becomes react-native-maps here. */
 const MapViewLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
@@ -21,4 +30,11 @@ const MapViewLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
  */
 export const mobileComponentMap: ComponentRegistry = {
   MAP_VIEW: MapViewLeaf,
+  CARD_IMAGE: CardImageLeaf,
+  CARD_LABEL: CardLabelLeaf,
+  CHECK_INDICATOR: CheckIndicatorLeaf,
+  DURATION_LABEL: DurationLabelLeaf,
+  PURPOSE_ICON: PurposeIconLeaf,
+  RANGE_LABEL: RangeLabelLeaf,
+  ROUTE_NODE: RouteNodeLeaf,
 };
