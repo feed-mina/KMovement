@@ -1,3 +1,4 @@
+import type React from 'react';
 import { Image, Text, View } from 'react-native';
 import type { SduiLeafProps } from '@kride/core';
 
