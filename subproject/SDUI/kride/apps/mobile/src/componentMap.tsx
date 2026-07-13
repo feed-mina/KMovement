@@ -1,3 +1,4 @@
+import type React from 'react';
 import { View } from 'react-native';
 import type { ComponentRegistry, SduiLeafProps } from '@kride/core';
 import KrideMap from './components/KrideMap';
@@ -10,6 +11,15 @@ import {
   RangeLabelLeaf,
   RouteNodeLeaf,
 } from './leaves';
+import {
+  CollapseBodyLeaf,
+  CollapseHeaderLeaf,
+  DurationButtonLeaf,
+  ItineraryPanelLeaf,
+  PurposeCardLeaf,
+  RangeTrackLeaf,
+  SelectionCardLeaf,
+} from './composites';
 
 /** MAP_VIEW leaf — leaflet MapView on web becomes react-native-maps here. */
 const MapViewLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
@@ -30,6 +40,7 @@ const MapViewLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
  */
 export const mobileComponentMap: ComponentRegistry = {
   MAP_VIEW: MapViewLeaf,
+  // display atoms (P4, 1st pass)
   CARD_IMAGE: CardImageLeaf,
   CARD_LABEL: CardLabelLeaf,
   CHECK_INDICATOR: CheckIndicatorLeaf,
@@ -37,4 +48,13 @@ export const mobileComponentMap: ComponentRegistry = {
   PURPOSE_ICON: PurposeIconLeaf,
   RANGE_LABEL: RangeLabelLeaf,
   ROUTE_NODE: RouteNodeLeaf,
+  // composite / interactive (P4, 2nd pass)
+  SELECTION_CARD: SelectionCardLeaf,
+  PURPOSE_CARD: PurposeCardLeaf,
+  DURATION_BUTTON: DurationButtonLeaf,
+  ITINERARY_PANEL: ItineraryPanelLeaf,
+  RANGE_TRACK: RangeTrackLeaf,
+  COLLAPSE_HEADER: CollapseHeaderLeaf,
+  COLLAPSE_BODY: CollapseBodyLeaf,
+  // deferred (need a slider/gesture dependency): RANGE_INPUT, DUAL_RANGE_SLIDER
 };
