@@ -17,6 +17,8 @@ try {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // @kride/core ships TypeScript source (main: src/index.ts); Next must transpile it.
+  transpilePackages: ["@kride/core"],
   async rewrites() {
     const apiBase =
       process.env.NEXT_PUBLIC_SDUI_API_BASE || "http://localhost:8080";

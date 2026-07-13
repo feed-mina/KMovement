@@ -15,7 +15,7 @@ export type PrimitiveRegistry = {
 };
 
 export const webPrimitives: PrimitiveRegistry = {
-  Box: ({ className, children, onPress, testID }) => <div className={className} onClick={onPress} data-testid={testID}>{children}</div>,
+  Box: ({ className, children, onPress, testID }) => <div className={className} onClick={onPress} data-testid={testID} style={onPress ? { cursor: "pointer" } : undefined}>{children}</div>,
   Txt: ({ className, children, testID }) => <span className={className} data-testid={testID}>{children}</span>,
   Btn: ({ className, children, onPress, testID }) => <button className={className} onClick={onPress} data-testid={testID}>{children}</button>,
 };
