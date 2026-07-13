@@ -11,8 +11,6 @@ const ARTIST_OPTIONS = [
   'BTS','BLACKPINK','SEVENTEEN','IVE','aespa','NewJeans','TWICE','Stray Kids','EXO','NCT','ATEEZ','LE SSERAFIM','아이유(IU)','태연(Taeyeon)','임영웅','지코(ZICO)','악뮤(AKMU)','DAY6','(여자)아이들','RIIZE','BOYNEXTDOOR','TOMORROW X TOGETHER','ENHYPEN','Red Velvet','ITZY','에스파(aespa)','G-DRAGON','박효신','이무진','볼빨간사춘기','백예린','성시경','장원영','차은우','유재석','침착맨','쯔양','곽튜브','빠니보틀','감스트','이영지','혜안','원지의하루','피식대학','숏박스','문복희','입짧은햇님','워크맨','딩고뮤직',
 ];
 
-declare global { interface Window { daum?: any } }
-
 export default function HolySubmitPage() {
   const { isLoggedIn, isLoading } = useAuth();
   const [provider, setProvider] = useState<'kakao' | 'google'>('kakao');
