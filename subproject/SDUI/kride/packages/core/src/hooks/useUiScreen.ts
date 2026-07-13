@@ -1,6 +1,6 @@
 'use client';
 import { useQuery } from "@tanstack/react-query";
-import { Metadata } from "../type";
+import { Metadata } from "../engine/type";
 
 export function useUiScreen(screenId: string, apiBase = "") {
   return useQuery<Metadata[]>({

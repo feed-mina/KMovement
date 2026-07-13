@@ -1,6 +1,6 @@
 'use client';
 import React from "react";
-import { componentMap } from "./componentMap";
+import { createBaseComponentMap } from "./componentMap";
 import { useDynamicEngine } from "./useDynamicEngine";
 import { DynamicEngineProps, Metadata } from "./type";
 import { webPrimitives } from "./primitives";
@@ -17,8 +17,16 @@ const DynamicEngine: React.FC<DynamicEngineProps> = (props) => {
     closeModal,
     activeModal,
     primitives = webPrimitives,
+    componentMap: injectedComponentMap,
     ...rest
   } = props;
+
+  // Platform-neutral base leaves are always available; the platform's registry
+  // (web HTML leaves or RN leaves) is merged on top when provided.
+  const componentMap = React.useMemo(
+    () => ({ ...createBaseComponentMap(primitives), ...injectedComponentMap }),
+    [primitives, injectedComponentMap]
+  );
 
   const { treeData, getComponentData } = useDynamicEngine(metadata, pageData, formData);
 

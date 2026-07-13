@@ -41,5 +41,6 @@ export interface DynamicEngineProps {
   closeModal?: () => void;
   onConfirmModal?: () => void;
   primitives?: import("./primitives").PrimitiveRegistry;
+  componentMap?: import("./componentMap").ComponentRegistry;
   [key: string]: any;
 }
