@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "KRIDE",
+    "slug": "kride-mobile",
+    "scheme": "kride",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "plugins": ["expo-router", "expo-secure-store"],
+    "experiments": { "typedRoutes": true },
+    "ios": { "supportsTablet": true },
+    "android": { "package": "com.kride.mobile" }
+  }
+}
