@@ -3,6 +3,14 @@
 import { useState } from 'react';
 import { loadKakaoShare } from '@/lib/kakao/loadKakaoShare';
 
+// Kakao recipients must receive a URL that is reachable outside the container.
+// `window.location.origin` can be localhost when the app sits behind a reverse proxy.
+const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://yerin.duckdns.org';
+
+function getShareUrl(path: string) {
+    return new URL(path, PUBLIC_SITE_URL).toString();
+}
+
 interface Props {
     text: string;   // 공유 메시지
     path: string;   // 공유할 앱 경로 (예: /view/ROUTE_PLANNER)
@@ -18,7 +26,7 @@ export default function KakaoShareButton({ text, path, label = '공유' }: Props
         setBusy(true);
         try {
             const Kakao = await loadKakaoShare();
-            const url = `${window.location.origin}${path}`;
+            const url = getShareUrl(path);
             Kakao.Share.sendDefault({
                 objectType: 'text',
                 text,

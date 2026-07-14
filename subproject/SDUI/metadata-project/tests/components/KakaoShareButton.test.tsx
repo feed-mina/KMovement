@@ -27,7 +27,8 @@ describe('KakaoShareButton', () => {
         const arg = sendDefault.mock.calls[0][0];
         expect(arg.objectType).toBe('text');
         expect(arg.text).toBe('하루 코스 공유');
-        expect(arg.link.webUrl).toContain('/view/ROUTE_PLANNER');
+        expect(arg.link.webUrl).toBe('https://yerin.duckdns.org/view/ROUTE_PLANNER');
+        expect(arg.link.mobileWebUrl).toBe('https://yerin.duckdns.org/view/ROUTE_PLANNER');
     });
 
     it('SDK 로드 실패 시 안내(alert)만 하고 공유는 호출하지 않는다', async () => {
