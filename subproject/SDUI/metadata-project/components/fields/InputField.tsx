@@ -2,6 +2,7 @@
 
 import React, { memo } from "react";
 import "../../app/styles/field.css";
+import { formatKoreanPhoneNumber } from "@/lib/formatters/phone";
 
 interface InputFieldProps {
     id: string;
@@ -28,6 +29,7 @@ const InputField = memo(({
     const targetKey = meta?.ref_data_id || meta?.refDataId || String(id || "");
     const value = (data && typeof data === 'object') ? (data[targetKey] ?? "") : (data ?? "");
     const isReadOnly = meta?.is_readonly || meta?.isReadonly || false;
+    const isPhone = targetKey === "phone" || targetKey.toLowerCase().includes("phone");
 
     // 클래스 네임 조합
     const inputClasses = [
@@ -40,7 +42,7 @@ const InputField = memo(({
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         //    console.log('[InputField] handleInputChange:', { targetKey, value: e.target.value, isReadOnly, onChangeFn: typeof onChange });
         if (!isReadOnly) {
-            onChange(targetKey, e.target.value);
+            onChange(targetKey, isPhone ? formatKoreanPhoneNumber(e.target.value) : e.target.value);
         }
     };
 
@@ -65,7 +67,10 @@ const InputField = memo(({
                 {...rest}
                 placeholder={meta?.placeholder || `${meta?.labelText}을(를) 입력하세요`}
                 id={targetKey}
-                type={targetKey.toLowerCase().includes('pw') ? (showPassword ? 'text' : 'password') : 'text'}
+                type={targetKey.toLowerCase().includes('pw') ? (showPassword ? 'text' : 'password') : isPhone ? 'tel' : 'text'}
+                inputMode={isPhone ? 'numeric' : undefined}
+                autoComplete={isPhone ? 'tel' : undefined}
+                maxLength={isPhone ? 13 : undefined}
                 value={value}
                 onChange={handleInputChange}
                 onKeyDown={onKeyDown}

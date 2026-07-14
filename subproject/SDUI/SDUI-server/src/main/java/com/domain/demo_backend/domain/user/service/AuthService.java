@@ -135,14 +135,19 @@ public class AuthService {
             return;
         }
 
-        // 2. 신규 가입 시 핸드폰 중복 체크
+        // 2. 신규 가입 시 아이디/핸드폰 중복 체크
+        String requestedUserId = registerRequest.getUserId().trim();
+        if (userRepository.existsByUserIdIgnoreCase(requestedUserId)) {
+            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+        }
+
         if (userRepository.findByPhone(registerRequest.getPhone()).isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 핸드폰 번호입니다.");
         }
 
         // 3. 신규 유저 저장
         User newUser = User.builder()
-                .userId(registerRequest.getEmail().split("@")[0])
+                .userId(requestedUserId)
                 .password(registerRequest.getPassword()) // 실제로는 BCryptPasswordEncoder 사용 권장
                 .hashedPassword(PasswordUtil.sha256(registerRequest.getPassword()))
                 .phone(registerRequest.getPhone())

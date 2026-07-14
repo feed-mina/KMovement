@@ -16,7 +16,7 @@ export const usePageHook = (screenId: string, metadata: any[], initialData: any)
         // 1. 공통/인증 관련 액션은 userActions에 먼저 물어봄
         const userActionTypes = [
             "LOGIN_SUBMIT", "LOGOUT", "KAKAO_LOGOUT",
-            "REGISTER_SUBMIT", "SUBMIT_ADDITIONAL_INFO",
+            "REGISTER_SUBMIT", "CHECK_USER_ID", "SUBMIT_ADDITIONAL_INFO",
             "VERIFY_CODE", "SOS", "TOGGLE_PW", "OPEN_POSTCODE"
         ];
 

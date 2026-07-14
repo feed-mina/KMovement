@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useBaseActions } from "./useBaseActions";
 import { handleError, extractErrorMessage } from "@/utils/errorHandler";
+import { formatKoreanPhoneNumber, isValidKoreanMobileNumber } from "@/lib/formatters/phone";
 
 
 //  @@@@ useUserActions 역할 : 메타데이터의 action_type에 따라 각 타입 설명
@@ -69,22 +70,53 @@ export const useUserActions = (screenId: string,metadata: any[] = [], initialDat
                 break;
             case "REGISTER_SUBMIT":
                 try {
+                    const userId = String(currentFormData.userId ?? '').trim();
+                    if (!/^[A-Za-z0-9_]{4,20}$/.test(userId)) {
+                        alert('아이디는 영문, 숫자, 밑줄을 사용해 4~20자로 입력해주세요.');
+                        return;
+                    }
+                    if (!currentFormData._userIdChecked || currentFormData._checkedUserId !== userId) {
+                        alert('아이디 중복 확인을 완료해주세요.');
+                        return;
+                    }
+
                     //   데이터 가공 (reg_ 접두어 제거)
                     const submitData = Object.keys(currentFormData).reduce((acc: any, key) => {
+                        if (key.startsWith('_')) return acc;
                         const cleanKey = key.startsWith('reg_') ? key.replace('reg_', '') : key;
                         acc[cleanKey] = currentFormData[key];
                         return acc;
                     }, {});
+                    submitData.userId = userId;
+                    submitData.phone = formatKoreanPhoneNumber(submitData.phone);
+                    if (!isValidKoreanMobileNumber(submitData.phone)) {
+                        alert('휴대폰 번호를 010-1234-5678 형식으로 입력해주세요.');
+                        return;
+                    }
 
                     // 2. 가입 API 호출
                     const res = await axios.post(actionUrl || '/api/auth/register', submitData);
 
                     // 3. 성공한 경우에만 인증 메일 발송 및 페이지 이동
                     if (res.status === 201 || res.status === 200) {
-                        // 인증 메일 발송
-                        await axios.post('/api/auth/signup?message=welcome', { email: submitData.email });
+                        // 계정 생성과 메일 발송은 별개다. 메일 장애가 이미 생성된
+                        // 계정을 '회원가입 실패'로 보이게 하지 않도록 분리한다.
+                        let mailSent = false;
+                        try {
+                            const mailResponse = await fetch('/api/auth/signup?message=welcome', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify({ email: submitData.email }),
+                            });
+                            mailSent = mailResponse.ok;
+                        } catch {
+                            mailSent = false;
+                        }
 
-                        alert("가입 성공! 이메일로 발송된 인증코드를 확인해주세요.");
+                        alert(mailSent
+                            ? "가입 성공! 이메일로 발송된 인증코드를 확인해주세요."
+                            : "가입은 완료됐지만 인증 메일 전송에 실패했습니다. 인증 페이지에서 재전송해주세요.");
 
                         // 4. 페이지 이동 (이메일을 쿼리 파라미터로 전달하여 useBaseActions가 useEffect에서 이메일을 자동으로 가져옴
                         const userEmail = submitData.email;
@@ -94,6 +126,28 @@ export const useUserActions = (screenId: string,metadata: any[] = [], initialDat
                     // 에러 발생 시 handleError 호출 후 함수 종료 (이후 코드 실행 방지)
                     handleError(error, 'REGISTER_SUBMIT', '회원가입에 실패했습니다');
                     return; // 명시적으로 함수 종료
+                }
+                break;
+
+            case "CHECK_USER_ID":
+                try {
+                    const userId = String(currentFormData.userId ?? '').trim();
+                    if (!/^[A-Za-z0-9_]{4,20}$/.test(userId)) {
+                        alert('아이디는 영문, 숫자, 밑줄을 사용해 4~20자로 입력해주세요.');
+                        return;
+                    }
+                    const res = await axios.get(actionUrl || '/api/auth/check-user-id', { params: { userId } });
+                    const available = Boolean(res.data?.available);
+                    base.setFormData((prev: any) => ({
+                        ...prev,
+                        userId,
+                        _userIdChecked: available,
+                        _checkedUserId: available ? userId : '',
+                    }));
+                    alert(available ? '사용 가능한 아이디입니다.' : '이미 사용 중인 아이디입니다.');
+                } catch (error: any) {
+                    const message = extractErrorMessage(error, '아이디 중복 확인에 실패했습니다.');
+                    alert(message);
                 }
                 break;
 

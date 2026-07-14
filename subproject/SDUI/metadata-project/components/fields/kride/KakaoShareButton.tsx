@@ -4,11 +4,42 @@ import { useState } from 'react';
 import { loadKakaoShare } from '@/lib/kakao/loadKakaoShare';
 
 // Kakao recipients must receive a URL that is reachable outside the container.
-// `window.location.origin` can be localhost when the app sits behind a reverse proxy.
-const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://yerin.duckdns.org';
+// A stale build-time env can still contain localhost, so never trust a local origin
+// for a link that will leave the current browser.
+const DEPLOYED_SITE_URL = 'https://yerin.duckdns.org';
+const CONFIGURED_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
 
-function getShareUrl(path: string) {
-    return new URL(path, PUBLIC_SITE_URL).toString();
+function isLocalOrigin(origin?: string | null) {
+    if (!origin) return true;
+    try {
+        const hostname = new URL(origin).hostname.toLowerCase();
+        return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+    } catch {
+        return true;
+    }
+}
+
+export function getShareUrl(path: string) {
+    const runtimeOrigin = typeof window !== 'undefined' ? window.location.origin : undefined;
+    const publicOrigin = !isLocalOrigin(CONFIGURED_SITE_URL)
+        ? CONFIGURED_SITE_URL!
+        : !isLocalOrigin(runtimeOrigin)
+            ? runtimeOrigin!
+            : DEPLOYED_SITE_URL;
+    return new URL(path, publicOrigin).toString();
+}
+
+async function shareWithoutKakao(text: string, url: string) {
+    if (typeof navigator.share === 'function') {
+        await navigator.share({ title: 'KRIDE', text, url });
+        return;
+    }
+    if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        alert('공유 링크를 복사했어요.');
+        return;
+    }
+    throw new Error('share fallback unavailable');
 }
 
 interface Props {
@@ -33,7 +64,11 @@ export default function KakaoShareButton({ text, path, label = '공유' }: Props
                 link: { webUrl: url, mobileWebUrl: url },
             });
         } catch {
-            alert('카카오 공유를 사용할 수 없어요. 잠시 후 다시 시도해 주세요.');
+            try {
+                await shareWithoutKakao(text, getShareUrl(path));
+            } catch {
+                alert('공유 기능을 사용할 수 없어요. 잠시 후 다시 시도해 주세요.');
+            }
         } finally {
             setBusy(false);
         }
@@ -44,7 +79,7 @@ export default function KakaoShareButton({ text, path, label = '공유' }: Props
             type="button"
             onClick={onShare}
             disabled={busy}
-            aria-label="카카오톡으로 공유"
+            aria-label="공유"
             style={{
                 display: 'inline-flex', alignItems: 'center', gap: 5,
                 fontSize: 12, padding: '6px 12px', borderRadius: 20, cursor: busy ? 'default' : 'pointer',

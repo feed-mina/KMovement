@@ -20,6 +20,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByuserId(String userId);
 
+    boolean existsByUserIdIgnoreCase(String userId);
+
     Optional<User> findByUserSqno(Long userSqno);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

@@ -74,6 +74,10 @@ export const useBaseActions = (screenId: string, metadata: any[] = [], initialDa
     const handleChange = useCallback((id: string, value: any) => {
         setFormData((prev: any) => {
             const updated = { ...prev, [id]: value };
+            if (id === 'userId') {
+                updated._userIdChecked = false;
+                updated._checkedUserId = '';
+            }
             const persist = getFormPersistence(screenId);
             if (persist && typeof window !== 'undefined') {
                 try { localStorage.setItem(persist.storageKey, JSON.stringify(updated)); } catch {}
