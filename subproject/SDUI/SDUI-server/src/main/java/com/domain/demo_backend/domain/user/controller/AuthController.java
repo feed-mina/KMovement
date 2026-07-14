@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,7 +153,7 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "서버오류"),
     })
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody com.domain.demo_backend.domain.user.dto.RegisterRequest registerRequest) {
+    public ResponseEntity<String> register(@Valid @RequestBody com.domain.demo_backend.domain.user.dto.RegisterRequest registerRequest) {
         // 1. 필수 값 검증 (간단한 예시)
         if (registerRequest.getZipCode() == null || registerRequest.getRoadAddress() == null) {
             return ResponseEntity.badRequest().body("주소 정보는 필수입니다.");
@@ -165,6 +166,22 @@ public class AuthController {
         authService.register(registerRequest);
         log.info("register service logic OK");
         return ResponseEntity.status(HttpStatus.CREATED).body("User registred successfully!");
+    }
+
+    @GetMapping("/check-user-id")
+    public ResponseEntity<Map<String, Object>> checkUserId(@RequestParam String userId) {
+        String normalized = userId == null ? "" : userId.trim();
+        if (!normalized.matches("^[A-Za-z0-9_]{4,20}$")) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "available", false,
+                    "message", "아이디는 영문, 숫자, 밑줄을 사용해 4~20자로 입력해주세요."
+            ));
+        }
+        boolean available = !userRepository.existsByUserIdIgnoreCase(normalized);
+        return ResponseEntity.ok(Map.of(
+                "available", available,
+                "message", available ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다."
+        ));
     }
 
 

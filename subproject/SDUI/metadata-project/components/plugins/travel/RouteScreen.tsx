@@ -7,7 +7,6 @@ import { tourPoisToRouteMapData } from '@/components/fields/kride/maps/tourToRou
 import { normalizeRouteMapData } from '@/components/fields/kride/maps/normalizeRouteMapData';
 import { routeDistanceKm, estimateMinutes, formatMinutes, groupByDay } from '@/components/fields/kride/maps/routeSummary';
 import { fetchRestaurants, TourPoi } from '@/services/tourApi';
-import { useAuth } from '@/context/AuthContext';
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
 
 // [동선] 화면 컨트롤러. 기본=TourAPI 최근접이웃 / AI=선호 기반 FastAPI 일정.
@@ -19,7 +18,6 @@ const DURATIONS = ['당일치기', '1박2일'];
 const SLOT_LABEL: Record<string, string> = { morning: '오전', afternoon: '오후', evening: '저녁' };
 
 export default function RouteScreen(_props: ScreenControllerProps) {
-    const { user } = useAuth();
     const [pois, setPois] = useState<TourPoi[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -99,7 +97,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                     <span style={{ fontSize: 13, color: '#888' }}>내 취향대로 하루 코스</span>
                 </span>
                 <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                    {user?.socialType === 'K' && <KakaoShareButton text="Kride에서 추천받은 하루 코스를 확인해 보세요!" path="/view/ROUTE_PLANNER" />}
+                    <KakaoShareButton text="Kride에서 추천받은 하루 코스를 확인해 보세요!" path="/view/ROUTE_PLANNER" />
                     <button type="button" onClick={() => setMode('tour')} aria-pressed={mode === 'tour'} style={pill(mode === 'tour')}>기본 코스</button>
                     <button type="button" onClick={requestAiCourse} aria-pressed={mode === 'ai'} style={pill(mode === 'ai')}>AI 코스</button>
                 </span>

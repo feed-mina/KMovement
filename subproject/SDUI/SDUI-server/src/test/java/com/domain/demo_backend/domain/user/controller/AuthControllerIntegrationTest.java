@@ -130,6 +130,22 @@ class AuthControllerIntegrationTest {
     class RegisterTests {
 
         @Test
+        @DisplayName("아이디 중복 확인: 사용 가능한 아이디")
+        void checkUserId_available() throws Exception {
+            mockMvc.perform(get("/api/auth/check-user-id").param("userId", "fresh_user"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.available").value(true));
+        }
+
+        @Test
+        @DisplayName("아이디 중복 확인: 대소문자와 무관하게 중복")
+        void checkUserId_duplicateIgnoringCase() throws Exception {
+            mockMvc.perform(get("/api/auth/check-user-id").param("userId", "AUTHTEST"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.available").value(false));
+        }
+
+        @Test
         @DisplayName("성공: 신규 사용자 가입 → 201")
         void register_success() throws Exception {
             mockMvc.perform(post("/api/auth/register")
@@ -143,6 +159,9 @@ class AuthControllerIntegrationTest {
                                     "\"roadAddress\":\"부산시 해운대구\"" +
                                     "}"))
                     .andExpect(status().isCreated());
+
+            User saved = userRepository.findByEmail("newuser@example.com").orElseThrow();
+            org.assertj.core.api.Assertions.assertThat(saved.getUserId()).isEqualTo("newuser");
         }
 
         @Test

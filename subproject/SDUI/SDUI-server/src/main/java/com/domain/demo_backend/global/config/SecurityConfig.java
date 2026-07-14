@@ -78,7 +78,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                         // PUBLIC — 인증 불필요
                         .requestMatchers(
-                                "/api/auth/login", "/api/auth/register",
+                                "/api/auth/login", "/api/auth/register", "/api/auth/check-user-id",
                                 "/api/auth/signup", "/api/auth/signUp",
                                 "/api/auth/me", "/api/auth/refresh", "/api/auth/logout",
                                 "/api/auth/verify-code", "/api/auth/resend-code",
