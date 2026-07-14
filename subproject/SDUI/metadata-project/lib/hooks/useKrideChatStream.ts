@@ -21,6 +21,7 @@ import type {
   KrideForm,
   KrideItinerary,
 } from '@/lib/types/krideChat';
+import { normalizeRouteMapData } from '@/components/fields/kride/maps/normalizeRouteMapData';
 
 const STORAGE_KEY = 'kride_form';
 const MESSAGE_REGION_KEYWORDS = [
@@ -88,14 +89,6 @@ function hasPlaces(value: any): boolean {
     (day?.afternoon?.places?.length ?? 0) > 0 ||
     (Array.isArray(day?.places) && day.places.length > 0)
   ));
-}
-
-function readItineraryMarkers(value: any) {
-  return Array.isArray(value?.mapData?.markers)
-    ? value.mapData.markers
-    : Array.isArray(value?.markers)
-      ? value.markers
-      : [];
 }
 
 /** kride_form + 사용자 입력 → ChatQueryRequest 빌더 */
@@ -285,7 +278,16 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
                 days: rawIt.days ?? (rawIt as Record<string, unknown>).itinerary as KrideItinerary['days'],
               }
             : undefined;
-          const itineraryMarkers = readItineraryMarkers(normalizedItinerary);
+          const routeData = normalizeRouteMapData({
+            itinerary: normalizedItinerary,
+            mapData: (normalizedItinerary as any)?.mapData,
+            markers: (normalizedItinerary as any)?.markers,
+            pois: payload.pois,
+            source_pois: (normalizedItinerary as any)?.source_pois,
+            markerResolutionStatus: (normalizedItinerary as any)?.markerResolutionStatus,
+            unresolvedPlaces: (normalizedItinerary as any)?.unresolvedPlaces,
+          });
+          const itineraryMarkers = routeData.markers;
           const hasItineraryResult = normalizedItinerary
             ? hasPlaces(normalizedItinerary) || itineraryMarkers.length > 0
             : false;
@@ -311,7 +313,7 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
 
           // AI가 생성한 일정을 전역 상태(페이지)로 전달하여 지도와 패널이 업데이트되도록 이벤트 발생
           if (typeof window !== 'undefined' && (normalizedItinerary || payload.pois)) {
-            const markers = hasPoiResult ? payload.pois ?? [] : itineraryMarkers;
+            const markers = itineraryMarkers;
             const shouldPublishItinerary = normalizedItinerary && (
               hasItineraryResult
             );
@@ -322,9 +324,12 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
                   itinerary: shouldPublishItinerary ? normalizedItinerary : undefined,
                   pois: payload.pois,
                   markers,
-                  mapData: markers.length > 0
-                    ? { ...(normalizedItinerary as any)?.mapData, markers, itinerary: normalizedItinerary }
-                    : (normalizedItinerary as any)?.mapData,
+                  mapData: {
+                    ...(normalizedItinerary as any)?.mapData,
+                    ...routeData,
+                    markers,
+                    itinerary: normalizedItinerary,
+                  },
                   sourcePois: (normalizedItinerary as any)?.source_pois,
                 },
               })

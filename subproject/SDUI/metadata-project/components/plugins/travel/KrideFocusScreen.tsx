@@ -9,6 +9,7 @@ import type { ScreenControllerProps } from "@/components/screens/types";
 import { useKrideItinerary } from "@/components/DynamicEngine/hook/useKrideItinerary";
 import { KrideButton, RaiStatePanel } from "@/components/fields/kride/atoms/KridePrimitives";
 import KrideChatComponent from "@/components/fields/kride/chat/KrideChatComponent";
+import { preferNonEmptyMarkers } from "@/components/fields/kride/maps/normalizeRouteMapData";
 
 // KRIDE_FOCUS 화면 컨트롤러 (여행 플러그인).
 // AI 일정 추천 훅, 챗봇 실시간 반영, 상태 패널, 플로팅 챗 모달을 담당한다.
@@ -31,10 +32,12 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
                 if (detail.itinerary) next.itinerary = detail.itinerary;
                 if (detail.pois) next.pois = detail.pois;
                 if (detail.sourcePois) next.source_pois = detail.sourcePois;
-                const markers =
+                const incomingMarkers =
                     detail.markers ?? detail.pois ?? detail.mapData?.markers ?? detail.itinerary?.mapData?.markers;
+                const existingMarkers = next.mapData?.markers ?? next.markers ?? [];
+                const markers = preferNonEmptyMarkers(incomingMarkers, existingMarkers);
 
-                if (markers) {
+                if (Array.isArray(markers)) {
                     next.markers = markers;
                     next.mapData = {
                         ...next.mapData,
@@ -59,12 +62,22 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
     // AI 일정 추천 결과를 formData에 동기화
     useEffect(() => {
         if (krideItinerary.data) {
-            s.setFormData((prev: any) => ({
-                ...prev,
-                itinerary: krideItinerary.data?.itinerary,
-                markers: krideItinerary.data?.mapData?.markers,
-                mapData: krideItinerary.data?.mapData,
-            }));
+            s.setFormData((prev: any) => {
+                const incomingMarkers = krideItinerary.data?.mapData?.markers ?? [];
+                const existingMarkers = prev?.mapData?.markers ?? prev?.markers ?? [];
+                const markers = preferNonEmptyMarkers(incomingMarkers, existingMarkers);
+                return {
+                    ...prev,
+                    itinerary: krideItinerary.data?.itinerary,
+                    markers,
+                    mapData: {
+                        ...prev?.mapData,
+                        ...krideItinerary.data?.mapData,
+                        markers,
+                        itinerary: krideItinerary.data?.itinerary,
+                    },
+                };
+            });
         }
     }, [krideItinerary.data, s.setFormData]);
 

@@ -19,6 +19,8 @@ K-Ride FastAPI 백엔드 서버
 
 from __future__ import annotations
 
+import asyncio
+import logging
 import math
 import os
 import pickle
@@ -35,6 +37,8 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 load_dotenv()
+
+logger = logging.getLogger("kride.itinerary")
 
 from src.api.route_history import (
     fetch_travel_trends,
@@ -221,40 +225,195 @@ def nearest_node(graph: nx.Graph, lat: float, lon: float) -> tuple:
     return min(graph.nodes, key=lambda n: haversine(n, target))
 
 
-async def geocode_address(address: str) -> dict | None:
-    """Nominatim으로 한국 주소 → lat/lon 변환 (무료, rate limit 1req/s)"""
-    url = "https://nominatim.openstreetmap.org/search"
-    params = {"q": address, "format": "json", "limit": 1, "countrycodes": "kr"}
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.get(url, params=params, headers={"User-Agent": "KRide/1.0"})
-            data = resp.json()
-            if data:
-                return {"lat": float(data[0]["lat"]), "lon": float(data[0]["lon"])}
-    except Exception:
-        pass
+_GEOCODE_CACHE: dict[str, dict | None] = {}
+_LAT_KEYS = ("lat", "latitude", "mapy", "y")
+_LNG_KEYS = ("lng", "lon", "longitude", "mapx", "x")
+
+
+def _coordinate_value(item: dict, keys: tuple[str, ...]) -> float | None:
+    for key in keys:
+        value = item.get(key)
+        if value is None or value == "":
+            continue
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError):
+            continue
+        if math.isfinite(parsed):
+            return parsed
     return None
 
 
-async def geocode_itinerary_places(itinerary: list) -> list[dict]:
-    """일정에서 장소 주소를 추출하여 좌표 변환 → 마커 리스트 반환"""
-    import asyncio
-    places = []
-    for day in itinerary:
-        for slot in ["morning", "afternoon"]:
-            for place in day.get(slot, {}).get("places", []):
-                if place.get("name") and place.get("address"):
-                    places.append(place)
+def extract_coordinates(item: dict | None) -> dict | None:
+    """서로 다른 POI 좌표 키를 한국 영역의 lat/lng로 정규화한다."""
+    if not isinstance(item, dict):
+        return None
+    lat = _coordinate_value(item, _LAT_KEYS)
+    lng = _coordinate_value(item, _LNG_KEYS)
+    if lat is None or lng is None:
+        return None
+    if not (32.0 <= lat <= 39.5 and 123.0 <= lng <= 132.0):
+        return None
+    return {"lat": lat, "lng": lng}
 
-    markers = []
+
+def _place_name(item: dict) -> str:
+    return str(item.get("name") or item.get("placeName") or item.get("place_name") or item.get("title") or "").strip()
+
+
+def _place_id(item: dict) -> str:
+    return str(item.get("id") or item.get("poi_id") or item.get("placeId") or item.get("place_id") or "").strip()
+
+
+def _normalize_place_key(value: object) -> str:
+    return " ".join(str(value or "").strip().lower().split())
+
+
+def _itinerary_places(itinerary: list) -> list[dict]:
+    result: list[dict] = []
+    for day_index, day in enumerate(itinerary or []):
+        if not isinstance(day, dict):
+            continue
+        day_number = day.get("day") or day_index + 1
+        for slot in ("morning", "afternoon", "evening"):
+            slot_data = day.get(slot) or {}
+            places = slot_data if isinstance(slot_data, list) else slot_data.get("places", []) if isinstance(slot_data, dict) else []
+            for place_index, place in enumerate(places if isinstance(places, list) else []):
+                if isinstance(place, dict) and _place_name(place):
+                    result.append({**place, "day": day_number, "slot": slot, "index": place_index})
+        if isinstance(day.get("places"), list):
+            for place_index, place in enumerate(day["places"]):
+                if isinstance(place, dict) and _place_name(place):
+                    result.append({**place, "day": day_number, "slot": place.get("slot") or "day", "index": place_index})
+    return result
+
+
+def _marker(place: dict, coord: dict, source: str) -> dict:
+    name = _place_name(place)
+    marker_id = _place_id(place) or f"{_normalize_place_key(name)}-{place.get('day', 0)}-{place.get('slot', '')}"
+    return {
+        "id": marker_id,
+        "name": name,
+        "address": place.get("address") or "",
+        "lat": coord["lat"],
+        "lng": coord["lng"],
+        "day": place.get("day"),
+        "slot": place.get("slot"),
+        "index": place.get("index"),
+        "coordinateSource": source,
+    }
+
+
+async def geocode_address(address: str) -> dict | None:
+    """Nominatim으로 한국 주소/장소 검색어를 lat/lng로 변환한다."""
+    query = " ".join(str(address or "").split())
+    if not query:
+        return None
+    if query in _GEOCODE_CACHE:
+        return _GEOCODE_CACHE[query]
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {"q": query, "format": "json", "limit": 1, "countrycodes": "kr"}
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(url, params=params, headers={"User-Agent": "KRide/1.0"})
+            resp.raise_for_status()
+            data = resp.json()
+            if data:
+                coord = extract_coordinates(data[0])
+                _GEOCODE_CACHE[query] = coord
+                return coord
+    except Exception as exc:
+        logger.warning("itinerary_geocode_error query=%r error=%s", query, exc)
+    return None
+
+
+async def resolve_itinerary_markers(itinerary: list, source_pois: list, regions: list[str] | None = None) -> dict:
+    """일정 장소를 자체 좌표, 원본 POI, 지오코딩 순으로 지도 마커에 연결한다."""
+    places = _itinerary_places(itinerary)
+    source_pois = [poi for poi in (source_pois or []) if isinstance(poi, dict)]
+    source_by_id = {_place_id(poi): poi for poi in source_pois if _place_id(poi)}
+    source_by_name = {_normalize_place_key(_place_name(poi)): poi for poi in source_pois if _place_name(poi)}
+    source_markers = [poi for poi in source_pois if extract_coordinates(poi)]
+
+    markers: list[dict] = []
+    unresolved: list[dict] = []
+    used_source_ids: set[str] = set()
+    marker_keys: set[str] = set()
+    resolved_itinerary_count = 0
+    should_geocode = not source_markers
+
+    def append_marker(value: dict) -> None:
+        key = value.get("id") or f"{_normalize_place_key(value.get('name'))}:{value.get('lat')}:{value.get('lng')}"
+        if key in marker_keys:
+            return
+        marker_keys.add(str(key))
+        markers.append(value)
+
     for place in places:
-        coord = await geocode_address(place["address"])
+        coord = extract_coordinates(place)
+        coordinate_source = "itinerary"
+        matched_poi = None
+        if coord is None:
+            matched_poi = source_by_id.get(_place_id(place)) or source_by_name.get(_normalize_place_key(_place_name(place)))
+            coord = extract_coordinates(matched_poi)
+            coordinate_source = "poi"
+
+        if coord is None and should_geocode:
+            address = str(place.get("address") or "").strip()
+            query = address or " ".join([_place_name(place), *(regions or [])]).strip()
+            coord = await geocode_address(query)
+            coordinate_source = "geocode"
+            if query:
+                await asyncio.sleep(1.1)
+
+        if coord is None:
+            reason = "missing_address" if not place.get("address") else "geocode_failed"
+            unresolved.append({
+                "id": _place_id(place) or None,
+                "name": _place_name(place),
+                "address": place.get("address") or "",
+                "reason": reason,
+            })
+            continue
+
+        marker_place = {**(matched_poi or {}), **place}
+        append_marker(_marker(marker_place, coord, coordinate_source))
+        resolved_itinerary_count += 1
+        if matched_poi and _place_id(matched_poi):
+            used_source_ids.add(_place_id(matched_poi))
+
+    # 기존 계약을 유지하면서 일정에 직접 매칭되지 않은 좌표 보유 POI도 노출한다.
+    for index, poi in enumerate(source_markers):
+        if _place_id(poi) and _place_id(poi) in used_source_ids:
+            continue
+        coord = extract_coordinates(poi)
         if coord:
-            markers.append({"name": place["name"], "lat": coord["lat"], "lon": coord["lon"]})
-        else:
-            print(f"[K-Ride] 지오코딩 실패 주소: '{place['address']}' (장소: {place['name']})")
-        await asyncio.sleep(1.1)  # Nominatim rate limit: 1 req/s
-    return markers
+            append_marker(_marker({**poi, "index": index}, coord, "poi"))
+
+    if not places:
+        status = "not_required"
+    elif resolved_itinerary_count == len(places):
+        status = "complete"
+    elif resolved_itinerary_count > 0 or markers:
+        status = "partial"
+    else:
+        status = "failed"
+
+    logger.info(
+        "itinerary_marker_resolution status=%s places=%d markers=%d unresolved=%d",
+        status, len(places), len(markers), len(unresolved),
+    )
+    return {
+        "markers": markers,
+        "markerResolutionStatus": status,
+        "resolvedMarkerCount": len(markers),
+        "unresolvedPlaces": unresolved,
+    }
+
+
+async def geocode_itinerary_places(itinerary: list) -> list[dict]:
+    """기존 호출부 호환용 일정 지오코딩 래퍼."""
+    return (await resolve_itinerary_markers(itinerary, []))["markers"]
 
 
 def _add_restaurant_recommendations(itinerary_result: dict, all_pois: list):
@@ -1411,24 +1570,19 @@ async def recommend_itinerary(req: ItineraryRequest):
     # 오전/오후 섹션에 추천 프리미엄 맛집 추가
     _add_restaurant_recommendations(itinerary_result, all_pois)
 
-    # 6. mapData 마커 생성 (좌표 있는 POI만)
-    markers = [
-        {"name": p.get("name", ""), "lat": p["lat"], "lon": p["lon"]}
-        for p in all_pois
-        if p.get("lat") and p.get("lon")
-    ]
-
-    # 7. POI 마커가 없으면 LLM 일정의 주소로 지오코딩 fallback
-    if not markers and itinerary_result.get("itinerary"):
-        try:
-            markers = await geocode_itinerary_places(itinerary_result["itinerary"])
-            print(f"[K-Ride] 지오코딩 마커 {len(markers)}개 생성")
-        except Exception as e:
-            print(f"[K-Ride] 지오코딩 실패: {e}")
+    # 6. 일정 장소를 자체 좌표 → 원본 POI → 지오코딩 순으로 지도 마커에 연결
+    marker_result = await resolve_itinerary_markers(
+        itinerary_result.get("itinerary", []),
+        all_pois,
+        regions,
+    )
 
     result = {
         **itinerary_result,
-        "mapData": {"markers": markers},
+        "mapData": marker_result,
+        "markerResolutionStatus": marker_result["markerResolutionStatus"],
+        "resolvedMarkerCount": marker_result["resolvedMarkerCount"],
+        "unresolvedPlaces": marker_result["unresolvedPlaces"],
         "source_pois": all_pois[:15],
     }
     save_user_route_history(
