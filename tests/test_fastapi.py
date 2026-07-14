@@ -17,9 +17,10 @@ test_fastapi.py — K-Ride FastAPI 단위 테스트
 
 from __future__ import annotations
 
+import asyncio
 import sys
 import types
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -35,7 +36,7 @@ for _pkg in ["neo4j", "chromadb", "groq", "supabase", "sentence_transformers"]:
     _stub(_pkg)
 
 # FastAPI 앱 임포트 (stub 설정 이후에 해야 ImportError 방지)
-from src.api.fastapi_server import app  # noqa: E402
+from src.api.fastapi_server import app, extract_coordinates, resolve_itinerary_markers  # noqa: E402
 
 client = TestClient(app, raise_server_exceptions=False)
 
@@ -240,6 +241,46 @@ MOCK_ITINERARY = {
 }
 
 class TestItinerary:
+    def test_coordinate_aliases_are_normalized(self):
+        assert extract_coordinates({"mapy": "37.5665", "mapx": "126.9780"}) == {
+            "lat": 37.5665,
+            "lng": 126.978,
+        }
+        assert extract_coordinates({"latitude": 37.5, "longitude": 127.0}) == {
+            "lat": 37.5,
+            "lng": 127.0,
+        }
+        assert extract_coordinates({"lat": 91, "lon": 127}) is None
+
+    def test_inline_itinerary_coordinates_create_complete_markers(self):
+        itinerary = [{
+            "day": 1,
+            "morning": {"places": [{"name": "경복궁", "latitude": "37.58", "longitude": "126.97"}]},
+            "afternoon": {"places": []},
+        }]
+
+        result = asyncio.run(resolve_itinerary_markers(itinerary, []))
+
+        assert result["markerResolutionStatus"] == "complete"
+        assert result["resolvedMarkerCount"] == 1
+        assert result["markers"][0]["coordinateSource"] == "itinerary"
+        assert result["markers"][0]["day"] == 1
+
+    def test_partial_resolution_keeps_valid_source_markers(self):
+        itinerary = [{
+            "day": 1,
+            "morning": {"places": [{"name": "경복궁"}, {"name": "알 수 없는 장소"}]},
+            "afternoon": {"places": []},
+        }]
+        source_pois = [{"poi_id": "p1", "name": "경복궁", "lat": 37.58, "lon": 126.97}]
+
+        with patch("src.api.fastapi_server.geocode_address", new=AsyncMock(return_value=None)):
+            result = asyncio.run(resolve_itinerary_markers(itinerary, source_pois))
+
+        assert result["markerResolutionStatus"] == "partial"
+        assert [marker["name"] for marker in result["markers"]] == ["경복궁"]
+        assert result["unresolvedPlaces"][0]["name"] == "알 수 없는 장소"
+
     def test_itinerary_503_no_ai(self):
         with patch("src.api.fastapi_server.HAS_AI", False):
             resp = client.post("/api/recommend/itinerary", json={})
@@ -263,6 +304,8 @@ class TestItinerary:
         assert "itinerary" in body
         assert "mapData" in body
         assert "markers" in body["mapData"]
+        assert "markerResolutionStatus" in body
+        assert "unresolvedPlaces" in body
 
     def test_itinerary_day_count_onenight(self):
         two_day = {

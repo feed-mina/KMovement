@@ -1,4 +1,4 @@
-import { normalizeRouteMapData } from '@/components/fields/kride/maps/normalizeRouteMapData';
+import { normalizeRouteMapData, preferNonEmptyMarkers } from '@/components/fields/kride/maps/normalizeRouteMapData';
 
 describe('normalizeRouteMapData', () => {
   it('normalizes lng/lon variants and derives center from markers', () => {
@@ -45,5 +45,42 @@ describe('normalizeRouteMapData', () => {
       slot: 'morning',
       description: '카페 거리',
     });
+  });
+
+  it('creates markers from coordinates embedded in itinerary days', () => {
+    const data = normalizeRouteMapData({
+      itinerary: {
+        days: [{
+          day: 1,
+          morning: { places: [{ name: '북촌', mapy: '37.5826', mapx: '126.9830' }] },
+          afternoon: { places: [] },
+        }],
+      },
+    });
+
+    expect(data.markers).toHaveLength(1);
+    expect(data.markers[0]).toMatchObject({ name: '북촌', day: 1, slot: 'morning' });
+    expect(data.hasItinerary).toBe(true);
+    expect(data.markerResolutionStatus).toBe('complete');
+  });
+
+  it('reports partial resolution without discarding valid markers', () => {
+    const data = normalizeRouteMapData({
+      itinerary: [{
+        morning: { places: [{ name: '성수동' }, { name: '좌표 없는 장소' }] },
+        afternoon: { places: [] },
+      }],
+      markers: [{ name: '성수동', lat: 37.544, lng: 127.055 }],
+    });
+
+    expect(data.markers).toHaveLength(1);
+    expect(data.unresolvedPlaceCount).toBe(1);
+    expect(data.markerResolutionStatus).toBe('partial');
+  });
+
+  it('keeps existing markers when an update contains an empty marker array', () => {
+    const existing = [{ name: '경복궁', lat: 37.58, lng: 126.97 }];
+    expect(preferNonEmptyMarkers([], existing)).toBe(existing);
+    expect(preferNonEmptyMarkers([{ name: '광장시장' }], existing)).toEqual([{ name: '광장시장' }]);
   });
 });

@@ -14,6 +14,7 @@ export type RouteMapMarker = {
   address?: string;
   lat: number;
   lng: number;
+  coordinateSource?: 'poi' | 'itinerary' | 'geocode' | string;
   imageUrl?: string;
   externalUrls?: {
     kakao?: string;
@@ -26,6 +27,9 @@ export type RouteMapData = {
   center: [number, number];
   zoom: number;
   markers: RouteMapMarker[];
+  hasItinerary?: boolean;
+  markerResolutionStatus?: 'complete' | 'partial' | 'failed' | 'not_required' | string;
+  unresolvedPlaceCount?: number;
 };
 
 export type RouteMarkerSelectDetail = {

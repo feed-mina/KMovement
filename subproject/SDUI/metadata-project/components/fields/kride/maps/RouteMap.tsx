@@ -84,6 +84,7 @@ export default function RouteMap({ data }: Props) {
   }, [data.markers]);
 
   const hasSelectedProviderKey = providerStatus[provider];
+  const hasUnresolvedPlaces = (data.unresolvedPlaceCount ?? 0) > 0;
   const map = hasSelectedProviderKey && provider === 'kakao'
     ? (
       <KakaoRouteMap
@@ -127,9 +128,18 @@ export default function RouteMap({ data }: Props) {
       <div className="route-map__body relative w-full h-full">
         {map}
         {data.markers.length === 0 && (
-          <div className="route-map__state absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white font-semibold z-[400] pointer-events-none rounded-b-2xl text-center px-4">
-            <span>표시할 장소가 없습니다.</span>
-            <span className="text-sm mt-2 text-gray-200">우측 하단 [AI 여행봇 채팅]을 열어<br/>일정을 생성해주세요!</span>
+          <div role="status" className="route-map__state absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white font-semibold z-[400] pointer-events-none rounded-b-2xl text-center px-4">
+            <span>{data.hasItinerary ? '일정은 생성되었지만 장소 위치를 확인하지 못했습니다.' : '표시할 장소가 없습니다.'}</span>
+            <span className="text-sm mt-2 text-gray-200">
+              {data.hasItinerary
+                ? '장소 주소를 확인하거나 잠시 후 다시 시도해주세요.'
+                : <>우측 하단 [AI 여행봇 채팅]을 열어<br/>일정을 생성해주세요!</>}
+            </span>
+          </div>
+        )}
+        {data.markers.length > 0 && hasUnresolvedPlaces && (
+          <div role="status" className="absolute left-1/2 top-20 z-[400] -translate-x-1/2 rounded-full bg-black/75 px-4 py-2 text-xs font-semibold text-white shadow-lg pointer-events-none">
+            {data.unresolvedPlaceCount}개 장소의 위치를 확인하지 못했습니다.
           </div>
         )}
       </div>
