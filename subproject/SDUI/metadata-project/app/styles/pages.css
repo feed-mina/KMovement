@@ -3265,15 +3265,47 @@ button:hover {
 }
 
 @media (max-width: 980px) {
-    .mypage-stats,
+    .mypage-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
     .mypage-main-grid {
         grid-template-columns: 1fr;
+    }
+
+    .mypage-stats .stat-card__body {
+        min-height: 126px;
+        padding: 16px;
+        gap: 8px;
+    }
+
+    .mypage-stats .stat-card__label {
+        line-height: 1.35;
     }
 }
 
 @media (max-width: 720px) {
     .mypage-page {
         padding: 18px 14px;
+    }
+
+    .mypage-stats {
+        gap: 10px;
+    }
+
+    .mypage-stats .stat-card {
+        border-radius: 14px;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .mypage-stats .stat-card__body {
+        min-height: 112px;
+        padding: 14px;
+    }
+
+    .mypage-stats .stat-card__value {
+        font-size: clamp(1.75rem, 9vw, 2.25rem);
     }
 }
 
