@@ -1,16 +1,16 @@
-'use client';
-import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useBaseActions } from "./useBaseActions";
 import { useOnboardingStore } from "../store/onboarding-store";
+import type { NavigationAdapter, RuntimeConfig } from "../config/runtimeConfig";
 
 export const useBusinessActions = (
   screenId: string,
   metadata: any[] = [],
-  initialData: any = {}
+  initialData: any = {},
+  navigation: NavigationAdapter,
+  routeParams: RuntimeConfig["routeParams"] = {}
 ) => {
-  const base = useBaseActions(screenId, metadata, initialData);
-  const router = useRouter();
+  const base = useBaseActions(screenId, metadata, initialData, routeParams);
 
   const handleAction = useCallback(
     async (meta: any, data?: any) => {
@@ -25,15 +25,15 @@ export const useBusinessActions = (
         case "ROUTE":
           if (!actionUrl) return;
           if (actionUrl.startsWith("http")) {
-            window.location.href = actionUrl;
+            navigation.openExternal?.(actionUrl);
           } else {
-            router.push(actionUrl);
+            navigation.push(actionUrl);
           }
           break;
 
         case "SET_DURATION":
           store.setDuration(data?.value ?? data);
-          router.push("/movies");
+          navigation.push("/movies");
           break;
 
         case "TOGGLE_ARTIST":
@@ -53,18 +53,18 @@ export const useBusinessActions = (
           break;
 
         case "GOTO_FOCUS":
-          router.push("/focus");
+          navigation.push("/focus");
           break;
 
         case "GOTO_MY_LIST":
-          router.push("/my-list");
+          navigation.push("/my-list");
           break;
 
         default:
           break;
       }
     },
-    [base, router]
+    [base, navigation]
   );
 
   return { ...base, handleAction };

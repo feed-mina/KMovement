@@ -1,14 +1,19 @@
-import { useLocalSearchParams } from 'expo-router';
-import { ScrollView, Text, View } from 'react-native';
-import { DynamicEngine, resolveRuntimeConfig, useUiScreen } from '@kride/core';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Linking, ScrollView, Text, View } from 'react-native';
+import { DynamicEngine, resolveRuntimeConfig, usePageHook, useUiScreen } from '@kride/core';
 import { rnPrimitives } from '../src/primitives';
 import { mobileComponentMap } from '../src/componentMap';
 
 export default function MobileScreen() {
   const { screenId } = useLocalSearchParams<{ screenId: string }>();
+  const router = useRouter();
   const sid = screenId ?? 'MAIN_PAGE';
   const config = resolveRuntimeConfig({ apiBase: process.env.EXPO_PUBLIC_API_BASE });
   const { data, isLoading, error } = useUiScreen(sid, config.apiBase);
+  const page = usePageHook(sid, data ?? [], {}, {
+    push: (path) => router.push(path as never),
+    openExternal: (url) => { void Linking.openURL(url); },
+  }, { screenId });
 
   if (isLoading) {
     return (
@@ -33,8 +38,10 @@ export default function MobileScreen() {
           metadata={data ?? []}
           screenId={sid}
           pageData={{}}
-          onChange={() => {}}
-          onAction={(meta) => console.log('mobile action', meta.actionType || meta.action_type)}
+          formData={page.formData}
+          setFormData={page.setFormData}
+          onChange={page.handleChange}
+          onAction={page.handleAction}
           primitives={rnPrimitives}
           componentMap={mobileComponentMap}
         />

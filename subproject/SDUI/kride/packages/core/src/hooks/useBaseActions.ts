@@ -1,37 +1,44 @@
 'use client';
 import { useState, useCallback, useRef, useEffect } from "react";
+import type { RuntimeConfig } from "../config/runtimeConfig";
+
+const firstParam = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] ?? "" : value ?? "";
 
 export const useBaseActions = (
   screenId: string,
   metadata: any[] = [],
-  initialData: any = {}
+  initialData: any = {},
+  routeParams: RuntimeConfig["routeParams"] = {}
 ) => {
   const [formData, setFormData] = useState<any>(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      return {
-        email: params.get("email") || "",
-        code: params.get("code") || "",
-      };
-    }
-    return {};
+    const email = firstParam(routeParams.email);
+    const code = firstParam(routeParams.code);
+    return email ? { email, code } : {};
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [pwType, setPwType] = useState("password");
   const [prevMetadata, setPrevMetadata] = useState(metadata);
+  const [prevRouteParams, setPrevRouteParams] = useState(routeParams);
   const [baseInitialData, setBaseInitialData] = useState(initialData);
 
   if (metadata !== prevMetadata) {
     setPrevMetadata(metadata);
-    const params = new URLSearchParams(window.location.search);
-    const urlEmail = params.get("email");
-    const urlCode = params.get("code");
+    const urlEmail = firstParam(routeParams.email);
+    const urlCode = firstParam(routeParams.code);
     if (!urlEmail) {
       setFormData({});
     } else {
       setFormData({ email: urlEmail, code: urlCode });
     }
+  }
+
+  if (routeParams !== prevRouteParams) {
+    setPrevRouteParams(routeParams);
+    const email = firstParam(routeParams.email);
+    const code = firstParam(routeParams.code);
+    setFormData(email ? { email, code } : {});
   }
 
   if (initialData !== baseInitialData && Object.keys(initialData).length > 0) {

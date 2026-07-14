@@ -4,6 +4,12 @@ export type RuntimeConfig = {
   routeParams?: Record<string, string | string[] | undefined>;
 };
 
+/** Platform adapter supplied by Next.js or expo-router. */
+export type NavigationAdapter = {
+  push: (path: string) => void;
+  openExternal?: (url: string) => void;
+};
+
 export function resolveRuntimeConfig(config: RuntimeConfig = {}): Required<Pick<RuntimeConfig, 'apiBase' | 'krideApiBase'>> & RuntimeConfig {
   return {
     apiBase: config.apiBase ?? '',

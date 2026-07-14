@@ -1,6 +1,7 @@
 import type React from 'react';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import Slider from '@react-native-community/slider';
 import {
   useOnboardingStore,
   type SduiLeafProps,
@@ -96,6 +97,81 @@ export const RangeTrackLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
         className="absolute h-2 rounded-full bg-kride"
         style={{ left: `${minPercent}%`, width: `${maxPercent - minPercent}%` }}
       />
+    </View>
+  );
+};
+
+const numberValue = (value: unknown, fallback: number) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+/** Native replacement for the web `<input type="range">` leaf. */
+export const RangeInputLeaf: React.FC<SduiLeafProps> = ({ id = '', meta, data, onChange, onAction }) => {
+  const minimum = numberValue(meta?.min ?? data?.min, 0);
+  const maximum = numberValue(meta?.max ?? data?.max, 100);
+  const step = numberValue(meta?.step ?? data?.step, 1);
+  const value = Math.min(maximum, Math.max(minimum, numberValue(data?.value ?? meta?.value, minimum)));
+  const commit = (next: number) => {
+    onChange?.(id, next);
+    onAction?.(meta, { value: next });
+  };
+  return (
+    <Slider
+      minimumValue={minimum}
+      maximumValue={maximum}
+      step={step}
+      value={value}
+      minimumTrackTintColor="#e50914"
+      maximumTrackTintColor="#4b5563"
+      thumbTintColor="#e50914"
+      onSlidingComplete={commit}
+    />
+  );
+};
+
+/**
+ * Two coordinated native sliders. It keeps the lower handle at or below the
+ * upper handle and emits the same `{ min, max }` payload as the web leaf.
+ */
+export const DualRangeSliderLeaf: React.FC<SduiLeafProps> = ({ id = '', meta, data, onChange, onAction }) => {
+  const minimum = numberValue(meta?.min ?? data?.min, 0);
+  const maximum = numberValue(meta?.max ?? data?.max, 100);
+  const step = numberValue(meta?.step ?? data?.step, 1);
+  const initialMin = Math.min(maximum, Math.max(minimum, numberValue(data?.minValue ?? data?.min ?? meta?.minValue, minimum)));
+  const initialMax = Math.max(initialMin, Math.min(maximum, numberValue(data?.maxValue ?? data?.max ?? meta?.maxValue, maximum)));
+  const [range, setRange] = useState({ min: initialMin, max: initialMax });
+  const commit = (next: { min: number; max: number }) => {
+    setRange(next);
+    onChange?.(id, next);
+    onAction?.(meta, next);
+  };
+  return (
+    <View className="gap-2">
+      <Slider
+        minimumValue={minimum}
+        maximumValue={range.max}
+        step={step}
+        value={range.min}
+        minimumTrackTintColor="#e50914"
+        maximumTrackTintColor="#4b5563"
+        thumbTintColor="#e50914"
+        onSlidingComplete={(min) => commit({ min, max: range.max })}
+      />
+      <Slider
+        minimumValue={range.min}
+        maximumValue={maximum}
+        step={step}
+        value={range.max}
+        minimumTrackTintColor="#e50914"
+        maximumTrackTintColor="#4b5563"
+        thumbTintColor="#e50914"
+        onSlidingComplete={(max) => commit({ min: range.min, max })}
+      />
+      <View className="flex-row justify-between">
+        <Text className="text-sm text-white">{range.min.toLocaleString('ko-KR')}</Text>
+        <Text className="text-sm text-white">{range.max.toLocaleString('ko-KR')}</Text>
+      </View>
     </View>
   );
 };

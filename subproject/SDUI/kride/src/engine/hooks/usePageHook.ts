@@ -1,20 +1,19 @@
 'use client';
-import { useCallback } from "react";
-import { useBusinessActions } from "./useBusinessActions";
+import { useRouter, useSearchParams } from "next/navigation";
+import { usePageHook as useCorePageHook } from "@kride/core";
 
 export const usePageHook = (
   screenId: string,
   metadata: any[],
   initialData: any = {}
 ) => {
-  const actions = useBusinessActions(screenId, metadata, initialData);
-
-  const handleAction = useCallback(
-    async (meta: any, data?: any) => {
-      return await actions.handleAction(meta, data);
-    },
-    [actions]
-  );
-
-  return { ...actions, handleAction };
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  return useCorePageHook(screenId, metadata, initialData, {
+    push: router.push,
+    openExternal: (url) => window.location.assign(url),
+  }, {
+    email: searchParams.get("email") ?? undefined,
+    code: searchParams.get("code") ?? undefined,
+  });
 };

@@ -17,6 +17,8 @@ import {
   DurationButtonLeaf,
   ItineraryPanelLeaf,
   PurposeCardLeaf,
+  DualRangeSliderLeaf,
+  RangeInputLeaf,
   RangeTrackLeaf,
   SelectionCardLeaf,
 } from './composites';
@@ -54,7 +56,8 @@ export const mobileComponentMap: ComponentRegistry = {
   DURATION_BUTTON: DurationButtonLeaf,
   ITINERARY_PANEL: ItineraryPanelLeaf,
   RANGE_TRACK: RangeTrackLeaf,
+  RANGE_INPUT: RangeInputLeaf,
+  DUAL_RANGE_SLIDER: DualRangeSliderLeaf,
   COLLAPSE_HEADER: CollapseHeaderLeaf,
   COLLAPSE_BODY: CollapseBodyLeaf,
-  // deferred (need a slider/gesture dependency): RANGE_INPUT, DUAL_RANGE_SLIDER
 };
