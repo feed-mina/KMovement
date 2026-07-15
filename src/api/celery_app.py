@@ -17,6 +17,7 @@ from __future__ import annotations
 import os
 
 from celery import Celery
+from celery.schedules import crontab
 
 BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/1")
 RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", BROKER_URL)
@@ -37,6 +38,13 @@ celery.conf.update(
         "src.api.tasks.task_classify_event":  {"queue": "ml"},
         "src.api.tasks.task_generate_tts":    {"queue": "media"},
         "src.api.tasks.task_generate_video":  {"queue": "media"},
+        "src.api.tasks.task_cleanup_temp":    {"queue": "media"},
+    },
+    beat_schedule={
+        "cleanup-orphaned-media-temp-hourly": {
+            "task": "src.api.tasks.task_cleanup_temp",
+            "schedule": crontab(minute=0),
+        },
     },
 )
 

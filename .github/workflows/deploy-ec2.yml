@@ -104,6 +104,7 @@ jobs:
           echo "SDUI_IMAGE=${{ secrets.DOCKER_USERNAME }}/sdui-app" >> $GITHUB_ENV
           echo "FRONTEND_IMAGE=${{ secrets.DOCKER_USERNAME }}/sdui-frontend" >> $GITHUB_ENV
           echo "KRIDE_FASTAPI_IMAGE=${{ secrets.DOCKER_USERNAME }}/kride-fastapi" >> $GITHUB_ENV
+          echo "KRIDE_CELERY_IMAGE=${{ secrets.DOCKER_USERNAME }}/kride-celery" >> $GITHUB_ENV
           if [ "${{ github.ref_name }}" = "main" ]; then
             echo "TARGET_PORT=8080" >> $GITHUB_ENV
             echo "CONTAINER_NAME=sdui-backend" >> $GITHUB_ENV
@@ -126,6 +127,16 @@ jobs:
             .
           docker push $KRIDE_FASTAPI_IMAGE:${{ env.BRANCH_TAG }}
           docker push $KRIDE_FASTAPI_IMAGE:latest
+
+      - name: Build and push K-Ride Celery image
+        if: steps.changes.outputs.fastapi == 'true'
+        run: |
+          docker build -f Dockerfile.worker \
+            -t $KRIDE_CELERY_IMAGE:${{ env.BRANCH_TAG }} \
+            -t $KRIDE_CELERY_IMAGE:latest \
+            .
+          docker push $KRIDE_CELERY_IMAGE:${{ env.BRANCH_TAG }}
+          docker push $KRIDE_CELERY_IMAGE:latest
 
       # ── Build & push backend image ──
       - name: Build and push Spring Boot image
@@ -217,6 +228,21 @@ jobs:
                   proxy_send_timeout 120s;
               }
 
+              # ── Celery job status/SSE — Next.js injects the server-only internal key ──
+              location /jobs/celery/ {
+                  proxy_pass http://localhost:3000;
+                  proxy_http_version 1.1;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+                  proxy_read_timeout 3600s;
+                  proxy_send_timeout 3600s;
+                  proxy_buffering off;
+                  proxy_cache off;
+                  chunked_transfer_encoding on;
+              }
+
               # ── Spring Boot API (쿠키 직접 전달 + SSE 지원) ──
               location /api/ {
                   proxy_pass http://localhost:8080;
@@ -292,9 +318,10 @@ jobs:
           fi
           if [ "__DEPLOY_FASTAPI__" = "true" ]; then
             docker pull __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__
+            docker pull __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__
           fi
 
-          docker image prune -af || true
+          docker image prune -f || true
 
           # ── Redis ──
           docker inspect sdui-redis >/dev/null 2>&1 || docker run -d --name sdui-redis --network sdui-network redis:7-alpine
@@ -344,6 +371,45 @@ jobs:
               fi
               sleep 5
             done
+
+            docker volume create kride-celery-temp >/dev/null
+            docker volume create kride-celery-beat >/dev/null
+            docker volume create kride-tora-ffmpeg-temp >/dev/null
+            docker volume create kride-tora-meta-temp >/dev/null
+
+            remove_container kride-celery-worker
+            docker run -d --name kride-celery-worker \
+              --network sdui-network \
+              --restart unless-stopped \
+              -v kride-celery-temp:/tmp/kride-celery \
+              -v kride-tora-ffmpeg-temp:/app/.tmp-tora-ffmpeg \
+              -v kride-tora-meta-temp:/app/.tmp-tora-meta \
+              -e CELERY_BROKER_URL=redis://sdui-redis:6379/1 \
+              -e CELERY_RESULT_BACKEND=redis://sdui-redis:6379/1 \
+              -e CELERY_MEDIA_TEMP_DIR=/tmp/kride-celery \
+              -e CELERY_TEMP_TTL_HOURS=6 \
+              -e CLOUDINARY_URL=__CLOUDINARY_URL__ \
+              -e CLOUDINARY_CLOUD_NAME=__CLOUDINARY_CLOUD_NAME__ \
+              -e CLOUDINARY_API_KEY=__CLOUDINARY_API_KEY__ \
+              -e CLOUDINARY_API_SECRET=__CLOUDINARY_API_SECRET__ \
+              -e KRIDE_RESULT_URL_REQUIRED=true \
+              __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__ \
+              celery -A src.api.celery_app worker -l info -c 1 -Q ml,media
+
+            remove_container kride-celery-beat
+            docker run -d --name kride-celery-beat \
+              --network sdui-network \
+              --restart unless-stopped \
+              -v kride-celery-beat:/tmp/celerybeat \
+              -e CELERY_BROKER_URL=redis://sdui-redis:6379/1 \
+              -e CELERY_RESULT_BACKEND=redis://sdui-redis:6379/1 \
+              __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__ \
+              celery -A src.api.celery_app beat -l info --schedule=/tmp/celerybeat/celerybeat-schedule
+
+            sleep 5
+            docker ps --filter name=kride-celery --format "table {{.Names}}\t{{.Status}}"
+            docker logs --tail 40 kride-celery-worker
+            docker logs --tail 40 kride-celery-beat
           fi
 
           # ── Backend ──
@@ -399,6 +465,7 @@ jobs:
               -p 3000:3000 \
               -e HOSTNAME=0.0.0.0 \
               -e FASTAPI_URL=__KRIDE_FASTAPI_URL__ \
+              -e FASTAPI_INTERNAL_API_KEY=__FASTAPI_INTERNAL_API_KEY__ \
               __FRONTEND_IMAGE__:__BRANCH_TAG__
 
             echo "Waiting for Next.js..."
@@ -419,6 +486,17 @@ jobs:
           curl -fsS http://localhost:8000/api/health >/dev/null
           curl -kfsS --resolve yerin.duckdns.org:443:127.0.0.1 https://yerin.duckdns.org/kride-api/health >/dev/null
 
+          SSE_SMOKE_OUTPUT="$(curl -kNsS --max-time 8 \
+            --resolve yerin.duckdns.org:443:127.0.0.1 \
+            "https://yerin.duckdns.org/jobs/celery/deploy-smoke-${RANDOM}/stream" \
+            2>/dev/null || true)"
+          SSE_FIRST_EVENT="$(printf '%s\n' "$SSE_SMOKE_OUTPUT" | sed -n '1p')"
+          echo "Celery SSE first event: $SSE_FIRST_EVENT"
+          printf '%s\n' "$SSE_FIRST_EVENT" | grep -q '^data: ' || {
+            echo "Celery SSE smoke test failed: no immediate event received."
+            exit 1
+          }
+
           echo "=== Deployment complete ==="
           docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
           DEPLOY_EOF
@@ -426,6 +504,7 @@ jobs:
           sed -i "s|__SDUI_IMAGE__|${{ env.SDUI_IMAGE }}|g" /tmp/deploy.sh
           sed -i "s|__FRONTEND_IMAGE__|${{ env.FRONTEND_IMAGE }}|g" /tmp/deploy.sh
           sed -i "s|__KRIDE_FASTAPI_IMAGE__|${{ env.KRIDE_FASTAPI_IMAGE }}|g" /tmp/deploy.sh
+          sed -i "s|__KRIDE_CELERY_IMAGE__|${{ env.KRIDE_CELERY_IMAGE }}|g" /tmp/deploy.sh
           sed -i "s|__BRANCH_TAG__|${{ env.BRANCH_TAG }}|g" /tmp/deploy.sh
           sed -i "s|__CONTAINER_NAME__|${{ env.CONTAINER_NAME }}|g" /tmp/deploy.sh
           sed -i "s|__TARGET_PORT__|${{ env.TARGET_PORT }}|g" /tmp/deploy.sh
@@ -452,6 +531,10 @@ jobs:
           sed -i "s|__RUNPOD_ENDPOINT_ID__|${{ secrets.RUNPOD_ENDPOINT_ID }}|g" /tmp/deploy.sh
           sed -i "s|__RUNPOD_MEDIA_ENDPOINT_ID__|${{ secrets.RUNPOD_MEDIA_ENDPOINT_ID }}|g" /tmp/deploy.sh
           sed -i "s|__RUNPOD_TORA_ENDPOINT_ID__|${{ secrets.RUNPOD_TORA_ENDPOINT_ID }}|g" /tmp/deploy.sh
+          sed -i "s|__CLOUDINARY_URL__|${{ secrets.CLOUDINARY_URL }}|g" /tmp/deploy.sh
+          sed -i "s|__CLOUDINARY_CLOUD_NAME__|${{ secrets.CLOUDINARY_CLOUD_NAME }}|g" /tmp/deploy.sh
+          sed -i "s|__CLOUDINARY_API_KEY__|${{ secrets.CLOUDINARY_API_KEY }}|g" /tmp/deploy.sh
+          sed -i "s|__CLOUDINARY_API_SECRET__|${{ secrets.CLOUDINARY_API_SECRET }}|g" /tmp/deploy.sh
           sed -i "s|__GCP_PROJECT_ID__|${{ secrets.GCP_PROJECT_ID }}|g" /tmp/deploy.sh
           sed -i "s|__SLACK_WEBHOOK_URL__|${{ secrets.SLACK_WEBHOOK_URL }}|g" /tmp/deploy.sh
           sed -i "s|__SLACK_BOT_TOKEN__|${{ secrets.SLACK_BOT_TOKEN }}|g" /tmp/deploy.sh
