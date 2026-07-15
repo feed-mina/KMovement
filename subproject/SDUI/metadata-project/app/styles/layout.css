@@ -64,6 +64,7 @@
     /* 사이드바 */
     .pc-sidebar {
         width: 280px;
+        flex: 0 0 280px;
         height: 100vh;
         position: sticky;
         top: 0;
@@ -74,6 +75,8 @@
         flex-direction: column;
         justify-content: space-between;
         z-index: 100;
+        overflow-x: hidden;
+        transition: width 0.22s ease, flex-basis 0.22s ease, padding 0.22s ease;
     }
 
     /* 메인 영역 */
@@ -101,6 +104,49 @@
 
     /* 사이드바 내부 요소 */
     .sidebar-logo { font-size: 24px; font-weight: 900; color: var(--primary-color); margin-bottom: 40px; cursor: pointer; }
+    .pc-sidebar .sidebar-logo {
+        position: relative;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-family: inherit;
+        text-align: left;
+        border-radius: 12px;
+        transition: background-color 0.2s ease, padding 0.22s ease;
+    }
+    .pc-sidebar .sidebar-logo:hover { background: var(--semantic-accent-soft); }
+    .pc-sidebar .sidebar-logo:focus-visible {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+    .sidebar-logo-compact { display: none; }
+    .sidebar-toggle-indicator {
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 1;
+        color: var(--text-muted);
+    }
+    .pc-sidebar.is-collapsed {
+        width: 88px;
+        flex-basis: 88px;
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+    .pc-sidebar.is-collapsed .sidebar-logo {
+        justify-content: center;
+        gap: 6px;
+        padding-right: 8px;
+        padding-left: 8px;
+    }
+    .pc-sidebar.is-collapsed .sidebar-logo-full { display: none; }
+    .pc-sidebar.is-collapsed .sidebar-logo-compact { display: inline; }
+    .pc-sidebar.is-collapsed .sidebar-content,
+    .pc-sidebar.is-collapsed .sidebar-footer { display: none; }
+    .pc-sidebar.is-admin .sidebar-logo:hover { background: #2d3748; }
     .nav-item { padding: 12px 16px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; color: #555; transition: 0.2s; }
     .nav-item.active { background: var(--semantic-accent-soft); color: var(--primary-color); font-weight: bold; }
 }

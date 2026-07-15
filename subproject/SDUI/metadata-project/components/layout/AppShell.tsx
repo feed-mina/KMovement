@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import BottomNav from "@/components/layout/BottomNav";
@@ -11,6 +12,7 @@ import FocusFooterBar from "@/components/layout/FocusFooterBar";
 const KRIDE_PATHS = ['/INTRO1', '/INTRO2', '/INTRO3', '/INTRO4', '/INTRO5', '/MY_LIST', '/FOCUS', '/CHAT', '/KRIDE_CHAT'];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const { isMobile, deviceClass } = useDeviceType();
     const isPc = !isMobile;
     const pathname = usePathname();
@@ -26,7 +28,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className={`app-wrapper ${deviceClass} ${isKrideScreen ? 'kride-fullscreen' : ''}${!isPc && !isKrideScreen ? ' has-bottom-nav' : ''}`}>
             <ServiceWorkerUpdater />
 
-            {!isKrideScreen && (isPc ? <Sidebar /> : <Header />)}
+            {!isKrideScreen && (isPc ? (
+                <Sidebar
+                    collapsed={isSidebarCollapsed}
+                    onToggle={() => setIsSidebarCollapsed(current => !current)}
+                />
+            ) : <Header />)}
 
             <main className="main-contents-area">
                 {isPc && !isKrideScreen && (

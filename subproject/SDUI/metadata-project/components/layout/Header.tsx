@@ -9,6 +9,7 @@ import { flattenMetadata } from "../utils/metadataUtils";
 import Skeleton from "@/components/utils/Skeleton";
 import {usePageHook} from "@/components/DynamicEngine/hook/usePageHook";
 import { useDeviceType } from "@/hooks/useDeviceType";
+import Rai from "@/components/fields/kride/atoms/Rai";
 
 
 export default function Header() {
@@ -55,8 +56,16 @@ export default function Header() {
         <header className="mobile-header">
             <div className="header-container">
                 <div className="header-top-row">
-                    <div className="logo" onClick={() => handleAction({actionType: 'ROUTE', actionUrl: '/view/MAIN_PAGE'})}>
+                    <button
+                        type="button"
+                        className="mobile-brand-logo"
+                        onClick={() => handleAction({actionType: 'ROUTE', actionUrl: '/view/MAIN_PAGE'})}
+                        aria-label="KRIDE 홈으로 이동"
+                    >
                         KRIDE
+                    </button>
+                    <div className="mobile-header-rai">
+                        <Rai state="greeting" size={42} title="라이 캐릭터" />
                     </div>
                     <div className="auth-actions">
                         {isRealLoggedIn ? (

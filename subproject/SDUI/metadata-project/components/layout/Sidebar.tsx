@@ -8,7 +8,34 @@ import { useDeviceType } from "@/hooks/useDeviceType";
 import { flattenMetadata } from "../utils/metadataUtils";
 import { usePageHook } from "@/components/DynamicEngine/hook/usePageHook";
 
-export default function Sidebar() {
+interface SidebarProps {
+    collapsed: boolean;
+    onToggle: () => void;
+}
+
+function SidebarLogoToggle({ collapsed, onToggle }: SidebarProps) {
+    const label = collapsed ? '사이드바 열기' : '사이드바 닫기';
+
+    return (
+        <button
+            type="button"
+            className="sidebar-logo p-4 font-bold text-xl"
+            onClick={onToggle}
+            aria-expanded={!collapsed}
+            aria-controls="pc-sidebar-content"
+            aria-label={label}
+            title={label}
+        >
+            <span className="sidebar-logo-full" aria-hidden="true">KRIDE</span>
+            <span className="sidebar-logo-compact" aria-hidden="true">K</span>
+            <span className="sidebar-toggle-indicator" aria-hidden="true">
+                {collapsed ? '›' : '‹'}
+            </span>
+        </button>
+    );
+}
+
+export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     const { isMobile } = useDeviceType();
     const isPc = !isMobile;
     const pathname = usePathname();
@@ -19,28 +46,32 @@ export default function Sidebar() {
 
     const flatMeta = useMemo(() => flattenMetadata(metadata), [metadata]);
 
+    const isRealLoggedIn = Boolean(isLoggedIn);
+    const isAdmin = user?.role === 'ROLE_ADMIN';
+
     if (!isPc) return null;
-    if (metaLoading) return <aside className="pc-sidebar-loading w-64 h-screen bg-gray-50" />;
+    if (metaLoading) {
+        return (
+            <aside className={`pc-sidebar pc-sidebar-loading flex flex-col h-screen bg-gray-50${collapsed ? ' is-collapsed' : ''}${isAdmin ? ' is-admin' : ''}`}>
+                <SidebarLogoToggle collapsed={collapsed} onToggle={onToggle} />
+            </aside>
+        );
+    }
 
     const getVal = (obj: any, snake: string, camel: string) => obj?.[snake] || obj?.[camel] || "";
 
     // 조건 단순화: Context에서 제공하는 isLoggedIn 불리언 값만 신뢰하도록 수정
-    const isRealLoggedIn = Boolean(isLoggedIn);
-    const isAdmin = user?.role === 'ROLE_ADMIN';
-
     // 메타데이터 매핑 (디버깅을 위해 콘솔 대신 대체 UI 렌더링 활용)
     const logoutId = user?.socialType === 'K' ? 'header_kakao_logout' : 'header_general_logout';
     const logoutMeta = flatMeta.find(m => getVal(m, 'component_id', 'componentId') === logoutId);
     const loginBtnMeta = flatMeta.find(m => getVal(m, 'component_id', 'componentId') === 'header_login_btn');
 
     return (
-        <aside className={`pc-sidebar flex flex-col justify-between h-screen w-64 bg-white border-r${isAdmin ? ' is-admin' : ''}`}>
+        <aside className={`pc-sidebar flex flex-col justify-between h-screen bg-white border-r${collapsed ? ' is-collapsed' : ''}${isAdmin ? ' is-admin' : ''}`}>
             <div className="sidebar-top flex-1">
-                <div className="sidebar-logo p-4 font-bold text-xl cursor-pointer"
-                    onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/MAIN_PAGE' })}>
-                    KRIDE
-                </div>
+                <SidebarLogoToggle collapsed={collapsed} onToggle={onToggle} />
 
+                <div id="pc-sidebar-content" className="sidebar-content">
                 {isRealLoggedIn ? (
                     logoutMeta ? (
                         isAdmin ? (
@@ -116,6 +147,7 @@ export default function Sidebar() {
                         <div className="text-red-500 text-sm text-center">로그인 메타데이터 누락</div>
                     )
                 )}
+                </div>
 
             </div>
 
