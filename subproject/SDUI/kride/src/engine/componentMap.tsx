@@ -1,22 +1,9 @@
 import type React from "react";
 
 // Level 1 — SDUI 기본 Atom
-const GroupComponent: React.FC<any> = ({ children }) =>
-  children as React.ReactElement;
-
-const TextField: React.FC<any> = ({ meta, data }) => {
-  const text =
-    typeof data === "string"
-      ? data
-      : data?.[meta?.componentId || meta?.component_id] ??
-        meta?.labelText ??
-        meta?.label_text ??
-        "";
-  return (
-    <span className={`text-field ${meta?.cssClass || ""}`}>{text}</span>
-  ) as React.ReactElement;
-};
-
+// GROUP/TEXT는 core의 createBaseComponentMap(webPrimitives)가 제공하므로
+// 여기서 재정의하지 않는다(중복 제거). BUTTON은 DOM id 속성 유지를 위해
+// 웹 전용 override로 남긴다 — core base BUTTON은 id를 렌더링하지 않음.
 const ButtonField: React.FC<any> = ({ id, meta, onAction }) => {
   const label = meta?.labelText || meta?.label_text || "";
   const cssClass = meta?.cssClass || meta?.css_class || "";
@@ -53,8 +40,7 @@ import MapView from "@/components/kride/MapView";
 import ItineraryPanel from "@/components/kride/ItineraryPanel";
 
 export const componentMap: Record<string, React.FC<any>> = {
-  GROUP: GroupComponent,
-  TEXT: TextField,
+  // GROUP/TEXT는 core base leaf가 병합 제공. 웹 전용 leaf만 여기서 override/추가.
   BUTTON: ButtonField,
   CARD_IMAGE: CardImage,
   CARD_LABEL: CardLabel,
