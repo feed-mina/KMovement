@@ -158,11 +158,34 @@ services:
       - TORCHSERVE_URL=http://torchserve:8085
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - CELERY_MEDIA_TEMP_DIR=/tmp/kride-celery
+      - CELERY_TEMP_TTL_HOURS=${CELERY_TEMP_TTL_HOURS:-6}
       - CLOUDINARY_URL=${CLOUDINARY_URL:-}
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:-}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-}
       - KRIDE_RESULT_URL_REQUIRED=${KRIDE_RESULT_URL_REQUIRED:-true}
+    volumes:
+      - celery_media_temp:/tmp/kride-celery
+      - tora_ffmpeg_temp:/app/.tmp-tora-ffmpeg
+      - tora_meta_temp:/app/.tmp-tora-meta
+    restart: unless-stopped
+
+  # ── Celery Beat (단일 스케줄러) ────────────────────────────────────────
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: kride_celery_beat
+    command: celery -A src.api.celery_app beat -l info --schedule=/tmp/celerybeat/celerybeat-schedule
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    volumes:
+      - celery_beat_data:/tmp/celerybeat
     restart: unless-stopped
 
   # ── Flower (Celery 모니터링 대시보드) ───────────────────────────────────
@@ -185,3 +208,7 @@ services:
 volumes:
   redis_data:
   hf_cache:
+  celery_media_temp:
+  celery_beat_data:
+  tora_ffmpeg_temp:
+  tora_meta_temp:

@@ -9,7 +9,12 @@ Phase 3: 미디어 파이프라인 (gTTS/GPT-SoVITS, CogVideoX)
 """
 from __future__ import annotations
 
+import logging
 import os
+from pathlib import Path
+import shutil
+import tempfile
+import time
 import traceback
 
 import httpx
@@ -17,6 +22,70 @@ import httpx
 from src.api.celery_app import celery
 
 TORCHSERVE_URL = os.environ.get("TORCHSERVE_URL", "http://localhost:8085")
+logger = logging.getLogger("kride.celery")
+
+
+def _media_temp_root(*, create: bool = False) -> Path:
+    configured = os.environ.get("CELERY_MEDIA_TEMP_DIR", "").strip()
+    root = Path(configured) if configured else Path(tempfile.gettempdir())
+    if create:
+        root.mkdir(parents=True, exist_ok=True)
+    return root
+
+
+def _remove_temp_path(path: Path) -> None:
+    if path.is_symlink() or path.is_file():
+        path.unlink(missing_ok=True)
+    else:
+        shutil.rmtree(path)
+
+
+def cleanup_stale_temp_paths(
+    *,
+    max_age_seconds: float,
+    temp_roots: list[Path] | None = None,
+    repository_root: Path | None = None,
+    now: float | None = None,
+) -> dict:
+    """TTL이 지난 Celery 작업 폴더와 Tora 임시 산출물을 안전하게 제거한다."""
+    cutoff = (time.time() if now is None else now) - max_age_seconds
+    roots = temp_roots or [_media_temp_root(), Path(tempfile.gettempdir())]
+    repository_root = repository_root or Path(
+        os.environ.get("KRIDE_REPOSITORY_ROOT", "").strip() or Path(__file__).resolve().parents[2]
+    )
+
+    candidates: set[Path] = set()
+    for root in roots:
+        if not root.exists():
+            continue
+        for pattern in ("celery_tts_*", "celery_video_*"):
+            candidates.update(root.glob(pattern))
+
+    for scratch_name in (".tmp-tora-ffmpeg", ".tmp-tora-meta"):
+        scratch_root = repository_root / scratch_name
+        if scratch_root.is_dir():
+            candidates.update(scratch_root.iterdir())
+
+    removed: list[str] = []
+    errors: list[dict[str, str]] = []
+    for candidate in sorted(candidates, key=lambda path: str(path)):
+        try:
+            if candidate.stat(follow_symlinks=False).st_mtime > cutoff:
+                continue
+            _remove_temp_path(candidate)
+            removed.append(str(candidate))
+        except FileNotFoundError:
+            continue
+        except Exception as exc:
+            errors.append({"path": str(candidate), "error": str(exc)[:500]})
+
+    return {
+        "removed_count": len(removed),
+        "removed": removed,
+        "error_count": len(errors),
+        "errors": errors,
+        "max_age_seconds": max_age_seconds,
+    }
 
 
 # ── Phase 2: ML 태스크 (TorchServe 경유) ─────────────────────────────────────
@@ -91,13 +160,11 @@ def task_generate_tts(self, text: str, voice_id: str = "default", lang: str = "k
 
     진행 상태: STARTED → TTS_RUNNING → UPLOADING → SUCCESS
     """
-    from pathlib import Path
-    import tempfile
-
     self.update_state(state="TTS_RUNNING", meta={"step": "tts", "progress": 20})
+    work_dir: Path | None = None
 
     try:
-        work_dir = Path(tempfile.mkdtemp(prefix="celery_tts_"))
+        work_dir = Path(tempfile.mkdtemp(prefix="celery_tts_", dir=_media_temp_root(create=True)))
 
         # gTTS 생성
         from deploy.media_motion.tts import synthesize_gtts
@@ -133,6 +200,9 @@ def task_generate_tts(self, text: str, voice_id: str = "default", lang: str = "k
     except Exception as exc:
         traceback.print_exc()
         raise self.retry(exc=exc)
+    finally:
+        if work_dir is not None:
+            shutil.rmtree(work_dir, ignore_errors=True)
 
 
 @celery.task(bind=True, max_retries=1, default_retry_delay=30, time_limit=1800)
@@ -153,10 +223,7 @@ def task_generate_video(
 
     지원 route: cogvideox_real, 3d_photo_light, 3d_photo_inpainting_real
     """
-    from pathlib import Path
-    import tempfile
-
-    work_dir = Path(tempfile.mkdtemp(prefix="celery_video_"))
+    work_dir = Path(tempfile.mkdtemp(prefix="celery_video_", dir=_media_temp_root(create=True)))
 
     try:
         # 1. 이미지 다운로드
@@ -230,3 +297,23 @@ def task_generate_video(
     except Exception as exc:
         traceback.print_exc()
         raise self.retry(exc=exc)
+    finally:
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+
+@celery.task
+def task_cleanup_temp(max_age_hours: float | None = None) -> dict:
+    """Celery Beat가 호출하는 고아 미디어 임시 파일 정리 태스크."""
+    if max_age_hours is None:
+        try:
+            max_age_hours = float(os.environ.get("CELERY_TEMP_TTL_HOURS", "6"))
+        except (TypeError, ValueError):
+            max_age_hours = 6.0
+    max_age_hours = max(float(max_age_hours), 0.01)
+
+    result = cleanup_stale_temp_paths(max_age_seconds=max_age_hours * 3600)
+    if result["error_count"]:
+        logger.warning("Celery temp cleanup completed with errors: %s", result)
+    else:
+        logger.info("Celery temp cleanup removed %s paths", result["removed_count"])
+    return result

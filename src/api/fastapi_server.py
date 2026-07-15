@@ -20,6 +20,7 @@ K-Ride FastAPI 백엔드 서버
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import math
 import os
@@ -30,7 +31,7 @@ import httpx
 
 import networkx as nx
 import pandas as pd
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -1870,6 +1871,7 @@ def _celery_submit_response(result) -> JSONResponse:
         "task_id": result.id,
         "status": "QUEUED",
         "status_url": f"/jobs/celery/{result.id}",
+        "stream_url": f"/jobs/celery/{result.id}/stream",
     })
 
 
@@ -1928,26 +1930,8 @@ def celery_event(
     return _submit_celery_task(task_classify_event, request.text)
 
 
-@app.get("/jobs/celery/{task_id}")
-def celery_status(
-    task_id: str,
-    _: None = Depends(_require_internal_api_key),
-):
-    """Celery 작업 상태 조회
-
-    상태 매핑:
-      PENDING  → 큐 대기 중 (또는 존재하지 않는 task_id)
-      STARTED  → 실행 중
-      RETRY    → 재시도 대기
-      SUCCESS  → 완료
-      FAILURE  → 실패
-      (custom) → task 내부 update_state로 설정한 진행 상태
-    """
-    from celery.result import AsyncResult
-    from src.api.celery_app import celery as celery_app
-
-    result = AsyncResult(task_id, app=celery_app)
-
+def _celery_status_payload(task_id: str, result) -> dict:
+    """AsyncResult를 polling/SSE가 공유하는 공개 응답으로 변환한다."""
     celery_status_value = result.status
     public_status = {
         "PENDING": "QUEUED",
@@ -1964,10 +1948,124 @@ def celery_status(
 
     if celery_status_value == "SUCCESS":
         response["result"] = jsonable_encoder(result.result)
+        response["meta"] = {"step": "complete", "progress": 100}
     elif celery_status_value == "FAILURE":
         response["error"] = str(result.result)[:2000] if result.result else "Unknown error"
-    elif result.info and isinstance(result.info, dict):
-        # custom update_state meta (진행률 등)
-        response["meta"] = jsonable_encoder(result.info)
+    elif celery_status_value == "REVOKED":
+        response["error"] = "Task was revoked."
+    else:
+        info = result.info
+        if isinstance(info, dict):
+            # custom update_state meta (진행률 등)
+            response["meta"] = jsonable_encoder(info)
 
+    return response
+
+
+def _positive_float_env(name: str, default: float, minimum: float) -> float:
+    try:
+        value = float(os.environ.get(name, str(default)))
+    except (TypeError, ValueError):
+        value = default
+    return max(value, minimum)
+
+
+CELERY_SSE_POLL_INTERVAL_SECONDS = _positive_float_env(
+    "CELERY_SSE_POLL_INTERVAL_SECONDS", 1.0, 0.1,
+)
+CELERY_SSE_HEARTBEAT_SECONDS = _positive_float_env(
+    "CELERY_SSE_HEARTBEAT_SECONDS", 15.0, 1.0,
+)
+CELERY_SSE_MAX_DURATION_SECONDS = _positive_float_env(
+    "CELERY_SSE_MAX_DURATION_SECONDS", 2100.0, 60.0,
+)
+_CELERY_TERMINAL_STATES = {"SUCCESS", "FAILURE", "REVOKED"}
+
+
+@app.get("/jobs/celery/{task_id}")
+def celery_status(
+    task_id: str,
+    _: None = Depends(_require_internal_api_key),
+):
+    """Celery 작업 상태를 단발 조회한다(SSE 미지원 환경의 폴백)."""
+    from celery.result import AsyncResult
+    from src.api.celery_app import celery as celery_app
+
+    result = AsyncResult(task_id, app=celery_app)
+    response = _celery_status_payload(task_id, result)
     return JSONResponse(content=response)
+
+
+@app.get("/jobs/celery/{task_id}/stream")
+async def celery_status_stream(
+    task_id: str,
+    request: Request,
+    _: None = Depends(_require_internal_api_key),
+):
+    """Celery 상태가 바뀔 때만 push하고 완료 후 종료하는 SSE 스트림."""
+    from celery.result import AsyncResult
+    from src.api.celery_app import celery as celery_app
+
+    async def _events():
+        result = AsyncResult(task_id, app=celery_app)
+        loop = asyncio.get_running_loop()
+        started_at = loop.time()
+        last_emit_at = started_at
+        last_payload_fingerprint = ""
+
+        while True:
+            if await request.is_disconnected():
+                return
+
+            try:
+                # Celery Redis backend is synchronous; keep its I/O off the ASGI event loop.
+                payload = await asyncio.to_thread(_celery_status_payload, task_id, result)
+            except Exception as exc:
+                logger.warning("Celery SSE backend read failed for %s: %s", task_id, exc)
+                error_payload = {
+                    "ok": False,
+                    "task_id": task_id,
+                    "status": "STREAM_ERROR",
+                    "error": str(exc)[:2000],
+                }
+                yield f"data: {json.dumps(error_payload, ensure_ascii=False)}\n\n"
+                yield "data: [DONE]\n\n"
+                return
+
+            fingerprint = json.dumps(payload, ensure_ascii=False, sort_keys=True)
+            now = loop.time()
+            if fingerprint != last_payload_fingerprint:
+                yield f"data: {fingerprint}\n\n"
+                last_payload_fingerprint = fingerprint
+                last_emit_at = now
+            elif now - last_emit_at >= CELERY_SSE_HEARTBEAT_SECONDS:
+                yield ": heartbeat\n\n"
+                last_emit_at = now
+
+            if payload["celery_status"] in _CELERY_TERMINAL_STATES:
+                yield "data: [DONE]\n\n"
+                return
+
+            if now - started_at >= CELERY_SSE_MAX_DURATION_SECONDS:
+                timeout_payload = {
+                    "ok": False,
+                    "task_id": task_id,
+                    "status": "STREAM_TIMEOUT",
+                    "celery_status": payload["celery_status"],
+                    "error": "SSE connection timed out; continue with the status endpoint.",
+                }
+                yield f"data: {json.dumps(timeout_payload, ensure_ascii=False)}\n\n"
+                yield "data: [DONE]\n\n"
+                return
+
+            await asyncio.sleep(CELERY_SSE_POLL_INTERVAL_SECONDS)
+
+    return StreamingResponse(
+        _events(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
