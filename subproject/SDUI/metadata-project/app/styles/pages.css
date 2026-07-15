@@ -52,21 +52,56 @@
 }
 
 .header-top-row {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
-    height: 44px;
+    gap: 12px;
+    min-height: 52px;
+    padding: 0;
     /* 모바일 표준 헤더 높이 */
 }
 
-.logo {
+.mobile-brand-logo {
+    justify-self: start;
+    border: 0;
+    background: transparent;
+    padding: 8px 4px;
     font-size: 1.125rem;
     font-weight: 800;
+    font-family: inherit;
     color: var(--kride-primary, #E50914);
     /* 포인트 컬러 (브랜드) */
     letter-spacing: -0.5px;
     cursor: pointer;
     white-space: nowrap; /* 로고 줄바꿈 방지 */
+}
+
+.mobile-brand-logo:focus-visible,
+.mobile-auth-btn:focus-visible {
+    outline: 2px solid var(--kride-primary, #E50914);
+    outline-offset: 2px;
+}
+
+.mobile-header-rai {
+    justify-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+}
+
+.mobile-header-rai svg {
+    display: block;
+    width: 42px;
+    height: 42px;
+}
+
+.mobile-header .auth-actions {
+    justify-self: end;
+    justify-content: flex-end;
+    width: auto;
+    min-width: 0;
 }
 
 /* 로그인/로그아웃 버튼 공통 */
@@ -77,6 +112,7 @@
     font-weight: 600;
     white-space: nowrap;
     transition: all 0.2s;
+    max-width: 100%;
 }
 
 .mobile-auth-btn.login {
@@ -89,6 +125,32 @@
     background-color: #fff1f0;
     color: #ff4d4f;
     border: 1px solid #ffa39e;
+}
+
+@media (max-width: 359px) {
+    .mobile-header {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .header-top-row {
+        gap: 6px;
+    }
+
+    .mobile-brand-logo {
+        font-size: 1rem;
+    }
+
+    .mobile-header-rai,
+    .mobile-header-rai svg {
+        width: 36px;
+        height: 36px;
+    }
+
+    .mobile-auth-btn {
+        padding: 4px 8px;
+        font-size: 0.6875rem;
+    }
 }
 
 /* Keep the full mobile header while making its auth row compact. */
