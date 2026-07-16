@@ -2,13 +2,23 @@ package com.domain.demo_backend.domain.celery.service;
 
 import com.domain.demo_backend.domain.celery.domain.CeleryJob;
 import com.domain.demo_backend.domain.celery.domain.CeleryJobRepository;
+import com.domain.demo_backend.domain.user.domain.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,23 +28,31 @@ import java.util.Set;
 public class CeleryJobService {
 
     private static final Set<String> ALLOWED_TASK_TYPES = Set.of(
-            "embed", "rerank", "weather", "event"
+            "embed", "rerank", "weather", "event", "tts", "video"
     );
-    private static final List<String> ACTIVE_STATUSES = List.of("QUEUED", "PENDING", "STARTED", "RETRY");
-    private static final Set<String> TERMINAL_STATUSES = Set.of("SUCCESS", "FAILURE");
+    private static final Set<String> MEDIA_TASK_TYPES = Set.of("tts", "video");
+    private static final Set<String> TERMINAL_STATUSES = Set.of("SUCCESS", "FAILURE", "REVOKED");
+    private static final int MAX_ACTIVE_MEDIA_JOBS_PER_USER = 2;
+    private static final int MAX_DAILY_MEDIA_JOBS_PER_USER = 10;
+    private static final Duration GATEWAY_TIMEOUT = Duration.ofSeconds(10);
 
     private final CeleryJobRepository celeryJobRepository;
+    private final UserRepository userRepository;
     private final WebClient gatewayClient;
+    private final String internalApiKey;
 
     public CeleryJobService(
             CeleryJobRepository celeryJobRepository,
+            UserRepository userRepository,
             @Value("${kride.fastapi.url:http://localhost:8000}") String fastApiUrl,
-            @Value("${fastapi.internal-api-key:sdui-internal-dev-key}") String internalApiKey
+            @Value("${fastapi.internal-api-key:}") String internalApiKey
     ) {
         this.celeryJobRepository = celeryJobRepository;
+        this.userRepository = userRepository;
+        this.internalApiKey = internalApiKey == null ? "" : internalApiKey.strip();
         WebClient.Builder builder = WebClient.builder().baseUrl(fastApiUrl);
-        if (internalApiKey != null && !internalApiKey.isBlank()) {
-            builder.defaultHeader("X-Internal-Api-Key", internalApiKey);
+        if (!this.internalApiKey.isBlank()) {
+            builder.defaultHeader("X-Internal-Api-Key", this.internalApiKey);
         }
         this.gatewayClient = builder.build();
     }
@@ -45,13 +63,15 @@ public class CeleryJobService {
             throw new IllegalArgumentException("지원하지 않는 작업 유형: " + taskType);
         }
 
+        enforceMediaSubmissionLimit(taskType, requestedBy);
+
         try {
             Map<String, Object> response = gatewayClient.post()
                     .uri("/jobs/celery/{taskType}", taskType)
                     .bodyValue(payload)
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                    .block();
+                    .block(GATEWAY_TIMEOUT);
 
             String taskId = response != null ? text(response.get("task_id")) : null;
             if (taskId == null) {
@@ -79,9 +99,10 @@ public class CeleryJobService {
         try {
             Map<String, Object> statusResponse = gatewayClient.get()
                     .uri("/jobs/celery/{taskId}", job.getCeleryTaskId())
+                    .header("X-Celery-Job-Token", celeryJobToken(job.getCeleryTaskId()))
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                    .block();
+                    .block(GATEWAY_TIMEOUT);
 
             applyCeleryStatus(job, statusResponse);
         } catch (Exception e) {
@@ -97,8 +118,20 @@ public class CeleryJobService {
                 .orElseThrow(() -> new IllegalArgumentException("작업을 찾을 수 없습니다."));
     }
 
+    @Transactional(readOnly = true)
+    public CeleryJob getOwnedJobStatus(String celeryTaskId, Long requestedBy) {
+        if (requestedBy == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required.");
+        }
+        return celeryJobRepository.findByCeleryTaskIdAndRequestedBy(celeryTaskId, requestedBy)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Celery job was not found."
+                ));
+    }
+
     public List<CeleryJob> getActiveJobs() {
-        return celeryJobRepository.findByStatusInAndNotifSentFalse(ACTIVE_STATUSES);
+        return celeryJobRepository.findByStatusNotInAndNotifSentFalse(TERMINAL_STATUSES);
     }
 
     private void applyCeleryStatus(CeleryJob job, Map<String, Object> statusResponse) {
@@ -145,6 +178,58 @@ public class CeleryJobService {
                 .requestedBy(requestedBy)
                 .errorMessage(errorMessage)
                 .build());
+    }
+
+    private void enforceMediaSubmissionLimit(String taskType, Long requestedBy) {
+        if (!MEDIA_TASK_TYPES.contains(taskType)) {
+            return;
+        }
+        if (requestedBy == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required.");
+        }
+
+        userRepository.findByUserSqnoForCeleryLimit(requestedBy)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Authenticated user was not found."
+                ));
+
+        long activeJobs = celeryJobRepository.countByRequestedByAndTaskTypeInAndStatusNotIn(
+                requestedBy,
+                MEDIA_TASK_TYPES,
+                TERMINAL_STATUSES
+        );
+        if (activeJobs >= MAX_ACTIVE_MEDIA_JOBS_PER_USER) {
+            throw new ResponseStatusException(
+                    HttpStatus.TOO_MANY_REQUESTS,
+                    "At most 2 media jobs may be active at the same time."
+            );
+        }
+
+        long dailyJobs = celeryJobRepository.countByRequestedByAndTaskTypeInAndCreatedAtGreaterThanEqual(
+                requestedBy,
+                MEDIA_TASK_TYPES,
+                LocalDate.now().atStartOfDay()
+        );
+        if (dailyJobs >= MAX_DAILY_MEDIA_JOBS_PER_USER) {
+            throw new ResponseStatusException(
+                    HttpStatus.TOO_MANY_REQUESTS,
+                    "The daily media job limit of 10 has been reached."
+            );
+        }
+    }
+
+    private String celeryJobToken(String taskId) {
+        if (internalApiKey.isBlank()) {
+            throw new IllegalStateException("fastapi.internal-api-key is not configured");
+        }
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(internalApiKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            return HexFormat.of().formatHex(mac.doFinal(taskId.getBytes(StandardCharsets.UTF_8)));
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Unable to sign Celery job token", e);
+        }
     }
 
     private String text(Object value) {

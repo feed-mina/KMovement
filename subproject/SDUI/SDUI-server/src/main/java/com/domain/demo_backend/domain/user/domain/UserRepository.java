@@ -28,6 +28,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.userSqno = :userSqno")
     Optional<User> findByUserSqnoForAnimationLimit(@Param("userSqno") Long userSqno);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.userSqno = :userSqno")
+    Optional<User> findByUserSqnoForCeleryLimit(@Param("userSqno") Long userSqno);
+
     // 2026.01.11 update 관련ㄹ 메서드들은 더티 체킹을 사용한다.
     // 2026.01.11 insert 대신 기본 제공되는 save()를 사용하면 된다.
 

@@ -15,24 +15,41 @@ from __future__ import annotations
 
 import base64
 import os
-import re
 import tempfile
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote, urlparse
 
 
 def _parse_cloudinary_url() -> None:
-    """Parse CLOUDINARY_URL and set individual env vars if not already set."""
-    url = os.environ.get("CLOUDINARY_URL", "")
+    """Fill missing Cloudinary credentials from ``CLOUDINARY_URL``.
+
+    Docker commonly injects optional individual variables as empty strings.  An
+    empty value is not a configured credential, so it must not block the
+    preferred URL form from supplying that credential.
+    """
+    url = os.environ.get("CLOUDINARY_URL", "").strip()
     if not url:
         return
-    # Format: cloudinary://API_KEY:API_SECRET@CLOUD_NAME
-    m = re.match(r"cloudinary://([^:]+):([^@]+)@(.+)", url)
-    if not m:
+
+    try:
+        parsed = urlparse(url)
+        username = parsed.username
+        password = parsed.password
+        hostname = parsed.hostname
+    except ValueError:
         return
-    os.environ.setdefault("CLOUDINARY_API_KEY", m.group(1))
-    os.environ.setdefault("CLOUDINARY_API_SECRET", m.group(2))
-    os.environ.setdefault("CLOUDINARY_CLOUD_NAME", m.group(3))
+    if parsed.scheme != "cloudinary" or not username or password is None or not hostname:
+        return
+
+    parsed_credentials = {
+        "CLOUDINARY_API_KEY": unquote(username),
+        "CLOUDINARY_API_SECRET": unquote(password),
+        "CLOUDINARY_CLOUD_NAME": hostname,
+    }
+    for name, value in parsed_credentials.items():
+        if not os.environ.get(name):
+            os.environ[name] = value
 
 
 _parse_cloudinary_url()
@@ -87,9 +104,17 @@ def upload_to_cloudinary(
 
         result = cloudinary.uploader.upload(str(file_path), **upload_kwargs)
 
+        uploaded_url = str(result.get("secure_url") or result.get("url") or "").strip()
+        if not uploaded_url:
+            return {
+                "ok": False,
+                "error": "Cloudinary upload returned no public URL",
+                "source": "none",
+            }
+
         return {
             "ok": True,
-            "url": result.get("secure_url", result.get("url", "")),
+            "url": uploaded_url,
             "public_id": result.get("public_id", ""),
             "format": result.get("format", ""),
             "size_bytes": result.get("bytes", 0),

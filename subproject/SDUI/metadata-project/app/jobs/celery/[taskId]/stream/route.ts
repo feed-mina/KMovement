@@ -1,5 +1,11 @@
 import { NextRequest } from 'next/server';
 
+import {
+  acquireCeleryStream,
+  prepareCeleryProxyRequest,
+  releaseAwareStream,
+} from '../../_proxySecurity';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -7,35 +13,46 @@ interface RouteContext {
   params: Promise<{ taskId: string }>;
 }
 
-function proxyConfig() {
-  const fastApiUrl = process.env.FASTAPI_URL ?? process.env.KRIDE_FASTAPI_URL;
-  const internalApiKey = process.env.FASTAPI_INTERNAL_API_KEY;
-  return { fastApiUrl: fastApiUrl?.replace(/\/$/, ''), internalApiKey };
-}
-
 export async function GET(request: NextRequest, context: RouteContext) {
-  const { fastApiUrl, internalApiKey } = proxyConfig();
-  if (!fastApiUrl || !internalApiKey) {
-    return new Response(JSON.stringify({ error: 'Celery proxy is not configured.' }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+  const { taskId } = await context.params;
+  const prepared = await prepareCeleryProxyRequest(request, taskId, 'stream');
+  if (prepared instanceof Response) return prepared;
+
+  const streamSlot = acquireCeleryStream(prepared.principal);
+  if (streamSlot instanceof Response) return streamSlot;
+  const releaseStream = () => {
+    request.signal.removeEventListener('abort', releaseStream);
+    streamSlot();
+  };
+  request.signal.addEventListener('abort', releaseStream, { once: true });
+
+  let upstream: Response;
+  try {
+    upstream = await fetch(
+      `${prepared.fastApiUrl}/jobs/celery/${encodeURIComponent(prepared.taskId)}/stream`,
+      {
+        headers: {
+          Accept: 'text/event-stream',
+          'X-Celery-Job-Token': prepared.jobToken,
+          'X-Internal-Api-Key': prepared.internalApiKey,
+        },
+        cache: 'no-store',
+        signal: request.signal,
+      },
+    );
+  } catch {
+    releaseStream();
+    return new Response(JSON.stringify({ error: 'Celery SSE upstream is unavailable.' }), {
+      status: 502,
+      headers: {
+        'Cache-Control': 'no-store',
+        'Content-Type': 'application/json; charset=utf-8',
+      },
     });
   }
 
-  const { taskId } = await context.params;
-  const upstream = await fetch(
-    `${fastApiUrl}/jobs/celery/${encodeURIComponent(taskId)}/stream`,
-    {
-      headers: {
-        Accept: 'text/event-stream',
-        'X-Internal-Api-Key': internalApiKey,
-      },
-      cache: 'no-store',
-      signal: request.signal,
-    },
-  );
-
   if (!upstream.body) {
+    releaseStream();
     return new Response(
       JSON.stringify({ error: 'Celery SSE upstream returned an empty response.' }),
       {
@@ -45,7 +62,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     );
   }
 
-  return new Response(upstream.body, {
+  return new Response(releaseAwareStream(upstream.body, releaseStream), {
     status: upstream.status,
     headers: {
       'Content-Type': upstream.headers.get('Content-Type') ?? 'text/event-stream; charset=utf-8',

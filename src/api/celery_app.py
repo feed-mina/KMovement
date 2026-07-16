@@ -38,7 +38,7 @@ celery.conf.update(
         "src.api.tasks.task_classify_event":  {"queue": "ml"},
         "src.api.tasks.task_generate_tts":    {"queue": "media"},
         "src.api.tasks.task_generate_video":  {"queue": "media"},
-        "src.api.tasks.task_cleanup_temp":    {"queue": "media"},
+        "src.api.tasks.task_cleanup_temp":    {"queue": "maintenance"},
     },
     beat_schedule={
         "cleanup-orphaned-media-temp-hourly": {

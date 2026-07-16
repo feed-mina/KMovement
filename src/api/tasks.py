@@ -180,22 +180,24 @@ def task_generate_tts(self, text: str, voice_id: str = "default", lang: str = "k
             resource_type="auto",
         )
 
-        if upload_result["ok"]:
+        public_url = str(upload_result.get("url") or "").strip()
+        if upload_result.get("ok") and public_url:
             return {
                 "status": "success",
-                "url": upload_result["url"],
-                "source": upload_result["source"],
+                "url": public_url,
+                "source": upload_result.get("source", "cloudinary"),
                 "text_length": len(text),
             }
         else:
+            upload_error = upload_result.get("error") or "TTS upload returned no public URL"
             if os.environ.get("KRIDE_RESULT_URL_REQUIRED", "false").lower() in {"1", "true", "yes", "on"}:
-                raise RuntimeError(upload_result.get("error", "TTS upload failed"))
+                raise RuntimeError(upload_error)
             return {
                 "status": "success",
-                "url": str(wav_path),
-                "source": "local",
+                "url": "",
+                "source": "unavailable",
                 "text_length": len(text),
-                "upload_error": upload_result.get("error", ""),
+                "upload_error": upload_error,
             }
     except Exception as exc:
         traceback.print_exc()
@@ -273,22 +275,22 @@ def task_generate_video(
         from deploy.media_motion.result_delivery import finalize_result
         final = finalize_result(result.to_dict())
 
-        result_url = ""
-        uploads = final.get("uploads", [])
-        for u in uploads:
-            if u.get("kind") == "final_video" and u.get("ok"):
-                result_url = u["url"]
-                break
-        if not result_url:
-            # 로컬 경로 fallback
-            for art in result.artifacts:
-                if art.kind == "final_video" and art.path and Path(art.path).exists():
-                    result_url = str(art.path)
-                    break
+        final_status = str(final.get("status") or result.status)
+        final_error = str(final.get("error") or final.get("result_delivery_error") or "")
+        result_url = str(final.get("result_url") or "").strip()
+        result_url_required = os.environ.get("KRIDE_RESULT_URL_REQUIRED", "false").lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
+
+        if final_status.lower() == "failed" or (result_url_required and not result_url):
+            raise RuntimeError(final_error or "Video result delivery did not produce a public URL")
 
         return {
-            "status": result.status,
-            "route": result.route,
+            "status": final_status,
+            "route": str(final.get("route") or result.route),
             "result_url": result_url,
             "actual_model_executed": result.metadata.get("actual_model_executed", False),
             "case_id": case_id,

@@ -20,13 +20,15 @@ K-Ride FastAPI 백엔드 서버
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import math
 import os
 import pickle
 import hmac
-from typing import Optional
+import re
+from typing import Literal, Optional
 import httpx
 
 import networkx as nx
@@ -1665,7 +1667,6 @@ RUNPOD_MEDIA_ENDPOINT_ID = os.environ.get("RUNPOD_MEDIA_ENDPOINT_ID", "") or RUN
 RUNPOD_TORA_ENDPOINT_ID = os.environ.get("RUNPOD_TORA_ENDPOINT_ID", "") or RUNPOD_ENDPOINT_ID
 FASTAPI_INTERNAL_API_KEY = (
     os.environ.get("FASTAPI_INTERNAL_API_KEY", "").strip()
-    or "sdui-internal-dev-key"
 )
 
 # Tora 전용 라우트 목록 — 이 라우트는 B타입 엔드포인트로 전송
@@ -1690,7 +1691,10 @@ def _configured_runpod_endpoint_ids() -> list[str]:
 def _require_internal_api_key(
     x_internal_api_key: str = Header(default="", alias="X-Internal-Api-Key"),
 ) -> None:
-    if not hmac.compare_digest(x_internal_api_key, FASTAPI_INTERNAL_API_KEY):
+    if not FASTAPI_INTERNAL_API_KEY or not hmac.compare_digest(
+        x_internal_api_key,
+        FASTAPI_INTERNAL_API_KEY,
+    ):
         raise HTTPException(status_code=401, detail="Invalid internal API key.")
 
 
@@ -1865,6 +1869,75 @@ class CeleryEventRequest(BaseModel):
     text: str = Field(..., min_length=1)
 
 
+class CeleryTtsRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=5000)
+    voice_id: str = Field(default="default", min_length=1, max_length=64)
+    lang: str = Field(default="ko", min_length=2, max_length=16)
+
+
+class CeleryVideoRequest(BaseModel):
+    image_url: str = Field(..., min_length=8, max_length=2048, pattern=r"^https://")
+    route: Literal[
+        "cogvideox_real",
+        "3d_photo_inpainting_real",
+        "3d_photo_light",
+    ] = "cogvideox_real"
+    tts_text: str = Field(default="", max_length=5000)
+    case_id: str = Field(
+        default="celery_video",
+        min_length=1,
+        max_length=100,
+        pattern=r"^[A-Za-z0-9_-]+$",
+    )
+    bgm_key: str = Field(default="bright_travel", min_length=1, max_length=100)
+    motion: str = Field(default="slow_zoom_in", min_length=1, max_length=100)
+    prompt: str = Field(default="", max_length=4000)
+    allow_fallback: bool = True
+
+
+class CeleryCleanupRequest(BaseModel):
+    max_age_hours: float = Field(default=6.0, ge=0.01, le=720.0)
+
+
+_CELERY_TASK_ID_PATTERN = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
+_CELERY_ML_TASKS_ENABLED_VALUES = {"1", "true", "yes", "on"}
+
+
+def _celery_job_token(task_id: str) -> str:
+    if not FASTAPI_INTERNAL_API_KEY:
+        raise RuntimeError("FASTAPI_INTERNAL_API_KEY is not configured.")
+    return hmac.new(
+        FASTAPI_INTERNAL_API_KEY.encode("utf-8"),
+        task_id.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def _require_celery_job_token(
+    task_id: str,
+    x_celery_job_token: str = Header(default="", alias="X-Celery-Job-Token"),
+) -> None:
+    if not _CELERY_TASK_ID_PATTERN.fullmatch(task_id):
+        raise HTTPException(status_code=400, detail="Invalid Celery task ID.")
+    if not FASTAPI_INTERNAL_API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid Celery job token.")
+    expected = _celery_job_token(task_id)
+    if not hmac.compare_digest(x_celery_job_token, expected):
+        raise HTTPException(status_code=401, detail="Invalid Celery job token.")
+
+
+def _require_ml_tasks_enabled() -> None:
+    enabled = os.environ.get("CELERY_ML_TASKS_ENABLED", "").strip().lower()
+    if enabled not in _CELERY_ML_TASKS_ENABLED_VALUES:
+        raise HTTPException(
+            status_code=503,
+            detail="Celery ML tasks are disabled because no ML worker is configured.",
+        )
+
+
 def _celery_submit_response(result) -> JSONResponse:
     return JSONResponse(content={
         "ok": True,
@@ -1894,6 +1967,7 @@ def _submit_celery_task(task, *args) -> JSONResponse:
 def celery_embed(
     request: CeleryEmbedRequest,
     _: None = Depends(_require_internal_api_key),
+    _ml_enabled: None = Depends(_require_ml_tasks_enabled),
 ):
     """배치 임베딩 작업을 Celery 큐에 제출"""
     from src.api.tasks import task_embed_texts
@@ -1904,6 +1978,7 @@ def celery_embed(
 def celery_rerank(
     request: CeleryRerankRequest,
     _: None = Depends(_require_internal_api_key),
+    _ml_enabled: None = Depends(_require_ml_tasks_enabled),
 ):
     """리랭킹 작업을 Celery 큐에 제출"""
     from src.api.tasks import task_rerank
@@ -1914,6 +1989,7 @@ def celery_rerank(
 def celery_weather(
     request: CeleryWeatherRequest,
     _: None = Depends(_require_internal_api_key),
+    _ml_enabled: None = Depends(_require_ml_tasks_enabled),
 ):
     """날씨 예측 작업을 Celery 큐에 제출"""
     from src.api.tasks import task_predict_weather
@@ -1924,10 +2000,59 @@ def celery_weather(
 def celery_event(
     request: CeleryEventRequest,
     _: None = Depends(_require_internal_api_key),
+    _ml_enabled: None = Depends(_require_ml_tasks_enabled),
 ):
     """이벤트 분류 작업을 Celery 큐에 제출"""
     from src.api.tasks import task_classify_event
     return _submit_celery_task(task_classify_event, request.text)
+
+
+@app.post("/jobs/celery/tts")
+def celery_tts(
+    request: CeleryTtsRequest,
+    _: None = Depends(_require_internal_api_key),
+):
+    """Submit a validated text-to-speech job to the media queue."""
+    from src.api.tasks import task_generate_tts
+    return _submit_celery_task(
+        task_generate_tts,
+        request.text,
+        request.voice_id,
+        request.lang,
+    )
+
+
+@app.post("/jobs/celery/video")
+def celery_video(
+    request: CeleryVideoRequest,
+    _: None = Depends(_require_internal_api_key),
+):
+    """Submit a validated media-generation job to the media queue."""
+    from src.api.tasks import task_generate_video
+    return _submit_celery_task(
+        task_generate_video,
+        request.image_url,
+        request.route,
+        request.tts_text,
+        request.case_id,
+        request.bgm_key,
+        request.motion,
+        request.prompt,
+        request.allow_fallback,
+    )
+
+
+@app.post("/jobs/celery/cleanup")
+def celery_cleanup(
+    request: CeleryCleanupRequest | None = None,
+    _: None = Depends(_require_internal_api_key),
+):
+    """Submit an internal cleanup job used by deployment/runtime smoke checks."""
+    from src.api.tasks import task_cleanup_temp
+    return _submit_celery_task(
+        task_cleanup_temp,
+        request.max_age_hours if request is not None else None,
+    )
 
 
 def _celery_status_payload(task_id: str, result) -> dict:
@@ -1985,7 +2110,8 @@ _CELERY_TERMINAL_STATES = {"SUCCESS", "FAILURE", "REVOKED"}
 @app.get("/jobs/celery/{task_id}")
 def celery_status(
     task_id: str,
-    _: None = Depends(_require_internal_api_key),
+    _internal: None = Depends(_require_internal_api_key),
+    _job: None = Depends(_require_celery_job_token),
 ):
     """Celery 작업 상태를 단발 조회한다(SSE 미지원 환경의 폴백)."""
     from celery.result import AsyncResult
@@ -2000,7 +2126,8 @@ def celery_status(
 async def celery_status_stream(
     task_id: str,
     request: Request,
-    _: None = Depends(_require_internal_api_key),
+    _internal: None = Depends(_require_internal_api_key),
+    _job: None = Depends(_require_celery_job_token),
 ):
     """Celery 상태가 바뀔 때만 push하고 완료 후 종료하는 SSE 스트림."""
     from celery.result import AsyncResult
