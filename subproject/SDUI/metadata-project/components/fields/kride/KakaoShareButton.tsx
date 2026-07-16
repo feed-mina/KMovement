@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { loadKakaoShare } from '@/lib/kakao/loadKakaoShare';
+import { trackEvent } from '@/lib/analytics/dataLayer';
 
 // Kakao recipients must receive a URL that is reachable outside the container.
 // A stale build-time env can still contain localhost, so never trust a local origin
@@ -32,12 +33,12 @@ export function getShareUrl(path: string) {
 async function shareWithoutKakao(text: string, url: string) {
     if (typeof navigator.share === 'function') {
         await navigator.share({ title: 'KRIDE', text, url });
-        return;
+        return 'web_share';
     }
     if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url);
         alert('공유 링크를 복사했어요.');
-        return;
+        return 'clipboard';
     }
     throw new Error('share fallback unavailable');
 }
@@ -63,9 +64,11 @@ export default function KakaoShareButton({ text, path, label = '공유' }: Props
                 text,
                 link: { webUrl: url, mobileWebUrl: url },
             });
+            trackEvent('share', { method: 'kakao', content_type: 'travel_route', item_id: path });
         } catch {
             try {
-                await shareWithoutKakao(text, getShareUrl(path));
+                const method = await shareWithoutKakao(text, getShareUrl(path));
+                trackEvent('share', { method, content_type: 'travel_route', item_id: path });
             } catch {
                 alert('공유 기능을 사용할 수 없어요. 잠시 후 다시 시도해 주세요.');
             }

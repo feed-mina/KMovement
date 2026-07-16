@@ -8,6 +8,8 @@ import { normalizeRouteMapData } from '@/components/fields/kride/maps/normalizeR
 import { routeDistanceKm, estimateMinutes, formatMinutes, groupByDay } from '@/components/fields/kride/maps/routeSummary';
 import { fetchRestaurants, TourPoi } from '@/services/tourApi';
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
+import { trackEvent } from '@/lib/analytics/dataLayer';
+import { countItineraryPlaces } from '@/lib/analytics/itinerary';
 
 // [동선] 화면 컨트롤러. 기본=TourAPI 최근접이웃 / AI=선호 기반 FastAPI 일정.
 // Epic #74 · #77 · #85.
@@ -44,17 +46,19 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const tourData = useMemo(() => tourPoisToRouteMapData(pois), [pois]);
     const aiRouteData = useMemo(() => (aiData ? normalizeRouteMapData(aiData) : null), [aiData]);
     const mapData = mode === 'ai' ? aiRouteData : tourData;
-    const markers = mapData?.markers ?? [];
+    const markers = useMemo(() => mapData?.markers ?? [], [mapData]);
     const dayGroups = useMemo(() => groupByDay(markers), [markers]);
 
     const fetchAi = async () => {
         const key = JSON.stringify({ region, purpose, duration });
-        if (fetchedKeyRef.current === key && aiData) return; // 같은 조건이면 재요청 안 함
+        if (fetchedKeyRef.current === key) return; // 같은 조건이면 재요청 안 함
         setAiLoading(true);
         setAiError(null);
+        trackEvent('preferences_complete', { region, purpose, duration });
+        let timer: ReturnType<typeof setTimeout> | undefined;
         try {
             const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 120_000);
+            timer = setTimeout(() => controller.abort(), 120_000);
             const res = await fetch('/kride-api/recommend/itinerary', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -67,18 +71,31 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                 }),
                 signal: controller.signal,
             });
-            clearTimeout(timer);
             if (!res.ok) throw new Error(`itinerary ${res.status}`);
-            setAiData(await res.json());
+            const result = await res.json();
             fetchedKeyRef.current = key;
-        } catch {
+            const placeCount = countItineraryPlaces(result);
+            if (placeCount === 0) throw new Error('empty_result');
+            setAiData(result);
+            trackEvent('itinerary_generated', { place_count: placeCount, duration, source: 'route_planner' });
+        } catch (reason) {
             setAiError('AI 코스를 불러오지 못했어요. 기본 코스로 볼 수 있어요.');
+            const message = reason instanceof Error ? reason.message : 'unknown';
+            trackEvent('itinerary_error', {
+                error_type: message === 'empty_result' ? 'empty_result' : message.includes('aborted') ? 'timeout' : message.startsWith('itinerary ') ? 'http_error' : 'request_error',
+                source: 'route_planner',
+            });
         } finally {
+            if (timer) clearTimeout(timer);
             setAiLoading(false);
         }
     };
 
-    const requestAiCourse = () => { setMode('ai'); void fetchAi(); };
+    const requestAiCourse = () => {
+        trackEvent('itinerary_start', { entry_point: 'route_planner_ai_button' });
+        setMode('ai');
+        void fetchAi();
+    };
     // AI 모드에서 선호를 바꾸면 재추천
     const changePref = (setter: (v: string) => void, v: string) => {
         setter(v);
