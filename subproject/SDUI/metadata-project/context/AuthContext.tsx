@@ -5,6 +5,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import api, { refreshSession } from '@/services/axios';
 import { useRouter } from "next/navigation";
 import { requestForToken, onMessageListener } from '@/lib/firebase';
+import { trackEvent } from '@/lib/analytics/dataLayer';
 
 interface User {
     userId?: string;
@@ -32,10 +33,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     // 로그인 성공 시 호출할 함수
-    const login = (userData: any) => {
+    const login = useCallback((userData: any) => {
         setUser(userData);
         setIsLoggedIn(true);
-    };
+        const socialType = String(userData?.socialType || '').toLowerCase();
+        const method = ['kakao', 'google', 'naver'].includes(socialType) ? socialType : 'email';
+        trackEvent('login', { method });
+    }, []);
 
 
     //  로그아웃

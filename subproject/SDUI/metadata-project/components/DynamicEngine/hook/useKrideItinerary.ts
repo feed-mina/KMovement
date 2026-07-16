@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { trackEvent } from '@/lib/analytics/dataLayer';
+import { countItineraryPlaces } from '@/lib/analytics/itinerary';
 
 const DURATION_TO_KOREAN: Record<string, string> = {
     day: "당일치기",
@@ -41,6 +43,8 @@ export function useKrideItinerary(
         const fetchItinerary = async () => {
             setIsLoading(true);
             setError(null);
+            trackEvent('itinerary_start', { entry_point: 'focus_auto_generation' });
+            let timer: ReturnType<typeof setTimeout> | undefined;
             try {
                 const rawDuration = formData?.duration ?? "day";
                 const body = {
@@ -57,10 +61,14 @@ export function useKrideItinerary(
                     budget: formData?.budget ?? { min: 30000, max: 2000000 },
                 };
 
-                console.log("[useKrideItinerary] 요청:", body);
+                trackEvent('preferences_complete', {
+                    region: body.regions[0] || 'unspecified',
+                    purpose: body.purposes[0] || 'unspecified',
+                    duration: String(body.duration),
+                });
 
                 const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), 120_000); // 2분 타임아웃
+                timer = setTimeout(() => controller.abort(), 120_000); // 2분 타임아웃
 
                 const res = await fetch("/kride-api/recommend/itinerary", {
                     method: "POST",
@@ -68,14 +76,13 @@ export function useKrideItinerary(
                     body: JSON.stringify(body),
                     signal: controller.signal,
                 });
-                clearTimeout(timer);
-
                 if (!res.ok) {
                     throw new Error(`FastAPI 응답 오류: ${res.status}`);
                 }
 
                 const json = await res.json();
-                console.log("[useKrideItinerary] 응답:", json);
+                const placeCount = countItineraryPlaces(json);
+                if (placeCount === 0) throw new Error('empty_result');
                 const itinerary = json.itinerary ?? [];
                 const markers = json.mapData?.markers ?? [];
                 setData({
@@ -85,10 +92,21 @@ export function useKrideItinerary(
                     markerResolutionStatus: json.markerResolutionStatus ?? json.mapData?.markerResolutionStatus,
                     unresolvedPlaces: json.unresolvedPlaces ?? json.mapData?.unresolvedPlaces,
                 } as any);
+                trackEvent('itinerary_generated', {
+                    place_count: placeCount,
+                    duration: String(body.duration),
+                    source: 'focus_onboarding',
+                });
             } catch (err: any) {
                 console.error("[useKrideItinerary]", err);
                 setError(err.message ?? "일정 요청 실패");
+                const message = String(err?.message || 'unknown');
+                trackEvent('itinerary_error', {
+                    error_type: message === 'empty_result' ? 'empty_result' : message.toLowerCase().includes('abort') ? 'timeout' : message.includes('응답 오류') ? 'http_error' : 'request_error',
+                    source: 'focus_onboarding',
+                });
             } finally {
+                if (timer) clearTimeout(timer);
                 setIsLoading(false);
             }
         };

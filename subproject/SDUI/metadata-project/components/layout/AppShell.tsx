@@ -42,7 +42,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     </div>
                 )}
 
-                <section className="page-view-container">
+                <section className="page-view-container" data-clarity-mask="true">
                     {children}
                 </section>
                 

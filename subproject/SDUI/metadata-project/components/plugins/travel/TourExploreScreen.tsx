@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ScreenControllerProps } from '@/components/screens/types';
 import { fetchHolyPois, fetchTourPois, TourPoi } from '@/services/tourApi';
 import { HOLY_SITES } from '@/lib/data/holySites';
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
+import { trackEvent } from '@/lib/analytics/dataLayer';
 
 // [탐색] 화면 컨트롤러 (여행 플러그인). TourAPI POI를 지역·카테고리·정렬로 탐색.
 // Epic #74 · #85 · 성지 #78.
@@ -51,41 +52,71 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const [saved, setSaved] = useState<Set<string>>(new Set());
 
     useEffect(() => {
-        try {
-            const raw = localStorage.getItem(SAVED_KEY);
-            if (raw) setSaved(new Set(JSON.parse(raw)));
-        } catch { /* noop */ }
+        let alive = true;
+        queueMicrotask(() => {
+            if (!alive) return;
+            try {
+                const raw = localStorage.getItem(SAVED_KEY);
+                if (raw) setSaved(new Set<string>(JSON.parse(raw)));
+            } catch { /* noop */ }
+        });
+        return () => { alive = false; };
     }, []);
 
     useEffect(() => {
-        // 성지는 검수 파이프라인 API(V76 tour_poi) — 빈 결과/실패 시 시드 폴백. #96-A
-        if (category === 'HOLY') {
-            let holyAlive = true;
+        let alive = true;
+        const loadPois = async () => {
+            await Promise.resolve();
+            if (!alive) return;
             setLoading(true);
             setError(null);
-            fetchHolyPois()
-                .then((list) => { if (holyAlive) setPois(list.length > 0 ? list : HOLY_SITES); })
-                .catch(() => { if (holyAlive) setPois(HOLY_SITES); })
-                .finally(() => { if (holyAlive) setLoading(false); });
-            return () => { holyAlive = false; };
-        }
-        let alive = true;
-        setLoading(true);
-        setError(null);
-        fetchTourPois({ areaCode: '1', sigunguCode: sigungu, contentTypeId: category, arrange, numOfRows: 24 })
-            .then((list) => { if (alive) setPois(list); })
-            .catch(() => { if (alive) setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.'); })
-            .finally(() => { if (alive) setLoading(false); });
+            try {
+                if (category === 'HOLY') {
+                    const list = await fetchHolyPois();
+                    if (alive) setPois(list.length > 0 ? list : HOLY_SITES);
+                } else {
+                    const list = await fetchTourPois({ areaCode: '1', sigunguCode: sigungu, contentTypeId: category, arrange, numOfRows: 24 });
+                    if (alive) setPois(list);
+                }
+            } catch {
+                if (alive && category === 'HOLY') setPois(HOLY_SITES);
+                if (alive && category !== 'HOLY') setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+            } finally {
+                if (alive) setLoading(false);
+            }
+        };
+        void loadPois();
         return () => { alive = false; };
     }, [category, sigungu, arrange]);
 
+    useEffect(() => {
+        if (loading || error || pois.length === 0) return;
+        trackEvent('view_item_list', {
+            item_list_name: 'tour_explore',
+            item_count: pois.length,
+            category,
+            region: sigungu || 'seoul_all',
+        });
+    }, [category, error, loading, pois.length, sigungu]);
+
     const toggleSave = (id?: string) => {
         if (!id) return;
+        const isAdding = !saved.has(id);
         setSaved((prev) => {
             const next = new Set(prev);
             if (next.has(id)) next.delete(id); else next.add(id);
             try { localStorage.setItem(SAVED_KEY, JSON.stringify([...next])); } catch { /* noop */ }
             return next;
+        });
+        if (isAdding) trackEvent('save_place', { item_id: id, item_category: category });
+    };
+
+    const openPlace = (place: TourPoi) => {
+        setSelected(place);
+        trackEvent('select_item', {
+            item_id: place.contentId || 'unknown',
+            item_category: category,
+            item_list_name: 'tour_explore',
         });
     };
 
@@ -148,7 +179,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                         return (
                             <article
                                 key={p.contentId ?? i}
-                                onClick={() => setSelected(p)}
+                                onClick={() => openPlace(p)}
                                 style={{ border: '0.5px solid #eee', borderRadius: 14, overflow: 'hidden', background: '#fff', cursor: 'pointer', position: 'relative' }}
                             >
                                 <div style={{ height: 100, background: '#f5f5f5', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -215,7 +246,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             )}
 
                             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                                <a href={mapsUrl(selected)} target="_blank" rel="noreferrer" style={{ flex: 1, textAlign: 'center', fontSize: 13, fontWeight: 500, color: '#fff', background: RED, borderRadius: 10, padding: '11px 0', textDecoration: 'none' }}>
+                                <a href={mapsUrl(selected)} target="_blank" rel="noreferrer" onClick={() => trackEvent('map_open', { map_provider: 'google_maps', item_id: selected.contentId || 'unknown' })} style={{ flex: 1, textAlign: 'center', fontSize: 13, fontWeight: 500, color: '#fff', background: RED, borderRadius: 10, padding: '11px 0', textDecoration: 'none' }}>
                                     구글지도에서 보기
                                 </a>
                                 <button type="button" onClick={() => toggleSave(selected.contentId)} style={{ border: '0.5px solid #ddd', background: 'transparent', borderRadius: 10, padding: '11px 16px', cursor: 'pointer', color: selected.contentId && saved.has(selected.contentId) ? RED : '#555', fontSize: 15 }}>

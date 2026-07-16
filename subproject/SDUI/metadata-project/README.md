@@ -29,6 +29,21 @@ NEXT_PUBLIC_KRIDE_MAP_DEFAULT_PROVIDER=kakao
 
 If the provider key is missing, the Focus map falls back to the existing Leaflet/OpenStreetMap renderer so the page remains usable locally.
 
+## SEO and privacy-safe analytics
+
+Set these values in the deployment environment. Analytics scripts are not loaded until the visitor grants statistics consent; missing IDs keep analytics disabled.
+
+```env
+NEXT_PUBLIC_SITE_URL=https://example.com
+NEXT_PUBLIC_SITE_ENV=production
+GOOGLE_SITE_VERIFICATION=
+NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+NEXT_PUBLIC_CLARITY_ID=
+```
+
+Configure the GA4 tag inside the GTM container with a Data Layer Variable named `ga_measurement_id`; the application supplies `NEXT_PUBLIC_GA_MEASUREMENT_ID` through that variable. Preview and staging deployments should set `NEXT_PUBLIC_SITE_ENV=staging` so `robots.txt` blocks indexing. After deployment, submit `/sitemap.xml` in Google Search Console and verify GTM Preview, GA4 DebugView, and the Clarity consent state.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically

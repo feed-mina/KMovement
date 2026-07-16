@@ -7,6 +7,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { useBaseActions } from "./useBaseActions";
 import { handleError, extractErrorMessage } from "@/utils/errorHandler";
 import { formatKoreanPhoneNumber, isValidKoreanMobileNumber } from "@/lib/formatters/phone";
+import { trackEvent } from '@/lib/analytics/dataLayer';
 
 
 //  @@@@ useUserActions 역할 : 메타데이터의 action_type에 따라 각 타입 설명
@@ -15,6 +16,7 @@ export const useUserActions = (screenId: string,metadata: any[] = [], initialDat
     const router = useRouter();
     const { user,login, logout } = useAuth();
     const { sendMessage } = useWebSocket();
+    const setBaseFormData = base.setFormData;
     //  모달 열기 상태
     const [activeModal, setActiveModal] = useState<string | null>(null);
 
@@ -28,14 +30,14 @@ export const useUserActions = (screenId: string,metadata: any[] = [], initialDat
             const params = new URLSearchParams(window.location.search);
             const emailFromUrl = params.get("email");
             if (emailFromUrl) {
-                base.setFormData((prev: any) => ({
+                setBaseFormData((prev: any) => ({
                     ...prev,
                     reg_email: emailFromUrl,
                     email: emailFromUrl
                 }));
             }
         }
-    }, [screenId, base.setFormData]);
+    }, [screenId, setBaseFormData]);
     const handleAction = useCallback(async (meta: any, data?: any) => {
         const info = base.getMetaInfo(meta);
         if (!info) return;
@@ -99,6 +101,7 @@ export const useUserActions = (screenId: string,metadata: any[] = [], initialDat
 
                     // 3. 성공한 경우에만 인증 메일 발송 및 페이지 이동
                     if (res.status === 201 || res.status === 200) {
+                        trackEvent('sign_up', { method: 'email' });
                         // 계정 생성과 메일 발송은 별개다. 메일 장애가 이미 생성된
                         // 계정을 '회원가입 실패'로 보이게 하지 않도록 분리한다.
                         let mailSent = false;
@@ -297,7 +300,7 @@ export const useUserActions = (screenId: string,metadata: any[] = [], initialDat
             default:
                 break;
         }
-    }, [base, user, sendMessage, router]);
+    }, [base, user, sendMessage, router, login, logout]);
 
     return {
         ...base,

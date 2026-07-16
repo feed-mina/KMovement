@@ -22,6 +22,8 @@ import type {
   KrideItinerary,
 } from '@/lib/types/krideChat';
 import { normalizeRouteMapData } from '@/components/fields/kride/maps/normalizeRouteMapData';
+import { trackEvent } from '@/lib/analytics/dataLayer';
+import { countItineraryPlaces } from '@/lib/analytics/itinerary';
 
 const STORAGE_KEY = 'kride_form';
 const MESSAGE_REGION_KEYWORDS = [
@@ -229,6 +231,14 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
 
       const form = opts.contextOverride ?? readKrideForm();
       const req = buildRequest(trimmed, form);
+      if (req.intent === 'itinerary') {
+        trackEvent('itinerary_start', { entry_point: 'chat_message' });
+        trackEvent('preferences_complete', {
+          region: req.regions?.[0] || 'unspecified',
+          purpose: req.purposes?.[0] || 'unspecified',
+          duration: String(req.duration || 'unspecified'),
+        });
+      }
 
       const controller = new AbortController();
       abortRef.current = controller;
@@ -303,6 +313,18 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
             setError(emptyResultError);
           }
 
+          if (req.intent === 'itinerary') {
+            if (hasItineraryResult) {
+              trackEvent('itinerary_generated', {
+                place_count: Math.max(itineraryMarkers.length, countItineraryPlaces(normalizedItinerary)),
+                duration: String(req.duration || 'unspecified'),
+                source: 'chat',
+              });
+            } else {
+              trackEvent('itinerary_error', { error_type: 'empty_result', source: 'chat' });
+            }
+          }
+
           updateLast({
             text: emptyResultError ?? payload.reply ?? payload.recommendationText ?? '',
             pois: payload.pois,
@@ -338,11 +360,13 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
         }
       } catch (e: unknown) {
         if ((e as Error)?.name === 'AbortError') {
+          if (req.intent === 'itinerary') trackEvent('itinerary_error', { error_type: 'timeout_or_cancelled', source: 'chat' });
           updateLast({ streaming: false });
           return;
         }
         const msg = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
         setError(msg);
+        if (req.intent === 'itinerary') trackEvent('itinerary_error', { error_type: 'request_error', source: 'chat' });
         updateLast({
           streaming: false,
           error: msg,

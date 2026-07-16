@@ -39,19 +39,15 @@ const connectSrc = [
     'wss://ws-us3.pusher.com',
     'https://*.supabase.co',
     'https://res.cloudinary.com',
+    'https://www.google-analytics.com',
+    'https://region1.google-analytics.com',
+    'https://*.google-analytics.com',
+    'https://*.clarity.ms',
+    'https://c.bing.com',
 ];
 
 const nextConfig: NextConfig = {
     output: 'standalone',
-    async redirects() {
-        return [
-            {
-                source: '/',
-                destination: '/view/MAIN_PAGE',
-                permanent: false,
-            },
-        ];
-    },
     async rewrites() {
         return [
             {
@@ -85,13 +81,13 @@ const nextConfig: NextConfig = {
                         key: 'Content-Security-Policy',
                         value: [
                             "default-src 'self'",
-                            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://t1.daumcdn.net https://t1.daumcdn.net https://dapi.kakao.com https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net http://*.daumcdn.net https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com https://vercel.live https://*.vercel.app https://va.vercel-scripts.com",
+                            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://t1.daumcdn.net https://t1.daumcdn.net https://dapi.kakao.com https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net http://*.daumcdn.net https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com https://www.googletagmanager.com https://*.clarity.ms https://vercel.live https://*.vercel.app https://va.vercel-scripts.com",
                             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-                            "img-src 'self' data: blob: https: http://*.daumcdn.net http://*.kakaocdn.net https://*.daumcdn.net https://*.kakao.com https://*.kakaocdn.net https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com https://*.supabase.co",
+                            "img-src 'self' data: blob: https: http://*.daumcdn.net http://*.kakaocdn.net https://*.daumcdn.net https://*.kakao.com https://*.kakaocdn.net https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com https://*.supabase.co https://www.google-analytics.com https://*.clarity.ms https://c.bing.com",
                             `connect-src ${Array.from(new Set(connectSrc)).join(' ')}`,
                             "font-src 'self' data: https://fonts.gstatic.com",
                             "media-src 'self' blob: https://*.supabase.co https://res.cloudinary.com",
-                            "frame-src http://postcode.map.daum.net https://postcode.map.daum.net http://postcode.map.kakao.com https://postcode.map.kakao.com",
+                            "frame-src http://postcode.map.daum.net https://postcode.map.daum.net http://postcode.map.kakao.com https://postcode.map.kakao.com https://www.googletagmanager.com",
                             "object-src 'none'",
                             "frame-ancestors 'none'",
                             "worker-src 'self'",
