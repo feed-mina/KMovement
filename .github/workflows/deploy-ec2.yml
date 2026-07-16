@@ -381,14 +381,68 @@ jobs:
             docker pull "$1"
           }
 
+          prune_unreferenced_service_images() {
+            # Protect every image referenced by any container, including stopped
+            # rollback containers, and remove only stale images from repositories
+            # this workflow owns. This releases tagged leftovers from failed
+            # deployments without touching unrelated host images or volumes.
+            REFERENCED_IMAGE_IDS="$(
+              docker ps -aq |
+                xargs -r docker inspect --format '{{.Image}}' |
+                sort -u
+            )"
+
+            for SERVICE_REPOSITORY in "$@"; do
+              docker image ls "$SERVICE_REPOSITORY" --no-trunc \
+                --format '{{.Repository}} {{.Tag}} {{.ID}}' |
+                while read -r IMAGE_REPOSITORY IMAGE_TAG IMAGE_ID; do
+                  [ "$IMAGE_TAG" != "<none>" ] || continue
+                  IMAGE_REF="${IMAGE_REPOSITORY}:${IMAGE_TAG}"
+                  if printf '%s\n' "$REFERENCED_IMAGE_IDS" | grep -Fxq "$IMAGE_ID"; then
+                    echo "Preserving container-referenced image $IMAGE_REF ($IMAGE_ID)"
+                  else
+                    echo "Removing unreferenced service image $IMAGE_REF ($IMAGE_ID)"
+                    # Do not force deletion: if a concurrent container acquires
+                    # the image after the snapshot, Docker must reject removal.
+                    docker image rm "$IMAGE_REF" || true
+                  fi
+                done
+            done
+          }
+
+          assert_minimum_docker_space() {
+            REQUIRED_KB="$1"
+            AVAILABLE_KB="$(df -Pk /var/lib/docker 2>/dev/null | awk 'NR == 2 { print $4 }')"
+            if [ -z "$AVAILABLE_KB" ]; then
+              AVAILABLE_KB="$(df -Pk / | awk 'NR == 2 { print $4 }')"
+            fi
+            if ! printf '%s' "$AVAILABLE_KB" | grep -Eq '^[0-9]+$'; then
+              echo "Unable to determine free space for /var/lib/docker."
+              exit 1
+            fi
+            if [ "$AVAILABLE_KB" -lt "$REQUIRED_KB" ]; then
+              echo "Insufficient Docker disk space after safe cleanup: ${AVAILABLE_KB}KB available, ${REQUIRED_KB}KB required."
+              docker system df -v || true
+              exit 1
+            fi
+          }
+
           # ── Pull images ──
           # Free space before pulling large service images. Volumes and running
           # containers are intentionally preserved; service pulls are sequential.
           docker system df || true
-          docker container prune -f --filter "until=24h" || true
+          prune_unreferenced_service_images \
+            __SDUI_IMAGE__ \
+            __FRONTEND_IMAGE__ \
+            __KRIDE_FASTAPI_IMAGE__ \
+            __KRIDE_CELERY_IMAGE__
           docker image prune -f || true
           docker builder prune -af || true
           docker system df || true
+          # The first PyTorch-based rollout needs room for a second copy of the
+          # heavy runtime layers. Fail before replacing any service if cleanup
+          # cannot provide at least 4 GiB.
+          assert_minimum_docker_space 4194304
 
           # Pull each image immediately before replacing its service. This caps
           # peak disk use at one old/new service pair instead of all images at once.
