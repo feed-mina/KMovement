@@ -40,6 +40,8 @@ def test_worker_changes_trigger_the_ec2_kride_build() -> None:
 def test_deploy_pulls_services_sequentially_and_preserves_volumes() -> None:
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
+    stale_cleanup = workflow.index("prune_unreferenced_service_images \\")
+    free_space_gate = workflow.index("assert_minimum_docker_space 4194304")
     backend_pull = workflow.index("pull_service_image __SDUI_IMAGE__:__BRANCH_TAG__")
     frontend_pull = workflow.index("pull_service_image __FRONTEND_IMAGE__:__BRANCH_TAG__")
     api_pull = workflow.index("pull_service_image __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__")
@@ -48,9 +50,27 @@ def test_deploy_pulls_services_sequentially_and_preserves_volumes() -> None:
     celery_pull = workflow.index("pull_service_image __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__")
     celery_replace = workflow.index("drain_celery_worker kride-celery-worker media", celery_pull)
 
+    assert stale_cleanup < free_space_gate < backend_pull
     assert backend_pull < frontend_pull < api_pull < api_replace < release_old_api < celery_pull < celery_replace
     assert "docker volume prune" not in workflow
     assert "docker image prune -af" not in workflow
+
+
+def test_disk_recovery_only_removes_unreferenced_owned_service_images() -> None:
+    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+
+    assert "prune_unreferenced_service_images()" in workflow
+    assert "docker ps -aq" in workflow
+    assert "docker inspect --format '{{.Image}}'" in workflow
+    assert "grep -Fxq \"$IMAGE_ID\"" in workflow
+    assert 'docker image ls "$SERVICE_REPOSITORY" --no-trunc' in workflow
+    assert 'docker image rm "$IMAGE_REF"' in workflow
+    assert "docker image rm -f" not in workflow
+    assert "docker container prune" not in workflow
+    assert "docker system prune" not in workflow
+    assert "__KRIDE_FASTAPI_IMAGE__" in workflow
+    assert "__KRIDE_CELERY_IMAGE__" in workflow
+    assert "docker system df -v" in workflow
 
 
 def test_media_worker_is_warm_drained_before_replacement() -> None:
