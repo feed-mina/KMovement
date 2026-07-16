@@ -382,10 +382,6 @@ jobs:
           }
 
           prune_unreferenced_service_images() {
-            # Protect every image referenced by any container, including stopped
-            # rollback containers, and remove only stale images from repositories
-            # this workflow owns. This releases tagged leftovers from failed
-            # deployments without touching unrelated host images or volumes.
             REFERENCED_IMAGE_IDS="$(
               docker ps -aq |
                 xargs -r docker inspect --format '{{.Image}}' |
@@ -402,8 +398,6 @@ jobs:
                     echo "Preserving container-referenced image $IMAGE_REF ($IMAGE_ID)"
                   else
                     echo "Removing unreferenced service image $IMAGE_REF ($IMAGE_ID)"
-                    # Do not force deletion: if a concurrent container acquires
-                    # the image after the snapshot, Docker must reject removal.
                     docker image rm "$IMAGE_REF" || true
                   fi
                 done
@@ -439,9 +433,6 @@ jobs:
           docker image prune -f || true
           docker builder prune -af || true
           docker system df || true
-          # The first PyTorch-based rollout needs room for a second copy of the
-          # heavy runtime layers. Fail before replacing any service if cleanup
-          # cannot provide at least 4 GiB.
           assert_minimum_docker_space 4194304
 
           # Pull each image immediately before replacing its service. This caps
