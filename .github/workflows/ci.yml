@@ -29,6 +29,13 @@ jobs:
         run: ./gradlew clean build -x test
         working-directory: ./subproject/SDUI/SDUI-server
 
+      - name: Run Celery job service tests
+        run: |
+          ./gradlew test \
+            --tests com.domain.demo_backend.domain.celery.service.CeleryJobServiceTest \
+            --tests com.domain.demo_backend.domain.celery.controller.CeleryJobControllerTest
+        working-directory: ./subproject/SDUI/SDUI-server
+
   # ── Next.js (metadata-project) ─────────────────────────────────────────────
   nextjs:
     runs-on: ubuntu-latest
@@ -87,7 +94,16 @@ jobs:
         # 테스트에 필요한 최소 패키지만 설치하도록 향후 requirements-ci.txt 분리 권장
 
       - name: Run tests
-        run: python -m pytest src/api/ -v --tb=short
+        run: |
+          python -m pytest \
+            src/api/ \
+            tests/test_celery_pipeline.py \
+            tests/test_celery_security.py \
+            tests/test_cloudinary_upload.py \
+            tests/test_deploy_ec2_recovery.py \
+            tests/test_fastapi_runpod_routing.py \
+            tests/test_result_delivery.py \
+            -v --tb=short
         env:
           TORCHSERVE_URL: http://localhost:8085
           CELERY_BROKER_URL: redis://localhost:6379/1

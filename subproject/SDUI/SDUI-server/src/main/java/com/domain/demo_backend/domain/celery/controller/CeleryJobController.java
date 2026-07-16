@@ -7,9 +7,11 @@ import com.domain.demo_backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +31,9 @@ public class CeleryJobController {
             @RequestBody Map<String, Object> payload,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        if (userDetails == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required.");
+        }
         CeleryJob job = celeryJobService.submitJob(
                 taskType, payload, userDetails.getUserSqno()
         );
@@ -38,12 +43,29 @@ public class CeleryJobController {
         ));
     }
 
+    @Operation(summary = "Check Celery task ownership")
+    @GetMapping("/jobs/{celeryTaskId}/ownership")
+    public ResponseEntity<Void> checkJobOwnership(
+            @PathVariable("celeryTaskId") String celeryTaskId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required.");
+        }
+        celeryJobService.getOwnedJobStatus(celeryTaskId, userDetails.getUserSqno());
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "Get Celery task status")
     @GetMapping("/jobs/{celeryTaskId}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getJobStatus(
-            @PathVariable("celeryTaskId") String celeryTaskId
+            @PathVariable("celeryTaskId") String celeryTaskId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        CeleryJob job = celeryJobService.getJobStatus(celeryTaskId);
+        if (userDetails == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required.");
+        }
+        CeleryJob job = celeryJobService.getOwnedJobStatus(celeryTaskId, userDetails.getUserSqno());
         CeleryJob refreshed = celeryJobService.refreshJob(job);
         return ResponseEntity.ok(ApiResponse.success(jobResponse(refreshed)));
     }

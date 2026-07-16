@@ -111,6 +111,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/ai/v2/tts").authenticated()
                         // 멤버십 API (인증 필요)
                         .requestMatchers("/api/v1/user-memberships/**").authenticated()
+                        .requestMatchers("/api/v1/celery/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/memberships").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/memberships/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/memberships/**").hasRole("ADMIN")

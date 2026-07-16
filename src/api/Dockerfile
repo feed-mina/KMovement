@@ -2,6 +2,9 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Keep this shared prefix identical in both K-Ride runtime Dockerfiles. Docker reuses the
+# large CPU Torch and application dependency layers across the API and worker
+# images instead of storing two copies on the deployment host.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     build-essential \
@@ -11,7 +14,10 @@ COPY src/api/requirements-docker.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
     && pip install --no-cache-dir -r /tmp/requirements.txt
 
+# End of the shared K-Ride dependency layers.
+
 COPY src/ /app/src/
+
 COPY dataset/models/route_graph.pkl /app/dataset/models/route_graph.pkl
 COPY dataset/data/raw_ml/road_scored.csv /app/dataset/data/raw_ml/road_scored.csv
 COPY dataset/data/raw_ml/facility_clean.csv /app/dataset/data/raw_ml/facility_clean.csv

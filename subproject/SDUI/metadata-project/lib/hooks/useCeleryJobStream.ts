@@ -19,13 +19,9 @@ export interface CeleryJobSnapshot<TResult = unknown> {
 }
 
 export interface UseCeleryJobStreamOptions {
-  baseUrl?: string;
   enabled?: boolean;
-  /** Direct FastAPI calls only. Production browsers should use the same-origin Next.js proxy. */
-  internalApiKey?: string;
   fallbackToPolling?: boolean;
   pollingIntervalMs?: number;
-  credentials?: RequestCredentials;
 }
 
 export interface UseCeleryJobStreamResult<TResult = unknown> {
@@ -121,12 +117,9 @@ export function useCeleryJobStream<TResult = unknown>(
   options: UseCeleryJobStreamOptions = {},
 ): UseCeleryJobStreamResult<TResult> {
   const {
-    baseUrl = '',
     enabled = true,
-    internalApiKey,
     fallbackToPolling = true,
     pollingIntervalMs = 2000,
-    credentials = 'include',
   } = options;
   const [job, setJob] = useState<CeleryJobSnapshot<TResult> | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -142,10 +135,8 @@ export function useCeleryJobStream<TResult = unknown>(
     if (!taskId || !enabled) return undefined;
 
     const controller = new AbortController();
-    const normalizedBaseUrl = baseUrl.replace(/\/$/, '');
     const encodedTaskId = encodeURIComponent(taskId);
     const headers: Record<string, string> = { Accept: 'text/event-stream' };
-    if (internalApiKey) headers['X-Internal-Api-Key'] = internalApiKey;
 
     let latest: CeleryJobSnapshot<TResult> | null = null;
     const applySnapshot = (snapshot: CeleryJobSnapshot<TResult>) => {
@@ -162,9 +153,9 @@ export function useCeleryJobStream<TResult = unknown>(
       setIsConnected(false);
       setError(null);
       while (!controller.signal.aborted) {
-        const response = await fetch(`${normalizedBaseUrl}/jobs/celery/${encodedTaskId}`, {
-          credentials,
-          headers: internalApiKey ? { 'X-Internal-Api-Key': internalApiKey } : undefined,
+        const response = await fetch(`/jobs/celery/${encodedTaskId}`, {
+          credentials: 'include',
+          headers: { Accept: 'application/json' },
           cache: 'no-store',
           signal: controller.signal,
         });
@@ -178,8 +169,10 @@ export function useCeleryJobStream<TResult = unknown>(
 
     const run = async () => {
       try {
-        const response = await fetch(`${normalizedBaseUrl}/jobs/celery/${encodedTaskId}/stream`, {
-          credentials,
+        // Browsers always use the authenticated same-origin Next.js proxy. The
+        // proxy owns the internal API key and derives the per-job HMAC token.
+        const response = await fetch(`/jobs/celery/${encodedTaskId}/stream`, {
+          credentials: 'include',
           headers,
           cache: 'no-store',
           signal: controller.signal,
@@ -206,11 +199,8 @@ export function useCeleryJobStream<TResult = unknown>(
 
     return () => controller.abort();
   }, [
-    baseUrl,
-    credentials,
     enabled,
     fallbackToPolling,
-    internalApiKey,
     pollingIntervalMs,
     taskId,
   ]);

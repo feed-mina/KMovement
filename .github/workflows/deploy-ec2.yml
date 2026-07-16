@@ -7,6 +7,8 @@ on:
       - "subproject/SDUI/SDUI-server/**"
       - "subproject/SDUI/metadata-project/**"
       - "src/api/**"
+      - "Dockerfile.worker"
+      - "deploy/media_motion/**"
       - "dataset/data/raw_ml/road_scored.csv"
       - "dataset/data/raw_ml/facility_clean.csv"
       - "dataset/data/raw_ml/tour_poi.csv"
@@ -64,12 +66,41 @@ jobs:
             echo "$CHANGED" | grep -q '^subproject/SDUI/SDUI-server/' && DEPLOY_BACKEND="true"
             echo "$CHANGED" | grep -q '^subproject/SDUI/metadata-project/' && DEPLOY_FRONTEND="true"
             echo "$CHANGED" | grep -q '^src/api/' && DEPLOY_FASTAPI="true"
+            echo "$CHANGED" | grep -Eq '^(Dockerfile\.worker|deploy/media_motion/)' && DEPLOY_FASTAPI="true"
             echo "$CHANGED" | grep -Eq '^(dataset/data/raw_ml/(road_scored|facility_clean|tour_poi)\.csv|dataset/models/route_graph\.pkl|chroma_db/|\.dockerignore)' && DEPLOY_FASTAPI="true"
             echo "$CHANGED" | grep -q '^\.github/workflows/deploy-ec2\.yml' && { DEPLOY_BACKEND="true"; DEPLOY_FRONTEND="true"; DEPLOY_FASTAPI="true"; }
           fi
           echo "backend=$DEPLOY_BACKEND"  >> $GITHUB_OUTPUT
           echo "frontend=$DEPLOY_FRONTEND" >> $GITHUB_OUTPUT
           echo "fastapi=$DEPLOY_FASTAPI" >> $GITHUB_OUTPUT
+
+      - name: Validate Celery production secrets
+        if: steps.changes.outputs.fastapi == 'true'
+        env:
+          INTERNAL_API_KEY: ${{ secrets.FASTAPI_INTERNAL_API_KEY }}
+          CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+        run: |
+          if [ -z "$INTERNAL_API_KEY" ]; then
+            echo "::error::FASTAPI_INTERNAL_API_KEY must be configured for Celery status and SSE authentication."
+            exit 1
+          fi
+          if [ -z "$CLOUDINARY_URL" ] && {
+            [ -z "$CLOUDINARY_CLOUD_NAME" ] ||
+            [ -z "$CLOUDINARY_API_KEY" ] ||
+            [ -z "$CLOUDINARY_API_SECRET" ];
+          }; then
+            echo "::error::Configure CLOUDINARY_URL or all three individual Cloudinary credentials."
+            exit 1
+          fi
+          for value in "$INTERNAL_API_KEY" "$CLOUDINARY_URL" "$CLOUDINARY_CLOUD_NAME" "$CLOUDINARY_API_KEY" "$CLOUDINARY_API_SECRET"; do
+            if [[ "$value" == *"'"* || "$value" == *$'\n'* || "$value" == *$'\r'* ]]; then
+              echo "::error::Celery deployment secrets must be single-line values without apostrophes."
+              exit 1
+            fi
+          done
 
       # ── Backend build ──
       - name: Set up JDK 17
@@ -289,6 +320,12 @@ jobs:
 
       # ── Deploy script ──
       - name: Create deploy script
+        env:
+          DEPLOY_FASTAPI_INTERNAL_API_KEY: ${{ secrets.FASTAPI_INTERNAL_API_KEY }}
+          DEPLOY_CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
+          DEPLOY_CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          DEPLOY_CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          DEPLOY_CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
           cat > /tmp/deploy.sh << 'DEPLOY_EOF'
           set -e
@@ -302,118 +339,71 @@ jobs:
             fi
           }
 
+          drain_celery_worker() {
+            WORKER_NAME="$1"
+            QUEUE_NAME="$2"
+            WORKER_STATUS="$(docker inspect --format '{{.State.Status}}' "$WORKER_NAME" 2>/dev/null || true)"
+            if [ "$WORKER_STATUS" != "running" ]; then
+              remove_container "$WORKER_NAME"
+              return
+            fi
+
+            # Stop reserving new work, rename the old container out of the way,
+            # and request a warm shutdown so an active media task may finish.
+            WORKER_NODE="celery@$(docker exec "$WORKER_NAME" hostname)"
+            docker update --restart=no "$WORKER_NAME" >/dev/null
+            docker exec "$WORKER_NAME" celery -A src.api.celery_app control \
+              --destination="$WORKER_NODE" --timeout=5 cancel_consumer "$QUEUE_NAME" || true
+            DRAINING_NAME="${WORKER_NAME}-draining-$(date +%s)"
+            docker rename "$WORKER_NAME" "$DRAINING_NAME"
+            docker exec "$DRAINING_NAME" celery -A src.api.celery_app control \
+              --destination="$WORKER_NODE" --timeout=5 shutdown || true
+
+            # The task hard limit is 30 minutes. Remove a wedged old worker only
+            # after that window, without blocking the deployment SSH session.
+            nohup sh -c "sleep 1900; docker rm -f '$DRAINING_NAME' >/dev/null 2>&1 || true" \
+              >/dev/null 2>&1 &
+          }
+
+          assert_container_running() {
+            CONTAINER_STATUS="$(docker inspect --format '{{.State.Status}}' "$1" 2>/dev/null || true)"
+            if [ "$CONTAINER_STATUS" != "running" ]; then
+              echo "$1 is not running (status: ${CONTAINER_STATUS:-missing})."
+              docker logs --tail 100 "$1" 2>/dev/null || true
+              exit 1
+            fi
+          }
+
+          pull_service_image() {
+            echo "Pulling $1"
+            df -h /var/lib/docker 2>/dev/null || df -h / || true
+            docker system df || true
+            docker pull "$1"
+          }
+
           # ── Pull images ──
-          # Free space before pulling large service images. Volumes and running containers are intentionally preserved.
+          # Free space before pulling large service images. Volumes and running
+          # containers are intentionally preserved; service pulls are sequential.
           docker system df || true
           docker container prune -f --filter "until=24h" || true
-          docker image prune -af || true
+          docker image prune -f || true
           docker builder prune -af || true
           docker system df || true
 
-          if [ "__DEPLOY_BACKEND__" = "true" ]; then
-            docker pull __SDUI_IMAGE__:__BRANCH_TAG__
-          fi
-          if [ "__DEPLOY_FRONTEND__" = "true" ]; then
-            docker pull __FRONTEND_IMAGE__:__BRANCH_TAG__
-          fi
-          if [ "__DEPLOY_FASTAPI__" = "true" ]; then
-            docker pull __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__
-            docker pull __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__
-          fi
-
-          docker image prune -f || true
+          # Pull each image immediately before replacing its service. This caps
+          # peak disk use at one old/new service pair instead of all images at once.
 
           # ── Redis ──
           docker inspect sdui-redis >/dev/null 2>&1 || docker run -d --name sdui-redis --network sdui-network redis:7-alpine
 
-          # K-Ride FastAPI
-          if [ "__DEPLOY_FASTAPI__" = "true" ]; then
-            remove_container kride-fastapi
-            docker run -d --name kride-fastapi \
-              -p 8000:8000 \
-              --network sdui-network \
-              --restart unless-stopped \
-              -e PORT=8000 \
-              -e TORCHSERVE_ENABLED=false \
-              -e TORCHSERVE_FALLBACK=true \
-              -e CELERY_BROKER_URL=redis://sdui-redis:6379/1 \
-              -e CELERY_RESULT_BACKEND=redis://sdui-redis:6379/1 \
-              -e CHROMA_MODE=persistent \
-              -e CHROMA_PATH=/app/chroma_db \
-              -e KRIDE_MODELS_DIR=/app/dataset/models \
-              -e KRIDE_RAW_DATA_DIR=/app/dataset/data/raw_ml \
-              -e HF_HOME=/tmp/hf_cache \
-              -e TRANSFORMERS_CACHE=/tmp/hf_cache/hub \
-              -e NEO4J_URI=__NEO4J_URI__ \
-              -e NEO4J_USERNAME=__NEO4J_USERNAME__ \
-              -e NEO4J_PASSWORD=__NEO4J_PASSWORD__ \
-              -e NEO4J_DATABASE=__NEO4J_DATABASE__ \
-              -e SUPABASE_URL=__SUPABASE_URL__ \
-              -e SUPABASE_KEY=__SUPABASE_KEY__ \
-              -e GROQ_API_KEY=__GROQ_API_KEY__ \
-              -e RUNPOD_API_KEY=__RUNPOD_API_KEY__ \
-              -e RUNPOD_ENDPOINT_ID=__RUNPOD_ENDPOINT_ID__ \
-              -e RUNPOD_MEDIA_ENDPOINT_ID=__RUNPOD_MEDIA_ENDPOINT_ID__ \
-              -e RUNPOD_TORA_ENDPOINT_ID=__RUNPOD_TORA_ENDPOINT_ID__ \
-              -e FASTAPI_INTERNAL_API_KEY=__FASTAPI_INTERNAL_API_KEY__ \
-              __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__
-
-            echo "Waiting for K-Ride FastAPI..."
-            sleep 25
-            docker logs --tail 80 kride-fastapi
-            for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
-              if curl -fsS http://localhost:8000/api/health; then
-                break
-              fi
-              if [ "$i" = "12" ]; then
-                echo "K-Ride FastAPI health check failed."
-                exit 1
-              fi
-              sleep 5
-            done
-
-            docker volume create kride-celery-temp >/dev/null
-            docker volume create kride-celery-beat >/dev/null
-            docker volume create kride-tora-ffmpeg-temp >/dev/null
-            docker volume create kride-tora-meta-temp >/dev/null
-
-            remove_container kride-celery-worker
-            docker run -d --name kride-celery-worker \
-              --network sdui-network \
-              --restart unless-stopped \
-              -v kride-celery-temp:/tmp/kride-celery \
-              -v kride-tora-ffmpeg-temp:/app/.tmp-tora-ffmpeg \
-              -v kride-tora-meta-temp:/app/.tmp-tora-meta \
-              -e CELERY_BROKER_URL=redis://sdui-redis:6379/1 \
-              -e CELERY_RESULT_BACKEND=redis://sdui-redis:6379/1 \
-              -e CELERY_MEDIA_TEMP_DIR=/tmp/kride-celery \
-              -e CELERY_TEMP_TTL_HOURS=6 \
-              -e CLOUDINARY_URL=__CLOUDINARY_URL__ \
-              -e CLOUDINARY_CLOUD_NAME=__CLOUDINARY_CLOUD_NAME__ \
-              -e CLOUDINARY_API_KEY=__CLOUDINARY_API_KEY__ \
-              -e CLOUDINARY_API_SECRET=__CLOUDINARY_API_SECRET__ \
-              -e KRIDE_RESULT_URL_REQUIRED=true \
-              __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__ \
-              celery -A src.api.celery_app worker -l info -c 1 -Q ml,media
-
-            remove_container kride-celery-beat
-            docker run -d --name kride-celery-beat \
-              --network sdui-network \
-              --restart unless-stopped \
-              -v kride-celery-beat:/tmp/celerybeat \
-              -e CELERY_BROKER_URL=redis://sdui-redis:6379/1 \
-              -e CELERY_RESULT_BACKEND=redis://sdui-redis:6379/1 \
-              __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__ \
-              celery -A src.api.celery_app beat -l info --schedule=/tmp/celerybeat/celerybeat-schedule
-
-            sleep 5
-            docker ps --filter name=kride-celery --format "table {{.Names}}\t{{.Status}}"
-            docker logs --tail 40 kride-celery-worker
-            docker logs --tail 40 kride-celery-beat
-          fi
+          # Deploy HMAC-capable consumers before enforcing the new FastAPI job
+          # token. Their extra header is backward-compatible with the old API.
+          # This order avoids leaving the old frontend/backend unable to poll if
+          # a later image pull or service replacement fails.
 
           # ── Backend ──
           if [ "__DEPLOY_BACKEND__" = "true" ]; then
+            pull_service_image __SDUI_IMAGE__:__BRANCH_TAG__
             remove_container __CONTAINER_NAME__
             docker run -d --name __CONTAINER_NAME__ \
               -p __TARGET_PORT__:8080 \
@@ -434,7 +424,7 @@ jobs:
               -e AWS_SECRET_KEY=__S3_SECRET_KEY__ \
               -e FASTAPI_URL=__KRIDE_FASTAPI_URL__ \
               -e KRIDE_FASTAPI_URL=__KRIDE_FASTAPI_URL__ \
-              -e FASTAPI_INTERNAL_API_KEY=__FASTAPI_INTERNAL_API_KEY__ \
+              -e FASTAPI_INTERNAL_API_KEY='__FASTAPI_INTERNAL_API_KEY__' \
               -e GCP_PROJECT_ID=__GCP_PROJECT_ID__ \
               -e GCP_PROCESSOR_ID=6ed87cfefab39a91 \
               -e GCP_CREDENTIALS_PATH=/app/gcp-credentials.json \
@@ -453,24 +443,171 @@ jobs:
 
             echo "Waiting for Spring Boot..."
             sleep 40
+            assert_container_running __CONTAINER_NAME__
             docker logs --tail 80 __CONTAINER_NAME__
             docker exec sdui-redis redis-cli FLUSHDB || true
+            docker image prune -f || true
           fi
 
           # ── Frontend ──
           if [ "__DEPLOY_FRONTEND__" = "true" ]; then
+            pull_service_image __FRONTEND_IMAGE__:__BRANCH_TAG__
             remove_container sdui-frontend
             docker run -d --name sdui-frontend \
               --network sdui-network \
               -p 3000:3000 \
               -e HOSTNAME=0.0.0.0 \
+              -e BACKEND_URL=http://__CONTAINER_NAME__:8080 \
               -e FASTAPI_URL=__KRIDE_FASTAPI_URL__ \
-              -e FASTAPI_INTERNAL_API_KEY=__FASTAPI_INTERNAL_API_KEY__ \
+              -e FASTAPI_INTERNAL_API_KEY='__FASTAPI_INTERNAL_API_KEY__' \
               __FRONTEND_IMAGE__:__BRANCH_TAG__
 
             echo "Waiting for Next.js..."
             sleep 10
+            assert_container_running sdui-frontend
             docker logs --tail 20 sdui-frontend
+            docker image prune -f || true
+          fi
+
+          # K-Ride FastAPI
+          if [ "__DEPLOY_FASTAPI__" = "true" ]; then
+            pull_service_image __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__
+            remove_container kride-fastapi
+            docker run -d --name kride-fastapi \
+              -p 8000:8000 \
+              --network sdui-network \
+              --restart unless-stopped \
+              -e PORT=8000 \
+              -e TORCHSERVE_ENABLED=false \
+              -e TORCHSERVE_FALLBACK=true \
+              -e CELERY_BROKER_URL=redis://sdui-redis:6379/1 \
+              -e CELERY_RESULT_BACKEND=redis://sdui-redis:6379/1 \
+              -e CELERY_ML_TASKS_ENABLED=false \
+              -e CHROMA_MODE=persistent \
+              -e CHROMA_PATH=/app/chroma_db \
+              -e KRIDE_MODELS_DIR=/app/dataset/models \
+              -e KRIDE_RAW_DATA_DIR=/app/dataset/data/raw_ml \
+              -e HF_HOME=/tmp/hf_cache \
+              -e TRANSFORMERS_CACHE=/tmp/hf_cache/hub \
+              -e NEO4J_URI=__NEO4J_URI__ \
+              -e NEO4J_USERNAME=__NEO4J_USERNAME__ \
+              -e NEO4J_PASSWORD=__NEO4J_PASSWORD__ \
+              -e NEO4J_DATABASE=__NEO4J_DATABASE__ \
+              -e SUPABASE_URL=__SUPABASE_URL__ \
+              -e SUPABASE_KEY=__SUPABASE_KEY__ \
+              -e GROQ_API_KEY=__GROQ_API_KEY__ \
+              -e RUNPOD_API_KEY=__RUNPOD_API_KEY__ \
+              -e RUNPOD_ENDPOINT_ID=__RUNPOD_ENDPOINT_ID__ \
+              -e RUNPOD_MEDIA_ENDPOINT_ID=__RUNPOD_MEDIA_ENDPOINT_ID__ \
+              -e RUNPOD_TORA_ENDPOINT_ID=__RUNPOD_TORA_ENDPOINT_ID__ \
+              -e FASTAPI_INTERNAL_API_KEY='__FASTAPI_INTERNAL_API_KEY__' \
+              __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__
+
+            echo "Waiting for K-Ride FastAPI..."
+            sleep 25
+            docker logs --tail 80 kride-fastapi
+            for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+              if curl -fsS http://localhost:8000/api/health; then
+                break
+              fi
+              if [ "$i" = "12" ]; then
+                echo "K-Ride FastAPI health check failed."
+                exit 1
+              fi
+              sleep 5
+            done
+
+            # The old API image is now unreferenced. Release it before pulling
+            # the worker image; the worker reuses the API's heavy dependency layers.
+            docker image prune -f || true
+            pull_service_image __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__
+
+            docker volume create kride-celery-temp >/dev/null
+            docker volume create kride-celery-beat >/dev/null
+            docker volume create kride-tora-ffmpeg-temp >/dev/null
+            docker volume create kride-tora-meta-temp >/dev/null
+
+            drain_celery_worker kride-celery-worker media
+            docker run -d --name kride-celery-worker \
+              --network sdui-network \
+              --restart unless-stopped \
+              -v kride-celery-temp:/tmp/kride-celery \
+              -v kride-tora-ffmpeg-temp:/app/.tmp-tora-ffmpeg \
+              -v kride-tora-meta-temp:/app/.tmp-tora-meta \
+              -e CELERY_BROKER_URL=redis://sdui-redis:6379/1 \
+              -e CELERY_RESULT_BACKEND=redis://sdui-redis:6379/1 \
+              -e CELERY_MEDIA_TEMP_DIR=/tmp/kride-celery \
+              -e CELERY_TEMP_TTL_HOURS=6 \
+              -e CLOUDINARY_URL='__CLOUDINARY_URL__' \
+              -e CLOUDINARY_CLOUD_NAME='__CLOUDINARY_CLOUD_NAME__' \
+              -e CLOUDINARY_API_KEY='__CLOUDINARY_API_KEY__' \
+              -e CLOUDINARY_API_SECRET='__CLOUDINARY_API_SECRET__' \
+              -e KRIDE_RESULT_URL_REQUIRED=true \
+              __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__ \
+              celery -A src.api.celery_app worker -l info -c 1 -Q media
+
+            # Cleanup is isolated from long-running media jobs so maintenance and
+            # deployment checks cannot be starved behind a video queue backlog.
+            remove_container kride-celery-maintenance
+            docker run -d --name kride-celery-maintenance \
+              --network sdui-network \
+              --restart unless-stopped \
+              -v kride-celery-temp:/tmp/kride-celery \
+              -v kride-tora-ffmpeg-temp:/app/.tmp-tora-ffmpeg \
+              -v kride-tora-meta-temp:/app/.tmp-tora-meta \
+              -e CELERY_BROKER_URL=redis://sdui-redis:6379/1 \
+              -e CELERY_RESULT_BACKEND=redis://sdui-redis:6379/1 \
+              -e CELERY_MEDIA_TEMP_DIR=/tmp/kride-celery \
+              -e CELERY_TEMP_TTL_HOURS=6 \
+              __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__ \
+              celery -A src.api.celery_app worker -l info -c 1 -Q maintenance
+
+            remove_container kride-celery-beat
+            docker run -d --name kride-celery-beat \
+              --network sdui-network \
+              --restart unless-stopped \
+              -v kride-celery-beat:/tmp/celerybeat \
+              -e CELERY_BROKER_URL=redis://sdui-redis:6379/1 \
+              -e CELERY_RESULT_BACKEND=redis://sdui-redis:6379/1 \
+              __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__ \
+              celery -A src.api.celery_app beat -l info --schedule=/tmp/celerybeat/celerybeat-schedule
+
+            sleep 8
+            assert_container_running kride-celery-worker
+            assert_container_running kride-celery-maintenance
+            assert_container_running kride-celery-beat
+            docker exec kride-celery-beat python -c \
+              'from src.api.celery_app import celery; schedule = celery.conf.beat_schedule; assert schedule["cleanup-orphaned-media-temp-hourly"]["task"] == "src.api.tasks.task_cleanup_temp"; assert celery.conf.task_routes["src.api.tasks.task_cleanup_temp"]["queue"] == "maintenance"'
+            docker exec kride-celery-worker python -c \
+              'from deploy.media_motion.cloudinary_upload import _cloudinary_configured; raise SystemExit(0 if _cloudinary_configured() else "Cloudinary credentials are not usable")'
+            docker exec kride-celery-worker python -c '
+          import tempfile, uuid
+          from pathlib import Path
+          from deploy.media_motion.cloudinary_upload import upload_to_cloudinary
+          artifact = Path(tempfile.gettempdir()) / f"kride-cloudinary-smoke-{uuid.uuid4()}.txt"
+          artifact.write_text("kride deployment smoke", encoding="utf-8")
+          try:
+              result = upload_to_cloudinary(
+                  artifact,
+                  folder="kride/deploy-smoke",
+                  resource_type="raw",
+                  public_id=f"deploy-{uuid.uuid4()}",
+              )
+              if not result.get("ok") or not result.get("url"):
+                  raise SystemExit("Cloudinary delivery smoke failed: {}".format(result.get("error", "unknown")))
+              try:
+                  import cloudinary.uploader
+                  cloudinary.uploader.destroy(result["public_id"], resource_type="raw", invalidate=True)
+              except Exception as cleanup_error:
+                  print(f"Cloudinary smoke cleanup warning: {cleanup_error}")
+          finally:
+              artifact.unlink(missing_ok=True)
+          '
+            docker ps --filter name=kride-celery --format "table {{.Names}}\t{{.Status}}"
+            docker logs --tail 40 kride-celery-worker
+            docker logs --tail 40 kride-celery-maintenance
+            docker logs --tail 40 kride-celery-beat
+            docker image prune -f || true
           fi
 
           # ── Host Nginx (SSL) ──
@@ -486,20 +623,86 @@ jobs:
           curl -fsS http://localhost:8000/api/health >/dev/null
           curl -kfsS --resolve yerin.duckdns.org:443:127.0.0.1 https://yerin.duckdns.org/kride-api/health >/dev/null
 
-          SSE_SMOKE_OUTPUT="$(curl -kNsS --max-time 8 \
-            --resolve yerin.duckdns.org:443:127.0.0.1 \
-            "https://yerin.duckdns.org/jobs/celery/deploy-smoke-${RANDOM}/stream" \
-            2>/dev/null || true)"
-          SSE_FIRST_EVENT="$(printf '%s\n' "$SSE_SMOKE_OUTPUT" | sed -n '1p')"
-          echo "Celery SSE first event: $SSE_FIRST_EVENT"
-          printf '%s\n' "$SSE_FIRST_EVENT" | grep -q '^data: ' || {
-            echo "Celery SSE smoke test failed: no immediate event received."
+          assert_container_running kride-celery-worker
+          assert_container_running kride-celery-maintenance
+          assert_container_running kride-celery-beat
+
+          # Worker responsiveness and SSE/result-backend streaming are checked
+          # separately so a legitimate media backlog cannot fail deployment.
+          CELERY_INSPECT="$(docker exec kride-celery-worker \
+            celery -A src.api.celery_app inspect active_queues --timeout=10)"
+          printf '%s' "$CELERY_INSPECT" | grep -q "'name': 'media'" || {
+            echo "Celery media worker did not report the media queue."
             exit 1
           }
+          printf '%s' "$CELERY_INSPECT" | grep -q "'name': 'maintenance'" || {
+            echo "Celery maintenance worker did not report the maintenance queue."
+            exit 1
+          }
+
+          SSE_SMOKE_TASK_ID="$(cat /proc/sys/kernel/random/uuid)"
+          printf '%s' "$SSE_SMOKE_TASK_ID" \
+            | grep -Eq '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$' || {
+            echo "Celery SSE smoke test did not create a UUID task id."
+            exit 1
+          }
+          docker exec -e SSE_SMOKE_TASK_ID="$SSE_SMOKE_TASK_ID" \
+            kride-celery-maintenance python -c \
+            'import os; from src.api.celery_app import celery; celery.backend.store_result(os.environ["SSE_SMOKE_TASK_ID"], {"smoke": True}, "SUCCESS")'
+
+          SSE_SMOKE_HEADERS="$(mktemp)"
+          SSE_SMOKE_BODY="$(mktemp)"
+          SSE_CURL_STATUS=0
+          curl -kNsS --max-time 45 \
+            --resolve yerin.duckdns.org:443:127.0.0.1 \
+            --header 'X-Internal-Api-Key: __FASTAPI_INTERNAL_API_KEY__' \
+            --dump-header "$SSE_SMOKE_HEADERS" \
+            --output "$SSE_SMOKE_BODY" \
+            "https://yerin.duckdns.org/jobs/celery/${SSE_SMOKE_TASK_ID}/stream" \
+            2>/dev/null || SSE_CURL_STATUS=$?
+
+          SSE_HTTP_STATUS="$(awk 'toupper($1) ~ /^HTTP\// { code=$2 } END { print code }' "$SSE_SMOKE_HEADERS")"
+          if [ "$SSE_CURL_STATUS" -ne 0 ]; then
+            rm -f "$SSE_SMOKE_HEADERS" "$SSE_SMOKE_BODY"
+            echo "Celery SSE smoke test request failed (curl status $SSE_CURL_STATUS)."
+            exit 1
+          fi
+          if [ "$SSE_HTTP_STATUS" != "200" ]; then
+            rm -f "$SSE_SMOKE_HEADERS" "$SSE_SMOKE_BODY"
+            echo "Celery SSE smoke test returned HTTP ${SSE_HTTP_STATUS:-unknown}."
+            exit 1
+          fi
+          if ! grep -qi '^content-type:[[:space:]]*text/event-stream' "$SSE_SMOKE_HEADERS"; then
+            rm -f "$SSE_SMOKE_HEADERS" "$SSE_SMOKE_BODY"
+            echo "Celery SSE smoke test did not return text/event-stream."
+            exit 1
+          fi
+          if ! grep -Eq '^data: .*"status"[[:space:]]*:[[:space:]]*"SUCCESS"' "$SSE_SMOKE_BODY"; then
+            rm -f "$SSE_SMOKE_HEADERS" "$SSE_SMOKE_BODY"
+            echo "Celery result backend did not reach SUCCESS through SSE."
+            exit 1
+          fi
+          if ! grep -q '^data: \[DONE\]$' "$SSE_SMOKE_BODY"; then
+            rm -f "$SSE_SMOKE_HEADERS" "$SSE_SMOKE_BODY"
+            echo "Celery SSE stream did not terminate with [DONE]."
+            exit 1
+          fi
+          rm -f "$SSE_SMOKE_HEADERS" "$SSE_SMOKE_BODY"
+          echo "Celery media/maintenance workers, beat, result backend, and authenticated SSE route are healthy."
 
           echo "=== Deployment complete ==="
           docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
           DEPLOY_EOF
+
+          escape_sed_replacement() {
+            printf '%s' "$1" | sed 's/[&|\\]/\\&/g'
+          }
+
+          FASTAPI_INTERNAL_API_KEY_ESCAPED="$(escape_sed_replacement "$DEPLOY_FASTAPI_INTERNAL_API_KEY")"
+          CLOUDINARY_URL_ESCAPED="$(escape_sed_replacement "$DEPLOY_CLOUDINARY_URL")"
+          CLOUDINARY_CLOUD_NAME_ESCAPED="$(escape_sed_replacement "$DEPLOY_CLOUDINARY_CLOUD_NAME")"
+          CLOUDINARY_API_KEY_ESCAPED="$(escape_sed_replacement "$DEPLOY_CLOUDINARY_API_KEY")"
+          CLOUDINARY_API_SECRET_ESCAPED="$(escape_sed_replacement "$DEPLOY_CLOUDINARY_API_SECRET")"
 
           sed -i "s|__SDUI_IMAGE__|${{ env.SDUI_IMAGE }}|g" /tmp/deploy.sh
           sed -i "s|__FRONTEND_IMAGE__|${{ env.FRONTEND_IMAGE }}|g" /tmp/deploy.sh
@@ -521,7 +724,7 @@ jobs:
           sed -i "s|__S3_ACCESS_KEY__|${{ secrets.AWS_ACCESS_KEY }}|g" /tmp/deploy.sh
           sed -i "s|__S3_SECRET_KEY__|${{ secrets.AWS_SECRET_KEY }}|g" /tmp/deploy.sh
           sed -i "s|__KRIDE_FASTAPI_URL__|${{ env.KRIDE_FASTAPI_URL }}|g" /tmp/deploy.sh
-          sed -i "s|__FASTAPI_INTERNAL_API_KEY__|${{ secrets.FASTAPI_INTERNAL_API_KEY }}|g" /tmp/deploy.sh
+          sed -i "s|__FASTAPI_INTERNAL_API_KEY__|$FASTAPI_INTERNAL_API_KEY_ESCAPED|g" /tmp/deploy.sh
           sed -i "s|__NEO4J_URI__|${{ secrets.NEO4J_URI }}|g" /tmp/deploy.sh
           sed -i "s|__NEO4J_USERNAME__|${{ secrets.NEO4J_USERNAME }}|g" /tmp/deploy.sh
           sed -i "s|__NEO4J_PASSWORD__|${{ secrets.NEO4J_PASSWORD }}|g" /tmp/deploy.sh
@@ -531,10 +734,10 @@ jobs:
           sed -i "s|__RUNPOD_ENDPOINT_ID__|${{ secrets.RUNPOD_ENDPOINT_ID }}|g" /tmp/deploy.sh
           sed -i "s|__RUNPOD_MEDIA_ENDPOINT_ID__|${{ secrets.RUNPOD_MEDIA_ENDPOINT_ID }}|g" /tmp/deploy.sh
           sed -i "s|__RUNPOD_TORA_ENDPOINT_ID__|${{ secrets.RUNPOD_TORA_ENDPOINT_ID }}|g" /tmp/deploy.sh
-          sed -i "s|__CLOUDINARY_URL__|${{ secrets.CLOUDINARY_URL }}|g" /tmp/deploy.sh
-          sed -i "s|__CLOUDINARY_CLOUD_NAME__|${{ secrets.CLOUDINARY_CLOUD_NAME }}|g" /tmp/deploy.sh
-          sed -i "s|__CLOUDINARY_API_KEY__|${{ secrets.CLOUDINARY_API_KEY }}|g" /tmp/deploy.sh
-          sed -i "s|__CLOUDINARY_API_SECRET__|${{ secrets.CLOUDINARY_API_SECRET }}|g" /tmp/deploy.sh
+          sed -i "s|__CLOUDINARY_URL__|$CLOUDINARY_URL_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__CLOUDINARY_CLOUD_NAME__|$CLOUDINARY_CLOUD_NAME_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__CLOUDINARY_API_KEY__|$CLOUDINARY_API_KEY_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__CLOUDINARY_API_SECRET__|$CLOUDINARY_API_SECRET_ESCAPED|g" /tmp/deploy.sh
           sed -i "s|__GCP_PROJECT_ID__|${{ secrets.GCP_PROJECT_ID }}|g" /tmp/deploy.sh
           sed -i "s|__SLACK_WEBHOOK_URL__|${{ secrets.SLACK_WEBHOOK_URL }}|g" /tmp/deploy.sh
           sed -i "s|__SLACK_BOT_TOKEN__|${{ secrets.SLACK_BOT_TOKEN }}|g" /tmp/deploy.sh

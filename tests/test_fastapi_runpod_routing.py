@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import os
 import sys
 import types
 from unittest.mock import MagicMock
 
 from fastapi.testclient import TestClient
+
+
+os.environ.setdefault("FASTAPI_INTERNAL_API_KEY", "test-internal-api-key-for-runpod-routing")
 
 
 def _stub(name: str) -> types.ModuleType:
@@ -46,6 +50,7 @@ class _FakeRunPodResponse:
 
 
 def _configure_runpod(monkeypatch) -> None:
+    monkeypatch.setattr(server, "FASTAPI_INTERNAL_API_KEY", "test-internal-api-key-for-runpod-routing")
     monkeypatch.setattr(server, "RUNPOD_API_KEY", "runpod-key")
     monkeypatch.setattr(server, "RUNPOD_ENDPOINT_ID", "legacy-endpoint")
     monkeypatch.setattr(server, "RUNPOD_MEDIA_ENDPOINT_ID", "media-endpoint")

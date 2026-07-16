@@ -7,6 +7,10 @@ import types
 from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
+import pytest
+
+
+os.environ.setdefault("FASTAPI_INTERNAL_API_KEY", "test-internal-api-key-for-celery-pipeline")
 
 
 def _stub(name: str) -> types.ModuleType:
@@ -68,6 +72,8 @@ except ModuleNotFoundError:
     _celery_module.Celery = _FakeCelery
     _celery_result_module.AsyncResult = MagicMock
     _celery_schedules_module.crontab = lambda **kwargs: kwargs
+    _celery_module.result = _celery_result_module
+    _celery_module.schedules = _celery_schedules_module
     sys.modules["celery"] = _celery_module
     sys.modules["celery.result"] = _celery_result_module
     sys.modules["celery.schedules"] = _celery_schedules_module
@@ -78,14 +84,18 @@ sys.modules.setdefault("src.api.ensemble_client", _ensemble)
 
 import src.api.fastapi_server as server  # noqa: E402
 from src.api.celery_app import celery  # noqa: E402
-from src.api.tasks import cleanup_stale_temp_paths, task_generate_tts  # noqa: E402
+from src.api.tasks import cleanup_stale_temp_paths, task_generate_tts, task_generate_video  # noqa: E402
 
 
 client = TestClient(server.app, raise_server_exceptions=False)
+CELERY_TASK_ID = "85a9f8bb-e57b-4b8d-a1ca-5a1f34cb764a"
 
 
-def _auth_headers() -> dict[str, str]:
-    return {"X-Internal-Api-Key": server.FASTAPI_INTERNAL_API_KEY}
+def _auth_headers(task_id: str = CELERY_TASK_ID) -> dict[str, str]:
+    return {
+        "X-Internal-Api-Key": server.FASTAPI_INTERNAL_API_KEY,
+        "X-Celery-Job-Token": server._celery_job_token(task_id),
+    }
 
 
 class _SequencedAsyncResult:
@@ -112,6 +122,73 @@ class _SequencedAsyncResult:
         return self._current[2]
 
 
+def _install_video_pipeline_stubs(monkeypatch, finalized: dict) -> dict[str, Path]:
+    captured: dict[str, Path] = {}
+
+    runpod_module = types.ModuleType("deploy.media_motion.runpod_handler")
+
+    def download_image(_url, _case_id, work_dir):
+        image_path = work_dir / "input.jpg"
+        image_path.write_bytes(b"image")
+        return image_path
+
+    runpod_module._download_image = download_image
+
+    bgm_module = types.ModuleType("deploy.media_motion.bgm")
+
+    def ensure_fallback_bgm(bgm_dir, _bgm_key):
+        bgm_dir.mkdir(parents=True, exist_ok=True)
+        bgm_path = bgm_dir / "fallback.wav"
+        bgm_path.write_bytes(b"audio")
+        return bgm_path
+
+    bgm_module.ensure_fallback_bgm = ensure_fallback_bgm
+
+    config_module = types.ModuleType("deploy.media_motion.worker_config")
+    config_module.load_worker_config = lambda **_kwargs: types.SimpleNamespace()
+
+    schemas_module = types.ModuleType("deploy.media_motion.schemas")
+    schemas_module.TravelCase = lambda **kwargs: types.SimpleNamespace(**kwargs)
+
+    video_module = types.ModuleType("deploy.media_motion.three_d_photo_light")
+
+    def run_video(_case, work_dir, _bgm_wav):
+        video_path = work_dir / "final.mp4"
+        video_path.write_bytes(b"video")
+        captured["local_video"] = video_path
+        artifact = types.SimpleNamespace(kind="final_video", path=video_path)
+        result = types.SimpleNamespace(
+            status="success",
+            route="3d_photo_light",
+            metadata={"actual_model_executed": True},
+            artifacts=[artifact],
+        )
+        result.to_dict = lambda: {
+            "status": result.status,
+            "route": result.route,
+            "metadata": result.metadata,
+            "artifacts": [{"kind": "final_video", "path": str(video_path)}],
+        }
+        return result
+
+    video_module.run_3d_photo_light_case = run_video
+
+    delivery_module = types.ModuleType("deploy.media_motion.result_delivery")
+    delivery_module.finalize_result = lambda _result: dict(finalized)
+
+    for name, module in {
+        "deploy.media_motion.runpod_handler": runpod_module,
+        "deploy.media_motion.bgm": bgm_module,
+        "deploy.media_motion.worker_config": config_module,
+        "deploy.media_motion.schemas": schemas_module,
+        "deploy.media_motion.three_d_photo_light": video_module,
+        "deploy.media_motion.result_delivery": delivery_module,
+    }.items():
+        monkeypatch.setitem(sys.modules, name, module)
+
+    return captured
+
+
 def test_submit_response_exposes_polling_and_stream_urls() -> None:
     response = server._celery_submit_response(types.SimpleNamespace(id="job-123"))
     body = bytes(response.body).decode("utf-8")
@@ -131,7 +208,10 @@ def test_celery_sse_emits_changes_done_and_proxy_headers(monkeypatch) -> None:
     monkeypatch.setattr(server, "CELERY_SSE_POLL_INTERVAL_SECONDS", 0.001)
 
     with patch("celery.result.AsyncResult", return_value=fake_result):
-        response = client.get("/jobs/celery/job-1/stream", headers=_auth_headers())
+        response = client.get(
+            f"/jobs/celery/{CELERY_TASK_ID}/stream",
+            headers=_auth_headers(),
+        )
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/event-stream")
@@ -142,7 +222,7 @@ def test_celery_sse_emits_changes_done_and_proxy_headers(monkeypatch) -> None:
 
 
 def test_celery_sse_requires_internal_api_key() -> None:
-    response = client.get("/jobs/celery/job-1/stream")
+    response = client.get(f"/jobs/celery/{CELERY_TASK_ID}/stream")
     assert response.status_code == 401
 
 
@@ -198,7 +278,168 @@ def test_tts_work_directory_is_removed_after_success(tmp_path: Path, monkeypatch
     assert list(tmp_path.glob("celery_tts_*")) == []
 
 
-def test_celery_beat_routes_hourly_cleanup_to_media_queue() -> None:
-    assert celery.conf.task_routes["src.api.tasks.task_cleanup_temp"] == {"queue": "media"}
+def test_tts_upload_failure_never_returns_deleted_local_path(tmp_path: Path, monkeypatch) -> None:
+    tts_module = types.ModuleType("deploy.media_motion.tts")
+    upload_module = types.ModuleType("deploy.media_motion.cloudinary_upload")
+
+    def synthesize_gtts(_text, output_path, lang):
+        output_path.write_bytes(f"audio-{lang}".encode())
+        return output_path
+
+    tts_module.synthesize_gtts = synthesize_gtts
+    upload_module.upload_to_cloudinary = lambda *_args, **_kwargs: {
+        "ok": False,
+        "error": "Cloudinary not configured",
+    }
+    monkeypatch.setitem(sys.modules, "deploy.media_motion.tts", tts_module)
+    monkeypatch.setitem(sys.modules, "deploy.media_motion.cloudinary_upload", upload_module)
+    monkeypatch.setenv("CELERY_MEDIA_TEMP_DIR", str(tmp_path))
+    monkeypatch.delenv("KRIDE_RESULT_URL_REQUIRED", raising=False)
+    monkeypatch.setattr(task_generate_tts, "update_state", MagicMock())
+
+    result = task_generate_tts.run("hello", lang="ko")
+
+    assert result == {
+        "status": "success",
+        "url": "",
+        "source": "unavailable",
+        "text_length": 5,
+        "upload_error": "Cloudinary not configured",
+    }
+    assert list(tmp_path.glob("celery_tts_*")) == []
+
+
+def test_tts_required_delivery_retries_when_upload_has_no_public_url(tmp_path: Path, monkeypatch) -> None:
+    tts_module = types.ModuleType("deploy.media_motion.tts")
+    upload_module = types.ModuleType("deploy.media_motion.cloudinary_upload")
+
+    def synthesize_gtts(_text, output_path, lang):
+        output_path.write_bytes(f"audio-{lang}".encode())
+        return output_path
+
+    tts_module.synthesize_gtts = synthesize_gtts
+    upload_module.upload_to_cloudinary = lambda *_args, **_kwargs: {
+        "ok": True,
+        "url": "",
+        "source": "cloudinary",
+    }
+    monkeypatch.setitem(sys.modules, "deploy.media_motion.tts", tts_module)
+    monkeypatch.setitem(sys.modules, "deploy.media_motion.cloudinary_upload", upload_module)
+    monkeypatch.setenv("CELERY_MEDIA_TEMP_DIR", str(tmp_path))
+    monkeypatch.setenv("KRIDE_RESULT_URL_REQUIRED", "true")
+    monkeypatch.setattr(task_generate_tts, "update_state", MagicMock())
+    retry = MagicMock(side_effect=RuntimeError("retry scheduled"))
+    monkeypatch.setattr(task_generate_tts, "retry", retry)
+
+    with pytest.raises(RuntimeError, match="retry scheduled"):
+        task_generate_tts.run("hello", lang="en")
+
+    retry.assert_called_once()
+    assert "no public URL" in str(retry.call_args.kwargs["exc"])
+    assert list(tmp_path.glob("celery_tts_*")) == []
+
+
+def test_video_uses_finalized_public_result_url(tmp_path: Path, monkeypatch) -> None:
+    captured = _install_video_pipeline_stubs(
+        monkeypatch,
+        {
+            "status": "success",
+            "route": "3d_photo_light",
+            "result_url": "https://cdn.example/final.mp4",
+        },
+    )
+    monkeypatch.setenv("CELERY_MEDIA_TEMP_DIR", str(tmp_path))
+    monkeypatch.setenv("KRIDE_RESULT_URL_REQUIRED", "true")
+    monkeypatch.setattr(task_generate_video, "update_state", MagicMock())
+
+    result = task_generate_video.run("https://example.com/input.jpg", route="3d_photo_light")
+
+    assert result == {
+        "status": "success",
+        "route": "3d_photo_light",
+        "result_url": "https://cdn.example/final.mp4",
+        "actual_model_executed": True,
+        "case_id": "celery_video",
+    }
+    assert not captured["local_video"].exists()
+    assert list(tmp_path.glob("celery_video_*")) == []
+
+
+def test_video_never_returns_deleted_local_result_path(tmp_path: Path, monkeypatch) -> None:
+    captured = _install_video_pipeline_stubs(
+        monkeypatch,
+        {
+            "status": "success",
+            "route": "3d_photo_light",
+            "result_delivery_error": "Cloudinary not configured",
+        },
+    )
+    monkeypatch.setenv("CELERY_MEDIA_TEMP_DIR", str(tmp_path))
+    monkeypatch.delenv("KRIDE_RESULT_URL_REQUIRED", raising=False)
+    monkeypatch.setattr(task_generate_video, "update_state", MagicMock())
+
+    result = task_generate_video.run("https://example.com/input.jpg", route="3d_photo_light")
+
+    assert result["result_url"] == ""
+    assert result["result_url"] != str(captured["local_video"])
+    assert not captured["local_video"].exists()
+
+
+def test_video_retries_when_required_result_delivery_fails(tmp_path: Path, monkeypatch) -> None:
+    captured = _install_video_pipeline_stubs(
+        monkeypatch,
+        {
+            "status": "failed",
+            "route": "3d_photo_light",
+            "error": "Cloudinary credentials are missing",
+        },
+    )
+    monkeypatch.setenv("CELERY_MEDIA_TEMP_DIR", str(tmp_path))
+    monkeypatch.setenv("KRIDE_RESULT_URL_REQUIRED", "true")
+    monkeypatch.setattr(task_generate_video, "update_state", MagicMock())
+
+    def raise_retry(*, exc):
+        raise exc
+
+    retry = MagicMock(side_effect=raise_retry)
+    monkeypatch.setattr(task_generate_video, "retry", retry)
+
+    with pytest.raises(RuntimeError, match="Cloudinary credentials are missing"):
+        task_generate_video.run("https://example.com/input.jpg", route="3d_photo_light")
+
+    retry.assert_called_once()
+    assert not captured["local_video"].exists()
+    assert list(tmp_path.glob("celery_video_*")) == []
+
+
+def test_video_retries_for_case_insensitive_failed_status(tmp_path: Path, monkeypatch) -> None:
+    captured = _install_video_pipeline_stubs(
+        monkeypatch,
+        {
+            "status": "FAILED",
+            "route": "3d_photo_light",
+            "result_url": "https://cdn.example/unusable.mp4",
+            "error": "Video generation failed",
+        },
+    )
+    monkeypatch.setenv("CELERY_MEDIA_TEMP_DIR", str(tmp_path))
+    monkeypatch.delenv("KRIDE_RESULT_URL_REQUIRED", raising=False)
+    monkeypatch.setattr(task_generate_video, "update_state", MagicMock())
+
+    def raise_retry(*, exc):
+        raise exc
+
+    retry = MagicMock(side_effect=raise_retry)
+    monkeypatch.setattr(task_generate_video, "retry", retry)
+
+    with pytest.raises(RuntimeError, match="Video generation failed"):
+        task_generate_video.run("https://example.com/input.jpg", route="3d_photo_light")
+
+    retry.assert_called_once()
+    assert not captured["local_video"].exists()
+
+
+def test_celery_beat_routes_hourly_cleanup_to_maintenance_queue() -> None:
+    assert celery.conf.task_routes["src.api.tasks.task_cleanup_temp"] == {"queue": "maintenance"}
     schedule = celery.conf.beat_schedule["cleanup-orphaned-media-temp-hourly"]
     assert schedule["task"] == "src.api.tasks.task_cleanup_temp"

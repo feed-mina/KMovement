@@ -31,6 +31,8 @@ services:
       - TORCHSERVE_URL=http://host.docker.internal:8085
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - CELERY_ML_TASKS_ENABLED=true
+      - FASTAPI_INTERNAL_API_KEY=${FASTAPI_INTERNAL_API_KEY:-}
       - CHROMA_HOST=chromadb
       - CHROMA_PORT=8000
       - HF_HOME=/tmp/hf_cache
@@ -113,6 +115,30 @@ services:
       - CELERY_TEMP_TTL_HOURS=${CELERY_TEMP_TTL_HOURS:-6}
       - HF_HOME=/tmp/hf_cache
       - TRANSFORMERS_CACHE=/tmp/hf_cache/hub
+    volumes:
+      - celery_media_temp:/tmp/kride-celery
+      - tora_ffmpeg_temp:/app/.tmp-tora-ffmpeg
+      - tora_meta_temp:/app/.tmp-tora-meta
+    restart: unless-stopped
+
+  # Cleanup stays responsive even while the single-slot media worker is busy.
+  celery-maintenance-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: kride_celery_maintenance
+    command: celery -A src.api.celery_app worker -l info -c 1 -Q maintenance
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - CELERY_MEDIA_TEMP_DIR=/tmp/kride-celery
+      - CELERY_TEMP_TTL_HOURS=${CELERY_TEMP_TTL_HOURS:-6}
     volumes:
       - celery_media_temp:/tmp/kride-celery
       - tora_ffmpeg_temp:/app/.tmp-tora-ffmpeg

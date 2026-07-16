@@ -9,12 +9,12 @@
 # Prerequisites:
 #   - Docker and docker compose installed
 #   - .env file with required variables
-#   - FASTAPI_INTERNAL_API_KEY in .env (or defaults to sdui-internal-dev-key)
+#   - FASTAPI_INTERNAL_API_KEY exported or configured in the FastAPI container
 
 set -euo pipefail
 
 COMPOSE_FILE="${1:-docker-compose.local.yml}"
-API_KEY="${FASTAPI_INTERNAL_API_KEY:-sdui-internal-dev-key}"
+API_KEY="${FASTAPI_INTERNAL_API_KEY:-}"
 BASE_URL="http://localhost:8000"
 MAX_WAIT=120
 POLL_INTERVAL=3
@@ -60,6 +60,17 @@ fi
 echo "  ✓ FastAPI is healthy"
 
 # ── Step 2: Verify workers registered ────────────────────────────────────────
+# Use the exact key configured in the running API container when the caller did
+# not export one. FastAPI intentionally has no development fallback key.
+if [ -z "$API_KEY" ]; then
+    API_KEY="$(docker compose -f "$COMPOSE_FILE" exec -T fastapi \
+        sh -c 'printf %s "$FASTAPI_INTERNAL_API_KEY"' 2>/dev/null | tr -d '\r')"
+fi
+if [ -z "$API_KEY" ]; then
+    echo "  ERROR: FASTAPI_INTERNAL_API_KEY is not configured"
+    exit 1
+fi
+
 echo "[4/7] Checking Celery worker connectivity..."
 sleep 5  # Give workers time to connect
 
@@ -75,20 +86,38 @@ SUBMIT_RESPONSE=$(curl -sf -X POST "$BASE_URL/jobs/celery/weather" \
     exit 1
 }
 
-TASK_ID=$(echo "$SUBMIT_RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('task_id',''))" 2>/dev/null || echo "")
+TASK_ID=$(echo "$SUBMIT_RESPONSE" | python3 -c "import sys,json,uuid; raw=json.load(sys.stdin).get('task_id',''); value=uuid.UUID(raw); assert raw.lower() == str(value) and value.variant == uuid.RFC_4122 and value.version in range(1, 6); print(value)" 2>/dev/null || echo "")
 if [ -z "$TASK_ID" ]; then
-    echo "  ✗ No task_id in response"
+    echo "  ✗ No canonical Celery UUID in response"
     echo "  Response: $SUBMIT_RESPONSE"
     exit 1
 fi
 echo "  ✓ Task submitted: $TASK_ID"
 
 # ── Step 4: Poll for completion ──────────────────────────────────────────────
+JOB_TOKEN=$(API_KEY="$API_KEY" TASK_ID="$TASK_ID" python3 - <<'PY'
+import hashlib
+import hmac
+import os
+
+print(hmac.new(
+    os.environ["API_KEY"].encode("utf-8"),
+    os.environ["TASK_ID"].encode("utf-8"),
+    hashlib.sha256,
+).hexdigest())
+PY
+)
+if ! [[ "$JOB_TOKEN" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "  ERROR: Could not derive Celery job token"
+    exit 1
+fi
+
 echo "[6/7] Polling task status..."
 FINAL_STATUS=""
 for i in $(seq 1 30); do
     STATUS_RESPONSE=$(curl -sf "$BASE_URL/jobs/celery/$TASK_ID" \
-        -H "X-Internal-Api-Key: $API_KEY" 2>&1) || continue
+        -H "X-Internal-Api-Key: $API_KEY" \
+        -H "X-Celery-Job-Token: $JOB_TOKEN" 2>&1) || continue
 
     STATUS=$(echo "$STATUS_RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo "")
     echo "  Poll $i: status=$STATUS"
