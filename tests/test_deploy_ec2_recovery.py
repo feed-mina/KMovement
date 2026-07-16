@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from textwrap import dedent
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -71,6 +72,20 @@ def test_disk_recovery_only_removes_unreferenced_owned_service_images() -> None:
     assert "__KRIDE_FASTAPI_IMAGE__" in workflow
     assert "__KRIDE_CELERY_IMAGE__" in workflow
     assert "docker system df -v" in workflow
+
+
+def test_create_deploy_script_stays_below_github_expression_limit() -> None:
+    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+
+    step = workflow.index("      - name: Create deploy script")
+    run_marker = "        run: |\n"
+    run_start = workflow.index(run_marker, step) + len(run_marker)
+    run_end = workflow.index("\n      - name: Deploy to EC2", run_start)
+    run_body = dedent(workflow[run_start:run_end])
+
+    # GitHub rejects a single run expression at 21,000 characters. Keep enough
+    # headroom that a small diagnostic addition cannot disable the workflow.
+    assert len(run_body) < 20_500
 
 
 def test_media_worker_is_warm_drained_before_replacement() -> None:
