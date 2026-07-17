@@ -6,6 +6,9 @@ const projectRoot = __dirname;
 const workspaceRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
+// Watch only the app and the shared core package (not the whole workspace) to keep
+// Watchman crawl/query fast. The local `index.js` entry keeps the dev-server bundle
+// URL inside projectRoot, so watching the workspace root is unnecessary.
 config.watchFolders = [path.resolve(workspaceRoot, 'packages/core')];
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),

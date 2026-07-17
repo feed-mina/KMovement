@@ -1,19 +1,45 @@
+import { useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Linking, ScrollView, Text, View } from 'react-native';
 import { DynamicEngine, resolveRuntimeConfig, usePageHook, useUiScreen } from '@kride/core';
 import { rnPrimitives } from '../src/primitives';
 import { mobileComponentMap } from '../src/componentMap';
 
+// Stable references. `useBaseActions` in @kride/core resets form state during
+// render whenever `metadata`/`routeParams`/`initialData` change *by reference*.
+// Passing fresh literals (`data ?? []`, `{ screenId }`, `{}`) every render made
+// those guards fire on every render → "Too many re-renders" infinite loop.
+const EMPTY_METADATA: any[] = [];
+const EMPTY_OBJ = {};
+
 export default function MobileScreen() {
   const { screenId } = useLocalSearchParams<{ screenId: string }>();
   const router = useRouter();
   const sid = screenId ?? 'MAIN_PAGE';
-  const config = resolveRuntimeConfig({ apiBase: process.env.EXPO_PUBLIC_API_BASE });
-  const { data, isLoading, error } = useUiScreen(sid, config.apiBase);
-  const page = usePageHook(sid, data ?? [], {}, {
-    push: (path) => router.push(path as never),
-    openExternal: (url) => { void Linking.openURL(url); },
-  }, { screenId });
+  const apiBase = resolveRuntimeConfig({ apiBase: process.env.EXPO_PUBLIC_API_BASE }).apiBase;
+  const { data, isLoading, error } = useUiScreen(sid, apiBase);
+
+  // react-query keeps `data` referentially stable until it actually changes;
+  // fall back to a module-level constant so the reference is stable while loading.
+  const metadata = data ?? EMPTY_METADATA;
+  const navigation = useMemo(
+    () => ({
+      push: (path: string) => {
+        // The server emits web-style routes (`/view/<screenId>`); the mobile
+        // router uses `/<screenId>` (app/[screenId].tsx). Normalize so pushes
+        // land on a real route instead of "Unmatched Route".
+        const normalized = path.startsWith('/view/') ? path.replace(/^\/view\//, '/') : path;
+        router.push(normalized as never);
+      },
+      openExternal: (url: string) => {
+        void Linking.openURL(url);
+      },
+    }),
+    [router],
+  );
+  const routeParams = useMemo(() => ({ screenId }), [screenId]);
+
+  const page = usePageHook(sid, metadata, EMPTY_OBJ, navigation, routeParams);
 
   if (isLoading) {
     return (
@@ -35,9 +61,9 @@ export default function MobileScreen() {
       <View className="px-5 pb-10 pt-16">
         <Text className="mb-6 text-2xl font-bold text-kride">KRIDE</Text>
         <DynamicEngine
-          metadata={data ?? []}
+          metadata={metadata}
           screenId={sid}
-          pageData={{}}
+          pageData={EMPTY_OBJ}
           formData={page.formData}
           setFormData={page.setFormData}
           onChange={page.handleChange}
