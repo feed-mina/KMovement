@@ -88,14 +88,18 @@ export const PasswordLeaf: React.FC<MobileInputLeafProps> = ({ id, meta, data, f
   );
 };
 
+/**
+ * EMAIL_SELECT deliberately ignores `is_readonly`, matching the web's
+ * EmailSelectField which never reads it. The LOGIN_PAGE seed marks
+ * `user_email_domain` readonly, which would otherwise leave the domain
+ * unselectable and make login unreachable.
+ */
 export const EmailSelectLeaf: React.FC<MobileInputLeafProps> = ({ id, meta, formData, onChange }) => {
   const key = fieldKey(id, meta);
   const value = textValue(formData?.[key]);
   const [custom, setCustom] = useState(value && !EMAIL_DOMAINS.includes(value));
-  const isReadonly = truthyReadonly(meta);
 
   const choose = (next: string) => {
-    if (isReadonly) return;
     setCustom(false);
     onChange?.(key, next);
   };
@@ -119,9 +123,7 @@ export const EmailSelectLeaf: React.FC<MobileInputLeafProps> = ({ id, meta, form
         <Pressable
           className={`rounded-full border px-3 py-2 ${custom ? 'border-kride bg-kride' : 'border-gray-300 bg-white'}`}
           accessibilityRole="button"
-          onPress={() => {
-            if (!isReadonly) setCustom(true);
-          }}
+          onPress={() => setCustom(true)}
         >
           <Text className={`text-sm ${custom ? 'font-semibold text-white' : 'text-gray-700'}`}>Custom</Text>
         </Pressable>
@@ -130,7 +132,6 @@ export const EmailSelectLeaf: React.FC<MobileInputLeafProps> = ({ id, meta, form
         <TextInput
           className={inputClassName}
           value={value}
-          editable={!isReadonly}
           placeholder="email domain"
           placeholderTextColor="#9ca3af"
           autoCapitalize="none"

@@ -8,9 +8,10 @@ export const usePageHook = (
   metadata: any[],
   initialData: any = {},
   navigation: NavigationAdapter,
-  routeParams: RuntimeConfig["routeParams"] = {}
+  routeParams: RuntimeConfig["routeParams"] = {},
+  runtime: RuntimeConfig = {}
 ) => {
-  const actions = useBusinessActions(screenId, metadata, initialData, navigation, routeParams);
+  const actions = useBusinessActions(screenId, metadata, initialData, navigation, routeParams, runtime);
 
   const handleAction = useCallback(
     async (meta: any, data?: any) => {

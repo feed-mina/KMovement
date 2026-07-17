@@ -2,11 +2,16 @@
 
 ## Local Device Smoke Test
 
-1. Copy `.env.example` to `.env` and keep `EXPO_PUBLIC_API_BASE` reachable from the phone.
+1. Copy `.env.example` to `.env`. `EXPO_PUBLIC_API_BASE` is required and must be
+   reachable **from the phone** — a local backend needs this machine's LAN IP,
+   not `localhost`. Without the variable the app falls back to an empty API base
+   and every request goes to an unresolvable relative path, so screens and login
+   fail with no obvious cause. The default in the template points at the same
+   deployed host the EAS profiles use, which needs no local backend.
 2. Start Metro from this directory:
 
 ```powershell
-cd D:\KMovement\subproject\SDUI\kride\apps\mobile
+cd <repo>\subproject\SDUI\kride\apps\mobile
 npm run start:clear
 ```
 
@@ -18,6 +23,34 @@ npm run start:tunnel
 ```
 
 If `Waiting for Watchman 'query'` keeps increasing for more than about 60 seconds, stop Metro with `Ctrl+C` and clear stale watch/indexing inputs before retrying. The current Metro config intentionally watches only the mobile app and `packages/core`.
+
+### What to check
+
+Automated tests cover the leaves and the login action in isolation; these are the
+parts only a device can confirm.
+
+| Step | Expect |
+|---|---|
+| Open `/LOGIN_PAGE` | Domain chips (`naver.com` …) respond to taps and show as selected |
+| Tap `Custom` | A domain text field appears and accepts input |
+| Fill id + domain + password, tap 로그인 | Navigates to `MAIN_PAGE` |
+| Retry with a wrong password | Alert: 로그인 정보가 올바르지 않습니다 |
+| Force-quit and relaunch | Still logged in (SecureStore round-trip) |
+
+The relaunch step is the one with no automated equivalent — the store tests
+simulate a restart in memory rather than exercising SecureStore itself.
+
+If the login button does nothing, check the server's DB before the client: the
+button is wired by `ui_metadata.action_type = 'LOGIN_SUBMIT'` for
+`LOGIN_PAGE.login_btn`. An unmigrated database still holding the old `SUBMIT`
+value produces a no-op button no matter what the app does (see `V21`).
+
+### Expo Go limits
+
+`react-native-maps` ships in dev/EAS builds but not in Expo Go, so any screen
+with a `MAP_VIEW` component (currently `KRIDE_FOCUS`) crashes there. The login
+path (`LOGIN_PAGE` → `MAIN_PAGE`) uses no map and is safe. Use an EAS build to
+exercise map screens.
 
 ## Bundle Check
 

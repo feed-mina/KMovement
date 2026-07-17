@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Linking, ScrollView, Text, View } from 'react-native';
+import { Alert, Linking, ScrollView, Text, View } from 'react-native';
 import { DynamicEngine, PATH_TO_SCREEN, resolveRuntimeConfig, usePageHook, useUiScreen } from '@kride/core';
 import { rnPrimitives } from '../src/primitives';
 import { mobileComponentMap } from '../src/componentMap';
@@ -53,12 +53,14 @@ export default function MobileScreen() {
       openExternal: (url: string) => {
         void Linking.openURL(url);
       },
+      notify: (message: string) => Alert.alert(message),
     }),
     [router],
   );
   const routeParams = useMemo(() => ({ screenId }), [screenId]);
+  const runtime = useMemo(() => ({ apiBase }), [apiBase]);
 
-  const page = usePageHook(sid, metadata, EMPTY_OBJ, navigation, routeParams);
+  const page = usePageHook(sid, metadata, EMPTY_OBJ, navigation, routeParams, runtime);
 
   if (isLoading) {
     return (
