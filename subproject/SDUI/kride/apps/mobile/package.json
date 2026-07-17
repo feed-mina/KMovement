@@ -5,8 +5,13 @@
   "main": "index.js",
   "scripts": {
     "start": "expo start",
+    "start:clear": "expo start -c",
+    "start:tunnel": "expo start --tunnel -c",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "export:android": "expo export --platform android --clear --max-workers 4",
+    "eas:build:preview": "eas build --platform android --profile preview",
+    "eas:build:production": "eas build --platform android --profile production",
     "test": "jest"
   },
   "dependencies": {
