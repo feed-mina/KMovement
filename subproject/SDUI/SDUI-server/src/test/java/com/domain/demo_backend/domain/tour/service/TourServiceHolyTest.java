@@ -128,6 +128,7 @@ class TourServiceHolyTest {
     void rejectSetsRejected() {
         TourPoi pending = holy("holy-r", "반려성지", "다수");
         pending.setPoiSqno(11L);
+        pending.setReviewStatus("PENDING");
         when(tourPoiRepository.findById(11L)).thenReturn(Optional.of(pending));
         when(tourPoiRepository.save(any(TourPoi.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -140,6 +141,7 @@ class TourServiceHolyTest {
     void invalidReviewRequestsThrow() {
         TourPoi pending = holy("holy-x", "성지X", "다수");
         pending.setPoiSqno(12L);
+        pending.setReviewStatus("PENDING");
         when(tourPoiRepository.findById(12L)).thenReturn(Optional.of(pending));
         when(tourPoiRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -155,6 +157,14 @@ class TourServiceHolyTest {
         assertThatThrownBy(() -> tourService.reviewHolyPoi(13L, "APPROVE", "admin"))
                 .isInstanceOf(IllegalArgumentException.class);
 
+        TourPoi alreadyReviewed = holy("holy-reviewed", "검수완료", "BTS");
+        alreadyReviewed.setPoiSqno(14L);
+        alreadyReviewed.setSource("UGC");
+        when(tourPoiRepository.findById(14L)).thenReturn(Optional.of(alreadyReviewed));
+        assertThatThrownBy(() -> tourService.reviewHolyPoi(14L, "REJECT", "admin"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("PENDING");
+
         verify(tourPoiRepository, never()).save(any(TourPoi.class));
     }
 
@@ -165,6 +175,9 @@ class TourServiceHolyTest {
                 .thenReturn(Optional.empty());
         when(tourPoiRepository.save(any(TourPoi.class))).thenAnswer(inv -> {
             TourPoi poi = inv.getArgument(0);
+            assertThat(poi.getSource()).isEqualTo("UGC");
+            assertThat(poi.getReviewStatus()).isEqualTo("PENDING");
+            assertThat(poi.getSubmittedBy()).isEqualTo(7L);
             poi.setPoiSqno(101L);
             return poi;
         });
@@ -196,6 +209,14 @@ class TourServiceHolyTest {
         assertThatThrownBy(() -> tourService.submitHolyPoi("서울숲", "서울", 10.0, 10.0,
                 "BTS", "확인된 사실", "not-a-url", 7L))
                 .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> tourService.submitHolyPoi("서울숲", "서울", 127.04, 37.54,
+                "BTS", "확인된 사실", "https://", 7L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("with a host");
+        assertThatThrownBy(() -> tourService.submitHolyPoi("서울숲", "서울", Double.NaN, 37.54,
+                "BTS", "확인된 사실", "https://example.com/fact", 7L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("South Korea");
         verify(tourPoiRepository, never()).save(any(TourPoi.class));
     }
 }
