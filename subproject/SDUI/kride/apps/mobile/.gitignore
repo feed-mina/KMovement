@@ -11,3 +11,6 @@ dist*/
 .eas-cli-tools/
 .eas-npm-cache/
 .eas-user-data/
+
+# Stray Windows system paths accidentally captured by tooling
+%ProgramData%/
