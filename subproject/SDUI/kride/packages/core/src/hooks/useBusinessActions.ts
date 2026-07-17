@@ -64,7 +64,7 @@ export const useBusinessActions = (
               return;
             }
 
-            useSessionStore.getState().setSession(token);
+            await useSessionStore.getState().setSession(token);
             navigation.push("/MAIN_PAGE");
           } catch {
             navigation.notify?.("네트워크 오류가 발생했습니다. 연결을 확인해주세요.");

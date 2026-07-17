@@ -44,8 +44,8 @@ const fillLoginForm = async (hook: ReturnType<typeof setup>["hook"]) => {
 };
 
 describe("LOGIN_SUBMIT", () => {
-  beforeEach(() => {
-    useSessionStore.getState().clearSession();
+  beforeEach(async () => {
+    await useSessionStore.getState().clearSession();
     jest.restoreAllMocks();
   });
 
