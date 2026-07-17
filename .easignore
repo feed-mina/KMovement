@@ -1,0 +1,29 @@
+# What EAS Build uploads. It archives the whole git root, which here is an
+# ML monorepo — ~1.9 GB of tracked datasets and models that the Expo app in
+# subproject/SDUI/kride has nothing to do with. Without this file the upload
+# either takes forever or dies walking directories it never needed to read.
+#
+# Note this REPLACES .gitignore for EAS (eas-cli skips .gitignore entirely once
+# .easignore exists), and unlike .gitignore it can also exclude tracked files —
+# which is required here, since the large datasets are committed. node_modules
+# is always ignored by eas-cli regardless.
+#
+# Allowlist: drop everything, then re-admit the path to the mobile workspace.
+# Each level needs its contents excluded before the next can be re-included —
+# a file cannot be re-included once a parent directory is excluded.
+/*
+!/subproject
+/subproject/*
+!/subproject/SDUI
+/subproject/SDUI/*
+!/subproject/SDUI/kride
+
+# Local build outputs inside the workspace — regenerated on the build server.
+**/.expo/
+**/dist/
+**/.eas-cli-tools/
+**/.eas-npm-cache/
+**/.eas-user-data/
+**/node_modules.stale/
+**/tsconfig.tsbuildinfo
+**/.env
