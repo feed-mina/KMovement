@@ -2,7 +2,7 @@ import type React from 'react';
 import { View } from 'react-native';
 import type { ComponentRegistry, SduiLeafProps } from '@kride/core';
 import KrideMap from './components/KrideMap';
-import { EmailSelectLeaf, InputLeaf, PasswordLeaf } from './formLeaves';
+import { ActionButtonLeaf, EmailSelectLeaf, InputLeaf, PasswordLeaf } from './formLeaves';
 import {
   CardImageLeaf,
   CardLabelLeaf,
@@ -47,6 +47,8 @@ export const mobileComponentMap: ComponentRegistry = {
   INPUT: InputLeaf,
   PASSWORD: PasswordLeaf,
   EMAIL_SELECT: EmailSelectLeaf,
+  LINK_BUTTON: ActionButtonLeaf,
+  SNS_BUTTON: ActionButtonLeaf,
   // display atoms (P4, 1st pass)
   CARD_IMAGE: CardImageLeaf,
   CARD_LABEL: CardLabelLeaf,

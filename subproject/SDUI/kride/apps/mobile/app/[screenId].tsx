@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Linking, ScrollView, Text, View } from 'react-native';
-import { DynamicEngine, resolveRuntimeConfig, usePageHook, useUiScreen } from '@kride/core';
+import { DynamicEngine, PATH_TO_SCREEN, resolveRuntimeConfig, usePageHook, useUiScreen } from '@kride/core';
 import { rnPrimitives } from '../src/primitives';
 import { mobileComponentMap } from '../src/componentMap';
 
@@ -11,6 +11,25 @@ import { mobileComponentMap } from '../src/componentMap';
 // those guards fire on every render → "Too many re-renders" infinite loop.
 const EMPTY_METADATA: any[] = [];
 const EMPTY_OBJ = {};
+
+const MOBILE_ROUTE_ALIASES: Record<string, string> = {
+  '/': '/MAIN_PAGE',
+  '/main': '/MAIN_PAGE',
+  '/login': '/LOGIN_PAGE',
+  '/register': '/REGISTER_PAGE',
+  '/set-time': '/SET_TIME_PAGE',
+  '/tutorial': '/TUTORIAL_PAGE',
+};
+
+const normalizeMobileRoute = (rawPath: string) => {
+  const parsed = rawPath.startsWith('http') ? new URL(rawPath) : null;
+  const pathWithQuery = parsed ? `${parsed.pathname}${parsed.search}` : rawPath;
+  const [pathname, query = ''] = pathWithQuery.split('?');
+  const fromViewRoute = pathname.startsWith('/view/') ? pathname.replace(/^\/view\//, '/') : pathname;
+  const fromCoreMap = PATH_TO_SCREEN[fromViewRoute] ? `/${PATH_TO_SCREEN[fromViewRoute]}` : fromViewRoute;
+  const normalizedPath = MOBILE_ROUTE_ALIASES[fromCoreMap] || fromCoreMap;
+  return query ? `${normalizedPath}?${query}` : normalizedPath;
+};
 
 export default function MobileScreen() {
   const { screenId } = useLocalSearchParams<{ screenId: string }>();
@@ -26,9 +45,9 @@ export default function MobileScreen() {
     () => ({
       push: (path: string) => {
         // The server emits web-style routes (`/view/<screenId>`); the mobile
-        // router uses `/<screenId>` (app/[screenId].tsx). Normalize so pushes
-        // land on a real route instead of "Unmatched Route".
-        const normalized = path.startsWith('/view/') ? path.replace(/^\/view\//, '/') : path;
+        // router uses `/<screenId>` (app/[screenId].tsx). Normalize aliases so
+        // pushes land on a real route instead of an empty or unmatched page.
+        const normalized = normalizeMobileRoute(path);
         router.push(normalized as never);
       },
       openExternal: (url: string) => {

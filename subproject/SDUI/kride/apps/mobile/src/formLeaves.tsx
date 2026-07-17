@@ -141,3 +141,31 @@ export const EmailSelectLeaf: React.FC<MobileInputLeafProps> = ({ id, meta, form
     </View>
   );
 };
+
+export const ActionButtonLeaf: React.FC<SduiLeafProps> = ({ meta, data, onAction }) => {
+  const label = textValue(meta?.labelText || meta?.label_text || 'Continue');
+  const cssClass = textValue(meta?.cssClass || meta?.css_class);
+  const isReadonly = truthyReadonly(meta);
+  const isKakao = cssClass.includes('kakao');
+  const isOutline = cssClass.includes('signup') || cssClass.includes('secondary');
+  const containerClassName = [
+    'min-h-12 w-full items-center justify-center rounded-xl px-4 py-3',
+    isKakao ? 'bg-[#FEE500]' : isOutline ? 'border border-kride bg-white' : 'bg-kride',
+    isReadonly ? 'opacity-50' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  return (
+    <Pressable
+      className={containerClassName}
+      disabled={isReadonly}
+      accessibilityRole="button"
+      onPress={() => {
+        if (!isReadonly) onAction?.(meta, data);
+      }}
+    >
+      <Text className={`text-center font-bold ${isKakao || isOutline ? 'text-gray-950' : 'text-white'}`}>{label}</Text>
+    </Pressable>
+  );
+};
