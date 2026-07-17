@@ -1,0 +1,13 @@
+{
+  "ignore_dirs": [
+    "node_modules.stale",
+    ".next",
+    ".git",
+    ".jest-cache",
+    ".jest-cache-slider2",
+    ".jest-cache-store",
+    ".jest-cache-store2",
+    ".jest-cache-store3",
+    ".jest-cache-store5"
+  ]
+}
