@@ -168,6 +168,36 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                 </div>
             </div>
 
+            {category === 'HOLY' && (
+                <section
+                    aria-labelledby="holy-submit-heading"
+                    style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14,
+                        marginBottom: 14, padding: '12px 14px', border: '0.5px solid #F4B8BB',
+                        borderRadius: 12, background: '#FFF6F6', flexWrap: 'wrap',
+                    }}
+                >
+                    <div style={{ flex: '1 1 220px' }}>
+                        <h2 id="holy-submit-heading" style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#791F1F' }}>
+                            새로운 팬 성지를 알고 있나요?
+                        </h2>
+                        <p id="holy-submit-note" style={{ margin: '4px 0 0', fontSize: 12, lineHeight: 1.5, color: '#8B4A4D' }}>
+                            제보는 공개 전 운영진이 검수하며, 사진 업로드는 지원하지 않아요.
+                        </p>
+                    </div>
+                    <a
+                        href="/holy/submit"
+                        aria-describedby="holy-submit-note"
+                        style={{
+                            flex: 'none', borderRadius: 10, background: RED, color: '#fff',
+                            padding: '9px 13px', fontSize: 12, fontWeight: 600, textDecoration: 'none',
+                        }}
+                    >
+                        새 성지 제보하기
+                    </a>
+                </section>
+            )}
+
             {loading && <div style={{ padding: 24, color: '#888' }}>불러오는 중…</div>}
             {error && <div style={{ padding: 24, color: '#A32D2D' }}>{error}</div>}
             {!loading && !error && pois.length === 0 && <div style={{ padding: 24, color: '#888' }}>표시할 장소가 없어요.</div>}

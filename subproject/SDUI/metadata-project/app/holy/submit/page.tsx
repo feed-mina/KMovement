@@ -43,9 +43,9 @@ export default function HolySubmitPage() {
   };
 
   if (isLoading) return <main className="holy-submit-page"><p>불러오는 중…</p></main>;
-  if (done) return <main className="holy-submit-page"><section className="holy-submit-card holy-submit-card--success"><span className="holy-kicker">KRIDE HOLY PLACE</span><h1>제보가 검수 대기열에 등록됐습니다.</h1><p>관리자 확인 후 성지 탐색 화면에 공개됩니다.</p></section></main>;
+  if (done) return <main className="holy-submit-page"><section className="holy-submit-card holy-submit-card--success"><span className="holy-kicker">KRIDE HOLY PLACE</span><h1>제보가 검수 대기열에 등록됐습니다.</h1><p>운영일 기준 3영업일 안에 검토하며, 승인되면 성지 탐색 화면에 공개됩니다.</p></section></main>;
   return <main className="holy-submit-page"><form onSubmit={submit} className="holy-submit-card">
-    <header className="holy-submit-card__header"><span className="holy-kicker">KRIDE HOLY PLACE</span><h1>팬 성지 제보</h1><p>공개된 사실 정보와 출처만 등록해 주세요. 사진·기사 본문·팬 창작물은 받지 않습니다.</p></header>
+    <header className="holy-submit-card__header"><span className="holy-kicker">KRIDE HOLY PLACE</span><h1>팬 성지 제보</h1><p>공개된 사실 정보와 출처만 등록해 주세요. 사진·기사 본문·팬 창작물은 받지 않으며, 운영자가 출처를 확인한 뒤 공개합니다.</p></header>
     {!isLoggedIn && <p className="holy-notice">제출하려면 로그인이 필요합니다. 입력과 지도 미리보기는 가능합니다.</p>}{error && <p className="holy-error">{error}</p>}
     <div className="holy-submit-layout"><section className="holy-submit-fields">
       <div className="holy-field-grid"><Field label="장소명" name="title" required /><label className="holy-field"><span>아티스트/채널 (국내 상위 후보)</span><select name="artist" required defaultValue=""><option value="" disabled>아티스트를 선택하세요</option>{ARTIST_OPTIONS.map((artist) => <option key={artist} value={artist}>{artist}</option>)}</select></label></div>
@@ -53,7 +53,7 @@ export default function HolySubmitPage() {
       <div className="holy-coordinate-card"><div className="holy-section-heading"><div><span className="holy-kicker">LOCATION PICKER</span><h2>선택된 주소 위치</h2></div><div className="holy-provider-toggle" role="tablist" aria-label="지도 제공자"><button type="button" className={provider === 'kakao' ? 'active' : ''} onClick={() => setProvider('kakao')}>카카오맵</button><button type="button" className={provider === 'google' ? 'active' : ''} onClick={() => setProvider('google')}>Google Maps</button></div></div><HolyMapPicker provider={provider} lat={lat} lng={lng} onChange={(nextLat, nextLng) => { setLat(nextLat); setLng(nextLng); }} /><p className="holy-selected-address">선택 주소: {baseAddress ? `${baseAddress} ${detailAddress}` : '주소를 검색하면 이곳에 표시됩니다.'}</p><input type="hidden" name="mapY" value={lat} /><input type="hidden" name="mapX" value={lng} /></div>
       <label className="holy-field holy-field--full"><span>추천 이유·확인 가능한 사실</span><textarea name="recommendReason" required maxLength={500} placeholder="공개 출처로 확인할 수 있는 사실을 적어주세요." /></label>
       <div className="holy-field-grid"><Field label="출처 URL" name="sourceUrl" type="url" required /></div>
-    </section><aside className="holy-submit-aside"><div><span className="holy-kicker">SUBMIT CHECKLIST</span><h2>검수 가능한 정보만</h2><ul><li>주소 검색 후 상세주소를 입력하세요.</li><li>선택 주소와 지도 마커를 확인하세요.</li><li>출처 URL은 필수입니다.</li><li>승인 전에는 공개되지 않습니다.</li></ul></div><button disabled={!isLoggedIn || busy} className="holy-submit-button">{busy ? '등록 중…' : '검수 요청하기'}</button></aside></div>
+    </section><aside className="holy-submit-aside"><div><span className="holy-kicker">SUBMIT CHECKLIST</span><h2>검수 가능한 정보만</h2><ul><li>주소 검색 후 상세주소를 입력하세요.</li><li>선택 주소와 지도 마커를 확인하세요.</li><li>출처 URL은 필수입니다.</li><li>승인 전에는 공개되지 않습니다.</li><li>검토 목표는 접수 후 3영업일입니다.</li><li>제출자 정보는 감사용으로만 보관되며 공개되지 않습니다.</li></ul></div><button disabled={!isLoggedIn || busy} className="holy-submit-button">{busy ? '등록 중…' : '검수 요청하기'}</button></aside></div>
   </form></main>;
 }
 

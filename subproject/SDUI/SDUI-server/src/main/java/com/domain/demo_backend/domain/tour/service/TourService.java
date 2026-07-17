@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -83,6 +84,9 @@ public class TourService {
         if (SOURCE_TOURAPI.equals(poi.getSource())) {
             throw new IllegalArgumentException("공공(TOURAPI) POI는 검수 대상이 아닙니다: " + poiSqno);
         }
+        if (!"PENDING".equals(poi.getReviewStatus())) {
+            throw new IllegalArgumentException("PENDING 상태의 POI만 검수할 수 있습니다: " + poiSqno);
+        }
         String status = switch (action == null ? "" : action.toUpperCase()) {
             case "APPROVE" -> "APPROVED";
             case "REJECT" -> "REJECTED";
@@ -101,11 +105,9 @@ public class TourService {
                                             String artist, String recommendReason, String sourceUrl,
                                             Long submitterSqno) {
         String cleanTitle = required(title, "title", 255);
-        String cleanSourceUrl = required(sourceUrl, "sourceUrl", 1000);
-        if (!cleanSourceUrl.startsWith("https://") && !cleanSourceUrl.startsWith("http://")) {
-            throw new IllegalArgumentException("sourceUrl must be an http(s) URL");
-        }
-        if (mapX == null || mapY == null || mapX < 124 || mapX > 132 || mapY < 33 || mapY > 39) {
+        String cleanSourceUrl = requiredHttpUrl(sourceUrl);
+        if (mapX == null || mapY == null || !Double.isFinite(mapX) || !Double.isFinite(mapY)
+                || mapX < 124 || mapX > 132 || mapY < 33 || mapY > 39) {
             throw new IllegalArgumentException("Coordinates must be within South Korea");
         }
         tourPoiRepository.findFirstBySourceUrlAndReviewStatus(cleanSourceUrl, "PENDING")
@@ -136,5 +138,20 @@ public class TourService {
         String clean = value.trim();
         if (clean.length() > max) throw new IllegalArgumentException("value is too long");
         return clean;
+    }
+
+    private String requiredHttpUrl(String value) {
+        String clean = required(value, "sourceUrl", 1000);
+        try {
+            URI uri = URI.create(clean);
+            String scheme = uri.getScheme();
+            if (!("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme))
+                    || uri.getHost() == null || uri.getHost().isBlank()) {
+                throw new IllegalArgumentException("sourceUrl must be a valid http(s) URL with a host");
+            }
+            return clean;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("sourceUrl must be a valid http(s) URL with a host");
+        }
     }
 }

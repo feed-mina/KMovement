@@ -99,6 +99,31 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         expect(mockedFetch).not.toHaveBeenCalled();
     });
 
+    it('성지 탐색 중에만 공개 전 검수·사진 미지원 안내를 표시한다', async () => {
+        renderScreen();
+        await waitFor(() => expect(screen.getByText('가나돈까스의집')).toBeInTheDocument());
+        expect(screen.queryByRole('link', { name: '새 성지 제보하기' })).not.toBeInTheDocument();
+
+        fireEvent.click(screen.getByText('성지'));
+        await screen.findByText('서울숲');
+        expect(screen.getByText('제보는 공개 전 운영진이 검수하며, 사진 업로드는 지원하지 않아요.')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByText('관광지'));
+        await screen.findByText('가나돈까스의집');
+        expect(screen.queryByRole('link', { name: '새 성지 제보하기' })).not.toBeInTheDocument();
+    });
+
+    it('성지 제보 CTA를 접근 가능한 제출 링크로 제공한다', async () => {
+        renderScreen();
+        await screen.findByText('가나돈까스의집');
+        fireEvent.click(screen.getByText('성지'));
+        await screen.findByText('서울숲');
+
+        const link = screen.getByRole('link', { name: '새 성지 제보하기' });
+        expect(link).toHaveAttribute('href', '/holy/submit');
+        expect(link).toHaveAccessibleDescription('제보는 공개 전 운영진이 검수하며, 사진 업로드는 지원하지 않아요.');
+    });
+
     it('성지 API 결과가 있으면 그대로 표시한다', async () => {
         mockedHolyFetch.mockResolvedValue([
             { contentId: 'holy-db-1', title: 'DB성지', addr: '서울', mapX: 127, mapY: 37.5, contentTypeId: 'HOLY', artist: 'BTS' },
