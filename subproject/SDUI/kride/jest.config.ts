@@ -20,7 +20,13 @@ const config: Config = {
       },
     ],
   },
-  testMatch: ["<rootDir>/src/__tests__/**/*.test.{ts,tsx}"],
+  // `roots` + `testRegex` rather than a testMatch glob: `**` skips path segments
+  // that start with a dot, so glob discovery finds nothing when the checkout
+  // lives under a dot-directory (e.g. a git worktree in `.claude/worktrees/`).
+  // `roots` keeps discovery inside src, as the old glob's prefix did — without
+  // it, apps/mobile's React Native tests get pulled into this jsdom project.
+  roots: ["<rootDir>/src"],
+  testRegex: "__tests__[\\\\/].*\\.test\\.(ts|tsx)$",
 };
 
 export default config;
