@@ -92,6 +92,9 @@ UI의 구조(Component, Layout, Action)와 비즈니스 로직을 데이터베�
 
 ## 🏗 시스템 아키텍처 (Architecture & Data Flow)
 
+> 📐 **[전체 아키텍처 다이어그램 · ERD · 렌더링 플로우 · 기술 스택 → ARCHITECTURE.md](ARCHITECTURE.md)**
+> (웹 + 모바일(Expo) + 공유 코어 엔진 포함)
+
 ### 🔄 핵심 렌더링 파이프라인
 
 메타데이터 로딩 파이프라인에서 발생하는 RDBMS 부하를 막기 위해 **Redis 캐싱 계층**을 두어 Cache Hit 비율을 극대화했습니다.

@@ -5,9 +5,13 @@
     "scheme": "kride",
     "version": "0.1.0",
     "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
     "plugins": ["expo-router", "expo-secure-store"],
     "experiments": { "typedRoutes": true },
     "ios": { "supportsTablet": true },
-    "android": { "package": "com.kride.mobile" }
+    "android": {
+      "package": "com.kride.mobile",
+      "versionCode": 1
+    }
   }
 }

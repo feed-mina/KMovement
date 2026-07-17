@@ -1,6 +1,38 @@
+const path = require('path');
 const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
-const config = getDefaultConfig(__dirname);
-config.watchFolders = [require('path').resolve(__dirname, '../../packages/core')];
-config.resolver.nodeModulesPaths = [require('path').resolve(__dirname, 'node_modules'), require('path').resolve(__dirname, '../../node_modules')];
-module.exports = withNativeWind(config, { input: './global.css' });
+
+const projectRoot = __dirname;
+const workspaceRoot = path.resolve(projectRoot, '../..');
+
+const config = getDefaultConfig(projectRoot);
+config.watchFolders = [path.resolve(workspaceRoot, 'packages/core')];
+config.resolver.nodeModulesPaths = [
+  path.resolve(projectRoot, 'node_modules'),
+  path.resolve(workspaceRoot, 'node_modules'),
+];
+
+const nwConfig = withNativeWind(config, { input: './global.css' });
+
+// Force a single copy of react-native and react (the app-local ones). The
+// hoisted root `expo` can otherwise pull an incompatible nested react-native
+// (newer major) whose Flow source the SDK 51 Babel preset cannot parse.
+const forced = {
+  'react-native': path.resolve(workspaceRoot, 'node_modules/react-native'),
+  react: path.resolve(workspaceRoot, 'node_modules/react'),
+};
+const upstreamResolveRequest = nwConfig.resolver.resolveRequest;
+nwConfig.resolver.resolveRequest = (context, moduleName, platform) => {
+  for (const name of Object.keys(forced)) {
+    if (moduleName === name || moduleName.startsWith(name + '/')) {
+      return context.resolveRequest(
+        context,
+        forced[name] + moduleName.slice(name.length),
+        platform,
+      );
+    }
+  }
+  return (upstreamResolveRequest || context.resolveRequest)(context, moduleName, platform);
+};
+
+module.exports = nwConfig;

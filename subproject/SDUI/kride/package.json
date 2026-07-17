@@ -11,17 +11,28 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch"
   },
+  "//mobileHoist": "expo-router (+ its unpinned peers: expo-status-bar/expo-linking/react-native-safe-area-context) and react-native/react-native-reanimated are declared here only so npm hoists them to the workspace root, where the hoisted babel-preset-expo detects them via hasModule() and expo-router can resolve its peers. The Next.js web app does not import them.",
   "dependencies": {
     "@tanstack/react-query": "^5.21.4",
     "@tanstack/react-query-devtools": "^5.21.5",
     "@types/leaflet": "^1.9.21",
+    "expo-linking": "~6.3.1",
+    "expo-router": "~3.5.23",
+    "expo-status-bar": "~1.12.1",
     "leaflet": "^1.9.4",
     "next": "^14.1.0",
     "next-pwa": "^5.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
+    "react-native": "0.74.5",
+    "react-native-reanimated": "~3.10.1",
+    "react-native-safe-area-context": "4.10.5",
     "zustand": "^5.0.13"
+  },
+  "overrides": {
+    "react-native": "0.74.5",
+    "@react-native/virtualized-lists": "0.74.87"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
