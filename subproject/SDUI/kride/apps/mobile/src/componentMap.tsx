@@ -2,6 +2,7 @@ import type React from 'react';
 import { View } from 'react-native';
 import type { ComponentRegistry, SduiLeafProps } from '@kride/core';
 import KrideMap from './components/KrideMap';
+import { EmailSelectLeaf, InputLeaf, PasswordLeaf } from './formLeaves';
 import {
   CardImageLeaf,
   CardLabelLeaf,
@@ -42,6 +43,10 @@ const MapViewLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
  */
 export const mobileComponentMap: ComponentRegistry = {
   MAP_VIEW: MapViewLeaf,
+  // P4 P0 form controls used by login/register screens.
+  INPUT: InputLeaf,
+  PASSWORD: PasswordLeaf,
+  EMAIL_SELECT: EmailSelectLeaf,
   // display atoms (P4, 1st pass)
   CARD_IMAGE: CardImageLeaf,
   CARD_LABEL: CardLabelLeaf,

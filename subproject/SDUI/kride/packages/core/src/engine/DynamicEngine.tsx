@@ -111,6 +111,7 @@ const DynamicEngine: React.FC<DynamicEngineProps> = (props) => {
         id: uId,
         meta: node,
         data: finalData,
+        formData,
         onChange,
         onAction,
         ...rest,
