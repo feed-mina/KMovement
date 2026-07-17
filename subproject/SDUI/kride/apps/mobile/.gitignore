@@ -5,6 +5,12 @@
 expo-env.d.ts
 # @end expo-cli
 
+# Local env — `.env.example` is the tracked template, and SDUI/.gitignore's
+# `*.env.*` would otherwise swallow it.
+.env
+.env.local
+!.env.example
+
 # Local Expo/EAS outputs
 .expo/
 dist*/
