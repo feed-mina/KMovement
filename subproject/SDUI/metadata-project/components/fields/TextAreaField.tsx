@@ -32,6 +32,7 @@ const TextAreaField = memo(({ id, meta, data, onChange, ...rest }: TextAreaField
     // 4. 읽기 전용 여부 판단
     const isReadOnly = meta?.isReadonly === true || meta?.isReadonly === "true" ||
         meta?.is_readonly === true || meta?.is_readonly === "true";
+    const labelText = meta?.labelText || meta?.label_text;
 
     // 5. 클래스 병합
     const mergedClassName = cn(
@@ -50,7 +51,11 @@ const TextAreaField = memo(({ id, meta, data, onChange, ...rest }: TextAreaField
 
     return (
         <div className={cn("textarea-field-wrap", isReadOnly && "readonly-wrap")}>
-            {meta?.labelText && <label className="field-label">{meta.labelText}</label>}
+            {labelText && (isReadOnly ? (
+                <span className="field-label">{labelText}</span>
+            ) : (
+                <label className="field-label" htmlFor={id}>{labelText}</label>
+            ))}
 
             {isReadOnly ? (
                 <div
