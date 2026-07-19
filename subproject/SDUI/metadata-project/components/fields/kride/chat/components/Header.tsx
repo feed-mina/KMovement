@@ -45,7 +45,7 @@ export default function Header({ title, status = 'idle', variant = 'full', onClo
         </div>
       </div>
       {onClose && (
-        <button type="button" className="kride-chat-header__close" onClick={onClose} aria-label="채팅 닫기">
+        <button type="button" className="kride-chat-header__close" onClick={onClose} aria-label="Close">
           x
         </button>
       )}
