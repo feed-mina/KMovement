@@ -1,9 +1,12 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { SCREEN_MAP } from "@/components/constants/screenMap";
+import { normalizeNode } from "@/components/DynamicEngine/normalizeNode";
 import { useDynamicEngine } from "@/components/DynamicEngine/useDynamicEngine";
 import { resolveDataApiUrl } from "@/components/DynamicEngine/hook/usePageMetadata";
-import { normalizeChartData } from "@/components/fields/stats/statsUtils";
+import Chart from "@/components/fields/stats/Chart";
+import StatCard from "@/components/fields/stats/StatCard";
+import { normalizeChartData, readMetaProps } from "@/components/fields/stats/statsUtils";
 import GalleryGrid from "@/components/fields/gallery/GalleryGrid";
 import HistoryList from "@/components/fields/history/HistoryList";
 
@@ -61,6 +64,91 @@ describe("MY_PAGE SDUI config helpers", () => {
             { label: "Failure", value: 1, color: undefined },
             { label: "Pending", value: 2, color: undefined },
         ]);
+    });
+
+    it("renders goal labels from backend props instead of raw metric keys", () => {
+        const meta = normalizeNode({
+            component_id: "mypage_goal_donut",
+            component_type: "CHART",
+            label_text: "Goal status",
+            props: {
+                type: "donut",
+                series: [
+                    { key: "success_count", label: "Success" },
+                    { key: "failure_count", label: "Failure" },
+                    { key: "pending_count", label: "Pending" },
+                ],
+            },
+        });
+
+        render(
+            <Chart
+                id="mypage_goal_donut"
+                meta={meta}
+                data={{
+                    total_goals: 6,
+                    success_count: 3,
+                    failure_count: 1,
+                    pending_count: 2,
+                    attainment_rate: 50,
+                }}
+            />
+        );
+
+        expect(screen.getByText("Success")).toBeInTheDocument();
+        expect(screen.getByText("Failure")).toBeInTheDocument();
+        expect(screen.getByText("Pending")).toBeInTheDocument();
+        expect(screen.queryByText("total_goals")).not.toBeInTheDocument();
+        expect(screen.queryByText("attainment_rate")).not.toBeInTheDocument();
+    });
+
+    it("selects preferred artists from a backend-shaped metadata response", () => {
+        const meta = normalizeNode({
+            component_id: "mypage_route_artists_chart",
+            component_type: "CHART",
+            label_text: "Preferred artists",
+            props: {
+                dataPath: "preferred_artists",
+                labelKey: "label",
+                valueKey: "value",
+            },
+        });
+
+        render(
+            <Chart
+                id="mypage_route_artists_chart"
+                meta={meta}
+                data={{
+                    total_routes: 4,
+                    total_distance_km: 37.2,
+                    avg_safety_score: 0.88,
+                    preferred_artists: [
+                        { label: "BTS", value: 3 },
+                        { label: "IVE", value: 1 },
+                    ],
+                }}
+            />
+        );
+
+        expect(screen.getByText("BTS")).toBeInTheDocument();
+        expect(screen.getByText("IVE")).toBeInTheDocument();
+        expect(screen.queryByText("total_routes")).not.toBeInTheDocument();
+        expect(screen.queryByText("avg_safety_score")).not.toBeInTheDocument();
+    });
+
+    it("uses backend props for MY_PAGE stat cards and JSON metadata", () => {
+        const meta = normalizeNode({
+            component_id: "mypage_goal_rate_card",
+            component_type: "STAT_CARD",
+            label_text: "Goal attainment",
+            props: { valueKey: "attainment_rate", suffix: "%" },
+        });
+
+        render(<StatCard id="mypage_goal_rate_card" meta={meta} data={{ attainment_rate: 82 }} />);
+
+        expect(screen.getByLabelText("Goal attainment")).toHaveTextContent("82%");
+        expect(readMetaProps({ props: '{"dataPath":"preferred_artists"}' }))
+            .toEqual({ dataPath: "preferred_artists" });
     });
 
     it("renders a selectable gallery item and detail preview", () => {

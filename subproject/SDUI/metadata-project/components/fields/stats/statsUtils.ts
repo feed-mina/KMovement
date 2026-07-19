@@ -7,7 +7,7 @@ export interface ChartDatum {
 }
 
 export function readMetaProps(meta: AnyRecord | undefined): AnyRecord {
-  const raw = meta?.componentProps ?? meta?.component_props ?? {};
+  const raw = meta?.componentProps ?? meta?.component_props ?? meta?.props ?? {};
   if (typeof raw === "string") {
     try {
       const parsed = JSON.parse(raw);

@@ -27,6 +27,7 @@ export const normalizeNode = (raw: Metadata): NormalizedNode => {
         isReadonly: firstDefined(node.isReadonly, node.is_readonly),
         dataSqlKey: firstDefined(node.dataSqlKey, node.data_sql_key),
         dataParams: firstDefined(node.dataParams, node.data_params),
+        componentProps: firstDefined(node.componentProps, node.component_props, node.props),
         children,
     };
 };
