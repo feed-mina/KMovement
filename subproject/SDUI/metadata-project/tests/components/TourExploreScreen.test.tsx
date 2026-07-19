@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import TourExploreScreen from '@/components/plugins/travel/TourExploreScreen';
 import { fetchHolyPois, fetchTourPois } from '@/services/tourApi';
 
@@ -146,5 +147,61 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         fireEvent.click(await screen.findByText('서울숲'));
         expect(await screen.findByText('왜 추천하나요?')).toBeInTheDocument();
         expect(screen.getByText('팬덤 발자취')).toBeInTheDocument();
+    });
+
+    it('성지 상세에 허용된 외부 출처 URL만 안전한 새 창 링크로 제공한다', async () => {
+        mockedHolyFetch.mockResolvedValue([
+            {
+                contentId: 'holy-safe-source',
+                title: '출처 있는 성지',
+                contentTypeId: 'HOLY',
+                sourceUrl: 'https://example.com/articles/holy-place?verified=true',
+            },
+            {
+                contentId: 'holy-unsafe-source',
+                title: '잘못된 출처 성지',
+                contentTypeId: 'HOLY',
+                sourceUrl: 'javascript:alert(document.domain)',
+            },
+        ]);
+        renderScreen();
+        fireEvent.click(await screen.findByRole('button', { name: '성지' }));
+
+        fireEvent.click(await screen.findByRole('button', { name: '출처 있는 성지 상세 보기' }));
+        const sourceLink = await screen.findByRole('link', { name: '출처 확인' });
+        expect(sourceLink).toHaveAttribute('href', 'https://example.com/articles/holy-place?verified=true');
+        expect(sourceLink).toHaveAttribute('target', '_blank');
+        expect(sourceLink).toHaveAttribute('rel', 'noopener noreferrer');
+
+        fireEvent.click(screen.getByRole('button', { name: '닫기' }));
+        await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+        fireEvent.click(screen.getByRole('button', { name: '잘못된 출처 성지 상세 보기' }));
+        expect(await screen.findByRole('dialog', { name: '잘못된 출처 성지' })).toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: '출처 확인' })).not.toBeInTheDocument();
+    });
+
+    it('상세 모달을 키보드로 열고 이름·초점 고정·Escape 종료·초점 복귀를 지원한다', async () => {
+        const user = userEvent.setup();
+        mockedHolyFetch.mockResolvedValue([
+            { contentId: 'holy-keyboard', title: '키보드 성지', contentTypeId: 'HOLY' },
+        ]);
+        renderScreen();
+        await user.click(await screen.findByRole('button', { name: '성지' }));
+
+        const trigger = await screen.findByRole('button', { name: '키보드 성지 상세 보기' });
+        trigger.focus();
+        await user.keyboard('{Enter}');
+
+        const dialog = await screen.findByRole('dialog', { name: '키보드 성지' });
+        expect(dialog).toBeInTheDocument();
+        const closeButton = screen.getByRole('button', { name: '닫기' });
+        await waitFor(() => expect(closeButton).toHaveFocus());
+
+        fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
+        expect(within(dialog).getByRole('button', { name: '키보드 성지 저장' })).toHaveFocus();
+
+        fireEvent.keyDown(document, { key: 'Escape' });
+        await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+        await waitFor(() => expect(trigger).toHaveFocus());
     });
 });

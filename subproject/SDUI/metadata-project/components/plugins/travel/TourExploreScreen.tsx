@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { ScreenControllerProps } from '@/components/screens/types';
 import { fetchHolyPois, fetchTourPois, TourPoi } from '@/services/tourApi';
 import { HOLY_SITES } from '@/lib/data/holySites';
@@ -39,6 +39,16 @@ function toHttps(url?: string): string | undefined {
     return url ? url.replace(/^http:\/\//i, 'https://') : undefined;
 }
 
+function safeExternalUrl(url?: string): string | undefined {
+    if (!url) return undefined;
+    try {
+        const parsed = new URL(url.trim());
+        return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.toString() : undefined;
+    } catch {
+        return undefined;
+    }
+}
+
 const RED = '#E50914';
 
 export default function TourExploreScreen(_props: ScreenControllerProps) {
@@ -50,6 +60,18 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const [error, setError] = useState<string | null>(null);
     const [selected, setSelected] = useState<TourPoi | null>(null);
     const [saved, setSaved] = useState<Set<string>>(new Set());
+    const dialogTitleId = useId();
+    const dialogRef = useRef<HTMLDivElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const returnFocusRef = useRef<HTMLElement | null>(null);
+
+    const closePlace = useCallback(() => {
+        const returnFocusTarget = returnFocusRef.current;
+        setSelected(null);
+        queueMicrotask(() => {
+            if (returnFocusTarget?.isConnected) returnFocusTarget.focus();
+        });
+    }, []);
 
     useEffect(() => {
         let alive = true;
@@ -99,6 +121,38 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         });
     }, [category, error, loading, pois.length, sigungu]);
 
+    useEffect(() => {
+        if (!selected) return;
+
+        closeButtonRef.current?.focus();
+        const handleDialogKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closePlace();
+                return;
+            }
+
+            if (event.key !== 'Tab') return;
+            const focusableElements = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
+                'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+            ) ?? []);
+            const first = focusableElements[0];
+            const last = focusableElements[focusableElements.length - 1];
+            if (!first || !last) return;
+
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+
+        document.addEventListener('keydown', handleDialogKeyDown);
+        return () => document.removeEventListener('keydown', handleDialogKeyDown);
+    }, [closePlace, selected]);
+
     const toggleSave = (id?: string) => {
         if (!id) return;
         const isAdding = !saved.has(id);
@@ -111,7 +165,9 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         if (isAdding) trackEvent('save_place', { item_id: id, item_category: category });
     };
 
-    const openPlace = (place: TourPoi) => {
+    const openPlace = (place: TourPoi, trigger?: HTMLElement) => {
+        returnFocusRef.current = trigger
+            ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
         setSelected(place);
         trackEvent('select_item', {
             item_id: place.contentId || 'unknown',
@@ -124,6 +180,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         p.mapY != null && p.mapX != null
             ? `https://www.google.com/maps/search/?api=1&query=${p.mapY},${p.mapX}`
             : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.title)}`;
+    const selectedSourceUrl = safeExternalUrl(selected?.sourceUrl);
 
     return (
         <div className="page-wrap TOUR_EXPLORE tour-explore" style={{ padding: '14px 16px' }}>
@@ -207,32 +264,36 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                     {pois.map((p, i) => {
                         const isSaved = !!p.contentId && saved.has(p.contentId);
                         return (
-                            <article
-                                key={p.contentId ?? i}
-                                onClick={() => openPlace(p)}
-                                style={{ border: '0.5px solid #eee', borderRadius: 14, overflow: 'hidden', background: '#fff', cursor: 'pointer', position: 'relative' }}
-                            >
-                                <div style={{ height: 100, background: '#f5f5f5', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {toHttps(p.firstImage)
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        ? <img src={toHttps(p.firstImage)} alt={p.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        : <span style={{ color: '#ccc', fontSize: 22 }}>♪</span>}
-                                    {p.contentTypeId === 'HOLY' && (
-                                        <span style={{ position: 'absolute', top: 6, left: 6, fontSize: 10, background: RED, color: '#fff', padding: '2px 7px', borderRadius: 20 }}>성지</span>
-                                    )}
-                                    <button
-                                        type="button"
-                                        aria-label={isSaved ? '저장 취소' : '저장'}
-                                        onClick={(e) => { e.stopPropagation(); toggleSave(p.contentId); }}
-                                        style={{ position: 'absolute', top: 6, right: 6, width: 28, height: 28, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.35)', color: isSaved ? RED : '#fff', cursor: 'pointer', fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                    >
-                                        {isSaved ? '♥' : '♡'}
-                                    </button>
-                                </div>
-                                <div style={{ padding: '8px 10px' }}>
-                                    <p style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>{p.title}</p>
-                                    {p.addr && <p style={{ margin: '3px 0 0', fontSize: 11, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.addr}</p>}
-                                </div>
+                            <article key={p.contentId ?? i} style={{ border: '0.5px solid #eee', borderRadius: 14, overflow: 'hidden', background: '#fff', position: 'relative' }}>
+                                <button
+                                    type="button"
+                                    aria-haspopup="dialog"
+                                    aria-label={`${p.title} 상세 보기`}
+                                    onClick={(event) => openPlace(p, event.currentTarget)}
+                                    style={{ display: 'block', width: '100%', padding: 0, border: 'none', background: 'transparent', color: 'inherit', textAlign: 'left', cursor: 'pointer' }}
+                                >
+                                    <span style={{ height: 100, background: '#f5f5f5', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        {toHttps(p.firstImage)
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            ? <img src={toHttps(p.firstImage)} alt={p.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            : <span style={{ color: '#ccc', fontSize: 22 }}>♪</span>}
+                                        {p.contentTypeId === 'HOLY' && (
+                                            <span style={{ position: 'absolute', top: 6, left: 6, fontSize: 10, background: RED, color: '#fff', padding: '2px 7px', borderRadius: 20 }}>성지</span>
+                                        )}
+                                    </span>
+                                    <span style={{ display: 'block', padding: '8px 10px' }}>
+                                        <span style={{ display: 'block', margin: 0, fontSize: 13, fontWeight: 500 }}>{p.title}</span>
+                                        {p.addr && <span style={{ display: 'block', margin: '3px 0 0', fontSize: 11, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.addr}</span>}
+                                    </span>
+                                </button>
+                                <button
+                                    type="button"
+                                    aria-label={isSaved ? `${p.title} 저장 취소` : `${p.title} 저장`}
+                                    onClick={() => toggleSave(p.contentId)}
+                                    style={{ position: 'absolute', top: 6, right: 6, width: 28, height: 28, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.35)', color: isSaved ? RED : '#fff', cursor: 'pointer', fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                >
+                                    {isSaved ? '♥' : '♡'}
+                                </button>
                             </article>
                         );
                     })}
@@ -241,9 +302,11 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
 
             {selected && (
                 <div
+                    ref={dialogRef}
                     role="dialog"
                     aria-modal="true"
-                    onClick={() => setSelected(null)}
+                    aria-labelledby={dialogTitleId}
+                    onClick={closePlace}
                     style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 1000 }}
                 >
                     <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: '#fff', borderRadius: 16, overflow: 'hidden', maxHeight: '86vh', overflowY: 'auto' }}>
@@ -252,10 +315,10 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 // eslint-disable-next-line @next/next/no-img-element
                                 ? <img src={toHttps(selected.firstImage)} alt={selected.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 : <span style={{ color: '#bbb', fontSize: 13 }}>이미지 없음</span>}
-                            <button type="button" aria-label="닫기" onClick={() => setSelected(null)} style={{ position: 'absolute', top: 10, right: 10, width: 30, height: 30, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.45)', color: '#fff', cursor: 'pointer', fontSize: 16 }}>✕</button>
+                            <button ref={closeButtonRef} type="button" aria-label="닫기" onClick={closePlace} style={{ position: 'absolute', top: 10, right: 10, width: 30, height: 30, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.45)', color: '#fff', cursor: 'pointer', fontSize: 16 }}>✕</button>
                         </div>
                         <div style={{ padding: '14px 16px' }}>
-                            <p style={{ margin: 0, fontSize: 17, fontWeight: 600 }}>{selected.title}</p>
+                            <h2 id={dialogTitleId} style={{ margin: 0, fontSize: 17, fontWeight: 600 }}>{selected.title}</h2>
                             {selected.addr && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#777' }}>{selected.addr}</p>}
                             {selected.tel && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#777' }}>☎ {selected.tel}</p>}
 
@@ -275,11 +338,17 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 </div>
                             )}
 
+                            {category === 'HOLY' && selectedSourceUrl && (
+                                <a href={selectedSourceUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 12, fontSize: 12, fontWeight: 600, color: '#1D4ED8', textDecoration: 'underline' }}>
+                                    출처 확인
+                                </a>
+                            )}
+
                             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
                                 <a href={mapsUrl(selected)} target="_blank" rel="noreferrer" onClick={() => trackEvent('map_open', { map_provider: 'google_maps', item_id: selected.contentId || 'unknown' })} style={{ flex: 1, textAlign: 'center', fontSize: 13, fontWeight: 500, color: '#fff', background: RED, borderRadius: 10, padding: '11px 0', textDecoration: 'none' }}>
                                     구글지도에서 보기
                                 </a>
-                                <button type="button" onClick={() => toggleSave(selected.contentId)} style={{ border: '0.5px solid #ddd', background: 'transparent', borderRadius: 10, padding: '11px 16px', cursor: 'pointer', color: selected.contentId && saved.has(selected.contentId) ? RED : '#555', fontSize: 15 }}>
+                                <button type="button" aria-label={selected.contentId && saved.has(selected.contentId) ? `${selected.title} 저장 취소` : `${selected.title} 저장`} onClick={() => toggleSave(selected.contentId)} style={{ border: '0.5px solid #ddd', background: 'transparent', borderRadius: 10, padding: '11px 16px', cursor: 'pointer', color: selected.contentId && saved.has(selected.contentId) ? RED : '#555', fontSize: 15 }}>
                                     {selected.contentId && saved.has(selected.contentId) ? '♥' : '♡'}
                                 </button>
                             </div>

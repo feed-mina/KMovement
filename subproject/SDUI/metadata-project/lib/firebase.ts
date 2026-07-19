@@ -51,6 +51,28 @@ const getFirebaseApp = (): FirebaseApp | null => {
 
 const app = getFirebaseApp();
 
+const hasNotificationPermission = async () => {
+  if (typeof window === "undefined" || !("Notification" in window)) {
+    return false;
+  }
+
+  if (window.Notification.permission === "denied") {
+    return false;
+  }
+
+  if (window.Notification.permission === "default") {
+    return (await window.Notification.requestPermission()) === "granted";
+  }
+
+  return true;
+};
+
+const isPermissionError = (error: unknown) => {
+  if (!error || typeof error !== "object" || !("code" in error)) return false;
+  const code = String((error as { code?: unknown }).code);
+  return code === "messaging/permission-blocked" || code === "messaging/permission-default";
+};
+
 export const requestForToken = async () => {
   try {
     const supported = await isSupported();
@@ -60,6 +82,10 @@ export const requestForToken = async () => {
     }
 
     if (!app) {
+      return null;
+    }
+
+    if (!(await hasNotificationPermission())) {
       return null;
     }
 
@@ -77,7 +103,8 @@ export const requestForToken = async () => {
     console.log("No registration token available. Permission may be denied.");
     return null;
   } catch (err) {
-    console.error("An error occurred while retrieving the FCM token: ", err);
+    if (isPermissionError(err)) return null;
+    console.warn("Firebase messaging token is temporarily unavailable: ", err);
     return null;
   }
 };
