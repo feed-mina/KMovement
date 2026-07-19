@@ -48,6 +48,19 @@ describe("normalizeNode", () => {
         expect(result.refDataId).toBe("camel_ref");
     });
 
+    it("normalizes backend props without overriding canonical component props", () => {
+        expect(normalizeNode({
+            component_id: "artist_chart",
+            props: { dataPath: "preferred_artists" },
+        }).componentProps).toEqual({ dataPath: "preferred_artists" });
+
+        expect(normalizeNode({
+            componentProps: { source: "camel" },
+            component_props: { source: "snake" },
+            props: { source: "backend" },
+        }).componentProps).toEqual({ source: "camel" });
+    });
+
     it("returns an empty normalized tree for missing input", () => {
         expect(normalizeTree(null)).toEqual([]);
         expect(normalizeTree(undefined)).toEqual([]);

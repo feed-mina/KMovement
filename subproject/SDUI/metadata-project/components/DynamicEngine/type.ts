@@ -30,6 +30,9 @@ export interface Metadata {
     data_sql_key?: string;
     dataParams?: any;
     data_params?: any;
+    componentProps?: any;
+    component_props?: any;
+    props?: any;
     children?: Metadata[] | null;
     [key: string]: any;
 }
@@ -51,6 +54,7 @@ export interface NormalizedNode {
     isReadonly?: boolean | string;
     dataSqlKey?: string;
     dataParams?: any;
+    componentProps?: any;
     children?: NormalizedNode[] | null;
     [key: string]: any;
 }
