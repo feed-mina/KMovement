@@ -23,7 +23,7 @@ module.exports = {
     // …and the renderer must match that react. @testing-library/react-native
     // pulls in its own react-test-renderer@18.2.0, which npm hoists to the root
     // and which would otherwise drive react 18.3.1.
-    '^react-test-renderer$': '<rootDir>/node_modules/react-test-renderer',
-    '^react-test-renderer/(.*)$': '<rootDir>/node_modules/react-test-renderer/$1',
+    '^react-test-renderer$': '<rootDir>/../../node_modules/react-test-renderer',
+    '^react-test-renderer/(.*)$': '<rootDir>/../../node_modules/react-test-renderer/$1',
   },
 };
