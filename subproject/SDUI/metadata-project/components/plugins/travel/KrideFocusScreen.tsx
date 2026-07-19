@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Skeleton from "@/components/utils/Skeleton";
 import { useScreenGuard } from "@/components/screens/useScreenGuard";
 import { useSduiScreen } from "@/components/screens/useSduiScreen";
@@ -21,6 +21,63 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
 
     // FOCUS 진입 시 챗 모달 기본 오픈
     const [isChatModalOpen, setIsChatModalOpen] = useState(true);
+    const chatDialogRef = useRef<HTMLDivElement>(null);
+    const chatOpenerRef = useRef<HTMLElement | null>(null);
+
+    const closeChatModal = useCallback(() => {
+        setIsChatModalOpen(false);
+        chatOpenerRef.current?.focus();
+    }, []);
+
+    useEffect(() => {
+        if (!isChatModalOpen) return;
+
+        const dialog = chatDialogRef.current;
+        if (!dialog) return;
+
+        const activeElement = document.activeElement;
+        if (activeElement instanceof HTMLElement && !dialog.contains(activeElement)) {
+            chatOpenerRef.current = activeElement;
+        }
+
+        const getFocusableElements = () =>
+            Array.from(
+                dialog.querySelectorAll<HTMLElement>(
+                    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                )
+            );
+
+        getFocusableElements()[0]?.focus();
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                event.preventDefault();
+                closeChatModal();
+                return;
+            }
+
+            if (event.key !== "Tab") return;
+            const focusableElements = getFocusableElements();
+            if (focusableElements.length === 0) {
+                event.preventDefault();
+                dialog.focus();
+                return;
+            }
+
+            const first = focusableElements[0];
+            const last = focusableElements[focusableElements.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [closeChatModal, isChatModalOpen]);
 
     // AI 챗봇이 생성한 일정/장소를 지도·패널에 실시간 반영
     useEffect(() => {
@@ -90,7 +147,8 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
     const handleAction = async (meta: any, data?: any) => {
         const actionUrl = meta?.actionUrl || meta?.action_url;
         if (actionUrl === "/view/CHAT" || actionUrl === "/view/KRIDE_CHAT") {
-            setIsChatModalOpen((prev) => !prev);
+            if (isChatModalOpen) closeChatModal();
+            else setIsChatModalOpen(true);
             return;
         }
         return s.handleAction(meta, data);
@@ -143,11 +201,18 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
             />
 
             {isChatModalOpen && (
-                <div className="kride-focus-chat-modal">
+                <div
+                    ref={chatDialogRef}
+                    className="kride-focus-chat-modal"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="K-RIDE 여행봇"
+                    tabIndex={-1}
+                >
                     <KrideChatComponent
                         meta={{ labelText: "K-RIDE 여행봇", cssClass: "h-full w-full" }}
                         data={{}}
-                        onCloseModal={() => setIsChatModalOpen(false)}
+                        onCloseModal={closeChatModal}
                     />
                 </div>
             )}

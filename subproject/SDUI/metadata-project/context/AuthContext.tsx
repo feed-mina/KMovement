@@ -129,31 +129,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // FCM 푸시 알림 설정 (로그인 되었을 때만)
     useEffect(() => {
-        if (isLoggedIn) {
-            // 브라우저 알림 권한 요청 및 FCM 토큰 획득
-            requestForToken().then((token) => {
-                if (token) {
-                    console.log("FCM 토큰 백엔드 전송 (예정): ", token);
-                    // TODO: 백엔드 API 연동 시 주석 해제
-                    // api.post('/api/users/fcm-token', { token }).catch(console.error);
-                }
-            });
+        if (!isLoggedIn) return;
+
+        let cancelled = false;
+
+        const setupMessaging = async () => {
+            const token = await requestForToken();
+            if (!token || cancelled) return;
+
+            console.log("FCM 토큰 백엔드 전송 (예정): ", token);
+            // TODO: 백엔드 API 연동 시 주석 해제
+            // api.post('/api/users/fcm-token', { token }).catch(console.error);
 
             // 화면을 보고 있을 때(Foreground) 알림 수신
             const setupMessageListener = async () => {
                 try {
                     const payload: any = await onMessageListener();
+                    if (cancelled) return;
                     console.log("포그라운드 알림 수신: ", payload);
                     // 브라우저 알림이나 Toast UI로 대체 가능
                     alert(`[새 알림] ${payload?.notification?.title}\n${payload?.notification?.body}`);
                     // 리스너 재귀 등록 (한 번 받으면 끝나는 Promise 구조이므로)
-                    setupMessageListener();
+                    void setupMessageListener();
                 } catch (err) {
-                    console.log('Foreground 메시지 리스너 오류: ', err);
+                    if (!cancelled) console.warn('Foreground 메시지 리스너 오류: ', err);
                 }
             };
-            setupMessageListener();
-        }
+            void setupMessageListener();
+        };
+
+        void setupMessaging();
+        return () => {
+            cancelled = true;
+        };
     }, [isLoggedIn]);
 
     return (
