@@ -76,50 +76,68 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     logoutMeta ? (
                         isAdmin ? (
                             <nav className="sidebar-nav mt-4 flex flex-col gap-2 px-4">
-                                <div className={`nav-item admin-nav-dashboard p-2 rounded cursor-pointer ${pathname === '/view/admin/ADMIN_DASHBOARD' ? 'bg-gray-700 font-bold' : ''}`}
+                                <button type="button"
+                                    aria-current={pathname === '/view/admin/ADMIN_DASHBOARD' ? 'page' : undefined}
+                                    className={`nav-item admin-nav-dashboard w-full border-0 p-2 text-left rounded cursor-pointer ${pathname === '/view/admin/ADMIN_DASHBOARD' ? 'bg-gray-700 font-bold' : 'bg-transparent'}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/admin/ADMIN_DASHBOARD' })}>
                                     대시보드
-                                </div>
-                                <div className={`nav-item admin-nav-users p-2 rounded cursor-pointer ${pathname === '/view/admin/USER_LIST' ? 'bg-gray-700 font-bold' : ''}`}
+                                </button>
+                                <button type="button"
+                                    aria-current={pathname === '/view/admin/USER_LIST' ? 'page' : undefined}
+                                    className={`nav-item admin-nav-users w-full border-0 p-2 text-left rounded cursor-pointer ${pathname === '/view/admin/USER_LIST' ? 'bg-gray-700 font-bold' : 'bg-transparent'}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/admin/USER_LIST' })}>
                                     회원 관리
-                                </div>
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/admin/sdui' ? 'bg-gray-700 font-bold' : ''}`}
+                                </button>
+                                <button type="button"
+                                    aria-current={pathname === '/admin/sdui' ? 'page' : undefined}
+                                    className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname === '/admin/sdui' ? 'bg-gray-700 font-bold' : 'bg-transparent'}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/admin/sdui' })}>
                                     SDUI Console
-                                </div>
+                                </button>
                             </nav>
                         ) : (
                             <nav className="sidebar-nav mt-4 flex flex-col gap-2 px-4">
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/TOUR_EXPLORE' ? 'bg-accent-soft text-accent font-bold' : ''}`}
+                                <button type="button"
+                                    aria-current={pathname === '/view/TOUR_EXPLORE' ? 'page' : undefined}
+                                    className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname === '/view/TOUR_EXPLORE' ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/TOUR_EXPLORE' })}>
                                     탐색
-                                </div>
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/ROUTE_PLANNER' ? 'bg-accent-soft text-accent font-bold' : ''}`}
+                                </button>
+                                <button type="button"
+                                    aria-current={pathname === '/view/ROUTE_PLANNER' ? 'page' : undefined}
+                                    className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname === '/view/ROUTE_PLANNER' ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/ROUTE_PLANNER' })}>
                                     동선
-                                </div>
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname?.startsWith('/view/COMMUNITY') ? 'bg-accent-soft text-accent font-bold' : ''}`}
+                                </button>
+                                <button type="button"
+                                    aria-current={pathname?.startsWith('/view/COMMUNITY') ? 'page' : undefined}
+                                    className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname?.startsWith('/view/COMMUNITY') ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/COMMUNITY_LIST' })}>
                                     커뮤니티
-                                </div>
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/SET_TIME_PAGE' ? 'bg-accent-soft text-accent font-bold' : ''}`}
+                                </button>
+                                <button type="button"
+                                    aria-current={pathname === '/view/SET_TIME_PAGE' ? 'page' : undefined}
+                                    className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname === '/view/SET_TIME_PAGE' ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/SET_TIME_PAGE' })}>
                                     동행
-                                </div>
-                                <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/MY_PAGE' ? 'bg-accent-soft text-accent font-bold' : ''}`}
+                                </button>
+                                <button type="button"
+                                    aria-current={pathname === '/view/MY_PAGE' ? 'page' : undefined}
+                                    className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname === '/view/MY_PAGE' ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/MY_PAGE' })}>
                                     마이
-                                </div>
+                                </button>
                                 {!isAdmin && <div className="sidebar-ai-section">
                                     <span className="sidebar-ai-label">AI 통역</span>
                                     <button
+                                        type="button"
                                         className={`sidebar-ai-btn ja${pathname === '/view/AI_JAPANESE_CHAT_PAGE' ? ' active' : ''}`}
                                         onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/AI_JAPANESE_CHAT_PAGE' })}>
                                         <span className="ai-badge">AI</span>
                                         일본어 채팅
                                     </button>
                                     <button
+                                        type="button"
                                         className={`sidebar-ai-btn en${pathname === '/view/AI_ENGLISH_CHAT_PAGE' ? ' active' : ''}`}
                                         onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/AI_ENGLISH_CHAT_PAGE' })}>
                                         <span className="ai-badge">AI</span>
@@ -134,14 +152,18 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 ) : (
                     loginBtnMeta ? (
                         <nav className="sidebar-nav mt-4 flex flex-col gap-2 px-4">
-                            <div className={`nav-item p-2 rounded cursor-pointer ${pathname === '/view/MAIN_PAGE' ? 'bg-accent-soft text-accent font-bold' : ''}`}
+                            <button type="button"
+                                aria-current={pathname === '/view/MAIN_PAGE' ? 'page' : undefined}
+                                className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname === '/view/MAIN_PAGE' ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}
                                 onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/MAIN_PAGE' })}>
                                 홈
-                            </div>
-                            <div className={`nav-item p-2 rounded cursor-pointer ${pathname?.startsWith('/view/COMMUNITY') ? 'bg-accent-soft text-accent font-bold' : ''}`}
+                            </button>
+                            <button type="button"
+                                aria-current={pathname?.startsWith('/view/COMMUNITY') ? 'page' : undefined}
+                                className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname?.startsWith('/view/COMMUNITY') ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}
                                 onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/COMMUNITY_LIST' })}>
                                 커뮤니티
-                            </div>
+                            </button>
                         </nav>
                     ) : (
                         <div className="text-red-500 text-sm text-center">로그인 메타데이터 누락</div>
@@ -154,7 +176,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <div className="sidebar-footer p-4 border-t border-gray-100">
                 {isRealLoggedIn ? (
                     logoutMeta ? (
-                        <button className="sidebar-auth-btn w-full p-2 bg-gray-100 rounded text-center"
+                        <button type="button" className="sidebar-auth-btn w-full p-2 bg-gray-100 rounded text-center"
                             onClick={() => handleAction(logoutMeta)}>
                             {getVal(logoutMeta, 'label_text', 'labelText')}
                         </button>
@@ -163,7 +185,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     )
                 ) : (
                     loginBtnMeta ? (
-                        <button className="sidebar-auth-btn login w-full p-2 bg-accent text-white rounded text-center"
+                        <button type="button" className="sidebar-auth-btn login w-full p-2 bg-accent text-white rounded text-center"
                             onClick={() => handleAction(loginBtnMeta)}>
                             {getVal(loginBtnMeta, 'label_text', 'labelText')}
                         </button>
