@@ -20,10 +20,13 @@
 
 # Local build outputs inside the workspace — regenerated on the build server.
 **/.expo/
+**/.next/
 **/dist/
+**/dist-*/
 **/.eas-cli-tools/
 **/.eas-npm-cache/
 **/.eas-user-data/
 **/node_modules.stale/
 **/tsconfig.tsbuildinfo
 **/.env
+**/.env.*
