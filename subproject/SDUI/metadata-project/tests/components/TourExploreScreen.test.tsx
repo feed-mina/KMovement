@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TourExploreScreen from '@/components/plugins/travel/TourExploreScreen';
 import { fetchHolyPois, fetchTourPois } from '@/services/tourApi';
@@ -192,12 +192,13 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         trigger.focus();
         await user.keyboard('{Enter}');
 
-        expect(await screen.findByRole('dialog', { name: '키보드 성지' })).toBeInTheDocument();
+        const dialog = await screen.findByRole('dialog', { name: '키보드 성지' });
+        expect(dialog).toBeInTheDocument();
         const closeButton = screen.getByRole('button', { name: '닫기' });
         await waitFor(() => expect(closeButton).toHaveFocus());
 
         fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
-        expect(screen.getByRole('button', { name: '키보드 성지 저장' })).toHaveFocus();
+        expect(within(dialog).getByRole('button', { name: '키보드 성지 저장' })).toHaveFocus();
 
         fireEvent.keyDown(document, { key: 'Escape' });
         await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
