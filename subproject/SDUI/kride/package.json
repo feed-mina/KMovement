@@ -11,7 +11,7 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch"
   },
-  "//mobileHoist": "expo-router (+ its unpinned peers: expo-status-bar/expo-linking/react-native-safe-area-context/react-native-screens) and react-native/react-native-reanimated are declared here only so npm hoists them to the workspace root, where the hoisted babel-preset-expo detects them via hasModule() and Expo native modules can resolve their React Native peer. The Next.js web app does not import them.",
+  "//mobileHoist": "RN community modules with native code must also be declared in apps/mobile/package.json so React Native native autolinking (Gradle/CocoaPods) can discover them. Root declarations only provide npm workspace hoisting and do not replace app-local declarations. Expo Router and its Expo peers remain hoisted here so babel-preset-expo and Expo native modules can resolve them. The Next.js web app does not import these mobile dependencies.",
   "dependencies": {
     "@tanstack/react-query": "^5.21.4",
     "@tanstack/react-query-devtools": "^5.21.5",
