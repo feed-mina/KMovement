@@ -5,6 +5,10 @@ import { hydrateSession, setSessionStorage } from '@kride/core';
 import { secureSessionStorage } from '../src/sessionStorage';
 import '../global.css';
 
+// Surface render-time exceptions on screen instead of a silent white screen —
+// expo-router only installs its boundary when the root layout exports one.
+export { ErrorBoundary } from 'expo-router';
+
 const queryClient = new QueryClient();
 
 // Registered at module scope so the adapter is in place before any screen

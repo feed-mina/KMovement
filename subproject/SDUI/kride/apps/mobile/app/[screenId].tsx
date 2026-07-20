@@ -62,10 +62,16 @@ export default function MobileScreen() {
 
   const page = usePageHook(sid, metadata, EMPTY_OBJ, navigation, routeParams, runtime);
 
+  // The loading/error screens double as a diagnostic surface: release APKs
+  // give us no logs, so the target server and failure reason must be readable
+  // on the device itself.
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center">
+      <View className="flex-1 items-center justify-center px-6">
         <Text>불러오는 중…</Text>
+        <Text className="mt-2 text-xs text-neutral-400">
+          {sid} · {apiBase || 'API 주소가 설정되지 않았습니다'}
+        </Text>
       </View>
     );
   }
@@ -73,6 +79,12 @@ export default function MobileScreen() {
     return (
       <View className="flex-1 items-center justify-center px-6">
         <Text className="text-red-600">화면을 불러오지 못했습니다.</Text>
+        <Text className="mt-2 text-center text-xs text-neutral-500">
+          {sid} · {apiBase || 'API 주소가 설정되지 않았습니다'}
+        </Text>
+        <Text className="mt-1 text-center text-xs text-neutral-400">
+          {error instanceof Error ? error.message : String(error)}
+        </Text>
       </View>
     );
   }
