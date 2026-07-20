@@ -4,19 +4,34 @@ import { StyleSheet, Text, View } from 'react-native';
 type MarkerData = { id?: string; lat: number; lng: number; name?: string };
 type Props = { provider?: 'google' | 'default'; center?: [number, number]; markers?: MarkerData[]; onMarkerPress?: (marker: MarkerData) => void };
 
-// react-native-maps ships a native module that is NOT bundled into Expo Go.
-// Importing its JS is fine, but rendering <MapView> there throws at the native
-// bridge. Detect Expo Go and skip loading the module entirely; a real map needs
-// a development build (`expo run:android` / EAS dev client).
+type MapsModule = typeof import('react-native-maps');
+
 const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
-const Maps = isExpoGo ? null : require('react-native-maps');
+let cachedMapsModule: MapsModule | null | undefined;
+
+// Keep the native map dependency lazy so a missing/misconfigured map module
+// cannot crash the whole app during startup before any MAP_VIEW is rendered.
+const getMapsModule = (): MapsModule | null => {
+  if (isExpoGo) return null;
+  if (cachedMapsModule !== undefined) return cachedMapsModule;
+
+  try {
+    cachedMapsModule = require('react-native-maps') as MapsModule;
+  } catch {
+    cachedMapsModule = null;
+  }
+
+  return cachedMapsModule;
+};
 
 export default function KrideMap({ provider = 'default', center = [37.5665, 126.978], markers = [], onMarkerPress }: Props) {
+  const Maps = getMapsModule();
+
   if (!Maps) {
     return (
       <View className="h-full w-full items-center justify-center bg-neutral-100 px-6">
         <Text className="text-center text-sm text-neutral-500">
-          지도는 개발 빌드에서 표시됩니다{'\n'}(Expo Go 미지원)
+          {isExpoGo ? `지도는 개발 빌드에서 표시됩니다${'\n'}(Expo Go 미지원)` : '지도를 불러오지 못했습니다.'}
         </Text>
       </View>
     );
