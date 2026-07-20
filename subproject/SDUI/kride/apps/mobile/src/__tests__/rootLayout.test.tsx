@@ -4,6 +4,7 @@ import RootLayout from '../../app/_layout';
 
 jest.mock('expo-router', () => ({
   Stack: () => require('react').createElement(require('react-native').Text, null, 'navigation'),
+  ErrorBoundary: () => null,
 }));
 
 jest.mock('@kride/core', () => ({

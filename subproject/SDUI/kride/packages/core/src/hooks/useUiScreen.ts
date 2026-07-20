@@ -7,7 +7,9 @@ export function useUiScreen(screenId: string, apiBase = "") {
     queryKey: ["ui-screen", screenId],
     queryFn: async () => {
       const res = await fetch(`${apiBase}/api/ui/${screenId}`);
-      if (!res.ok) throw new Error(`Failed to load screen: ${screenId}`);
+      // Status is part of the message so release builds, which have no logs,
+      // can tell a server rejection apart from an unreachable host on screen.
+      if (!res.ok) throw new Error(`Failed to load screen: ${screenId} (HTTP ${res.status})`);
       const json = await res.json();
       return json.data ?? [];
     },

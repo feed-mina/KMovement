@@ -1,4 +1,3 @@
-import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { StyleSheet, Text, View } from 'react-native';
 
 type MarkerData = { id?: string; lat: number; lng: number; name?: string };
@@ -6,13 +5,29 @@ type Props = { provider?: 'google' | 'default'; center?: [number, number]; marke
 
 type MapsModule = typeof import('react-native-maps');
 
-const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+let cachedIsExpoGo: boolean | undefined;
 let cachedMapsModule: MapsModule | null | undefined;
+
+// Resolved lazily: componentMap imports this file at startup, so a top-level
+// expo-constants access would run before any MAP_VIEW renders and could take
+// the whole app down if the module is missing or misconfigured.
+const isExpoGo = (): boolean => {
+  if (cachedIsExpoGo !== undefined) return cachedIsExpoGo;
+
+  try {
+    const { default: Constants, ExecutionEnvironment } = require('expo-constants') as typeof import('expo-constants');
+    cachedIsExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+  } catch {
+    cachedIsExpoGo = false;
+  }
+
+  return cachedIsExpoGo;
+};
 
 // Keep the native map dependency lazy so a missing/misconfigured map module
 // cannot crash the whole app during startup before any MAP_VIEW is rendered.
 const getMapsModule = (): MapsModule | null => {
-  if (isExpoGo) return null;
+  if (isExpoGo()) return null;
   if (cachedMapsModule !== undefined) return cachedMapsModule;
 
   try {
@@ -31,7 +46,7 @@ export default function KrideMap({ provider = 'default', center = [37.5665, 126.
     return (
       <View className="h-full w-full items-center justify-center bg-neutral-100 px-6">
         <Text className="text-center text-sm text-neutral-500">
-          {isExpoGo ? `지도는 개발 빌드에서 표시됩니다${'\n'}(Expo Go 미지원)` : '지도를 불러오지 못했습니다.'}
+          {isExpoGo() ? `지도는 개발 빌드에서 표시됩니다${'\n'}(Expo Go 미지원)` : '지도를 불러오지 못했습니다.'}
         </Text>
       </View>
     );
