@@ -18,7 +18,7 @@
     },
     "android": {
       "package": "com.kride.mobile",
-      "versionCode": 3
+      "versionCode": 4
     },
     "extra": {
       "router": {
