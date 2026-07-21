@@ -1,4 +1,6 @@
-import { act } from "react";
+// React 18.2 does not export `act` from the `react` package (added in 18.3+).
+// Import from `react-dom/test-utils` for store-level state mutations.
+import { act } from "react-dom/test-utils";
 import { useOnboardingStore } from "@/store/onboarding-store";
 import type { ContentItem, TravelDuration } from "@/store/onboarding-store";
 

@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { act } from "react";
+// React 18.2 does not export `act` from the `react` package (added in 18.3+).
+import { act } from "react-dom/test-utils";
 import SelectionCard from "@/components/kride/SelectionCard";
 import { useOnboardingStore } from "@/store/onboarding-store";
 
