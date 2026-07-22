@@ -4,6 +4,8 @@ import com.domain.demo_backend.domain.query.domain.QueryMaster;
 import com.domain.demo_backend.domain.query.repository.DynamicExecutor;
 import com.domain.demo_backend.domain.query.service.QueryMasterService;
 import com.domain.demo_backend.global.security.CustomUserDetails;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,13 +14,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/execute")
 public class CommonQueryController {
     private final QueryMasterService queryMasterService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final DynamicExecutor dynamicExecutor; // 실행기 추가
 
     @Autowired
@@ -78,6 +83,11 @@ public class CommonQueryController {
             params.put("userId", userDetails.getUserId());
         }
 
+        ResponseEntity<?> paramError = validateAllowedParams(queryMaster, params);
+        if (paramError != null) {
+            return paramError;
+        }
+
         try {
             Object result;
             if ("COMMAND".equals(returnType)) {
@@ -112,6 +122,53 @@ public class CommonQueryController {
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "쿼리 실행 중 오류가 발생했습니다.", "error", e.getMessage()));
+        }
+    }
+
+    private ResponseEntity<?> validateAllowedParams(QueryMaster queryMaster, Map<String, Object> params) {
+        Set<String> allowed = new LinkedHashSet<>();
+        allowed.add("userSqno");
+        allowed.add("userId");
+        addRequiredParams(allowed, queryMaster.getRequiredParams());
+        addParamMappingKeys(allowed, queryMaster.getParamMapping());
+
+        if (allowed.size() <= 2) {
+            return null;
+        }
+
+        Set<String> rejected = new LinkedHashSet<>(params.keySet());
+        rejected.removeAll(allowed);
+        if (rejected.isEmpty()) {
+            return null;
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "status", "error",
+                "message", "Unsupported query parameter.",
+                "sqlKey", queryMaster.getSqlKey(),
+                "rejectedParams", rejected
+        ));
+    }
+
+    private void addRequiredParams(Set<String> allowed, String rawJson) {
+        if (rawJson == null || rawJson.isBlank()) {
+            return;
+        }
+        try {
+            List<String> names = objectMapper.readValue(rawJson, new TypeReference<List<String>>() {});
+            allowed.addAll(names);
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void addParamMappingKeys(Set<String> allowed, String rawJson) {
+        if (rawJson == null || rawJson.isBlank()) {
+            return;
+        }
+        try {
+            Map<String, Object> mapping = objectMapper.readValue(rawJson, new TypeReference<Map<String, Object>>() {});
+            allowed.addAll(mapping.keySet());
+        } catch (Exception ignored) {
         }
     }
 }

@@ -6,6 +6,10 @@ export const SCREEN_IDS = {
   INTRO5: "KRIDE_INTRO5",
   MY_LIST: "KRIDE_MY_LIST",
   FOCUS: "KRIDE_FOCUS",
+  KPOP_EXPLORE: "KPOP_EXPLORE",
+  KPOP_ARTIST_DETAIL: "KPOP_ARTIST_DETAIL",
+  KPOP_EVENTS: "KPOP_EVENTS",
+  KPOP_EVENT_DETAIL: "KPOP_EVENT_DETAIL",
 } as const;
 
 export type ScreenId = (typeof SCREEN_IDS)[keyof typeof SCREEN_IDS];
@@ -18,4 +22,8 @@ export const PATH_TO_SCREEN: Record<string, ScreenId> = {
   "/intro5": SCREEN_IDS.INTRO5,
   "/my-list": SCREEN_IDS.MY_LIST,
   "/focus": SCREEN_IDS.FOCUS,
+  "/kpop": SCREEN_IDS.KPOP_EXPLORE,
+  "/kpop/artists": SCREEN_IDS.KPOP_ARTIST_DETAIL,
+  "/kpop/events": SCREEN_IDS.KPOP_EVENTS,
+  "/kpop/event": SCREEN_IDS.KPOP_EVENT_DETAIL,
 };

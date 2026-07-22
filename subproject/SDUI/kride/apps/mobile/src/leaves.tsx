@@ -72,3 +72,43 @@ export const CheckIndicatorLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
     </View>
   );
 };
+
+const kpopName = (data?: Record<string, any>) =>
+  data?.nameKo || data?.name_ko || data?.nameEn || data?.name || 'K-POP';
+
+export const ArtistCardLeaf: React.FC<SduiLeafProps> = ({ data }) => {
+  const name = kpopName(data);
+  const imageUrl = data?.imageUrl || data?.image_url;
+  return (
+    <View className="mb-3 overflow-hidden rounded-xl border border-neutral-200 bg-white">
+      <View className="h-32 w-full bg-neutral-100">
+        {imageUrl ? <Image source={{ uri: imageUrl }} className="h-full w-full" resizeMode="cover" /> : null}
+      </View>
+      <View className="gap-2 p-4">
+        <Text className="text-xs font-semibold uppercase text-kride">Artist</Text>
+        <Text className="text-lg font-bold text-neutral-950">{String(name)}</Text>
+        <Text className="text-sm text-neutral-600" numberOfLines={2}>
+          {String(data?.profile || 'Follow events, fan routes, and reliable merch candidates.')}
+        </Text>
+      </View>
+    </View>
+  );
+};
+
+export const EventCardLeaf: React.FC<SduiLeafProps> = ({ data }) => {
+  const title = data?.titleKo || data?.title_ko || data?.titleEn || data?.title || 'K-POP event';
+  return (
+    <View className="mb-3 rounded-xl border border-neutral-200 bg-white p-4">
+      <Text className="text-xs font-semibold uppercase text-kride">
+        {String(data?.artistNameKo || data?.artistName || 'Event')}
+      </Text>
+      <Text className="mt-1 text-lg font-bold text-neutral-950">{String(title)}</Text>
+      <Text className="mt-2 text-sm text-neutral-600" numberOfLines={2}>
+        {[data?.region, data?.venue, data?.date].filter(Boolean).join(' - ')}
+      </Text>
+      <Text className="mt-2 text-xs text-neutral-500" numberOfLines={2}>
+        Only official or reviewed links should be treated as reliable.
+      </Text>
+    </View>
+  );
+};

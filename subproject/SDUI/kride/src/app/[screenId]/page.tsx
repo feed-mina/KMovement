@@ -8,6 +8,10 @@ const SCREEN_ROUTES: Record<string, string> = {
   KRIDE_INTRO5: "/intro5",
   KRIDE_FOCUS: "/focus",
   KRIDE_MY_LIST: "/my-list",
+  KPOP_EXPLORE: "/kpop",
+  KPOP_ARTIST_DETAIL: "/kpop/artists",
+  KPOP_EVENTS: "/kpop/events",
+  KPOP_EVENT_DETAIL: "/kpop/event",
 };
 
 export default function ScreenIdPage({
