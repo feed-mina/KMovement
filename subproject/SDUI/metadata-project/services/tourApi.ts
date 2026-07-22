@@ -12,6 +12,8 @@ export interface TourPoi {
     mapX?: number; // 경도(lng)
     mapY?: number; // 위도(lat)
     firstImage?: string;
+    imageSourceUrl?: string;
+    imageCredit?: string;
     tel?: string;
     cat1?: string;
     cat2?: string;

@@ -12,6 +12,7 @@ import {
 } from '@/services/tourApi';
 import { HOLY_SITES } from '@/lib/data/holySites';
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
+import PoiImage from '@/components/plugins/travel/PoiImage';
 import { trackEvent } from '@/lib/analytics/dataLayer';
 
 // [탐색] 화면 컨트롤러 (여행 플러그인). TourAPI POI를 지역·카테고리·정렬로 탐색.
@@ -47,10 +48,6 @@ const SORTS = [
 ] as const;
 
 const SAVED_KEY = 'kride:saved-pois';
-
-function toHttps(url?: string): string | undefined {
-    return url ? url.replace(/^http:\/\//i, 'https://') : undefined;
-}
 
 function safeExternalUrl(url?: string): string | undefined {
     if (!url) return undefined;
@@ -370,10 +367,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                     style={{ display: 'block', width: '100%', padding: 0, border: 'none', background: 'transparent', color: 'inherit', textAlign: 'left', cursor: 'pointer' }}
                                 >
                                     <span style={{ height: 100, background: '#f5f5f5', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        {toHttps(p.firstImage)
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            ? <img src={toHttps(p.firstImage)} alt={p.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            : <span style={{ color: '#ccc', fontSize: 22 }}>♪</span>}
+                                        <PoiImage src={p.firstImage} title={p.title} variant="card" />
                                         {p.contentTypeId === 'HOLY' && (
                                             <span style={{ position: 'absolute', top: 6, left: 6, fontSize: 10, background: RED, color: '#fff', padding: '2px 7px', borderRadius: 20 }}>성지</span>
                                         )}
@@ -407,11 +401,14 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                     style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 1000 }}
                 >
                     <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: '#fff', borderRadius: 16, overflow: 'hidden', maxHeight: '86vh', overflowY: 'auto' }}>
-                        <div style={{ height: 140, background: '#f5f5f5', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {toHttps(selected.firstImage)
-                                // eslint-disable-next-line @next/next/no-img-element
-                                ? <img src={toHttps(selected.firstImage)} alt={selected.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                : <span style={{ color: '#bbb', fontSize: 13 }}>이미지 없음</span>}
+                        <div style={{ background: '#f5f5f5', position: 'relative' }}>
+                            <PoiImage
+                                src={selected.firstImage}
+                                title={selected.title}
+                                variant="modal"
+                                sourceUrl={selected.imageSourceUrl}
+                                credit={selected.imageCredit}
+                            />
                             <button ref={closeButtonRef} type="button" aria-label="닫기" onClick={closePlace} style={{ position: 'absolute', top: 10, right: 10, width: 30, height: 30, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.45)', color: '#fff', cursor: 'pointer', fontSize: 16 }}>✕</button>
                         </div>
                         <div style={{ padding: '14px 16px' }}>

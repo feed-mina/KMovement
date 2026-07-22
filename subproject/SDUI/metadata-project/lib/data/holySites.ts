@@ -12,11 +12,17 @@ export const HOLY_SITES: TourPoi[] = [
     {
         contentId: 'holy-bukchon', title: '북촌 한옥마을', addr: '서울특별시 종로구 계동길 37',
         mapX: 126.9850, mapY: 37.5826, contentTypeId: 'HOLY', areaCode: '1', sigunguCode: '23',
+        firstImage: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Bukchon_Hanok_Village_01.jpg?width=960',
+        imageSourceUrl: 'https://commons.wikimedia.org/wiki/File:Bukchon_Hanok_Village_01.jpg',
+        imageCredit: 'Bgag · CC0 1.0',
         artist: 'IVE·NewJeans', fandomInfo: '화보·뮤비 한옥 배경 성지', recommendReason: '한복 대여 후 촬영하기 좋은 골목, 경복궁과 도보 코스.',
     },
     {
         contentId: 'holy-seoulforest', title: '서울숲', addr: '서울특별시 성동구 뚝섬로 273',
         mapX: 127.0374, mapY: 37.5444, contentTypeId: 'HOLY', areaCode: '1', sigunguCode: '16',
+        firstImage: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/SeoulForest.jpg?width=800',
+        imageSourceUrl: 'https://commons.wikimedia.org/wiki/File:SeoulForest.jpg',
+        imageCredit: 'JeongAhn · Public Domain',
         artist: 'aespa', fandomInfo: '뮤비 촬영지 · 팬 성지', recommendReason: '산책 동선이 좋고 성수 카페거리와 이어져요.',
     },
     {
@@ -37,11 +43,17 @@ export const HOLY_SITES: TourPoi[] = [
     {
         contentId: 'holy-ddp', title: 'DDP 동대문디자인플라자', addr: '서울특별시 중구 을지로 281',
         mapX: 127.0094, mapY: 37.5669, contentTypeId: 'HOLY', areaCode: '1', sigunguCode: '24',
+        firstImage: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Dongdaemun_Design_Plaza_%26_Park.jpg?width=960',
+        imageSourceUrl: 'https://commons.wikimedia.org/wiki/File:Dongdaemun_Design_Plaza_%26_Park.jpg',
+        imageCredit: 'Nestor Lacle · CC BY 2.0',
         artist: '다수', fandomInfo: '패션위크·뮤비 배경', recommendReason: '미래적 건축 배경 촬영, 야간 조명 인증샷.',
     },
     {
         contentId: 'holy-lotte', title: '서울스카이 (롯데월드타워)', addr: '서울특별시 송파구 올림픽로 300',
         mapX: 127.1025, mapY: 37.5126, contentTypeId: 'HOLY', areaCode: '1', sigunguCode: '18',
+        firstImage: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Lotte_World_Tower_and_Namsan_Tower_in_Seoul.jpg?width=960',
+        imageSourceUrl: 'https://commons.wikimedia.org/wiki/File:Lotte_World_Tower_and_Namsan_Tower_in_Seoul.jpg',
+        imageCredit: 'Arturbraun · CC BY-SA 4.0',
         artist: '다수', fandomInfo: '전망대 성지', recommendReason: '국내 최고층 전망, 잠실 코스 마무리로 좋아요.',
     },
 ];

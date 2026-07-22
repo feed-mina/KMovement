@@ -74,6 +74,17 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         expect(img.src).toBe('https://img/a.jpg');
     });
 
+    it('카드와 상세 모달에서 같은 대표 이미지와 대체 텍스트를 사용한다', async () => {
+        renderScreen();
+        const cardImage = await screen.findByAltText('가나돈까스의집') as HTMLImageElement;
+        fireEvent.click(screen.getByRole('button', { name: '가나돈까스의집 상세 보기' }));
+
+        const images = await screen.findAllByAltText('가나돈까스의집') as HTMLImageElement[];
+        expect(images).toHaveLength(2);
+        expect(images[0].src).toBe(cardImage.src);
+        expect(images[1].src).toBe(cardImage.src);
+    });
+
     it('조회 실패 시 안내 문구를 표시해야 함', async () => {
         mockedFetch.mockRejectedValueOnce(new Error('network'));
         renderScreen();

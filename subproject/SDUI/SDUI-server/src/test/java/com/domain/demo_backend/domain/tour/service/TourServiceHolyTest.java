@@ -71,8 +71,12 @@ class TourServiceHolyTest {
     @Test
     @DisplayName("엔티티 → DTO 매핑에 성지 확장 필드(artist/fandomInfo/recommendReason)가 보존된다")
     void dtoCarriesHolyFields() {
+        TourPoi holy = holy("holy-b", "성지B", "aespa");
+        holy.setFirstImage("https://images.example.com/holy-b.jpg");
+        holy.setImageSourceUrl("https://commons.wikimedia.org/wiki/File:Holy-b.jpg");
+        holy.setImageCredit("Photographer · CC BY 4.0");
         when(tourPoiRepository.findHolyPoisByRegion("TOURAPI", "APPROVED", null, null))
-                .thenReturn(List.of(holy("holy-b", "성지B", "aespa")));
+                .thenReturn(List.of(holy));
 
         HolyPoiDto dto = tourService.getHolyPois().get(0);
 
@@ -83,6 +87,9 @@ class TourServiceHolyTest {
         assertThat(dto.recommendReason()).isEqualTo("추천 이유");
         assertThat(dto.mapX()).isEqualTo(127.0);
         assertThat(dto.mapY()).isEqualTo(37.5);
+        assertThat(dto.firstImage()).isEqualTo("https://images.example.com/holy-b.jpg");
+        assertThat(dto.imageSourceUrl()).contains("commons.wikimedia.org");
+        assertThat(dto.imageCredit()).isEqualTo("Photographer · CC BY 4.0");
     }
 
     @Test
