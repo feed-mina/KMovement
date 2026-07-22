@@ -2,6 +2,7 @@ package com.domain.demo_backend.domain.tour.controller;
 
 import com.domain.demo_backend.domain.tour.dto.HolyPoiDto;
 import com.domain.demo_backend.domain.tour.dto.TourPoiDto;
+import com.domain.demo_backend.domain.tour.dto.TourRegionDto;
 import com.domain.demo_backend.domain.tour.service.TourService;
 import com.domain.demo_backend.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +43,20 @@ public class TourController {
 
     /** GET /api/v1/tour/holy — 성지(K-컬처) POI 목록. 검수 승인분만 노출. Dev-4(#96-A). */
     @GetMapping("/holy")
-    public ApiResponse<List<HolyPoiDto>> getHolyPois() {
-        return ApiResponse.success(tourService.getHolyPois());
+    public ApiResponse<List<HolyPoiDto>> getHolyPois(
+            @RequestParam(required = false) String areaCode,
+            @RequestParam(required = false) String sigunguCode) {
+        return ApiResponse.success(tourService.getHolyPois(areaCode, sigunguCode));
+    }
+
+    /**
+     * GET /api/v1/tour/areas returns provinces.
+     * GET /api/v1/tour/areas?areaCode=1 returns districts in Seoul.
+     */
+    @GetMapping("/areas")
+    public ApiResponse<List<TourRegionDto>> getAreas(
+            @RequestParam(required = false) String areaCode) {
+        return ApiResponse.success(tourService.getAreas(areaCode));
     }
 
     /** GET /api/v1/tour/restaurants?areaCode=1 — 맛집(음식점) 조회 편의 엔드포인트. */

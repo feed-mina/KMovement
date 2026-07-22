@@ -2,21 +2,26 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TourExploreScreen from '@/components/plugins/travel/TourExploreScreen';
-import { fetchHolyPois, fetchTourPois } from '@/services/tourApi';
+import { fetchHolyPois, fetchTourAreas, fetchTourDistricts, fetchTourPois } from '@/services/tourApi';
+import { HOLY_SITES } from '@/lib/data/holySites';
 
 jest.mock('@/services/tourApi', () => ({
     __esModule: true,
     fetchTourPois: jest.fn(),
     fetchHolyPois: jest.fn(),
+    fetchTourAreas: jest.fn(),
+    fetchTourDistricts: jest.fn(),
 }));
 
 jest.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { socialType: 'K' }, isLoggedIn: true }) }));
 
 const mockedFetch = fetchTourPois as jest.Mock;
 const mockedHolyFetch = fetchHolyPois as jest.Mock;
+const mockedAreaFetch = fetchTourAreas as jest.Mock;
+const mockedDistrictFetch = fetchTourDistricts as jest.Mock;
 
 const sample = [
-    { contentId: '1', title: '가나돈까스의집', addr: '서울 강남구', firstImage: 'http://img/a.jpg', mapX: 127, mapY: 37.5 },
+    { contentId: '1', title: '가나돈까스의집', addr: '서울 강남구', firstImage: 'http://img/a.jpg', mapX: 127, mapY: 37.5, recommendReason: '근처 공연장과 함께 들르기 좋아요.' },
     { contentId: '2', title: '가담', addr: '서울 강남구', firstImage: '', mapX: 127.03, mapY: 37.52 },
 ];
 
@@ -24,9 +29,20 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
     beforeEach(() => {
         mockedFetch.mockReset();
         mockedFetch.mockResolvedValue(sample);
-        // 기본: 성지 API는 빈 결과 → 시드(HOLY_SITES) 폴백 경로
         mockedHolyFetch.mockReset();
-        mockedHolyFetch.mockResolvedValue([]);
+        mockedHolyFetch.mockResolvedValue(HOLY_SITES);
+        mockedAreaFetch.mockReset();
+        mockedAreaFetch.mockResolvedValue([
+            { code: '1', name: '서울' },
+            { code: '31', name: '경기도' },
+            { code: '32', name: '강원특별자치도' },
+        ]);
+        mockedDistrictFetch.mockReset();
+        mockedDistrictFetch.mockImplementation((areaCode: string) => Promise.resolve(
+            areaCode === '31'
+                ? [{ code: '13', name: '수원시' }, { code: '17', name: '안양시' }]
+                : [{ code: '1', name: '강남구' }, { code: '23', name: '종로구' }],
+        ));
     });
 
     const renderScreen = () => render(<TourExploreScreen screenId="TOUR_EXPLORE" refId={null} />);
@@ -58,6 +74,28 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         expect(img.src).toBe('https://img/a.jpg');
     });
 
+    it('카드와 상세 모달에서 같은 대표 이미지와 대체 텍스트를 사용한다', async () => {
+        renderScreen();
+        const cardImage = await screen.findByAltText('가나돈까스의집') as HTMLImageElement;
+        fireEvent.click(screen.getByRole('button', { name: '가나돈까스의집 상세 보기' }));
+
+        const images = await screen.findAllByAltText('가나돈까스의집') as HTMLImageElement[];
+        expect(images).toHaveLength(2);
+        expect(images[0].src).toBe(cardImage.src);
+        expect(images[1].src).toBe(cardImage.src);
+    });
+
+    it('동일한 추천 이유를 카드와 상세 모달에서 함께 사용하고 없는 카드는 영역을 생략한다', async () => {
+        renderScreen();
+
+        expect(await screen.findByText('근처 공연장과 함께 들르기 좋아요.')).toBeInTheDocument();
+        expect(screen.getAllByTestId('tour-poi-recommend-reason')).toHaveLength(1);
+
+        fireEvent.click(screen.getByRole('button', {name: '가나돈까스의집 상세 보기'}));
+        expect(await screen.findByText('왜 추천하나요?')).toBeInTheDocument();
+        expect(screen.getAllByText('근처 공연장과 함께 들르기 좋아요.')).toHaveLength(2);
+    });
+
     it('조회 실패 시 안내 문구를 표시해야 함', async () => {
         mockedFetch.mockRejectedValueOnce(new Error('network'));
         renderScreen();
@@ -71,6 +109,40 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         await waitFor(() =>
             expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ sigunguCode: '23' })),
         );
+    });
+
+    it('시·도 변경 시 하위 목록을 바꾸고 이전 시·군·구 선택을 초기화한다', async () => {
+        renderScreen();
+        fireEvent.click(await screen.findByRole('button', { name: '종로구' }));
+        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1', sigunguCode: '23' })));
+
+        fireEvent.click(screen.getByRole('button', { name: '경기도' }));
+
+        expect(await screen.findByRole('button', { name: '경기도 전체' })).toHaveAttribute('aria-pressed', 'true');
+        expect(await screen.findByRole('button', { name: '수원시' })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: '종로구' })).not.toBeInTheDocument();
+        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '31', sigunguCode: '' })));
+    });
+
+    it('시·도 전체와 시·군·구 선택을 같은 지역 코드 계약으로 조회한다', async () => {
+        renderScreen();
+        fireEvent.click(await screen.findByRole('button', { name: '경기도' }));
+        fireEvent.click(await screen.findByRole('button', { name: '수원시' }));
+
+        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '31', sigunguCode: '13' })));
+        fireEvent.click(screen.getByRole('button', { name: '성지' }));
+        await waitFor(() => expect(mockedHolyFetch).toHaveBeenCalledWith({ areaCode: '31', sigunguCode: '13' }));
+    });
+
+    it('지역 카탈로그가 실패하면 서울 기본값과 전체 선택을 안전하게 제공한다', async () => {
+        mockedAreaFetch.mockRejectedValueOnce(new Error('network'));
+        mockedDistrictFetch.mockRejectedValueOnce(new Error('network'));
+
+        renderScreen();
+
+        expect(await screen.findByRole('button', { name: '서울' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: '서울 전체' })).toHaveAttribute('aria-pressed', 'true');
+        expect(await screen.findByRole('status')).toHaveTextContent(/지역 전체로 탐색/);
     });
 
     it('정렬(최신순) 선택 시 arrange=C로 재조회해야 함', async () => {

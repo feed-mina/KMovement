@@ -49,6 +49,12 @@ public class TourPoi {
     @Column(name = "first_image")
     private String firstImage;
 
+    @Column(name = "image_source_url")
+    private String imageSourceUrl;
+
+    @Column(name = "image_credit", length = 255)
+    private String imageCredit;
+
     @Column(name = "tel", length = 100)
     private String tel;
 
