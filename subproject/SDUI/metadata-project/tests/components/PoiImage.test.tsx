@@ -8,7 +8,7 @@ describe('PoiImage', () => {
 
         const image = screen.getByAltText('서울숲') as HTMLImageElement;
         expect(image.src).toBe('https://images.example.com/place.jpg');
-        expect(image.loading).toBe('lazy');
+        expect(image).toHaveAttribute('loading', 'lazy');
     });
 
     it('URL 부재와 유효하지 않은 URL은 동일 fallback으로 표시한다', () => {
