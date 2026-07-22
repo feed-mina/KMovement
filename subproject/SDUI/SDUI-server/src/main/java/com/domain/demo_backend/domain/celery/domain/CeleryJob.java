@@ -43,6 +43,27 @@ public class CeleryJob {
     @Column(name = "requested_by")
     private Long requestedBy;
 
+    @Column(name = "source_object_key", columnDefinition = "TEXT")
+    private String sourceObjectKey;
+
+    @Column(name = "source_content_type", length = 80)
+    private String sourceContentType;
+
+    @Column(name = "source_deleted_at")
+    private LocalDateTime sourceDeletedAt;
+
+    @Column(name = "consent_scope", length = 120)
+    private String consentScope;
+
+    @Column(name = "consented_at")
+    private LocalDateTime consentedAt;
+
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
+
+    @Column(name = "idempotency_key", length = 120)
+    private String idempotencyKey;
+
     @Builder.Default
     @Column(name = "notif_sent", nullable = false)
     private boolean notifSent = false;

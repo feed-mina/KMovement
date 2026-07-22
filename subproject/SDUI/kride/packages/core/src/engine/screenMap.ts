@@ -10,6 +10,8 @@ export const SCREEN_IDS = {
   KPOP_ARTIST_DETAIL: "KPOP_ARTIST_DETAIL",
   KPOP_EVENTS: "KPOP_EVENTS",
   KPOP_EVENT_DETAIL: "KPOP_EVENT_DETAIL",
+  KPOP_AI_FIND: "KPOP_AI_FIND",
+  KPOP_AI_RESULT: "KPOP_AI_RESULT",
 } as const;
 
 export type ScreenId = (typeof SCREEN_IDS)[keyof typeof SCREEN_IDS];
@@ -26,4 +28,6 @@ export const PATH_TO_SCREEN: Record<string, ScreenId> = {
   "/kpop/artists": SCREEN_IDS.KPOP_ARTIST_DETAIL,
   "/kpop/events": SCREEN_IDS.KPOP_EVENTS,
   "/kpop/event": SCREEN_IDS.KPOP_EVENT_DETAIL,
+  "/kpop/ai": SCREEN_IDS.KPOP_AI_FIND,
+  "/kpop/ai/result": SCREEN_IDS.KPOP_AI_RESULT,
 };

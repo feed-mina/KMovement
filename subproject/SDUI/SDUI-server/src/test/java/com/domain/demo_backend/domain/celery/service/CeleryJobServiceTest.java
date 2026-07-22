@@ -147,6 +147,105 @@ class CeleryJobServiceTest {
     }
 
     @Test
+    void numericOwnedLookupDoesNotLeakAnotherUsersJob() {
+        CeleryJobRepository repository = mock(CeleryJobRepository.class);
+        when(repository.findByIdAndRequestedBy(91L, 7L)).thenReturn(Optional.empty());
+        CeleryJobService service = new CeleryJobService(
+                repository,
+                mock(UserRepository.class),
+                "http://127.0.0.1:1",
+                INTERNAL_KEY
+        );
+
+        ResponseStatusException error = assertThrows(
+                ResponseStatusException.class,
+                () -> service.getOwnedJobStatus(91L, 7L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, error.getStatusCode());
+        verify(repository).findByIdAndRequestedBy(91L, 7L);
+    }
+
+    @Test
+    void kpopTaskUsesGatewayAliasAndPersistsConsentAudit() throws Exception {
+        AtomicReference<String> requestPath = new AtomicReference<>();
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/jobs/celery/", exchange -> {
+            requestPath.set(exchange.getRequestURI().getPath());
+            byte[] body = ("{\"task_id\":\"" + TASK_ID + "\"}").getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, body.length);
+            exchange.getResponseBody().write(body);
+            exchange.close();
+        });
+        server.start();
+
+        try {
+            CeleryJobRepository repository = mock(CeleryJobRepository.class);
+            when(repository.save(any(CeleryJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            UserRepository userRepository = mock(UserRepository.class);
+            when(userRepository.findByUserSqnoForCeleryLimit(7L))
+                    .thenReturn(Optional.of(User.builder().userSqno(7L).build()));
+            CeleryJobService service = new CeleryJobService(
+                    repository,
+                    userRepository,
+                    "http://127.0.0.1:" + server.getAddress().getPort(),
+                    INTERNAL_KEY
+            );
+
+            CeleryJob submitted = service.submitJob("KPOP_OUTFIT_ANALYSIS", Map.of(
+                    "sourceKey", "kpop-analysis/7/image.webp",
+                    "contentType", "image/webp",
+                    "consentScope", "user-owned-image-analysis",
+                    "idempotencyKey", "upload-7-1"
+            ), 7L);
+
+            assertEquals("/jobs/celery/kpop-outfit-analysis", requestPath.get());
+            assertEquals("kpop-analysis/7/image.webp", submitted.getSourceObjectKey());
+            assertEquals("image/webp", submitted.getSourceContentType());
+            assertEquals("user-owned-image-analysis", submitted.getConsentScope());
+            assertEquals("upload-7-1", submitted.getIdempotencyKey());
+            assertTrue(submitted.getConsentedAt() != null);
+            assertTrue(submitted.getExpiresAt() != null);
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void kpopIdempotencyKeyReturnsExistingJobWithoutGatewaySubmission() {
+        CeleryJob existing = CeleryJob.builder()
+                .id(91L)
+                .celeryTaskId(TASK_ID)
+                .taskType("KPOP_OUTFIT_ANALYSIS")
+                .requestedBy(7L)
+                .idempotencyKey("upload-7-1")
+                .build();
+        CeleryJobRepository repository = mock(CeleryJobRepository.class);
+        when(repository.findByRequestedByAndIdempotencyKey(7L, "upload-7-1"))
+                .thenReturn(Optional.of(existing));
+        CeleryJobService service = new CeleryJobService(
+                repository,
+                mock(UserRepository.class),
+                "http://127.0.0.1:1",
+                INTERNAL_KEY
+        );
+
+        CeleryJob result = service.submitJob("KPOP_OUTFIT_ANALYSIS", Map.of(
+                "sourceKey", "kpop-analysis/7/image.webp",
+                "contentType", "image/webp",
+                "consentScope", "user-owned-image-analysis",
+                "idempotencyKey", "upload-7-1"
+        ), 7L);
+
+        assertSame(existing, result);
+        verify(repository, never()).save(any(CeleryJob.class));
+        verify(repository, never()).countByRequestedByAndTaskTypeInAndStatusNotIn(
+                any(Long.class), anyCollection(), anyCollection()
+        );
+    }
+
+    @Test
     void ownedLookupIsDatabaseOnly() throws Exception {
         AtomicInteger gatewayRequests = new AtomicInteger();
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
@@ -261,7 +360,7 @@ class CeleryJobServiceTest {
 
         assertEquals(List.of(customStateJob), activeJobs);
         verify(repository).findByStatusNotInAndNotifSentFalse(
-                Set.of("SUCCESS", "FAILURE", "REVOKED")
+                Set.of("SUCCESS", "FAILURE", "REVOKED", "SUCCEEDED", "FAILED", "CANCELLED", "EXPIRED")
         );
     }
 

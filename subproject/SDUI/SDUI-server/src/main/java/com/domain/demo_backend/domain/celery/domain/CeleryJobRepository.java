@@ -13,6 +13,10 @@ public interface CeleryJobRepository extends JpaRepository<CeleryJob, Long> {
 
     Optional<CeleryJob> findByCeleryTaskIdAndRequestedBy(String celeryTaskId, Long requestedBy);
 
+    Optional<CeleryJob> findByIdAndRequestedBy(Long id, Long requestedBy);
+
+    Optional<CeleryJob> findByRequestedByAndIdempotencyKey(Long requestedBy, String idempotencyKey);
+
     long countByRequestedByAndTaskTypeInAndStatusNotIn(
             Long requestedBy,
             Collection<String> taskTypes,

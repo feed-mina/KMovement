@@ -1895,6 +1895,22 @@ class CeleryVideoRequest(BaseModel):
     allow_fallback: bool = True
 
 
+class CeleryKpopOutfitRequest(BaseModel):
+    sourceKey: str = Field(
+        ...,
+        min_length=24,
+        max_length=512,
+        pattern=r"^kpop-analysis/[1-9][0-9]*/[A-Za-z0-9][A-Za-z0-9._-]*$",
+    )
+    contentType: Literal["image/jpeg", "image/png", "image/webp"]
+    consentScope: str = Field(
+        ...,
+        min_length=1,
+        max_length=120,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9:_-]*$",
+    )
+
+
 class CeleryCleanupRequest(BaseModel):
     max_age_hours: float = Field(default=6.0, ge=0.01, le=720.0)
 
@@ -2039,6 +2055,21 @@ def celery_video(
         request.motion,
         request.prompt,
         request.allow_fallback,
+    )
+
+
+@app.post("/jobs/celery/kpop-outfit-analysis")
+def celery_kpop_outfit_analysis(
+    request: CeleryKpopOutfitRequest,
+    _: None = Depends(_require_internal_api_key),
+):
+    """Submit a consent-checked K-POP outfit image for asynchronous analysis."""
+    from src.api.tasks import task_analyze_kpop_outfit
+    return _submit_celery_task(
+        task_analyze_kpop_outfit,
+        request.sourceKey,
+        request.contentType,
+        request.consentScope,
     )
 
 

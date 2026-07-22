@@ -12,6 +12,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
+import re
 import shutil
 import tempfile
 import time
@@ -23,6 +24,11 @@ from src.api.celery_app import celery
 
 TORCHSERVE_URL = os.environ.get("TORCHSERVE_URL", "http://localhost:8085")
 logger = logging.getLogger("kride.celery")
+_KPOP_ANALYSIS_SOURCE_KEY_PATTERN = re.compile(
+    r"^kpop-analysis/[1-9][0-9]*/[A-Za-z0-9][A-Za-z0-9._-]*$"
+)
+_KPOP_ANALYSIS_CONSENT_SCOPE_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9:_-]{0,119}$")
+_KPOP_ANALYSIS_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
 
 def _media_temp_root(*, create: bool = False) -> Path:
@@ -152,6 +158,52 @@ def task_classify_event(self, text: str) -> dict:
 
 
 # ── Phase 3: 미디어 파이프라인 태스크 ─────────────────────────────────────────
+
+
+@celery.task(bind=True)
+def task_analyze_kpop_outfit(
+    self,
+    source_key: str,
+    content_type: str,
+    consent_scope: str,
+) -> dict:
+    """Return a conservative result until an evidence-producing model is connected.
+
+    The Spring API validates object ownership, upload metadata, and recorded consent
+    before submitting this task. The worker deliberately does not echo the private
+    object key in its result.
+    """
+    self.update_state(
+        state="ANALYSIS_VALIDATING",
+        meta={"step": "validating_input", "progress": 10},
+    )
+
+    # Keep these arguments explicit in the task contract while the actual model and
+    # catalog provider remain undecided. Validation is repeated here so a task that
+    # bypasses the FastAPI endpoint still fails closed.
+    if not _KPOP_ANALYSIS_SOURCE_KEY_PATTERN.fullmatch(source_key):
+        raise ValueError("Invalid K-POP analysis source key.")
+    if content_type not in _KPOP_ANALYSIS_CONTENT_TYPES:
+        raise ValueError("Unsupported K-POP analysis content type.")
+    if not _KPOP_ANALYSIS_CONSENT_SCOPE_PATTERN.fullmatch(consent_scope):
+        raise ValueError("K-POP analysis consent scope is required.")
+
+    self.update_state(
+        state="ANALYSIS_RUNNING",
+        meta={"step": "grading_evidence", "progress": 90},
+    )
+    return {
+        "grade": "INSUFFICIENT_EVIDENCE",
+        "confidence": 0.0,
+        "evidence": [
+            {
+                "type": "metadata",
+                "score": 0.0,
+                "source": "analysis_model_not_connected",
+            }
+        ],
+        "candidates": [],
+    }
 
 
 @celery.task(bind=True, max_retries=2, default_retry_delay=10)

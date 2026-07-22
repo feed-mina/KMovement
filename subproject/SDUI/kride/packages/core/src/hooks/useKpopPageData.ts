@@ -2,6 +2,12 @@
 import { useQuery } from "@tanstack/react-query";
 
 const EMPTY: Record<string, unknown> = {};
+const DATA_SCREENS = new Set([
+  "KPOP_EXPLORE",
+  "KPOP_EVENTS",
+  "KPOP_ARTIST_DETAIL",
+  "KPOP_EVENT_DETAIL",
+]);
 
 export type KpopPageParams = {
   artistId?: string | number | null;
@@ -47,7 +53,7 @@ export function useKpopPageData(
 
   return useQuery<Record<string, unknown>>({
     queryKey: ["kpop-page-data", screenId, apiBase, artistId, eventId, region, from, to],
-    enabled: screenId.startsWith("KPOP_") && hasRequiredId,
+    enabled: DATA_SCREENS.has(screenId) && hasRequiredId,
     staleTime: 1000 * 60 * 3,
     queryFn: async () => {
       if (screenId === "KPOP_EXPLORE") {

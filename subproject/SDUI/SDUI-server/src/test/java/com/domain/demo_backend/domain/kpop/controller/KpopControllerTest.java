@@ -1,5 +1,6 @@
 package com.domain.demo_backend.domain.kpop.controller;
 
+import com.domain.demo_backend.domain.kpop.service.KpopAnalysisService;
 import com.domain.demo_backend.global.common.response.ApiResponse;
 import com.domain.demo_backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.mock;
@@ -24,7 +27,8 @@ import static org.mockito.Mockito.when;
 class KpopControllerTest {
 
     private final NamedParameterJdbcTemplate jdbcTemplate = mock(NamedParameterJdbcTemplate.class);
-    private final KpopController controller = new KpopController(jdbcTemplate);
+    private final KpopAnalysisService analysisService = mock(KpopAnalysisService.class);
+    private final KpopController controller = new KpopController(jdbcTemplate, analysisService, Runnable::run);
 
     @Test
     void artistsReturnsApprovedArtistCards() {
@@ -56,11 +60,36 @@ class KpopControllerTest {
     void createAnalysisJobRejectsMissingConsentForAuthenticatedUser() {
         CustomUserDetails user = mock(CustomUserDetails.class);
         when(user.getUserSqno()).thenReturn(42L);
+        when(analysisService.submit(anyMap(), anyLong())).thenThrow(
+                new ResponseStatusException(HttpStatus.BAD_REQUEST, "Upload consent is required.")
+        );
 
         assertThatThrownBy(() -> controller.createAnalysisJob(Map.of("consented", false), user))
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
                 .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void createAnalysisJobReturnsAcceptedWithBothJobIdentifiers() {
+        CustomUserDetails user = mock(CustomUserDetails.class);
+        when(user.getUserSqno()).thenReturn(42L);
+        when(analysisService.submit(anyMap(), anyLong())).thenReturn(Map.of(
+                "jobId", 91L,
+                "taskId", "task-91",
+                "status", "QUEUED"
+        ));
+
+        ResponseEntity<ApiResponse<Map<String, Object>>> response = controller.createAnalysisJob(
+                Map.of("consented", true),
+                user
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getData())
+                .containsEntry("jobId", 91L)
+                .containsEntry("taskId", "task-91");
     }
 
     @Test
