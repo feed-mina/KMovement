@@ -2,7 +2,14 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { ScreenControllerProps } from '@/components/screens/types';
-import { fetchHolyPois, fetchTourPois, TourPoi } from '@/services/tourApi';
+import {
+    fetchHolyPois,
+    fetchTourAreas,
+    fetchTourDistricts,
+    fetchTourPois,
+    TourPoi,
+    TourRegion,
+} from '@/services/tourApi';
 import { HOLY_SITES } from '@/lib/data/holySites';
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
 import { trackEvent } from '@/lib/analytics/dataLayer';
@@ -17,16 +24,22 @@ const CATEGORIES = [
     { id: '14', label: '문화시설' },
 ] as const;
 
-// TourAPI 서울(areaCode=1) 시군구 코드
-const SEOUL_DISTRICTS = [
-    { code: '', label: '서울 전체' },
-    { code: '1', label: '강남구' },
-    { code: '23', label: '종로구' },
-    { code: '24', label: '중구' },
-    { code: '13', label: '마포구' },
-    { code: '16', label: '성동구' },
-    { code: '18', label: '송파구' },
-] as const;
+const FALLBACK_AREAS: TourRegion[] = [{ code: '1', name: '서울' }];
+const FALLBACK_SEOUL_DISTRICTS: TourRegion[] = [
+    { code: '1', name: '강남구' }, { code: '2', name: '강동구' },
+    { code: '3', name: '강북구' }, { code: '4', name: '강서구' },
+    { code: '5', name: '관악구' }, { code: '6', name: '광진구' },
+    { code: '7', name: '구로구' }, { code: '8', name: '금천구' },
+    { code: '9', name: '노원구' }, { code: '10', name: '도봉구' },
+    { code: '11', name: '동대문구' }, { code: '12', name: '동작구' },
+    { code: '13', name: '마포구' }, { code: '14', name: '서대문구' },
+    { code: '15', name: '서초구' }, { code: '16', name: '성동구' },
+    { code: '17', name: '성북구' }, { code: '18', name: '송파구' },
+    { code: '19', name: '양천구' }, { code: '20', name: '영등포구' },
+    { code: '21', name: '용산구' }, { code: '22', name: '은평구' },
+    { code: '23', name: '종로구' }, { code: '24', name: '중구' },
+    { code: '25', name: '중랑구' },
+];
 
 const SORTS = [
     { code: 'A', label: '이름순' },
@@ -53,7 +66,12 @@ const RED = '#E50914';
 
 export default function TourExploreScreen(_props: ScreenControllerProps) {
     const [category, setCategory] = useState('39');
+    const [areaCode, setAreaCode] = useState('1');
     const [sigungu, setSigungu] = useState('');
+    const [areas, setAreas] = useState<TourRegion[]>(FALLBACK_AREAS);
+    const [districts, setDistricts] = useState<TourRegion[]>(FALLBACK_SEOUL_DISTRICTS);
+    const [regionsLoading, setRegionsLoading] = useState(true);
+    const [regionError, setRegionError] = useState<string | null>(null);
     const [arrange, setArrange] = useState('A');
     const [pois, setPois] = useState<TourPoi[]>([]);
     const [loading, setLoading] = useState(true);
@@ -64,6 +82,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const dialogRef = useRef<HTMLDivElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const returnFocusRef = useRef<HTMLElement | null>(null);
+    const selectedAreaName = areas.find((area) => area.code === areaCode)?.name ?? '선택 지역';
 
     const closePlace = useCallback(() => {
         const returnFocusTarget = returnFocusRef.current;
@@ -87,6 +106,40 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
 
     useEffect(() => {
         let alive = true;
+        const loadAreas = async () => {
+            try {
+                const list = await fetchTourAreas();
+                if (alive && list.length > 0) setAreas(list);
+            } catch {
+                if (alive) setRegionError('지역 목록을 새로 불러오지 못해 기본 지역을 표시해요.');
+            }
+        };
+        void loadAreas();
+        return () => { alive = false; };
+    }, []);
+
+    useEffect(() => {
+        let alive = true;
+        const loadDistricts = async () => {
+            setRegionsLoading(true);
+            setRegionError(null);
+            try {
+                const list = await fetchTourDistricts(areaCode);
+                if (alive) setDistricts(list);
+            } catch {
+                if (!alive) return;
+                setDistricts(areaCode === '1' ? FALLBACK_SEOUL_DISTRICTS : []);
+                setRegionError('시·군·구 목록을 불러오지 못했어요. 지역 전체로 탐색할 수 있어요.');
+            } finally {
+                if (alive) setRegionsLoading(false);
+            }
+        };
+        void loadDistricts();
+        return () => { alive = false; };
+    }, [areaCode]);
+
+    useEffect(() => {
+        let alive = true;
         const loadPois = async () => {
             await Promise.resolve();
             if (!alive) return;
@@ -94,14 +147,17 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             setError(null);
             try {
                 if (category === 'HOLY') {
-                    const list = await fetchHolyPois();
-                    if (alive) setPois(list.length > 0 ? list : HOLY_SITES);
+                    const list = await fetchHolyPois({ areaCode, sigunguCode: sigungu });
+                    if (alive) setPois(list);
                 } else {
-                    const list = await fetchTourPois({ areaCode: '1', sigunguCode: sigungu, contentTypeId: category, arrange, numOfRows: 24 });
+                    const list = await fetchTourPois({ areaCode, sigunguCode: sigungu, contentTypeId: category, arrange, numOfRows: 24 });
                     if (alive) setPois(list);
                 }
             } catch {
-                if (alive && category === 'HOLY') setPois(HOLY_SITES);
+                if (alive && category === 'HOLY') {
+                    setPois(HOLY_SITES.filter((site) =>
+                        site.areaCode === areaCode && (!sigungu || site.sigunguCode === sigungu)));
+                }
                 if (alive && category !== 'HOLY') setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
             } finally {
                 if (alive) setLoading(false);
@@ -109,7 +165,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         };
         void loadPois();
         return () => { alive = false; };
-    }, [category, sigungu, arrange]);
+    }, [areaCode, category, sigungu, arrange]);
 
     useEffect(() => {
         if (loading || error || pois.length === 0) return;
@@ -117,9 +173,9 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             item_list_name: 'tour_explore',
             item_count: pois.length,
             category,
-            region: sigungu || 'seoul_all',
+            region: `${areaCode}:${sigungu || 'all'}`,
         });
-    }, [category, error, loading, pois.length, sigungu]);
+    }, [areaCode, category, error, loading, pois.length, sigungu]);
 
     useEffect(() => {
         if (!selected) return;
@@ -192,20 +248,61 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                 <KakaoShareButton text="Kride에서 K-컬처 여행지·맛집을 찾아보세요!" path="/view/TOUR_EXPLORE" />
             </header>
 
-            {/* 지역 필터 */}
-            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 8, marginBottom: 10 }}>
-                {SEOUL_DISTRICTS.map((d) => (
+            <section aria-label="지역 필터" style={{ marginBottom: 10 }}>
+                <div
+                    role="group"
+                    aria-label="시·도 선택"
+                    style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'thin' }}
+                >
+                    {areas.map((area) => (
+                        <button
+                            key={area.code}
+                            type="button"
+                            onClick={() => {
+                                if (area.code === areaCode) return;
+                                setSigungu('');
+                                setAreaCode(area.code);
+                            }}
+                            aria-pressed={areaCode === area.code}
+                            style={chipStyle(areaCode === area.code, true)}
+                        >
+                            {area.name}
+                        </button>
+                    ))}
+                </div>
+
+                <div
+                    role="group"
+                    aria-label={`${selectedAreaName} 시·군·구 선택`}
+                    aria-busy={regionsLoading}
+                    style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'thin' }}
+                >
                     <button
-                        key={d.code || 'all'}
                         type="button"
-                        onClick={() => setSigungu(d.code)}
-                        aria-pressed={sigungu === d.code}
-                        style={chipStyle(sigungu === d.code, true)}
+                        onClick={() => setSigungu('')}
+                        aria-pressed={sigungu === ''}
+                        style={chipStyle(sigungu === '', true)}
                     >
-                        {d.label}
+                        {selectedAreaName} 전체
                     </button>
-                ))}
-            </div>
+                    {districts.map((district) => (
+                        <button
+                            key={district.code}
+                            type="button"
+                            onClick={() => setSigungu(district.code)}
+                            aria-pressed={sigungu === district.code}
+                            style={chipStyle(sigungu === district.code, true)}
+                        >
+                            {district.name}
+                        </button>
+                    ))}
+                </div>
+                {regionError && (
+                    <p role="status" style={{ margin: '0 2px 8px', color: '#8B4A4D', fontSize: 11 }}>
+                        {regionError}
+                    </p>
+                )}
+            </section>
 
             {/* 카테고리 + 정렬 */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>

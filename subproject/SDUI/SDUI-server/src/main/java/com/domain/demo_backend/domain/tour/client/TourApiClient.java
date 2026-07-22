@@ -1,6 +1,7 @@
 package com.domain.demo_backend.domain.tour.client;
 
 import com.domain.demo_backend.domain.tour.dto.TourPoiDto;
+import com.domain.demo_backend.domain.tour.dto.TourRegionDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -82,6 +83,66 @@ public class TourApiClient {
                 .block();
 
         return parseItems(res);
+    }
+
+    /**
+     * Returns TourAPI area codes. Without {@code areaCode}, this returns provinces;
+     * with an area code, it returns that province's districts.
+     */
+    public List<TourRegionDto> areaCodes(String areaCode) {
+        if (serviceKey == null || serviceKey.isBlank()) {
+            throw new IllegalStateException("TOUR_API_KEY is not configured");
+        }
+
+        Optional<String> area = Optional.ofNullable(areaCode).filter(s -> !s.isBlank());
+        Map<String, Object> res = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/areaCode2")
+                        .queryParam("serviceKey", serviceKey)
+                        .queryParam("MobileOS", "ETC")
+                        .queryParam("MobileApp", mobileApp)
+                        .queryParam("_type", "json")
+                        .queryParam("numOfRows", 100)
+                        .queryParam("pageNo", 1)
+                        .queryParamIfPresent("areaCode", area)
+                        .build())
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                .block();
+
+        return parseRegions(res);
+    }
+
+    @SuppressWarnings("unchecked")
+    static List<TourRegionDto> parseRegions(Map<String, Object> res) {
+        List<TourRegionDto> out = new ArrayList<>();
+        if (res == null) return out;
+
+        Object responseObj = res.get("response");
+        if (!(responseObj instanceof Map<?, ?> response)) return out;
+        Object bodyObj = ((Map<String, Object>) response).get("body");
+        if (!(bodyObj instanceof Map<?, ?> body)) return out;
+        Object itemsObj = ((Map<String, Object>) body).get("items");
+        if (!(itemsObj instanceof Map<?, ?> items)) return out;
+        Object itemObj = ((Map<String, Object>) items).get("item");
+
+        List<Map<String, Object>> itemList = new ArrayList<>();
+        if (itemObj instanceof List<?> list) {
+            for (Object item : list) {
+                if (item instanceof Map<?, ?> map) itemList.add((Map<String, Object>) map);
+            }
+        } else if (itemObj instanceof Map<?, ?> single) {
+            itemList.add((Map<String, Object>) single);
+        }
+
+        for (Map<String, Object> item : itemList) {
+            String code = str(item.get("code"));
+            String name = str(item.get("name"));
+            if (code != null && !code.isBlank() && name != null && !name.isBlank()) {
+                out.add(new TourRegionDto(code, name));
+            }
+        }
+        return out;
     }
 
     @SuppressWarnings("unchecked")
