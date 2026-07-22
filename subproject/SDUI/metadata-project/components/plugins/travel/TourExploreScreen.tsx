@@ -13,6 +13,7 @@ import {
 import { HOLY_SITES } from '@/lib/data/holySites';
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
 import PoiImage from '@/components/plugins/travel/PoiImage';
+import TourPoiCard from '@/components/plugins/travel/TourPoiCard';
 import { trackEvent } from '@/lib/analytics/dataLayer';
 
 // [탐색] 화면 컨트롤러 (여행 플러그인). TourAPI POI를 지역·카테고리·정렬로 탐색.
@@ -355,39 +356,15 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
 
             {!loading && !error && pois.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 }}>
-                    {pois.map((p, i) => {
-                        const isSaved = !!p.contentId && saved.has(p.contentId);
-                        return (
-                            <article key={p.contentId ?? i} style={{ border: '0.5px solid #eee', borderRadius: 14, overflow: 'hidden', background: '#fff', position: 'relative' }}>
-                                <button
-                                    type="button"
-                                    aria-haspopup="dialog"
-                                    aria-label={`${p.title} 상세 보기`}
-                                    onClick={(event) => openPlace(p, event.currentTarget)}
-                                    style={{ display: 'block', width: '100%', padding: 0, border: 'none', background: 'transparent', color: 'inherit', textAlign: 'left', cursor: 'pointer' }}
-                                >
-                                    <span style={{ height: 100, background: '#f5f5f5', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <PoiImage src={p.firstImage} title={p.title} variant="card" />
-                                        {p.contentTypeId === 'HOLY' && (
-                                            <span style={{ position: 'absolute', top: 6, left: 6, fontSize: 10, background: RED, color: '#fff', padding: '2px 7px', borderRadius: 20 }}>성지</span>
-                                        )}
-                                    </span>
-                                    <span style={{ display: 'block', padding: '8px 10px' }}>
-                                        <span style={{ display: 'block', margin: 0, fontSize: 13, fontWeight: 500 }}>{p.title}</span>
-                                        {p.addr && <span style={{ display: 'block', margin: '3px 0 0', fontSize: 11, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.addr}</span>}
-                                    </span>
-                                </button>
-                                <button
-                                    type="button"
-                                    aria-label={isSaved ? `${p.title} 저장 취소` : `${p.title} 저장`}
-                                    onClick={() => toggleSave(p.contentId)}
-                                    style={{ position: 'absolute', top: 6, right: 6, width: 28, height: 28, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.35)', color: isSaved ? RED : '#fff', cursor: 'pointer', fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                >
-                                    {isSaved ? '♥' : '♡'}
-                                </button>
-                            </article>
-                        );
-                    })}
+                    {pois.map((poi, index) => (
+                        <TourPoiCard
+                            key={poi.contentId ?? index}
+                            poi={poi}
+                            isSaved={Boolean(poi.contentId && saved.has(poi.contentId))}
+                            onOpen={openPlace}
+                            onToggleSave={toggleSave}
+                        />
+                    ))}
                 </div>
             )}
 

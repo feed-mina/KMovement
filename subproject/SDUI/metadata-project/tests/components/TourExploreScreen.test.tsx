@@ -21,7 +21,7 @@ const mockedAreaFetch = fetchTourAreas as jest.Mock;
 const mockedDistrictFetch = fetchTourDistricts as jest.Mock;
 
 const sample = [
-    { contentId: '1', title: '가나돈까스의집', addr: '서울 강남구', firstImage: 'http://img/a.jpg', mapX: 127, mapY: 37.5 },
+    { contentId: '1', title: '가나돈까스의집', addr: '서울 강남구', firstImage: 'http://img/a.jpg', mapX: 127, mapY: 37.5, recommendReason: '근처 공연장과 함께 들르기 좋아요.' },
     { contentId: '2', title: '가담', addr: '서울 강남구', firstImage: '', mapX: 127.03, mapY: 37.52 },
 ];
 
@@ -83,6 +83,17 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         expect(images).toHaveLength(2);
         expect(images[0].src).toBe(cardImage.src);
         expect(images[1].src).toBe(cardImage.src);
+    });
+
+    it('동일한 추천 이유를 카드와 상세 모달에서 함께 사용하고 없는 카드는 영역을 생략한다', async () => {
+        renderScreen();
+
+        expect(await screen.findByText('근처 공연장과 함께 들르기 좋아요.')).toBeInTheDocument();
+        expect(screen.getAllByTestId('tour-poi-recommend-reason')).toHaveLength(1);
+
+        fireEvent.click(screen.getByRole('button', {name: '가나돈까스의집 상세 보기'}));
+        expect(await screen.findByText('왜 추천하나요?')).toBeInTheDocument();
+        expect(screen.getAllByText('근처 공연장과 함께 들르기 좋아요.')).toHaveLength(2);
     });
 
     it('조회 실패 시 안내 문구를 표시해야 함', async () => {
