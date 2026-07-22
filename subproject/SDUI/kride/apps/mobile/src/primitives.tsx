@@ -59,6 +59,13 @@ const CLASS_MAP: Record<string, string> = {
   'diary-nav2': 'my-2 w-full max-w-[300px] border border-kride bg-white',
   'diary-btn-primary': 'mb-3 w-[250px] bg-kride',
   'diary-btn-secondary': 'mb-3 w-[250px] border border-kride bg-white',
+
+  'kpop-screen': 'w-full gap-5 bg-[#141414]',
+  'kpop-title': 'text-3xl font-extrabold text-white',
+  'kpop-subtitle': 'text-sm leading-5 text-neutral-300',
+  'kpop-grid': 'w-full gap-3',
+  'kpop-list': 'w-full gap-3',
+  'kpop-primary-btn': 'mt-2 bg-kride',
 };
 
 const translateClassName = (className?: string) => {

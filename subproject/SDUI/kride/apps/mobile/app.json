@@ -8,8 +8,15 @@
     "userInterfaceStyle": "automatic",
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-updates"
     ],
+    "updates": {
+      "url": "https://u.expo.dev/cc4cddc4-e3df-446d-8f62-7d0d39dc77a2"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "experiments": {
       "typedRoutes": true
     },

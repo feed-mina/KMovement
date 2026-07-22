@@ -25,3 +25,95 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+.kpop-screen {
+  min-height: 100vh;
+  gap: 20px;
+  padding: 32px 20px;
+  background: #141414;
+  color: #f8fafc;
+}
+
+.kpop-title {
+  font-size: clamp(28px, 6vw, 52px);
+  font-weight: 800;
+}
+
+.kpop-subtitle {
+  max-width: 680px;
+  color: #cbd5e1;
+}
+
+.kpop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.kpop-list {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+}
+
+.kpop-card {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: #1f1f1f;
+}
+
+.kpop-card-image {
+  display: grid;
+  min-height: 160px;
+  place-items: center;
+  background: #2a0b12;
+  color: #fb7185;
+  font-size: 48px;
+  font-weight: 800;
+}
+
+.kpop-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kpop-card-body {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.kpop-card h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+}
+
+.kpop-card p {
+  margin: 0;
+  color: #cbd5e1;
+}
+
+.kpop-eyebrow,
+.kpop-evidence {
+  font-size: 12px;
+}
+
+.kpop-card button,
+.kpop-primary-btn {
+  width: fit-content;
+  border: 0;
+  border-radius: 999px;
+  background: #e11d48;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px 14px;
+}
+
+.kpop-card small {
+  color: #fda4af;
+}

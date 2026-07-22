@@ -84,6 +84,55 @@ npm run eas:build:production
 
 Use EAS managed credentials unless a project keystore has already been provisioned.
 
+## OTA Updates
+
+`expo-updates` is configured for the EAS project
+`cc4cddc4-e3df-446d-8f62-7d0d39dc77a2`.
+
+- `preview` builds receive updates from the `preview` channel.
+- `production` builds receive updates from the `production` channel.
+- `runtimeVersion` follows the app version (`0.1.0` now). Keep the same version
+  for JS-only fixes; bump the app version when native runtime changes.
+
+Use OTA for:
+
+- SDUI renderer fixes in `apps/mobile/src/**`.
+- shared JS fixes in `packages/core/**`.
+- copy, spacing, routing, and non-native UI behavior.
+
+Use a new EAS build instead of OTA for:
+
+- adding/removing native modules,
+- Expo SDK / React Native upgrades,
+- Android permissions, package id, scheme, icon/splash, or Gradle changes,
+- `runtimeVersion` or `app.json` native config changes.
+
+Publish preview OTA:
+
+```powershell
+cd <repo>\subproject\SDUI\kride\apps\mobile
+npm run eas:update:preview -- "short change summary"
+```
+
+Publish production OTA only after preview QA:
+
+```powershell
+npm run eas:update:production -- "short change summary"
+```
+
+Rollback options:
+
+- Republish the previous known-good update to the same branch.
+- Or run `eas update:rollback --branch preview` / `--branch production` after
+  confirming the affected branch.
+
+Before every OTA, run:
+
+```powershell
+npm run export:android
+npm test
+```
+
 ## Android Preview Build 장애 해결 기록
 
 ### 증상과 원인

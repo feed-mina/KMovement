@@ -6,6 +6,7 @@
   "build": {
     "preview": {
       "distribution": "internal",
+      "channel": "preview",
       "env": {
         "EXPO_PUBLIC_API_BASE": "https://yerin.duckdns.org"
       },
@@ -15,6 +16,7 @@
     },
     "production": {
       "autoIncrement": true,
+      "channel": "production",
       "env": {
         "EXPO_PUBLIC_API_BASE": "https://yerin.duckdns.org"
       },

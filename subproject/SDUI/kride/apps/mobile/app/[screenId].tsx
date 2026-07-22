@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, Linking, ScrollView, Text, View } from 'react-native';
-import { DynamicEngine, PATH_TO_SCREEN, resolveRuntimeConfig, usePageHook, useUiScreen } from '@kride/core';
+import { DynamicEngine, PATH_TO_SCREEN, resolveRuntimeConfig, useKpopPageData, usePageHook, useUiScreen } from '@kride/core';
 import { rnPrimitives } from '../src/primitives';
 import { mobileComponentMap } from '../src/componentMap';
 import KrideFocusNativeScreen from '../src/screens/KrideFocusNativeScreen';
@@ -38,6 +38,7 @@ export default function MobileScreen() {
   const sid = screenId ?? 'MAIN_PAGE';
   const apiBase = resolveRuntimeConfig({ apiBase: process.env.EXPO_PUBLIC_API_BASE }).apiBase;
   const { data, isLoading, error } = useUiScreen(sid, apiBase);
+  const { data: kpopPageData } = useKpopPageData(sid, apiBase);
 
   // react-query keeps `data` referentially stable until it actually changes;
   // fall back to a module-level constant so the reference is stable while loading.
@@ -104,7 +105,7 @@ export default function MobileScreen() {
         <DynamicEngine
           metadata={metadata}
           screenId={sid}
-          pageData={EMPTY_OBJ}
+          pageData={kpopPageData ?? EMPTY_OBJ}
           formData={page.formData}
           setFormData={page.setFormData}
           onChange={page.handleChange}
