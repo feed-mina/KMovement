@@ -1,5 +1,5 @@
 import type React from 'react';
-import { View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import type { ComponentRegistry, SduiLeafProps } from '@kride/core';
 import KrideMap from './components/KrideMap';
 import { ActionButtonLeaf, EmailSelectLeaf, InputLeaf, PasswordLeaf } from './formLeaves';
@@ -29,12 +29,15 @@ const MapViewLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
   const source = data ?? meta ?? {};
   const center = source.center ?? source.mapCenter;
   const markers = source.markers ?? source.mapMarkers ?? [];
-  return (
-    <View className="h-64 w-full overflow-hidden rounded-2xl">
-      <KrideMap center={center} markers={markers} />
-    </View>
-  );
+  return <KrideMap center={center} markers={markers} style={styles.mapLeaf} />;
 };
+
+const styles = StyleSheet.create({
+  mapLeaf: {
+    borderRadius: 16,
+    height: 256,
+  },
+});
 
 /**
  * Mobile-owned registry. Platform-neutral base leaves (GROUP/TEXT/BUTTON) are
