@@ -3,8 +3,8 @@
 import { useAnalyticsConsent } from '@/components/analytics/AnalyticsProvider';
 
 export default function PrivacySettingsButton() {
-    const { consent, setSettingsOpen } = useAnalyticsConsent();
-    if (consent === 'unset') return null;
+    const { consent, ready, setSettingsOpen } = useAnalyticsConsent();
+    if (!ready || consent === 'unset') return null;
     return (
         <button
             type="button"

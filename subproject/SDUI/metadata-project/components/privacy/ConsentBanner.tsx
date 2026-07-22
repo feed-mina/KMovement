@@ -3,8 +3,8 @@
 import { useAnalyticsConsent } from '@/components/analytics/AnalyticsProvider';
 
 export default function ConsentBanner() {
-    const { consent, setConsent, settingsOpen, setSettingsOpen } = useAnalyticsConsent();
-    if (consent !== 'unset' && !settingsOpen) return null;
+    const { consent, ready, setConsent, settingsOpen, setSettingsOpen } = useAnalyticsConsent();
+    if (!ready || (consent !== 'unset' && !settingsOpen)) return null;
 
     return (
         <section

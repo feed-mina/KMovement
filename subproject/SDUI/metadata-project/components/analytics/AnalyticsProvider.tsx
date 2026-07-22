@@ -15,6 +15,7 @@ import PrivacySettingsButton from '@/components/privacy/PrivacySettingsButton';
 
 interface ConsentContextValue {
     consent: AnalyticsConsent;
+    ready: boolean;
     setConsent: (value: Exclude<AnalyticsConsent, 'unset'>) => void;
     settingsOpen: boolean;
     setSettingsOpen: (open: boolean) => void;
@@ -44,10 +45,15 @@ function safePublicId(value: string | undefined, pattern: RegExp) {
 
 export default function AnalyticsProvider({ children }: { children: React.ReactNode }) {
     const consent = useSyncExternalStore<AnalyticsConsent>(subscribeToConsent, readAnalyticsConsent, () => 'unset');
+    const [ready, setReady] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const gtmId = safePublicId(process.env.NEXT_PUBLIC_GTM_ID, /^GTM-[A-Z0-9]+$/i);
     const gaMeasurementId = safePublicId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, /^G-[A-Z0-9]+$/i);
     const clarityId = safePublicId(process.env.NEXT_PUBLIC_CLARITY_ID, /^[a-z0-9]+$/i);
+
+    useEffect(() => {
+        setReady(true);
+    }, []);
 
     useEffect(() => {
         if (consent !== 'unset') applyAnalyticsConsent(consent);
@@ -58,8 +64,8 @@ export default function AnalyticsProvider({ children }: { children: React.ReactN
         setSettingsOpen(false);
     }, []);
 
-    const context = useMemo(() => ({ consent, setConsent, settingsOpen, setSettingsOpen }), [consent, setConsent, settingsOpen]);
-    const enabled = consent === 'granted';
+    const context = useMemo(() => ({ consent, ready, setConsent, settingsOpen, setSettingsOpen }), [consent, ready, setConsent, settingsOpen]);
+    const enabled = ready && consent === 'granted';
 
     return (
         <ConsentContext.Provider value={context}>
