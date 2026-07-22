@@ -23,8 +23,12 @@ describe('TourPoiCard', () => {
 
         const reason = screen.getByTestId('tour-poi-recommend-reason');
         expect(reason).toHaveTextContent(longReason.trim());
-        expect(reason.style.webkitLineClamp).toBe('2');
-        expect(reason.style.webkitBoxOrient).toBe('vertical');
+        const prefixedStyle = reason.style as CSSStyleDeclaration & {
+            WebkitLineClamp: string;
+            WebkitBoxOrient: string;
+        };
+        expect(prefixedStyle.WebkitLineClamp).toBe('2');
+        expect(prefixedStyle.WebkitBoxOrient).toBe('vertical');
         expect(reason).toHaveStyle({overflow: 'hidden', overflowWrap: 'anywhere'});
     });
 
