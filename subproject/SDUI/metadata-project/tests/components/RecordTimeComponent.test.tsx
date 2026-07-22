@@ -104,12 +104,12 @@ describe('RecordTimeComponent accordion', () => {
         });
 
         render(<RecordTimeComponent/>);
-        expect(screen.getByText(/목표 시간 날짜 2026-07-22T18:30:00/)).toBeVisible();
+        expect(screen.getByText(/목표 시간 날짜 2026-07-22T18:30:00/, {selector: 'strong'})).toBeVisible();
         expect(screen.getByRole('button', {name: '도착 완료'})).toBeVisible();
 
         fireEvent.click(screen.getByRole('button', {name: /접기/}));
 
-        expect(screen.getByText(/목표 시간 날짜 2026-07-22T18:30:00/)).toBeVisible();
+        expect(screen.getByText(/목표 시간 날짜 2026-07-22T18:30:00/, {selector: 'strong'})).toBeVisible();
         expect(screen.queryByRole('button', {name: '도착 완료'})).not.toBeInTheDocument();
         expect(window.localStorage.getItem('kride:record-time-collapsed:v1')).toBe('collapsed');
     });
