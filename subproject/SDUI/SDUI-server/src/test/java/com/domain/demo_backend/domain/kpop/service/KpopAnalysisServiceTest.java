@@ -25,10 +25,12 @@ class KpopAnalysisServiceTest {
 
     private final S3Service s3Service = mock(S3Service.class);
     private final CeleryJobService celeryJobService = mock(CeleryJobService.class);
+    private final KpopProductService productService = mock(KpopProductService.class);
     private final KpopAnalysisService service = new KpopAnalysisService(
             s3Service,
             celeryJobService,
-            new ObjectMapper()
+            new ObjectMapper(),
+            productService
     );
 
     @Test
@@ -116,6 +118,7 @@ class KpopAnalysisServiceTest {
                 .build();
         when(celeryJobService.getOwnedJobStatus(91L, 42L)).thenReturn(job);
         when(celeryJobService.refreshJob(job)).thenReturn(job);
+        when(productService.sanitizeAnalysisResult(eq(91L), anyMap())).thenAnswer(invocation -> invocation.getArgument(1));
 
         Map<String, Object> response = service.snapshot(91L, 42L, true);
 

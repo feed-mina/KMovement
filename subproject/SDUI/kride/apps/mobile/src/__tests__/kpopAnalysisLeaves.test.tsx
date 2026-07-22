@@ -9,6 +9,8 @@ const mockPutKpopAnalysisAsset = jest.fn();
 const mockCreateKpopAnalysisJob = jest.fn();
 const mockGetKpopAnalysisJob = jest.fn();
 const mockDeleteKpopAnalysisSource = jest.fn();
+const mockSaveKpopProductCandidate = jest.fn();
+const mockDeleteKpopSavedItem = jest.fn();
 
 jest.mock('expo-image-picker', () => ({
   MediaTypeOptions: { Images: 'Images' },
@@ -24,6 +26,10 @@ jest.mock('@kride/core', () => ({
   createKpopAnalysisJob: (...args: unknown[]) => mockCreateKpopAnalysisJob(...args),
   getKpopAnalysisJob: (...args: unknown[]) => mockGetKpopAnalysisJob(...args),
   deleteKpopAnalysisSource: (...args: unknown[]) => mockDeleteKpopAnalysisSource(...args),
+  saveKpopProductCandidate: (...args: unknown[]) => mockSaveKpopProductCandidate(...args),
+  deleteKpopSavedItem: (...args: unknown[]) => mockDeleteKpopSavedItem(...args),
+  canOpenKpopOfficialUrl: (candidate: { rightsChecked?: boolean; officialUrl?: string }) =>
+    candidate.rightsChecked === true && candidate.officialUrl?.startsWith('https://') === true,
   isKpopAnalysisTerminal: (status?: string) => ['SUCCEEDED', 'FAILED', 'CANCELLED', 'EXPIRED'].includes(String(status)),
   makeKpopAnalysisIdempotencyKey: () => 'kpop-mobile-key',
 }));
@@ -57,6 +63,7 @@ describe('K-POP mobile analysis leaves', () => {
     });
     mockPutKpopAnalysisAsset.mockResolvedValue(undefined);
     mockCreateKpopAnalysisJob.mockResolvedValue({ jobId: 92, status: 'QUEUED' });
+    mockSaveKpopProductCandidate.mockResolvedValue({ id: 44, itemType: 'PRODUCT_CANDIDATE', itemRef: 17 });
   });
 
   it('picks an owned photo, records explicit consent, and starts the owner job', async () => {
@@ -96,5 +103,29 @@ describe('K-POP mobile analysis leaves', () => {
     await waitFor(() => expect(screen.getByText(/근거 유형 visual_similarity/)).toBeTruthy());
     expect(screen.getByText(/AI 결과는 비교를 시작하기 위한 후보/)).toBeTruthy();
     expect(screen.getByLabelText('원본 사진 삭제').props.accessibilityState.disabled).toBe(true);
+  });
+
+  it('saves an analysis candidate and hides an unchecked external link', async () => {
+    mockGetKpopAnalysisJob.mockResolvedValue({
+      jobId: 92,
+      status: 'SUCCEEDED',
+      result: {
+        evidenceGrade: 'SIMILAR',
+        candidates: [{
+          id: 17,
+          name: '무대 재킷 후보',
+          evidenceGrade: 'SIMILAR',
+          officialUrl: 'https://official.example/item',
+          rightsChecked: false,
+        }],
+      },
+    });
+    const screen = render(<AiResultCardLeaf apiBase="https://api.example.com" data={{ jobId: 92 }} />);
+
+    await waitFor(() => expect(screen.getByLabelText('후보 저장')).toBeTruthy());
+    expect(screen.queryByRole('link')).toBeNull();
+    fireEvent.press(screen.getByLabelText('후보 저장'));
+    await waitFor(() => expect(mockSaveKpopProductCandidate).toHaveBeenCalledWith('https://api.example.com', 17));
+    expect(screen.getByText('후보를 저장했습니다.')).toBeTruthy();
   });
 });

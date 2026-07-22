@@ -285,6 +285,48 @@ body {
   padding: 9px 13px;
 }
 
+.kpop-product-search,
+.kpop-saved-list {
+  display: grid;
+  width: min(100%, 840px);
+  gap: 18px;
+}
+
+.kpop-product-search h2,
+.kpop-saved-list h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(24px, 5vw, 36px);
+}
+
+.kpop-product-filters {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.kpop-product-filters label {
+  display: grid;
+  min-width: min(100%, 320px);
+  gap: 7px;
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
+.kpop-product-filters input {
+  border: 1px solid #52525b;
+  border-radius: 12px;
+  background: #292929;
+  color: #fff;
+  padding: 11px 13px;
+}
+
+.kpop-product-list {
+  display: grid;
+  gap: 14px;
+}
+
 @media (max-width: 520px) {
   .kpop-upload-preview,
   .kpop-result-heading {

@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Image, Linking, Pressable, Text, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import {
+  canOpenKpopOfficialUrl,
   createKpopAnalysisJob,
+  deleteKpopSavedItem,
   deleteKpopAnalysisSource,
   getKpopAnalysisJob,
   isKpopAnalysisTerminal,
@@ -11,6 +13,7 @@ import {
   makeKpopAnalysisIdempotencyKey,
   presignKpopAnalysisAsset,
   putKpopAnalysisAsset,
+  saveKpopProductCandidate,
   type KpopAnalysisCandidate,
   type KpopAnalysisEvidence,
   type KpopAnalysisJob,
@@ -189,11 +192,44 @@ const evidenceList = (value?: KpopAnalysisEvidence | KpopAnalysisEvidence[]) => 
   return values.map(evidenceLine);
 };
 
-const Candidate: React.FC<{ candidate: KpopAnalysisCandidate }> = ({ candidate }) => {
+const Candidate: React.FC<{ candidate: KpopAnalysisCandidate; apiBase?: string }> = ({ candidate, apiBase = '' }) => {
   const evidence = evidenceList(candidate.evidence);
-  const officialUrl = typeof candidate.officialUrl === 'string' && candidate.officialUrl.startsWith('https://')
+  const candidateId = candidate.id ?? candidate.productCandidateId ?? candidate.productRef;
+  const [savedItemId, setSavedItemId] = useState<string | number | undefined>(
+    (candidate.savedItemId ?? candidate.saved_item_id) as string | number | undefined,
+  );
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+  const officialUrl = typeof candidate.officialUrl === 'string'
     ? candidate.officialUrl
-    : '';
+    : typeof candidate.officialLink === 'string'
+      ? candidate.officialLink
+      : '';
+  const canOpen = canOpenKpopOfficialUrl({
+    officialUrl,
+    rightsChecked: candidate.rightsChecked === true,
+  });
+
+  const toggleSaved = async () => {
+    if (candidateId === undefined || candidateId === null || candidateId === '' || saving) return;
+    setSaving(true);
+    setMessage('');
+    try {
+      if (savedItemId) {
+        await deleteKpopSavedItem(apiBase, savedItemId);
+        setSavedItemId(undefined);
+        setMessage('저장을 해제했습니다.');
+      } else {
+        const saved = await saveKpopProductCandidate(apiBase, candidateId as string | number);
+        setSavedItemId(saved.id);
+        setMessage('후보를 저장했습니다.');
+      }
+    } catch (error) {
+      setMessage(errorCopy(error));
+    } finally {
+      setSaving(false);
+    }
+  };
   return (
     <View className="gap-2 rounded-xl border border-neutral-200 bg-white p-4">
       <Text className="text-xs font-bold uppercase text-kride">{gradeCopy(candidate.evidenceGrade || String(candidate.grade || ''))}</Text>
@@ -201,16 +237,24 @@ const Candidate: React.FC<{ candidate: KpopAnalysisCandidate }> = ({ candidate }
       {candidate.brand ? <Text className="text-sm text-neutral-600">{candidate.brand}</Text> : null}
       {typeof candidate.confidence === 'number' ? <Text className="text-xs text-neutral-500">모델 참고 점수 {Math.round(candidate.confidence)} / 100</Text> : null}
       {evidence.length ? evidence.map((item, index) => <Text key={index} className="text-sm text-neutral-600">• {item}</Text>) : <Text className="text-sm text-neutral-600">확인 가능한 근거가 아직 없습니다.</Text>}
-      {officialUrl ? (
-        <Pressable accessibilityRole="link" onPress={() => void Linking.openURL(officialUrl)}>
-          <Text className="font-bold text-kride">공식 출처에서 확인</Text>
+      <View className="flex-row flex-wrap gap-2">
+      {candidateId !== undefined && candidateId !== null && candidateId !== '' ? (
+        <Pressable accessibilityRole="button" accessibilityLabel={savedItemId ? '저장 해제' : '후보 저장'} disabled={saving} onPress={toggleSaved}>
+          <Text className="font-bold text-kride">{saving ? '처리 중…' : savedItemId ? '저장 해제' : '후보 저장'}</Text>
         </Pressable>
       ) : null}
+      {canOpen ? (
+        <Pressable accessibilityRole="link" onPress={() => void Linking.openURL(officialUrl)}>
+          <Text className="font-bold text-kride">권리 확인된 공식 출처</Text>
+        </Pressable>
+      ) : null}
+      </View>
+      {message ? <Text accessibilityRole="alert" className="text-sm text-rose-600">{message}</Text> : null}
     </View>
   );
 };
 
-const AnalysisResult: React.FC<{ result: KpopAnalysisResult }> = ({ result }) => {
+const AnalysisResult: React.FC<{ result: KpopAnalysisResult; apiBase?: string }> = ({ result, apiBase = '' }) => {
   const evidence = evidenceList(result.evidence);
   const candidates = Array.isArray(result.candidates) ? result.candidates : [];
   return (
@@ -221,7 +265,7 @@ const AnalysisResult: React.FC<{ result: KpopAnalysisResult }> = ({ result }) =>
         {typeof result.confidence === 'number' ? <Text className="text-xs text-rose-700">모델 참고 점수 {Math.round(result.confidence)} / 100</Text> : null}
       </View>
       {evidence.map((item, index) => <Text key={index} className="text-sm text-neutral-600">• {item}</Text>)}
-      {candidates.length ? candidates.map((candidate, index) => <Candidate key={String(candidate.id ?? index)} candidate={candidate} />) : (
+      {candidates.length ? candidates.map((candidate, index) => <Candidate key={String(candidate.id ?? index)} candidate={candidate} apiBase={apiBase} />) : (
         <Text className="text-sm text-neutral-600">제시할 만한 상품 후보가 없습니다. 근거 부족은 정상적인 분석 결과입니다.</Text>
       )}
     </View>
@@ -294,7 +338,7 @@ export const AiResultCardLeaf: React.FC<SduiLeafProps> = ({ data, apiBase = '' }
           <View className="h-full rounded-full bg-kride" style={{ width: `${Math.max(4, Math.min(100, job.progressPct || 0))}%` }} />
         </View>
       ) : null}
-      {job?.status === 'SUCCEEDED' && job.result ? <AnalysisResult result={job.result} /> : null}
+      {job?.status === 'SUCCEEDED' && job.result ? <AnalysisResult result={job.result} apiBase={apiBase} /> : null}
       {job?.status === 'FAILED' ? <Text className="text-sm text-rose-600">{job.errorMessage || '잠시 후 새 사진으로 다시 시도해 주세요.'}</Text> : null}
       <View className="flex-row flex-wrap gap-2">
         <Pressable accessibilityRole="button" accessibilityLabel="상태 새로고침" className="rounded-full border border-kride px-3 py-2" onPress={refresh}>

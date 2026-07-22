@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  canOpenKpopOfficialUrl,
   createKpopAnalysisJob,
+  deleteKpopSavedItem,
   deleteKpopAnalysisSource,
   getKpopAnalysisJob,
   isKpopAnalysisTerminal,
@@ -11,6 +13,7 @@ import {
   makeKpopAnalysisIdempotencyKey,
   presignKpopAnalysisAsset,
   putKpopAnalysisAsset,
+  saveKpopProductCandidate,
   streamKpopAnalysisJob,
   type KpopAnalysisCandidate,
   type KpopAnalysisEvidence,
@@ -181,12 +184,45 @@ const evidenceList = (value?: KpopAnalysisEvidence | KpopAnalysisEvidence[]) => 
   return values.map(evidenceLine);
 };
 
-function CandidateCard({ candidate }: { candidate: KpopAnalysisCandidate }) {
+function CandidateCard({ candidate, apiBase = '' }: { candidate: KpopAnalysisCandidate; apiBase?: string }) {
   const grade = candidate.evidenceGrade || String(candidate.grade || '');
   const evidence = evidenceList(candidate.evidence);
-  const url = typeof candidate.officialUrl === 'string' && candidate.officialUrl.startsWith('https://')
+  const candidateId = candidate.id ?? candidate.productCandidateId ?? candidate.productRef;
+  const [savedItemId, setSavedItemId] = useState<string | number | undefined>(
+    (candidate.savedItemId ?? candidate.saved_item_id) as string | number | undefined,
+  );
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+  const url = typeof candidate.officialUrl === 'string'
     ? candidate.officialUrl
-    : '';
+    : typeof candidate.officialLink === 'string'
+      ? candidate.officialLink
+      : '';
+  const canOpen = canOpenKpopOfficialUrl({
+    officialUrl: url,
+    rightsChecked: candidate.rightsChecked === true,
+  });
+
+  const toggleSaved = async () => {
+    if (candidateId === undefined || candidateId === null || candidateId === '' || saving) return;
+    setSaving(true);
+    setMessage('');
+    try {
+      if (savedItemId) {
+        await deleteKpopSavedItem(apiBase, savedItemId);
+        setSavedItemId(undefined);
+        setMessage('저장을 해제했습니다.');
+      } else {
+        const saved = await saveKpopProductCandidate(apiBase, candidateId as string | number);
+        setSavedItemId(saved.id);
+        setMessage('후보를 저장했습니다.');
+      }
+    } catch (error) {
+      setMessage(readableError(error));
+    } finally {
+      setSaving(false);
+    }
+  };
   return (
     <article className="kpop-result-candidate">
       <p className="kpop-eyebrow">{gradeCopy(grade)}</p>
@@ -196,12 +232,20 @@ function CandidateCard({ candidate }: { candidate: KpopAnalysisCandidate }) {
         <p className="kpop-evidence">모델 참고 점수 {Math.round(candidate.confidence)} / 100</p>
       ) : null}
       {evidence.length ? <ul>{evidence.map((item, index) => <li key={index}>{item}</li>)}</ul> : <p>확인 가능한 근거가 아직 없습니다.</p>}
-      {url ? <a href={url} target="_blank" rel="noreferrer">공식 출처에서 확인</a> : null}
+      <div className="kpop-result-actions">
+        {candidateId !== undefined && candidateId !== null && candidateId !== '' ? (
+          <button type="button" disabled={saving} onClick={toggleSaved}>
+            {saving ? '처리 중…' : savedItemId ? '저장 해제' : '후보 저장'}
+          </button>
+        ) : null}
+        {canOpen ? <a href={url} target="_blank" rel="noreferrer">권리 확인된 공식 출처</a> : null}
+      </div>
+      {message ? <p className="kpop-analysis-message" role="status">{message}</p> : null}
     </article>
   );
 }
 
-function ResultBody({ result }: { result: KpopAnalysisResult }) {
+function ResultBody({ result, apiBase = '' }: { result: KpopAnalysisResult; apiBase?: string }) {
   const candidates = Array.isArray(result.candidates) ? result.candidates : [];
   const grade = result.evidenceGrade || result.grade;
   const evidence = evidenceList(result.evidence);
@@ -214,7 +258,7 @@ function ResultBody({ result }: { result: KpopAnalysisResult }) {
       </div>
       {evidence.length ? <ul>{evidence.map((item, index) => <li key={index}>{item}</li>)}</ul> : null}
       {candidates.length ? candidates.map((candidate, index) => (
-        <CandidateCard key={String(candidate.id ?? index)} candidate={candidate} />
+        <CandidateCard key={String(candidate.id ?? index)} candidate={candidate} apiBase={apiBase} />
       )) : <p>제시할 만한 상품 후보가 없습니다. 근거 부족은 정상적인 분석 결과입니다.</p>}
     </div>
   );
@@ -308,7 +352,7 @@ export function AiResultCard({ data, apiBase = '' }: LeafProps) {
           <span style={{ width: `${Math.max(4, Math.min(100, job.progressPct || 0))}%` }} />
         </div>
       ) : null}
-      {job?.status === 'SUCCEEDED' && job.result ? <ResultBody result={job.result} /> : null}
+      {job?.status === 'SUCCEEDED' && job.result ? <ResultBody result={job.result} apiBase={apiBase} /> : null}
       {job?.status === 'FAILED' ? <p>{job.errorMessage || '잠시 후 새 사진으로 다시 시도해 주세요.'}</p> : null}
       <div className="kpop-result-actions">
         <button type="button" onClick={refresh}>상태 새로고침</button>

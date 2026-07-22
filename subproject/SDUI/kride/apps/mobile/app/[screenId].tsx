@@ -33,7 +33,7 @@ const normalizeMobileRoute = (rawPath: string) => {
 };
 
 export default function MobileScreen() {
-  const { screenId, artistId, eventId, jobId, region, from, to } = useLocalSearchParams<{
+  const { screenId, artistId, eventId, jobId, region, from, to, q } = useLocalSearchParams<{
     screenId: string;
     artistId?: string;
     eventId?: string;
@@ -41,6 +41,7 @@ export default function MobileScreen() {
     region?: string;
     from?: string;
     to?: string;
+    q?: string;
   }>();
   const router = useRouter();
   const sid = screenId ?? 'MAIN_PAGE';
@@ -76,7 +77,12 @@ export default function MobileScreen() {
   const routeParams = useMemo(() => ({ screenId }), [screenId]);
   const runtime = useMemo(() => ({ apiBase }), [apiBase]);
   const analysisPageData = useMemo(() => ({ jobId: jobId || '' }), [jobId]);
-  const dynamicPageData = sid === 'KPOP_AI_RESULT' ? analysisPageData : (kpopPageData ?? EMPTY_OBJ);
+  const productPageData = useMemo(() => ({ q: q || '', artistId: artistId || '', eventId: eventId || '' }), [artistId, eventId, q]);
+  const dynamicPageData = sid === 'KPOP_AI_RESULT'
+    ? analysisPageData
+    : sid === 'KPOP_PRODUCTS'
+      ? productPageData
+      : (kpopPageData ?? EMPTY_OBJ);
 
   const page = usePageHook(sid, metadata, EMPTY_OBJ, navigation, routeParams, runtime);
 

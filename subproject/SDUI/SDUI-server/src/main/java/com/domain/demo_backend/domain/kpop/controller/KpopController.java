@@ -3,6 +3,7 @@ package com.domain.demo_backend.domain.kpop.controller;
 import com.domain.demo_backend.global.common.response.ApiResponse;
 import com.domain.demo_backend.global.security.CustomUserDetails;
 import com.domain.demo_backend.domain.kpop.service.KpopAnalysisService;
+import com.domain.demo_backend.domain.kpop.service.KpopProductService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -26,15 +27,18 @@ public class KpopController {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final KpopAnalysisService analysisService;
+    private final KpopProductService productService;
     private final Executor sseExecutor;
 
     public KpopController(
             NamedParameterJdbcTemplate jdbcTemplate,
             KpopAnalysisService analysisService,
+            KpopProductService productService,
             @Qualifier("sseExecutor") Executor sseExecutor
     ) {
         this.jdbcTemplate = jdbcTemplate;
         this.analysisService = analysisService;
+        this.productService = productService;
         this.sseExecutor = sseExecutor;
     }
 
@@ -213,16 +217,14 @@ public class KpopController {
 
     @GetMapping("/product-candidates")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> productCandidates(
-            @RequestParam(name = "artistId", required = false) Long artistId
+            @RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "artistId", required = false) Long artistId,
+            @RequestParam(name = "eventId", required = false) Long eventId,
+            @RequestParam(name = "limit", required = false) Integer limit
     ) {
-        return ResponseEntity.ok(ApiResponse.success(jdbcTemplate.queryForList("""
-                SELECT product_candidate_id AS id, artist_id AS "artistId", name, brand,
-                       evidence_grade AS "evidenceGrade", confidence, evidence_text AS "evidenceText",
-                       official_url AS "officialUrl"
-                FROM product_candidate
-                WHERE approved_yn = 'Y' AND (:artistId IS NULL OR artist_id = :artistId)
-                ORDER BY confidence DESC, product_candidate_id DESC
-                """, params("artistId", artistId))));
+        return ResponseEntity.ok(ApiResponse.success(
+                productService.productCandidates(q, artistId, eventId, limit)
+        ));
     }
 
     @PostMapping("/saved-items")
@@ -231,15 +233,9 @@ public class KpopController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
-        String itemType = String.valueOf(payload.get("itemType"));
-        Long itemRef = Long.valueOf(String.valueOf(payload.get("itemRef")));
-        Long id = jdbcTemplate.queryForObject("""
-                INSERT INTO saved_item (user_sqno, item_type, item_ref)
-                VALUES (:userSqno, :itemType, :itemRef)
-                ON CONFLICT (user_sqno, item_type, item_ref) DO UPDATE SET updated_at = NOW()
-                RETURNING saved_item_id
-                """, params("userSqno", user.getUserSqno()).addValue("itemType", itemType).addValue("itemRef", itemRef), Long.class);
-        return ResponseEntity.ok(ApiResponse.success(Map.of("id", id, "itemType", itemType, "itemRef", itemRef)));
+        return ResponseEntity.ok(ApiResponse.success(
+                productService.saveItem(payload, user.getUserSqno())
+        ));
     }
 
     @GetMapping("/saved-items")
@@ -247,12 +243,18 @@ public class KpopController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
-        return ResponseEntity.ok(ApiResponse.success(jdbcTemplate.queryForList("""
-                SELECT saved_item_id AS id, item_type AS "itemType", item_ref AS "itemRef", created_at AS "createdAt"
-                FROM saved_item
-                WHERE user_sqno = :userSqno
-                ORDER BY created_at DESC
-                """, params("userSqno", user.getUserSqno()))));
+        return ResponseEntity.ok(ApiResponse.success(productService.savedItems(user.getUserSqno())));
+    }
+
+    @DeleteMapping("/saved-items/{savedItemId}")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> deleteSavedItem(
+            @PathVariable Long savedItemId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        requireUser(user);
+        return ResponseEntity.ok(ApiResponse.success(
+                productService.deleteSavedItem(savedItemId, user.getUserSqno())
+        ));
     }
 
     private void streamAnalysisSnapshots(Long jobId, Long userSqno, SseEmitter emitter) {

@@ -29,6 +29,7 @@ public class KpopAnalysisService {
     private final S3Service s3Service;
     private final CeleryJobService celeryJobService;
     private final ObjectMapper objectMapper;
+    private final KpopProductService productService;
 
     public Map<String, Object> createUpload(Map<String, Object> payload, Long userSqno) {
         String contentType = requiredText(payload, "contentType");
@@ -140,7 +141,7 @@ public class KpopAnalysisService {
         response.put("statusUrl", "/api/v1/kpop/analysis-jobs/" + job.getId());
         response.put("streamUrl", "/api/v1/kpop/analysis-jobs/" + job.getId() + "/stream");
         if (includeResult && job.getResultJson() != null && !job.getResultJson().isBlank()) {
-            response.put("result", parseResult(job.getResultJson()));
+            response.put("result", parseResult(job.getId(), job.getResultJson()));
         }
         if ("FAILED".equals(response.get("status"))) {
             response.put("error", "Analysis failed. Please try again.");
@@ -166,17 +167,28 @@ public class KpopAnalysisService {
         };
     }
 
-    private Object parseResult(String resultJson) {
+    private Map<String, Object> parseResult(Long jobId, String resultJson) {
         try {
-            return objectMapper.readValue(resultJson, new TypeReference<Map<String, Object>>() {});
-        } catch (JsonProcessingException ignored) {
-            return Map.of(
-                    "grade", "INSUFFICIENT_EVIDENCE",
-                    "confidence", 0,
-                    "evidence", java.util.List.of(),
-                    "candidates", java.util.List.of()
+            Map<String, Object> rawResult = objectMapper.readValue(
+                    resultJson,
+                    new TypeReference<Map<String, Object>>() {}
             );
+            if (rawResult == null) {
+                return insufficientEvidenceResult();
+            }
+            return productService.sanitizeAnalysisResult(jobId, rawResult);
+        } catch (JsonProcessingException ignored) {
+            return insufficientEvidenceResult();
         }
+    }
+
+    private Map<String, Object> insufficientEvidenceResult() {
+        return Map.of(
+                "grade", "INSUFFICIENT_EVIDENCE",
+                "confidence", 0,
+                "evidence", java.util.List.of(),
+                "candidates", java.util.List.of()
+        );
     }
 
     private String requiredText(Map<String, Object> payload, String field) {
