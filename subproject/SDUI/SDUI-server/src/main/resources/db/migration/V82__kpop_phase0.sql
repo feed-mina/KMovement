@@ -4,6 +4,24 @@
 ALTER TABLE query_master
     ADD COLUMN IF NOT EXISTS required_params TEXT;
 
+-- `celery_jobs` was historically created by Hibernate ddl-auto rather than a
+-- Flyway migration. Flyway runs first on a clean database, so define the table
+-- here before the K-POP job shell alters or inserts into it.
+CREATE TABLE IF NOT EXISTS celery_jobs (
+    id BIGSERIAL PRIMARY KEY,
+    celery_task_id VARCHAR(100) UNIQUE,
+    task_type VARCHAR(50) NOT NULL,
+    status VARCHAR(30) DEFAULT 'QUEUED',
+    result_json TEXT,
+    error_message TEXT,
+    progress_step VARCHAR(50),
+    progress_pct INTEGER,
+    requested_by BIGINT,
+    notif_sent BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS artist (
     artist_id BIGSERIAL PRIMARY KEY,
     slug VARCHAR(120) UNIQUE NOT NULL,
@@ -92,10 +110,10 @@ ALTER TABLE celery_jobs
 
 INSERT INTO artist (slug, name_ko, name_en, profile, image_url, official_url, sort_order)
 VALUES
-('bts', 'BTS', 'BTS', 'Global K-POP artist with Seoul travel demand.', '/artists/BTS.jpg', 'https://ibighit.com/bts', 1),
-('blackpink', 'BLACKPINK', 'BLACKPINK', 'K-POP artist connected to pop-up, fashion, and concert routes.', '/artists/BLACKPINK.jpg', 'https://www.ygfamily.com', 2),
-('seventeen', 'SEVENTEEN', 'SEVENTEEN', 'Performance-focused K-POP artist for event-led routes.', '/artists/SEVENTEEN.jpg', 'https://www.pledis.co.kr', 3),
-('ive', 'IVE', 'IVE', 'Trend-forward K-POP artist for fan travel discovery.', '/artists/IVE.jpg', 'https://www.starship-ent.com', 4)
+('bts', 'BTS', 'BTS', 'Global K-POP artist with Seoul travel demand.', NULL, 'https://ibighit.com/bts', 1),
+('blackpink', 'BLACKPINK', 'BLACKPINK', 'K-POP artist connected to pop-up, fashion, and concert routes.', NULL, 'https://www.ygfamily.com', 2),
+('seventeen', 'SEVENTEEN', 'SEVENTEEN', 'Performance-focused K-POP artist for event-led routes.', NULL, 'https://www.pledis.co.kr', 3),
+('ive', 'IVE', 'IVE', 'Trend-forward K-POP artist for fan travel discovery.', NULL, 'https://www.starship-ent.com', 4)
 ON CONFLICT (slug) DO UPDATE SET
     name_ko = EXCLUDED.name_ko,
     name_en = EXCLUDED.name_en,
@@ -152,7 +170,7 @@ VALUES
 ('KPOP_EVENTS','kpop_events_root','GROUP','',1,NULL,NULL,'COLUMN','kpop-screen',NULL,NULL,NULL,true,'true','{}'),
 ('KPOP_EVENTS','kpop_events_title','TEXT','K-POP events',2,NULL,'kpop_events_root',NULL,'kpop-title',NULL,NULL,NULL,true,'true','{}'),
 ('KPOP_EVENTS','kpop_events_grid','GROUP','',3,'events','kpop_events_root','COLUMN','kpop-list',NULL,NULL,'kpop_event_cards',true,'true','{}'),
-('KPOP_EVENTS','kpop_event_card','EVENT_CARD','',4,NULL,'kpop_events_grid',NULL,'','ROUTE','/kpop/events',NULL,false,'true','{}'),
+('KPOP_EVENTS','kpop_event_card','EVENT_CARD','',4,NULL,'kpop_events_grid',NULL,'','ROUTE','/kpop/event',NULL,false,'true','{}'),
 
 ('KPOP_ARTIST_DETAIL','kpop_artist_detail_root','GROUP','',1,NULL,NULL,'COLUMN','kpop-screen',NULL,NULL,NULL,true,'true','{}'),
 ('KPOP_ARTIST_DETAIL','kpop_artist_detail','ARTIST_CARD','Artist detail',2,'artist','kpop_artist_detail_root',NULL,'kpop-detail-card',NULL,NULL,NULL,true,'true','{}'),

@@ -1,6 +1,6 @@
-import type React from 'react';
-import { Image, Text, View } from 'react-native';
-import type { SduiLeafProps } from '@kride/core';
+import React, { useState } from 'react';
+import { Image, Pressable, Text, View } from 'react-native';
+import { authHeader, type SduiLeafProps } from '@kride/core';
 
 /**
  * Mobile display leaves (P4, 1st pass) — direct RN ports of the web atoms.
@@ -76,13 +76,44 @@ export const CheckIndicatorLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
 const kpopName = (data?: Record<string, any>) =>
   data?.nameKo || data?.name_ko || data?.nameEn || data?.name || 'K-POP';
 
-export const ArtistCardLeaf: React.FC<SduiLeafProps> = ({ data }) => {
+const requestKpop = async (apiBase: string, path: string, method = 'POST') => {
+  const response = await fetch(`${apiBase}${path}`, {
+    method,
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+  });
+  if (!response.ok) throw new Error(String(response.status));
+  return response.json();
+};
+
+const actionError = (error: unknown) =>
+  error instanceof Error && error.message === '401' ? 'Login required' : 'Request failed';
+
+export const ArtistCardLeaf: React.FC<SduiLeafProps> = ({ data, meta, onAction, apiBase = '' }) => {
   const name = kpopName(data);
   const imageUrl = data?.imageUrl || data?.image_url;
+  const [followed, setFollowed] = useState(Boolean(data?.followed));
+  const [status, setStatus] = useState('');
+
+  const follow = async () => {
+    try {
+      await requestKpop(apiBase, `/api/v1/kpop/artists/${data?.id}/follow`, followed ? 'DELETE' : 'POST');
+      setFollowed((current) => !current);
+      setStatus(followed ? 'Follow removed' : 'Following');
+    } catch (error) {
+      setStatus(actionError(error));
+    }
+  };
+
   return (
     <View className="mb-3 overflow-hidden rounded-xl border border-neutral-200 bg-white">
       <View className="h-32 w-full bg-neutral-100">
-        {imageUrl ? <Image source={{ uri: imageUrl }} className="h-full w-full" resizeMode="cover" /> : null}
+        {imageUrl ? (
+          <Image source={{ uri: imageUrl }} className="h-full w-full" resizeMode="cover" />
+        ) : (
+          <View className="h-full w-full items-center justify-center bg-rose-50">
+            <Text className="text-4xl font-bold text-kride">{String(name).slice(0, 1)}</Text>
+          </View>
+        )}
       </View>
       <View className="gap-2 p-4">
         <Text className="text-xs font-semibold uppercase text-kride">Artist</Text>
@@ -90,13 +121,45 @@ export const ArtistCardLeaf: React.FC<SduiLeafProps> = ({ data }) => {
         <Text className="text-sm text-neutral-600" numberOfLines={2}>
           {String(data?.profile || 'Follow events, fan routes, and reliable merch candidates.')}
         </Text>
+        <View className="mt-2 flex-row gap-2">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`View ${name} details`}
+            className="rounded-full border border-kride px-3 py-2"
+            onPress={() => onAction?.({ ...meta, actionType: 'ROUTE', actionUrl: `/kpop/artists?artistId=${data?.id}` }, data)}
+          >
+            <Text className="font-semibold text-kride">View details</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${followed ? 'Unfollow' : 'Follow'} ${name}`}
+            className="rounded-full bg-kride px-3 py-2"
+            onPress={follow}
+          >
+            <Text className="font-semibold text-white">{followed ? 'Unfollow' : 'Follow'}</Text>
+          </Pressable>
+        </View>
+        {status ? <Text className="text-xs text-neutral-500">{status}</Text> : null}
       </View>
     </View>
   );
 };
 
-export const EventCardLeaf: React.FC<SduiLeafProps> = ({ data }) => {
+export const EventCardLeaf: React.FC<SduiLeafProps> = ({ data, meta, onAction, apiBase = '' }) => {
   const title = data?.titleKo || data?.title_ko || data?.titleEn || data?.title || 'K-POP event';
+  const [bookmarked, setBookmarked] = useState(Boolean(data?.bookmarked));
+  const [status, setStatus] = useState('');
+
+  const bookmark = async () => {
+    try {
+      await requestKpop(apiBase, `/api/v1/kpop/events/${data?.id}/bookmark`);
+      setBookmarked(true);
+      setStatus('Bookmarked');
+    } catch (error) {
+      setStatus(actionError(error));
+    }
+  };
+
   return (
     <View className="mb-3 rounded-xl border border-neutral-200 bg-white p-4">
       <Text className="text-xs font-semibold uppercase text-kride">
@@ -109,6 +172,26 @@ export const EventCardLeaf: React.FC<SduiLeafProps> = ({ data }) => {
       <Text className="mt-2 text-xs text-neutral-500" numberOfLines={2}>
         Only official or reviewed links should be treated as reliable.
       </Text>
+      <View className="mt-3 flex-row gap-2">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`View ${title} details`}
+          className="rounded-full border border-kride px-3 py-2"
+          onPress={() => onAction?.({ ...meta, actionType: 'ROUTE', actionUrl: `/kpop/event?eventId=${data?.id}` }, data)}
+        >
+          <Text className="font-semibold text-kride">View details</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Bookmark ${title}`}
+          className="rounded-full bg-kride px-3 py-2"
+          disabled={bookmarked}
+          onPress={bookmark}
+        >
+          <Text className="font-semibold text-white">{bookmarked ? 'Bookmarked' : 'Bookmark'}</Text>
+        </Pressable>
+      </View>
+      {status ? <Text className="mt-2 text-xs text-neutral-500">{status}</Text> : null}
     </View>
   );
 };

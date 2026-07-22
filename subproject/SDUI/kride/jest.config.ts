@@ -2,6 +2,9 @@ import type { Config } from "jest";
 
 const config: Config = {
   preset: "ts-jest",
+  // Watchman on this Windows host can fail while opening its user-profile log
+  // and dump the child environment. Use Jest's filesystem crawler instead.
+  watchman: false,
   testEnvironment: "jest-environment-jsdom",
   setupFilesAfterEnv: ["<rootDir>/src/__tests__/jest.setup.ts"],
   moduleNameMapper: {

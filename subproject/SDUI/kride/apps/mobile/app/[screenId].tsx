@@ -33,12 +33,25 @@ const normalizeMobileRoute = (rawPath: string) => {
 };
 
 export default function MobileScreen() {
-  const { screenId } = useLocalSearchParams<{ screenId: string }>();
+  const { screenId, artistId, eventId, region, from, to } = useLocalSearchParams<{
+    screenId: string;
+    artistId?: string;
+    eventId?: string;
+    region?: string;
+    from?: string;
+    to?: string;
+  }>();
   const router = useRouter();
   const sid = screenId ?? 'MAIN_PAGE';
   const apiBase = resolveRuntimeConfig({ apiBase: process.env.EXPO_PUBLIC_API_BASE }).apiBase;
   const { data, isLoading, error } = useUiScreen(sid, apiBase);
-  const { data: kpopPageData } = useKpopPageData(sid, apiBase);
+  const { data: kpopPageData } = useKpopPageData(sid, apiBase, {
+    artistId,
+    eventId,
+    region,
+    from,
+    to,
+  });
 
   // react-query keeps `data` referentially stable until it actually changes;
   // fall back to a module-level constant so the reference is stable while loading.
@@ -110,6 +123,7 @@ export default function MobileScreen() {
           setFormData={page.setFormData}
           onChange={page.handleChange}
           onAction={page.handleAction}
+          apiBase={apiBase}
           primitives={rnPrimitives}
           componentMap={mobileComponentMap}
         />

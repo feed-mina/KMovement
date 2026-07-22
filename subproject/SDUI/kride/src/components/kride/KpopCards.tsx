@@ -3,6 +3,8 @@ import { useState } from "react";
 
 type CardProps = {
   data?: Record<string, any>;
+  meta?: Record<string, any>;
+  onAction?: (meta: Record<string, any>, data?: Record<string, any>) => void;
 };
 
 const displayName = (data?: Record<string, any>) =>
@@ -20,15 +22,17 @@ async function postJson(url: string, method = "POST") {
   return res.json();
 }
 
-export function ArtistCard({ data }: CardProps) {
+export function ArtistCard({ data, meta, onAction }: CardProps) {
   const [status, setStatus] = useState("");
+  const [followed, setFollowed] = useState(Boolean(data?.followed));
   const name = displayName(data);
   const imageUrl = data?.imageUrl || data?.image_url;
 
   const follow = async () => {
     try {
-      await postJson(`/api/v1/kpop/artists/${data?.id}/follow`);
-      setStatus("Following");
+      await postJson(`/api/v1/kpop/artists/${data?.id}/follow`, followed ? "DELETE" : "POST");
+      setFollowed((current) => !current);
+      setStatus(followed ? "Follow removed" : "Following");
     } catch {
       setStatus("Login required");
     }
@@ -37,20 +41,26 @@ export function ArtistCard({ data }: CardProps) {
   return (
     <article className="kpop-card">
       <div className="kpop-card-image">
-        {imageUrl ? <img src={imageUrl} alt="" /> : <span>{name.slice(0, 1)}</span>}
+        {imageUrl ? <img src={imageUrl} alt={`${name} profile`} /> : <span>{name.slice(0, 1)}</span>}
       </div>
       <div className="kpop-card-body">
         <p className="kpop-eyebrow">Artist</p>
         <h3>{name}</h3>
         <p>{data?.profile || "Follow events, fan routes, and reliable merch candidates."}</p>
-        <button type="button" onClick={follow}>Follow</button>
+        <button
+          type="button"
+          onClick={() => onAction?.({ ...meta, actionType: "ROUTE", actionUrl: `/kpop/artists?artistId=${data?.id}` }, data)}
+        >
+          View details
+        </button>
+        <button type="button" onClick={follow}>{followed ? "Unfollow" : "Follow"}</button>
         {status ? <small>{status}</small> : null}
       </div>
     </article>
   );
 }
 
-export function EventCard({ data }: CardProps) {
+export function EventCard({ data, meta, onAction }: CardProps) {
   const [status, setStatus] = useState("");
   const title = data?.titleKo || data?.title_ko || data?.titleEn || data?.title || "K-POP event";
 
@@ -70,6 +80,12 @@ export function EventCard({ data }: CardProps) {
         <h3>{title}</h3>
         <p>{[data?.region, data?.venue, data?.date].filter(Boolean).join(" - ")}</p>
         <p className="kpop-evidence">Only official or reviewed links should be treated as reliable.</p>
+        <button
+          type="button"
+          onClick={() => onAction?.({ ...meta, actionType: "ROUTE", actionUrl: `/kpop/event?eventId=${data?.id}` }, data)}
+        >
+          View details
+        </button>
         <button type="button" onClick={bookmark}>Bookmark</button>
         {status ? <small>{status}</small> : null}
       </div>
