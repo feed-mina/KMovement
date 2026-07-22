@@ -8,6 +8,16 @@
     ".jest-cache-store",
     ".jest-cache-store2",
     ".jest-cache-store3",
-    ".jest-cache-store5"
+    ".jest-cache-store5",
+    "apps/mobile/dist",
+    "apps/mobile/dist-codex-final-3",
+    "apps/mobile/dist-codex-p4-p0",
+    "apps/mobile/dist-codex-p6-verify",
+    "apps/mobile/dist-codex-p6-verify-warm",
+    "apps/mobile/.expo",
+    "apps/mobile/.eas-cli-tools",
+    "apps/mobile/.eas-npm-cache",
+    "apps/mobile/.eas-user-data",
+    "apps/mobile/.codex-metro-temp"
   ]
 }

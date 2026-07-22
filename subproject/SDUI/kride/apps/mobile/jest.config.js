@@ -1,3 +1,13 @@
+const path = require('path');
+
+// Resolve these packages wherever npm actually put them. The workspace hoists
+// non-deterministically — react-native, nativewind, and react-native-css-interop
+// have each landed at the root or app-local across reinstalls — so a hardcoded
+// path silently breaks suite loading after a fresh install. Following Node's own
+// resolution keeps the mapper correct regardless of hoisting.
+const pkgDir = (name) =>
+  path.dirname(require.resolve(`${name}/package.json`)).replace(/\\/g, '/');
+
 /** @type {import('jest').Config} */
 module.exports = {
   preset: 'jest-expo',
@@ -13,8 +23,8 @@ module.exports = {
     //
     // babel.config.js sets jsxImportSource: 'nativewind', so every JSX file
     // needs nativewind's runtime, which only exists here.
-    '^nativewind(.*)$': '<rootDir>/node_modules/nativewind$1',
-    '^react-native-css-interop(.*)$': '<rootDir>/node_modules/react-native-css-interop$1',
+    '^nativewind(.*)$': `${pkgDir('nativewind')}$1`,
+    '^react-native-css-interop(.*)$': `${pkgDir('react-native-css-interop')}$1`,
     // One copy of react, the hoisted one metro forces at runtime. Without this
     // the app-local copy renders while react-test-renderer drives the root one,
     // and every hook call throws.
