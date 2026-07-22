@@ -3934,3 +3934,126 @@ button:hover {
         max-width: none;
     }
 }
+
+/* Record time accordion */
+.record-time-widget {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    cursor: default;
+}
+
+.record-time-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--kride-space-3);
+    width: 100%;
+}
+
+.record-time-summary-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    text-align: left;
+}
+
+.record-time-summary-copy strong {
+    color: var(--kride-text-strong);
+    font-size: 0.95rem;
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.record-time-eyebrow {
+    color: var(--kride-primary-dark);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.record-time-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 68px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--kride-border);
+    border-radius: 999px;
+    background: var(--kride-bg-card);
+    color: var(--kride-text-main);
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.record-time-toggle:hover {
+    border-color: var(--kride-primary);
+    color: var(--kride-primary-dark);
+}
+
+.record-time-toggle:focus-visible {
+    outline: 3px solid var(--kride-focus-ring);
+    outline-offset: 2px;
+}
+
+.record-time-toggle-icon {
+    display: inline-block;
+    font-size: 1rem;
+    line-height: 1;
+    transform: rotate(0deg);
+    transition: transform 180ms ease;
+}
+
+.record-time-widget.is-collapsed .record-time-toggle-icon {
+    transform: rotate(180deg);
+}
+
+.record-time-body {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: var(--kride-space-4);
+}
+
+.record-time-body[hidden] {
+    display: none !important;
+}
+
+.record-time-widget .setup-button {
+    align-self: center;
+    margin-bottom: 0;
+}
+
+.main-bento .record-time-widget.no-goal-container::before {
+    content: none;
+}
+
+.pc-top-utility .record-time-widget .record-time-body {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--kride-space-3);
+    margin-top: var(--kride-space-2);
+}
+
+@media (max-width: 767px) {
+    .main-bento .record-time-widget.is-collapsed {
+        min-height: 0;
+        padding: var(--kride-space-3) var(--kride-space-4);
+    }
+
+    .record-time-summary-copy strong {
+        white-space: nowrap;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .record-time-toggle-icon {
+        transition: none;
+    }
+}
