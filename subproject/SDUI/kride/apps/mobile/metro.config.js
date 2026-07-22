@@ -10,6 +10,12 @@ const config = getDefaultConfig(projectRoot);
 // Watchman crawl/query fast. The local `index.js` entry keeps the dev-server bundle
 // URL inside projectRoot, so watching the workspace root is unnecessary.
 config.watchFolders = [path.resolve(workspaceRoot, 'packages/core')];
+// One-shot builds (`expo export`) never need file watching, and Watchman's crawl of
+// this repo on D: can wedge its server for good. Opt out with EXPO_NO_WATCHMAN=1 to
+// fall back to Metro's node crawler; the dev server keeps using Watchman.
+if (process.env.EXPO_NO_WATCHMAN === '1') {
+  config.resolver.useWatchman = false;
+}
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),

@@ -42,10 +42,10 @@ describe('EmailSelectLeaf', () => {
     const onChange = jest.fn();
     render(<EmailSelectLeaf id="user_email_domain" meta={DOMAIN_META} formData={{}} onChange={onChange} />);
 
-    expect(screen.queryByPlaceholderText('email domain')).toBeNull();
+    expect(screen.queryByPlaceholderText('예: kakao.com')).toBeNull();
 
-    fireEvent.press(screen.getByText('Custom'));
-    const input = screen.getByPlaceholderText('email domain');
+    fireEvent.press(screen.getByText('직접 입력'));
+    const input = screen.getByPlaceholderText('예: kakao.com');
     fireEvent.changeText(input, 'kakao.com');
 
     expect(input.props.editable).not.toBe(false);

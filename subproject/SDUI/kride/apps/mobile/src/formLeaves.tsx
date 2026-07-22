@@ -106,7 +106,13 @@ export const EmailSelectLeaf: React.FC<MobileInputLeafProps> = ({ id, meta, form
 
   return (
     <View className="w-full gap-2">
-      <View className="flex-row flex-wrap gap-2">
+      {/* Users kept typing the whole address into the ID field and then also
+          picking a domain, producing `id@naver.com@naver.com` → a 401 that
+          looks like a wrong password. The hint + leading "@" make it clear the
+          ID field holds only the local part and the domain is chosen here. */}
+      <Text className="text-xs text-gray-500">아이디는 @ 앞부분만 입력하세요</Text>
+      <View className="flex-row flex-wrap items-center gap-2">
+        <Text className="px-1 text-base font-semibold text-gray-500">@</Text>
         {EMAIL_DOMAINS.map((domain) => {
           const selected = value === domain;
           return (
@@ -123,16 +129,19 @@ export const EmailSelectLeaf: React.FC<MobileInputLeafProps> = ({ id, meta, form
         <Pressable
           className={`rounded-full border px-3 py-2 ${custom ? 'border-kride bg-kride' : 'border-gray-300 bg-white'}`}
           accessibilityRole="button"
-          onPress={() => setCustom(true)}
+          onPress={() => {
+            setCustom(true);
+            if (EMAIL_DOMAINS.includes(value)) onChange?.(key, '');
+          }}
         >
-          <Text className={`text-sm ${custom ? 'font-semibold text-white' : 'text-gray-700'}`}>Custom</Text>
+          <Text className={`text-sm ${custom ? 'font-semibold text-white' : 'text-gray-700'}`}>직접 입력</Text>
         </Pressable>
       </View>
       {custom ? (
         <TextInput
           className={inputClassName}
-          value={value}
-          placeholder="email domain"
+          value={EMAIL_DOMAINS.includes(value) ? '' : value}
+          placeholder="예: kakao.com"
           placeholderTextColor="#9ca3af"
           autoCapitalize="none"
           keyboardType="email-address"

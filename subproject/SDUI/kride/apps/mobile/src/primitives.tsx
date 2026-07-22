@@ -43,6 +43,18 @@ const CLASS_MAP: Record<string, string> = {
   'col-span-2': 'w-full',
   'col-span-3': 'w-full',
 
+  // MAIN_PAGE KRIDE hero card (V51). The web renders these via custom CSS in
+  // metadata-project/app/styles/pages.css, which NativeWind can't read — so the
+  // card fell back to unstyled black-on-white text. Translate to utilities here.
+  // The web background is a red-glow gradient on near-black; a multi-stop
+  // gradient isn't expressible as a className, so approximate with a solid dark
+  // fill. (`bento-card` already supplies rounded corners, min height, padding.)
+  'bento-card-kride': 'justify-center bg-[#1a0a0c]',
+  'bento-card-kride__kicker': 'font-mono text-[11px] uppercase tracking-widest text-kride',
+  'bento-card-kride__title': 'my-1 text-3xl font-extrabold leading-tight text-white',
+  'bento-card-kride__desc': 'text-[13px] leading-relaxed text-white/70',
+  'bento-card-kride__cta': 'mt-4 self-start rounded-full bg-kride px-[18px] py-[10px]',
+
   'diary-nav1': 'my-2 w-full max-w-[300px] bg-kride',
   'diary-nav2': 'my-2 w-full max-w-[300px] border border-kride bg-white',
   'diary-btn-primary': 'mb-3 w-[250px] bg-kride',
