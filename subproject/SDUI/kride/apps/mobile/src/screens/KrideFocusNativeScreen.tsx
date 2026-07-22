@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authHeader, useOnboardingStore } from '@kride/core';
 import KrideMap from '../components/KrideMap';
+import NativeItineraryLoadingPanel from '../components/NativeItineraryLoadingPanel';
 
 type MarkerData = { id?: string; lat: number; lng: number; name?: string };
 type ChatMessage = { id: string; role: 'user' | 'assistant'; text: string; error?: boolean };
@@ -26,6 +27,7 @@ type ChatPayload = {
 type Props = {
   apiBase: string;
   onBack?: () => void;
+  autoGenerate?: boolean;
 };
 
 const SUGGESTIONS = [
@@ -84,20 +86,29 @@ export const extractChatMarkers = (payload: ChatPayload): MarkerData[] => {
 
 const messageId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-export default function KrideFocusNativeScreen({ apiBase, onBack }: Props) {
+export default function KrideFocusNativeScreen({ apiBase, onBack, autoGenerate = true }: Props) {
   const duration = useOnboardingStore((state) => state.duration);
   const selectedArtists = useOnboardingStore((state) => state.selectedArtists);
   const selectedRegions = useOnboardingStore((state) => state.selectedRegions);
   const purposes = useOnboardingStore((state) => state.purposes);
   const budget = useOnboardingStore((state) => state.budget);
+  const hasPreferences = Boolean(
+    duration || selectedArtists.length > 0 || selectedRegions.length > 0 || purposes.length > 0,
+  );
   const [chatOpen, setChatOpen] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
+  const [isItineraryLoading, setIsItineraryLoading] = useState(autoGenerate && hasPreferences);
+  const [itineraryError, setItineraryError] = useState<string | null>(null);
+  const chatAbortRef = useRef<AbortController | null>(null);
+  const itineraryAbortRef = useRef<AbortController | null>(null);
 
-  useEffect(() => () => abortRef.current?.abort(), []);
+  useEffect(() => () => {
+    chatAbortRef.current?.abort();
+    itineraryAbortRef.current?.abort();
+  }, []);
 
   const requestContext = useMemo(() => ({
     artists: selectedArtists.map((artist) => artist.name),
@@ -106,6 +117,65 @@ export default function KrideFocusNativeScreen({ apiBase, onBack }: Props) {
     duration: durationToDays(duration),
     budget: [budget.min, budget.max],
   }), [budget.max, budget.min, duration, purposes, selectedArtists, selectedRegions]);
+
+  useEffect(() => {
+    if (!autoGenerate || !hasPreferences) return;
+
+    const controller = new AbortController();
+    itineraryAbortRef.current = controller;
+    let disposed = false;
+    const timeout = setTimeout(() => controller.abort(), 120_000);
+
+    const generate = async () => {
+      setIsItineraryLoading(true);
+      setItineraryError(null);
+      try {
+        const response = await fetch(`${apiBase}/kride-api/recommend/itinerary`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            duration: duration === 'twonight' ? '2박 3일' : duration === 'onenight' ? '1박 2일' : '당일치기',
+            artists: requestContext.artists,
+            regions: requestContext.regions,
+            purposes: requestContext.purposes,
+            budget,
+          }),
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const json = await response.json();
+        const payload = json?.data ?? json;
+        const nextMarkers = extractChatMarkers({
+          pois: payload?.pois,
+          itinerary: {
+            days: payload?.itinerary,
+            mapData: payload?.mapData,
+            markers: payload?.markers,
+          },
+        });
+        if (!disposed && nextMarkers.length > 0) setMarkers(nextMarkers);
+      } catch (error) {
+        if (disposed) return;
+        setItineraryError(
+          error instanceof Error && error.name === 'AbortError'
+            ? '코스 생성 시간이 길어졌어요. 여행봇에서 다시 요청해 주세요.'
+            : '코스를 바로 만들지 못했어요. 여행봇에서 다시 요청할 수 있어요.',
+        );
+      } finally {
+        if (!disposed) setIsItineraryLoading(false);
+        clearTimeout(timeout);
+        if (itineraryAbortRef.current === controller) itineraryAbortRef.current = null;
+      }
+    };
+
+    void generate();
+    return () => {
+      disposed = true;
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [apiBase, autoGenerate, budget, duration, hasPreferences, requestContext]);
 
   const send = useCallback(async (rawText: string) => {
     const text = rawText.trim();
@@ -118,7 +188,7 @@ export default function KrideFocusNativeScreen({ apiBase, onBack }: Props) {
     setIsSending(true);
 
     const controller = new AbortController();
-    abortRef.current = controller;
+    chatAbortRef.current = controller;
     const timeout = setTimeout(() => controller.abort(), 30_000);
 
     try {
@@ -151,7 +221,7 @@ export default function KrideFocusNativeScreen({ apiBase, onBack }: Props) {
       }]);
     } finally {
       clearTimeout(timeout);
-      abortRef.current = null;
+      if (chatAbortRef.current === controller) chatAbortRef.current = null;
       setIsSending(false);
     }
   }, [apiBase, isSending, requestContext]);
@@ -184,10 +254,16 @@ export default function KrideFocusNativeScreen({ apiBase, onBack }: Props) {
         </View>
 
         <View style={styles.body}>
+          {isItineraryLoading ? (
+            <NativeItineraryLoadingPanel />
+          ) : (
+            <>
           <View testID="kride-focus-map-region" style={[styles.mapRegion, !chatOpen && styles.mapRegionExpanded]}>
             <KrideMap markers={markers} style={styles.map} />
             <View pointerEvents="none" style={styles.mapBadge}>
-              <Text style={styles.mapBadgeText}>{markers.length > 0 ? `${markers.length}개 장소` : '추천 동선 준비 중'}</Text>
+              <Text style={styles.mapBadgeText}>
+                {markers.length > 0 ? `${markers.length}개 장소` : itineraryError ?? '추천 동선 준비 중'}
+              </Text>
             </View>
           </View>
 
@@ -256,6 +332,8 @@ export default function KrideFocusNativeScreen({ apiBase, onBack }: Props) {
               </View>
             </View>
           ) : null}
+            </>
+          )}
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
