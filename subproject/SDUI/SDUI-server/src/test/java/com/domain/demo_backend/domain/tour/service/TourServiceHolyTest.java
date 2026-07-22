@@ -5,6 +5,7 @@ import com.domain.demo_backend.domain.tour.domain.TourPoi;
 import com.domain.demo_backend.domain.tour.domain.TourPoiRepository;
 import com.domain.demo_backend.domain.tour.dto.HolyPoiDto;
 import com.domain.demo_backend.domain.tour.dto.HolyReviewItemDto;
+import com.domain.demo_backend.domain.tour.dto.TourRegionDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -56,21 +58,25 @@ class TourServiceHolyTest {
     @Test
     @DisplayName("성지 조회는 공공(TOURAPI) 제외 + APPROVED만 리포지토리에 요청한다")
     void holyQueryUsesApprovedNonTourapiFilter() {
-        when(tourPoiRepository.findBySourceNotAndReviewStatusOrderByPoiSqnoAsc("TOURAPI", "APPROVED"))
+        when(tourPoiRepository.findHolyPoisByRegion("TOURAPI", "APPROVED", null, null))
                 .thenReturn(List.of(holy("holy-a", "성지A", "BTS")));
 
         List<HolyPoiDto> result = tourService.getHolyPois();
 
         assertThat(result).hasSize(1);
-        verify(tourPoiRepository).findBySourceNotAndReviewStatusOrderByPoiSqnoAsc("TOURAPI", "APPROVED");
+        verify(tourPoiRepository).findHolyPoisByRegion("TOURAPI", "APPROVED", null, null);
         verifyNoInteractions(tourApiClient); // 성지는 TourAPI를 타지 않는다
     }
 
     @Test
     @DisplayName("엔티티 → DTO 매핑에 성지 확장 필드(artist/fandomInfo/recommendReason)가 보존된다")
     void dtoCarriesHolyFields() {
-        when(tourPoiRepository.findBySourceNotAndReviewStatusOrderByPoiSqnoAsc("TOURAPI", "APPROVED"))
-                .thenReturn(List.of(holy("holy-b", "성지B", "aespa")));
+        TourPoi holy = holy("holy-b", "성지B", "aespa");
+        holy.setFirstImage("https://images.example.com/holy-b.jpg");
+        holy.setImageSourceUrl("https://commons.wikimedia.org/wiki/File:Holy-b.jpg");
+        holy.setImageCredit("Photographer · CC BY 4.0");
+        when(tourPoiRepository.findHolyPoisByRegion("TOURAPI", "APPROVED", null, null))
+                .thenReturn(List.of(holy));
 
         HolyPoiDto dto = tourService.getHolyPois().get(0);
 
@@ -81,15 +87,47 @@ class TourServiceHolyTest {
         assertThat(dto.recommendReason()).isEqualTo("추천 이유");
         assertThat(dto.mapX()).isEqualTo(127.0);
         assertThat(dto.mapY()).isEqualTo(37.5);
+        assertThat(dto.firstImage()).isEqualTo("https://images.example.com/holy-b.jpg");
+        assertThat(dto.imageSourceUrl()).contains("commons.wikimedia.org");
+        assertThat(dto.imageCredit()).isEqualTo("Photographer · CC BY 4.0");
     }
 
     @Test
     @DisplayName("결과가 없으면 빈 리스트를 반환한다(프론트는 시드 폴백 사용)")
     void emptyResultReturnsEmptyList() {
-        when(tourPoiRepository.findBySourceNotAndReviewStatusOrderByPoiSqnoAsc("TOURAPI", "APPROVED"))
+        when(tourPoiRepository.findHolyPoisByRegion("TOURAPI", "APPROVED", null, null))
                 .thenReturn(List.of());
 
         assertThat(tourService.getHolyPois()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("성지 조회는 선택한 시·도와 시·군·구 코드를 함께 적용한다")
+    void holyQueryUsesSelectedRegion() {
+        TourPoi poi = holy("holy-jongno", "종로 성지", "BTS");
+        poi.setAreaCode("1");
+        poi.setSigunguCode("23");
+        when(tourPoiRepository.findHolyPoisByRegion("TOURAPI", "APPROVED", "1", "23"))
+                .thenReturn(List.of(poi));
+
+        HolyPoiDto result = tourService.getHolyPois("1", "23").get(0);
+
+        assertThat(result.areaCode()).isEqualTo("1");
+        assertThat(result.sigunguCode()).isEqualTo("23");
+        verify(tourPoiRepository).findHolyPoisByRegion("TOURAPI", "APPROVED", "1", "23");
+    }
+
+    @Test
+    @DisplayName("지역 카탈로그는 TTL 안에서 같은 TourAPI 결과를 재사용한다")
+    void regionCatalogUsesShortTtlCache() {
+        when(tourApiClient.areaCodes(""))
+                .thenReturn(List.of(new TourRegionDto("1", "서울"), new TourRegionDto("31", "경기도")));
+
+        assertThat(tourService.getAreas("")).extracting(TourRegionDto::code)
+                .containsExactly("1", "31");
+        assertThat(tourService.getAreas(null)).hasSize(2);
+
+        verify(tourApiClient, times(1)).areaCodes("");
     }
 
     // ── 검수(2차) ──

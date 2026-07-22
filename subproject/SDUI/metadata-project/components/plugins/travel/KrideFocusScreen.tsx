@@ -10,6 +10,7 @@ import { useKrideItinerary } from "@/components/DynamicEngine/hook/useKrideItine
 import { KrideButton, RaiStatePanel } from "@/components/fields/kride/atoms/KridePrimitives";
 import KrideChatComponent from "@/components/fields/kride/chat/KrideChatComponent";
 import { preferNonEmptyMarkers } from "@/components/fields/kride/maps/normalizeRouteMapData";
+import ItineraryLoadingPanel from "@/components/fields/kride/ItineraryLoadingPanel";
 
 // KRIDE_FOCUS 화면 컨트롤러 (여행 플러그인).
 // AI 일정 추천 훅, 챗봇 실시간 반영, 상태 패널, 플로팅 챗 모달을 담당한다.
@@ -159,12 +160,7 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
     if (krideItinerary.isLoading) {
         return (
             <div className="page-wrap KRIDE_FOCUS kride-focus-state-page">
-                <RaiStatePanel
-                    state="thinking"
-                    eyebrow="K-RIDE AI"
-                    title="라이가 여행 코스를 그리고 있어요"
-                    description="잠시만 기다려 주세요."
-                />
+                <ItineraryLoadingPanel />
             </div>
         );
     }

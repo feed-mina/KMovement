@@ -4,6 +4,7 @@ import { Alert, Linking, ScrollView, Text, View } from 'react-native';
 import { DynamicEngine, PATH_TO_SCREEN, resolveRuntimeConfig, useKpopPageData, usePageHook, useUiScreen } from '@kride/core';
 import { rnPrimitives } from '../src/primitives';
 import { mobileComponentMap } from '../src/componentMap';
+import KrideFocusNativeScreen from '../src/screens/KrideFocusNativeScreen';
 
 // Stable references. `useBaseActions` in @kride/core resets form state during
 // render whenever `metadata`/`routeParams`/`initialData` change *by reference*.
@@ -62,6 +63,13 @@ export default function MobileScreen() {
   const runtime = useMemo(() => ({ apiBase }), [apiBase]);
 
   const page = usePageHook(sid, metadata, EMPTY_OBJ, navigation, routeParams, runtime);
+
+  // The focus screen owns a map, an independently scrollable chat thread and a
+  // keyboard-bound composer. The generic page ScrollView made those regions
+  // compete for height, so this screen uses its own bounded native layout.
+  if (sid === 'KRIDE_FOCUS') {
+    return <KrideFocusNativeScreen apiBase={apiBase} onBack={() => router.back()} />;
+  }
 
   // The loading/error screens double as a diagnostic surface: release APKs
   // give us no logs, so the target server and failure reason must be readable

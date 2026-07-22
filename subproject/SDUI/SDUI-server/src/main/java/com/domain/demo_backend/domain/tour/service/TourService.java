@@ -6,6 +6,7 @@ import com.domain.demo_backend.domain.tour.domain.TourPoiRepository;
 import com.domain.demo_backend.domain.tour.dto.HolyPoiDto;
 import com.domain.demo_backend.domain.tour.dto.HolyReviewItemDto;
 import com.domain.demo_backend.domain.tour.dto.TourPoiDto;
+import com.domain.demo_backend.domain.tour.dto.TourRegionDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 관광 POI 서비스 — TourAPI 조회 오케스트레이션 + 성지(tour_poi) 조회.
@@ -36,6 +39,15 @@ public class TourService {
     /** 검수 통과 상태. */
     public static final String REVIEW_APPROVED = "APPROVED";
 
+    private static final long REGION_CACHE_TTL_MILLIS = 10 * 60 * 1000L;
+    private final Map<String, RegionCacheEntry> regionCache = new ConcurrentHashMap<>();
+
+    private record RegionCacheEntry(List<TourRegionDto> regions, long cachedAt) {
+        boolean isFresh(long now) {
+            return now - cachedAt < REGION_CACHE_TTL_MILLIS;
+        }
+    }
+
     public List<TourPoiDto> getPois(String areaCode, String sigunguCode, String contentTypeId,
                                     String arrange, int numOfRows, int pageNo) {
         int rows = numOfRows <= 0 ? 20 : Math.min(numOfRows, 100);
@@ -54,13 +66,44 @@ public class TourService {
      * 데이터 파이프라인 1차: 시드(V76) 서빙. 후속: LLM 정제 투입분(PENDING)은 검수 후 노출.
      */
     public List<HolyPoiDto> getHolyPois() {
+        return getHolyPois(null, null);
+    }
+
+    public List<HolyPoiDto> getHolyPois(String areaCode, String sigunguCode) {
         List<HolyPoiDto> pois = tourPoiRepository
-                .findBySourceNotAndReviewStatusOrderByPoiSqnoAsc(SOURCE_TOURAPI, REVIEW_APPROVED)
+                .findHolyPoisByRegion(SOURCE_TOURAPI, REVIEW_APPROVED, areaCode, sigunguCode)
                 .stream()
                 .map(HolyPoiDto::from)
                 .toList();
-        log.info("[TourService] 성지 POI 조회 - {}건", pois.size());
+        log.info("[TourService] 성지 POI 조회 - area={}, sigungu={}, {}건", areaCode, sigunguCode, pois.size());
         return pois;
+    }
+
+    /**
+     * TourAPI 지역 코드를 짧은 TTL로 캐시한다. 갱신 실패 시 마지막 성공값을 반환한다.
+     */
+    public List<TourRegionDto> getAreas(String areaCode) {
+        String normalizedAreaCode = areaCode == null ? "" : areaCode.trim();
+        String cacheKey = normalizedAreaCode.isEmpty() ? "areas" : "districts:" + normalizedAreaCode;
+        long now = System.currentTimeMillis();
+        RegionCacheEntry cached = regionCache.get(cacheKey);
+        if (cached != null && cached.isFresh(now)) return cached.regions();
+
+        try {
+            List<TourRegionDto> regions = List.copyOf(tourApiClient.areaCodes(normalizedAreaCode));
+            if (!regions.isEmpty()) {
+                regionCache.put(cacheKey, new RegionCacheEntry(regions, now));
+                return regions;
+            }
+            if (cached != null) return cached.regions();
+            return List.of();
+        } catch (RuntimeException error) {
+            if (cached != null) {
+                log.warn("[TourService] 지역 코드 갱신 실패, 마지막 성공 캐시 사용 - key={}", cacheKey, error);
+                return cached.regions();
+            }
+            throw error;
+        }
     }
 
     /** 검수 대기(PENDING) 성지 목록 — 어드민 검수 큐. Dev-4 2차. */

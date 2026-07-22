@@ -1,116 +1,163 @@
 'use client';
-import {useState} from "react";
-import {useRecordTime} from "@/hooks/useRecordTime";
-import {ArrivalButton} from "@/components/fields/ArrivalButton";
-import {dateFormatter} from "@/utils/dateFormatter";
 
-// 1. props 타입 정의 (data 안에 무엇이 들어있는지 명시)
-// @@@@ 2026-02-04 추가 data 타입 optional
+import {useEffect, useId, useState} from 'react';
+import {ArrivalButton} from '@/components/fields/ArrivalButton';
+import {useRecordTime} from '@/hooks/useRecordTime';
+import {dateFormatter} from '@/utils/dateFormatter';
+
 interface RecordTimeProps {
     data?: {
         user_id?: string;
         user_sqno?: string | number;
-        [key: string]: any; // 다른 데이터가 더 들어올 수도 있음을 허용
+        [key: string]: unknown;
     };
-    onChange?: (value: any) => void;
+    onChange?: (value: unknown) => void;
 }
 
-// 부모 블록 전체 화면을 관리하는 곳
-const RecordTimeComponent = ({data, onChange}: RecordTimeProps) => {
-    // console.log("  Record Time 컴포넌트가 받은 데이터:", data);
-    const {formatGoalDate, formatTimePretty, formatDateOnly} = dateFormatter();
+const COLLAPSE_STORAGE_KEY = 'kride:record-time-collapsed:v1';
+const MOBILE_QUERY = '(max-width: 767px)';
+
+const RecordTimeComponent = (_props: RecordTimeProps) => {
+    const {formatGoalDate, formatTimePretty} = dateFormatter();
     const {
         goalTime,
         todaysMessage,
         goalList,
         remainTimeText,
         handleLinkToSetup,
-        handleArrival
+        handleArrival,
     } = useRecordTime();
-    const [isListOpen, setIsListOpen] = useState(false); // 팝업 열림/닫힘
-    // console.log('goalTime',goalTime);
-    // console.log('goalList',goalList);
+    const [isListOpen, setIsListOpen] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const bodyId = useId();
 
-    // 목표시간이 없을때 화면
-    if (!goalTime) {
-        return (
-            <div className="no-goal-container" onClick={handleLinkToSetup} style={{cursor: 'pointer'}}>
-                <p>오늘의 약속 시간은 언제인가요?</p>
-                <button className="setup-button">시간 설정하기</button>
-            </div>
-        );
-    }
-// 목표 시간이 있을때
+    useEffect(() => {
+        try {
+            const savedPreference = window.localStorage.getItem(COLLAPSE_STORAGE_KEY);
+
+            if (savedPreference === 'collapsed' || savedPreference === 'expanded') {
+                setIsCollapsed(savedPreference === 'collapsed');
+                return;
+            }
+        } catch {
+            // Storage can be unavailable in privacy-restricted browsers and WebViews.
+        }
+
+        setIsCollapsed(window.matchMedia(MOBILE_QUERY).matches);
+    }, []);
+
+    const handleToggle = () => {
+        setIsCollapsed((previous) => {
+            const next = !previous;
+
+            try {
+                window.localStorage.setItem(
+                    COLLAPSE_STORAGE_KEY,
+                    next ? 'collapsed' : 'expanded',
+                );
+            } catch {
+                // The accordion still works for the current visit when storage is blocked.
+            }
+
+            return next;
+        });
+    };
+
+    const summary = goalTime
+        ? `목표 시간 ${formatGoalDate(goalTime)} ${formatTimePretty(goalTime)}`
+        : '오늘의 약속 시간은 언제인가요?';
+
     return (
-        <div className="time-record-container">
-            {/* 상단 정보 + 버튼 영역 */}
-            <div className="clock-container">
-                <div className="clock-display-box">
-                    <span className="target-time-label">
-                        목표 시간  {formatGoalDate(goalTime)}
-                    </span>
-                    <div className="formatted-time">
-                        {formatTimePretty(goalTime)}
-                    </div>
-                    <div className="remain-time">
-                        {remainTimeText}
-                    </div>
-                    {todaysMessage && (
-                        <div className="goal-memo-text">{todaysMessage}</div>
-                    )}
+        <section
+            className={`record-time-widget ${goalTime ? 'time-record-container' : 'no-goal-container'} ${isCollapsed ? 'is-collapsed' : ''}`}
+            aria-label="약속 시간"
+        >
+            <div className="record-time-summary">
+                <div className="record-time-summary-copy">
+                    <span className="record-time-eyebrow">시간 설정</span>
+                    <strong>{summary}</strong>
                 </div>
+                <button
+                    type="button"
+                    className="record-time-toggle"
+                    aria-expanded={!isCollapsed}
+                    aria-controls={bodyId}
+                    onClick={handleToggle}
+                >
+                    <span className="record-time-toggle-label">
+                        {isCollapsed ? '펼치기' : '접기'}
+                    </span>
+                    <span className="record-time-toggle-icon" aria-hidden="true">⌃</span>
+                </button>
             </div>
 
-            {/* 하단 영역 */}
-            <div className="more-list-section">
-                <div className="bottom-btn-group">
-
-                    {/* (1) 도착 완료 버튼 */}
-                    <ArrivalButton onClick={handleArrival}/>
-
-                    {/* (2) 시간 추가 버튼 */}
-                    <button onClick={handleLinkToSetup} className="add-time-btn">
-                        + 시간 추가
+            <div id={bodyId} className="record-time-body" hidden={isCollapsed}>
+                {!goalTime ? (
+                    <button type="button" className="setup-button" onClick={handleLinkToSetup}>
+                        시간 설정하기
                     </button>
-                    {/* 2. ... 버튼: 리스트가 있을 때만 보임 */}
-                    {goalList && goalList.length > 0 && (
-                        <button
-                            className="more-list-button"
-                            onClick={() => setIsListOpen(!isListOpen)}
-                        >
-                            •••
-                        </button>
-                    )}
-                </div>
+                ) : (
+                    <>
+                        <div className="clock-container">
+                            <div className="clock-display-box">
+                                <span className="target-time-label">
+                                    목표 시간 {formatGoalDate(goalTime)}
+                                </span>
+                                <div className="formatted-time">
+                                    {formatTimePretty(goalTime)}
+                                </div>
+                                <div className="remain-time">
+                                    {remainTimeText}
+                                </div>
+                                {todaysMessage && (
+                                    <div className="goal-memo-text">{todaysMessage}</div>
+                                )}
+                            </div>
+                        </div>
 
-                {/* 3. 팝업 리스트: 열려있고 데이터가 있을 때만 보임 */}
-                {isListOpen && goalList && goalList.length > 0 && (
-                    <div className="goal-list-popup">
-                        <ul className="goal-list-popup-ul">
-                            {goalList.map((time: string, index: number) => (
-                                <li className="goal-list-popup-li" key={index} style={{
-                                    padding: '5px 0',
-                                    borderBottom: index < goalList.length - 1 ? '1px solid #eee' : 'none',
-                                    fontSize: '14px',
-                                    color: '#555'
-                                }}>
-                                    <span>🗓️</span>
-                                    <div className="goal-list-content">
-                                        <span className="goal-list-popup-date">
-                                            {formatGoalDate(time)}
-                                        </span>
-                                        <span className="goal-list-popup-time">
-                                            {formatTimePretty(time)}
-                                        </span>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                        <div className="more-list-section">
+                            <div className="bottom-btn-group">
+                                <ArrivalButton onClick={handleArrival}/>
+                                <button type="button" onClick={handleLinkToSetup} className="add-time-btn">
+                                    + 시간 추가
+                                </button>
+                                {goalList && goalList.length > 0 && (
+                                    <button
+                                        type="button"
+                                        className="more-list-button"
+                                        aria-expanded={isListOpen}
+                                        onClick={() => setIsListOpen((previous) => !previous)}
+                                    >
+                                        더보기
+                                    </button>
+                                )}
+                            </div>
+
+                            {isListOpen && goalList && goalList.length > 0 && (
+                                <div className="goal-list-popup">
+                                    <ul className="goal-list-popup-ul">
+                                        {goalList.map((time: string, index: number) => (
+                                            <li className="goal-list-popup-li" key={`${time}-${index}`}>
+                                                <span aria-hidden="true">⏰</span>
+                                                <div className="goal-list-content">
+                                                    <span className="goal-list-popup-date">
+                                                        {formatGoalDate(time)}
+                                                    </span>
+                                                    <span className="goal-list-popup-time">
+                                                        {formatTimePretty(time)}
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    </>
                 )}
             </div>
-        </div>
-    )
-}
+        </section>
+    );
+};
 
 export default RecordTimeComponent;
