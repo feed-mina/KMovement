@@ -86,21 +86,28 @@ const requestKpop = async (apiBase: string, path: string, method = 'POST') => {
 };
 
 const actionError = (error: unknown) =>
-  error instanceof Error && error.message === '401' ? 'Login required' : 'Request failed';
+  error instanceof Error && error.message === '401'
+    ? '로그인 후 이용해 주세요.'
+    : '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
 
 export const ArtistCardLeaf: React.FC<SduiLeafProps> = ({ data, meta, onAction, apiBase = '' }) => {
   const name = kpopName(data);
   const imageUrl = data?.imageUrl || data?.image_url;
   const [followed, setFollowed] = useState(Boolean(data?.followed));
+  const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
 
   const follow = async () => {
+    if (busy) return;
+    setBusy(true);
     try {
       await requestKpop(apiBase, `/api/v1/kpop/artists/${data?.id}/follow`, followed ? 'DELETE' : 'POST');
       setFollowed((current) => !current);
-      setStatus(followed ? 'Follow removed' : 'Following');
+      setStatus(followed ? '팔로우를 취소했습니다.' : '팔로우했습니다.');
     } catch (error) {
       setStatus(actionError(error));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -108,38 +115,47 @@ export const ArtistCardLeaf: React.FC<SduiLeafProps> = ({ data, meta, onAction, 
     <View className="mb-3 overflow-hidden rounded-xl border border-neutral-200 bg-white">
       <View className="h-32 w-full bg-neutral-100">
         {imageUrl ? (
-          <Image source={{ uri: imageUrl }} className="h-full w-full" resizeMode="cover" />
+          <Image
+            accessibilityLabel={`${name} 아티스트 이미지`}
+            accessible
+            source={{ uri: imageUrl }}
+            className="h-full w-full"
+            resizeMode="cover"
+          />
         ) : (
-          <View className="h-full w-full items-center justify-center bg-rose-50">
+          <View accessible accessibilityLabel={`${name} 아티스트 이미지 없음`} className="h-full w-full items-center justify-center bg-rose-50">
             <Text className="text-4xl font-bold text-kride">{String(name).slice(0, 1)}</Text>
           </View>
         )}
       </View>
       <View className="gap-2 p-4">
-        <Text className="text-xs font-semibold uppercase text-kride">Artist</Text>
-        <Text className="text-lg font-bold text-neutral-950">{String(name)}</Text>
+        <Text className="text-xs font-semibold uppercase text-kride">아티스트</Text>
+        <Text accessibilityRole="header" className="text-lg font-bold text-neutral-950">{String(name)}</Text>
         <Text className="text-sm text-neutral-600" numberOfLines={2}>
-          {String(data?.profile || 'Follow events, fan routes, and reliable merch candidates.')}
+          {String(data?.profile || '이벤트, 팬 동선, 근거가 확인된 상품 후보 소식을 확인해 보세요.')}
         </Text>
         <View className="mt-2 flex-row gap-2">
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`View ${name} details`}
-            className="rounded-full border border-kride px-3 py-2"
+            accessibilityLabel={`${name} 상세 보기`}
+            accessibilityHint="아티스트 상세 화면으로 이동합니다."
+            className="min-h-12 justify-center rounded-full border border-kride px-4 py-2"
             onPress={() => onAction?.({ ...meta, actionType: 'ROUTE', actionUrl: `/kpop/artists?artistId=${data?.id}` }, data)}
           >
-            <Text className="font-semibold text-kride">View details</Text>
+            <Text className="font-semibold text-kride">상세 보기</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`${followed ? 'Unfollow' : 'Follow'} ${name}`}
-            className="rounded-full bg-kride px-3 py-2"
+            accessibilityLabel={`${name} ${followed ? '팔로우 취소' : '팔로우'}`}
+            accessibilityState={{ disabled: busy, selected: followed }}
+            className="min-h-12 justify-center rounded-full bg-kride px-4 py-2"
+            disabled={busy}
             onPress={follow}
           >
-            <Text className="font-semibold text-white">{followed ? 'Unfollow' : 'Follow'}</Text>
+            <Text className="font-semibold text-white">{busy ? '처리 중…' : followed ? '팔로잉' : '팔로우'}</Text>
           </Pressable>
         </View>
-        {status ? <Text className="text-xs text-neutral-500">{status}</Text> : null}
+        {status ? <Text accessibilityLiveRegion="polite" className="text-xs text-neutral-700">{status}</Text> : null}
       </View>
     </View>
   );
@@ -148,15 +164,20 @@ export const ArtistCardLeaf: React.FC<SduiLeafProps> = ({ data, meta, onAction, 
 export const EventCardLeaf: React.FC<SduiLeafProps> = ({ data, meta, onAction, apiBase = '' }) => {
   const title = data?.titleKo || data?.title_ko || data?.titleEn || data?.title || 'K-POP event';
   const [bookmarked, setBookmarked] = useState(Boolean(data?.bookmarked));
+  const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
 
   const bookmark = async () => {
+    if (busy || bookmarked) return;
+    setBusy(true);
     try {
       await requestKpop(apiBase, `/api/v1/kpop/events/${data?.id}/bookmark`);
       setBookmarked(true);
-      setStatus('Bookmarked');
+      setStatus('이벤트를 저장했습니다.');
     } catch (error) {
       setStatus(actionError(error));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -165,33 +186,35 @@ export const EventCardLeaf: React.FC<SduiLeafProps> = ({ data, meta, onAction, a
       <Text className="text-xs font-semibold uppercase text-kride">
         {String(data?.artistNameKo || data?.artistName || 'Event')}
       </Text>
-      <Text className="mt-1 text-lg font-bold text-neutral-950">{String(title)}</Text>
+      <Text accessibilityRole="header" className="mt-1 text-lg font-bold text-neutral-950">{String(title)}</Text>
       <Text className="mt-2 text-sm text-neutral-600" numberOfLines={2}>
         {[data?.region, data?.venue, data?.date].filter(Boolean).join(' - ')}
       </Text>
       <Text className="mt-2 text-xs text-neutral-500" numberOfLines={2}>
-        Only official or reviewed links should be treated as reliable.
+        공식 또는 운영 검수를 거친 링크인지 확인한 뒤 이용해 주세요.
       </Text>
       <View className="mt-3 flex-row gap-2">
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`View ${title} details`}
-          className="rounded-full border border-kride px-3 py-2"
+          accessibilityLabel={`${title} 상세 보기`}
+          accessibilityHint="이벤트 상세 화면으로 이동합니다."
+          className="min-h-12 justify-center rounded-full border border-kride px-4 py-2"
           onPress={() => onAction?.({ ...meta, actionType: 'ROUTE', actionUrl: `/kpop/event?eventId=${data?.id}` }, data)}
         >
-          <Text className="font-semibold text-kride">View details</Text>
+          <Text className="font-semibold text-kride">상세 보기</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Bookmark ${title}`}
-          className="rounded-full bg-kride px-3 py-2"
-          disabled={bookmarked}
+          accessibilityLabel={`${title} 저장`}
+          accessibilityState={{ disabled: bookmarked || busy, selected: bookmarked }}
+          className="min-h-12 justify-center rounded-full bg-kride px-4 py-2"
+          disabled={bookmarked || busy}
           onPress={bookmark}
         >
-          <Text className="font-semibold text-white">{bookmarked ? 'Bookmarked' : 'Bookmark'}</Text>
+          <Text className="font-semibold text-white">{busy ? '저장 중…' : bookmarked ? '저장됨' : '저장'}</Text>
         </Pressable>
       </View>
-      {status ? <Text className="mt-2 text-xs text-neutral-500">{status}</Text> : null}
+      {status ? <Text accessibilityLiveRegion="polite" className="mt-2 text-xs text-neutral-700">{status}</Text> : null}
     </View>
   );
 };

@@ -39,6 +39,7 @@ export const ProductCandidateCardLeaf: React.FC<{
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const canOpen = canOpenKpopOfficialUrl(candidate);
+  const evidenceGrade = gradeCopy(candidate.evidenceGrade);
 
   useEffect(() => setSavedItemId(candidate.savedItemId), [candidate.savedItemId]);
 
@@ -66,8 +67,10 @@ export const ProductCandidateCardLeaf: React.FC<{
 
   return (
     <View className="gap-2 rounded-xl border border-neutral-200 bg-white p-4">
-      <Text className="text-xs font-bold uppercase text-kride">{gradeCopy(candidate.evidenceGrade)}</Text>
-      <Text className="text-lg font-bold text-neutral-950">{candidate.name}</Text>
+      <Text accessibilityLabel={`근거 등급: ${evidenceGrade}`} className="text-xs font-bold uppercase text-kride">
+        근거 등급 · {evidenceGrade}
+      </Text>
+      <Text accessibilityRole="header" className="text-lg font-bold text-neutral-950">{candidate.name}</Text>
       {candidate.brand ? <Text className="text-sm text-neutral-600">{candidate.brand}</Text> : null}
       {typeof candidate.confidence === 'number' ? (
         <Text className="text-xs text-neutral-500">모델 참고 점수 {Math.round(candidate.confidence)} / 100</Text>
@@ -79,20 +82,27 @@ export const ProductCandidateCardLeaf: React.FC<{
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={savedItemId ? '저장 해제' : '후보 저장'}
-          accessibilityState={{ disabled: busy || !candidate.id }}
+          accessibilityHint={savedItemId ? '저장한 후보 목록에서 제거합니다.' : '나중에 다시 볼 후보 목록에 저장합니다.'}
+          accessibilityState={{ disabled: busy || !candidate.id, selected: Boolean(savedItemId) }}
           disabled={busy || !candidate.id}
-          className="rounded-full border border-kride px-3 py-2"
+          className="min-h-12 justify-center rounded-full border border-kride px-4 py-2"
           onPress={toggleSaved}
         >
           <Text className="font-bold text-kride">{busy ? '처리 중…' : savedItemId ? '저장 해제' : '후보 저장'}</Text>
         </Pressable>
         {canOpen ? (
-          <Pressable accessibilityRole="link" onPress={() => void Linking.openURL(candidate.officialUrl!)}>
-            <Text className="px-2 py-2 font-bold text-kride">권리 확인된 공식 출처</Text>
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel={`${candidate.name} 권리 확인된 공식 출처 열기`}
+            accessibilityHint="외부 브라우저에서 열립니다."
+            className="min-h-12 justify-center px-2"
+            onPress={() => void Linking.openURL(candidate.officialUrl!)}
+          >
+            <Text className="font-bold text-kride">권리 확인된 공식 출처</Text>
           </Pressable>
         ) : null}
       </View>
-      {message ? <Text accessibilityRole="alert" className="text-sm text-rose-600">{message}</Text> : null}
+      {message ? <Text accessibilityLiveRegion="polite" className="text-sm text-neutral-700">{message}</Text> : null}
     </View>
   );
 };
@@ -143,14 +153,23 @@ export const ProductSearchLeaf: React.FC<SduiLeafProps> = ({ data, apiBase = '' 
   return (
     <View className="gap-4">
       <View className="gap-2">
-        <Text className="text-2xl font-bold text-neutral-950">상품 후보 검색</Text>
+        <Text accessibilityRole="header" className="text-2xl font-bold text-neutral-950">상품 후보 검색</Text>
         <Text className="text-sm leading-5 text-neutral-600">검색 결과는 후보이며 동일 상품·정품·구매 적합성을 보증하지 않습니다.</Text>
       </View>
-      <TextInput accessibilityLabel="상품 키워드" value={q} onChangeText={setQ} placeholder="상품명 또는 브랜드" className="rounded-xl border border-neutral-300 px-4 py-3" />
-      <Pressable accessibilityRole="button" accessibilityLabel="후보 검색" accessibilityState={{ disabled: busy }} disabled={busy} className="items-center rounded-full bg-kride px-4 py-3" onPress={() => void runSearch()}>
+      <TextInput
+        accessibilityLabel="상품 키워드"
+        accessibilityHint="상품명 또는 브랜드를 입력합니다."
+        value={q}
+        onChangeText={setQ}
+        onSubmitEditing={() => void runSearch()}
+        placeholder="상품명 또는 브랜드"
+        returnKeyType="search"
+        className="min-h-12 rounded-xl border border-neutral-300 px-4 py-3"
+      />
+      <Pressable accessibilityRole="button" accessibilityLabel="후보 검색" accessibilityState={{ disabled: busy }} disabled={busy} className="min-h-12 items-center justify-center rounded-full bg-kride px-4 py-3" onPress={() => void runSearch()}>
         <Text className="font-bold text-white">{busy ? '검색 중…' : '후보 검색'}</Text>
       </Pressable>
-      {message ? <Text accessibilityRole="alert" className="text-sm text-neutral-600">{message}</Text> : null}
+      {message ? <Text accessibilityLiveRegion="polite" className="text-sm text-neutral-700">{message}</Text> : null}
       <View className="gap-3">
         {products.map((candidate) => <ProductCandidateCardLeaf key={String(candidate.id)} candidate={candidate} apiBase={apiBase} />)}
       </View>
@@ -185,12 +204,16 @@ export const SavedItemListLeaf: React.FC<SduiLeafProps> = ({ apiBase = '' }) => 
     [items],
   );
 
-  if (loading) return <Text>저장 목록을 불러오고 있어요.</Text>;
+  if (loading) return (
+    <View accessibilityRole="progressbar" accessibilityLabel="저장한 상품 후보 불러오는 중">
+      <Text>저장 목록을 불러오고 있어요.</Text>
+    </View>
+  );
 
   return (
     <View className="gap-3">
-      <Text className="text-2xl font-bold text-neutral-950">저장한 상품 후보</Text>
-      {message ? <Text accessibilityRole="alert" className="text-sm text-neutral-600">{message}</Text> : null}
+      <Text accessibilityRole="header" className="text-2xl font-bold text-neutral-950">저장한 상품 후보</Text>
+      {message ? <Text accessibilityLiveRegion="polite" className="text-sm text-neutral-700">{message}</Text> : null}
       {products.map((item) => (
         <ProductCandidateCardLeaf
           key={String(item.id)}

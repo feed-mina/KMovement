@@ -51,8 +51,25 @@ describe('K-POP mobile product leaves', () => {
     }} />);
 
     expect(view.queryByRole('link')).toBeNull();
+    expect(view.getByLabelText('근거 등급: 근거 부족 · 상품을 단정할 수 없음')).toBeTruthy();
+    expect(view.getByLabelText('후보 저장').props.accessibilityState.selected).toBe(false);
     fireEvent.press(view.getByLabelText('후보 저장'));
     await waitFor(() => expect(view.getByText('이미 저장한 후보입니다.')).toBeTruthy());
-    expect(view.getByLabelText('저장 해제')).toBeTruthy();
+    expect(view.getByLabelText('저장 해제').props.accessibilityState.selected).toBe(true);
+  });
+
+  it('labels a rights-checked external link and its browser behavior', () => {
+    const view = render(<ProductCandidateCardLeaf apiBase="https://api.example.com" candidate={{
+      id: 18,
+      name: '공식 재킷 후보',
+      evidenceGrade: 'SIMILAR',
+      officialUrl: 'https://official.example/item',
+      rightsChecked: true,
+    }} />);
+
+    const link = view.getByLabelText('공식 재킷 후보 권리 확인된 공식 출처 열기');
+    expect(link.props.accessibilityRole).toBe('link');
+    expect(link.props.accessibilityHint).toBe('외부 브라우저에서 열립니다.');
+    expect(view.getByLabelText('근거 등급: 유사 후보')).toBeTruthy();
   });
 });

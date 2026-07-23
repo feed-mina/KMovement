@@ -70,9 +70,15 @@ describe('K-POP mobile analysis leaves', () => {
     const onAction = jest.fn();
     const screen = render(<UploadConsentLeaf apiBase="https://api.example.com" onAction={onAction} />);
 
+    expect(screen.getByLabelText('후보 분석 시작').props.accessibilityState.disabled).toBe(true);
+    expect(screen.getByLabelText('소유 사진 분석 동의').props.accessibilityState.checked).toBe(false);
     fireEvent.press(screen.getByLabelText('사진 선택'));
     await waitFor(() => expect(screen.getByText('outfit.jpg')).toBeTruthy());
+    expect(screen.getByLabelText('선택한 분석 사진 outfit.jpg')).toBeTruthy();
+    expect(screen.getByLabelText('후보 분석 시작').props.accessibilityState.disabled).toBe(true);
     fireEvent.press(screen.getByLabelText('소유 사진 분석 동의'));
+    expect(screen.getByLabelText('소유 사진 분석 동의').props.accessibilityState.checked).toBe(true);
+    expect(screen.getByLabelText('후보 분석 시작').props.accessibilityState.disabled).toBe(false);
     fireEvent.press(screen.getByLabelText('후보 분석 시작'));
 
     await waitFor(() => expect(onAction).toHaveBeenCalled());
@@ -102,7 +108,22 @@ describe('K-POP mobile analysis leaves', () => {
 
     await waitFor(() => expect(screen.getByText(/근거 유형 visual_similarity/)).toBeTruthy());
     expect(screen.getByText(/AI 결과는 비교를 시작하기 위한 후보/)).toBeTruthy();
+    expect(screen.getByLabelText('분석 근거 등급: 근거 부족')).toBeTruthy();
     expect(screen.getByLabelText('원본 사진 삭제').props.accessibilityState.disabled).toBe(true);
+  });
+
+  it('exposes numeric and visible progress without relying on bar color', async () => {
+    mockGetKpopAnalysisJob.mockResolvedValue({
+      jobId: 92,
+      status: 'RUNNING',
+      progressPct: 42,
+    });
+    const screen = render(<AiResultCardLeaf apiBase="https://api.example.com" data={{ jobId: 92 }} />);
+
+    const progress = await screen.findByLabelText('상품 후보 분석 진행률');
+    expect(progress.props.accessibilityRole).toBe('progressbar');
+    expect(progress.props.accessibilityValue).toEqual({ min: 0, max: 100, now: 42, text: '42% 완료' });
+    expect(screen.getByText('진행률 42%')).toBeTruthy();
   });
 
   it('saves an analysis candidate and hides an unchecked external link', async () => {
@@ -124,8 +145,11 @@ describe('K-POP mobile analysis leaves', () => {
 
     await waitFor(() => expect(screen.getByLabelText('후보 저장')).toBeTruthy());
     expect(screen.queryByRole('link')).toBeNull();
+    expect(screen.getByLabelText('근거 등급: 유사 후보')).toBeTruthy();
+    expect(screen.getByLabelText('후보 저장').props.accessibilityState.selected).toBe(false);
     fireEvent.press(screen.getByLabelText('후보 저장'));
     await waitFor(() => expect(mockSaveKpopProductCandidate).toHaveBeenCalledWith('https://api.example.com', 17));
     expect(screen.getByText('후보를 저장했습니다.')).toBeTruthy();
+    expect(screen.getByLabelText('저장 해제').props.accessibilityState.selected).toBe(true);
   });
 });

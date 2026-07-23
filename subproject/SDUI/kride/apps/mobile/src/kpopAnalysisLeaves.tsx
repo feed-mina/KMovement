@@ -36,11 +36,14 @@ export const UploadConsentLeaf: React.FC<SduiLeafProps> = ({ meta, onAction, api
   const [consented, setConsented] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageKind, setMessageKind] = useState<'status' | 'error'>('status');
 
   const pickImage = async () => {
     setMessage('');
+    setMessageKind('status');
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
+      setMessageKind('error');
       setMessage('사진을 선택하려면 사진 보관함 접근을 허용해 주세요.');
       return;
     }
@@ -53,10 +56,12 @@ export const UploadConsentLeaf: React.FC<SduiLeafProps> = ({ meta, onAction, api
     const next = selection.assets[0];
     const contentType = next.mimeType || 'image/jpeg';
     if (!allowedTypes.has(contentType)) {
+      setMessageKind('error');
       setMessage('JPG, PNG, WebP 이미지만 선택할 수 있습니다.');
       return;
     }
     if (next.fileSize && next.fileSize > KPOP_ANALYSIS_MAX_BYTES) {
+      setMessageKind('error');
       setMessage('이미지는 10MB 이하로 선택해 주세요.');
       return;
     }
@@ -66,6 +71,7 @@ export const UploadConsentLeaf: React.FC<SduiLeafProps> = ({ meta, onAction, api
   const submit = async () => {
     if (!asset || !consented || busy) return;
     setBusy(true);
+    setMessageKind('status');
     try {
       setMessage('사진을 확인하고 있어요.');
       const localResponse = await fetch(asset.uri);
@@ -92,6 +98,7 @@ export const UploadConsentLeaf: React.FC<SduiLeafProps> = ({ meta, onAction, api
         actionUrl: `/kpop/ai/result?jobId=${encodeURIComponent(String(job.jobId))}`,
       }, job);
     } catch (error) {
+      setMessageKind('error');
       setMessage(errorCopy(error));
     } finally {
       setBusy(false);
@@ -111,7 +118,10 @@ export const UploadConsentLeaf: React.FC<SduiLeafProps> = ({ meta, onAction, api
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={asset ? '다른 사진 선택' : '사진 선택'}
-        className="self-start rounded-full border border-kride px-4 py-3"
+        accessibilityHint="사진 보관함에서 분석할 사진 한 장을 선택합니다."
+        accessibilityState={{ disabled: busy }}
+        className="min-h-12 self-start justify-center rounded-full border border-kride px-4 py-3"
+        disabled={busy}
         onPress={pickImage}
       >
         <Text className="font-bold text-kride">{asset ? '다른 사진 선택' : '사진 선택'}</Text>
@@ -119,7 +129,13 @@ export const UploadConsentLeaf: React.FC<SduiLeafProps> = ({ meta, onAction, api
 
       {asset ? (
         <View className="flex-row items-center gap-3 rounded-xl bg-neutral-100 p-3">
-          <Image source={{ uri: asset.uri }} className="h-24 w-24 rounded-xl" resizeMode="cover" />
+          <Image
+            accessibilityLabel={`선택한 분석 사진 ${asset.fileName || ''}`.trim()}
+            accessible
+            source={{ uri: asset.uri }}
+            className="h-24 w-24 rounded-xl"
+            resizeMode="cover"
+          />
           <View className="flex-1 gap-1">
             <Text className="font-bold text-neutral-950" numberOfLines={1}>{asset.fileName || '선택한 사진'}</Text>
             <Text className="text-xs text-neutral-500">
@@ -131,9 +147,11 @@ export const UploadConsentLeaf: React.FC<SduiLeafProps> = ({ meta, onAction, api
 
       <Pressable
         accessibilityRole="checkbox"
-        accessibilityState={{ checked: consented }}
+        accessibilityState={{ checked: consented, disabled: busy }}
         accessibilityLabel="소유 사진 분석 동의"
+        accessibilityHint="직접 촬영했거나 사용 권한이 있는 사진임을 확인합니다."
         className="flex-row items-start gap-3 rounded-xl bg-neutral-100 p-4"
+        disabled={busy}
         onPress={() => setConsented((current) => !current)}
       >
         <View className={`mt-0.5 h-5 w-5 items-center justify-center rounded border ${consented ? 'border-kride bg-kride' : 'border-neutral-400'}`}>
@@ -147,14 +165,24 @@ export const UploadConsentLeaf: React.FC<SduiLeafProps> = ({ meta, onAction, api
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="후보 분석 시작"
+        accessibilityHint="선택한 사진을 업로드하고 상품 후보 분석을 시작합니다."
         accessibilityState={{ disabled: !asset || !consented || busy }}
+        accessibilityValue={{ text: busy ? message || '분석 준비 중' : '분석 시작 가능' }}
         disabled={!asset || !consented || busy}
-        className={`items-center rounded-full px-4 py-3 ${!asset || !consented || busy ? 'bg-neutral-300' : 'bg-kride'}`}
+        className={`min-h-12 items-center justify-center rounded-full px-4 py-3 ${!asset || !consented || busy ? 'bg-neutral-300' : 'bg-kride'}`}
         onPress={submit}
       >
         <Text className="font-bold text-white">{busy ? '분석 준비 중…' : '후보 분석 시작'}</Text>
       </Pressable>
-      {message ? <Text accessibilityRole="alert" className="text-sm text-rose-600">{message}</Text> : null}
+      {message ? (
+        <Text
+          accessibilityLiveRegion={messageKind === 'error' ? 'assertive' : 'polite'}
+          accessibilityRole={messageKind === 'error' ? 'alert' : undefined}
+          className={`text-sm ${messageKind === 'error' ? 'text-rose-700' : 'text-neutral-700'}`}
+        >
+          {message}
+        </Text>
+      ) : null}
     </View>
   );
 };
@@ -209,6 +237,7 @@ const Candidate: React.FC<{ candidate: KpopAnalysisCandidate; apiBase?: string }
     officialUrl,
     rightsChecked: candidate.rightsChecked === true,
   });
+  const evidenceGrade = gradeCopy(candidate.evidenceGrade || String(candidate.grade || ''));
 
   const toggleSaved = async () => {
     if (candidateId === undefined || candidateId === null || candidateId === '' || saving) return;
@@ -232,24 +261,40 @@ const Candidate: React.FC<{ candidate: KpopAnalysisCandidate; apiBase?: string }
   };
   return (
     <View className="gap-2 rounded-xl border border-neutral-200 bg-white p-4">
-      <Text className="text-xs font-bold uppercase text-kride">{gradeCopy(candidate.evidenceGrade || String(candidate.grade || ''))}</Text>
-      <Text className="text-lg font-bold text-neutral-950">{candidate.name || '이름이 확인되지 않은 후보'}</Text>
+      <Text accessibilityLabel={`근거 등급: ${evidenceGrade}`} className="text-xs font-bold uppercase text-kride">
+        근거 등급 · {evidenceGrade}
+      </Text>
+      <Text accessibilityRole="header" className="text-lg font-bold text-neutral-950">{candidate.name || '이름이 확인되지 않은 후보'}</Text>
       {candidate.brand ? <Text className="text-sm text-neutral-600">{candidate.brand}</Text> : null}
       {typeof candidate.confidence === 'number' ? <Text className="text-xs text-neutral-500">모델 참고 점수 {Math.round(candidate.confidence)} / 100</Text> : null}
       {evidence.length ? evidence.map((item, index) => <Text key={index} className="text-sm text-neutral-600">• {item}</Text>) : <Text className="text-sm text-neutral-600">확인 가능한 근거가 아직 없습니다.</Text>}
       <View className="flex-row flex-wrap gap-2">
       {candidateId !== undefined && candidateId !== null && candidateId !== '' ? (
-        <Pressable accessibilityRole="button" accessibilityLabel={savedItemId ? '저장 해제' : '후보 저장'} disabled={saving} onPress={toggleSaved}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={savedItemId ? '저장 해제' : '후보 저장'}
+          accessibilityHint={savedItemId ? '저장한 후보 목록에서 제거합니다.' : '나중에 다시 볼 후보 목록에 저장합니다.'}
+          accessibilityState={{ disabled: saving, selected: Boolean(savedItemId) }}
+          className="min-h-12 justify-center px-2"
+          disabled={saving}
+          onPress={toggleSaved}
+        >
           <Text className="font-bold text-kride">{saving ? '처리 중…' : savedItemId ? '저장 해제' : '후보 저장'}</Text>
         </Pressable>
       ) : null}
       {canOpen ? (
-        <Pressable accessibilityRole="link" onPress={() => void Linking.openURL(officialUrl)}>
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel={`${candidate.name || '상품 후보'} 권리 확인된 공식 출처 열기`}
+          accessibilityHint="외부 브라우저에서 열립니다."
+          className="min-h-12 justify-center px-2"
+          onPress={() => void Linking.openURL(officialUrl)}
+        >
           <Text className="font-bold text-kride">권리 확인된 공식 출처</Text>
         </Pressable>
       ) : null}
       </View>
-      {message ? <Text accessibilityRole="alert" className="text-sm text-rose-600">{message}</Text> : null}
+      {message ? <Text accessibilityLiveRegion="polite" className="text-sm text-neutral-700">{message}</Text> : null}
     </View>
   );
 };
@@ -257,10 +302,13 @@ const Candidate: React.FC<{ candidate: KpopAnalysisCandidate; apiBase?: string }
 const AnalysisResult: React.FC<{ result: KpopAnalysisResult; apiBase?: string }> = ({ result, apiBase = '' }) => {
   const evidence = evidenceList(result.evidence);
   const candidates = Array.isArray(result.candidates) ? result.candidates : [];
+  const evidenceGrade = gradeCopy(result.evidenceGrade || result.grade);
   return (
     <View className="gap-3">
       <View className="gap-2 rounded-xl bg-rose-50 p-4">
-        <Text className="font-bold text-rose-900">{gradeCopy(result.evidenceGrade || result.grade)}</Text>
+        <Text accessibilityLabel={`분석 근거 등급: ${evidenceGrade}`} className="font-bold text-rose-900">
+          분석 근거 등급 · {evidenceGrade}
+        </Text>
         <Text className="text-sm leading-5 text-rose-900">AI 결과는 비교를 시작하기 위한 후보입니다. 동일 상품·정품·구매 적합성을 보증하지 않습니다.</Text>
         {typeof result.confidence === 'number' ? <Text className="text-xs text-rose-700">모델 참고 점수 {Math.round(result.confidence)} / 100</Text> : null}
       </View>
@@ -277,6 +325,7 @@ export const AiResultCardLeaf: React.FC<SduiLeafProps> = ({ data, apiBase = '' }
   const [job, setJob] = useState<KpopAnalysisJob | null>(null);
   const [message, setMessage] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (!jobId) return;
@@ -302,11 +351,15 @@ export const AiResultCardLeaf: React.FC<SduiLeafProps> = ({ data, apiBase = '' }
   }, [apiBase, jobId]);
 
   const refresh = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
     try {
       setJob(await getKpopAnalysisJob(apiBase, jobId));
       setMessage('최신 상태로 갱신했습니다.');
     } catch (error) {
       setMessage(errorCopy(error));
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -325,31 +378,47 @@ export const AiResultCardLeaf: React.FC<SduiLeafProps> = ({ data, apiBase = '' }
   };
 
   if (!jobId) return <View className="rounded-xl bg-white p-5"><Text>분석 작업 번호가 없습니다.</Text></View>;
+  const progressPct = Math.max(0, Math.min(100, Math.round(job?.progressPct || 0)));
 
   return (
     <View className="gap-4 rounded-2xl border border-neutral-200 bg-white p-5">
       <View className="gap-1">
         <Text className="text-xs font-bold uppercase text-kride">작업 #{jobId}</Text>
-        <Text className="text-2xl font-bold text-neutral-950">{statusCopy[job?.status || 'QUEUED']}</Text>
+        <Text accessibilityRole="header" className="text-2xl font-bold text-neutral-950">{statusCopy[job?.status || 'QUEUED']}</Text>
         {!isKpopAnalysisTerminal(job?.status) ? <Text className="text-xs text-neutral-500">3초마다 안전하게 상태를 확인합니다.</Text> : null}
       </View>
       {job && !isKpopAnalysisTerminal(job.status) ? (
-        <View className="h-2 overflow-hidden rounded-full bg-neutral-200">
-          <View className="h-full rounded-full bg-kride" style={{ width: `${Math.max(4, Math.min(100, job.progressPct || 0))}%` }} />
+        <View
+          accessibilityLabel="상품 후보 분석 진행률"
+          accessibilityRole="progressbar"
+          accessibilityValue={{ min: 0, max: 100, now: progressPct, text: `${progressPct}% 완료` }}
+          className="gap-2"
+        >
+          <View className="h-2 overflow-hidden rounded-full bg-neutral-200">
+            <View className="h-full rounded-full bg-kride" style={{ width: `${Math.max(4, progressPct)}%` }} />
+          </View>
+          <Text className="text-xs font-semibold text-neutral-700">진행률 {progressPct}%</Text>
         </View>
       ) : null}
       {job?.status === 'SUCCEEDED' && job.result ? <AnalysisResult result={job.result} apiBase={apiBase} /> : null}
-      {job?.status === 'FAILED' ? <Text className="text-sm text-rose-600">{job.errorMessage || '잠시 후 새 사진으로 다시 시도해 주세요.'}</Text> : null}
+      {job?.status === 'FAILED' ? <Text accessibilityRole="alert" className="text-sm text-rose-700">{job.errorMessage || '잠시 후 새 사진으로 다시 시도해 주세요.'}</Text> : null}
       <View className="flex-row flex-wrap gap-2">
-        <Pressable accessibilityRole="button" accessibilityLabel="상태 새로고침" className="rounded-full border border-kride px-3 py-2" onPress={refresh}>
-          <Text className="font-bold text-kride">상태 새로고침</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="상태 새로고침"
+          accessibilityState={{ disabled: refreshing }}
+          className="min-h-12 justify-center rounded-full border border-kride px-4 py-2"
+          disabled={refreshing}
+          onPress={refresh}
+        >
+          <Text className="font-bold text-kride">{refreshing ? '새로고침 중…' : '상태 새로고침'}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="원본 사진 삭제"
           accessibilityState={{ disabled: Boolean(job?.sourceDeleted || job?.sourceDeletedAt) || deleting }}
           disabled={Boolean(job?.sourceDeleted || job?.sourceDeletedAt) || deleting}
-          className={`rounded-full border px-3 py-2 ${job?.sourceDeleted || job?.sourceDeletedAt || deleting ? 'border-neutral-300' : 'border-kride'}`}
+          className={`min-h-12 justify-center rounded-full border px-4 py-2 ${job?.sourceDeleted || job?.sourceDeletedAt || deleting ? 'border-neutral-300' : 'border-kride'}`}
           onPress={removeSource}
         >
           <Text className={job?.sourceDeleted || job?.sourceDeletedAt || deleting ? 'font-bold text-neutral-400' : 'font-bold text-kride'}>
@@ -358,7 +427,7 @@ export const AiResultCardLeaf: React.FC<SduiLeafProps> = ({ data, apiBase = '' }
         </Pressable>
       </View>
       <Text className="text-xs leading-4 text-neutral-500">원본 삭제 후에도 이미 생성된 분석 결과와 최소 작업 기록은 보관 정책에 따라 남을 수 있습니다.</Text>
-      {message ? <Text accessibilityRole="alert" className="text-sm text-rose-600">{message}</Text> : null}
+      {message ? <Text accessibilityLiveRegion="polite" className="text-sm text-neutral-700">{message}</Text> : null}
     </View>
   );
 };

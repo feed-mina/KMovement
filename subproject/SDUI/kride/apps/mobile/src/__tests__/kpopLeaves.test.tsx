@@ -29,14 +29,17 @@ describe('K-POP mobile cards', () => {
       />,
     );
 
-    fireEvent.press(screen.getByLabelText('View BTS details'));
+    expect(screen.getByLabelText('BTS 아티스트 이미지 없음')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('BTS 상세 보기'));
     expect(onAction).toHaveBeenCalledWith(
       expect.objectContaining({ actionUrl: '/kpop/artists?artistId=7' }),
       expect.objectContaining({ id: 7 }),
     );
 
-    fireEvent.press(screen.getByLabelText('Follow BTS'));
-    await waitFor(() => expect(screen.getByText('Following')).toBeTruthy());
+    expect(screen.getByLabelText('BTS 팔로우').props.accessibilityState.selected).toBe(false);
+    fireEvent.press(screen.getByLabelText('BTS 팔로우'));
+    await waitFor(() => expect(screen.getByText('팔로우했습니다.')).toBeTruthy());
+    expect(screen.getByLabelText('BTS 팔로우 취소').props.accessibilityState.selected).toBe(true);
     expect(global.fetch).toHaveBeenCalledWith(
       'https://api.example.com/api/v1/kpop/artists/7/follow',
       expect.objectContaining({
@@ -52,8 +55,25 @@ describe('K-POP mobile cards', () => {
       <EventCardLeaf data={{ id: 9, titleKo: 'Seoul fan route' }} apiBase="https://api.example.com" />,
     );
 
-    fireEvent.press(screen.getByLabelText('Bookmark Seoul fan route'));
+    fireEvent.press(screen.getByLabelText('Seoul fan route 저장'));
 
-    await waitFor(() => expect(screen.getByText('Login required')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('로그인 후 이용해 주세요.')).toBeTruthy());
+  });
+
+  it('announces the event saved state with text and accessibility state', async () => {
+    const screen = render(
+      <EventCardLeaf data={{ id: 9, titleKo: 'Seoul fan route' }} apiBase="https://api.example.com" />,
+    );
+
+    const saveButton = screen.getByLabelText('Seoul fan route 저장');
+    expect(saveButton.props.accessibilityState).toEqual({ disabled: false, selected: false });
+    fireEvent.press(saveButton);
+
+    await waitFor(() => expect(screen.getByText('이벤트를 저장했습니다.')).toBeTruthy());
+    expect(screen.getByText('저장됨')).toBeTruthy();
+    expect(screen.getByLabelText('Seoul fan route 저장').props.accessibilityState).toEqual({
+      disabled: true,
+      selected: true,
+    });
   });
 });
