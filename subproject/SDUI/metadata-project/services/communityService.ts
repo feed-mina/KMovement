@@ -21,6 +21,7 @@ export interface PostResponse {
     authorNickname: string;
     likeCount: number;
     reportCount: number;
+    moderationStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
     createdAt: string;
     updatedAt: string;
     images: PostImageDto[];
@@ -48,6 +49,17 @@ export interface PostListResponse {
 export interface LikeStatusResponse {
     liked: boolean;
     likeCount: number;
+}
+
+export interface CommentResponse {
+    commentId: number;
+    postId: number;
+    authorSqno: number;
+    authorNickname: string;
+    content: string;
+    moderationStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface AnimationStatusResponse {
@@ -131,6 +143,27 @@ export const communityService = {
 
     async reportPost(postId: number, reasonCode: string, detailText?: string) {
         const res = await api.post(`${BASE}/posts/${postId}/reports`, { reasonCode, detailText });
+        return res.data;
+    },
+
+    async getComments(postId: number) {
+        const res = await api.get(`${BASE}/posts/${postId}/comments`);
+        const data = res.data.data;
+        return (Array.isArray(data) ? data : data?.content ?? []) as CommentResponse[];
+    },
+
+    async createComment(postId: number, content: string) {
+        const res = await api.post(`${BASE}/posts/${postId}/comments`, { content });
+        return res.data.data as CommentResponse;
+    },
+
+    async updateComment(postId: number, commentId: number, content: string) {
+        const res = await api.patch(`${BASE}/posts/${postId}/comments/${commentId}`, { content });
+        return res.data.data as CommentResponse;
+    },
+
+    async deleteComment(postId: number, commentId: number) {
+        const res = await api.delete(`${BASE}/posts/${postId}/comments/${commentId}`);
         return res.data;
     },
 

@@ -49,9 +49,13 @@ public class CommunityPostController {
     @Operation(summary = "게시글 상세 조회")
     @GetMapping("/{postId}")
     public ResponseEntity<ApiResponse<PostResponse>> getPostDetail(
-            @PathVariable("postId") Long postId) {
+            @PathVariable("postId") Long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        PostResponse response = postService.getPostDetail(postId);
+        PostResponse response = postService.getPostDetail(
+                postId,
+                userDetails == null ? null : userDetails.getUserSqno(),
+                userDetails != null && "ROLE_ADMIN".equals(userDetails.getRole()));
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

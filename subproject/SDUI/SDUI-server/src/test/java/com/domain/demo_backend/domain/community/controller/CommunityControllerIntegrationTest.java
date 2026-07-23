@@ -1,11 +1,15 @@
 package com.domain.demo_backend.domain.community.controller;
 
 import com.domain.demo_backend.domain.community.dto.LikeStatusResponse;
+import com.domain.demo_backend.domain.community.dto.AdminCommunityPostResponse;
+import com.domain.demo_backend.domain.community.dto.ModerationTransitionRequest;
 import com.domain.demo_backend.domain.community.dto.PostCreateRequest;
 import com.domain.demo_backend.domain.community.dto.PostListResponse;
 import com.domain.demo_backend.domain.community.dto.PostResponse;
 import com.domain.demo_backend.domain.community.dto.ReportRequest;
 import com.domain.demo_backend.domain.community.service.CommunityPostService;
+import com.domain.demo_backend.domain.community.service.CommunityModerationService;
+import com.domain.demo_backend.domain.community.service.PostCommentService;
 import com.domain.demo_backend.domain.community.service.PostLikeService;
 import com.domain.demo_backend.domain.community.service.PostReportService;
 import com.domain.demo_backend.domain.community.service.UserFollowService;
@@ -37,10 +41,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -70,6 +76,12 @@ class CommunityControllerIntegrationTest {
 
     @MockBean
     private UserFollowService followService;
+
+    @MockBean
+    private PostCommentService commentService;
+
+    @MockBean
+    private CommunityModerationService moderationService;
 
     @Test
     @DisplayName("GET /api/v1/community/posts returns paged post list")
@@ -200,12 +212,61 @@ class CommunityControllerIntegrationTest {
         verify(followService).toggleFollow(7L, 22L);
     }
 
+    @Test
+    @DisplayName("ROLE_USER cannot access the community moderation queue")
+    void moderationQueue_rejectsRegularUser() throws Exception {
+        mockMvc.perform(get("/api/admin/community/posts")
+                        .with(user(authenticatedUser()))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(moderationService);
+    }
+
+    @Test
+    @DisplayName("ROLE_ADMIN can moderate a pending community post")
+    void moderatePost_allowsAdminAndPassesActor() throws Exception {
+        AdminCommunityPostResponse response = AdminCommunityPostResponse.builder()
+                .postId(101L)
+                .title("Seoul concert route")
+                .moderationStatus("APPROVED")
+                .lastActorSqno(99L)
+                .build();
+        when(moderationService.moderatePost(eq(101L), eq(99L), any(ModerationTransitionRequest.class)))
+                .thenReturn(response);
+
+        mockMvc.perform(patch("/api/admin/community/posts/101/moderation")
+                        .with(user(adminUser()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"APPROVED\",\"note\":\"Evidence checked\"}")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.moderationStatus").value("APPROVED"))
+                .andExpect(jsonPath("$.data.lastActorSqno").value(99));
+
+        ArgumentCaptor<ModerationTransitionRequest> captor =
+                ArgumentCaptor.forClass(ModerationTransitionRequest.class);
+        verify(moderationService).moderatePost(eq(101L), eq(99L), captor.capture());
+        assertThat(captor.getValue().getNote()).isEqualTo("Evidence checked");
+    }
+
     private CustomUserDetails authenticatedUser() {
         User user = User.builder()
                 .userSqno(7L)
                 .userId("traveler")
                 .email("traveler@example.com")
                 .role("ROLE_USER")
+                .delYn("N")
+                .build();
+        return new CustomUserDetails(user);
+    }
+
+    private CustomUserDetails adminUser() {
+        User user = User.builder()
+                .userSqno(99L)
+                .userId("admin")
+                .email("admin@example.com")
+                .role("ROLE_ADMIN")
                 .delYn("N")
                 .build();
         return new CustomUserDetails(user);

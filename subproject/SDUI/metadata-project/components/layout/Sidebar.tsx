@@ -94,6 +94,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/admin/sdui' })}>
                                     SDUI Console
                                 </button>
+                                <button type="button"
+                                    aria-current={pathname === '/admin/community' ? 'page' : undefined}
+                                    className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname === '/admin/community' ? 'bg-gray-700 font-bold' : 'bg-transparent'}`}
+                                    onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/admin/community' })}>
+                                    커뮤니티 신고·검수
+                                </button>
                             </nav>
                         ) : (
                             <nav className="sidebar-nav mt-4 flex flex-col gap-2 px-4">

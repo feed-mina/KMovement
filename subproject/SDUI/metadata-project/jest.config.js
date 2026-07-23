@@ -1,6 +1,7 @@
 // jest.config.js
 module.exports = {
     testEnvironment: 'jsdom',
+    watchman: false,
     setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 
     transformIgnorePatterns: [

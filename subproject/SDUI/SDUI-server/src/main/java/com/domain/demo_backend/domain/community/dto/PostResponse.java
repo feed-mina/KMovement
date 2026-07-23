@@ -18,6 +18,7 @@ public class PostResponse {
     private String authorNickname;
     private Long likeCount;
     private Long reportCount;
+    private String moderationStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<PostImageDto> images;
@@ -35,6 +36,8 @@ public class PostResponse {
                         : null)
                 .likeCount(post.getLikeCount())
                 .reportCount(post.getReportCount())
+                .moderationStatus(post.getModerationStatus() == null
+                        ? null : post.getModerationStatus().name())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .images(post.getImages() != null

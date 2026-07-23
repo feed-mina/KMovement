@@ -161,6 +161,56 @@ describe('communityService', () => {
         });
     });
 
+    describe('comments', () => {
+        const comment = {
+            commentId: 7,
+            postId: 1,
+            authorSqno: 3,
+            authorNickname: '여행자',
+            content: '좋은 정보예요.',
+            moderationStatus: 'PENDING',
+            createdAt: '2026-07-23T09:00:00',
+            updatedAt: '2026-07-23T09:00:00',
+        };
+
+        it('공개 댓글 목록을 조회해야 함', async () => {
+            (api.get as jest.Mock).mockResolvedValue({
+                data: { data: { content: [comment], totalElements: 1 } },
+            });
+
+            const result = await communityService.getComments(1);
+
+            expect(api.get).toHaveBeenCalledWith('/api/v1/community/posts/1/comments');
+            expect(result).toEqual([comment]);
+        });
+
+        it('댓글을 작성하고 수정해야 함', async () => {
+            (api.post as jest.Mock).mockResolvedValue({ data: { data: comment } });
+            (api.patch as jest.Mock).mockResolvedValue({
+                data: { data: { ...comment, content: '수정한 댓글입니다.' } },
+            });
+
+            await communityService.createComment(1, '좋은 정보예요.');
+            const updated = await communityService.updateComment(1, 7, '수정한 댓글입니다.');
+
+            expect(api.post).toHaveBeenCalledWith('/api/v1/community/posts/1/comments', {
+                content: '좋은 정보예요.',
+            });
+            expect(api.patch).toHaveBeenCalledWith('/api/v1/community/posts/1/comments/7', {
+                content: '수정한 댓글입니다.',
+            });
+            expect(updated.content).toBe('수정한 댓글입니다.');
+        });
+
+        it('댓글을 삭제해야 함', async () => {
+            (api.delete as jest.Mock).mockResolvedValue({ data: { status: 'success' } });
+
+            await communityService.deleteComment(1, 7);
+
+            expect(api.delete).toHaveBeenCalledWith('/api/v1/community/posts/1/comments/7');
+        });
+    });
+
     describe('toggleFollow', () => {
         it('팔로우를 토글해야 함', async () => {
             const mockData = {
