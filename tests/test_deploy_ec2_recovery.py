@@ -80,7 +80,7 @@ def test_create_deploy_script_stays_below_github_expression_limit() -> None:
     step = workflow.index("      - name: Create deploy script")
     run_marker = "        run: |\n"
     run_start = workflow.index(run_marker, step) + len(run_marker)
-    run_end = workflow.index("\n      - name: Deploy to EC2", run_start)
+    run_end = workflow.index("\n      - name:", run_start)
     run_body = dedent(workflow[run_start:run_end])
 
     # GitHub rejects a single run expression at 21,000 characters. Keep enough

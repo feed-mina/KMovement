@@ -96,7 +96,7 @@ jobs:
           if [ -n "$container_ids" ]; then
             for container_id in $container_ids; do
               docker inspect \
-                --format 'name={{.Name}} image={{.Config.Image}} status={{.State.Status}} restart_count={{.RestartCount}} restart_policy={{.HostConfig.RestartPolicy.Name}} log_driver={{.HostConfig.LogConfig.Type}} log_options={{json .HostConfig.LogConfig.Config}}' \
+                --format 'name={{.Name}} id={{.Id}} image={{.Config.Image}} status={{.State.Status}} restart_count={{.RestartCount}} restart_policy={{.HostConfig.RestartPolicy.Name}} log_driver={{.HostConfig.LogConfig.Type}} log_options={{json .HostConfig.LogConfig.Config}} log_path={{.LogPath}}' \
                 "$container_id"
             done
           else
