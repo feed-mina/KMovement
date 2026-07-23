@@ -2,7 +2,7 @@ name: Deploy K-Ride services to EC2
 
 on:
   push:
-    branches: ["main", "refactor/krider_backup"]
+    branches: ["main"]
     paths:
       - "subproject/SDUI/SDUI-server/**"
       - "subproject/SDUI/metadata-project/**"
@@ -339,6 +339,10 @@ jobs:
             fi
           }
 
+          run_with_log_rotation() {
+            docker run --log-opt max-size=10m --log-opt max-file=3 "$@"
+          }
+
           drain_celery_worker() {
             WORKER_NAME="$1"
             QUEUE_NAME="$2"
@@ -348,8 +352,6 @@ jobs:
               return
             fi
 
-            # Stop reserving new work, rename the old container out of the way,
-            # and request a warm shutdown so an active media task may finish.
             WORKER_NODE="celery@$(docker exec "$WORKER_NAME" hostname)"
             docker update --restart=no "$WORKER_NAME" >/dev/null
             docker exec "$WORKER_NAME" celery -A src.api.celery_app control \
@@ -359,8 +361,6 @@ jobs:
             docker exec "$DRAINING_NAME" celery -A src.api.celery_app control \
               --destination="$WORKER_NODE" --timeout=5 shutdown || true
 
-            # The task hard limit is 30 minutes. Remove a wedged old worker only
-            # after that window, without blocking the deployment SSH session.
             nohup sh -c "sleep 1900; docker rm -f '$DRAINING_NAME' >/dev/null 2>&1 || true" \
               >/dev/null 2>&1 &
           }
@@ -422,8 +422,6 @@ jobs:
           }
 
           # ── Pull images ──
-          # Free space before pulling large service images. Volumes and running
-          # containers are intentionally preserved; service pulls are sequential.
           docker system df || true
           prune_unreferenced_service_images \
             __SDUI_IMAGE__ \
@@ -435,11 +433,10 @@ jobs:
           docker system df || true
           assert_minimum_docker_space 4194304
 
-          # Pull each image immediately before replacing its service. This caps
-          # peak disk use at one old/new service pair instead of all images at once.
-
           # ── Redis ──
-          docker inspect sdui-redis >/dev/null 2>&1 || docker run -d --name sdui-redis --network sdui-network redis:7-alpine
+          docker inspect sdui-redis >/dev/null 2>&1 || run_with_log_rotation -d --name sdui-redis \
+            --network sdui-network \
+            redis:7-alpine
 
           # Deploy HMAC-capable consumers before enforcing the new FastAPI job
           # token. Their extra header is backward-compatible with the old API.
@@ -450,7 +447,7 @@ jobs:
           if [ "__DEPLOY_BACKEND__" = "true" ]; then
             pull_service_image __SDUI_IMAGE__:__BRANCH_TAG__
             remove_container __CONTAINER_NAME__
-            docker run -d --name __CONTAINER_NAME__ \
+            run_with_log_rotation -d --name __CONTAINER_NAME__ \
               -p __TARGET_PORT__:8080 \
               --network sdui-network \
               -e SPRING_PROFILES_ACTIVE=prod \
@@ -498,7 +495,7 @@ jobs:
           if [ "__DEPLOY_FRONTEND__" = "true" ]; then
             pull_service_image __FRONTEND_IMAGE__:__BRANCH_TAG__
             remove_container sdui-frontend
-            docker run -d --name sdui-frontend \
+            run_with_log_rotation -d --name sdui-frontend \
               --network sdui-network \
               -p 3000:3000 \
               -e HOSTNAME=0.0.0.0 \
@@ -518,7 +515,7 @@ jobs:
           if [ "__DEPLOY_FASTAPI__" = "true" ]; then
             pull_service_image __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__
             remove_container kride-fastapi
-            docker run -d --name kride-fastapi \
+            run_with_log_rotation -d --name kride-fastapi \
               -p 8000:8000 \
               --network sdui-network \
               --restart unless-stopped \
@@ -573,7 +570,7 @@ jobs:
             docker volume create kride-tora-meta-temp >/dev/null
 
             drain_celery_worker kride-celery-worker media
-            docker run -d --name kride-celery-worker \
+            run_with_log_rotation -d --name kride-celery-worker \
               --network sdui-network \
               --restart unless-stopped \
               -v kride-celery-temp:/tmp/kride-celery \
@@ -594,7 +591,7 @@ jobs:
             # Cleanup is isolated from long-running media jobs so maintenance and
             # deployment checks cannot be starved behind a video queue backlog.
             remove_container kride-celery-maintenance
-            docker run -d --name kride-celery-maintenance \
+            run_with_log_rotation -d --name kride-celery-maintenance \
               --network sdui-network \
               --restart unless-stopped \
               -v kride-celery-temp:/tmp/kride-celery \
@@ -608,7 +605,7 @@ jobs:
               celery -A src.api.celery_app worker -l info -c 1 -Q maintenance
 
             remove_container kride-celery-beat
-            docker run -d --name kride-celery-beat \
+            run_with_log_rotation -d --name kride-celery-beat \
               --network sdui-network \
               --restart unless-stopped \
               -v kride-celery-beat:/tmp/celerybeat \

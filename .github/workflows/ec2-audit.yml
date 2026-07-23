@@ -1,0 +1,168 @@
+name: EC2 Read-Only Audit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ec2-read-only-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Configure SSH key
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.AWS_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Audit EC2 without changing state
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh \
+            -i ~/.ssh/deploy_key \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o StrictHostKeyChecking=accept-new \
+            "${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }}" <<'AUDIT_EOF'
+          set -u
+
+          echo "=== Host ==="
+          date --iso-8601=seconds
+          hostname
+          uname -a
+          uptime
+          free -h
+          lsblk -o NAME,TYPE,SIZE,FSTYPE,MOUNTPOINTS
+
+          echo
+          echo "=== EC2 identity ==="
+          IMDS_TOKEN="$(curl -fsS --max-time 2 -X PUT \
+            -H 'X-aws-ec2-metadata-token-ttl-seconds: 60' \
+            http://169.254.169.254/latest/api/token || true)"
+          if [ -n "$IMDS_TOKEN" ]; then
+            for metadata_path in instance-id instance-type placement/availability-zone; do
+              printf '%s=' "$metadata_path"
+              curl -fsS --max-time 2 \
+                -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" \
+                "http://169.254.169.254/latest/meta-data/$metadata_path" || true
+              echo
+            done
+          else
+            echo "IMDSv2 metadata is unavailable."
+          fi
+
+          echo
+          echo "=== Filesystem capacity ==="
+          df -hT / /var/lib/docker 2>/dev/null || df -hT /
+          df -ih /
+
+          echo
+          echo "=== Host disk hot spots ==="
+          sudo du -xhd1 /var/log /var/cache /home/ubuntu 2>/dev/null |
+            sort -h || true
+          sudo find /var/lib/docker/containers \
+            -type f -name '*-json.log' -printf '%s %p\n' 2>/dev/null |
+            sort -nr |
+            head -20 || true
+
+          echo
+          echo "=== System journal capacity ==="
+          sudo journalctl --disk-usage || true
+
+          echo
+          echo "=== Docker capacity ==="
+          docker system df -v
+
+          echo
+          echo "=== Containers ==="
+          docker ps -a \
+            --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}\t{{.Size}}' \
+            --size
+
+          echo
+          echo "=== Container restart and log policies ==="
+          container_ids="$(docker ps -aq)"
+          if [ -n "$container_ids" ]; then
+            for container_id in $container_ids; do
+              docker inspect \
+                --format 'name={{.Name}} image={{.Config.Image}} status={{.State.Status}} restart_count={{.RestartCount}} restart_policy={{.HostConfig.RestartPolicy.Name}} log_driver={{.HostConfig.LogConfig.Type}} log_options={{json .HostConfig.LogConfig.Config}}' \
+                "$container_id"
+            done
+          else
+            echo "No containers found."
+          fi
+
+          echo
+          echo "=== Database mounts and writable-layer changes ==="
+          docker inspect sdui-db \
+            --format '{{range .Mounts}}type={{.Type}} source={{.Source}} destination={{.Destination}}{{println}}{{end}}' \
+            || true
+          docker diff sdui-backend | head -200 || true
+          docker diff kride-fastapi | head -200 || true
+
+          echo
+          echo "=== Application temp usage ==="
+          docker exec sdui-backend sh -lc \
+            'du -xhd1 /tmp /app 2>/dev/null | sort -h' || true
+          docker exec kride-fastapi sh -lc \
+            'du -xhd1 /tmp /app 2>/dev/null | sort -h' || true
+
+          echo
+          echo "=== Images ==="
+          docker images --digests \
+            --format 'table {{.Repository}}\t{{.Tag}}\t{{.Digest}}\t{{.ID}}\t{{.CreatedSince}}\t{{.Size}}'
+
+          echo
+          echo "=== Volumes and networks ==="
+          docker volume ls
+          docker network ls
+
+          echo
+          echo "=== Listening TCP ports ==="
+          sudo ss -ltnp || true
+
+          echo
+          echo "=== Nginx and certificate renewal ==="
+          sudo systemctl is-active nginx || true
+          sudo systemctl is-enabled certbot.timer || true
+          sudo systemctl is-active certbot.timer || true
+          sudo systemctl list-timers --all certbot.timer --no-pager || true
+          if sudo test -r /etc/letsencrypt/live/yerin.duckdns.org/fullchain.pem; then
+            sudo openssl x509 \
+              -in /etc/letsencrypt/live/yerin.duckdns.org/fullchain.pem \
+              -noout \
+              -subject \
+              -issuer \
+              -dates
+          else
+            echo "TLS certificate file is not readable or does not exist."
+          fi
+
+          echo
+          echo "=== Local service health ==="
+          curl -fsS --max-time 10 -o /dev/null \
+            -w 'frontend http=%{http_code} time=%{time_total}s\n' \
+            http://127.0.0.1:3000/ || true
+          curl -fsS --max-time 10 -o /dev/null \
+            -w 'spring http=%{http_code} time=%{time_total}s\n' \
+            http://127.0.0.1:8080/api/ui/MAIN_PAGE || true
+          curl -fsS --max-time 10 -o /dev/null \
+            -w 'fastapi http=%{http_code} time=%{time_total}s\n' \
+            http://127.0.0.1:8000/api/health || true
+          AUDIT_EOF
+
+      - name: Remove runner SSH key
+        if: always()
+        shell: bash
+        run: rm -f ~/.ssh/deploy_key

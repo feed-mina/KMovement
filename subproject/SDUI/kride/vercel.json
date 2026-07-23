@@ -1,6 +1,13 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- kride/ && exit 0 || exit 1"
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "*": false
+    }
+  },
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- . && exit 0 || exit 1"
 }

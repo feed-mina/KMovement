@@ -85,6 +85,45 @@ The `preview` EAS environment must define `EXPO_PUBLIC_API_BASE`. Do not use
 `--include-sensitive` while checking the environment. The `env` block in the
 build profile is not automatically reused by `eas update`.
 
+### EAS 비용·중복 빌드 사전 확인
+
+EAS 빌드는 한 작업자만 소유합니다. 빌드를 시작할 사람 또는 에이전트는
+이슈/PR에 자신을 작업자로 기록하고, 완료·취소 또는 명시적인 인계 전에는 다른
+작업자, CI, 로컬 터미널에서 같은 빌드를 시작하지 않습니다.
+
+새 preview 빌드 전에 현재 Git SHA, runtimeVersion, Android versionCode가 모두
+같은 빌드가 이미 있는지 확인합니다:
+
+```powershell
+$gitSha = git rev-parse HEAD
+$expoConfig = npx expo config --type public --json | ConvertFrom-Json
+$runtimeVersion = $expoConfig.version
+$versionCode = [string]$expoConfig.android.versionCode
+
+eas build:list `
+  --platform android `
+  --build-profile preview `
+  --git-commit-hash $gitSha `
+  --runtime-version $runtimeVersion `
+  --app-build-version $versionCode `
+  --limit 20
+```
+
+- `new`, `in-queue`, `in-progress`, `pending-cancel`이면 새 빌드를 만들지 말고 기존
+  빌드를 기다립니다.
+- `finished`이면 기존 artifact와 build ID를 재사용합니다.
+- `errored` 또는 `canceled`이면 실패 원인을 수정하고 이전 build ID를
+  이슈/PR에 기록한 뒤 한 작업자만 재시도합니다.
+- 실제 `npm run eas:build:preview` 직전에 같은 조회를 다시 실행해, 조회와 시작
+  사이에 생긴 중복 요청도 차단합니다.
+
+JS-only 변경은 새 native binary를 만들지 않습니다. 네이티브 모듈, Expo/RN
+버전, 권한, `app.json`의 native config, runtimeVersion이 그대로이고 기존
+runtime의 preview APK가 설치·검증돼 있다면 Bundle Check와 테스트 후
+`npm run eas:update:preview -- "short change summary"`를 사용합니다. 네이티브
+경계가 바뀐 경우에만 app version/runtime과 versionCode를 올리고 위 사전
+확인을 거쳐 EAS Build를 실행합니다.
+
 Then build the new native runtime:
 
 ```powershell
