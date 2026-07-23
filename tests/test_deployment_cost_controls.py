@@ -104,6 +104,44 @@ def test_ec2_deploy_rotates_container_logs() -> None:
     assert re.search(r"--log-opt\s+max-file=\S+", run_prefix)
 
 
+def test_ec2_cleanup_is_manual_opt_in_and_scoped() -> None:
+    workflow = _read(WORKFLOWS / "deploy-ec2.yml")
+    triggers, separator, _jobs = workflow.partition("\njobs:")
+
+    assert separator
+    assert "cleanup_logs_and_caches:" in triggers
+    assert "default: false" in triggers
+    assert "type: boolean" in triggers
+
+    marker = "- name: Clean approved logs and caches before container recreation"
+    assert marker in workflow
+    cleanup_step = workflow.split(marker, 1)[1].split(
+        "- name: Deploy to EC2", 1
+    )[0]
+    assert (
+        "github.event_name == 'workflow_dispatch' && "
+        "inputs.cleanup_logs_and_caches"
+    ) in cleanup_step
+    for approved_cleanup in (
+        "sudo journalctl --vacuum-size=64M",
+        "sudo apt-get clean",
+        'find /app/logs -mindepth 1 -maxdepth 1 -type f -name "application-*.log" -delete',
+        ": > /app/logs/application.log",
+        "find /tmp/hf_cache -mindepth 1 -delete",
+        'if [ "$available_kb" -lt 4194304 ]',
+    ):
+        assert approved_cleanup in cleanup_step
+
+    for disallowed_cleanup in (
+        "docker system prune",
+        "docker volume prune",
+        "docker image prune",
+        "rm -rf /var/lib/docker",
+        "rm -rf /home",
+    ):
+        assert disallowed_cleanup not in cleanup_step
+
+
 def test_ec2_audit_is_manual_and_read_only() -> None:
     workflow = _read(WORKFLOWS / "ec2-audit.yml")
     lowered = workflow.lower()
@@ -119,6 +157,7 @@ def test_ec2_audit_is_manual_and_read_only() -> None:
         "docker ps",
         "docker inspect",
         "journalctl --disk-usage",
+        "log_path={{.LogPath}}",
     ):
         assert diagnostic in workflow
 

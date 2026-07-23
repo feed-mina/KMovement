@@ -16,6 +16,12 @@ on:
       - "chroma_db/**"
       - ".dockerignore"
   workflow_dispatch:
+    inputs:
+      cleanup_logs_and_caches:
+        description: "Clean approved EC2 logs/caches before recreating containers"
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
   group: ec2-deploy-${{ github.ref }}
@@ -791,6 +797,81 @@ jobs:
           sed -i "s|__DEPLOY_BACKEND__|${{ steps.changes.outputs.backend }}|g" /tmp/deploy.sh
           sed -i "s|__DEPLOY_FRONTEND__|${{ steps.changes.outputs.frontend }}|g" /tmp/deploy.sh
           sed -i "s|__DEPLOY_FASTAPI__|${{ steps.changes.outputs.fastapi }}|g" /tmp/deploy.sh
+
+      - name: Clean approved logs and caches before container recreation
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.cleanup_logs_and_caches }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh \
+            -i ~/.ssh/deploy_key \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o StrictHostKeyChecking=accept-new \
+            "${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }}" <<'CLEANUP_EOF'
+          set -euo pipefail
+
+          for container_name in sdui-backend kride-fastapi; do
+            container_status="$(
+              docker inspect --format '{{.State.Status}}' "$container_name" 2>/dev/null || true
+            )"
+            if [ "$container_status" != "running" ]; then
+              echo "$container_name must be running before approved cleanup (status: ${container_status:-missing})."
+              exit 1
+            fi
+          done
+
+          echo "=== Approved cleanup: before ==="
+          df -Pk /var/lib/docker 2>/dev/null || df -Pk /
+          sudo journalctl --disk-usage
+          sudo du -sh /var/cache/apt 2>/dev/null || true
+          docker exec sdui-backend sh -ceu \
+            'du -sh /app/logs 2>/dev/null || true'
+          docker exec kride-fastapi sh -ceu \
+            'du -sh /tmp/hf_cache 2>/dev/null || true'
+
+          sudo journalctl --rotate
+          sudo journalctl --vacuum-size=64M
+          sudo apt-get clean
+          docker exec sdui-backend sh -ceu '
+            if [ -d /app/logs ]; then
+              find /app/logs -mindepth 1 -maxdepth 1 -type f -name "application-*.log" -delete
+              if [ -f /app/logs/application.log ]; then
+                : > /app/logs/application.log
+              fi
+            fi
+          '
+          docker exec kride-fastapi sh -ceu '
+            if [ -d /tmp/hf_cache ]; then
+              find /tmp/hf_cache -mindepth 1 -delete
+            fi
+          '
+          sync
+
+          echo "=== Approved cleanup: after ==="
+          df -Pk /var/lib/docker 2>/dev/null || df -Pk /
+          sudo journalctl --disk-usage
+          sudo du -sh /var/cache/apt 2>/dev/null || true
+          docker exec sdui-backend sh -ceu \
+            'du -sh /app/logs 2>/dev/null || true'
+          docker exec kride-fastapi sh -ceu \
+            'du -sh /tmp/hf_cache 2>/dev/null || true'
+
+          available_kb="$(
+            df -Pk /var/lib/docker 2>/dev/null | awk 'NR == 2 { print $4 }'
+          )"
+          if [ -z "$available_kb" ]; then
+            available_kb="$(df -Pk / | awk 'NR == 2 { print $4 }')"
+          fi
+          if ! printf '%s' "$available_kb" | grep -Eq '^[0-9]+$'; then
+            echo "Unable to determine free space after approved cleanup."
+            exit 1
+          fi
+          if [ "$available_kb" -lt 4194304 ]; then
+            echo "Approved cleanup left ${available_kb}KB available; deployment requires 4194304KB."
+            exit 1
+          fi
+          CLEANUP_EOF
 
       - name: Deploy to EC2
         run: |
