@@ -5,6 +5,7 @@ export * from './hooks/useKpopPageData';
 export * from './hooks/useBaseActions';
 export * from './hooks/useBusinessActions';
 export * from './hooks/usePageHook';
+export * from './lib/phone';
 export * from './store/onboarding-store';
 export * from './store/session-store';
 export * from './loading/itineraryLoadingStages';

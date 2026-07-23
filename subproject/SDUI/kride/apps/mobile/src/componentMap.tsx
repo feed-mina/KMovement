@@ -56,6 +56,8 @@ export const mobileComponentMap: ComponentRegistry = {
   EMAIL_SELECT: EmailSelectLeaf,
   LINK_BUTTON: ActionButtonLeaf,
   SNS_BUTTON: ActionButtonLeaf,
+  // VERIFY_CODE_PAGE's resend button ships as component_type LINK.
+  LINK: ActionButtonLeaf,
   // display atoms (P4, 1st pass)
   CARD_IMAGE: CardImageLeaf,
   CARD_LABEL: CardLabelLeaf,

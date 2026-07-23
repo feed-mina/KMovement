@@ -1,11 +1,14 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, Linking, ScrollView, Text, View } from 'react-native';
 import { DynamicEngine, PATH_TO_SCREEN, resolveRuntimeConfig, useKpopPageData, usePageHook, useUiScreen } from '@kride/core';
+import type { PostcodeResult } from '@kride/core';
 import { rnPrimitives } from '../src/primitives';
 import { mobileComponentMap } from '../src/componentMap';
+import AddressSearchModal from '../src/components/AddressSearchModal';
 import KrideFocusNativeScreen from '../src/screens/KrideFocusNativeScreen';
 import CommunityNativeScreen from '../src/screens/CommunityNativeScreen';
+import { withKakaoAppState } from '../src/kakaoLogin';
 import { publicApiOrigin, summarizeMobileFailure } from '../src/mobileDiagnostics';
 
 // Stable references. `useBaseActions` in @kride/core resets form state during
@@ -36,7 +39,7 @@ const normalizeMobileRoute = (rawPath: string) => {
 };
 
 export default function MobileScreen() {
-  const { screenId, artistId, eventId, jobId, region, from, to, q } = useLocalSearchParams<{
+  const { screenId, artistId, eventId, jobId, region, from, to, q, email, code } = useLocalSearchParams<{
     screenId: string;
     artistId?: string;
     eventId?: string;
@@ -45,8 +48,13 @@ export default function MobileScreen() {
     from?: string;
     to?: string;
     q?: string;
+    email?: string;
+    code?: string;
   }>();
   const router = useRouter();
+  // Holds the OPEN_POSTCODE callback while the address modal is up; non-null
+  // doubles as the modal's visibility flag.
+  const [postcodeApply, setPostcodeApply] = useState<((result: PostcodeResult) => void) | null>(null);
   const sid = screenId ?? 'MAIN_PAGE';
   const apiBase = resolveRuntimeConfig({ apiBase: process.env.EXPO_PUBLIC_API_BASE }).apiBase;
   const { data, isLoading, error } = useUiScreen(sid, apiBase);
@@ -71,13 +79,18 @@ export default function MobileScreen() {
         router.push(normalized as never);
       },
       openExternal: (url: string) => {
-        void Linking.openURL(url);
+        // Kakao OAuth must round-trip back into the app: state=app makes the
+        // server callback 302 to kride://kakao-callback instead of the web URL.
+        void Linking.openURL(withKakaoAppState(url));
       },
       notify: (message: string) => Alert.alert(message),
+      openPostcode: (onComplete: (result: PostcodeResult) => void) => {
+        setPostcodeApply(() => onComplete);
+      },
     }),
     [router],
   );
-  const routeParams = useMemo(() => ({ screenId }), [screenId]);
+  const routeParams = useMemo(() => ({ screenId, email, code }), [screenId, email, code]);
   const runtime = useMemo(() => ({ apiBase }), [apiBase]);
   const analysisPageData = useMemo(() => ({ jobId: jobId || '' }), [jobId]);
   const productPageData = useMemo(() => ({ q: q || '', artistId: artistId || '', eventId: eventId || '' }), [artistId, eventId, q]);
@@ -133,22 +146,33 @@ export default function MobileScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white">
-      <View className="px-5 pb-10 pt-16">
-        <Text className="mb-6 text-2xl font-bold text-kride">KRIDE</Text>
-        <DynamicEngine
-          metadata={metadata}
-          screenId={sid}
-          pageData={dynamicPageData}
-          formData={page.formData}
-          setFormData={page.setFormData}
-          onChange={page.handleChange}
-          onAction={page.handleAction}
-          apiBase={apiBase}
-          primitives={rnPrimitives}
-          componentMap={mobileComponentMap}
-        />
-      </View>
-    </ScrollView>
+    <>
+      <ScrollView className="flex-1 bg-white">
+        <View className="px-5 pb-10 pt-16">
+          <Text className="mb-6 text-2xl font-bold text-kride">KRIDE</Text>
+          <DynamicEngine
+            metadata={metadata}
+            screenId={sid}
+            pageData={dynamicPageData}
+            formData={page.formData}
+            setFormData={page.setFormData}
+            onChange={page.handleChange}
+            onAction={page.handleAction}
+            apiBase={apiBase}
+            primitives={rnPrimitives}
+            componentMap={mobileComponentMap}
+          />
+        </View>
+      </ScrollView>
+      <AddressSearchModal
+        visible={postcodeApply != null}
+        apiBase={apiBase}
+        onComplete={(result) => {
+          postcodeApply?.(result);
+          setPostcodeApply(null);
+        }}
+        onClose={() => setPostcodeApply(null)}
+      />
+    </>
   );
 }

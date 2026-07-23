@@ -66,6 +66,8 @@ app:
   url:
     web: ${WEB_URL:http://localhost:3000}
     mobile: ${MOBILE_URL:https://yerin.duckdns.org}
+    # 카카오 로그인(state=app) 완료 후 네이티브 앱으로 복귀할 딥링크
+    app-deeplink: ${APP_DEEPLINK:kride://kakao-callback}
 
 kakao:
   client-id: ${KAKAO_CLIENT_ID:change-me-local}

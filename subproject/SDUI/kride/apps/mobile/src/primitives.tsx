@@ -28,6 +28,18 @@ const CLASS_MAP: Record<string, string> = {
   'signup-nav': 'mt-3 border border-kride bg-transparent',
   'kakao-button': 'mt-3 bg-[#FEE500]',
 
+  // REGISTER_PAGE / VERIFY_CODE_PAGE. Base BUTTON leaves have no background of
+  // their own, so anything unmapped renders white-on-white (invisible).
+  REG_ID_ROW: 'w-full items-stretch gap-2',
+  INFO_SECTION: 'w-full gap-3',
+  'mt-30': 'mt-6 w-full gap-3',
+  'mt-40': 'mt-8 w-full gap-3',
+  reg_id_check: 'shrink-0 bg-kride',
+  reg_addr_btn: 'bg-kride',
+  reg_submit: 'mt-2 bg-kride',
+  'verify-submit-btn': 'mt-2 bg-kride',
+  'resend-link': 'mt-1 border border-kride bg-white',
+
   'main-bento': 'w-full flex-row flex-wrap gap-3 bg-[#fff7f2] p-4',
   'bento-card': 'min-h-36 rounded-2xl p-5',
   'bento-card-appointment': 'border border-gray-200 bg-white',
@@ -79,7 +91,13 @@ const translateClassName = (className?: string) => {
 
 const buttonTextClassName = (className?: string) => {
   const names = new Set((className || '').split(/\s+/).filter(Boolean));
-  if (names.has('kakao-button') || names.has('signup-nav') || names.has('diary-nav2') || names.has('diary-btn-secondary')) {
+  if (
+    names.has('kakao-button') ||
+    names.has('signup-nav') ||
+    names.has('diary-nav2') ||
+    names.has('diary-btn-secondary') ||
+    names.has('resend-link')
+  ) {
     return 'text-center font-bold text-gray-950';
   }
   return 'text-center font-bold text-white';

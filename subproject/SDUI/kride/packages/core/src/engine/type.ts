@@ -11,7 +11,9 @@ export interface Metadata {
   ref_data_id?: string;
   isVisible?: boolean | string;
   is_visible?: boolean | string;
-  groupDirection?: "ROW" | "COLUMN";
+  /** Seeds carry 'ROW'/'COLUMN' plus 'horizontal'/'vertical' in newer rows. */
+  groupDirection?: "ROW" | "COLUMN" | (string & {});
+  group_direction?: string;
   cssClass?: string;
   css_class?: string;
   inlineStyle?: any;

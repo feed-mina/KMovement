@@ -24,6 +24,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +48,11 @@ public class KakaoController {
 
     @Value("${app.url.mobile}")
     private String mobileUrl;
+
+    // 네이티브 앱(expo)의 딥링크. state=app 로그인 완료 시 이 주소로 302시켜
+    // 외부 브라우저에서 앱으로 복귀시킨다.
+    @Value("${app.url.app-deeplink:kride://kakao-callback}")
+    private String appDeepLink;
 
     @Value("${kakao.client-id}")
     private String clientId;
@@ -191,6 +198,19 @@ public class KakaoController {
 
         // state 값이 없으면 기본적으로 'web'으로 간주
         String platform = (state != null) ? state : "web";
+
+        // 네이티브 앱: 외부 브라우저에서 열린 OAuth를 딥링크로 앱에 되돌려준다.
+        // (state=mobile의 JSON 응답은 브라우저 화면에 그대로 노출되어 앱 복귀가 불가능)
+        if ("app".equals(platform)) {
+            String deepLink = appDeepLink
+                    + "?accessToken=" + URLEncoder.encode(jwtToken.getAccessToken(), StandardCharsets.UTF_8)
+                    + "&refreshToken=" + URLEncoder.encode(jwtToken.getRefreshToken(), StandardCharsets.UTF_8)
+                    + "&role=" + URLEncoder.encode(jwtToken.getRole() == null ? "" : jwtToken.getRole(), StandardCharsets.UTF_8);
+            HttpHeaders appRedirectHeaders = new HttpHeaders();
+            appRedirectHeaders.setLocation(URI.create(deepLink));
+            log.info("KAKAOCONTROLLER-app deep link redirect: role={}", jwtToken.getRole());
+            return new ResponseEntity<>(appRedirectHeaders, HttpStatus.FOUND);
+        }
 
         if ("mobile".equals(platform)) {
             response.addHeader(HttpHeaders.SET_COOKIE, loginTypeCookie.toString());
