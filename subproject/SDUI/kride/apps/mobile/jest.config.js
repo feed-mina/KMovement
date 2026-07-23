@@ -11,6 +11,9 @@ const pkgDir = (name) =>
 /** @type {import('jest').Config} */
 module.exports = {
   preset: 'jest-expo',
+  // Keep tests on Jest's filesystem crawler. A failing Watchman child process
+  // can print its full inherited environment on Windows.
+  watchman: false,
   // testRegex rather than jest's default testMatch globs: `**` skips path
   // segments that start with a dot, so glob discovery finds nothing when the
   // checkout lives under a dot-directory (e.g. a worktree in `.claude/`).

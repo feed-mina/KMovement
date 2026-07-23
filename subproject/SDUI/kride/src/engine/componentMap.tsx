@@ -39,6 +39,8 @@ import DualRangeSlider from "@/components/kride/DualRangeSlider";
 import MapView from "@/components/kride/MapView";
 import ItineraryPanel from "@/components/kride/ItineraryPanel";
 import { ArtistCard, EventCard } from "@/components/kride/KpopCards";
+import { AiResultCard, UploadConsent } from "@/components/kride/KpopAnalysis";
+import { ProductSearch, SavedItemList } from "@/components/kride/KpopProducts";
 
 export const componentMap: Record<string, React.FC<any>> = {
   // GROUP/TEXT는 core base leaf가 병합 제공. 웹 전용 leaf만 여기서 override/추가.
@@ -62,4 +64,8 @@ export const componentMap: Record<string, React.FC<any>> = {
   ITINERARY_PANEL: ItineraryPanel,
   ARTIST_CARD: ArtistCard,
   EVENT_CARD: EventCard,
+  UPLOAD_CONSENT: UploadConsent,
+  AI_RESULT_CARD: AiResultCard,
+  PRODUCT_SEARCH: ProductSearch,
+  SAVED_ITEM_LIST: SavedItemList,
 };

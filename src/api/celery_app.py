@@ -36,6 +36,7 @@ celery.conf.update(
         "src.api.tasks.task_rerank":          {"queue": "ml"},
         "src.api.tasks.task_predict_weather": {"queue": "ml"},
         "src.api.tasks.task_classify_event":  {"queue": "ml"},
+        "src.api.tasks.task_analyze_kpop_outfit": {"queue": "media"},
         "src.api.tasks.task_generate_tts":    {"queue": "media"},
         "src.api.tasks.task_generate_video":  {"queue": "media"},
         "src.api.tasks.task_cleanup_temp":    {"queue": "maintenance"},

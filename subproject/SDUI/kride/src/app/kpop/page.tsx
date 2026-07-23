@@ -6,12 +6,12 @@ import { useKpopPageData, useUiScreen } from "@kride/core";
 
 export default function KpopExplorePage() {
   const screenId = SCREEN_IDS.KPOP_EXPLORE;
-  const { data: metadata = [], isLoading, error } = useUiScreen(screenId);
-  const { data: pageData = {} } = useKpopPageData(screenId);
+  const { data: metadata = [], isLoading: isMetadataLoading, error: metadataError } = useUiScreen(screenId);
+  const { data: pageData = {}, isLoading: isDataLoading, error: dataError } = useKpopPageData(screenId);
   const { formData, handleChange, handleAction } = usePageHook(screenId, metadata, {});
 
-  if (isLoading) return <main className="kpop-screen"><p>Loading K-POP travel...</p></main>;
-  if (error) return <main className="kpop-screen"><p>Could not load K-POP screen.</p></main>;
+  if (isMetadataLoading || isDataLoading) return <main className="kpop-screen"><p>Loading K-POP travel...</p></main>;
+  if (metadataError || dataError) return <main className="kpop-screen"><p>Could not load K-POP screen.</p></main>;
 
   return (
     <DynamicEngine

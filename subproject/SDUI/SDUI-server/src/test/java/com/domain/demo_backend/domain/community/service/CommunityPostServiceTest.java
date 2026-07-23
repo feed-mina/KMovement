@@ -113,7 +113,8 @@ class CommunityPostServiceTest {
     void getPostList_returnsPaginatedResult() {
         // Given
         Page<CommunityPost> page = new PageImpl<>(List.of(testPost));
-        when(postRepository.findByDelYnOrderByCreatedAtDesc(eq("N"), any(Pageable.class)))
+        when(postRepository.findByDelYnAndModerationStatusOrderByCreatedAtDesc(
+                eq("N"), eq(ContentModerationStatus.APPROVED), any(Pageable.class)))
                 .thenReturn(page);
 
         // When
@@ -127,6 +128,7 @@ class CommunityPostServiceTest {
     @Test
     @DisplayName("게시글 상세 조회 — 성공")
     void getPostDetail_success() {
+        testPost.setModerationStatus(ContentModerationStatus.APPROVED);
         when(postRepository.findByPostIdWithDetails(100L)).thenReturn(Optional.of(testPost));
 
         PostResponse response = postService.getPostDetail(100L);
@@ -143,6 +145,28 @@ class CommunityPostServiceTest {
         assertThatThrownBy(() -> postService.getPostDetail(999L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("게시글을 찾을 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("작성자는 검수 대기 게시글 상세를 조회할 수 있다")
+    void getPostDetail_pendingOwnerCanRead() {
+        testPost.setModerationStatus(ContentModerationStatus.PENDING);
+        when(postRepository.findByPostIdWithDetails(100L)).thenReturn(Optional.of(testPost));
+
+        PostResponse response = postService.getPostDetail(100L, 1L, false);
+
+        assertThat(response.getModerationStatus()).isEqualTo("PENDING");
+    }
+
+    @Test
+    @DisplayName("다른 사용자는 검수 대기 게시글 상세를 조회할 수 없다")
+    void getPostDetail_pendingNonOwnerCannotRead() {
+        testPost.setModerationStatus(ContentModerationStatus.PENDING);
+        when(postRepository.findByPostIdWithDetails(100L)).thenReturn(Optional.of(testPost));
+
+        assertThatThrownBy(() -> postService.getPostDetail(100L, 2L, false))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Published post not found.");
     }
 
     @Test

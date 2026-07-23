@@ -25,6 +25,8 @@ import {
   RangeTrackLeaf,
   SelectionCardLeaf,
 } from './composites';
+import { AiResultCardLeaf, UploadConsentLeaf } from './kpopAnalysisLeaves';
+import { ProductSearchLeaf, SavedItemListLeaf } from './kpopProductLeaves';
 
 /** MAP_VIEW leaf — leaflet MapView on web becomes react-native-maps here. */
 const MapViewLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
@@ -74,4 +76,8 @@ export const mobileComponentMap: ComponentRegistry = {
   DUAL_RANGE_SLIDER: DualRangeSliderLeaf,
   COLLAPSE_HEADER: CollapseHeaderLeaf,
   COLLAPSE_BODY: CollapseBodyLeaf,
+  UPLOAD_CONSENT: UploadConsentLeaf,
+  AI_RESULT_CARD: AiResultCardLeaf,
+  PRODUCT_SEARCH: ProductSearchLeaf,
+  SAVED_ITEM_LIST: SavedItemListLeaf,
 };

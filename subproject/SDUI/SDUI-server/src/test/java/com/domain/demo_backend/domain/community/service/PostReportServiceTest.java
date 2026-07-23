@@ -66,7 +66,7 @@ class PostReportServiceTest {
 
         when(reportRepository.existsByPost_PostIdAndReporter_UserSqno(101L, 7L))
                 .thenReturn(false);
-        when(postRepository.findById(101L)).thenReturn(Optional.of(post));
+        when(postRepository.findApprovedByPostIdWithDetails(101L)).thenReturn(Optional.of(post));
         when(userRepository.findById(7L)).thenReturn(Optional.of(reporter));
 
         reportService.reportPost(101L, 7L, request);

@@ -49,6 +49,24 @@ public class CommunityPost {
     @Column(name = "del_yn", length = 1)
     private String delYn = "N";
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "moderation_status", nullable = false, length = 20)
+    private ContentModerationStatus moderationStatus = ContentModerationStatus.PENDING;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "moderated_by")
+    private User moderatedBy;
+
+    @Column(name = "moderated_at")
+    private LocalDateTime moderatedAt;
+
+    @Column(name = "moderation_note", length = 1000)
+    private String moderationNote;
+
+    @Column(name = "moderation_due_at", nullable = false)
+    private LocalDateTime moderationDueAt;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -61,8 +79,13 @@ public class CommunityPost {
 
     @PrePersist
     public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = this.createdAt == null ? now : this.createdAt;
+        this.updatedAt = this.updatedAt == null ? now : this.updatedAt;
+        this.moderationStatus = this.moderationStatus == null
+                ? ContentModerationStatus.PENDING : this.moderationStatus;
+        this.moderationDueAt = this.moderationDueAt == null
+                ? now.plusHours(24) : this.moderationDueAt;
     }
 
     @PreUpdate

@@ -10,6 +10,7 @@ import org.postgresql.PGConnection;
 import org.postgresql.PGNotification;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import com.domain.demo_backend.domain.kpop.service.KpopCacheService;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -25,6 +26,7 @@ public class PostgresCacheListener {
     private final DataSource dataSource;
     private final StringRedisTemplate stringRedisTemplate;
     private final ObjectMapper objectMapper;
+    private final KpopCacheService kpopCacheService;
 
     @PostConstruct
     public void startListener() {
@@ -65,6 +67,11 @@ public class PostgresCacheListener {
                 cacheKey = "ui:metadata:" + key;
             } else if ("query_master".equals(table)) {
                 cacheKey = "SQL:" + key;
+                if (key.startsWith("kpop_")) {
+                    kpopCacheService.invalidateCatalog();
+                }
+            } else if ("kpop_catalog".equals(table)) {
+                kpopCacheService.invalidateCatalog();
             }
 
             if (!cacheKey.isEmpty()) {

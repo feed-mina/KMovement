@@ -20,6 +20,8 @@ public class ApiResponse<T> {
     private final String message;     // 사용자에게 표시할 메시지
     private final T data;             // 성공 시 데이터
     private final String error;       // 실패 시 상세 에러 정보
+    private final String code;        // 클라이언트가 분기할 수 있는 안정적인 오류 코드
+    private final String requestId;   // 서버 로그와 응답을 연결하는 요청 식별자
     private final LocalDateTime timestamp;
     private final String path;
 
@@ -67,6 +69,20 @@ public class ApiResponse<T> {
                 .status("error")
                 .message(message)
                 .error(error)
+                .code(error)
+                .path(path)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    public static <T> ApiResponse<T> error(
+            String message, String code, String path, String requestId) {
+        return ApiResponse.<T>builder()
+                .status("error")
+                .message(message)
+                .error(code)
+                .code(code)
+                .requestId(requestId)
                 .path(path)
                 .timestamp(LocalDateTime.now())
                 .build();

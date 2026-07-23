@@ -2,26 +2,67 @@ package com.domain.demo_backend.domain.kpop.controller;
 
 import com.domain.demo_backend.global.common.response.ApiResponse;
 import com.domain.demo_backend.global.security.CustomUserDetails;
-import lombok.RequiredArgsConstructor;
+import com.domain.demo_backend.domain.kpop.service.KpopAnalysisService;
+import com.domain.demo_backend.domain.kpop.service.KpopCacheService;
+import com.domain.demo_backend.domain.kpop.service.KpopProductService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.time.LocalDateTime;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 @RestController
 @RequestMapping("/api/v1/kpop")
-@RequiredArgsConstructor
 public class KpopController {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final KpopAnalysisService analysisService;
+    private final KpopProductService productService;
+    private final KpopCacheService cacheService;
+    private final Executor sseExecutor;
+
+    @Autowired
+    public KpopController(
+            NamedParameterJdbcTemplate jdbcTemplate,
+            KpopAnalysisService analysisService,
+            KpopProductService productService,
+            @Qualifier("sseExecutor") Executor sseExecutor,
+            KpopCacheService cacheService
+    ) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.analysisService = analysisService;
+        this.productService = productService;
+        this.sseExecutor = sseExecutor;
+        this.cacheService = cacheService;
+    }
+
+    public KpopController(
+            NamedParameterJdbcTemplate jdbcTemplate,
+            KpopAnalysisService analysisService,
+            KpopProductService productService,
+            Executor sseExecutor
+    ) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.analysisService = analysisService;
+        this.productService = productService;
+        this.sseExecutor = sseExecutor;
+        this.cacheService = null;
+    }
 
     @GetMapping("/artists")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> artists(
@@ -35,24 +76,41 @@ public class KpopController {
                   AND (:q IS NULL OR name_ko ILIKE CONCAT('%', :q, '%') OR name_en ILIKE CONCAT('%', :q, '%'))
                 ORDER BY sort_order ASC, name_ko ASC
                 """;
-        return ResponseEntity.ok(ApiResponse.success(jdbcTemplate.queryForList(sql, params("q", blankToNull(q)))));
+        Map<String, Object> keyParts = nullableParts("q", blankToNull(q));
+        List<Map<String, Object>> rows = cachedCatalog(
+                "artists",
+                keyParts,
+                Duration.ofMinutes(5),
+                new TypeReference<List<Map<String, Object>>>() {},
+                () -> jdbcTemplate.queryForList(sql, params("q", blankToNull(q)))
+        );
+        return ResponseEntity.ok(ApiResponse.success(rows));
     }
 
     @GetMapping("/artists/{artistId}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> artist(@PathVariable Long artistId) {
-        Map<String, Object> artist = one("""
-                SELECT artist_id AS id, slug, name_ko AS "nameKo", name_en AS "nameEn",
-                       profile, image_url AS "imageUrl", official_url AS "officialUrl"
-                FROM artist
-                WHERE artist_id = :artistId AND approved_yn = 'Y'
-                """, params("artistId", artistId));
-        artist.put("events", jdbcTemplate.queryForList("""
-                SELECT event_id AS id, artist_id AS "artistId", title_ko AS "titleKo", title_en AS "titleEn",
-                       region, venue, event_date AS date, official_url AS "officialUrl"
-                FROM event
-                WHERE artist_id = :artistId AND approved_yn = 'Y'
-                ORDER BY event_date ASC
-                """, params("artistId", artistId)));
+        Map<String, Object> artist = cachedCatalog(
+                "artist_detail",
+                Map.of("artistId", artistId),
+                Duration.ofMinutes(5),
+                new TypeReference<Map<String, Object>>() {},
+                () -> {
+                    Map<String, Object> loaded = new LinkedHashMap<>(one("""
+                            SELECT artist_id AS id, slug, name_ko AS "nameKo", name_en AS "nameEn",
+                                   profile, image_url AS "imageUrl", official_url AS "officialUrl"
+                            FROM artist
+                            WHERE artist_id = :artistId AND approved_yn = 'Y'
+                            """, params("artistId", artistId)));
+                    loaded.put("events", jdbcTemplate.queryForList("""
+                            SELECT event_id AS id, artist_id AS "artistId", title_ko AS "titleKo", title_en AS "titleEn",
+                                   region, venue, event_date AS date, official_url AS "officialUrl"
+                            FROM event
+                            WHERE artist_id = :artistId AND approved_yn = 'Y'
+                            ORDER BY event_date ASC
+                            """, params("artistId", artistId)));
+                    return loaded;
+                }
+        );
         return ResponseEntity.ok(ApiResponse.success(artist));
     }
 
@@ -78,19 +136,29 @@ public class KpopController {
                 .addValue("region", blankToNull(region))
                 .addValue("fromDate", blankToNull(from))
                 .addValue("toDate", blankToNull(to));
-        return ResponseEntity.ok(ApiResponse.success(jdbcTemplate.queryForList(sql, p)));
+        Map<String, Object> keyParts = new LinkedHashMap<>();
+        keyParts.put("region", blankToNull(region));
+        keyParts.put("from", blankToNull(from));
+        keyParts.put("to", blankToNull(to));
+        return ResponseEntity.ok(ApiResponse.success(cachedCatalog(
+                "events", keyParts, Duration.ofMinutes(3),
+                new TypeReference<List<Map<String, Object>>>() {},
+                () -> jdbcTemplate.queryForList(sql, p))));
     }
 
     @GetMapping("/events/{eventId}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> event(@PathVariable Long eventId) {
-        return ResponseEntity.ok(ApiResponse.success(one("""
-                SELECT e.event_id AS id, e.artist_id AS "artistId", a.name_ko AS "artistNameKo",
-                       e.title_ko AS "titleKo", e.title_en AS "titleEn", e.region, e.venue,
-                       e.event_date AS date, e.official_url AS "officialUrl", e.description
-                FROM event e
-                JOIN artist a ON a.artist_id = e.artist_id
-                WHERE e.event_id = :eventId AND e.approved_yn = 'Y'
-                """, params("eventId", eventId))));
+        return ResponseEntity.ok(ApiResponse.success(cachedCatalog(
+                "event_detail", Map.of("eventId", eventId), Duration.ofMinutes(5),
+                new TypeReference<Map<String, Object>>() {},
+                () -> one("""
+                        SELECT e.event_id AS id, e.artist_id AS "artistId", a.name_ko AS "artistNameKo",
+                               e.title_ko AS "titleKo", e.title_en AS "titleEn", e.region, e.venue,
+                               e.event_date AS date, e.official_url AS "officialUrl", e.description
+                        FROM event e
+                        JOIN artist a ON a.artist_id = e.artist_id
+                        WHERE e.event_id = :eventId AND e.approved_yn = 'Y'
+                        """, params("eventId", eventId)))));
     }
 
     @PostMapping("/artists/{artistId}/follow")
@@ -124,63 +192,94 @@ public class KpopController {
         return ResponseEntity.ok(ApiResponse.success(Map.of("eventId", eventId, "bookmarked", true)));
     }
 
-    @PostMapping("/analysis/jobs")
+    @PostMapping("/analysis-assets/presign")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> createAnalysisUpload(
+            @RequestBody Map<String, Object> payload,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        requireUser(user);
+        return ResponseEntity.ok(ApiResponse.success(
+                analysisService.createUpload(payload, user.getUserSqno())
+        ));
+    }
+
+    @PostMapping({"/analysis-jobs", "/analysis/jobs"})
     public ResponseEntity<ApiResponse<Map<String, Object>>> createAnalysisJob(
             @RequestBody Map<String, Object> payload,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
-        String consentScope = String.valueOf(payload.getOrDefault("consentScope", "user-owned-image-analysis"));
-        if (!Boolean.TRUE.equals(payload.get("consented"))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Upload consent is required.");
-        }
-        MapSqlParameterSource p = new MapSqlParameterSource()
-                .addValue("taskType", "KPOP_OUTFIT_ANALYSIS")
-                .addValue("status", "QUEUED")
-                .addValue("requestedBy", user.getUserSqno())
-                .addValue("progressStep", "CONSENT_RECORDED")
-                .addValue("progressPct", 5)
-                .addValue("resultJson", "{\"schema\":\"kpop-analysis-shell\",\"grade\":\"INSUFFICIENT_EVIDENCE\"}")
-                .addValue("errorMessage", "consentScope=" + consentScope)
-                .addValue("now", LocalDateTime.now());
-        Long id = jdbcTemplate.queryForObject("""
-                INSERT INTO celery_jobs (task_type, status, requested_by, progress_step, progress_pct, result_json, error_message, created_at, updated_at)
-                VALUES (:taskType, :status, :requestedBy, :progressStep, :progressPct, :resultJson, :errorMessage, :now, :now)
-                RETURNING id
-                """, p, Long.class);
-        return ResponseEntity.ok(ApiResponse.success(Map.of("jobId", id, "status", "QUEUED")));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(ApiResponse.success(
+                analysisService.submit(payload, user.getUserSqno())
+        ));
     }
 
-    @DeleteMapping("/analysis/jobs/{jobId}/source")
+    @GetMapping({"/analysis-jobs/{jobId}", "/analysis/jobs/{jobId}"})
+    public ResponseEntity<ApiResponse<Map<String, Object>>> analysisJob(
+            @PathVariable Long jobId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        requireUser(user);
+        return ResponseEntity.ok(ApiResponse.success(
+                analysisService.snapshot(jobId, user.getUserSqno(), true)
+        ));
+    }
+
+    @GetMapping(
+            value = {"/analysis-jobs/{jobId}/stream", "/analysis/jobs/{jobId}/stream"},
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
+    public SseEmitter streamAnalysisJob(
+            @PathVariable Long jobId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        requireUser(user);
+        Long userSqno = user.getUserSqno();
+        analysisService.snapshot(jobId, userSqno, false);
+
+        SseEmitter emitter = new SseEmitter(180_000L);
+        sseExecutor.execute(() -> streamAnalysisSnapshots(jobId, userSqno, emitter));
+        return emitter;
+    }
+
+    @GetMapping({"/analysis-jobs/{jobId}/source-download", "/analysis/jobs/{jobId}/source-download"})
+    public ResponseEntity<ApiResponse<Map<String, Object>>> analysisSourceDownload(
+            @PathVariable Long jobId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        requireUser(user);
+        return ResponseEntity.ok(ApiResponse.success(
+                analysisService.createSourceDownload(jobId, user.getUserSqno())
+        ));
+    }
+
+    @DeleteMapping({"/analysis-jobs/{jobId}/source", "/analysis/jobs/{jobId}/source"})
     public ResponseEntity<ApiResponse<Map<String, Object>>> deleteAnalysisSource(
             @PathVariable Long jobId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
-        int updated = jdbcTemplate.update("""
-                UPDATE celery_jobs
-                SET result_json = '{"sourceDeleted":true}',
-                    updated_at = NOW()
-                WHERE id = :jobId AND requested_by = :userSqno
-                """, params("jobId", jobId).addValue("userSqno", user.getUserSqno()));
-        if (updated == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Analysis job not found.");
-        }
-        return ResponseEntity.ok(ApiResponse.success(Map.of("jobId", jobId, "sourceDeleted", true)));
+        return ResponseEntity.ok(ApiResponse.success(
+                analysisService.deleteSource(jobId, user.getUserSqno())
+        ));
     }
 
     @GetMapping("/product-candidates")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> productCandidates(
-            @RequestParam(name = "artistId", required = false) Long artistId
+            @RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "artistId", required = false) Long artistId,
+            @RequestParam(name = "eventId", required = false) Long eventId,
+            @RequestParam(name = "limit", required = false) Integer limit
     ) {
-        return ResponseEntity.ok(ApiResponse.success(jdbcTemplate.queryForList("""
-                SELECT product_candidate_id AS id, artist_id AS "artistId", name, brand,
-                       evidence_grade AS "evidenceGrade", confidence, evidence_text AS "evidenceText",
-                       official_url AS "officialUrl"
-                FROM product_candidate
-                WHERE approved_yn = 'Y' AND (:artistId IS NULL OR artist_id = :artistId)
-                ORDER BY confidence DESC, product_candidate_id DESC
-                """, params("artistId", artistId))));
+        Map<String, Object> keyParts = new LinkedHashMap<>();
+        keyParts.put("q", blankToNull(q));
+        keyParts.put("artistId", artistId);
+        keyParts.put("eventId", eventId);
+        keyParts.put("limit", limit);
+        return ResponseEntity.ok(ApiResponse.success(cachedCatalog(
+                "product_candidates", keyParts, Duration.ofMinutes(3),
+                new TypeReference<List<Map<String, Object>>>() {},
+                () -> productService.productCandidates(q, artistId, eventId, limit))));
     }
 
     @PostMapping("/saved-items")
@@ -189,15 +288,9 @@ public class KpopController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
-        String itemType = String.valueOf(payload.get("itemType"));
-        Long itemRef = Long.valueOf(String.valueOf(payload.get("itemRef")));
-        Long id = jdbcTemplate.queryForObject("""
-                INSERT INTO saved_item (user_sqno, item_type, item_ref)
-                VALUES (:userSqno, :itemType, :itemRef)
-                ON CONFLICT (user_sqno, item_type, item_ref) DO UPDATE SET updated_at = NOW()
-                RETURNING saved_item_id
-                """, params("userSqno", user.getUserSqno()).addValue("itemType", itemType).addValue("itemRef", itemRef), Long.class);
-        return ResponseEntity.ok(ApiResponse.success(Map.of("id", id, "itemType", itemType, "itemRef", itemRef)));
+        return ResponseEntity.ok(ApiResponse.success(
+                productService.saveItem(payload, user.getUserSqno())
+        ));
     }
 
     @GetMapping("/saved-items")
@@ -205,12 +298,38 @@ public class KpopController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
-        return ResponseEntity.ok(ApiResponse.success(jdbcTemplate.queryForList("""
-                SELECT saved_item_id AS id, item_type AS "itemType", item_ref AS "itemRef", created_at AS "createdAt"
-                FROM saved_item
-                WHERE user_sqno = :userSqno
-                ORDER BY created_at DESC
-                """, params("userSqno", user.getUserSqno()))));
+        return ResponseEntity.ok(ApiResponse.success(productService.savedItems(user.getUserSqno())));
+    }
+
+    @DeleteMapping("/saved-items/{savedItemId}")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> deleteSavedItem(
+            @PathVariable Long savedItemId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        requireUser(user);
+        return ResponseEntity.ok(ApiResponse.success(
+                productService.deleteSavedItem(savedItemId, user.getUserSqno())
+        ));
+    }
+
+    private void streamAnalysisSnapshots(Long jobId, Long userSqno, SseEmitter emitter) {
+        try {
+            while (true) {
+                Map<String, Object> snapshot = analysisService.snapshot(jobId, userSqno, true);
+                emitter.send(SseEmitter.event().name("status").data(snapshot));
+                if (analysisService.isTerminal(snapshot)) {
+                    emitter.send(SseEmitter.event().name("done").data("[DONE]"));
+                    emitter.complete();
+                    return;
+                }
+                Thread.sleep(1_000L);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            emitter.completeWithError(e);
+        } catch (IOException | RuntimeException e) {
+            emitter.completeWithError(e);
+        }
     }
 
     private Map<String, Object> one(String sql, MapSqlParameterSource params) {
@@ -241,5 +360,22 @@ public class KpopController {
 
     private Object blankToNull(String value) {
         return value == null || value.isBlank() ? null : value;
+    }
+
+    private Map<String, Object> nullableParts(String name, Object value) {
+        Map<String, Object> parts = new LinkedHashMap<>();
+        parts.put(name, value);
+        return parts;
+    }
+
+    private <T> T cachedCatalog(
+            String resource,
+            Map<String, ?> keyParts,
+            Duration ttl,
+            TypeReference<T> type,
+            java.util.function.Supplier<T> loader) {
+        return cacheService == null
+                ? loader.get()
+                : cacheService.catalog(resource, keyParts, ttl, type, loader);
     }
 }

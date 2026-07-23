@@ -125,6 +125,16 @@ kride:
     url: ${KRIDE_FASTAPI_URL:http://localhost:8000}
     chatbot-url: ${KRIDE_CHATBOT_URL:http://localhost:8001}
 
+kpop:
+  analysis:
+    rate:
+      # Product-tunable safeguards; DB checks remain authoritative when Redis is unavailable.
+      window-capacity: ${KPOP_ANALYSIS_WINDOW_CAPACITY:3}
+      window-seconds: ${KPOP_ANALYSIS_WINDOW_SECONDS:600}
+      max-active: ${KPOP_ANALYSIS_MAX_ACTIVE:2}
+      max-daily: ${KPOP_ANALYSIS_MAX_DAILY:10}
+      active-retry-seconds: ${KPOP_ANALYSIS_ACTIVE_RETRY_SECONDS:60}
+
 # ── Resilience4j 서킷 브레이커 설정 ──
 resilience4j:
   circuitbreaker:

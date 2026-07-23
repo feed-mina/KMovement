@@ -104,6 +104,8 @@ body {
 
 .kpop-card button,
 .kpop-primary-btn {
+  min-width: 44px;
+  min-height: 44px;
   width: fit-content;
   border: 0;
   border-radius: 999px;
@@ -114,6 +116,349 @@ body {
   padding: 10px 14px;
 }
 
+.kpop-card button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.kpop-card button:focus-visible,
+.kpop-primary-btn:focus-visible,
+.kpop-result-actions button:focus-visible,
+.kpop-result-actions a:focus-visible,
+.kpop-product-filters input:focus-visible,
+.kpop-consent-row input:focus-visible {
+  outline: 3px solid #fef08a;
+  outline-offset: 3px;
+}
+
 .kpop-card small {
   color: #fda4af;
+}
+
+.kpop-analysis-upload,
+.kpop-analysis-card {
+  display: grid;
+  width: min(100%, 760px);
+  gap: 18px;
+  padding: clamp(20px, 4vw, 36px);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 20px;
+  background: #1f1f1f;
+}
+
+.kpop-analysis-upload h2,
+.kpop-analysis-card h2 {
+  margin: 4px 0 10px;
+  color: #fff;
+  font-size: clamp(22px, 5vw, 32px);
+}
+
+.kpop-analysis-upload p,
+.kpop-analysis-card p,
+.kpop-analysis-card li {
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.kpop-file-picker {
+  display: inline-flex;
+  width: fit-content;
+  cursor: pointer;
+  border: 1px solid #fb7185;
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: #fda4af;
+  font-weight: 700;
+  min-height: 44px;
+  align-items: center;
+}
+
+.kpop-file-picker:focus-within {
+  outline: 3px solid #fef08a;
+  outline-offset: 3px;
+}
+
+.kpop-file-picker input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.kpop-upload-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #292929;
+}
+
+.kpop-field-help {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+.kpop-upload-preview img {
+  width: 92px;
+  height: 92px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.kpop-upload-preview div {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.kpop-upload-preview strong {
+  overflow: hidden;
+  color: #fff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kpop-upload-preview small,
+.kpop-result-heading small {
+  color: #94a3b8;
+}
+
+.kpop-consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #292929;
+  color: #e2e8f0;
+  line-height: 1.5;
+}
+
+.kpop-consent-row input {
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  accent-color: #e11d48;
+}
+
+.kpop-primary-btn:disabled,
+.kpop-result-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.kpop-analysis-message {
+  margin: 0;
+  color: #fda4af !important;
+}
+
+.kpop-result-heading,
+.kpop-result-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.kpop-progress {
+  flex: 1;
+  overflow: hidden;
+  min-width: 140px;
+  height: 12px;
+  border-radius: 999px;
+  background: #3f3f46;
+}
+
+.kpop-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kpop-progress-row > strong {
+  min-width: 72px;
+  color: #fff;
+  font-size: 13px;
+  text-align: right;
+}
+
+.kpop-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #e11d48, #fb7185);
+  transition: width 300ms ease;
+}
+
+.kpop-analysis-results {
+  display: grid;
+  gap: 14px;
+}
+
+.kpop-candidate-list {
+  display: grid;
+  gap: 14px;
+}
+
+.kpop-result-notice,
+.kpop-result-candidate {
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: #292929;
+}
+
+.kpop-result-notice strong,
+.kpop-result-candidate h3 {
+  color: #fff;
+}
+
+.kpop-evidence-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: fit-content;
+  margin: 0 0 10px;
+  padding: 7px 10px;
+  border: 1px solid #a1a1aa;
+  border-radius: 8px;
+  background: #18181b;
+  color: #f4f4f5 !important;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.kpop-evidence-symbol {
+  display: inline-grid;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+.kpop-evidence-badge.is-strong {
+  border-color: #86efac;
+}
+
+.kpop-evidence-badge.is-similar {
+  border-color: #93c5fd;
+}
+
+.kpop-evidence-badge.is-insufficient {
+  border-color: #fcd34d;
+}
+
+.kpop-evidence-note strong,
+.kpop-evidence strong {
+  color: #fff;
+}
+
+.kpop-result-candidate a {
+  color: #fda4af;
+}
+
+.kpop-result-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.kpop-result-actions button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid #fb7185;
+  border-radius: 999px;
+  background: transparent;
+  color: #fda4af;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 9px 13px;
+}
+
+.kpop-result-actions a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 8px 4px;
+}
+
+.kpop-product-search,
+.kpop-saved-list {
+  display: grid;
+  width: min(100%, 840px);
+  gap: 18px;
+}
+
+.kpop-product-search h2,
+.kpop-saved-list h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(24px, 5vw, 36px);
+}
+
+.kpop-product-filters {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.kpop-product-filters label {
+  display: grid;
+  min-width: min(100%, 320px);
+  gap: 7px;
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
+.kpop-product-filters input {
+  min-height: 44px;
+  border: 1px solid #52525b;
+  border-radius: 12px;
+  background: #292929;
+  color: #fff;
+  padding: 11px 13px;
+}
+
+.kpop-product-list {
+  display: grid;
+  gap: 14px;
+}
+
+@media (max-width: 520px) {
+  .kpop-upload-preview,
+  .kpop-result-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .kpop-progress-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .kpop-progress-row > strong {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kpop-progress span {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .kpop-evidence-badge,
+  .kpop-file-picker,
+  .kpop-card,
+  .kpop-result-candidate,
+  .kpop-result-notice {
+    border-color: CanvasText;
+  }
 }

@@ -5,6 +5,8 @@ import { DynamicEngine, PATH_TO_SCREEN, resolveRuntimeConfig, useKpopPageData, u
 import { rnPrimitives } from '../src/primitives';
 import { mobileComponentMap } from '../src/componentMap';
 import KrideFocusNativeScreen from '../src/screens/KrideFocusNativeScreen';
+import CommunityNativeScreen from '../src/screens/CommunityNativeScreen';
+import { publicApiOrigin, summarizeMobileFailure } from '../src/mobileDiagnostics';
 
 // Stable references. `useBaseActions` in @kride/core resets form state during
 // render whenever `metadata`/`routeParams`/`initialData` change *by reference*.
@@ -20,6 +22,7 @@ const MOBILE_ROUTE_ALIASES: Record<string, string> = {
   '/register': '/REGISTER_PAGE',
   '/set-time': '/SET_TIME_PAGE',
   '/tutorial': '/TUTORIAL_PAGE',
+  '/community': '/COMMUNITY_LIST',
 };
 
 const normalizeMobileRoute = (rawPath: string) => {
@@ -33,12 +36,27 @@ const normalizeMobileRoute = (rawPath: string) => {
 };
 
 export default function MobileScreen() {
-  const { screenId } = useLocalSearchParams<{ screenId: string }>();
+  const { screenId, artistId, eventId, jobId, region, from, to, q } = useLocalSearchParams<{
+    screenId: string;
+    artistId?: string;
+    eventId?: string;
+    jobId?: string;
+    region?: string;
+    from?: string;
+    to?: string;
+    q?: string;
+  }>();
   const router = useRouter();
   const sid = screenId ?? 'MAIN_PAGE';
   const apiBase = resolveRuntimeConfig({ apiBase: process.env.EXPO_PUBLIC_API_BASE }).apiBase;
   const { data, isLoading, error } = useUiScreen(sid, apiBase);
-  const { data: kpopPageData } = useKpopPageData(sid, apiBase);
+  const { data: kpopPageData } = useKpopPageData(sid, apiBase, {
+    artistId,
+    eventId,
+    region,
+    from,
+    to,
+  });
 
   // react-query keeps `data` referentially stable until it actually changes;
   // fall back to a module-level constant so the reference is stable while loading.
@@ -61,6 +79,13 @@ export default function MobileScreen() {
   );
   const routeParams = useMemo(() => ({ screenId }), [screenId]);
   const runtime = useMemo(() => ({ apiBase }), [apiBase]);
+  const analysisPageData = useMemo(() => ({ jobId: jobId || '' }), [jobId]);
+  const productPageData = useMemo(() => ({ q: q || '', artistId: artistId || '', eventId: eventId || '' }), [artistId, eventId, q]);
+  const dynamicPageData = sid === 'KPOP_AI_RESULT'
+    ? analysisPageData
+    : sid === 'KPOP_PRODUCTS'
+      ? productPageData
+      : (kpopPageData ?? EMPTY_OBJ);
 
   const page = usePageHook(sid, metadata, EMPTY_OBJ, navigation, routeParams, runtime);
 
@@ -71,6 +96,14 @@ export default function MobileScreen() {
     return <KrideFocusNativeScreen apiBase={apiBase} onBack={() => router.back()} />;
   }
 
+  // COMMUNITY_LIST predates the newer SDUI screen migrations and is already
+  // linked from MAIN_PAGE. Render its native workflow directly so mobile post,
+  // comment, like/follow, and report actions remain usable even when a target
+  // environment has not received optional community presentation metadata.
+  if (sid === 'COMMUNITY_LIST') {
+    return <CommunityNativeScreen apiBase={apiBase} onBack={() => router.back()} />;
+  }
+
   // The loading/error screens double as a diagnostic surface: release APKs
   // give us no logs, so the target server and failure reason must be readable
   // on the device itself.
@@ -79,20 +112,21 @@ export default function MobileScreen() {
       <View className="flex-1 items-center justify-center px-6">
         <Text>불러오는 중…</Text>
         <Text className="mt-2 text-xs text-neutral-400">
-          {sid} · {apiBase || 'API 주소가 설정되지 않았습니다'}
+          {sid} · {publicApiOrigin(apiBase)}
         </Text>
       </View>
     );
   }
   if (error) {
+    const failure = summarizeMobileFailure(error);
     return (
       <View className="flex-1 items-center justify-center px-6">
         <Text className="text-red-600">화면을 불러오지 못했습니다.</Text>
         <Text className="mt-2 text-center text-xs text-neutral-500">
-          {sid} · {apiBase || 'API 주소가 설정되지 않았습니다'}
+          {sid} · {publicApiOrigin(apiBase)}
         </Text>
         <Text className="mt-1 text-center text-xs text-neutral-400">
-          {error instanceof Error ? error.message : String(error)}
+          {failure.message} 진단 코드: {failure.code}
         </Text>
       </View>
     );
@@ -105,11 +139,12 @@ export default function MobileScreen() {
         <DynamicEngine
           metadata={metadata}
           screenId={sid}
-          pageData={kpopPageData ?? EMPTY_OBJ}
+          pageData={dynamicPageData}
           formData={page.formData}
           setFormData={page.setFormData}
           onChange={page.handleChange}
           onAction={page.handleAction}
+          apiBase={apiBase}
           primitives={rnPrimitives}
           componentMap={mobileComponentMap}
         />

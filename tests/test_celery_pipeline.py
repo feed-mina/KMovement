@@ -84,7 +84,12 @@ sys.modules.setdefault("src.api.ensemble_client", _ensemble)
 
 import src.api.fastapi_server as server  # noqa: E402
 from src.api.celery_app import celery  # noqa: E402
-from src.api.tasks import cleanup_stale_temp_paths, task_generate_tts, task_generate_video  # noqa: E402
+from src.api.tasks import (  # noqa: E402
+    cleanup_stale_temp_paths,
+    task_analyze_kpop_outfit,
+    task_generate_tts,
+    task_generate_video,
+)
 
 
 client = TestClient(server.app, raise_server_exceptions=False)
@@ -224,6 +229,53 @@ def test_celery_sse_emits_changes_done_and_proxy_headers(monkeypatch) -> None:
 def test_celery_sse_requires_internal_api_key() -> None:
     response = client.get(f"/jobs/celery/{CELERY_TASK_ID}/stream")
     assert response.status_code == 401
+
+
+def test_kpop_outfit_task_reports_progress_and_never_claims_an_unproven_match(monkeypatch) -> None:
+    update_state = MagicMock()
+    monkeypatch.setattr(task_analyze_kpop_outfit, "update_state", update_state)
+
+    result = task_analyze_kpop_outfit.run(
+        "kpop-analysis/42/85a9f8bb-e57b-4b8d-a1ca-5a1f34cb764a.webp",
+        "image/webp",
+        "user-owned-image-analysis",
+    )
+
+    assert result == {
+        "grade": "INSUFFICIENT_EVIDENCE",
+        "confidence": 0.0,
+        "evidence": [
+            {
+                "type": "metadata",
+                "score": 0.0,
+                "source": "analysis_model_not_connected",
+            }
+        ],
+        "candidates": [],
+    }
+    assert "sourceKey" not in result
+    assert "source_key" not in result
+    assert [entry.kwargs for entry in update_state.call_args_list] == [
+        {"state": "ANALYSIS_VALIDATING", "meta": {"step": "validating_input", "progress": 10}},
+        {"state": "ANALYSIS_RUNNING", "meta": {"step": "grading_evidence", "progress": 90}},
+    ]
+
+
+def test_kpop_outfit_task_rejects_a_source_outside_the_user_analysis_namespace(monkeypatch) -> None:
+    update_state = MagicMock()
+    monkeypatch.setattr(task_analyze_kpop_outfit, "update_state", update_state)
+
+    with pytest.raises(ValueError, match="source key"):
+        task_analyze_kpop_outfit.run(
+            "kpop-analysis/42/../../private.jpg",
+            "image/jpeg",
+            "user-owned-image-analysis",
+        )
+
+    update_state.assert_called_once_with(
+        state="ANALYSIS_VALIDATING",
+        meta={"step": "validating_input", "progress": 10},
+    )
 
 
 def test_cleanup_stale_temp_paths_preserves_fresh_entries(tmp_path: Path) -> None:
@@ -440,6 +492,7 @@ def test_video_retries_for_case_insensitive_failed_status(tmp_path: Path, monkey
 
 
 def test_celery_beat_routes_hourly_cleanup_to_maintenance_queue() -> None:
+    assert celery.conf.task_routes["src.api.tasks.task_analyze_kpop_outfit"] == {"queue": "media"}
     assert celery.conf.task_routes["src.api.tasks.task_cleanup_temp"] == {"queue": "maintenance"}
     schedule = celery.conf.beat_schedule["cleanup-orphaned-media-temp-hourly"]
     assert schedule["task"] == "src.api.tasks.task_cleanup_temp"

@@ -186,6 +186,63 @@ def test_tts_and_video_submissions_are_validated_and_do_not_expose_job_tokens(mo
     assert insecure.status_code == 422
 
 
+def test_kpop_outfit_submission_accepts_camel_case_contract_and_requires_internal_auth(monkeypatch):
+    _configure_key(monkeypatch)
+    submit = MagicMock(return_value=_SubmittedResult())
+    monkeypatch.setattr(tasks.task_analyze_kpop_outfit, "apply_async", submit, raising=False)
+    payload = {
+        "sourceKey": "kpop-analysis/42/85a9f8bb-e57b-4b8d-a1ca-5a1f34cb764a.webp",
+        "contentType": "image/webp",
+        "consentScope": "user-owned-image-analysis",
+    }
+
+    unauthorized = client.post("/jobs/celery/kpop-outfit-analysis", json=payload)
+    accepted = client.post(
+        "/jobs/celery/kpop-outfit-analysis",
+        headers=_internal_headers(),
+        json=payload,
+    )
+
+    assert unauthorized.status_code == 401
+    assert accepted.status_code == 200
+    assert accepted.json()["task_id"] == TASK_ID
+    assert "job_token" not in accepted.json()
+    submit.assert_called_once_with(args=(
+        payload["sourceKey"],
+        payload["contentType"],
+        payload["consentScope"],
+    ))
+
+
+def test_kpop_outfit_submission_rejects_non_analysis_paths_and_unsupported_media(monkeypatch):
+    _configure_key(monkeypatch)
+    submit = MagicMock(return_value=_SubmittedResult())
+    monkeypatch.setattr(tasks.task_analyze_kpop_outfit, "apply_async", submit, raising=False)
+
+    invalid_path = client.post(
+        "/jobs/celery/kpop-outfit-analysis",
+        headers=_internal_headers(),
+        json={
+            "sourceKey": "other-prefix/42/input.jpg",
+            "contentType": "image/jpeg",
+            "consentScope": "user-owned-image-analysis",
+        },
+    )
+    invalid_media = client.post(
+        "/jobs/celery/kpop-outfit-analysis",
+        headers=_internal_headers(),
+        json={
+            "sourceKey": "kpop-analysis/42/input.gif",
+            "contentType": "image/gif",
+            "consentScope": "user-owned-image-analysis",
+        },
+    )
+
+    assert invalid_path.status_code == 422
+    assert invalid_media.status_code == 422
+    submit.assert_not_called()
+
+
 def test_cleanup_smoke_submission_accepts_an_empty_body(monkeypatch):
     _configure_key(monkeypatch)
     apply_async = MagicMock(return_value=_SubmittedResult())

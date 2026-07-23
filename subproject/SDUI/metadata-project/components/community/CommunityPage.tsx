@@ -12,6 +12,7 @@ import {
 } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import CommunityDiscussion from '@/components/community/CommunityDiscussion';
 import {
     AnimationStatusResponse,
     BatchImageInput,
@@ -729,11 +730,11 @@ function CommunityDetail({ postId }: { postId: number }) {
     }, [loadPost]);
 
     useEffect(() => {
-        if (!isLoggedIn || !postId) return;
+        if (!isLoggedIn || !postId || post?.moderationStatus !== 'APPROVED') return;
         communityService.getLikeStatus(postId)
             .then((status) => setLiked(status.liked))
             .catch(() => undefined);
-    }, [isLoggedIn, postId]);
+    }, [isLoggedIn, post?.moderationStatus, postId]);
 
     const startAnimPolling = useCallback(() => {
         if (pollingRef.current) return;
@@ -893,22 +894,6 @@ function CommunityDetail({ postId }: { postId: number }) {
         }
     };
 
-    const reportPost = async () => {
-        if (!isLoggedIn) {
-            alert('로그인이 필요한 기능입니다.');
-            router.push('/view/LOGIN_PAGE');
-            return;
-        }
-        const detailText = window.prompt('신고 사유를 입력해주세요.');
-        if (!detailText) return;
-        try {
-            await communityService.reportPost(postId, 'ETC', detailText);
-            alert('신고가 접수되었습니다.');
-        } catch {
-            alert('신고 처리에 실패했습니다.');
-        }
-    };
-
     const followAuthor = async () => {
         if (!isLoggedIn || !post?.authorSqno) {
             alert('로그인이 필요한 기능입니다.');
@@ -961,6 +946,7 @@ function CommunityDetail({ postId }: { postId: number }) {
         : '';
     const hasBatchProgress =
         typeof animStatus?.totalImages === 'number' && animStatus.totalImages > 1;
+    const moderationStatus = post.moderationStatus ?? 'APPROVED';
 
     return (
         <div className="community-page community-detail-page">
@@ -991,6 +977,19 @@ function CommunityDetail({ postId }: { postId: number }) {
                         <span>좋아요 {post.likeCount ?? 0}</span>
                     </div>
                 </header>
+
+                {moderationStatus === 'PENDING' && (
+                    <div className="community-moderation-notice" role="status">
+                        <strong>운영 검수 대기 중입니다.</strong>
+                        <span>검수가 끝나면 다른 여행자에게 공개되고 댓글·좋아요를 받을 수 있습니다.</span>
+                    </div>
+                )}
+                {moderationStatus === 'REJECTED' && (
+                    <div className="community-moderation-notice is-rejected" role="status">
+                        <strong>이 글은 공개되지 않았습니다.</strong>
+                        <span>내용을 수정해 다시 등록하거나 운영 기준에 맞는지 확인해 주세요.</span>
+                    </div>
+                )}
 
                 {post.images?.length > 0 && (
                     <div className="community-detail-images">
@@ -1239,19 +1238,30 @@ function CommunityDetail({ postId }: { postId: number }) {
 
                 <div className="community-content">{post.content}</div>
 
-                <div className="community-detail-actions">
-                    <button className={liked ? 'community-primary-btn' : 'community-secondary-btn'} type="button" onClick={toggleLike}>
-                        {liked ? '좋아요 취소' : '좋아요'}
-                    </button>
-                    {!isOwner && (
-                        <button className="community-secondary-btn" type="button" onClick={followAuthor}>
-                            작성자 팔로우
-                        </button>
-                    )}
-                    <button className="community-secondary-btn" type="button" onClick={reportPost}>
-                        신고
-                    </button>
-                </div>
+                {moderationStatus === 'APPROVED' && (
+                    <>
+                        <div className="community-detail-actions">
+                            <button className={liked ? 'community-primary-btn' : 'community-secondary-btn'} type="button" onClick={toggleLike}>
+                                {liked ? '좋아요 취소' : '좋아요'}
+                            </button>
+                            {!isOwner && (
+                                <button className="community-secondary-btn" type="button" onClick={followAuthor}>
+                                    작성자 팔로우
+                                </button>
+                            )}
+                        </div>
+
+                        <CommunityDiscussion
+                            postId={postId}
+                            isLoggedIn={isLoggedIn}
+                            currentUserSqno={user?.userSqno}
+                            onRequireLogin={() => {
+                                alert('로그인이 필요한 기능입니다.');
+                                router.push('/view/LOGIN_PAGE');
+                            }}
+                        />
+                    </>
+                )}
             </article>
         </div>
     );

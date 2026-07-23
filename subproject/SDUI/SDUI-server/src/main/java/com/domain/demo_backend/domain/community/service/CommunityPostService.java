@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -26,15 +27,12 @@ public class CommunityPostService {
     private final UserRepository userRepository;
     private final SupabaseStorageService storageService;
 
-    private static final int MIN_IMAGES = 1;
     private static final int MAX_IMAGES = 10;
 
     @Transactional
     public PostResponse createPost(Long userSqno, PostCreateRequest request, List<MultipartFile> images) {
-        if (images == null || images.stream().noneMatch(f -> !f.isEmpty())) {
-            throw new IllegalArgumentException("이미지를 최소 1장 이상 첨부해야 합니다.");
-        }
-        long validCount = images.stream().filter(f -> !f.isEmpty()).count();
+        List<MultipartFile> files = images == null ? List.of() : images;
+        long validCount = files.stream().filter(f -> !f.isEmpty()).count();
         if (validCount > MAX_IMAGES) {
             throw new IllegalArgumentException("이미지는 최대 " + MAX_IMAGES + "장까지 가능합니다.");
         }
@@ -52,7 +50,7 @@ public class CommunityPostService {
 
         int sortOrder = 1;
         int failCount = 0;
-        for (MultipartFile file : images) {
+        for (MultipartFile file : files) {
             if (file.isEmpty()) continue;
             try {
                 String publicUrl = storageService.upload(file, post.getPostId());
@@ -81,15 +79,28 @@ public class CommunityPostService {
 
     @Transactional(readOnly = true)
     public Page<PostListResponse> getPostList(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return postRepository.findByDelYnOrderByCreatedAtDesc("N", pageable)
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, Math.max(1, size)));
+        return postRepository.findByDelYnAndModerationStatusOrderByCreatedAtDesc(
+                        "N", ContentModerationStatus.APPROVED, pageable)
                 .map(PostListResponse::from);
     }
 
     @Transactional(readOnly = true)
     public PostResponse getPostDetail(Long postId) {
+        return getPostDetail(postId, null, false);
+    }
+
+    @Transactional(readOnly = true)
+    public PostResponse getPostDetail(Long postId, Long viewerSqno, boolean admin) {
         CommunityPost post = postRepository.findByPostIdWithDetails(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        Long authorSqno = post.getAuthorSqno() != null
+                ? post.getAuthorSqno()
+                : post.getAuthor() == null ? null : post.getAuthor().getUserSqno();
+        boolean owner = viewerSqno != null && viewerSqno.equals(authorSqno);
+        if (post.getModerationStatus() != ContentModerationStatus.APPROVED && !owner && !admin) {
+            throw new IllegalArgumentException("Published post not found.");
+        }
         return PostResponse.from(post);
     }
 
@@ -109,6 +120,12 @@ public class CommunityPostService {
             post.setContent(request.getContent());
         }
 
+        post.setModerationStatus(ContentModerationStatus.PENDING);
+        post.setModeratedBy(null);
+        post.setModeratedAt(null);
+        post.setModerationNote(null);
+        post.setModerationDueAt(LocalDateTime.now().plusHours(24));
+
         // 기존 이미지 중 유지할 이미지만 남기기
         if (request.getRetainedImages() != null) {
             post.getImages().removeIf(img ->
@@ -119,9 +136,6 @@ public class CommunityPostService {
         long newValidCount = (newImages == null) ? 0 : newImages.stream().filter(f -> !f.isEmpty()).count();
         long totalCount = retainedCount + newValidCount;
 
-        if (totalCount < MIN_IMAGES) {
-            throw new IllegalArgumentException("이미지를 최소 1장 이상 첨부해야 합니다.");
-        }
         if (totalCount > MAX_IMAGES) {
             throw new IllegalArgumentException("이미지는 최대 " + MAX_IMAGES + "장까지 가능합니다.");
         }
