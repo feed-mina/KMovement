@@ -33,7 +33,7 @@ def test_vercel_git_deployments_are_main_only() -> None:
 
     assert config["git"]["deploymentEnabled"] == {
         "main": True,
-        "*": False,
+        "**": False,
     }
     assert config["ignoreCommand"] == (
         "git diff HEAD^ HEAD --quiet -- . && exit 0 || exit 1"
