@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 from pathlib import Path
 
 
@@ -192,6 +193,42 @@ def test_runpod_cost_audit_is_manual_read_only_and_redacted() -> None:
     assert "jq -r" in workflow
     assert ".env" not in workflow
     assert "template.env" not in workflow.lower()
+
+    billing_filter_marker = '--slurpfile volumes "$volume_billing_file" ' + "\\"
+    assert billing_filter_marker in workflow
+    billing_filter = workflow.split(billing_filter_marker, 1)[1].split("'", 2)[1]
+    compiled = subprocess.run(
+        [
+            "jq",
+            "--null-input",
+            "--arg",
+            "start",
+            "2026-06-23T00:00:00Z",
+            "--arg",
+            "end",
+            "2026-07-23T00:00:00Z",
+            "--argjson",
+            "endpoints",
+            '[[{"amount": 2.5, "timeBilledMs": 5400000}]]',
+            "--argjson",
+            "pods",
+            '[[{"amount": 1.25, "timeBilledMs": 3600000}]]',
+            "--argjson",
+            "volumes",
+            '[[{"amount": 0.2, "highPerformanceStorageAmount": 0.3}]]',
+            billing_filter,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    summary = json.loads(compiled.stdout)
+    assert summary["serverless_usd"] == 2.5
+    assert summary["serverless_billed_hours"] == 1.5
+    assert summary["pods_usd"] == 1.25
+    assert summary["pods_billed_hours"] == 1
+    assert summary["network_volumes_standard_usd"] == 0.2
+    assert summary["network_volumes_high_performance_usd"] == 0.3
 
 
 def test_mobile_runbook_blocks_duplicate_eas_builds() -> None:
