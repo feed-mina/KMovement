@@ -104,6 +104,8 @@ body {
 
 .kpop-card button,
 .kpop-primary-btn {
+  min-width: 44px;
+  min-height: 44px;
   width: fit-content;
   border: 0;
   border-radius: 999px;
@@ -112,6 +114,21 @@ body {
   cursor: pointer;
   font-weight: 700;
   padding: 10px 14px;
+}
+
+.kpop-card button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.kpop-card button:focus-visible,
+.kpop-primary-btn:focus-visible,
+.kpop-result-actions button:focus-visible,
+.kpop-result-actions a:focus-visible,
+.kpop-product-filters input:focus-visible,
+.kpop-consent-row input:focus-visible {
+  outline: 3px solid #fef08a;
+  outline-offset: 3px;
 }
 
 .kpop-card small {
@@ -152,6 +169,13 @@ body {
   padding: 10px 14px;
   color: #fda4af;
   font-weight: 700;
+  min-height: 44px;
+  align-items: center;
+}
+
+.kpop-file-picker:focus-within {
+  outline: 3px solid #fef08a;
+  outline-offset: 3px;
 }
 
 .kpop-file-picker input {
@@ -169,6 +193,12 @@ body {
   padding: 12px;
   border-radius: 14px;
   background: #292929;
+}
+
+.kpop-field-help {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 13px;
 }
 
 .kpop-upload-preview img {
@@ -208,8 +238,8 @@ body {
 }
 
 .kpop-consent-row input {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   margin-top: 2px;
   accent-color: #e11d48;
 }
@@ -234,10 +264,25 @@ body {
 }
 
 .kpop-progress {
+  flex: 1;
   overflow: hidden;
-  height: 8px;
+  min-width: 140px;
+  height: 12px;
   border-radius: 999px;
   background: #3f3f46;
+}
+
+.kpop-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kpop-progress-row > strong {
+  min-width: 72px;
+  color: #fff;
+  font-size: 13px;
+  text-align: right;
 }
 
 .kpop-progress span {
@@ -249,6 +294,11 @@ body {
 }
 
 .kpop-analysis-results {
+  display: grid;
+  gap: 14px;
+}
+
+.kpop-candidate-list {
   display: grid;
   gap: 14px;
 }
@@ -266,6 +316,49 @@ body {
   color: #fff;
 }
 
+.kpop-evidence-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: fit-content;
+  margin: 0 0 10px;
+  padding: 7px 10px;
+  border: 1px solid #a1a1aa;
+  border-radius: 8px;
+  background: #18181b;
+  color: #f4f4f5 !important;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.kpop-evidence-symbol {
+  display: inline-grid;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+.kpop-evidence-badge.is-strong {
+  border-color: #86efac;
+}
+
+.kpop-evidence-badge.is-similar {
+  border-color: #93c5fd;
+}
+
+.kpop-evidence-badge.is-insufficient {
+  border-color: #fcd34d;
+}
+
+.kpop-evidence-note strong,
+.kpop-evidence strong {
+  color: #fff;
+}
+
 .kpop-result-candidate a {
   color: #fda4af;
 }
@@ -276,6 +369,8 @@ body {
 }
 
 .kpop-result-actions button {
+  min-width: 44px;
+  min-height: 44px;
   border: 1px solid #fb7185;
   border-radius: 999px;
   background: transparent;
@@ -283,6 +378,13 @@ body {
   cursor: pointer;
   font-weight: 700;
   padding: 9px 13px;
+}
+
+.kpop-result-actions a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 8px 4px;
 }
 
 .kpop-product-search,
@@ -315,6 +417,7 @@ body {
 }
 
 .kpop-product-filters input {
+  min-height: 44px;
   border: 1px solid #52525b;
   border-radius: 12px;
   background: #292929;
@@ -332,5 +435,30 @@ body {
   .kpop-result-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .kpop-progress-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .kpop-progress-row > strong {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kpop-progress span {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .kpop-evidence-badge,
+  .kpop-file-picker,
+  .kpop-card,
+  .kpop-result-candidate,
+  .kpop-result-notice {
+    border-color: CanvasText;
   }
 }

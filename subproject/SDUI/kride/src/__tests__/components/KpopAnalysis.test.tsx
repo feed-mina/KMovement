@@ -48,6 +48,8 @@ describe('K-POP web analysis leaves', () => {
     const file = new File(['photo'], 'outfit.jpg', { type: 'image/jpeg' });
 
     fireEvent.change(container.querySelector('input[type="file"]')!, { target: { files: [file] } });
+    expect(screen.getByLabelText('다른 사진 선택')).toHaveAccessibleDescription(/지원 형식 JPG, PNG, WebP/);
+    expect(screen.getByRole('img', { name: '선택한 분석 사진 미리보기: outfit.jpg' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '후보 분석 시작' })).toBeDisabled();
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', { name: '후보 분석 시작' }));
@@ -69,6 +71,21 @@ describe('K-POP web analysis leaves', () => {
     );
   });
 
+  it('exposes numeric progress and connection state without relying on color', async () => {
+    getKpopAnalysisJob.mockResolvedValue({ jobId: 91, status: 'RUNNING', progressPct: 42 });
+    streamKpopAnalysisJob.mockImplementation(() => new Promise(() => undefined));
+
+    render(<AiResultCard apiBase="https://api.example.com" data={{ jobId: 91 }} />);
+
+    const progress = await screen.findByRole('progressbar', { name: '의상 후보 분석 진행률' });
+    expect(progress).toHaveAttribute('aria-valuemin', '0');
+    expect(progress).toHaveAttribute('aria-valuemax', '100');
+    expect(progress).toHaveAttribute('aria-valuenow', '42');
+    expect(progress).toHaveAttribute('aria-valuetext', '42% 완료');
+    expect(screen.getByText('42% 완료')).toBeInTheDocument();
+    expect(await screen.findByText(/연결 방식: 실시간 상태 연결/)).toBeInTheDocument();
+  });
+
   it('renders structured evidence safely and honors the backend sourceDeleted flag', async () => {
     getKpopAnalysisJob.mockResolvedValue({
       jobId: 91,
@@ -84,6 +101,7 @@ describe('K-POP web analysis leaves', () => {
     render(<AiResultCard apiBase="https://api.example.com" data={{ jobId: 91 }} />);
 
     expect(await screen.findByText(/근거 유형 visual_similarity/)).toHaveTextContent('근거 참고 점수 0.42');
+    expect(screen.getByRole('note')).toHaveTextContent('근거 수준: 근거 부족');
     expect(screen.getByText(/AI 결과는 비교를 시작하기 위한 후보/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '원본 사진 삭제됨' })).toBeDisabled();
     expect(streamKpopAnalysisJob).not.toHaveBeenCalled();
@@ -107,9 +125,24 @@ describe('K-POP web analysis leaves', () => {
 
     render(<AiResultCard apiBase="https://api.example.com" data={{ jobId: 91 }} />);
     const saveButton = await screen.findByRole('button', { name: '후보 저장' });
+    expect(saveButton).toHaveAttribute('aria-pressed', 'false');
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     fireEvent.click(saveButton);
     await waitFor(() => expect(saveKpopProductCandidate).toHaveBeenCalledWith('https://api.example.com', 17));
     expect(await screen.findByText('후보를 저장했습니다.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '저장 해제' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('does not expose internal upload errors in the live status message', async () => {
+    presignKpopAnalysisAsset.mockRejectedValue(new Error('signed URL failed with internal-token-value'));
+    const { container } = render(<UploadConsent apiBase="https://api.example.com" />);
+    const file = new File(['photo'], 'outfit.jpg', { type: 'image/jpeg' });
+
+    fireEvent.change(container.querySelector('input[type="file"]')!, { target: { files: [file] } });
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: '후보 분석 시작' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent('요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+    expect(screen.queryByText(/internal-token-value/)).not.toBeInTheDocument();
   });
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useId, useMemo, useState } from 'react';
 import {
   canOpenKpopOfficialUrl,
   deleteKpopSavedItem,
@@ -10,6 +10,7 @@ import {
   type KpopProductCandidate,
   type KpopSavedItem,
 } from '@kride/core';
+import KpopEvidenceBadge from '@/components/kride/KpopEvidenceBadge';
 
 type LeafProps = {
   data?: Record<string, any>;
@@ -21,7 +22,10 @@ const errorCopy = (error: unknown, action = '요청') => {
   if (message === '401' || message.toLowerCase().includes('unauthorized')) {
     return `${action}하려면 로그인해 주세요.`;
   }
-  return message || `${action}을 처리하지 못했습니다.`;
+  if (message === '429' || message.toLowerCase().includes('too many requests')) {
+    return '요청이 많습니다. 잠시 후 다시 시도해 주세요.';
+  }
+  return `${action}을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.`;
 };
 
 export const productGradeCopy = (grade?: string) => {
@@ -44,6 +48,8 @@ export function ProductCandidateCard({
   apiBase?: string;
   onRemoved?: (candidate: KpopProductCandidate) => void;
 }) {
+  const titleId = useId();
+  const evidenceId = useId();
   const [savedItemId, setSavedItemId] = useState<string | number | undefined>(candidate.savedItemId);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -74,25 +80,31 @@ export function ProductCandidateCard({
   };
 
   return (
-    <article className="kpop-result-candidate">
-      <p className="kpop-eyebrow">{productGradeCopy(candidate.evidenceGrade)}</p>
-      <h3>{candidate.name}</h3>
+    <article className="kpop-result-candidate" role="listitem" aria-labelledby={titleId} aria-describedby={evidenceId}>
+      <KpopEvidenceBadge id={evidenceId} grade={candidate.evidenceGrade} label={productGradeCopy(candidate.evidenceGrade)} />
+      <h3 id={titleId}>{candidate.name || '이름이 확인되지 않은 상품 후보'}</h3>
       {candidate.brand ? <p>{candidate.brand}</p> : null}
       {typeof candidate.confidence === 'number' ? (
-        <p className="kpop-evidence">모델 참고 점수 {Math.round(candidate.confidence)} / 100</p>
+        <p className="kpop-evidence"><strong>모델 참고 점수:</strong> {Math.round(candidate.confidence)} / 100</p>
       ) : null}
-      {candidate.evidenceText ? <p>{candidate.evidenceText}</p> : (
-        <p>확인 가능한 근거가 없습니다. 근거 부족은 정상적인 결과이며 상품을 단정하지 않습니다.</p>
+      {candidate.evidenceText ? <p><strong>확인 근거:</strong> {candidate.evidenceText}</p> : (
+        <p><strong>확인 근거:</strong> 제공되지 않았습니다. 근거 부족은 정상적인 결과이며 상품을 단정하지 않습니다.</p>
       )}
       <div className="kpop-result-actions">
-        <button type="button" disabled={busy || !candidate.id} onClick={toggleSaved}>
+        <button
+          type="button"
+          aria-pressed={Boolean(savedItemId)}
+          aria-busy={busy}
+          disabled={busy || !candidate.id}
+          onClick={toggleSaved}
+        >
           {busy ? '처리 중…' : savedItemId ? '저장 해제' : '후보 저장'}
         </button>
         {canOpen ? (
-          <a href={candidate.officialUrl} target="_blank" rel="noreferrer">권리 확인된 공식 출처</a>
+          <a href={candidate.officialUrl} target="_blank" rel="noreferrer">권리 확인된 공식 출처 <span>(새 창)</span></a>
         ) : null}
       </div>
-      {message ? <p className="kpop-analysis-message" role="status">{message}</p> : null}
+      {message ? <p className="kpop-analysis-message" role="status" aria-live="polite" aria-atomic="true">{message}</p> : null}
     </article>
   );
 }
@@ -106,6 +118,7 @@ const savedByProduct = (items: KpopSavedItem[]) => {
 };
 
 export function ProductSearch({ data, apiBase = '' }: LeafProps) {
+  const helpId = useId();
   const [q, setQ] = useState(String(data?.q ?? ''));
   const artistId = String(data?.artistId ?? '');
   const eventId = String(data?.eventId ?? '');
@@ -140,21 +153,33 @@ export function ProductSearch({ data, apiBase = '' }: LeafProps) {
     void runSearch();
   }, []); // Route query values are initial filters; subsequent searches are explicit.
 
+  const submitSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void runSearch();
+  };
+
   return (
     <section className="kpop-product-search" aria-labelledby="kpop-product-search-title">
       <h2 id="kpop-product-search-title">상품 후보 검색</h2>
-      <p>검색 결과는 후보이며 동일 상품·정품·구매 적합성을 보증하지 않습니다.</p>
-      <div className="kpop-product-filters">
+      <p id={helpId}>검색 결과는 후보이며 동일 상품·정품·구매 적합성을 보증하지 않습니다.</p>
+      <form className="kpop-product-filters" role="search" onSubmit={submitSearch}>
         <label>
           키워드
-          <input aria-label="상품 키워드" value={q} onChange={(event) => setQ(event.target.value)} placeholder="상품명 또는 브랜드" />
+          <input
+            type="search"
+            aria-label="상품 키워드"
+            aria-describedby={helpId}
+            value={q}
+            onChange={(event) => setQ(event.target.value)}
+            placeholder="상품명 또는 브랜드"
+          />
         </label>
-        <button type="button" className="kpop-primary-btn" disabled={busy} onClick={() => void runSearch()}>
+        <button type="submit" className="kpop-primary-btn" aria-busy={busy} disabled={busy}>
           {busy ? '검색 중…' : '후보 검색'}
         </button>
-      </div>
-      {message ? <p className="kpop-analysis-message" role="status">{message}</p> : null}
-      <div className="kpop-product-list">
+      </form>
+      {message ? <p className="kpop-analysis-message" role="status" aria-live="polite" aria-atomic="true">{message}</p> : null}
+      <div className="kpop-product-list" role="list" aria-label="상품 검색 후보" aria-busy={busy}>
         {products.map((candidate) => (
           <ProductCandidateCard key={String(candidate.id)} candidate={candidate} apiBase={apiBase} />
         ))}
@@ -190,13 +215,13 @@ export function SavedItemList({ apiBase = '' }: LeafProps) {
     [items],
   );
 
-  if (loading) return <p role="status">저장 목록을 불러오고 있어요.</p>;
+  if (loading) return <p role="status" aria-live="polite">저장 목록을 불러오고 있어요.</p>;
 
   return (
     <section className="kpop-saved-list" aria-labelledby="kpop-saved-list-title">
       <h2 id="kpop-saved-list-title">저장한 상품 후보</h2>
-      {message ? <p className="kpop-analysis-message" role="status">{message}</p> : null}
-      <div className="kpop-product-list">
+      {message ? <p className="kpop-analysis-message" role="status" aria-live="polite" aria-atomic="true">{message}</p> : null}
+      <div className="kpop-product-list" role="list" aria-label="저장한 상품 후보">
         {productItems.map((item) => (
           <ProductCandidateCard
             key={String(item.id)}
