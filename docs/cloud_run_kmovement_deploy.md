@@ -1,5 +1,12 @@
 # KMovement Cloud Run Deployment Notes
 
+> **Archived on 2026-07-23.** EC2 is the canonical production path.
+> The Cloud Run deployment workflow was retired under issue
+> [#177](https://github.com/feed-mina/KMovement/issues/177). Keep this document
+> only as migration history; do not use it to create a new parallel deployment.
+> Before deleting the legacy Cloud Run service or Artifact Registry images,
+> verify 30-day request traffic and preserve a rollback image.
+
 ## Migration Target
 
 Use a Cloud Run service in the new GCP project. Do not deploy new revisions to

@@ -5,8 +5,11 @@ on:
     branches: ["main"]
     paths:
       - "deploy/media_motion/**"
-      - ".github/workflows/deploy-runpod.yml"
   workflow_dispatch:
+
+concurrency:
+  group: runpod-media-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   DOCKERHUB_IMAGE: ${{ secrets.DOCKER_USERNAME }}/kride-media-gpu
@@ -45,7 +48,8 @@ jobs:
           context: .
           file: deploy/media_motion/Dockerfile.runpod
           push: true
-          no-cache: true
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_IMAGE }}:latest
+          cache-to: type=inline
           tags: |
             ${{ env.DOCKERHUB_IMAGE }}:latest
             ${{ env.DOCKERHUB_IMAGE }}:${{ steps.meta.outputs.sha_short }}

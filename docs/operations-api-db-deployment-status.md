@@ -1,5 +1,11 @@
 # 운영 API·DB 서버 배포 현황
 
+> **2026-07-23 이후 이 문서는 과거 현황 기록입니다.** 현재 운영 계약과
+> 비용·폐기 기준은
+> [`deployment-cost-optimization.md`](./deployment-cost-optimization.md)를
+> 따릅니다. 아래의 `deploy-cloud-run.yml`·`deploy-gcp.yml` 안내는 재실행하지
+> 않습니다.
+>
 > 기준일: 2026-07-14 (Asia/Seoul)
 >
 > 근거: 저장소의 GitHub Actions·Docker 배포 설정 및 이 작업 공간에서 확인한 로컬 프로세스.

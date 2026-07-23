@@ -1,0 +1,74 @@
+name: GCP Read-Only Cost Audit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gcp-read-only-cost-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+    steps:
+      - name: Validate audit target
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$GCP_PROJECT_ID" ]; then
+            echo "::error::GCP_PROJECT_ID secret is required."
+            exit 1
+          fi
+          echo "GCP audit target is configured."
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: List compute instances
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud compute instances list \
+            --project "$GCP_PROJECT_ID"
+
+      - name: List persistent disks
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud compute disks list \
+            --project "$GCP_PROJECT_ID"
+
+      - name: List reserved addresses
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud compute addresses list \
+            --project "$GCP_PROJECT_ID"
+
+      - name: List Cloud Run services
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run services list \
+            --platform managed \
+            --project "$GCP_PROJECT_ID"
+
+      - name: List Artifact Registry repositories
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud artifacts repositories list \
+            --project "$GCP_PROJECT_ID"

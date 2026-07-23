@@ -2,7 +2,7 @@ name: CI - Build Verification
 
 on:
   push:
-    branches: ["main", "refactor/krider_backup"]
+    branches: ["main"]
   pull_request:
     branches: ["main"]
 
@@ -101,6 +101,7 @@ jobs:
             tests/test_celery_security.py \
             tests/test_cloudinary_upload.py \
             tests/test_deploy_ec2_recovery.py \
+            tests/test_deployment_cost_controls.py \
             tests/test_fastapi_runpod_routing.py \
             tests/test_result_delivery.py \
             -v --tb=short

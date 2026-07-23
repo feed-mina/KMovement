@@ -69,6 +69,8 @@ jobs:
             docker run -d --name sdui-frontend \
               -p 3000:3000 \
               --network sdui-network \
+              --log-opt max-size=10m \
+              --log-opt max-file=3 \
               -e NODE_ENV=production \
               -e BACKEND_URL=http://sdui-backend:8080 \
               -e FASTAPI_URL=${{ env.KRIDE_FASTAPI_URL }} \
