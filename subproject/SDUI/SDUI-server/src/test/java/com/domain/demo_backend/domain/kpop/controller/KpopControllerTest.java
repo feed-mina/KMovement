@@ -79,13 +79,14 @@ class KpopControllerTest {
     }
 
     @Test
-    void createAnalysisJobReturnsAcceptedWithBothJobIdentifiers() {
+    void replayedAnalysisJobStillReturnsAcceptedWithBothJobIdentifiers() {
         CustomUserDetails user = mock(CustomUserDetails.class);
         when(user.getUserSqno()).thenReturn(42L);
         when(analysisService.submit(anyMap(), anyLong())).thenReturn(Map.of(
                 "jobId", 91L,
                 "taskId", "task-91",
-                "status", "QUEUED"
+                "status", "QUEUED",
+                "idempotentReplay", true
         ));
 
         ResponseEntity<ApiResponse<Map<String, Object>>> response = controller.createAnalysisJob(
@@ -97,7 +98,8 @@ class KpopControllerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getData())
                 .containsEntry("jobId", 91L)
-                .containsEntry("taskId", "task-91");
+                .containsEntry("taskId", "task-91")
+                .containsEntry("idempotentReplay", true);
     }
 
     @Test

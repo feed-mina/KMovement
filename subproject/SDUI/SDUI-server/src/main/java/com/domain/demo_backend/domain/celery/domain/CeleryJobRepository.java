@@ -29,6 +29,12 @@ public interface CeleryJobRepository extends JpaRepository<CeleryJob, Long> {
             LocalDateTime createdAt
     );
 
+    long countByRequestedByAndTaskTypeAndCreatedAtGreaterThanEqual(
+            Long requestedBy,
+            String taskType,
+            LocalDateTime createdAt
+    );
+
     List<CeleryJob> findByStatusNotInAndNotifSentFalse(Collection<String> terminalStatuses);
 
     List<CeleryJob> findByRequestedByAndTaskTypeOrderByCreatedAtDesc(

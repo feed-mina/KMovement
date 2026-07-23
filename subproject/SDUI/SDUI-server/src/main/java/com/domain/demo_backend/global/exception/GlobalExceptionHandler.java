@@ -2,15 +2,18 @@ package com.domain.demo_backend.global.exception;
 
 import com.domain.demo_backend.domain.kakao.service.OperationAlertService;
 import com.domain.demo_backend.global.common.response.ApiResponse;
+import com.domain.demo_backend.global.common.util.RequestIdSupport;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +45,8 @@ public class GlobalExceptionHandler {
         ApiResponse<Void> response = ApiResponse.error(
                 e.getMessage(),
                 e.getClass().getSimpleName(),
-                request.getRequestURI()
+                request.getRequestURI(),
+                RequestIdSupport.getOrCreate(request)
         );
 
         return ResponseEntity
@@ -68,8 +72,11 @@ public class GlobalExceptionHandler {
         ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
                 .status("error")
                 .message("입력값을 확인해주세요")
+                .error("VALIDATION_FAILED")
+                .code("VALIDATION_FAILED")
                 .data(errors)
                 .path(request.getRequestURI())
+                .requestId(RequestIdSupport.getOrCreate(request))
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
@@ -100,7 +107,8 @@ public class GlobalExceptionHandler {
         ApiResponse<Void> response = ApiResponse.error(
                 message,
                 "DataIntegrityViolation",
-                request.getRequestURI()
+                request.getRequestURI(),
+                RequestIdSupport.getOrCreate(request)
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
@@ -119,10 +127,66 @@ public class GlobalExceptionHandler {
         ApiResponse<Void> response = ApiResponse.error(
                 e.getMessage(),
                 "IllegalArgument",
-                request.getRequestURI()
+                request.getRequestURI(),
+                RequestIdSupport.getOrCreate(request)
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException e,
+            HttpServletRequest request
+    ) {
+        String requestId = RequestIdSupport.getOrCreate(request);
+        log.warn("audit_event=malformed_json requestId={}", requestId);
+        ApiResponse<Void> response = ApiResponse.error(
+                "The request body contains malformed JSON.",
+                "MALFORMED_JSON",
+                request.getRequestURI(),
+                requestId
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(KpopRateLimitException.class)
+    public ResponseEntity<ApiResponse<Void>> handleKpopRateLimit(
+            KpopRateLimitException e,
+            HttpServletRequest request
+    ) {
+        String requestId = RequestIdSupport.getOrCreate(request);
+        log.warn("audit_event=kpop_rate_limited code={} retryAfter={} requestId={}",
+                e.getCode(), e.getRetryAfterSeconds(), requestId);
+        ApiResponse<Void> response = ApiResponse.error(
+                safeReason(e, "Too many analysis requests."),
+                e.getCode(),
+                request.getRequestURI(),
+                requestId
+        );
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", String.valueOf(e.getRetryAfterSeconds()))
+                .body(response);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResponseStatusException(
+            ResponseStatusException e,
+            HttpServletRequest request
+    ) {
+        String requestId = RequestIdSupport.getOrCreate(request);
+        String code = e instanceof CodedResponseStatusException coded
+                ? coded.getCode()
+                : "HTTP_" + e.getStatusCode().value();
+        log.warn("audit_event=http_status_error code={} status={} requestId={}",
+                code, e.getStatusCode().value(), requestId);
+        ApiResponse<Void> response = ApiResponse.error(
+                safeReason(e, "The request could not be completed."),
+                code,
+                request.getRequestURI(),
+                requestId
+        );
+        return ResponseEntity.status(e.getStatusCode()).body(response);
     }
 
     /**
@@ -139,7 +203,8 @@ public class GlobalExceptionHandler {
         ApiResponse<Void> response = ApiResponse.error(
                 "서버 내부 오류가 발생했습니다",
                 "InternalError",
-                request.getRequestURI()
+                request.getRequestURI(),
+                RequestIdSupport.getOrCreate(request)
         );
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -159,9 +224,15 @@ public class GlobalExceptionHandler {
         ApiResponse<Void> response = ApiResponse.error(
                 "서버 오류가 발생했습니다",
                 "InternalError",
-                request.getRequestURI()
+                request.getRequestURI(),
+                RequestIdSupport.getOrCreate(request)
         );
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    private String safeReason(ResponseStatusException exception, String fallback) {
+        String reason = exception.getReason();
+        return reason == null || reason.isBlank() ? fallback : reason;
     }
 }

@@ -41,4 +41,10 @@ public class QueryMaster {
 
     @Column(name = "param_mapping", columnDefinition = "TEXT")
     private String paramMapping;
+
+    @Column(name = "use_redis_yn", length = 1)
+    private String useRedisYn;
+
+    @Column(name = "redis_ttl_sec")
+    private Integer redisTtlSec;
 }

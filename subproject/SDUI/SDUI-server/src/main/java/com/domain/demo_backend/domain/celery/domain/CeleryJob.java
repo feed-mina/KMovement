@@ -64,6 +64,9 @@ public class CeleryJob {
     @Column(name = "idempotency_key", length = 120)
     private String idempotencyKey;
 
+    @Column(name = "request_fingerprint", length = 64)
+    private String requestFingerprint;
+
     @Builder.Default
     @Column(name = "notif_sent", nullable = false)
     private boolean notifSent = false;

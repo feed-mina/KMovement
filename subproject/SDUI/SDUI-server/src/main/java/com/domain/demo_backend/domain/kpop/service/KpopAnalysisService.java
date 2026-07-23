@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -66,19 +67,29 @@ public class KpopAnalysisService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Idempotency key is too long.");
         }
 
+        Map<String, Object> jobPayload = Map.of(
+                "sourceKey", sourceKey,
+                "contentType", contentType,
+                "consentScope", consentScope,
+                "idempotencyKey", idempotencyKey
+        );
+        Optional<CeleryJob> replay = celeryJobService.findReusableKpopJob(jobPayload, userSqno);
+        if (replay.isPresent()) {
+            Map<String, Object> response = new LinkedHashMap<>(snapshot(replay.get(), false));
+            response.put("idempotentReplay", true);
+            return response;
+        }
+
         try {
             s3Service.validateKpopAnalysisObject(sourceKey, userSqno, contentType);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
 
-        CeleryJob job = celeryJobService.submitJob(TASK_TYPE, Map.of(
-                "sourceKey", sourceKey,
-                "contentType", contentType,
-                "consentScope", consentScope,
-                "idempotencyKey", idempotencyKey
-        ), userSqno);
-        return snapshot(job, false);
+        CeleryJob job = celeryJobService.submitJob(TASK_TYPE, jobPayload, userSqno);
+        Map<String, Object> response = new LinkedHashMap<>(snapshot(job, false));
+        response.put("idempotentReplay", false);
+        return response;
     }
 
     public Map<String, Object> snapshot(Long jobId, Long userSqno, boolean refresh) {
