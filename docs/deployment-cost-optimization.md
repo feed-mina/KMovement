@@ -98,8 +98,8 @@ Vercel dashboard에서 연결 repository, project root, Production Branch가
 - Ignored Build Step은 선택된 K-Ride Root Directory에서 실행되므로
   `git diff HEAD^ HEAD --quiet -- .`로 현재 앱 전체의 변경을 판정한다.
 - 최근 Production/Preview 수와 사용량을 변경 전후로 기록한다.
-- `main=true`, `"*=false"`가 적용된 다음 non-main push가 새 Preview를
-  만들지 않는지 확인한다.
+- `main=true`, `"**=false"`가 적용된 다음 `/`를 포함한 중첩 브랜치를
+  포함해 non-main push가 새 Preview를 만들지 않는지 확인한다.
 - public domain이 현재 Production deployment를 가리키는지 확인한다.
 - 사용 중인 Vercel project와 Production deployment는 삭제하지 않는다.
 
