@@ -158,9 +158,9 @@ jobs:
               period_start: $start,
               period_end: $end,
               serverless_usd: ([$endpoints[0][]?.amount // 0] | add // 0),
-              serverless_billed_hours: ([$endpoints[0][]?.timeBilledMs // 0] | add // 0) / 3600000,
+              serverless_billed_hours: (([$endpoints[0][]?.timeBilledMs // 0] | add // 0) / 3600000),
               pods_usd: ([$pods[0][]?.amount // 0] | add // 0),
-              pods_billed_hours: ([$pods[0][]?.timeBilledMs // 0] | add // 0) / 3600000,
+              pods_billed_hours: (([$pods[0][]?.timeBilledMs // 0] | add // 0) / 3600000),
               network_volumes_standard_usd: ([$volumes[0][]?.amount // 0] | add // 0),
               network_volumes_high_performance_usd:
                 ([$volumes[0][]?.highPerformanceStorageAmount // 0] | add // 0)
