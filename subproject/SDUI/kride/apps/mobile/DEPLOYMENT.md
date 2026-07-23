@@ -57,10 +57,13 @@ exercise map screens.
 Use this before opening or updating an EAS build:
 
 ```powershell
+$env:EXPO_NO_WATCHMAN = "1"
 npm run export:android
 ```
 
 This validates that the Expo Router entry, Metro config, and Android JS bundle are all coherent.
+If this still remains at `Starting Metro Bundler`, treat the export as failed; do
+not publish an OTA from an unverified bundle.
 
 ## EAS Android Builds
 
@@ -69,13 +72,20 @@ The app has two Android build profiles in `eas.json`:
 - `preview`: internal APK for device testing.
 - `production`: AAB artifact for release verification.
 
-Login first:
+Authenticate and verify the project before the first build:
 
 ```powershell
 eas login
+eas whoami
+eas project:info
+eas env:list preview --format short
 ```
 
-Then build:
+The `preview` EAS environment must define `EXPO_PUBLIC_API_BASE`. Do not use
+`--include-sensitive` while checking the environment. The `env` block in the
+build profile is not automatically reused by `eas update`.
+
+Then build the new native runtime:
 
 ```powershell
 npm run eas:build:preview
@@ -91,8 +101,12 @@ Use EAS managed credentials unless a project keystore has already been provision
 
 - `preview` builds receive updates from the `preview` channel.
 - `production` builds receive updates from the `production` channel.
-- `runtimeVersion` follows the app version (`0.1.0` now). Keep the same version
-  for JS-only fixes; bump the app version when native runtime changes.
+- `runtimeVersion` follows the app version (`0.2.0` now). Keep the same version
+  only for JS-only fixes against the same native runtime.
+- `0.2.0` is the first runtime that includes `expo-image-picker` and
+  `expo-file-system`. Build and install a new `preview` APK before publishing
+  any OTA that imports those modules. Existing `0.1.0` binaries are not a valid
+  test target for this batch.
 
 Use OTA for:
 
@@ -107,10 +121,17 @@ Use a new EAS build instead of OTA for:
 - Android permissions, package id, scheme, icon/splash, or Gradle changes,
 - `runtimeVersion` or `app.json` native config changes.
 
+Before every native change, bump `expo.version` so the `appVersion` runtime
+policy cannot deliver incompatible JavaScript to an older binary. Android
+`versionCode` must also be greater than the last installed/published build;
+`preview` is manual (`4` for the next build), while `production` uses
+`autoIncrement`.
+
 Publish preview OTA:
 
 ```powershell
 cd <repo>\subproject\SDUI\kride\apps\mobile
+eas channel:view preview
 npm run eas:update:preview -- "short change summary"
 ```
 
@@ -122,15 +143,22 @@ npm run eas:update:production -- "short change summary"
 
 Rollback options:
 
-- Republish the previous known-good update to the same branch.
-- Or run `eas update:rollback --branch preview` / `--branch production` after
-  confirming the affected branch.
+- Roll back the latest update group with
+  `eas update:rollback <latest-update-group-id> --platform android --message "rollback reason"`.
+- Or republish a known-good group with
+  `eas update:republish --group <known-good-update-group-id> --destination-channel preview --platform android --message "rollback reason"`.
+- If no compatible known-good OTA exists, use
+  `eas update:roll-back-to-embedded --channel preview --runtime-version 0.2.0 --platform android --message "rollback to embedded"`.
+- Replace `preview` with `production` only after confirming the affected
+  channel. Test rollback against preview first because persistent local state
+  may not be backwards-compatible.
 
 Before every OTA, run:
 
 ```powershell
+$env:EXPO_NO_WATCHMAN = "1"
 npm run export:android
-npm test
+npm test -- --runInBand
 ```
 
 ## Android Preview Build 장애 해결 기록
