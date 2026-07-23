@@ -79,6 +79,8 @@ credential을 이름만 보고 함께 삭제하지 않는다.
 
 정확한 Media/Tora endpoint ID마다 worker type(Flex/Active), min/max worker,
 idle timeout, network volume, 최근 30일 job·GPU 사용량·청구액을 확인한다.
+수동 `.github/workflows/runpod-cost-audit.yml`은 API 응답의 환경변수·토큰을
+출력하지 않고 endpoint/pod/volume과 최근 30일 청구 합계만 읽는다.
 간헐 사용 endpoint는 우선 Active/min worker를 `0`으로 만들고 관찰한다.
 최근 job 또는 volume 소비자를 확인하지 않은 endpoint와 network volume은
 삭제하지 않는다.

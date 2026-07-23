@@ -1,0 +1,165 @@
+name: RunPod Read-Only Cost Audit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runpod-read-only-cost-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+
+    steps:
+      - name: Validate audit credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$RUNPOD_API_KEY" ]; then
+            echo "::error::RUNPOD_API_KEY secret is required."
+            exit 1
+          fi
+
+      - name: List endpoint cost controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+
+          http_code="$(curl --silent --show-error \
+            --request GET \
+            --get \
+            --url https://rest.runpod.io/v1/endpoints \
+            --header "Authorization: Bearer $RUNPOD_API_KEY" \
+            --data-urlencode includeTemplate=true \
+            --data-urlencode includeWorkers=true \
+            --output "$response_file" \
+            --write-out '%{http_code}')"
+          if [ "$http_code" != "200" ]; then
+            echo "::error::RunPod endpoint inventory failed with HTTP $http_code."
+            exit 1
+          fi
+
+          jq -e 'type == "array"' "$response_file" >/dev/null
+          printf 'endpoint_id\tname\tworkers_min\tworkers_max\tidle_timeout_s\tgpu_count\tgpu_types\tvolume_ids\tworker_states\tcost_per_hour\n'
+          jq -r '
+            .[] |
+            [
+              .id,
+              .name,
+              (.workersMin // 0),
+              (.workersMax // 0),
+              (.idleTimeout // 0),
+              (.gpuCount // 0),
+              ((.gpuTypeIds // []) | join(",")),
+              (([.networkVolumeIds[]?] + [(.networkVolumeId // empty)]) | unique | join(",")),
+              (([.workers[]? | (.status // "unknown")]) | join(",")),
+              (.template.costPerHr // .template.currentPricePerGpu // "unknown")
+            ] | @tsv
+          ' "$response_file"
+
+      - name: List pods and network volumes
+        shell: bash
+        run: |
+          set -euo pipefail
+          pods_file="$(mktemp)"
+          volumes_file="$(mktemp)"
+          trap 'rm -f "$pods_file" "$volumes_file"' EXIT
+
+          pods_code="$(curl --silent --show-error \
+            --request GET \
+            --url https://rest.runpod.io/v1/pods \
+            --header "Authorization: Bearer $RUNPOD_API_KEY" \
+            --output "$pods_file" \
+            --write-out '%{http_code}')"
+          volumes_code="$(curl --silent --show-error \
+            --request GET \
+            --url https://rest.runpod.io/v1/networkvolumes \
+            --header "Authorization: Bearer $RUNPOD_API_KEY" \
+            --output "$volumes_file" \
+            --write-out '%{http_code}')"
+          if [ "$pods_code" != "200" ] || [ "$volumes_code" != "200" ]; then
+            echo "::error::RunPod pod/volume inventory failed (pods=$pods_code, volumes=$volumes_code)."
+            exit 1
+          fi
+
+          jq -e 'type == "array"' "$pods_file" >/dev/null
+          jq -e 'type == "array"' "$volumes_file" >/dev/null
+          printf 'pod_id\tname\tdesired_status\tcost_per_hour\tgpu_count\tgpu_type\tvolume_id\n'
+          jq -r '
+            .[] |
+            [
+              .id,
+              .name,
+              (.desiredStatus // .status // "unknown"),
+              (.adjustedCostPerHr // .costPerHr // "unknown"),
+              (.gpuCount // 0),
+              (.machine.gpuDisplayName // .gpu.displayName // "unknown"),
+              (.networkVolumeId // "none")
+            ] | @tsv
+          ' "$pods_file"
+
+          printf 'volume_id\tname\tsize_gb\tdata_center\n'
+          jq -r '
+            .[] |
+            [.id, .name, (.size // 0), (.dataCenterId // "unknown")] | @tsv
+          ' "$volumes_file"
+
+      - name: Summarize trailing 30-day billing
+        shell: bash
+        run: |
+          set -euo pipefail
+          endpoint_billing_file="$(mktemp)"
+          pod_billing_file="$(mktemp)"
+          volume_billing_file="$(mktemp)"
+          trap 'rm -f "$endpoint_billing_file" "$pod_billing_file" "$volume_billing_file"' EXIT
+          start_time="$(date -u -d '30 days ago' +'%Y-%m-%dT%H:%M:%SZ')"
+          end_time="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+          fetch_billing() {
+            resource="$1"
+            output_file="$2"
+            http_code="$(curl --silent --show-error \
+              --request GET \
+              --get \
+              --url "https://rest.runpod.io/v1/billing/$resource" \
+              --header "Authorization: Bearer $RUNPOD_API_KEY" \
+              --data-urlencode "startTime=$start_time" \
+              --data-urlencode "endTime=$end_time" \
+              --data-urlencode bucketSize=month \
+              --output "$output_file" \
+              --write-out '%{http_code}')"
+            if [ "$http_code" != "200" ]; then
+              echo "::error::RunPod $resource billing query failed with HTTP $http_code."
+              exit 1
+            fi
+            jq -e 'type == "array"' "$output_file" >/dev/null
+          }
+
+          fetch_billing endpoints "$endpoint_billing_file"
+          fetch_billing pods "$pod_billing_file"
+          fetch_billing networkvolumes "$volume_billing_file"
+
+          jq -n \
+            --arg start "$start_time" \
+            --arg end "$end_time" \
+            --slurpfile endpoints "$endpoint_billing_file" \
+            --slurpfile pods "$pod_billing_file" \
+            --slurpfile volumes "$volume_billing_file" \
+            '{
+              period_start: $start,
+              period_end: $end,
+              serverless_usd: ([$endpoints[0][]?.amount // 0] | add // 0),
+              serverless_billed_hours: ([$endpoints[0][]?.timeBilledMs // 0] | add // 0) / 3600000,
+              pods_usd: ([$pods[0][]?.amount // 0] | add // 0),
+              pods_billed_hours: ([$pods[0][]?.timeBilledMs // 0] | add // 0) / 3600000,
+              network_volumes_usd: ([$volumes[0][]?.amount // 0] | add // 0)
+            }'

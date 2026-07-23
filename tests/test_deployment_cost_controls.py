@@ -165,6 +165,29 @@ def test_gcp_cost_audit_is_manual_and_list_only() -> None:
     )
 
 
+def test_runpod_cost_audit_is_manual_read_only_and_redacted() -> None:
+    workflow = _read(WORKFLOWS / "runpod-cost-audit.yml")
+    triggers, separator, _jobs = workflow.partition("\njobs:")
+
+    assert separator
+    assert "workflow_dispatch:" in triggers
+    assert "push:" not in triggers
+    assert "schedule:" not in triggers
+    for endpoint in (
+        "https://rest.runpod.io/v1/endpoints",
+        "https://rest.runpod.io/v1/pods",
+        "https://rest.runpod.io/v1/networkvolumes",
+        "https://rest.runpod.io/v1/billing/$resource",
+    ):
+        assert endpoint in workflow
+    assert "includeWorkers=true" in workflow
+    assert "--request GET" in workflow
+    assert not re.search(r"--request\s+(?:POST|PUT|PATCH|DELETE)\b", workflow)
+    assert "jq -r" in workflow
+    assert ".env" not in workflow
+    assert "template.env" not in workflow.lower()
+
+
 def test_mobile_runbook_blocks_duplicate_eas_builds() -> None:
     runbook = _read(MOBILE_DEPLOYMENT)
     normalized = " ".join(runbook.split())
