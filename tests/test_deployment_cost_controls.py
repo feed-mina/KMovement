@@ -54,14 +54,19 @@ def test_ci_and_ec2_deployment_only_auto_run_from_main() -> None:
 
     ci_workflow = _read(WORKFLOWS / "ci.yml")
     assert "tests/test_deployment_cost_controls.py" in ci_workflow
+    deploy_triggers = _read(WORKFLOWS / "deploy-ec2.yml").partition("\njobs:")[0]
+    assert '.github/workflows/deploy-ec2.yml' not in deploy_triggers
 
 
 def test_runpod_builds_cancel_duplicates_and_reuse_inline_registry_cache() -> None:
     for workflow_name in ("deploy-runpod.yml", "deploy-runpod-tora.yml"):
         workflow = _read(WORKFLOWS / workflow_name)
+        triggers, separator, _jobs = workflow.partition("\njobs:")
+        assert separator
         assert "concurrency:" in workflow
         assert "cancel-in-progress: true" in workflow
         assert "no-cache: true" not in workflow
+        assert f".github/workflows/{workflow_name}" not in triggers
         assert (
             "cache-from: type=registry,ref=${{ env.DOCKERHUB_IMAGE }}:latest"
             in workflow

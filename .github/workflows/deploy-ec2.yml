@@ -15,7 +15,6 @@ on:
       - "dataset/models/route_graph.pkl"
       - "chroma_db/**"
       - ".dockerignore"
-      - ".github/workflows/deploy-ec2.yml"
   workflow_dispatch:
 
 concurrency:
