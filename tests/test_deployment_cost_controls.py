@@ -181,6 +181,12 @@ def test_runpod_cost_audit_is_manual_read_only_and_redacted() -> None:
     ):
         assert endpoint in workflow
     assert "includeWorkers=true" in workflow
+    assert "includeTemplate=true" not in workflow
+    assert "includeNetworkVolume=true" in workflow
+    assert ".networkVolume.id" in workflow
+    assert ".gpu.count" in workflow
+    assert ".desiredStatus" in workflow
+    assert "highPerformanceStorageAmount" in workflow
     assert "--request GET" in workflow
     assert not re.search(r"--request\s+(?:POST|PUT|PATCH|DELETE)\b", workflow)
     assert "jq -r" in workflow

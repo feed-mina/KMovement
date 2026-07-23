@@ -39,7 +39,6 @@ jobs:
             --get \
             --url https://rest.runpod.io/v1/endpoints \
             --header "Authorization: Bearer $RUNPOD_API_KEY" \
-            --data-urlencode includeTemplate=true \
             --data-urlencode includeWorkers=true \
             --output "$response_file" \
             --write-out '%{http_code}')"
@@ -49,7 +48,7 @@ jobs:
           fi
 
           jq -e 'type == "array"' "$response_file" >/dev/null
-          printf 'endpoint_id\tname\tworkers_min\tworkers_max\tidle_timeout_s\tgpu_count\tgpu_types\tvolume_ids\tworker_states\tcost_per_hour\n'
+          printf 'endpoint_id\tname\tworkers_min\tworkers_max\tidle_timeout_s\tgpu_count\tgpu_types\tvolume_ids\tworker_states\n'
           jq -r '
             .[] |
             [
@@ -61,8 +60,7 @@ jobs:
               (.gpuCount // 0),
               ((.gpuTypeIds // []) | join(",")),
               (([.networkVolumeIds[]?] + [(.networkVolumeId // empty)]) | unique | join(",")),
-              (([.workers[]? | (.status // "unknown")]) | join(",")),
-              (.template.costPerHr // .template.currentPricePerGpu // "unknown")
+              (([.workers[]? | (.desiredStatus // .status // "unknown")]) | join(","))
             ] | @tsv
           ' "$response_file"
 
@@ -76,8 +74,10 @@ jobs:
 
           pods_code="$(curl --silent --show-error \
             --request GET \
+            --get \
             --url https://rest.runpod.io/v1/pods \
             --header "Authorization: Bearer $RUNPOD_API_KEY" \
+            --data-urlencode includeNetworkVolume=true \
             --output "$pods_file" \
             --write-out '%{http_code}')"
           volumes_code="$(curl --silent --show-error \
@@ -101,9 +101,9 @@ jobs:
               .name,
               (.desiredStatus // .status // "unknown"),
               (.adjustedCostPerHr // .costPerHr // "unknown"),
-              (.gpuCount // 0),
-              (.machine.gpuDisplayName // .gpu.displayName // "unknown"),
-              (.networkVolumeId // "none")
+              (.gpu.count // 0),
+              (.gpu.displayName // .machine.gpuDisplayName // "unknown"),
+              (.networkVolume.id // "none")
             ] | @tsv
           ' "$pods_file"
 
@@ -161,5 +161,7 @@ jobs:
               serverless_billed_hours: ([$endpoints[0][]?.timeBilledMs // 0] | add // 0) / 3600000,
               pods_usd: ([$pods[0][]?.amount // 0] | add // 0),
               pods_billed_hours: ([$pods[0][]?.timeBilledMs // 0] | add // 0) / 3600000,
-              network_volumes_usd: ([$volumes[0][]?.amount // 0] | add // 0)
+              network_volumes_standard_usd: ([$volumes[0][]?.amount // 0] | add // 0),
+              network_volumes_high_performance_usd:
+                ([$volumes[0][]?.highPerformanceStorageAmount // 0] | add // 0)
             }'
