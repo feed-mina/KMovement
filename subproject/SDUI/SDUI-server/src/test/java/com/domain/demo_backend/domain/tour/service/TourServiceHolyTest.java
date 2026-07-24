@@ -68,7 +68,7 @@ class TourServiceHolyTest {
     @DisplayName("성지 조회는 공공(TOURAPI) 제외 + APPROVED만, 상한(Pageable)과 함께 요청한다")
     void holyQueryUsesApprovedNonTourapiFilter() {
         when(tourPoiRepository.findHolyPoisByRegion(
-                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
                 .thenReturn(List.of(holy("holy-a", "성지A", "BTS")));
 
         List<HolyPoiDto> result = tourService.getHolyPois();
@@ -76,7 +76,7 @@ class TourServiceHolyTest {
         assertThat(result).hasSize(1);
         ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
         verify(tourPoiRepository).findHolyPoisByRegion(
-                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), isNull(), pageable.capture());
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), isNull(), isNull(), pageable.capture());
         assertThat(pageable.getValue().getPageSize()).isEqualTo(TourService.HOLY_MAX_RESULTS);
         verifyNoInteractions(tourApiClient); // 성지는 TourAPI를 타지 않는다
     }
@@ -89,7 +89,7 @@ class TourServiceHolyTest {
         holy.setImageSourceUrl("https://commons.wikimedia.org/wiki/File:Holy-b.jpg");
         holy.setImageCredit("Photographer · CC BY 4.0");
         when(tourPoiRepository.findHolyPoisByRegion(
-                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
                 .thenReturn(List.of(holy));
 
         HolyPoiDto dto = tourService.getHolyPois().get(0);
@@ -110,7 +110,7 @@ class TourServiceHolyTest {
     @DisplayName("결과가 없으면 빈 리스트를 반환한다(프론트는 시드 폴백 사용)")
     void emptyResultReturnsEmptyList() {
         when(tourPoiRepository.findHolyPoisByRegion(
-                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
                 .thenReturn(List.of());
 
         assertThat(tourService.getHolyPois()).isEmpty();
@@ -123,7 +123,7 @@ class TourServiceHolyTest {
         poi.setAreaCode("1");
         poi.setSigunguCode("23");
         when(tourPoiRepository.findHolyPoisByRegion(
-                eq("TOURAPI"), eq("APPROVED"), eq("1"), eq("23"), isNull(), isNull(), any(Pageable.class)))
+                eq("TOURAPI"), eq("APPROVED"), eq("1"), eq("23"), isNull(), isNull(), isNull(), any(Pageable.class)))
                 .thenReturn(List.of(poi));
 
         HolyPoiDto result = tourService.getHolyPois("1", "23").get(0);
@@ -131,31 +131,45 @@ class TourServiceHolyTest {
         assertThat(result.areaCode()).isEqualTo("1");
         assertThat(result.sigunguCode()).isEqualTo("23");
         verify(tourPoiRepository).findHolyPoisByRegion(
-                eq("TOURAPI"), eq("APPROVED"), eq("1"), eq("23"), isNull(), isNull(), any(Pageable.class));
+                eq("TOURAPI"), eq("APPROVED"), eq("1"), eq("23"), isNull(), isNull(), isNull(), any(Pageable.class));
     }
 
     @Test
     @DisplayName("전국 시드(V90)용 시·군·구 이름 필터가 리포지토리로 전달된다")
     void holyQueryPassesSigunguName() {
         when(tourPoiRepository.findHolyPoisByRegion(
-                eq("TOURAPI"), eq("APPROVED"), eq("31"), eq(""), eq("고양시"), isNull(), any(Pageable.class)))
+                eq("TOURAPI"), eq("APPROVED"), eq("31"), eq(""), eq("고양시"), isNull(), isNull(), any(Pageable.class)))
                 .thenReturn(List.of(holy("kride-media-1", "커피파머", "가족입니다")));
 
         assertThat(tourService.getHolyPois("31", "", "고양시")).hasSize(1);
         verify(tourPoiRepository).findHolyPoisByRegion(
-                eq("TOURAPI"), eq("APPROVED"), eq("31"), eq(""), eq("고양시"), isNull(), any(Pageable.class));
+                eq("TOURAPI"), eq("APPROVED"), eq("31"), eq(""), eq("고양시"), isNull(), isNull(), any(Pageable.class));
     }
 
     @Test
     @DisplayName("작품/아티스트 필터(contentSqno)가 리포지토리로 전달된다")
     void holyQueryPassesContentFilter() {
         when(tourPoiRepository.findHolyPoisByRegion(
-                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), eq(77L), any(Pageable.class)))
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), eq(77L), isNull(), any(Pageable.class)))
                 .thenReturn(List.of(holy("kride-media-9", "촬영 카페", "김비서가 왜 그럴까")));
 
         assertThat(tourService.getHolyPois(null, null, null, 77L)).hasSize(1);
         verify(tourPoiRepository).findHolyPoisByRegion(
-                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), eq(77L), any(Pageable.class));
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), eq(77L), isNull(), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("성지 맛집 칩은 kind=FOOD로 식당·카페 촬영지(HOLY_FOOD)만 요청한다")
+    void holyQueryPassesFoodKind() {
+        TourPoi cafe = holy("kride-media-3", "카페 그루비", "(아는 건 별로 없지만) 가족입니다");
+        cafe.setContentTypeId("HOLY_FOOD");
+        when(tourPoiRepository.findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), eq("31"), isNull(), isNull(), isNull(), eq("FOOD"), any(Pageable.class)))
+                .thenReturn(List.of(cafe));
+
+        assertThat(tourService.getHolyPois("31", null, null, null, "FOOD")).hasSize(1);
+        verify(tourPoiRepository).findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), eq("31"), isNull(), isNull(), isNull(), eq("FOOD"), any(Pageable.class));
     }
 
     @Test

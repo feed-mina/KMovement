@@ -101,14 +101,20 @@ public class TourService {
     }
 
     public List<HolyPoiDto> getHolyPois(String areaCode, String sigunguCode, String sigunguName, Long contentSqno) {
+        return getHolyPois(areaCode, sigunguCode, sigunguName, contentSqno, null);
+    }
+
+    /** kind='FOOD' → 식당·카페 촬영지(HOLY_FOOD, '성지 맛집' 칩)만. 그 외/미지정은 전체. */
+    public List<HolyPoiDto> getHolyPois(String areaCode, String sigunguCode, String sigunguName,
+                                        Long contentSqno, String kind) {
         List<HolyPoiDto> pois = tourPoiRepository
                 .findHolyPoisByRegion(SOURCE_TOURAPI, REVIEW_APPROVED, areaCode, sigunguCode,
-                        sigunguName, contentSqno, PageRequest.of(0, HOLY_MAX_RESULTS))
+                        sigunguName, contentSqno, kind, PageRequest.of(0, HOLY_MAX_RESULTS))
                 .stream()
                 .map(HolyPoiDto::from)
                 .toList();
-        log.info("[TourService] 성지 POI 조회 - area={}, sigungu={}, sigunguName={}, content={}, {}건",
-                areaCode, sigunguCode, sigunguName, contentSqno, pois.size());
+        log.info("[TourService] 성지 POI 조회 - area={}, sigungu={}, sigunguName={}, content={}, kind={}, {}건",
+                areaCode, sigunguCode, sigunguName, contentSqno, kind, pois.size());
         return pois;
     }
 

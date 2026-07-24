@@ -126,6 +126,9 @@ title, addr, map_x/map_y(경위도), first_image, cat1~3, area_code/sigungu_code
 submitted_by `FK→users`(V78, UGC 제출자), image_source_url/image_credit(V81), area/sigungu 코드 백필(V80).
 V90: 전국 성지 9,017행 시드(kcisa_media_2023, content_id `kride-media-*`, source CRAWL) —
 생성기 `scripts/build_holy_poi_seed.py`, sigungu 이름은 raw_json에 보존(주소 LIKE 필터, 시군구 코드 없음).
+V92: 그중 식당·카페 촬영지(raw_json sub_category restaurant/cafe, 약 6천 행)를
+content_type_id='HOLY_FOOD'로 태깅 — `/holy?kind=FOOD`가 '성지 맛집' 칩. (CSV category=food
+1만 행은 전부 tourapi_food 공공 덤프라 성지 아님 — 미임포트, 일반 '맛집' 칩=TourAPI 실시간 유지)
 
 ### holy_content / holy_content_poi (V91)
 작품별 성지 필터: **holy_content**(content_sqno **PK**, source_ref UNIQUE `kride-artist-*`, name/name_en,

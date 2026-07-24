@@ -23,10 +23,16 @@ import { trackEvent } from '@/lib/analytics/dataLayer';
 
 const CATEGORIES = [
     { id: 'HOLY', label: '성지' },
+    // 성지 맛집(V92): 방영 씬 설명이 있는 식당·카페 촬영지 부분집합.
+    // 일반 '맛집'(TourAPI 실시간)과 다른 큐레이션이다.
+    { id: 'HOLY_FOOD', label: '성지 맛집' },
     { id: '39', label: '맛집' },
     { id: '12', label: '관광지' },
     { id: '14', label: '문화시설' },
 ] as const;
+
+/** 성지 계열(공용 tour_poi 데이터) 카테고리 여부 — 작품 필터를 공유한다. */
+const isHolyCategory = (category: string) => category === 'HOLY' || category === 'HOLY_FOOD';
 
 // 서버(TourService.NATIONWIDE_AREAS)와 동일한 TourAPI 시/도 코드 체계.
 // /areas 응답 실패 시에도 전국 성지(V90 시드)를 탐색할 수 있어야 한다.
@@ -170,10 +176,11 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             setLoading(true);
             setError(null);
             try {
-                if (category === 'HOLY') {
+                if (isHolyCategory(category)) {
                     const list = await fetchHolyPois({
                         areaCode, sigunguCode: sigungu, sigunguName: selectedSigunguName,
                         contentSqno: selectedContent?.contentSqno,
+                        kind: category === 'HOLY_FOOD' ? 'FOOD' : undefined,
                     });
                     if (alive) setPois(list);
                 } else {
@@ -186,6 +193,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                         site.areaCode === areaCode && (!sigungu || site.sigunguCode === sigungu)));
                 }
                 if (alive && category !== 'HOLY') setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+                if (alive && category === 'HOLY_FOOD') setPois([]);
             } finally {
                 if (alive) setLoading(false);
             }
@@ -194,9 +202,9 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         return () => { alive = false; };
     }, [areaCode, category, sigungu, arrange, selectedSigunguName, selectedContent?.contentSqno]);
 
-    // 작품/아티스트 자동완성 — 성지 카테고리에서 2자 이상 입력 시 300ms 디바운스 조회.
+    // 작품/아티스트 자동완성 — 성지 계열 카테고리에서 2자 이상 입력 시 300ms 디바운스 조회.
     useEffect(() => {
-        if (category !== 'HOLY' || contentQuery.trim().length < 2) {
+        if (!isHolyCategory(category) || contentQuery.trim().length < 2) {
             setContentOptions([]);
             return;
         }
@@ -367,7 +375,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                 </div>
             </div>
 
-            {category === 'HOLY' && (
+            {isHolyCategory(category) && (
                 <section aria-label="작품·아티스트 필터" style={{ marginBottom: 14 }}>
                     <label htmlFor="holy-content-search" style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#791F1F', marginBottom: 6 }}>
                         작품·아티스트로 성지 찾기

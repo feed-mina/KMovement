@@ -85,4 +85,14 @@ describe('tourApi 서비스', () => {
             params: { q: '김비서', limit: 8 },
         });
     });
+
+    it('성지 맛집(kind=FOOD) 조회 파라미터를 전달한다', async () => {
+        mockedApi.get.mockResolvedValue({ data: { data: [] } });
+
+        await fetchHolyPois({ areaCode: '31', kind: 'FOOD' });
+
+        expect(mockedApi.get).toHaveBeenCalledWith('/api/v1/tour/holy', {
+            params: { areaCode: '31', kind: 'FOOD' },
+        });
+    });
 });

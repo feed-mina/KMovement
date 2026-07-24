@@ -10,12 +10,18 @@
   subproject/SDUI/SDUI-server/src/main/resources/db/migration/V90__holy_poi_nationwide_seed.sql
 
 정책:
-  - 성지 성격 행만: category ∈ {kculture, kpop} (food/tourism/facility는 TourAPI 실시간과 중복)
+  - 성지 성격 행만: category ∈ {kculture, kpop} (food/tourism/facility는 TourAPI 실시간과 중복.
+    특히 category=food는 전부 source=tourapi_food 공공 덤프로 방영 이력이 없다)
   - (name, address) 중복 제거, sido 없는 행 제외
   - source='CRAWL' + review_status='APPROVED' (공공 kcisa_media_2023 출처)
   - content_id='kride-media-{tmp_poi_id}' 로 재실행 안전(DELETE 후 INSERT)
   - sido → TourAPI areaCode 매핑, sigungu 이름은 raw_json에 보존(주소 LIKE 필터용)
   - 대표 아티스트/작품 1개를 tour_poi.artist 에 기록 (연결 수 최다 → 최소 tmp_artist_id)
+  - 식당·카페 촬영지는 content_type_id='HOLY_FOOD' ('성지 맛집' 칩, V92와 동일 기준)
+
+주의:
+  - V90이 어느 환경에든 적용된 뒤에는 재생성 금지 (Flyway 체크섬 불일치).
+    데이터 갱신은 새 번호의 마이그레이션으로 만들 것.
 
 사용:
   python scripts/build_holy_poi_seed.py
@@ -60,6 +66,8 @@ SIDO_TO_AREA = {
 }
 
 HOLY_CATEGORIES = {"kculture", "kpop"}
+# 식당·카페 촬영지는 '성지 맛집' 칩으로 구분 노출 (V92와 동일 기준)
+EAT_SUB_CATEGORIES = {"restaurant", "cafe"}
 BATCH = 500
 MAX_REASON = 500  # tour_poi.recommend_reason varchar(500)
 MAX_TITLE = 255
@@ -150,6 +158,7 @@ def main() -> int:
             rows.append(
                 {
                     "content_id": f"kride-media-{tmp_id}",
+                    "kind": "HOLY_FOOD" if raw["sub_category"] in EAT_SUB_CATEGORIES else "HOLY",
                     "title": name,
                     "addr": addr or None,
                     "lon": lon,
@@ -181,8 +190,9 @@ def main() -> int:
         values = []
         for r in batch:
             values.append(
-                "({cid}, 'HOLY', 'CRAWL', {title}, {addr}, {lon}, {lat}, {img}, {area}, {artist}, {reason}, 'APPROVED', {raw}::jsonb)".format(
+                "({cid}, {kind}, 'CRAWL', {title}, {addr}, {lon}, {lat}, {img}, {area}, {artist}, {reason}, 'APPROVED', {raw}::jsonb)".format(
                     cid=q(r["content_id"]),
+                    kind=q(r["kind"]),
                     title=q(r["title"]),
                     addr=q(r["addr"]),
                     lon=r["lon"],

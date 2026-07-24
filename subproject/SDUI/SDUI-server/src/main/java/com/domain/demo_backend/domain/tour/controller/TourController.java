@@ -52,8 +52,9 @@ public class TourController {
             @RequestParam(required = false) String areaCode,
             @RequestParam(required = false) String sigunguCode,
             @RequestParam(required = false) String sigunguName,
-            @RequestParam(required = false) Long contentSqno) {
-        return ApiResponse.success(tourService.getHolyPois(areaCode, sigunguCode, sigunguName, contentSqno));
+            @RequestParam(required = false) Long contentSqno,
+            @RequestParam(required = false) String kind) {
+        return ApiResponse.success(tourService.getHolyPois(areaCode, sigunguCode, sigunguName, contentSqno, kind));
     }
 
     /**

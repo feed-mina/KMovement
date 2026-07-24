@@ -142,6 +142,18 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
             { areaCode: '31', sigunguCode: '13', sigunguName: '수원시' }));
     });
 
+    it('성지 맛집 칩은 kind=FOOD로 조회하고 작품 필터를 함께 쓸 수 있다', async () => {
+        renderScreen();
+        fireEvent.click(await screen.findByRole('button', { name: '성지 맛집' }));
+
+        await waitFor(() => expect(mockedHolyFetch).toHaveBeenCalledWith(
+            expect.objectContaining({ kind: 'FOOD' })));
+        // 성지 계열이므로 작품 검색 입력이 함께 제공된다.
+        expect(screen.getByLabelText('작품·아티스트로 성지 찾기')).toBeInTheDocument();
+        // 제보 배너는 일반 성지 칩 전용이다.
+        expect(screen.queryByText('새로운 팬 성지를 알고 있나요?')).not.toBeInTheDocument();
+    });
+
     it('작품 검색에서 선택하면 contentSqno로 성지를 거르고 칩 해제 시 전체로 돌아간다', async () => {
         renderScreen();
         fireEvent.click(await screen.findByRole('button', { name: '성지' }));
