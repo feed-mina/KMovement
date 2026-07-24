@@ -2,6 +2,7 @@
   "name": "kride",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@9.15.9",
   "workspaces": ["packages/core", "apps/mobile"],
   "scripts": {
     "dev": "next dev",
@@ -13,6 +14,7 @@
   },
   "//mobileHoist": "RN community modules with native code must also be declared in apps/mobile/package.json so React Native native autolinking (Gradle/CocoaPods) can discover them. Root declarations only provide npm workspace hoisting and do not replace app-local declarations. Expo Router and its Expo peers remain hoisted here so babel-preset-expo and Expo native modules can resolve them. The Next.js web app does not import these mobile dependencies.",
   "dependencies": {
+    "@kride/core": "workspace:*",
     "@tanstack/react-query": "^5.21.4",
     "@tanstack/react-query-devtools": "^5.21.5",
     "@types/leaflet": "^1.9.21",
@@ -34,6 +36,14 @@
   "overrides": {
     "react-native": "0.74.5",
     "@react-native/virtualized-lists": "0.74.87"
+  },
+  "//pnpmOverrides": "@types/minimatch 6.x는 d.ts 없는 deprecated 스텁이라 tsc의 암묵 @types 포함(next build 타입체크)이 깨진다. 실제 타입이 있는 마지막 버전 5.1.2로 고정한다.",
+  "pnpm": {
+    "overrides": {
+      "react-native": "0.74.5",
+      "@react-native/virtualized-lists": "0.74.87",
+      "@types/minimatch": "5.1.2"
+    }
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

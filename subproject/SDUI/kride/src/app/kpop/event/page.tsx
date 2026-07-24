@@ -1,4 +1,5 @@
 'use client';
+import { Suspense } from "react";
 
 import DynamicEngine from "@/engine/DynamicEngine";
 import { usePageHook } from "@/engine/hooks/usePageHook";
@@ -6,7 +7,7 @@ import { SCREEN_IDS } from "@/engine/screenMap";
 import { useKpopPageData, useUiScreen } from "@kride/core";
 import { useSearchParams } from "next/navigation";
 
-export default function KpopEventDetailPage() {
+function KpopEventDetailPageInner() {
   const screenId = SCREEN_IDS.KPOP_EVENT_DETAIL;
   const searchParams = useSearchParams();
   const eventId = searchParams.get("eventId");
@@ -37,5 +38,16 @@ export default function KpopEventDetailPage() {
       onChange={handleChange}
       onAction={handleAction}
     />
+  );
+}
+
+// usePageHook가 내부에서 useSearchParams를 쓰므로 정적 프리렌더에는 Suspense
+// 경계가 필요하다(missing-suspense-with-csr-bailout). 클라이언트 페이지의
+// force-dynamic export는 Next 14가 무시하므로 이 구조가 표준 해법이다.
+export default function KpopEventDetailPage() {
+  return (
+    <Suspense fallback={null}>
+      <KpopEventDetailPageInner />
+    </Suspense>
   );
 }

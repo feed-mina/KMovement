@@ -1,10 +1,11 @@
 'use client';
+import { Suspense } from "react";
 import DynamicEngine from "@/engine/DynamicEngine";
 import { usePageHook } from "@/engine/hooks/usePageHook";
 import { useUiScreen } from "@/engine/hooks/useUiScreen";
 import { SCREEN_IDS } from "@/engine/screenMap";
 
-export default function BrowsePage() {
+function BrowsePageInner() {
   const { data: metadata = [], isLoading, error } = useUiScreen(SCREEN_IDS.INTRO1);
   const { formData, handleChange, handleAction } = usePageHook(SCREEN_IDS.INTRO1, metadata, {});
 
@@ -45,5 +46,16 @@ export default function BrowsePage() {
       onChange={handleChange}
       onAction={handleAction}
     />
+  );
+}
+
+// usePageHook가 내부에서 useSearchParams를 쓰므로 정적 프리렌더에는 Suspense
+// 경계가 필요하다(missing-suspense-with-csr-bailout). 클라이언트 페이지의
+// force-dynamic export는 Next 14가 무시하므로 이 구조가 표준 해법이다.
+export default function BrowsePage() {
+  return (
+    <Suspense fallback={null}>
+      <BrowsePageInner />
+    </Suspense>
   );
 }
