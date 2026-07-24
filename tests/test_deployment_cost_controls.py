@@ -285,7 +285,7 @@ def test_mobile_runbook_blocks_duplicate_eas_builds() -> None:
         "--app-build-version",
         "`new`, `in-queue`, `in-progress`, `pending-cancel`",
         "`finished`이면 기존 artifact와 build ID를 재사용",
-        "실제 `npm run eas:build:preview` 직전에 같은 조회를 다시 실행",
+        "실제 `pnpm run eas:build:preview` 직전에 같은 조회를 다시 실행",
         "JS-only 변경은 새 native binary를 만들지 않습니다",
         "eas:update:preview",
     ):
