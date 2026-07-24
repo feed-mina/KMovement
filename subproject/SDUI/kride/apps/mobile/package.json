@@ -17,7 +17,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@kride/core": "*",
+    "@kride/core": "workspace:*",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/slider": "4.5.2",
     "@tanstack/react-query": "^5.21.4",
