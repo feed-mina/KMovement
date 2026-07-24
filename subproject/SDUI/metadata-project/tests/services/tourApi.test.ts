@@ -60,4 +60,14 @@ describe('tourApi 서비스', () => {
             params: { areaCode: '1', sigunguCode: '23' },
         });
     });
+
+    it('전국 시드용 시·군·구 이름(sigunguName)도 성지 조회에 전달한다', async () => {
+        mockedApi.get.mockResolvedValue({ data: { data: [] } });
+
+        await fetchHolyPois({ areaCode: '31', sigunguCode: '13', sigunguName: '수원시' });
+
+        expect(mockedApi.get).toHaveBeenCalledWith('/api/v1/tour/holy', {
+            params: { areaCode: '31', sigunguCode: '13', sigunguName: '수원시' },
+        });
+    });
 });

@@ -13,9 +13,14 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 
+import org.mockito.ArgumentCaptor;
+import org.springframework.data.domain.Pageable;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -56,15 +61,19 @@ class TourServiceHolyTest {
     }
 
     @Test
-    @DisplayName("성지 조회는 공공(TOURAPI) 제외 + APPROVED만 리포지토리에 요청한다")
+    @DisplayName("성지 조회는 공공(TOURAPI) 제외 + APPROVED만, 상한(Pageable)과 함께 요청한다")
     void holyQueryUsesApprovedNonTourapiFilter() {
-        when(tourPoiRepository.findHolyPoisByRegion("TOURAPI", "APPROVED", null, null))
+        when(tourPoiRepository.findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), any(Pageable.class)))
                 .thenReturn(List.of(holy("holy-a", "성지A", "BTS")));
 
         List<HolyPoiDto> result = tourService.getHolyPois();
 
         assertThat(result).hasSize(1);
-        verify(tourPoiRepository).findHolyPoisByRegion("TOURAPI", "APPROVED", null, null);
+        ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
+        verify(tourPoiRepository).findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), pageable.capture());
+        assertThat(pageable.getValue().getPageSize()).isEqualTo(TourService.HOLY_MAX_RESULTS);
         verifyNoInteractions(tourApiClient); // 성지는 TourAPI를 타지 않는다
     }
 
@@ -75,7 +84,8 @@ class TourServiceHolyTest {
         holy.setFirstImage("https://images.example.com/holy-b.jpg");
         holy.setImageSourceUrl("https://commons.wikimedia.org/wiki/File:Holy-b.jpg");
         holy.setImageCredit("Photographer · CC BY 4.0");
-        when(tourPoiRepository.findHolyPoisByRegion("TOURAPI", "APPROVED", null, null))
+        when(tourPoiRepository.findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), any(Pageable.class)))
                 .thenReturn(List.of(holy));
 
         HolyPoiDto dto = tourService.getHolyPois().get(0);
@@ -95,7 +105,8 @@ class TourServiceHolyTest {
     @Test
     @DisplayName("결과가 없으면 빈 리스트를 반환한다(프론트는 시드 폴백 사용)")
     void emptyResultReturnsEmptyList() {
-        when(tourPoiRepository.findHolyPoisByRegion("TOURAPI", "APPROVED", null, null))
+        when(tourPoiRepository.findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), any(Pageable.class)))
                 .thenReturn(List.of());
 
         assertThat(tourService.getHolyPois()).isEmpty();
@@ -107,14 +118,44 @@ class TourServiceHolyTest {
         TourPoi poi = holy("holy-jongno", "종로 성지", "BTS");
         poi.setAreaCode("1");
         poi.setSigunguCode("23");
-        when(tourPoiRepository.findHolyPoisByRegion("TOURAPI", "APPROVED", "1", "23"))
+        when(tourPoiRepository.findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), eq("1"), eq("23"), isNull(), any(Pageable.class)))
                 .thenReturn(List.of(poi));
 
         HolyPoiDto result = tourService.getHolyPois("1", "23").get(0);
 
         assertThat(result.areaCode()).isEqualTo("1");
         assertThat(result.sigunguCode()).isEqualTo("23");
-        verify(tourPoiRepository).findHolyPoisByRegion("TOURAPI", "APPROVED", "1", "23");
+        verify(tourPoiRepository).findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), eq("1"), eq("23"), isNull(), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("전국 시드(V90)용 시·군·구 이름 필터가 리포지토리로 전달된다")
+    void holyQueryPassesSigunguName() {
+        when(tourPoiRepository.findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), eq("31"), eq(""), eq("고양시"), any(Pageable.class)))
+                .thenReturn(List.of(holy("kride-media-1", "커피파머", "가족입니다")));
+
+        assertThat(tourService.getHolyPois("31", "", "고양시")).hasSize(1);
+        verify(tourPoiRepository).findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), eq("31"), eq(""), eq("고양시"), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("TourAPI 장애 시 시/도 목록은 전국 상수로 폴백한다(서울 쪼그라듦 방지)")
+    void areasFallBackToNationwideConstantOnFailure() {
+        when(tourApiClient.areaCodes("")).thenThrow(new IllegalStateException("TOUR_API_KEY is not configured"));
+
+        List<TourRegionDto> areas = tourService.getAreas("");
+
+        assertThat(areas).hasSize(17);
+        assertThat(areas).extracting(TourRegionDto::code).contains("1", "31", "39");
+        assertThat(areas).extracting(TourRegionDto::name).contains("서울", "경기", "제주");
+
+        // 시·군·구 목록은 폴백하지 않는다(프론트가 '지역 전체' 탐색으로 처리).
+        when(tourApiClient.areaCodes("31")).thenThrow(new IllegalStateException("down"));
+        assertThatThrownBy(() -> tourService.getAreas("31")).isInstanceOf(IllegalStateException.class);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.domain.demo_backend.domain.tour.domain;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,19 +19,30 @@ public interface TourPoiRepository extends JpaRepository<TourPoi, Long> {
     /** 성지 목록: 공공(TOURAPI) 제외 + 승인분만. idx_tour_poi_holy 부분 인덱스 사용. */
     List<TourPoi> findBySourceNotAndReviewStatusOrderByPoiSqnoAsc(String excludedSource, String reviewStatus);
 
+    /**
+     * 시·군·구는 두 갈래로 매칭한다: 초기 서울 시드는 TourAPI sigungu_code 를,
+     * 전국 시드(V90, kcisa_media_2023)는 코드가 없어 주소 문자열(:sigunguName)을 쓴다.
+     * 결과 상한은 Pageable 로 건다(전국 시드 이후 지역당 수천 행 가능).
+     */
     @Query("""
             SELECT p FROM TourPoi p
             WHERE p.source <> :excludedSource
               AND p.reviewStatus = :reviewStatus
               AND (:areaCode IS NULL OR :areaCode = '' OR p.areaCode = :areaCode)
-              AND (:sigunguCode IS NULL OR :sigunguCode = '' OR p.sigunguCode = :sigunguCode)
+              AND (
+                    ((:sigunguCode IS NULL OR :sigunguCode = '') AND (:sigunguName IS NULL OR :sigunguName = ''))
+                 OR (:sigunguCode IS NOT NULL AND :sigunguCode <> '' AND p.sigunguCode = :sigunguCode)
+                 OR (:sigunguName IS NOT NULL AND :sigunguName <> '' AND p.addr LIKE CONCAT('%', :sigunguName, '%'))
+              )
             ORDER BY p.poiSqno ASC
             """)
     List<TourPoi> findHolyPoisByRegion(
             @Param("excludedSource") String excludedSource,
             @Param("reviewStatus") String reviewStatus,
             @Param("areaCode") String areaCode,
-            @Param("sigunguCode") String sigunguCode);
+            @Param("sigunguCode") String sigunguCode,
+            @Param("sigunguName") String sigunguName,
+            Pageable pageable);
 
     Optional<TourPoi> findFirstBySourceUrlAndReviewStatus(String sourceUrl, String reviewStatus);
 }

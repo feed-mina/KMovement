@@ -53,8 +53,13 @@ export async function fetchRestaurants(areaCode?: string, numOfRows = 20): Promi
     return res.data?.data ?? [];
 }
 
-/** 성지(K-컬처) POI 조회 — tour_poi 검수 승인분(V76 파이프라인). #96-A */
-export async function fetchHolyPois(params: Pick<TourQuery, 'areaCode' | 'sigunguCode'> = {}): Promise<TourPoi[]> {
+/**
+ * 성지(K-컬처) POI 조회 — tour_poi 검수 승인분(V76 파이프라인). #96-A
+ * sigunguName: 전국 시드(V90)는 TourAPI 시·군·구 코드가 없어 주소 문자열로 필터한다.
+ */
+export async function fetchHolyPois(
+    params: Pick<TourQuery, 'areaCode' | 'sigunguCode'> & { sigunguName?: string } = {},
+): Promise<TourPoi[]> {
     const res = await api.get('/api/v1/tour/holy', { params });
     return res.data?.data ?? [];
 }

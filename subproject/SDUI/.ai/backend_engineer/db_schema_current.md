@@ -119,11 +119,13 @@ notif_sent, request_fingerprint(V88 — 중복 요청 차단).
 
 ## 5. 관광 / 성지
 
-### tour_poi (V75 → V76/V78/V80/V81 확장)
+### tour_poi (V75 → V76/V78/V80/V81 확장, V90 전국 시드)
 TourAPI 공공 POI + 성지 큐레이션 통합: content_id(공공 UNIQUE, NULL=수집), content_type_id, source(TOURAPI/UGC/CRAWL),
 title, addr, map_x/map_y(경위도), first_image, cat1~3, area_code/sigungu_code, raw_json JSONB
 + artist/fandom_info/recommend_reason/source_url(V76), review_status(APPROVED 기본)/reviewed_by/at(V76),
-submitted_by `FK→users`(V78, UGC 제출자), image_source_url/image_credit(V81), region 백필(V80).
+submitted_by `FK→users`(V78, UGC 제출자), image_source_url/image_credit(V81), area/sigungu 코드 백필(V80).
+V90: 전국 성지 9,017행 시드(kcisa_media_2023, content_id `kride-media-*`, source CRAWL) —
+생성기 `scripts/build_holy_poi_seed.py`, sigungu 이름은 raw_json에 보존(주소 LIKE 필터, 시군구 코드 없음).
 
 ## 6. B2B 파일럿 (V77)
 

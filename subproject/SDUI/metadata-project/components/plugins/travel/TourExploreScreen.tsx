@@ -26,7 +26,19 @@ const CATEGORIES = [
     { id: '14', label: '문화시설' },
 ] as const;
 
-const FALLBACK_AREAS: TourRegion[] = [{ code: '1', name: '서울' }];
+// 서버(TourService.NATIONWIDE_AREAS)와 동일한 TourAPI 시/도 코드 체계.
+// /areas 응답 실패 시에도 전국 성지(V90 시드)를 탐색할 수 있어야 한다.
+const FALLBACK_AREAS: TourRegion[] = [
+    { code: '1', name: '서울' }, { code: '2', name: '인천' },
+    { code: '3', name: '대전' }, { code: '4', name: '대구' },
+    { code: '5', name: '광주' }, { code: '6', name: '부산' },
+    { code: '7', name: '울산' }, { code: '8', name: '세종' },
+    { code: '31', name: '경기' }, { code: '32', name: '강원' },
+    { code: '33', name: '충북' }, { code: '34', name: '충남' },
+    { code: '35', name: '경북' }, { code: '36', name: '경남' },
+    { code: '37', name: '전북' }, { code: '38', name: '전남' },
+    { code: '39', name: '제주' },
+];
 const FALLBACK_SEOUL_DISTRICTS: TourRegion[] = [
     { code: '1', name: '강남구' }, { code: '2', name: '강동구' },
     { code: '3', name: '강북구' }, { code: '4', name: '강서구' },
@@ -81,6 +93,10 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const returnFocusRef = useRef<HTMLElement | null>(null);
     const selectedAreaName = areas.find((area) => area.code === areaCode)?.name ?? '선택 지역';
+    // 전국 성지 시드(V90)는 시·군·구 코드가 없어 이름(주소 매칭)으로 거른다.
+    const selectedSigunguName = sigungu
+        ? districts.find((district) => district.code === sigungu)?.name ?? ''
+        : '';
 
     const closePlace = useCallback(() => {
         const returnFocusTarget = returnFocusRef.current;
@@ -145,7 +161,9 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             setError(null);
             try {
                 if (category === 'HOLY') {
-                    const list = await fetchHolyPois({ areaCode, sigunguCode: sigungu });
+                    const list = await fetchHolyPois({
+                        areaCode, sigunguCode: sigungu, sigunguName: selectedSigunguName,
+                    });
                     if (alive) setPois(list);
                 } else {
                     const list = await fetchTourPois({ areaCode, sigunguCode: sigungu, contentTypeId: category, arrange, numOfRows: 24 });
@@ -163,7 +181,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         };
         void loadPois();
         return () => { alive = false; };
-    }, [areaCode, category, sigungu, arrange]);
+    }, [areaCode, category, sigungu, arrange, selectedSigunguName]);
 
     useEffect(() => {
         if (loading || error || pois.length === 0) return;

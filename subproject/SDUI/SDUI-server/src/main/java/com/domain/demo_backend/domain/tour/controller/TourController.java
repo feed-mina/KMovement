@@ -41,12 +41,16 @@ public class TourController {
         return ApiResponse.success(tourService.getPois(areaCode, sigunguCode, contentTypeId, arrange, numOfRows, pageNo));
     }
 
-    /** GET /api/v1/tour/holy — 성지(K-컬처) POI 목록. 검수 승인분만 노출. Dev-4(#96-A). */
+    /**
+     * GET /api/v1/tour/holy — 성지(K-컬처) POI 목록. 검수 승인분만 노출. Dev-4(#96-A).
+     * sigunguName: 전국 시드(V90)는 TourAPI 시·군·구 코드가 없어 주소 문자열로 거른다.
+     */
     @GetMapping("/holy")
     public ApiResponse<List<HolyPoiDto>> getHolyPois(
             @RequestParam(required = false) String areaCode,
-            @RequestParam(required = false) String sigunguCode) {
-        return ApiResponse.success(tourService.getHolyPois(areaCode, sigunguCode));
+            @RequestParam(required = false) String sigunguCode,
+            @RequestParam(required = false) String sigunguName) {
+        return ApiResponse.success(tourService.getHolyPois(areaCode, sigunguCode, sigunguName));
     }
 
     /**
