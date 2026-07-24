@@ -80,7 +80,12 @@ describe('K-POP web product leaves', () => {
 
     render(<ProductSearch apiBase="https://api.example.com" />);
 
-    expect(await screen.findByRole('status')).toHaveTextContent('검색을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+    // The busy indicator is also role="status", so grab-and-assert races the
+    // rejected search on slow machines — poll until the error copy lands.
+    await waitFor(
+      () => expect(screen.getByRole('status')).toHaveTextContent('검색을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.'),
+      { timeout: 15000 },
+    );
     expect(screen.queryByText(/database host|internal-token-value/)).not.toBeInTheDocument();
   });
 });

@@ -27,15 +27,18 @@ module.exports = {
     testEnvironmentOptions: {
         customExportConditions: ['node', 'node-addons'],
     },
-    // @@@@ 테스트 파일 경로 규칙 추가
-    testMatch: [
-        "<rootDir>/tests/**/*.(test|spec).(ts|tsx)",
-        "<rootDir>/src/**/__tests__/**/*.(ts|tsx)"
-    ],
+    // @@@@ 테스트 파일 경로 규칙: testMatch 글롭 대신 roots + testRegex.
+    // `**` 글롭은 점(.)으로 시작하는 경로 세그먼트를 건너뛰므로, 체크아웃이
+    // dot-디렉터리(예: `.claude/worktrees/…` git worktree) 아래에 있으면 테스트를
+    // 하나도 찾지 못한다. kride/jest.config.ts와 동일한 해결책.
+    // (src/는 존재하지 않아 기존 testMatch의 src 글롭도 죽은 항목이었다)
+    roots: ["<rootDir>/tests"],
+    testRegex: "tests[\\\\/].*\\.(test|spec)\\.(ts|tsx)$",
     // @@@@ Playwright E2E 테스트는 Jest에서 제외 (npx playwright test 로 실행)
+    // 경로 구분자 양쪽([/\\]) 대응: Windows에서는 '\'라 '/tests/e2e/' 패턴이 안 걸린다.
     testPathIgnorePatterns: [
-        "<rootDir>/node_modules/",
-        "<rootDir>/tests/e2e/"
+        "node_modules[/\\\\]",
+        "tests[/\\\\]e2e[/\\\\]"
     ],
     reporters: [
         "default",  // 터미널 출력을 위해 기본 리포터 유지

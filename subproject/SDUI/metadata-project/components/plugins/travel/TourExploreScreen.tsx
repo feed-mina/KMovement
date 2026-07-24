@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { ScreenControllerProps } from '@/components/screens/types';
 import {
+    fetchHolyContents,
     fetchHolyPois,
     fetchTourAreas,
     fetchTourDistricts,
     fetchTourPois,
+    HolyContentOption,
     TourPoi,
     TourRegion,
 } from '@/services/tourApi';
@@ -21,12 +23,30 @@ import { trackEvent } from '@/lib/analytics/dataLayer';
 
 const CATEGORIES = [
     { id: 'HOLY', label: '성지' },
+    // 성지 맛집(V92): 방영 씬 설명이 있는 식당·카페 촬영지 부분집합.
+    // 일반 '맛집'(TourAPI 실시간)과 다른 큐레이션이다.
+    { id: 'HOLY_FOOD', label: '성지 맛집' },
     { id: '39', label: '맛집' },
     { id: '12', label: '관광지' },
     { id: '14', label: '문화시설' },
 ] as const;
 
-const FALLBACK_AREAS: TourRegion[] = [{ code: '1', name: '서울' }];
+/** 성지 계열(공용 tour_poi 데이터) 카테고리 여부 — 작품 필터를 공유한다. */
+const isHolyCategory = (category: string) => category === 'HOLY' || category === 'HOLY_FOOD';
+
+// 서버(TourService.NATIONWIDE_AREAS)와 동일한 TourAPI 시/도 코드 체계.
+// /areas 응답 실패 시에도 전국 성지(V90 시드)를 탐색할 수 있어야 한다.
+const FALLBACK_AREAS: TourRegion[] = [
+    { code: '1', name: '서울' }, { code: '2', name: '인천' },
+    { code: '3', name: '대전' }, { code: '4', name: '대구' },
+    { code: '5', name: '광주' }, { code: '6', name: '부산' },
+    { code: '7', name: '울산' }, { code: '8', name: '세종' },
+    { code: '31', name: '경기' }, { code: '32', name: '강원' },
+    { code: '33', name: '충북' }, { code: '34', name: '충남' },
+    { code: '35', name: '경북' }, { code: '36', name: '경남' },
+    { code: '37', name: '전북' }, { code: '38', name: '전남' },
+    { code: '39', name: '제주' },
+];
 const FALLBACK_SEOUL_DISTRICTS: TourRegion[] = [
     { code: '1', name: '강남구' }, { code: '2', name: '강동구' },
     { code: '3', name: '강북구' }, { code: '4', name: '강서구' },
@@ -47,6 +67,10 @@ const SORTS = [
     { code: 'A', label: '이름순' },
     { code: 'C', label: '최신순' },
 ] as const;
+
+const CONTENT_CATEGORY_LABELS: Record<string, string> = {
+    kpop: 'K-POP', drama: '드라마', movie: '영화', show: '예능',
+};
 
 const SAVED_KEY = 'kride:saved-pois';
 
@@ -74,6 +98,10 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const [pois, setPois] = useState<TourPoi[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    // 작품/아티스트 성지 필터 (V91): 검색어 → 자동완성 → 선택 칩.
+    const [contentQuery, setContentQuery] = useState('');
+    const [contentOptions, setContentOptions] = useState<HolyContentOption[]>([]);
+    const [selectedContent, setSelectedContent] = useState<HolyContentOption | null>(null);
     const [selected, setSelected] = useState<TourPoi | null>(null);
     const [saved, setSaved] = useState<Set<string>>(new Set());
     const dialogTitleId = useId();
@@ -81,6 +109,10 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const returnFocusRef = useRef<HTMLElement | null>(null);
     const selectedAreaName = areas.find((area) => area.code === areaCode)?.name ?? '선택 지역';
+    // 전국 성지 시드(V90)는 시·군·구 코드가 없어 이름(주소 매칭)으로 거른다.
+    const selectedSigunguName = sigungu
+        ? districts.find((district) => district.code === sigungu)?.name ?? ''
+        : '';
 
     const closePlace = useCallback(() => {
         const returnFocusTarget = returnFocusRef.current;
@@ -144,8 +176,12 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             setLoading(true);
             setError(null);
             try {
-                if (category === 'HOLY') {
-                    const list = await fetchHolyPois({ areaCode, sigunguCode: sigungu });
+                if (isHolyCategory(category)) {
+                    const list = await fetchHolyPois({
+                        areaCode, sigunguCode: sigungu, sigunguName: selectedSigunguName,
+                        contentSqno: selectedContent?.contentSqno,
+                        kind: category === 'HOLY_FOOD' ? 'FOOD' : undefined,
+                    });
                     if (alive) setPois(list);
                 } else {
                     const list = await fetchTourPois({ areaCode, sigunguCode: sigungu, contentTypeId: category, arrange, numOfRows: 24 });
@@ -157,13 +193,32 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                         site.areaCode === areaCode && (!sigungu || site.sigunguCode === sigungu)));
                 }
                 if (alive && category !== 'HOLY') setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+                if (alive && category === 'HOLY_FOOD') setPois([]);
             } finally {
                 if (alive) setLoading(false);
             }
         };
         void loadPois();
         return () => { alive = false; };
-    }, [areaCode, category, sigungu, arrange]);
+    }, [areaCode, category, sigungu, arrange, selectedSigunguName, selectedContent?.contentSqno]);
+
+    // 작품/아티스트 자동완성 — 성지 계열 카테고리에서 2자 이상 입력 시 300ms 디바운스 조회.
+    useEffect(() => {
+        if (!isHolyCategory(category) || contentQuery.trim().length < 2) {
+            setContentOptions([]);
+            return;
+        }
+        let alive = true;
+        const timer = setTimeout(async () => {
+            try {
+                const options = await fetchHolyContents({ q: contentQuery.trim(), limit: 8 });
+                if (alive) setContentOptions(options);
+            } catch {
+                if (alive) setContentOptions([]);
+            }
+        }, 300);
+        return () => { alive = false; clearTimeout(timer); };
+    }, [category, contentQuery]);
 
     useEffect(() => {
         if (loading || error || pois.length === 0) return;
@@ -319,6 +374,72 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                     ))}
                 </div>
             </div>
+
+            {isHolyCategory(category) && (
+                <section aria-label="작품·아티스트 필터" style={{ marginBottom: 14 }}>
+                    <label htmlFor="holy-content-search" style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#791F1F', marginBottom: 6 }}>
+                        작품·아티스트로 성지 찾기
+                    </label>
+                    {selectedContent ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            <span style={{ ...chipStyle(true, true), display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                                {selectedContent.name}
+                                {CONTENT_CATEGORY_LABELS[selectedContent.category]
+                                    ? ` · ${CONTENT_CATEGORY_LABELS[selectedContent.category]}`
+                                    : ''}
+                            </span>
+                            <button
+                                type="button"
+                                aria-label={`${selectedContent.name} 필터 해제`}
+                                onClick={() => { setSelectedContent(null); setContentQuery(''); }}
+                                style={{ ...chipStyle(false, true), cursor: 'pointer' }}
+                            >
+                                필터 해제 ✕
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <input
+                                id="holy-content-search"
+                                type="search"
+                                value={contentQuery}
+                                onChange={(e) => setContentQuery(e.target.value)}
+                                placeholder="예: 김비서가 왜 그럴까, 방탄소년단"
+                                style={{
+                                    width: '100%', maxWidth: 360, fontSize: 13, padding: '9px 12px',
+                                    border: '0.5px solid #ddd', borderRadius: 10, outline: 'none',
+                                }}
+                            />
+                            {contentOptions.length > 0 && (
+                                <ul aria-label="작품·아티스트 검색 결과" style={{ listStyle: 'none', margin: '8px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 4, maxWidth: 360 }}>
+                                    {contentOptions.map((option) => (
+                                        <li key={option.contentSqno}>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setSelectedContent(option);
+                                                    setContentOptions([]);
+                                                }}
+                                                style={{
+                                                    width: '100%', textAlign: 'left', fontSize: 13, padding: '8px 12px',
+                                                    border: '0.5px solid #eee', borderRadius: 10, background: '#fff', cursor: 'pointer',
+                                                }}
+                                            >
+                                                {option.name}
+                                                <span style={{ color: '#999', fontSize: 12 }}>
+                                                    {' · '}
+                                                    {CONTENT_CATEGORY_LABELS[option.category] ?? option.category}
+                                                    {` · 성지 ${option.poiCount}곳`}
+                                                </span>
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </>
+                    )}
+                </section>
+            )}
 
             {category === 'HOLY' && (
                 <section

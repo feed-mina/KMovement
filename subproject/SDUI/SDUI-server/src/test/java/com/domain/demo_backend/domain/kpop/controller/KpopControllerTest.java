@@ -133,6 +133,21 @@ class KpopControllerTest {
     }
 
     @Test
+    void unbookmarkEventDeletesOnlyTheCallersRow() {
+        CustomUserDetails user = mock(CustomUserDetails.class);
+        when(user.getUserSqno()).thenReturn(42L);
+        when(jdbcTemplate.update(contains("DELETE FROM event_bookmark"), any(MapSqlParameterSource.class)))
+                .thenReturn(1);
+
+        ResponseEntity<ApiResponse<Map<String, Object>>> response = controller.unbookmarkEvent(9L, user);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getData()).containsEntry("eventId", 9L).containsEntry("bookmarked", false);
+        verify(jdbcTemplate).update(contains("DELETE FROM event_bookmark"), any(MapSqlParameterSource.class));
+    }
+
+    @Test
     void productCandidatesDelegateAllBoundedSearchInputs() {
         when(productService.productCandidates("light", 1L, 2L, 50)).thenReturn(List.of(Map.of(
                 "id", 91L,

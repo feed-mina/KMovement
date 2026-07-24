@@ -19,6 +19,18 @@ export const CardImageLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
   );
 };
 
+/**
+ * Generic IMAGE leaf. Only absolute URLs render: relative paths in metadata
+ * (e.g. INTRO1's `/images/kride_hero.png`) are web-app public assets that do
+ * not exist on the device or the API host.
+ */
+export const RemoteImageLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
+  const raw = (typeof data === 'string' && data) || data?.src || meta?.labelText || meta?.label_text || '';
+  const src = String(raw);
+  if (!/^https?:\/\//.test(src)) return null;
+  return <Image source={{ uri: src }} className="h-48 w-full rounded-xl" resizeMode="cover" />;
+};
+
 export const CardLabelLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
   const text = data?.name || meta?.labelText || meta?.label_text || '';
   return <Text className="mt-1 w-full text-center text-sm text-white" numberOfLines={1}>{String(text)}</Text>;
@@ -168,12 +180,13 @@ export const EventCardLeaf: React.FC<SduiLeafProps> = ({ data, meta, onAction, a
   const [status, setStatus] = useState('');
 
   const bookmark = async () => {
-    if (busy || bookmarked) return;
+    if (busy) return;
     setBusy(true);
     try {
-      await requestKpop(apiBase, `/api/v1/kpop/events/${data?.id}/bookmark`);
-      setBookmarked(true);
-      setStatus('이벤트를 저장했습니다.');
+      // 팔로우와 동일한 토글: 저장된 상태에서 다시 누르면 DELETE로 해제한다.
+      await requestKpop(apiBase, `/api/v1/kpop/events/${data?.id}/bookmark`, bookmarked ? 'DELETE' : 'POST');
+      setBookmarked((current) => !current);
+      setStatus(bookmarked ? '이벤트 저장을 취소했습니다.' : '이벤트를 저장했습니다.');
     } catch (error) {
       setStatus(actionError(error));
     } finally {
@@ -205,10 +218,10 @@ export const EventCardLeaf: React.FC<SduiLeafProps> = ({ data, meta, onAction, a
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`${title} 저장`}
-          accessibilityState={{ disabled: bookmarked || busy, selected: bookmarked }}
+          accessibilityLabel={`${title} ${bookmarked ? '저장 취소' : '저장'}`}
+          accessibilityState={{ disabled: busy, selected: bookmarked }}
           className="min-h-12 justify-center rounded-full bg-kride px-4 py-2"
-          disabled={bookmarked || busy}
+          disabled={busy}
           onPress={bookmark}
         >
           <Text className="font-semibold text-white">{busy ? '저장 중…' : bookmarked ? '저장됨' : '저장'}</Text>

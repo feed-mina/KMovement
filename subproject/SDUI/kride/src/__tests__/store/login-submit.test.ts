@@ -97,6 +97,43 @@ describe("LOGIN_SUBMIT", () => {
     expect(navigation.push).not.toHaveBeenCalled();
   });
 
+  it("rejects a full address typed into the ID field before calling the API", async () => {
+    const fetchMock = jest.fn();
+    global.fetch = fetchMock as any;
+
+    const { navigation, hook } = setup();
+    await act(async () => {
+      hook.result.current.handleChange("user_email", "me@naver.com");
+      hook.result.current.handleChange("user_email_domain", "naver.com");
+      hook.result.current.handleChange("user_pw", "pw1234");
+    });
+    await act(async () => {
+      await hook.result.current.handleAction(LOGIN_BTN);
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(navigation.notify).toHaveBeenCalledWith(
+      "아이디 칸에는 @ 앞부분만 입력하세요. 도메인은 아래에서 선택해주세요."
+    );
+  });
+
+  it("surfaces the server's own failure reason when one is provided", async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      text: async () => "계정이 비활성화되었습니다.",
+    }) as any;
+
+    const { navigation, hook } = setup();
+    await fillLoginForm(hook);
+    await act(async () => {
+      await hook.result.current.handleAction(LOGIN_BTN);
+    });
+
+    expect(navigation.notify).toHaveBeenCalledWith("계정이 비활성화되었습니다.");
+    expect(useSessionStore.getState().isLoggedIn).toBe(false);
+  });
+
   it("reports bad credentials and keeps the user logged out on 401", async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: false,

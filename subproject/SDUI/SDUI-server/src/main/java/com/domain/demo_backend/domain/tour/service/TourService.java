@@ -1,14 +1,17 @@
 package com.domain.demo_backend.domain.tour.service;
 
 import com.domain.demo_backend.domain.tour.client.TourApiClient;
+import com.domain.demo_backend.domain.tour.domain.HolyContentRepository;
 import com.domain.demo_backend.domain.tour.domain.TourPoi;
 import com.domain.demo_backend.domain.tour.domain.TourPoiRepository;
+import com.domain.demo_backend.domain.tour.dto.HolyContentOptionDto;
 import com.domain.demo_backend.domain.tour.dto.HolyPoiDto;
 import com.domain.demo_backend.domain.tour.dto.HolyReviewItemDto;
 import com.domain.demo_backend.domain.tour.dto.TourPoiDto;
 import com.domain.demo_backend.domain.tour.dto.TourRegionDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +32,7 @@ public class TourService {
 
     private final TourApiClient tourApiClient;
     private final TourPoiRepository tourPoiRepository;
+    private final HolyContentRepository holyContentRepository;
 
     /** 맛집(음식점, contentTypeId=39) 조회 편의 메서드. */
     public static final String CONTENT_TYPE_RESTAURANT = "39";
@@ -41,6 +45,25 @@ public class TourService {
 
     private static final long REGION_CACHE_TTL_MILLIS = 10 * 60 * 1000L;
     private final Map<String, RegionCacheEntry> regionCache = new ConcurrentHashMap<>();
+
+    /** 성지 목록 응답 상한 — 전국 시드(V90) 이후 지역당 수천 행이 될 수 있다. */
+    static final int HOLY_MAX_RESULTS = 300;
+
+    /**
+     * TourAPI 표준 시/도 코드. TOUR_API_KEY 미설정·장애 시에도 지역 탐색이
+     * 서울로 쪼그라들지 않도록 서버가 전국 목록을 보장한다
+     * (scripts/build_holy_poi_seed.py 의 SIDO_TO_AREA 매핑과 동일 코드 체계).
+     */
+    static final List<TourRegionDto> NATIONWIDE_AREAS = List.of(
+            new TourRegionDto("1", "서울"), new TourRegionDto("2", "인천"),
+            new TourRegionDto("3", "대전"), new TourRegionDto("4", "대구"),
+            new TourRegionDto("5", "광주"), new TourRegionDto("6", "부산"),
+            new TourRegionDto("7", "울산"), new TourRegionDto("8", "세종"),
+            new TourRegionDto("31", "경기"), new TourRegionDto("32", "강원"),
+            new TourRegionDto("33", "충북"), new TourRegionDto("34", "충남"),
+            new TourRegionDto("35", "경북"), new TourRegionDto("36", "경남"),
+            new TourRegionDto("37", "전북"), new TourRegionDto("38", "전남"),
+            new TourRegionDto("39", "제주"));
 
     private record RegionCacheEntry(List<TourRegionDto> regions, long cachedAt) {
         boolean isFresh(long now) {
@@ -66,17 +89,45 @@ public class TourService {
      * 데이터 파이프라인 1차: 시드(V76) 서빙. 후속: LLM 정제 투입분(PENDING)은 검수 후 노출.
      */
     public List<HolyPoiDto> getHolyPois() {
-        return getHolyPois(null, null);
+        return getHolyPois(null, null, null, null);
     }
 
     public List<HolyPoiDto> getHolyPois(String areaCode, String sigunguCode) {
+        return getHolyPois(areaCode, sigunguCode, null, null);
+    }
+
+    public List<HolyPoiDto> getHolyPois(String areaCode, String sigunguCode, String sigunguName) {
+        return getHolyPois(areaCode, sigunguCode, sigunguName, null);
+    }
+
+    public List<HolyPoiDto> getHolyPois(String areaCode, String sigunguCode, String sigunguName, Long contentSqno) {
+        return getHolyPois(areaCode, sigunguCode, sigunguName, contentSqno, null);
+    }
+
+    /** kind='FOOD' → 식당·카페 촬영지(HOLY_FOOD, '성지 맛집' 칩)만. 그 외/미지정은 전체. */
+    public List<HolyPoiDto> getHolyPois(String areaCode, String sigunguCode, String sigunguName,
+                                        Long contentSqno, String kind) {
         List<HolyPoiDto> pois = tourPoiRepository
-                .findHolyPoisByRegion(SOURCE_TOURAPI, REVIEW_APPROVED, areaCode, sigunguCode)
+                .findHolyPoisByRegion(SOURCE_TOURAPI, REVIEW_APPROVED, areaCode, sigunguCode,
+                        sigunguName, contentSqno, kind, PageRequest.of(0, HOLY_MAX_RESULTS))
                 .stream()
                 .map(HolyPoiDto::from)
                 .toList();
-        log.info("[TourService] 성지 POI 조회 - area={}, sigungu={}, {}건", areaCode, sigunguCode, pois.size());
+        log.info("[TourService] 성지 POI 조회 - area={}, sigungu={}, sigunguName={}, content={}, kind={}, {}건",
+                areaCode, sigunguCode, sigunguName, contentSqno, kind, pois.size());
         return pois;
+    }
+
+    /** 작품/아티스트 필터 선택지 검색 — 성지 수 내림차순, 상한 1~50(기본 20). */
+    public List<HolyContentOptionDto> searchHolyContents(String q, String category, int limit) {
+        int rows = Math.min(Math.max(limit, 1), 50);
+        String query = q == null ? "" : q.trim();
+        String cleanCategory = category == null ? "" : category.trim();
+        return holyContentRepository
+                .searchOptions(query, cleanCategory, PageRequest.of(0, rows))
+                .stream()
+                .map(HolyContentOptionDto::from)
+                .toList();
     }
 
     /**
@@ -89,6 +140,7 @@ public class TourService {
         RegionCacheEntry cached = regionCache.get(cacheKey);
         if (cached != null && cached.isFresh(now)) return cached.regions();
 
+        boolean provinceRequest = normalizedAreaCode.isEmpty();
         try {
             List<TourRegionDto> regions = List.copyOf(tourApiClient.areaCodes(normalizedAreaCode));
             if (!regions.isEmpty()) {
@@ -96,11 +148,17 @@ public class TourService {
                 return regions;
             }
             if (cached != null) return cached.regions();
-            return List.of();
+            return provinceRequest ? NATIONWIDE_AREAS : List.of();
         } catch (RuntimeException error) {
             if (cached != null) {
                 log.warn("[TourService] 지역 코드 갱신 실패, 마지막 성공 캐시 사용 - key={}", cacheKey, error);
                 return cached.regions();
+            }
+            // 시/도 목록만은 TourAPI 없이도 보장한다 — 키 미설정/장애 시 프론트가
+            // 서울 폴백으로 쪼그라들어 전국 성지 데이터를 탐색할 수 없었다.
+            if (provinceRequest) {
+                log.warn("[TourService] 지역 코드 조회 실패, 전국 시/도 상수로 폴백", error);
+                return NATIONWIDE_AREAS;
             }
             throw error;
         }

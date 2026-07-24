@@ -157,7 +157,7 @@ export const ActionButtonLeaf: React.FC<SduiLeafProps> = ({ meta, data, onAction
   const cssClass = textValue(meta?.cssClass || meta?.css_class);
   const isReadonly = truthyReadonly(meta);
   const isKakao = cssClass.includes('kakao');
-  const isOutline = cssClass.includes('signup') || cssClass.includes('secondary');
+  const isOutline = cssClass.includes('signup') || cssClass.includes('secondary') || cssClass.includes('resend');
   const containerClassName = [
     'min-h-12 w-full items-center justify-center rounded-xl px-4 py-3',
     isKakao ? 'bg-[#FEE500]' : isOutline ? 'border border-kride bg-white' : 'bg-kride',

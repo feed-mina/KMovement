@@ -120,6 +120,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/community/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/community/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/community/**").authenticated()
+                        // ── [추가] 주소 검색 (회원가입은 비로그인 상태라 공개) ──
+                        .requestMatchers(HttpMethod.GET, "/api/v1/address/search").permitAll()
                         // ── [추가] 관광 POI (공개 조회) — Epic #74 Dev-2 ──
                         .requestMatchers(HttpMethod.GET, "/api/v1/tour/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/tour/holy/submissions").authenticated()

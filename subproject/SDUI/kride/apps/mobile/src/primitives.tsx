@@ -6,7 +6,10 @@ const CLASS_MAP: Record<string, string> = {
   'content-area': 'w-full gap-4',
   'flex-row-layout': 'flex-row flex-wrap',
   'flex-col-layout': 'flex-col',
-  'text-field': 'text-base text-gray-900',
+  // No default text color: metadata carries its own (`text-white` on the dark
+  // INTRO screens), and a baked-in gray-900 can win the class conflict and
+  // vanish against black backgrounds. RN's default text color is black anyway.
+  'text-field': 'text-base',
   'btn-field': 'min-h-12 items-center justify-center rounded-xl px-4 py-3',
   'content-btn': 'min-h-12 items-center justify-center rounded-xl px-4 py-3',
 
@@ -27,6 +30,18 @@ const CLASS_MAP: Record<string, string> = {
   login_form_button: 'mt-2 bg-kride',
   'signup-nav': 'mt-3 border border-kride bg-transparent',
   'kakao-button': 'mt-3 bg-[#FEE500]',
+
+  // REGISTER_PAGE / VERIFY_CODE_PAGE. Base BUTTON leaves have no background of
+  // their own, so anything unmapped renders white-on-white (invisible).
+  REG_ID_ROW: 'w-full items-stretch gap-2',
+  INFO_SECTION: 'w-full gap-3',
+  'mt-30': 'mt-6 w-full gap-3',
+  'mt-40': 'mt-8 w-full gap-3',
+  reg_id_check: 'shrink-0 bg-kride',
+  reg_addr_btn: 'bg-kride',
+  reg_submit: 'mt-2 bg-kride',
+  'verify-submit-btn': 'mt-2 bg-kride',
+  'resend-link': 'mt-1 border border-kride bg-white',
 
   'main-bento': 'w-full flex-row flex-wrap gap-3 bg-[#fff7f2] p-4',
   'bento-card': 'min-h-36 rounded-2xl p-5',
@@ -60,6 +75,14 @@ const CLASS_MAP: Record<string, string> = {
   'diary-btn-primary': 'mb-3 w-[250px] bg-kride',
   'diary-btn-secondary': 'mb-3 w-[250px] border border-kride bg-white',
 
+  // ADMIN_DASHBOARD (V71) — grids gain spacing; cards style themselves.
+  'admin-dashboard-page': 'w-full gap-4',
+  'admin-dashboard-header': 'w-full gap-1',
+  'admin-dashboard-title': 'text-2xl font-extrabold text-gray-950',
+  'admin-dashboard-subtitle': 'text-sm text-gray-500',
+  'admin-dashboard-metrics': 'w-full gap-3',
+  'admin-dashboard-charts': 'w-full gap-3',
+
   'kpop-screen': 'w-full gap-5 bg-[#141414]',
   'kpop-title': 'text-3xl font-extrabold text-white',
   'kpop-subtitle': 'text-sm leading-5 text-neutral-300',
@@ -79,7 +102,13 @@ const translateClassName = (className?: string) => {
 
 const buttonTextClassName = (className?: string) => {
   const names = new Set((className || '').split(/\s+/).filter(Boolean));
-  if (names.has('kakao-button') || names.has('signup-nav') || names.has('diary-nav2') || names.has('diary-btn-secondary')) {
+  if (
+    names.has('kakao-button') ||
+    names.has('signup-nav') ||
+    names.has('diary-nav2') ||
+    names.has('diary-btn-secondary') ||
+    names.has('resend-link')
+  ) {
     return 'text-center font-bold text-gray-950';
   }
   return 'text-center font-bold text-white';

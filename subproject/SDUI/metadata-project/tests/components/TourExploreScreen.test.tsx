@@ -2,13 +2,14 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TourExploreScreen from '@/components/plugins/travel/TourExploreScreen';
-import { fetchHolyPois, fetchTourAreas, fetchTourDistricts, fetchTourPois } from '@/services/tourApi';
+import { fetchHolyContents, fetchHolyPois, fetchTourAreas, fetchTourDistricts, fetchTourPois } from '@/services/tourApi';
 import { HOLY_SITES } from '@/lib/data/holySites';
 
 jest.mock('@/services/tourApi', () => ({
     __esModule: true,
     fetchTourPois: jest.fn(),
     fetchHolyPois: jest.fn(),
+    fetchHolyContents: jest.fn(),
     fetchTourAreas: jest.fn(),
     fetchTourDistricts: jest.fn(),
 }));
@@ -17,6 +18,7 @@ jest.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { socialType
 
 const mockedFetch = fetchTourPois as jest.Mock;
 const mockedHolyFetch = fetchHolyPois as jest.Mock;
+const mockedContentFetch = fetchHolyContents as jest.Mock;
 const mockedAreaFetch = fetchTourAreas as jest.Mock;
 const mockedDistrictFetch = fetchTourDistricts as jest.Mock;
 
@@ -31,6 +33,10 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         mockedFetch.mockResolvedValue(sample);
         mockedHolyFetch.mockReset();
         mockedHolyFetch.mockResolvedValue(HOLY_SITES);
+        mockedContentFetch.mockReset();
+        mockedContentFetch.mockResolvedValue([
+            { contentSqno: 77, name: '김비서가 왜 그럴까', category: 'drama', poiCount: 12 },
+        ]);
         mockedAreaFetch.mockReset();
         mockedAreaFetch.mockResolvedValue([
             { code: '1', name: '서울' },
@@ -131,10 +137,42 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
 
         await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '31', sigunguCode: '13' })));
         fireEvent.click(screen.getByRole('button', { name: '성지' }));
-        await waitFor(() => expect(mockedHolyFetch).toHaveBeenCalledWith({ areaCode: '31', sigunguCode: '13' }));
+        // 전국 시드(V90)는 시·군·구 코드가 없어 주소 매칭용 이름도 함께 보낸다.
+        await waitFor(() => expect(mockedHolyFetch).toHaveBeenCalledWith(
+            { areaCode: '31', sigunguCode: '13', sigunguName: '수원시' }));
     });
 
-    it('지역 카탈로그가 실패하면 서울 기본값과 전체 선택을 안전하게 제공한다', async () => {
+    it('성지 맛집 칩은 kind=FOOD로 조회하고 작품 필터를 함께 쓸 수 있다', async () => {
+        renderScreen();
+        fireEvent.click(await screen.findByRole('button', { name: '성지 맛집' }));
+
+        await waitFor(() => expect(mockedHolyFetch).toHaveBeenCalledWith(
+            expect.objectContaining({ kind: 'FOOD' })));
+        // 성지 계열이므로 작품 검색 입력이 함께 제공된다.
+        expect(screen.getByLabelText('작품·아티스트로 성지 찾기')).toBeInTheDocument();
+        // 제보 배너는 일반 성지 칩 전용이다.
+        expect(screen.queryByText('새로운 팬 성지를 알고 있나요?')).not.toBeInTheDocument();
+    });
+
+    it('작품 검색에서 선택하면 contentSqno로 성지를 거르고 칩 해제 시 전체로 돌아간다', async () => {
+        renderScreen();
+        fireEvent.click(await screen.findByRole('button', { name: '성지' }));
+        await waitFor(() => expect(mockedHolyFetch).toHaveBeenCalled());
+
+        fireEvent.change(screen.getByLabelText('작품·아티스트로 성지 찾기'), { target: { value: '김비서' } });
+        await waitFor(() => expect(mockedContentFetch).toHaveBeenCalledWith({ q: '김비서', limit: 8 }));
+
+        fireEvent.click(await screen.findByRole('button', { name: /김비서가 왜 그럴까/ }));
+        await waitFor(() => expect(mockedHolyFetch).toHaveBeenCalledWith(
+            expect.objectContaining({ contentSqno: 77 })));
+        expect(screen.getByText(/김비서가 왜 그럴까 · 드라마/)).toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole('button', { name: '김비서가 왜 그럴까 필터 해제' }));
+        await waitFor(() => expect(mockedHolyFetch).toHaveBeenCalledWith(
+            expect.objectContaining({ contentSqno: undefined })));
+    });
+
+    it('지역 카탈로그가 실패하면 전국 시/도 기본값과 전체 선택을 안전하게 제공한다', async () => {
         mockedAreaFetch.mockRejectedValueOnce(new Error('network'));
         mockedDistrictFetch.mockRejectedValueOnce(new Error('network'));
 
@@ -142,6 +180,9 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
 
         expect(await screen.findByRole('button', { name: '서울' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: '서울 전체' })).toHaveAttribute('aria-pressed', 'true');
+        // 폴백이 서울로 쪼그라들지 않고 전국 시/도를 제공해야 한다.
+        expect(screen.getByRole('button', { name: '부산' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: '제주' })).toBeInTheDocument();
         expect(await screen.findByRole('status')).toHaveTextContent(/지역 전체로 탐색/);
     });
 

@@ -1,4 +1,5 @@
 import {
+    fetchHolyContents,
     fetchHolyPois,
     fetchRestaurants,
     fetchTourAreas,
@@ -58,6 +59,40 @@ describe('tourApi 서비스', () => {
 
         expect(mockedApi.get).toHaveBeenCalledWith('/api/v1/tour/holy', {
             params: { areaCode: '1', sigunguCode: '23' },
+        });
+    });
+
+    it('전국 시드용 시·군·구 이름(sigunguName)도 성지 조회에 전달한다', async () => {
+        mockedApi.get.mockResolvedValue({ data: { data: [] } });
+
+        await fetchHolyPois({ areaCode: '31', sigunguCode: '13', sigunguName: '수원시' });
+
+        expect(mockedApi.get).toHaveBeenCalledWith('/api/v1/tour/holy', {
+            params: { areaCode: '31', sigunguCode: '13', sigunguName: '수원시' },
+        });
+    });
+
+    it('작품 필터(contentSqno)와 선택지 검색을 성지 계약으로 호출한다', async () => {
+        mockedApi.get.mockResolvedValue({ data: { data: [] } });
+
+        await fetchHolyPois({ areaCode: '1', contentSqno: 77 });
+        expect(mockedApi.get).toHaveBeenCalledWith('/api/v1/tour/holy', {
+            params: { areaCode: '1', contentSqno: 77 },
+        });
+
+        await fetchHolyContents({ q: '김비서', limit: 8 });
+        expect(mockedApi.get).toHaveBeenCalledWith('/api/v1/tour/holy/contents', {
+            params: { q: '김비서', limit: 8 },
+        });
+    });
+
+    it('성지 맛집(kind=FOOD) 조회 파라미터를 전달한다', async () => {
+        mockedApi.get.mockResolvedValue({ data: { data: [] } });
+
+        await fetchHolyPois({ areaCode: '31', kind: 'FOOD' });
+
+        expect(mockedApi.get).toHaveBeenCalledWith('/api/v1/tour/holy', {
+            params: { areaCode: '31', kind: 'FOOD' },
         });
     });
 });

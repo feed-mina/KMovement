@@ -60,8 +60,12 @@ const DynamicEngine: React.FC<DynamicEngineProps> = (props) => {
           classList.push(cid);
         }
 
+        // Seeds use both 'ROW' (V22-era) and 'horizontal' (V79 register rows).
+        const rawDirection = node.groupDirection ?? node.group_direction;
         const directionClass =
-          node.groupDirection === "ROW" ? "flex-row-layout" : "flex-col-layout";
+          rawDirection === "ROW" || rawDirection === "horizontal"
+            ? "flex-row-layout"
+            : "flex-col-layout";
         classList.push(directionClass);
 
         const combinedClassName = Array.from(new Set(classList))

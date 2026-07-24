@@ -24,15 +24,61 @@ const LABEL_TO_DURATION: Record<string, TravelDuration> = {
 
 export const DurationButtonLeaf: React.FC<SduiLeafProps> = ({ meta, data, onAction }) => {
   const duration = useOnboardingStore((s) => s.duration);
+  const setDuration = useOnboardingStore((s) => s.setDuration);
   const label = meta?.labelText || meta?.label_text || data?.label || '';
   const value = LABEL_TO_DURATION[label] || label;
   const selected = duration === value;
   return (
     <Pressable
-      onPress={() => onAction?.(meta, { value })}
+      onPress={() => {
+        // V53 wires these buttons to LINK (navigation), so the store write must
+        // happen here or KRIDE_FOCUS later reads no duration at all.
+        if (LABEL_TO_DURATION[label]) setDuration(LABEL_TO_DURATION[label]);
+        onAction?.(meta, { value });
+      }}
       className={`rounded-full border-2 border-kride px-8 py-4 ${selected ? 'bg-kride' : 'bg-transparent'}`}
     >
       <Text className={`text-lg font-bold ${selected ? 'text-white' : 'text-kride'}`}>{String(label)}</Text>
+    </Pressable>
+  );
+};
+
+/** Static stand-in for the web's animated TYPEWRITER_TEXT title. */
+export const TypewriterTextLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
+  const text = (typeof data === 'string' && data) || meta?.labelText || meta?.label_text || '';
+  if (!text) return null;
+  return <Text className="text-2xl font-bold text-white">{String(text)}</Text>;
+};
+
+/**
+ * KRIDE_NEXT_BTN — mirrors the web KrideNextButton: optional gating through
+ * componentProps.checkKey/minCount (unset in V53, so visible by default) and a
+ * plain onAction dispatch that lets the LINK action navigate.
+ */
+export const KrideNextButtonLeaf: React.FC<SduiLeafProps & { formData?: Record<string, unknown> }> = ({
+  meta,
+  formData,
+  onAction,
+}) => {
+  const props = meta?.componentProps || meta?.component_props || {};
+  const checkKey: string = props.checkKey ?? '';
+  const minCount: number = props.minCount ?? 1;
+  const items = checkKey ? (formData as any)?.[checkKey] : null;
+  const visible = !checkKey || (Array.isArray(items) && items.length >= minCount);
+  if (!visible) return null;
+
+  let label = String(meta?.labelText || meta?.label_text || '다음');
+  if (label.includes('AI') && (label.includes('상담') || label.includes('챗'))) {
+    label = '라이와 코스 상담';
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      className="mt-6 min-h-12 w-full items-center justify-center rounded-xl bg-kride px-4 py-3"
+      onPress={() => onAction?.(meta, {})}
+    >
+      <Text className="text-center font-bold text-white">{label}</Text>
     </Pressable>
   );
 };
@@ -135,6 +181,7 @@ export const RangeInputLeaf: React.FC<SduiLeafProps> = ({ id = '', meta, data, o
  * upper handle and emits the same `{ min, max }` payload as the web leaf.
  */
 export const DualRangeSliderLeaf: React.FC<SduiLeafProps> = ({ id = '', meta, data, onChange, onAction }) => {
+  const setBudget = useOnboardingStore((s) => s.setBudget);
   const minimum = numberValue(meta?.min ?? data?.min, 0);
   const maximum = numberValue(meta?.max ?? data?.max, 100);
   const step = numberValue(meta?.step ?? data?.step, 1);
@@ -143,6 +190,9 @@ export const DualRangeSliderLeaf: React.FC<SduiLeafProps> = ({ id = '', meta, da
   const [range, setRange] = useState({ min: initialMin, max: initialMax });
   const commit = (next: { min: number; max: number }) => {
     setRange(next);
+    // INTRO5's slider has no action_type, so the store write happens here for
+    // KRIDE_FOCUS to read (same reason as DurationButtonLeaf above).
+    setBudget(next);
     onChange?.(id, next);
     onAction?.(meta, next);
   };

@@ -192,6 +192,17 @@ public class KpopController {
         return ResponseEntity.ok(ApiResponse.success(Map.of("eventId", eventId, "bookmarked", true)));
     }
 
+    @DeleteMapping("/events/{eventId}/bookmark")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> unbookmarkEvent(
+            @PathVariable Long eventId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        requireUser(user);
+        jdbcTemplate.update("DELETE FROM event_bookmark WHERE user_sqno = :userSqno AND event_id = :id",
+                params("userSqno", user.getUserSqno()).addValue("id", eventId));
+        return ResponseEntity.ok(ApiResponse.success(Map.of("eventId", eventId, "bookmarked", false)));
+    }
+
     @PostMapping("/analysis-assets/presign")
     public ResponseEntity<ApiResponse<Map<String, Object>>> createAnalysisUpload(
             @RequestBody Map<String, Object> payload,
