@@ -84,12 +84,13 @@ export function EventCard({ data, meta, onAction }: CardProps) {
   const title = data?.titleKo || data?.title_ko || data?.titleEn || data?.title || "K-POP event";
 
   const bookmark = async () => {
-    if (bookmarked || busy) return;
+    if (busy) return;
     setBusy(true);
     try {
-      await postJson(`/api/v1/kpop/events/${data?.id}/bookmark`);
-      setBookmarked(true);
-      setStatus("일정을 저장했습니다.");
+      // 팔로우와 동일한 토글: 저장된 상태에서 다시 누르면 DELETE로 해제한다.
+      await postJson(`/api/v1/kpop/events/${data?.id}/bookmark`, bookmarked ? "DELETE" : "POST");
+      setBookmarked((current) => !current);
+      setStatus(bookmarked ? "일정 저장을 취소했습니다." : "일정을 저장했습니다.");
     } catch {
       setStatus("로그인 후 일정을 저장할 수 있습니다.");
     } finally {
@@ -113,8 +114,8 @@ export function EventCard({ data, meta, onAction }: CardProps) {
         >
           상세 보기
         </button>
-        <button type="button" aria-pressed={bookmarked} aria-busy={busy} disabled={busy || bookmarked} onClick={bookmark}>
-          {busy ? "저장 중…" : bookmarked ? "일정 저장됨" : "일정 저장"}
+        <button type="button" aria-pressed={bookmarked} aria-busy={busy} disabled={busy} onClick={bookmark}>
+          {busy ? "저장 중…" : bookmarked ? "일정 저장 취소" : "일정 저장"}
         </button>
         {status ? <small role="status" aria-live="polite" aria-atomic="true">{status}</small> : null}
       </div>

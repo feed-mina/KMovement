@@ -54,6 +54,29 @@ describe("K-POP cards", () => {
     await waitFor(() => expect(screen.getByText("로그인 후 일정을 저장할 수 있습니다.")).toBeInTheDocument());
   });
 
+  it("saves and unsaves an event as a toggle like follow", async () => {
+    render(<EventCard data={{ id: 9, titleKo: "Seoul fan route" }} />);
+
+    const saveButton = screen.getByRole("button", { name: "일정 저장" });
+    expect(saveButton).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(saveButton);
+    await screen.findByText("일정을 저장했습니다.");
+    expect(screen.getByRole("button", { name: "일정 저장 취소" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "일정 저장 취소" }));
+    await screen.findByText("일정 저장을 취소했습니다.");
+
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      1,
+      "/api/v1/kpop/events/9/bookmark",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      2,
+      "/api/v1/kpop/events/9/bookmark",
+      expect.objectContaining({ method: "DELETE", credentials: "include" }),
+    );
+  });
+
   it("provides descriptive image alternatives and a non-color reliability note", () => {
     const { rerender } = render(<ArtistCard data={{ id: 7, nameKo: "BTS", imageUrl: "https://img.example/bts.jpg" }} />);
     expect(screen.getByRole("img", { name: "BTS 아티스트 프로필 이미지" })).toBeInTheDocument();

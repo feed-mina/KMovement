@@ -71,9 +71,25 @@ describe('K-POP mobile cards', () => {
 
     await waitFor(() => expect(screen.getByText('이벤트를 저장했습니다.')).toBeTruthy());
     expect(screen.getByText('저장됨')).toBeTruthy();
-    expect(screen.getByLabelText('Seoul fan route 저장').props.accessibilityState).toEqual({
-      disabled: true,
+    // Saved is a toggle now (like follow): stays pressable so it can be undone.
+    expect(screen.getByLabelText('Seoul fan route 저장 취소').props.accessibilityState).toEqual({
+      disabled: false,
       selected: true,
     });
+  });
+
+  it('cancels a saved event with DELETE when pressed again', async () => {
+    const screen = render(
+      <EventCardLeaf data={{ id: 9, titleKo: 'Seoul fan route', bookmarked: true }} apiBase="https://api.example.com" />,
+    );
+
+    fireEvent.press(screen.getByLabelText('Seoul fan route 저장 취소'));
+
+    await waitFor(() => expect(screen.getByText('이벤트 저장을 취소했습니다.')).toBeTruthy());
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://api.example.com/api/v1/kpop/events/9/bookmark',
+      expect.objectContaining({ method: 'DELETE' }),
+    );
+    expect(screen.getByLabelText('Seoul fan route 저장').props.accessibilityState.selected).toBe(false);
   });
 });
