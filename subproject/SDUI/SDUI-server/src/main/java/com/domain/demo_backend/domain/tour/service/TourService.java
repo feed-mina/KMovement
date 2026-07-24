@@ -1,8 +1,10 @@
 package com.domain.demo_backend.domain.tour.service;
 
 import com.domain.demo_backend.domain.tour.client.TourApiClient;
+import com.domain.demo_backend.domain.tour.domain.HolyContentRepository;
 import com.domain.demo_backend.domain.tour.domain.TourPoi;
 import com.domain.demo_backend.domain.tour.domain.TourPoiRepository;
+import com.domain.demo_backend.domain.tour.dto.HolyContentOptionDto;
 import com.domain.demo_backend.domain.tour.dto.HolyPoiDto;
 import com.domain.demo_backend.domain.tour.dto.HolyReviewItemDto;
 import com.domain.demo_backend.domain.tour.dto.TourPoiDto;
@@ -30,6 +32,7 @@ public class TourService {
 
     private final TourApiClient tourApiClient;
     private final TourPoiRepository tourPoiRepository;
+    private final HolyContentRepository holyContentRepository;
 
     /** 맛집(음식점, contentTypeId=39) 조회 편의 메서드. */
     public static final String CONTENT_TYPE_RESTAURANT = "39";
@@ -86,23 +89,39 @@ public class TourService {
      * 데이터 파이프라인 1차: 시드(V76) 서빙. 후속: LLM 정제 투입분(PENDING)은 검수 후 노출.
      */
     public List<HolyPoiDto> getHolyPois() {
-        return getHolyPois(null, null, null);
+        return getHolyPois(null, null, null, null);
     }
 
     public List<HolyPoiDto> getHolyPois(String areaCode, String sigunguCode) {
-        return getHolyPois(areaCode, sigunguCode, null);
+        return getHolyPois(areaCode, sigunguCode, null, null);
     }
 
     public List<HolyPoiDto> getHolyPois(String areaCode, String sigunguCode, String sigunguName) {
+        return getHolyPois(areaCode, sigunguCode, sigunguName, null);
+    }
+
+    public List<HolyPoiDto> getHolyPois(String areaCode, String sigunguCode, String sigunguName, Long contentSqno) {
         List<HolyPoiDto> pois = tourPoiRepository
                 .findHolyPoisByRegion(SOURCE_TOURAPI, REVIEW_APPROVED, areaCode, sigunguCode,
-                        sigunguName, PageRequest.of(0, HOLY_MAX_RESULTS))
+                        sigunguName, contentSqno, PageRequest.of(0, HOLY_MAX_RESULTS))
                 .stream()
                 .map(HolyPoiDto::from)
                 .toList();
-        log.info("[TourService] 성지 POI 조회 - area={}, sigungu={}, sigunguName={}, {}건",
-                areaCode, sigunguCode, sigunguName, pois.size());
+        log.info("[TourService] 성지 POI 조회 - area={}, sigungu={}, sigunguName={}, content={}, {}건",
+                areaCode, sigunguCode, sigunguName, contentSqno, pois.size());
         return pois;
+    }
+
+    /** 작품/아티스트 필터 선택지 검색 — 성지 수 내림차순, 상한 1~50(기본 20). */
+    public List<HolyContentOptionDto> searchHolyContents(String q, String category, int limit) {
+        int rows = Math.min(Math.max(limit, 1), 50);
+        String query = q == null ? "" : q.trim();
+        String cleanCategory = category == null ? "" : category.trim();
+        return holyContentRepository
+                .searchOptions(query, cleanCategory, PageRequest.of(0, rows))
+                .stream()
+                .map(HolyContentOptionDto::from)
+                .toList();
     }
 
     /**

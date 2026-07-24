@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { ScreenControllerProps } from '@/components/screens/types';
 import {
+    fetchHolyContents,
     fetchHolyPois,
     fetchTourAreas,
     fetchTourDistricts,
     fetchTourPois,
+    HolyContentOption,
     TourPoi,
     TourRegion,
 } from '@/services/tourApi';
@@ -60,6 +62,10 @@ const SORTS = [
     { code: 'C', label: '최신순' },
 ] as const;
 
+const CONTENT_CATEGORY_LABELS: Record<string, string> = {
+    kpop: 'K-POP', drama: '드라마', movie: '영화', show: '예능',
+};
+
 const SAVED_KEY = 'kride:saved-pois';
 
 function safeExternalUrl(url?: string): string | undefined {
@@ -86,6 +92,10 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const [pois, setPois] = useState<TourPoi[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    // 작품/아티스트 성지 필터 (V91): 검색어 → 자동완성 → 선택 칩.
+    const [contentQuery, setContentQuery] = useState('');
+    const [contentOptions, setContentOptions] = useState<HolyContentOption[]>([]);
+    const [selectedContent, setSelectedContent] = useState<HolyContentOption | null>(null);
     const [selected, setSelected] = useState<TourPoi | null>(null);
     const [saved, setSaved] = useState<Set<string>>(new Set());
     const dialogTitleId = useId();
@@ -163,6 +173,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                 if (category === 'HOLY') {
                     const list = await fetchHolyPois({
                         areaCode, sigunguCode: sigungu, sigunguName: selectedSigunguName,
+                        contentSqno: selectedContent?.contentSqno,
                     });
                     if (alive) setPois(list);
                 } else {
@@ -181,7 +192,25 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         };
         void loadPois();
         return () => { alive = false; };
-    }, [areaCode, category, sigungu, arrange, selectedSigunguName]);
+    }, [areaCode, category, sigungu, arrange, selectedSigunguName, selectedContent?.contentSqno]);
+
+    // 작품/아티스트 자동완성 — 성지 카테고리에서 2자 이상 입력 시 300ms 디바운스 조회.
+    useEffect(() => {
+        if (category !== 'HOLY' || contentQuery.trim().length < 2) {
+            setContentOptions([]);
+            return;
+        }
+        let alive = true;
+        const timer = setTimeout(async () => {
+            try {
+                const options = await fetchHolyContents({ q: contentQuery.trim(), limit: 8 });
+                if (alive) setContentOptions(options);
+            } catch {
+                if (alive) setContentOptions([]);
+            }
+        }, 300);
+        return () => { alive = false; clearTimeout(timer); };
+    }, [category, contentQuery]);
 
     useEffect(() => {
         if (loading || error || pois.length === 0) return;
@@ -337,6 +366,72 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                     ))}
                 </div>
             </div>
+
+            {category === 'HOLY' && (
+                <section aria-label="작품·아티스트 필터" style={{ marginBottom: 14 }}>
+                    <label htmlFor="holy-content-search" style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#791F1F', marginBottom: 6 }}>
+                        작품·아티스트로 성지 찾기
+                    </label>
+                    {selectedContent ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            <span style={{ ...chipStyle(true, true), display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                                {selectedContent.name}
+                                {CONTENT_CATEGORY_LABELS[selectedContent.category]
+                                    ? ` · ${CONTENT_CATEGORY_LABELS[selectedContent.category]}`
+                                    : ''}
+                            </span>
+                            <button
+                                type="button"
+                                aria-label={`${selectedContent.name} 필터 해제`}
+                                onClick={() => { setSelectedContent(null); setContentQuery(''); }}
+                                style={{ ...chipStyle(false, true), cursor: 'pointer' }}
+                            >
+                                필터 해제 ✕
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <input
+                                id="holy-content-search"
+                                type="search"
+                                value={contentQuery}
+                                onChange={(e) => setContentQuery(e.target.value)}
+                                placeholder="예: 김비서가 왜 그럴까, 방탄소년단"
+                                style={{
+                                    width: '100%', maxWidth: 360, fontSize: 13, padding: '9px 12px',
+                                    border: '0.5px solid #ddd', borderRadius: 10, outline: 'none',
+                                }}
+                            />
+                            {contentOptions.length > 0 && (
+                                <ul aria-label="작품·아티스트 검색 결과" style={{ listStyle: 'none', margin: '8px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 4, maxWidth: 360 }}>
+                                    {contentOptions.map((option) => (
+                                        <li key={option.contentSqno}>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setSelectedContent(option);
+                                                    setContentOptions([]);
+                                                }}
+                                                style={{
+                                                    width: '100%', textAlign: 'left', fontSize: 13, padding: '8px 12px',
+                                                    border: '0.5px solid #eee', borderRadius: 10, background: '#fff', cursor: 'pointer',
+                                                }}
+                                            >
+                                                {option.name}
+                                                <span style={{ color: '#999', fontSize: 12 }}>
+                                                    {' · '}
+                                                    {CONTENT_CATEGORY_LABELS[option.category] ?? option.category}
+                                                    {` · 성지 ${option.poiCount}곳`}
+                                                </span>
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </>
+                    )}
+                </section>
+            )}
 
             {category === 'HOLY' && (
                 <section

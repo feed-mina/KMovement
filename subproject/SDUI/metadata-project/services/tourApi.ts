@@ -41,6 +41,15 @@ export interface TourRegion {
     name: string;
 }
 
+/** 작품/아티스트 필터 선택지 (V91 holy_content). */
+export interface HolyContentOption {
+    contentSqno: number;
+    name: string;
+    nameEn?: string | null;
+    category: 'kpop' | 'drama' | 'movie' | 'show' | string;
+    poiCount: number;
+}
+
 /** 지역기반 관광정보/맛집 POI 조회. ApiResponse.data 언랩. */
 export async function fetchTourPois(params: TourQuery = {}): Promise<TourPoi[]> {
     const res = await api.get('/api/v1/tour/poi', { params });
@@ -56,11 +65,20 @@ export async function fetchRestaurants(areaCode?: string, numOfRows = 20): Promi
 /**
  * 성지(K-컬처) POI 조회 — tour_poi 검수 승인분(V76 파이프라인). #96-A
  * sigunguName: 전국 시드(V90)는 TourAPI 시·군·구 코드가 없어 주소 문자열로 필터한다.
+ * contentSqno: 작품/아티스트 링크(V91) 필터.
  */
 export async function fetchHolyPois(
-    params: Pick<TourQuery, 'areaCode' | 'sigunguCode'> & { sigunguName?: string } = {},
+    params: Pick<TourQuery, 'areaCode' | 'sigunguCode'> & { sigunguName?: string; contentSqno?: number } = {},
 ): Promise<TourPoi[]> {
     const res = await api.get('/api/v1/tour/holy', { params });
+    return res.data?.data ?? [];
+}
+
+/** 작품/아티스트 필터 선택지 검색(자동완성) — 성지 수 내림차순. */
+export async function fetchHolyContents(
+    params: { q?: string; category?: string; limit?: number } = {},
+): Promise<HolyContentOption[]> {
+    const res = await api.get('/api/v1/tour/holy/contents', { params });
     return res.data?.data ?? [];
 }
 

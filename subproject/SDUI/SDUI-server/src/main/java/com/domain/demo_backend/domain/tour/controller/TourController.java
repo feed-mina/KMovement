@@ -1,5 +1,6 @@
 package com.domain.demo_backend.domain.tour.controller;
 
+import com.domain.demo_backend.domain.tour.dto.HolyContentOptionDto;
 import com.domain.demo_backend.domain.tour.dto.HolyPoiDto;
 import com.domain.demo_backend.domain.tour.dto.TourPoiDto;
 import com.domain.demo_backend.domain.tour.dto.TourRegionDto;
@@ -44,13 +45,27 @@ public class TourController {
     /**
      * GET /api/v1/tour/holy — 성지(K-컬처) POI 목록. 검수 승인분만 노출. Dev-4(#96-A).
      * sigunguName: 전국 시드(V90)는 TourAPI 시·군·구 코드가 없어 주소 문자열로 거른다.
+     * contentSqno: 작품/아티스트 링크(V91)로 필터.
      */
     @GetMapping("/holy")
     public ApiResponse<List<HolyPoiDto>> getHolyPois(
             @RequestParam(required = false) String areaCode,
             @RequestParam(required = false) String sigunguCode,
-            @RequestParam(required = false) String sigunguName) {
-        return ApiResponse.success(tourService.getHolyPois(areaCode, sigunguCode, sigunguName));
+            @RequestParam(required = false) String sigunguName,
+            @RequestParam(required = false) Long contentSqno) {
+        return ApiResponse.success(tourService.getHolyPois(areaCode, sigunguCode, sigunguName, contentSqno));
+    }
+
+    /**
+     * GET /api/v1/tour/holy/contents?q=김비서&category=drama&limit=20
+     * 작품/아티스트 필터 선택지(자동완성) — 성지 수 내림차순.
+     */
+    @GetMapping("/holy/contents")
+    public ApiResponse<List<HolyContentOptionDto>> getHolyContents(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String category,
+            @RequestParam(defaultValue = "20") int limit) {
+        return ApiResponse.success(tourService.searchHolyContents(q, category, limit));
     }
 
     /**

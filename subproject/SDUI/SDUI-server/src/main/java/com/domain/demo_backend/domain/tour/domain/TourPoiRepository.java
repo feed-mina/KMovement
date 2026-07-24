@@ -22,6 +22,7 @@ public interface TourPoiRepository extends JpaRepository<TourPoi, Long> {
     /**
      * 시·군·구는 두 갈래로 매칭한다: 초기 서울 시드는 TourAPI sigungu_code 를,
      * 전국 시드(V90, kcisa_media_2023)는 코드가 없어 주소 문자열(:sigunguName)을 쓴다.
+     * :contentSqno 가 오면 작품/아티스트 링크(V91)가 있는 성지만 남긴다.
      * 결과 상한은 Pageable 로 건다(전국 시드 이후 지역당 수천 행 가능).
      */
     @Query("""
@@ -34,6 +35,9 @@ public interface TourPoiRepository extends JpaRepository<TourPoi, Long> {
                  OR (:sigunguCode IS NOT NULL AND :sigunguCode <> '' AND p.sigunguCode = :sigunguCode)
                  OR (:sigunguName IS NOT NULL AND :sigunguName <> '' AND p.addr LIKE CONCAT('%', :sigunguName, '%'))
               )
+              AND (:contentSqno IS NULL OR EXISTS (
+                    SELECT 1 FROM HolyContentPoi l
+                    WHERE l.poiSqno = p.poiSqno AND l.contentSqno = :contentSqno))
             ORDER BY p.poiSqno ASC
             """)
     List<TourPoi> findHolyPoisByRegion(
@@ -42,6 +46,7 @@ public interface TourPoiRepository extends JpaRepository<TourPoi, Long> {
             @Param("areaCode") String areaCode,
             @Param("sigunguCode") String sigunguCode,
             @Param("sigunguName") String sigunguName,
+            @Param("contentSqno") Long contentSqno,
             Pageable pageable);
 
     Optional<TourPoi> findFirstBySourceUrlAndReviewStatus(String sourceUrl, String reviewStatus);

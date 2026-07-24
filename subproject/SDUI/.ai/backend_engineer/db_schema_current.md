@@ -127,6 +127,12 @@ submitted_by `FK→users`(V78, UGC 제출자), image_source_url/image_credit(V81
 V90: 전국 성지 9,017행 시드(kcisa_media_2023, content_id `kride-media-*`, source CRAWL) —
 생성기 `scripts/build_holy_poi_seed.py`, sigungu 이름은 raw_json에 보존(주소 LIKE 필터, 시군구 코드 없음).
 
+### holy_content / holy_content_poi (V91)
+작품별 성지 필터: **holy_content**(content_sqno **PK**, source_ref UNIQUE `kride-artist-*`, name/name_en,
+category kpop|drama|movie|show) 1,024건 + **holy_content_poi**(content_sqno FK, poi_sqno `FK→tour_poi`,
+relationship, (content,poi) UNIQUE) 링크 14,969건. 생성기 `scripts/build_holy_content_seed.py`.
+조회: `GET /api/v1/tour/holy/contents?q=`(자동완성, 성지 수 내림차순), `GET /api/v1/tour/holy?contentSqno=`.
+
 ## 6. B2B 파일럿 (V77)
 
 - **b2b_partner**: 파트너사.
