@@ -13,7 +13,7 @@
 | 메인 (SDUI 웹) | https://yerin.duckdns.org/view/MAIN_PAGE | K-RIDE 여행 시작·K-POP 진입 카드 |
 | 로그인 / 회원가입 | https://yerin.duckdns.org/view/LOGIN_PAGE · [/view/REGISTER_PAGE](https://yerin.duckdns.org/view/REGISTER_PAGE) | 카카오 로그인 지원 |
 | 탐색 (전국 성지·맛집) | https://yerin.duckdns.org/view/TOUR_EXPLORE | 시/도·시군구, 작품별 필터, 성지 맛집 |
-| K-POP 데모 웹 (kride, Vercel) | `https://<Vercel 프로젝트 도메인>/kpop` | main 머지 시 자동 배포. 도메인은 Vercel 대시보드의 kride 프로젝트에서 확인 후 이 표를 갱신할 것 |
+| K-POP 데모 웹 (kride, Vercel) | https://k-movement.vercel.app/kpop | 루트(`/`)도 `/kpop`으로 리다이렉트. main 머지 시 자동 배포 (Root Directory: `subproject/SDUI/kride`) |
 | BTS 광화문 이벤트 | https://bts-gwanghwamun.vercel.app | 단독 이벤트 페이지 |
 | API 문서 (Swagger) | https://yerin.duckdns.org/swagger-ui.html | Spring Boot 백엔드 (`/api/**`) |
 | 모바일 앱 | Android (EAS `kride-mobile`, preview/production 채널) | 딥링크 스킴 `kride://` (예: `kride://KPOP_EXPLORE`) |
