@@ -17,6 +17,10 @@ export const useDynamicEngine = (metadata: Metadata[], pageData: any, formData: 
     if (refId && pageData && pageData[refId]) {
       const isRepeater = node.children && node.children.length > 0;
       if (!isRepeater && Array.isArray(pageData[refId])) {
+        // CHART consumes the whole series (signup trend rows 등); every other
+        // non-repeater leaf keeps the historical first-record binding.
+        const typeKey = String(node.componentType || node.component_type || "").toUpperCase();
+        if (typeKey === "CHART") return pageData[refId];
         return pageData[refId][0] || {};
       }
       return isRepeater ? pageData[refId] : pageData;

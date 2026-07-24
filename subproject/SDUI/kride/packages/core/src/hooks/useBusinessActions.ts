@@ -67,6 +67,13 @@ export const useBusinessActions = (
             navigation.notify?.("이메일과 비밀번호를 모두 입력해주세요.");
             return;
           }
+          // Typing the full address into the ID field produces
+          // `id@naver.com@naver.com` → a 401 that reads as a wrong password.
+          // Catch it here with a message that says what to fix.
+          if (localPart.includes("@")) {
+            navigation.notify?.("아이디 칸에는 @ 앞부분만 입력하세요. 도메인은 아래에서 선택해주세요.");
+            return;
+          }
 
           try {
             const res = await fetch(`${apiBase}${actionUrl || "/api/auth/login"}`, {
@@ -79,11 +86,13 @@ export const useBusinessActions = (
             });
 
             if (!res.ok) {
-              navigation.notify?.(
+              // Prefer the server's own reason (e.g. 비활성화 계정 403, 소셜
+              // 전용 계정) so a device with no logs still shows the real cause.
+              const fallback =
                 res.status === 401
                   ? "로그인 정보가 올바르지 않습니다."
-                  : "로그인에 실패했습니다. 잠시 후 다시 시도해주세요."
-              );
+                  : "로그인에 실패했습니다. 잠시 후 다시 시도해주세요.";
+              navigation.notify?.(await readErrorMessage(res, fallback));
               return;
             }
 

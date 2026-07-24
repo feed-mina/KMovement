@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, Linking, ScrollView, Text, View } from 'react-native';
-import { DynamicEngine, PATH_TO_SCREEN, resolveRuntimeConfig, useKpopPageData, usePageHook, useUiScreen } from '@kride/core';
+import { DynamicEngine, PATH_TO_SCREEN, resolveRuntimeConfig, useKpopPageData, usePageHook, useSqlPageData, useUiScreen } from '@kride/core';
 import type { PostcodeResult } from '@kride/core';
 import { rnPrimitives } from '../src/primitives';
 import { mobileComponentMap } from '../src/componentMap';
@@ -69,6 +69,9 @@ export default function MobileScreen() {
   // react-query keeps `data` referentially stable until it actually changes;
   // fall back to a module-level constant so the reference is stable while loading.
   const metadata = data ?? EMPTY_METADATA;
+  // Repeater lists the metadata binds by data_sql_key (e.g. KRIDE_INTRO2/3's
+  // artist/region grids) — the web engine auto-fetches these, so mobile must too.
+  const { data: sqlPageData } = useSqlPageData(sid, metadata, apiBase);
   const navigation = useMemo(
     () => ({
       push: (path: string) => {
@@ -94,11 +97,15 @@ export default function MobileScreen() {
   const runtime = useMemo(() => ({ apiBase }), [apiBase]);
   const analysisPageData = useMemo(() => ({ jobId: jobId || '' }), [jobId]);
   const productPageData = useMemo(() => ({ q: q || '', artistId: artistId || '', eventId: eventId || '' }), [artistId, eventId, q]);
+  const mergedPageData = useMemo(() => {
+    if (!sqlPageData && !kpopPageData) return EMPTY_OBJ;
+    return { ...(sqlPageData ?? {}), ...(kpopPageData ?? {}) };
+  }, [sqlPageData, kpopPageData]);
   const dynamicPageData = sid === 'KPOP_AI_RESULT'
     ? analysisPageData
     : sid === 'KPOP_PRODUCTS'
       ? productPageData
-      : (kpopPageData ?? EMPTY_OBJ);
+      : mergedPageData;
 
   const page = usePageHook(sid, metadata, EMPTY_OBJ, navigation, routeParams, runtime);
 

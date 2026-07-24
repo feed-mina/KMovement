@@ -12,6 +12,7 @@ import {
   EventCardLeaf,
   PurposeIconLeaf,
   RangeLabelLeaf,
+  RemoteImageLeaf,
   RouteNodeLeaf,
 } from './leaves';
 import {
@@ -19,14 +20,17 @@ import {
   CollapseHeaderLeaf,
   DurationButtonLeaf,
   ItineraryPanelLeaf,
+  KrideNextButtonLeaf,
   PurposeCardLeaf,
   DualRangeSliderLeaf,
   RangeInputLeaf,
   RangeTrackLeaf,
   SelectionCardLeaf,
+  TypewriterTextLeaf,
 } from './composites';
 import { AiResultCardLeaf, UploadConsentLeaf } from './kpopAnalysisLeaves';
 import { ProductSearchLeaf, SavedItemListLeaf } from './kpopProductLeaves';
+import { ChartLeaf, StatCardLeaf } from './adminLeaves';
 
 /** MAP_VIEW leaf — leaflet MapView on web becomes react-native-maps here. */
 const MapViewLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
@@ -68,6 +72,13 @@ export const mobileComponentMap: ComponentRegistry = {
   PURPOSE_ICON: PurposeIconLeaf,
   RANGE_LABEL: RangeLabelLeaf,
   ROUTE_NODE: RouteNodeLeaf,
+  // KRIDE INTRO1-5 onboarding flow (V53 metadata)
+  IMAGE: RemoteImageLeaf,
+  TYPEWRITER_TEXT: TypewriterTextLeaf,
+  KRIDE_NEXT_BTN: KrideNextButtonLeaf,
+  // ADMIN_DASHBOARD (V71) + MY_PAGE charts — DATA_SOURCE-driven stats.
+  STAT_CARD: StatCardLeaf,
+  CHART: ChartLeaf,
   // composite / interactive (P4, 2nd pass)
   SELECTION_CARD: SelectionCardLeaf,
   PURPOSE_CARD: PurposeCardLeaf,

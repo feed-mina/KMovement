@@ -6,7 +6,10 @@ const CLASS_MAP: Record<string, string> = {
   'content-area': 'w-full gap-4',
   'flex-row-layout': 'flex-row flex-wrap',
   'flex-col-layout': 'flex-col',
-  'text-field': 'text-base text-gray-900',
+  // No default text color: metadata carries its own (`text-white` on the dark
+  // INTRO screens), and a baked-in gray-900 can win the class conflict and
+  // vanish against black backgrounds. RN's default text color is black anyway.
+  'text-field': 'text-base',
   'btn-field': 'min-h-12 items-center justify-center rounded-xl px-4 py-3',
   'content-btn': 'min-h-12 items-center justify-center rounded-xl px-4 py-3',
 
@@ -71,6 +74,14 @@ const CLASS_MAP: Record<string, string> = {
   'diary-nav2': 'my-2 w-full max-w-[300px] border border-kride bg-white',
   'diary-btn-primary': 'mb-3 w-[250px] bg-kride',
   'diary-btn-secondary': 'mb-3 w-[250px] border border-kride bg-white',
+
+  // ADMIN_DASHBOARD (V71) — grids gain spacing; cards style themselves.
+  'admin-dashboard-page': 'w-full gap-4',
+  'admin-dashboard-header': 'w-full gap-1',
+  'admin-dashboard-title': 'text-2xl font-extrabold text-gray-950',
+  'admin-dashboard-subtitle': 'text-sm text-gray-500',
+  'admin-dashboard-metrics': 'w-full gap-3',
+  'admin-dashboard-charts': 'w-full gap-3',
 
   'kpop-screen': 'w-full gap-5 bg-[#141414]',
   'kpop-title': 'text-3xl font-extrabold text-white',

@@ -26,6 +26,16 @@ export const PATH_TO_SCREEN: Record<string, ScreenId> = {
   "/intro5": SCREEN_IDS.INTRO5,
   "/my-list": SCREEN_IDS.MY_LIST,
   "/focus": SCREEN_IDS.FOCUS,
+  // SDUI metadata (V51/V53) emits `/view/INTRO1`-style action_urls whose
+  // `/view` prefix routers strip. Without these entries the mobile app pushes
+  // `/INTRO1`, fetches the nonexistent screen id INTRO1, and renders blank.
+  "/INTRO1": SCREEN_IDS.INTRO1,
+  "/INTRO2": SCREEN_IDS.INTRO2,
+  "/INTRO3": SCREEN_IDS.INTRO3,
+  "/INTRO4": SCREEN_IDS.INTRO4,
+  "/INTRO5": SCREEN_IDS.INTRO5,
+  "/MY_LIST": SCREEN_IDS.MY_LIST,
+  "/FOCUS": SCREEN_IDS.FOCUS,
   "/kpop": SCREEN_IDS.KPOP_EXPLORE,
   "/kpop/artists": SCREEN_IDS.KPOP_ARTIST_DETAIL,
   "/kpop/events": SCREEN_IDS.KPOP_EVENTS,

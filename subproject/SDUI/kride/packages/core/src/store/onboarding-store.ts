@@ -1,5 +1,20 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
+
+// zustand's persist defaults to window.localStorage, which does not exist on
+// React Native (Hermes) — the first store WRITE then throws
+// "Cannot read properties of undefined (reading 'setItem')" and kills the
+// INTRO onboarding flow. Fall back to a no-op in-memory storage there; the
+// selections still live in the store for the session, they just don't survive
+// an app restart (web keeps real localStorage persistence).
+const memoryFallbackStorage: StateStorage = {
+  getItem: () => null,
+  setItem: () => undefined,
+  removeItem: () => undefined,
+};
+
+const safeStorage = () =>
+  typeof localStorage !== "undefined" ? localStorage : memoryFallbackStorage;
 
 export type TravelDuration = "day" | "onenight" | "twonight";
 export type TravelPurpose =
@@ -83,6 +98,6 @@ export const useOnboardingStore = create<OnboardingState>()(
           budget: DEFAULT_BUDGET,
         }),
     }),
-    { name: "kride-onboarding" }
+    { name: "kride-onboarding", storage: createJSONStorage(safeStorage) }
   )
 );

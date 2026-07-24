@@ -19,6 +19,18 @@ export const CardImageLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
   );
 };
 
+/**
+ * Generic IMAGE leaf. Only absolute URLs render: relative paths in metadata
+ * (e.g. INTRO1's `/images/kride_hero.png`) are web-app public assets that do
+ * not exist on the device or the API host.
+ */
+export const RemoteImageLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
+  const raw = (typeof data === 'string' && data) || data?.src || meta?.labelText || meta?.label_text || '';
+  const src = String(raw);
+  if (!/^https?:\/\//.test(src)) return null;
+  return <Image source={{ uri: src }} className="h-48 w-full rounded-xl" resizeMode="cover" />;
+};
+
 export const CardLabelLeaf: React.FC<SduiLeafProps> = ({ meta, data }) => {
   const text = data?.name || meta?.labelText || meta?.label_text || '';
   return <Text className="mt-1 w-full text-center text-sm text-white" numberOfLines={1}>{String(text)}</Text>;
