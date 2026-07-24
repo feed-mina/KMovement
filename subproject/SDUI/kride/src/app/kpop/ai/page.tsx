@@ -1,11 +1,12 @@
 'use client';
+import { Suspense } from "react";
 
 import DynamicEngine from '@/engine/DynamicEngine';
 import { usePageHook } from '@/engine/hooks/usePageHook';
 import { SCREEN_IDS } from '@/engine/screenMap';
 import { useUiScreen } from '@kride/core';
 
-export default function KpopAiFindPage() {
+function KpopAiFindPageInner() {
   const screenId = SCREEN_IDS.KPOP_AI_FIND;
   const { data: metadata = [], isLoading, error } = useUiScreen(screenId);
   const { formData, handleChange, handleAction } = usePageHook(screenId, metadata, {});
@@ -23,5 +24,16 @@ export default function KpopAiFindPage() {
       onAction={handleAction}
       apiBase=""
     />
+  );
+}
+
+// usePageHook가 내부에서 useSearchParams를 쓰므로 정적 프리렌더에는 Suspense
+// 경계가 필요하다(missing-suspense-with-csr-bailout). 클라이언트 페이지의
+// force-dynamic export는 Next 14가 무시하므로 이 구조가 표준 해법이다.
+export default function KpopAiFindPage() {
+  return (
+    <Suspense fallback={null}>
+      <KpopAiFindPageInner />
+    </Suspense>
   );
 }

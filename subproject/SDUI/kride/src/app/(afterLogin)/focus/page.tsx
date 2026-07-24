@@ -1,4 +1,5 @@
 'use client';
+import { Suspense } from "react";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -60,7 +61,7 @@ interface DayPlan {
 //   { lat: 37.5509, lng: 126.9882, label: "남산서울타워" },
 // ];
 
-export default function FocusPage() {
+function FocusPageInner() {
 
   const store = useOnboardingStore();
   const { data, isLoading: isItineraryLoading } = useQuery({
@@ -139,5 +140,16 @@ export default function FocusPage() {
       onChange={handleChange}
       onAction={handleAction}
     />
+  );
+}
+
+// usePageHook가 내부에서 useSearchParams를 쓰므로 정적 프리렌더에는 Suspense
+// 경계가 필요하다(missing-suspense-with-csr-bailout). 클라이언트 페이지의
+// force-dynamic export는 Next 14가 무시하므로 이 구조가 표준 해법이다.
+export default function FocusPage() {
+  return (
+    <Suspense fallback={null}>
+      <FocusPageInner />
+    </Suspense>
   );
 }

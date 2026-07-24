@@ -1,4 +1,5 @@
 'use client';
+import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 import DynamicEngine from "@/engine/DynamicEngine";
 import { usePageHook } from "@/engine/hooks/usePageHook";
@@ -17,7 +18,7 @@ const PURPOSE_ITEMS: { key: TravelPurpose; label: string }[] = [
 
 const purposePageData = PURPOSE_ITEMS.map((p) => ({ purposeKey: p.key, name: p.label }));
 
-export default function Intro4Page() {
+function Intro4PageInner() {
   const router = useRouter();
   const { purposes } = useOnboardingStore();
   const { data: metadata = [], isLoading } = useUiScreen(SCREEN_IDS.INTRO4);
@@ -53,5 +54,16 @@ export default function Intro4Page() {
         </button>
       </div>
     </div>
+  );
+}
+
+// usePageHook가 내부에서 useSearchParams를 쓰므로 정적 프리렌더에는 Suspense
+// 경계가 필요하다(missing-suspense-with-csr-bailout). 클라이언트 페이지의
+// force-dynamic export는 Next 14가 무시하므로 이 구조가 표준 해법이다.
+export default function Intro4Page() {
+  return (
+    <Suspense fallback={null}>
+      <Intro4PageInner />
+    </Suspense>
   );
 }

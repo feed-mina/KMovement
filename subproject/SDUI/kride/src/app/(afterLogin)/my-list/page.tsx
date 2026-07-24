@@ -1,4 +1,5 @@
 'use client';
+import { Suspense } from "react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DynamicEngine from "@/engine/DynamicEngine";
@@ -22,7 +23,7 @@ const PURPOSE_LABEL: Record<string, string> = {
   rest: "휴식",
 };
 
-export default function MyListPage() {
+function MyListPageInner() {
   const router = useRouter();
   const { duration, selectedArtists, selectedRegions, purposes, budget } =
     useOnboardingStore();
@@ -143,5 +144,16 @@ export default function MyListPage() {
       onChange={handleChange}
       onAction={handleAction}
     />
+  );
+}
+
+// usePageHook가 내부에서 useSearchParams를 쓰므로 정적 프리렌더에는 Suspense
+// 경계가 필요하다(missing-suspense-with-csr-bailout). 클라이언트 페이지의
+// force-dynamic export는 Next 14가 무시하므로 이 구조가 표준 해법이다.
+export default function MyListPage() {
+  return (
+    <Suspense fallback={null}>
+      <MyListPageInner />
+    </Suspense>
   );
 }

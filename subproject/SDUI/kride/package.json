@@ -37,10 +37,12 @@
     "react-native": "0.74.5",
     "@react-native/virtualized-lists": "0.74.87"
   },
+  "//pnpmOverrides": "@types/minimatch 6.x는 d.ts 없는 deprecated 스텁이라 tsc의 암묵 @types 포함(next build 타입체크)이 깨진다. 실제 타입이 있는 마지막 버전 5.1.2로 고정한다.",
   "pnpm": {
     "overrides": {
       "react-native": "0.74.5",
-      "@react-native/virtualized-lists": "0.74.87"
+      "@react-native/virtualized-lists": "0.74.87",
+      "@types/minimatch": "5.1.2"
     }
   },
   "devDependencies": {

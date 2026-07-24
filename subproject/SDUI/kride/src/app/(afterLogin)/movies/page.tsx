@@ -1,4 +1,5 @@
 'use client';
+import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import DynamicEngine from "@/engine/DynamicEngine";
@@ -30,7 +31,7 @@ import { useOnboardingStore } from "@/store/onboarding-store";
 //   { id: 20, name: "제로베이스원", imageUrl: "https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" },
 // ];
 
-export default function MoviesPage() {
+function MoviesPageInner() {
   const { data } = useQuery({
     queryKey: ['artists'],
     queryFn: () => fetch(`/kride-api/artists`)
@@ -74,5 +75,16 @@ export default function MoviesPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+// usePageHook가 내부에서 useSearchParams를 쓰므로 정적 프리렌더에는 Suspense
+// 경계가 필요하다(missing-suspense-with-csr-bailout). 클라이언트 페이지의
+// force-dynamic export는 Next 14가 무시하므로 이 구조가 표준 해법이다.
+export default function MoviesPage() {
+  return (
+    <Suspense fallback={null}>
+      <MoviesPageInner />
+    </Suspense>
   );
 }
