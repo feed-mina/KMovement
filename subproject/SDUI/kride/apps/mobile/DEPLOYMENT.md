@@ -1,5 +1,33 @@
 # KRIDE Mobile Runbook
 
+## 패키지 매니저: pnpm (2026-07 전환)
+
+kride 모노레포는 pnpm으로 설치한다 — `npm install`을 쓰지 말 것
+(package-lock.json이 다시 생겨 트리가 이중화된다). 레이아웃은
+`.npmrc`의 `node-linker=hoisted`로 npm과 동일하게 유지된다.
+
+최초 1회 준비 (Windows):
+
+```powershell
+npm install -g corepack@latest   # 구버전 corepack은 npm 서명 키 교체로 실패한다
+corepack enable
+corepack prepare pnpm@9.15.9 --activate
+pnpm config set store-dir D:\pnpm-store --global   # 프로젝트와 같은 볼륨이어야 하드링크가 된다
+```
+
+설치는 kride 루트에서:
+
+```powershell
+cd <repo>\subproject\SDUI\kride
+pnpm install
+```
+
+첫 설치는 전역 스토어를 채우느라 오래 걸리지만(이 저장소 기준 실측 2h25m),
+이후에는 스토어 하드링크로 수 분(실측 3m25s)이면 끝난다. Vercel은
+`vercel.json`의 `pnpm install --frozen-lockfile`을, EAS는 pnpm-lock.yaml
+자동 감지를 사용하므로 별도 설정이 필요 없다. `store-dir`을 저장소의
+`.npmrc`에 넣으면 CI/EAS 리눅스 빌더가 깨지므로 전역 설정만 쓴다.
+
 ## Local Device Smoke Test
 
 1. Copy `.env.example` to `.env`. `EXPO_PUBLIC_API_BASE` is required and must be
@@ -12,14 +40,14 @@
 
 ```powershell
 cd <repo>\subproject\SDUI\kride\apps\mobile
-npm run start:clear
+pnpm run start:clear
 ```
 
 3. Scan the QR code after Metro prints `Metro waiting on exp://...`.
 4. If LAN is unstable, use the tunnel profile:
 
 ```powershell
-npm run start:tunnel
+pnpm run start:tunnel
 ```
 
 If `Waiting for Watchman 'query'` keeps increasing for more than about 60 seconds, stop Metro with `Ctrl+C` and clear stale watch/indexing inputs before retrying. The current Metro config intentionally watches only the mobile app and `packages/core`.
@@ -58,7 +86,7 @@ Use this before opening or updating an EAS build:
 
 ```powershell
 $env:EXPO_NO_WATCHMAN = "1"
-npm run export:android
+pnpm run export:android
 ```
 
 This validates that the Expo Router entry, Metro config, and Android JS bundle are all coherent.
@@ -114,21 +142,21 @@ eas build:list `
 - `finished`이면 기존 artifact와 build ID를 재사용합니다.
 - `errored` 또는 `canceled`이면 실패 원인을 수정하고 이전 build ID를
   이슈/PR에 기록한 뒤 한 작업자만 재시도합니다.
-- 실제 `npm run eas:build:preview` 직전에 같은 조회를 다시 실행해, 조회와 시작
+- 실제 `pnpm run eas:build:preview` 직전에 같은 조회를 다시 실행해, 조회와 시작
   사이에 생긴 중복 요청도 차단합니다.
 
 JS-only 변경은 새 native binary를 만들지 않습니다. 네이티브 모듈, Expo/RN
 버전, 권한, `app.json`의 native config, runtimeVersion이 그대로이고 기존
 runtime의 preview APK가 설치·검증돼 있다면 Bundle Check와 테스트 후
-`npm run eas:update:preview -- "short change summary"`를 사용합니다. 네이티브
+`pnpm run eas:update:preview -- "short change summary"`를 사용합니다. 네이티브
 경계가 바뀐 경우에만 app version/runtime과 versionCode를 올리고 위 사전
 확인을 거쳐 EAS Build를 실행합니다.
 
 Then build the new native runtime:
 
 ```powershell
-npm run eas:build:preview
-npm run eas:build:production
+pnpm run eas:build:preview
+pnpm run eas:build:production
 ```
 
 Use EAS managed credentials unless a project keystore has already been provisioned.
@@ -171,13 +199,13 @@ Publish preview OTA:
 ```powershell
 cd <repo>\subproject\SDUI\kride\apps\mobile
 eas channel:view preview
-npm run eas:update:preview -- "short change summary"
+pnpm run eas:update:preview -- "short change summary"
 ```
 
 Publish production OTA only after preview QA:
 
 ```powershell
-npm run eas:update:production -- "short change summary"
+pnpm run eas:update:production -- "short change summary"
 ```
 
 Rollback options:
@@ -196,8 +224,8 @@ Before every OTA, run:
 
 ```powershell
 $env:EXPO_NO_WATCHMAN = "1"
-npm run export:android
-npm test -- --runInBand
+pnpm run export:android
+pnpm exec jest --runInBand
 ```
 
 ## Android Preview Build 장애 해결 기록
