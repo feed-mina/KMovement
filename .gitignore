@@ -30,6 +30,18 @@ dataset/data/
 *.npy
 *.crdownload
 
+# ── 실험용 ML 산출물 (archive/legacy-experiments 브랜치에 보존) ──
+mlruns/
+chroma_db/
+.tmp-tora-meta/
+.tmp-tora-ffmpeg/
+
+# ── 실험/이벤트 앱 (archive/legacy-experiments 브랜치에 보존) ──
+subproject/SDUI/bts-event/
+
+# ── 런타임 캐시 ──
+cache/
+
 # ── Python / FastAPI ──
 __pycache__/
 **/__pycache__/
@@ -118,3 +130,4 @@ docs/celery_redis_current_state_and_plan.md
 report/0608_runpod_media_deploy_fix.md
 report/3D inpainting.txt
 report/community_22_cogvideo_photo_final.mp4.codex-work/
+report/scratch/
