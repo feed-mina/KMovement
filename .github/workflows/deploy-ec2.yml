@@ -205,10 +205,8 @@ jobs:
       - name: Prepare chroma_db build context
         if: steps.changes.outputs.fastapi == 'true'
         run: |
-          if [ ! -d chroma_db ]; then
-            mkdir -p chroma_db
-            echo "chroma_db not present in checkout; created empty placeholder for Docker build context."
-          fi
+          mkdir -p chroma_db
+          echo "Created empty chroma_db placeholder for Docker build context (directory is gitignored)."
 
       - name: Build and push K-Ride FastAPI image
         if: steps.changes.outputs.fastapi == 'true'
