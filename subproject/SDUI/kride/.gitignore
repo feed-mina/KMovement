@@ -1,0 +1,24 @@
+# ── Next.js build output ──
+.next/
+next-env.d.ts
+
+# ── TypeScript build info ──
+tsconfig.tsbuildinfo
+packages/core/tsconfig.tsbuildinfo
+apps/mobile/tsconfig.tsbuildinfo
+
+# ── Jest caches ──
+.jest-cache/
+.jest-cache-*/
+
+# ── pnpm artifacts (lock / lifecycle marker files) ──
+# pnpm creates empty marker files named <package>@<semver> after lifecycle scripts.
+node_modules/
+*@[0-9]*.[0-9]*
+jest
+
+# ── Expo / React Native ──
+apps/mobile/.expo/
+apps/mobile/ios/
+apps/mobile/android/
+apps/mobile/dist/
