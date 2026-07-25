@@ -136,13 +136,16 @@ jobs:
           MISSING=""
           [ -n "$DEPLOY_DB_PASSWORD" ]    || MISSING="$MISSING DB_PASSWORD"
           [ -n "$DEPLOY_JWT_SECRET_KEY" ] || MISSING="$MISSING JWT_SECRET_KEY"
+          [ -n "$DEPLOY_MAIL_PASSWORD" ]  || MISSING="$MISSING MAIL_PASSWORD"
           if [ -n "$MISSING" ]; then
             echo "::error::Missing required backend secrets:$MISSING"
             exit 1
           fi
-          for value in "$DEPLOY_DB_PASSWORD" "$DEPLOY_JWT_SECRET_KEY" "$DEPLOY_MAIL_PASSWORD"; do
+          for entry in "DB_PASSWORD:$DEPLOY_DB_PASSWORD" "JWT_SECRET_KEY:$DEPLOY_JWT_SECRET_KEY" "MAIL_PASSWORD:$DEPLOY_MAIL_PASSWORD"; do
+            name="${entry%%:*}"
+            value="${entry#*:}"
             if [[ "$value" == *$'\n'* || "$value" == *$'\r'* ]]; then
-              echo "::error::Backend deployment secrets must be single-line values (no embedded newlines)."
+              echo "::error::Backend deployment secret $name must be a single-line value (no embedded newlines)."
               exit 1
             fi
           done
