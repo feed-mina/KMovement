@@ -55,6 +55,25 @@ jobs:
             exit 1
           fi
 
+      - name: Validate deployment credentials
+        env:
+          SECRET_AWS_HOST: ${{ secrets.AWS_HOST }}
+          SECRET_AWS_USERNAME: ${{ secrets.AWS_USERNAME }}
+          SECRET_AWS_KEY: ${{ secrets.AWS_KEY }}
+          SECRET_DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          SECRET_DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          MISSING=""
+          [ -n "$SECRET_AWS_HOST" ]        || MISSING="$MISSING AWS_HOST"
+          [ -n "$SECRET_AWS_USERNAME" ]    || MISSING="$MISSING AWS_USERNAME"
+          [ -n "$SECRET_AWS_KEY" ]         || MISSING="$MISSING AWS_KEY"
+          [ -n "$SECRET_DOCKER_USERNAME" ] || MISSING="$MISSING DOCKER_USERNAME"
+          [ -n "$SECRET_DOCKER_PASSWORD" ] || MISSING="$MISSING DOCKER_PASSWORD"
+          if [ -n "$MISSING" ]; then
+            echo "::error::Missing required deployment secrets:$MISSING"
+            exit 1
+          fi
+
       # ── Detect what changed ──
       - name: Detect changed paths
         id: changes
@@ -107,6 +126,27 @@ jobs:
             fi
           done
 
+      - name: Validate backend deployment secrets
+        if: steps.changes.outputs.backend == 'true'
+        env:
+          DEPLOY_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DEPLOY_JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          DEPLOY_MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+        run: |
+          MISSING=""
+          [ -n "$DEPLOY_DB_PASSWORD" ]    || MISSING="$MISSING DB_PASSWORD"
+          [ -n "$DEPLOY_JWT_SECRET_KEY" ] || MISSING="$MISSING JWT_SECRET_KEY"
+          if [ -n "$MISSING" ]; then
+            echo "::error::Missing required backend secrets:$MISSING"
+            exit 1
+          fi
+          for value in "$DEPLOY_DB_PASSWORD" "$DEPLOY_JWT_SECRET_KEY" "$DEPLOY_MAIL_PASSWORD"; do
+            if [[ "$value" == *$'\n'* || "$value" == *$'\r'* ]]; then
+              echo "::error::Backend deployment secrets must be single-line values (no embedded newlines)."
+              exit 1
+            fi
+          done
+
       # ── Backend build ──
       - name: Set up JDK 17
         if: steps.changes.outputs.backend == 'true'
@@ -153,6 +193,14 @@ jobs:
 
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Prepare chroma_db build context
+        if: steps.changes.outputs.fastapi == 'true'
+        run: |
+          if [ ! -d chroma_db ]; then
+            mkdir -p chroma_db
+            echo "chroma_db not present in checkout; created empty placeholder for Docker build context."
+          fi
 
       - name: Build and push K-Ride FastAPI image
         if: steps.changes.outputs.fastapi == 'true'
