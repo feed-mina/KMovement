@@ -12,8 +12,9 @@ apps/mobile/tsconfig.tsbuildinfo
 .jest-cache-*/
 
 # ── pnpm artifacts (lock / lifecycle marker files) ──
+# pnpm creates empty marker files named <package>@<semver> after lifecycle scripts.
 node_modules/
-*@*.*
+*@[0-9]*.[0-9]*
 jest
 
 # ── Expo / React Native ──
