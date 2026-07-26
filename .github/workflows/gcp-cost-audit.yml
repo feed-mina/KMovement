@@ -37,38 +37,61 @@ jobs:
       - name: Set up Google Cloud CLI
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: List compute instances
+      # gcloud 는 권한이 거부돼도 경고만 찍고 "Listed 0 items." 로 정상 종료한다.
+      # 그 출력을 그대로 믿으면 "자원이 없다"고 잘못 판단해 비용 원인을 놓친다.
+      # (2026-07-26 실제 사례: 프로젝트가 CONSUMER_SUSPENDED 인데 compute
+      #  instances 가 0 items 로 보고됨.) 부분 실패는 명시적으로 실패시킨다.
+      - name: Inventory billable resources
+        id: inventory
         shell: bash
         run: |
-          set -euo pipefail
-          gcloud compute instances list \
-            --project "$GCP_PROJECT_ID"
+          set -uo pipefail
+          FAILED=""
 
-      - name: List persistent disks
-        shell: bash
-        run: |
-          set -euo pipefail
-          gcloud compute disks list \
-            --project "$GCP_PROJECT_ID"
+          audit_list() {
+            local label="$1"; shift
+            echo "::group::$label"
+            local out status
+            out="$("$@" 2>&1)"; status=$?
+            printf '%s\n' "$out"
+            echo "::endgroup::"
 
-      - name: List reserved addresses
-        shell: bash
-        run: |
-          set -euo pipefail
-          gcloud compute addresses list \
-            --project "$GCP_PROJECT_ID"
+            if [ "$status" -ne 0 ]; then
+              echo "::error::$label failed (exit $status). Resource state is UNKNOWN, not empty."
+              FAILED="$FAILED\n  - $label: command failed"
+              return
+            fi
+            if printf '%s' "$out" | grep -Eqi 'permission denied|has been suspended|did not succeed|PERMISSION_DENIED|CONSUMER_SUSPENDED'; then
+              echo "::error::$label returned partial results due to a permissions/suspension error. Treat the listing as UNKNOWN, not empty."
+              FAILED="$FAILED\n  - $label: permission or suspension error"
+            fi
+          }
 
-      - name: List Cloud Run services
-        shell: bash
-        run: |
-          set -euo pipefail
-          gcloud run services list \
-            --platform managed \
-            --project "$GCP_PROJECT_ID"
+          audit_list "Compute instances"  gcloud compute instances list --project "$GCP_PROJECT_ID"
+          audit_list "Persistent disks"   gcloud compute disks list --project "$GCP_PROJECT_ID"
+          audit_list "Reserved addresses" gcloud compute addresses list --project "$GCP_PROJECT_ID"
+          audit_list "Cloud Run services" gcloud run services list --platform managed --project "$GCP_PROJECT_ID"
+          audit_list "Artifact Registry"  gcloud artifacts repositories list --project "$GCP_PROJECT_ID"
 
-      - name: List Artifact Registry repositories
+          if [ -n "$FAILED" ]; then
+            echo "::error::GCP audit could not establish resource state:"
+            printf "$FAILED\n"
+            echo "Fix API access for GCP_PROJECT_ID, or point the audit at the project that actually hosts the running resources, then re-run."
+            exit 1
+          fi
+          echo "All GCP resource listings completed with full permissions."
+
+      # 감사 자격증명이 닿지 않는 프로젝트에 살아 있는 레거시 서비스를 놓치지
+      # 않기 위한 외부 관측. run.app 호스트명의 숫자는 프로젝트 번호이므로,
+      # 응답이 오면 GCP_PROJECT_ID 와 다른 프로젝트가 과금 중일 수 있다.
+      - name: Probe legacy Cloud Run endpoint
+        if: always()
         shell: bash
         run: |
-          set -euo pipefail
-          gcloud artifacts repositories list \
-            --project "$GCP_PROJECT_ID"
+          set -uo pipefail
+          LEGACY_URL="https://kmovement-46122739597.europe-west1.run.app/api/health"
+          CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$LEGACY_URL" || echo "000")"
+          echo "Legacy Cloud Run health probe: HTTP $CODE ($LEGACY_URL)"
+          if [ "$CODE" = "200" ]; then
+            echo "::warning::Legacy Cloud Run service (project number 46122739597) is still serving traffic and may still be billing. It is a duplicate of the EC2 FastAPI."
+          fi

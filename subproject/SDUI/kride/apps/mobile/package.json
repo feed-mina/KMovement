@@ -10,8 +10,10 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "export:android": "expo export --platform android --clear --max-workers 4",
-    "eas:build:preview": "eas build --platform android --profile preview",
-    "eas:build:production": "eas build --platform android --profile production",
+    "eas:guard:preview": "node scripts/guard-eas-build.mjs preview",
+    "eas:guard:production": "node scripts/guard-eas-build.mjs production",
+    "eas:build:preview": "node scripts/guard-eas-build.mjs preview && eas build --platform android --profile preview",
+    "eas:build:production": "node scripts/guard-eas-build.mjs production && eas build --platform android --profile production",
     "eas:update:preview": "eas update --channel preview --environment preview --platform android --message",
     "eas:update:production": "eas update --channel production --environment production --platform android --message",
     "test": "jest"

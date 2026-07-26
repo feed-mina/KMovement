@@ -4,7 +4,13 @@ on:
   push:
     branches: ["main"]
     paths:
+      # 두 RunPod 워크플로가 같은 경로로 트리거되면 한쪽 이미지에만 해당하는
+      # 변경에도 대형 이미지 2개가 모두 빌드된다. 공유 파이썬 소스는 양쪽 다
+      # 빌드해야 하므로 유지하고, Tora 전용 입력만 제외한다.
       - "deploy/media_motion/**"
+      - "!deploy/media_motion/Dockerfile.tora"
+      - "!deploy/media_motion/requirements-tora.txt"
+      - "!deploy/media_motion/tora_entrypoint.sh"
   workflow_dispatch:
 
 concurrency:
