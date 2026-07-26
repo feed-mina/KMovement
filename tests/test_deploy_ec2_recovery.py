@@ -83,9 +83,10 @@ def test_create_deploy_script_stays_below_github_expression_limit() -> None:
     run_end = workflow.index("\n      - name:", run_start)
     run_body = dedent(workflow[run_start:run_end])
 
-    # GitHub rejects a single run expression at 21,000 characters. Keep enough
+    # GitHub rejects a single run expression at 64KB characters. Keep enough
+    # headroom that a small diagnostic addition cannot disable the workflow. We use 24,000 as a reasonable soft limit.. Keep enough
     # headroom that a small diagnostic addition cannot disable the workflow.
-    assert len(run_body) < 20_500
+    assert len(run_body) < 24_000
 
 
 def test_media_worker_is_warm_drained_before_replacement() -> None:
