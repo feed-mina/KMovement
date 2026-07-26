@@ -119,8 +119,22 @@ EAS 빌드는 한 작업자만 소유합니다. 빌드를 시작할 사람 또�
 이슈/PR에 자신을 작업자로 기록하고, 완료·취소 또는 명시적인 인계 전에는 다른
 작업자, CI, 로컬 터미널에서 같은 빌드를 시작하지 않습니다.
 
-새 preview 빌드 전에 현재 Git SHA, runtimeVersion, Android versionCode가 모두
-같은 빌드가 이미 있는지 확인합니다:
+이 확인은 이제 `pnpm run eas:build:preview` / `eas:build:production` 에 내장돼
+있습니다. `scripts/guard-eas-build.mjs` 가 빌드 명령보다 먼저 실행되어 같은
+Git SHA·runtimeVersion·Android versionCode 좌표의 빌드가 있으면 빌드를
+시작하지 않습니다. 조회 자체가 실패해도 fail-closed로 중단합니다.
+
+2026-07-23에 같은 SHA/runtime/versionCode로 preview 빌드가 2건(약 8.9분 +
+9.9분) 실행된 원인은, 이 절차가 문서에만 있고 `eas:build:preview` 가 곧바로
+`eas build` 를 호출해 절차를 건너뛸 수 있었기 때문입니다.
+
+빌드 없이 확인만 하려면:
+
+```bash
+pnpm run eas:guard:preview
+```
+
+가드가 내부적으로 실행하는 조회는 다음과 같습니다:
 
 ```powershell
 $gitSha = git rev-parse HEAD
@@ -137,13 +151,18 @@ eas build:list `
   --limit 20
 ```
 
+> 플래그 이름 주의: 빌드 프로필 필터는 `--profile` 이 아니라 `--build-profile`
+> 입니다. 잘못 주면 `build:list` 전체가 실패합니다.
+
 - `new`, `in-queue`, `in-progress`, `pending-cancel`이면 새 빌드를 만들지 말고 기존
   빌드를 기다립니다.
 - `finished`이면 기존 artifact와 build ID를 재사용합니다.
 - `errored` 또는 `canceled`이면 실패 원인을 수정하고 이전 build ID를
   이슈/PR에 기록한 뒤 한 작업자만 재시도합니다.
-- 실제 `pnpm run eas:build:preview` 직전에 같은 조회를 다시 실행해, 조회와 시작
-  사이에 생긴 중복 요청도 차단합니다.
+- 가드가 `pnpm run eas:build:preview` 직전에 같은 조회를 자동으로 다시 실행하므로,
+  조회와 시작 사이에 생긴 중복 요청도 차단됩니다.
+- 의도적으로 중복 빌드가 필요하면 `node scripts/guard-eas-build.mjs preview --allow-duplicate`
+  로 이유를 남기고 우회합니다.
 
 JS-only 변경은 새 native binary를 만들지 않습니다. 네이티브 모듈, Expo/RN
 버전, 권한, `app.json`의 native config, runtimeVersion이 그대로이고 기존

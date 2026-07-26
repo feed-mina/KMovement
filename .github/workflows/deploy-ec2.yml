@@ -15,10 +15,14 @@ on:
       - "dataset/models/route_graph.pkl"
       - "chroma_db/**"
       - ".dockerignore"
+      # 이 워크플로 자신의 변경도 배포를 트리거해야 한다. 아래 "Detect changed
+      # paths"는 이미 이 경로를 전체 재배포로 처리하지만, paths 필터에 없으면
+      # 워크플로가 시작조차 하지 않아 워크플로 수정본이 영영 실행되지 않는다.
+      - ".github/workflows/deploy-ec2.yml"
   workflow_dispatch:
     inputs:
       cleanup_logs_and_caches:
-        description: "Clean approved EC2 logs/caches before recreating containers"
+        description: "Fail the deploy if approved log/cache cleanup cannot reach the 4GiB floor"
         required: true
         default: false
         type: boolean
@@ -68,6 +72,17 @@ jobs:
             DEPLOY_FASTAPI="true"
           else
             CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} || echo "")
+            # fetch-depth 2 로는 squash merge 등에서 before 커밋이 없어 diff 가
+            # 비는 경우가 있다. 그때 조용히 아무것도 배포하지 않으면 워크플로가
+            # 성공으로 끝나면서 실제로는 배포가 누락된다. paths 필터가 이미
+            # 관련 변경을 보장하므로 전체 배포로 fallback 한다.
+            if [ -z "$CHANGED" ]; then
+              echo "::warning::Could not resolve changed files from ${{ github.event.before }}; deploying all services."
+              echo "backend=true"  >> $GITHUB_OUTPUT
+              echo "frontend=true" >> $GITHUB_OUTPUT
+              echo "fastapi=true"  >> $GITHUB_OUTPUT
+              exit 0
+            fi
             echo "$CHANGED" | grep -q '^subproject/SDUI/SDUI-server/' && DEPLOY_BACKEND="true"
             echo "$CHANGED" | grep -q '^subproject/SDUI/metadata-project/' && DEPLOY_FRONTEND="true"
             echo "$CHANGED" | grep -q '^src/api/' && DEPLOY_FASTAPI="true"
@@ -852,9 +867,18 @@ jobs:
           sed -i "s|__DEPLOY_FRONTEND__|${{ steps.changes.outputs.frontend }}|g" /tmp/deploy.sh
           sed -i "s|__DEPLOY_FASTAPI__|${{ steps.changes.outputs.fastapi }}|g" /tmp/deploy.sh
 
-      - name: Clean approved logs and caches before container recreation
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.cleanup_logs_and_caches }}
+      # 이 정리는 매 배포마다 돌린다. 배포 스크립트의 assert_minimum_docker_space
+      # 4GiB 가드가 정리 전 여유공간(2.666GiB 관측)으로는 항상 실패하기 때문이다.
+      # 대상은 재생성 가능한 로그·캐시뿐이며 활성 컨테이너·이미지·DB 볼륨·named
+      # volume 은 건드리지 않는다. 여기서 바닥을 못 채워도 실패시키지 않고,
+      # 배포 스크립트의 fail-closed 가드가 진단과 함께 최종 판정한다.
+      # workflow_dispatch 에서 cleanup_logs_and_caches=true 면 이 단계에서 즉시
+      # 실패시켜 원인을 배포 전에 드러낸다.
+      - name: Reclaim safe logs and caches before container recreation
+        if: steps.changes.outputs.backend == 'true' || steps.changes.outputs.fastapi == 'true' || steps.changes.outputs.frontend == 'true'
         shell: bash
+        env:
+          STRICT_CLEANUP: ${{ github.event_name == 'workflow_dispatch' && inputs.cleanup_logs_and_caches }}
         run: |
           set -euo pipefail
           ssh \
@@ -862,54 +886,70 @@ jobs:
             -o BatchMode=yes \
             -o ConnectTimeout=15 \
             -o StrictHostKeyChecking=accept-new \
-            "${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }}" <<'CLEANUP_EOF'
+            "${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }}" \
+            "bash -s -- '${STRICT_CLEANUP}'" <<'CLEANUP_EOF'
           set -euo pipefail
+          STRICT="${1:-false}"
 
-          for container_name in sdui-backend kride-fastapi; do
-            container_status="$(
-              docker inspect --format '{{.State.Status}}' "$container_name" 2>/dev/null || true
-            )"
-            if [ "$container_status" != "running" ]; then
-              echo "$container_name must be running before approved cleanup (status: ${container_status:-missing})."
-              exit 1
-            fi
+          report_space() {
+            echo "=== Safe reclaim: $1 ==="
+            df -Pk /var/lib/docker 2>/dev/null || df -Pk /
+            sudo journalctl --disk-usage || true
+            sudo du -sh /var/cache/apt 2>/dev/null || true
+          }
+
+          # 컨테이너가 떠 있지 않으면 그 컨테이너 내부 정리만 건너뛴다.
+          # 첫 배포나 장애 복구 상황에서 호스트 레벨 회수까지 막지 않기 위함이다.
+          container_running() {
+            [ "$(docker inspect --format '{{.State.Status}}' "$1" 2>/dev/null || true)" = "running" ]
+          }
+
+          report_space "before"
+
+          # 1. systemd journal 과 apt 캐시 (호스트, 항상 재생성 가능)
+          sudo journalctl --rotate || true
+          sudo journalctl --vacuum-size=64M || true
+          sudo apt-get clean || true
+
+          # 2. Docker 컨테이너 json 로그. run_with_log_rotation 이전에 만들어진
+          #    컨테이너는 회전 설정이 없어 무제한 증가한다. 파일을 지우지 않고
+          #    truncate 하므로 실행 중인 컨테이너의 로그 핸들이 깨지지 않는다.
+          for log_path in $(sudo find /var/lib/docker/containers -name '*-json.log' -size +32M 2>/dev/null || true); do
+            echo "Truncating oversized container log: $log_path"
+            sudo truncate -s 0 "$log_path" || true
           done
 
-          echo "=== Approved cleanup: before ==="
-          df -Pk /var/lib/docker 2>/dev/null || df -Pk /
-          sudo journalctl --disk-usage
-          sudo du -sh /var/cache/apt 2>/dev/null || true
-          docker exec sdui-backend sh -ceu \
-            'du -sh /app/logs 2>/dev/null || true'
-          docker exec kride-fastapi sh -ceu \
-            'du -sh /tmp/hf_cache 2>/dev/null || true'
-
-          sudo journalctl --rotate
-          sudo journalctl --vacuum-size=64M
-          sudo apt-get clean
-          docker exec sdui-backend sh -ceu '
-            if [ -d /app/logs ]; then
-              find /app/logs -mindepth 1 -maxdepth 1 -type f -name "application-*.log" -delete
-              if [ -f /app/logs/application.log ]; then
-                : > /app/logs/application.log
+          # 3. 애플리케이션 로그와 모델 캐시 (컨테이너 내부, 재생성 가능)
+          if container_running sdui-backend; then
+            docker exec sdui-backend sh -ceu '
+              if [ -d /app/logs ]; then
+                find /app/logs -mindepth 1 -maxdepth 1 -type f -name "application-*.log" -delete
+                if [ -f /app/logs/application.log ]; then
+                  : > /app/logs/application.log
+                fi
               fi
-            fi
-          '
-          docker exec kride-fastapi sh -ceu '
-            if [ -d /tmp/hf_cache ]; then
-              find /tmp/hf_cache -mindepth 1 -delete
-            fi
-          '
-          sync
+            ' || true
+          else
+            echo "sdui-backend is not running; skipping its log reclaim."
+          fi
 
-          echo "=== Approved cleanup: after ==="
-          df -Pk /var/lib/docker 2>/dev/null || df -Pk /
-          sudo journalctl --disk-usage
-          sudo du -sh /var/cache/apt 2>/dev/null || true
-          docker exec sdui-backend sh -ceu \
-            'du -sh /app/logs 2>/dev/null || true'
-          docker exec kride-fastapi sh -ceu \
-            'du -sh /tmp/hf_cache 2>/dev/null || true'
+          if container_running kride-fastapi; then
+            docker exec kride-fastapi sh -ceu '
+              if [ -d /tmp/hf_cache ]; then
+                find /tmp/hf_cache -mindepth 1 -delete
+              fi
+            ' || true
+          else
+            echo "kride-fastapi is not running; skipping its cache reclaim."
+          fi
+
+          # 4. Docker build cache 와 dangling image. 태그된 이미지와 named
+          #    volume 은 대상이 아니다.
+          docker builder prune -af || true
+          docker image prune -f || true
+
+          sync
+          report_space "after"
 
           available_kb="$(
             df -Pk /var/lib/docker 2>/dev/null | awk 'NR == 2 { print $4 }'
@@ -918,12 +958,16 @@ jobs:
             available_kb="$(df -Pk / | awk 'NR == 2 { print $4 }')"
           fi
           if ! printf '%s' "$available_kb" | grep -Eq '^[0-9]+$'; then
-            echo "Unable to determine free space after approved cleanup."
+            echo "Unable to determine free space after safe reclaim."
             exit 1
           fi
           if [ "$available_kb" -lt 4194304 ]; then
-            echo "Approved cleanup left ${available_kb}KB available; deployment requires 4194304KB."
-            exit 1
+            echo "Safe reclaim left ${available_kb}KB available; deployment requires 4194304KB."
+            docker system df -v || true
+            if [ "$STRICT" = "true" ]; then
+              exit 1
+            fi
+            echo "::warning::EC2 free space is still below the 4GiB deploy floor after safe reclaim."
           fi
           CLEANUP_EOF
 

@@ -4,7 +4,12 @@ on:
   push:
     branches: ["main"]
     paths:
+      # deploy-runpod.yml 과 짝을 이루는 제외 규칙. 공유 파이썬 소스는 양쪽 다
+      # 빌드하고, Media 워커 전용 입력 변경으로는 Tora 를 빌드하지 않는다.
       - "deploy/media_motion/**"
+      - "!deploy/media_motion/Dockerfile.runpod"
+      - "!deploy/media_motion/Dockerfile.worker"
+      - "!deploy/media_motion/supervisord.conf"
   workflow_dispatch:
 
 concurrency:

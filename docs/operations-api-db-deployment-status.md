@@ -97,7 +97,7 @@ Cloud Run 배포 워크플로는 구 프로젝트 `quartz-kiba`를 명시적으�
 
 ## 6. 운영 상태 확정 체크리스트
 
-- [ ] GitHub Actions에서 최근 성공한 `deploy-ec2.yml`, `deploy-cloud-run.yml`, `deploy-gcp.yml` 실행을 확인한다.
+- [ ] GitHub Actions에서 최근 성공한 `deploy-ec2.yml` 실행을 확인한다. (2026-07-26 확인: 마지막 성공은 2026-07-16 `331217277`, 이후 10회 연속 실패)
 - [ ] EC2에서 `sdui-frontend`, `sdui-backend`, `sdui-redis`, `kride-fastapi`의 실행 상태와 이미지 태그를 확인한다.
 - [ ] EC2 `sdui-db`의 `SDUI_TD`에 읽기 전용으로 연결해 Flyway 버전과 `ROLE_ADMIN` 계정을 확인한다.
 - [ ] Cloud Run `kmovement`의 최신 리비전·트래픽 비율·`/api/health` 응답을 확인한다.
@@ -106,10 +106,34 @@ Cloud Run 배포 워크플로는 구 프로젝트 `quartz-kiba`를 명시적으�
 
 ## 참고한 설정
 
+> 이 문서가 작성된 2026-07-14 기준 목록입니다. `deploy-cloud-run.yml`,
+> `deploy-gcp.yml`, `ec2-fix-frontend.yml`, `ec2-fix-ssl.yml`,
+> `ec2-diagnose.yml`, `ec2-apply-migration.yml` 은 #177에 따라 저장소에서
+> 제거되었습니다. 현재 워크플로 목록은 아래와 같습니다.
+
+작성 당시 참고한 설정:
+
 - `.github/workflows/deploy-ec2.yml`
-- `.github/workflows/deploy-cloud-run.yml`
-- `.github/workflows/deploy-gcp.yml`
+- `.github/workflows/deploy-cloud-run.yml` (제거됨)
+- `.github/workflows/deploy-gcp.yml` (제거됨)
 - `.github/workflows/deploy-runpod.yml`
 - `.github/workflows/deploy-runpod-tora.yml`
 - `docker-compose.yml`
 - `docs/cloud_run_kmovement_deploy.md`
+
+2026-07-26 기준 실제 워크플로:
+
+| 워크플로 | 트리거 | 역할 |
+|---|---|---|
+| `ci.yml` | push/PR | 빌드 검증 |
+| `deploy-ec2.yml` | `main` push (해당 경로) + 수동 | **유일한 배포 경로**. Spring/Next.js/FastAPI/Celery |
+| `ec2-deploy-frontend.yml` | 수동 | 프런트엔드 단독 재배포. `deploy-ec2` 와 같은 concurrency group |
+| `deploy-runpod.yml` | `main` push (media 경로) | RunPod Media 워커 이미지 |
+| `deploy-runpod-tora.yml` | `main` push (media 경로) | RunPod Tora 워커 이미지 |
+| `ec2-audit.yml` | 수동 | EC2 읽기 전용 감사 |
+| `gcp-cost-audit.yml` | 수동 | GCP 읽기 전용 비용 감사 |
+| `runpod-cost-audit.yml` | 수동 | RunPod 읽기 전용 비용 감사 |
+
+> 레거시 Cloud Run 서비스(`kmovement-46122739597.europe-west1.run.app`)는
+> 배포 워크플로가 제거된 뒤에도 계속 실행 중입니다. 워크플로 삭제는 외부
+> 클라우드 과금 중단의 근거가 아닙니다.
