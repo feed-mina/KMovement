@@ -37,7 +37,12 @@ describe("usePageHook 렌더 안정성", () => {
 
   it("호출부가 매 렌더 새 배열을 만들어도 렌더 루프에 빠지지 않는다", () => {
     // `const { data: metadata = [] } = useUiScreen(...)` 로딩 중 패턴 재현
+    // 부모를 한 번 강제 재렌더해 metadata={[]} 가 새 배열 참조로 다시 생성되는 케이스를 커버한다
     function UnstableCaller() {
+      const [, setTick] = React.useState(0);
+      React.useEffect(() => {
+        setTick(t => t + 1);
+      }, []);
       return <Probe metadata={[]} />;
     }
     expect(() => render(<UnstableCaller />)).not.toThrow();
