@@ -130,6 +130,29 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '31', sigunguCode: '' })));
     });
 
+    it('지역 필터 이동 버튼으로 칩 레일을 부드럽게 스크롤하고 끝 지점을 표시한다', async () => {
+        renderScreen();
+        const rail = screen.getByRole('group', { name: '시·도 선택' });
+        const scrollBy = jest.fn();
+        Object.defineProperties(rail, {
+            clientWidth: { configurable: true, value: 300 },
+            scrollWidth: { configurable: true, value: 900 },
+            scrollLeft: { configurable: true, value: 0, writable: true },
+            scrollBy: { configurable: true, value: scrollBy },
+        });
+
+        fireEvent.scroll(rail);
+        const nextButton = screen.getByRole('button', { name: '시·도 선택 다음 항목' });
+        await waitFor(() => expect(nextButton).toBeEnabled());
+        fireEvent.click(nextButton);
+        expect(scrollBy).toHaveBeenCalledWith({ left: 220, behavior: 'smooth' });
+
+        Object.defineProperty(rail, 'scrollLeft', { configurable: true, value: 600 });
+        fireEvent.scroll(rail);
+        await waitFor(() => expect(nextButton).toBeDisabled());
+        expect(screen.getByRole('button', { name: '시·도 선택 이전 항목' })).toBeEnabled();
+    });
+
     it('시·도 전체와 시·군·구 선택을 같은 지역 코드 계약으로 조회한다', async () => {
         renderScreen();
         fireEvent.click(await screen.findByRole('button', { name: '경기도' }));

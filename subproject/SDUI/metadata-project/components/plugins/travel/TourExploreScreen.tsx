@@ -86,6 +86,86 @@ function safeExternalUrl(url?: string): string | undefined {
 
 const RED = '#E50914';
 
+function HorizontalFilterRail({
+    label,
+    busy,
+    children,
+}: {
+    label: string;
+    busy?: boolean;
+    children: React.ReactNode;
+}) {
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [scrollState, setScrollState] = useState({ left: false, right: false });
+
+    const updateScrollState = useCallback(() => {
+        const rail = scrollRef.current;
+        if (!rail) return;
+        const maxScrollLeft = rail.scrollWidth - rail.clientWidth;
+        setScrollState({
+            left: rail.scrollLeft > 2,
+            right: maxScrollLeft - rail.scrollLeft > 2,
+        });
+    }, []);
+
+    useEffect(() => {
+        const rail = scrollRef.current;
+        if (!rail) return;
+        const frame = requestAnimationFrame(updateScrollState);
+        const resizeObserver = typeof ResizeObserver === 'undefined'
+            ? null
+            : new ResizeObserver(updateScrollState);
+        resizeObserver?.observe(rail);
+        rail.addEventListener('scroll', updateScrollState, { passive: true });
+        return () => {
+            cancelAnimationFrame(frame);
+            resizeObserver?.disconnect();
+            rail.removeEventListener('scroll', updateScrollState);
+        };
+    }, [children, updateScrollState]);
+
+    const move = (direction: -1 | 1) => {
+        const rail = scrollRef.current;
+        if (!rail) return;
+        rail.scrollBy({
+            left: direction * Math.max(rail.clientWidth * 0.72, 220),
+            behavior: 'smooth',
+        });
+    };
+
+    return (
+        <div className="tour-filter-rail">
+            <button
+                type="button"
+                className="tour-filter-rail__control"
+                aria-label={`${label} 이전 항목`}
+                disabled={!scrollState.left}
+                onClick={() => move(-1)}
+            >
+                <span aria-hidden="true">‹</span>
+            </button>
+            <div
+                ref={scrollRef}
+                role="group"
+                aria-label={label}
+                aria-busy={busy}
+                className="tour-filter-rail__scroll"
+            >
+                {children}
+            </div>
+            <button
+                type="button"
+                className="tour-filter-rail__control"
+                aria-label={`${label} 다음 항목`}
+                disabled={!scrollState.right}
+                onClick={() => move(1)}
+            >
+                <span aria-hidden="true">›</span>
+            </button>
+        </div>
+    );
+}
+
 export default function TourExploreScreen(_props: ScreenControllerProps) {
     const [category, setCategory] = useState('39');
     const [areaCode, setAreaCode] = useState('1');
@@ -302,11 +382,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             </header>
 
             <section aria-label="지역 필터" style={{ marginBottom: 10 }}>
-                <div
-                    role="group"
-                    aria-label="시·도 선택"
-                    style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'thin' }}
-                >
+                <HorizontalFilterRail label="시·도 선택">
                     {areas.map((area) => (
                         <button
                             key={area.code}
@@ -322,13 +398,11 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             {area.name}
                         </button>
                     ))}
-                </div>
+                </HorizontalFilterRail>
 
-                <div
-                    role="group"
-                    aria-label={`${selectedAreaName} 시·군·구 선택`}
-                    aria-busy={regionsLoading}
-                    style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'thin' }}
+                <HorizontalFilterRail
+                    label={`${selectedAreaName} 시·군·구 선택`}
+                    busy={regionsLoading}
                 >
                     <button
                         type="button"
@@ -349,7 +423,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             {district.name}
                         </button>
                     ))}
-                </div>
+                </HorizontalFilterRail>
                 {regionError && (
                     <p role="status" style={{ margin: '0 2px 8px', color: '#8B4A4D', fontSize: 11 }}>
                         {regionError}

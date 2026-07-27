@@ -3239,6 +3239,104 @@ button:hover {
     }
 }
 
+/* ── TOUR_EXPLORE 지역 필터 레일 ── */
+.tour-filter-rail {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) 32px;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.tour-filter-rail__scroll {
+    display: flex;
+    gap: 8px;
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(229, 9, 20, 0.42) transparent;
+    padding: 4px 2px 9px;
+}
+
+.tour-filter-rail__scroll > button {
+    scroll-snap-align: start;
+    transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.tour-filter-rail__scroll > button:hover {
+    transform: translateY(-1px);
+}
+
+.tour-filter-rail__scroll::-webkit-scrollbar {
+    height: 5px;
+}
+
+.tour-filter-rail__scroll::-webkit-scrollbar-track {
+    background: #eeeeeb;
+    border-radius: 999px;
+}
+
+.tour-filter-rail__scroll::-webkit-scrollbar-thumb {
+    background: rgba(229, 9, 20, 0.48);
+    border-radius: 999px;
+}
+
+.tour-filter-rail__scroll::-webkit-scrollbar-thumb:hover {
+    background: #E50914;
+}
+
+.tour-filter-rail__control {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid #deded9;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #791F1F;
+    box-shadow: 0 2px 8px rgba(34, 34, 30, 0.08);
+    cursor: pointer;
+}
+
+.tour-filter-rail__control span {
+    font-size: 22px;
+    line-height: 1;
+    transform: translateY(-1px);
+}
+
+.tour-filter-rail__control:hover:not(:disabled),
+.tour-filter-rail__control:focus-visible {
+    border-color: #E50914;
+    color: #E50914;
+    outline: none;
+}
+
+.tour-filter-rail__control:focus-visible {
+    box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.16);
+}
+
+.tour-filter-rail__control:disabled {
+    opacity: 0.28;
+    cursor: default;
+    box-shadow: none;
+}
+
+@media (max-width: 480px) {
+    .tour-filter-rail {
+        grid-template-columns: 28px minmax(0, 1fr) 28px;
+        gap: 4px;
+    }
+
+    .tour-filter-rail__control {
+        width: 28px;
+        height: 28px;
+    }
+}
+
 /* 메모(각오) 텍스트 */
 .goal-memo-text {
     margin-top: 6px;
