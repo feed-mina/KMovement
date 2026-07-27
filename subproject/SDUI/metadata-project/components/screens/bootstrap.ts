@@ -33,3 +33,6 @@ registerScreenAccess((id) => ADMIN_SCREENS.includes(id), { requireRole: "ROLE_AD
 // 엔진 오픈코어 추출 시: 아래 2줄 + components/plugins/travel 폴더 제거.
 import { registerTravelPlugin } from "@/components/plugins/travel/register";
 registerTravelPlugin();
+
+import { registerKpopPlugin } from "@/components/plugins/kpop/register";
+registerKpopPlugin();
