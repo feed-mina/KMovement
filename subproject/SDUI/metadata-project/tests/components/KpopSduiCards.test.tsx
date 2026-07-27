@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import DynamicEngine from '@/components/DynamicEngine/DynamicEngine';
 import { registerKpopPlugin } from '@/components/plugins/kpop/register';
 import { renderWithProviders } from '@/tests/test-utils';
@@ -65,5 +65,43 @@ describe('K-POP internal SDUI cards', () => {
             expect.objectContaining({ actionUrl: '/view/KPOP_EVENT_DETAIL/11' }),
             expect.objectContaining({ id: 11 }),
         );
+    });
+
+    it('uploads a consented image and routes the AI job result internally', async () => {
+        const onAction = jest.fn();
+        const fetchMock = jest.spyOn(global, 'fetch')
+            .mockResolvedValueOnce(new Response(JSON.stringify({
+                data: { sourceKey: 'kpop/user/source.webp', uploadUrl: 'https://upload.example/source' },
+            }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+            .mockResolvedValueOnce(new Response(null, { status: 200 }))
+            .mockResolvedValueOnce(new Response(JSON.stringify({ data: { jobId: 22, status: 'QUEUED' } }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            }));
+        Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: jest.fn(() => 'blob:preview') });
+        Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: jest.fn() });
+
+        renderWithProviders(
+            <DynamicEngine
+                metadata={[{ componentId: 'ai-upload', componentType: 'UPLOAD_CONSENT' }]}
+                screenId="KPOP_AI_FIND"
+                pageData={{}}
+                formData={{}}
+                onChange={jest.fn()}
+                onAction={onAction}
+            />,
+        );
+
+        const file = new File(['image'], 'outfit.webp', { type: 'image/webp' });
+        fireEvent.change(screen.getByLabelText(/사진 선택/), { target: { files: [file] } });
+        fireEvent.click(screen.getByRole('checkbox'));
+        fireEvent.click(screen.getByRole('button', { name: '후보 분석 시작' }));
+
+        await waitFor(() => expect(onAction).toHaveBeenCalledWith(
+            expect.objectContaining({ actionUrl: '/view/KPOP_AI_RESULT?jobId=22' }),
+            expect.objectContaining({ jobId: 22 }),
+        ));
+        expect(fetchMock).toHaveBeenCalledTimes(3);
+        fetchMock.mockRestore();
     });
 });
