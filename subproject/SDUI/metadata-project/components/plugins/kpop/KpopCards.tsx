@@ -27,6 +27,7 @@ export function KpopArtistCard({ data, meta, onAction }: CardProps) {
     const [status, setStatus] = useState('');
     const name = artistName(data);
     const imageUrl = data?.imageUrl || data?.image_url;
+    const isDetail = String(meta?.componentId || '').includes('_detail');
 
     const toggleFollow = async () => {
         if (busy || !data?.id) return;
@@ -56,16 +57,18 @@ export function KpopArtistCard({ data, meta, onAction }: CardProps) {
                 <h3 id={titleId}>{name}</h3>
                 <p>{data?.profile || '이벤트와 팬 여행 정보를 확인해 보세요.'}</p>
                 <div className="kpop-card-actions">
-                    <button
-                        type="button"
-                        onClick={() => onAction?.({
-                            ...meta,
-                            actionType: 'ROUTE',
-                            actionUrl: `/view/KPOP_ARTIST_DETAIL/${data?.id}`,
-                        }, data)}
-                    >
-                        상세 보기
-                    </button>
+                    {!isDetail && (
+                        <button
+                            type="button"
+                            onClick={() => onAction?.({
+                                ...meta,
+                                actionType: 'ROUTE',
+                                actionUrl: `/view/KPOP_ARTIST_DETAIL/${data?.id}`,
+                            }, data)}
+                        >
+                            상세 보기
+                        </button>
+                    )}
                     <button type="button" aria-pressed={followed} aria-busy={busy} disabled={busy} onClick={toggleFollow}>
                         {busy ? '처리 중...' : followed ? '팔로우 취소' : '팔로우'}
                     </button>
@@ -82,6 +85,7 @@ export function KpopEventCard({ data, meta, onAction }: CardProps) {
     const [busy, setBusy] = useState(false);
     const [status, setStatus] = useState('');
     const title = data?.titleKo || data?.title_ko || data?.titleEn || data?.title || 'K-POP 이벤트';
+    const isDetail = String(meta?.componentId || '').includes('_detail');
 
     const toggleBookmark = async () => {
         if (busy || !data?.id) return;
@@ -105,16 +109,18 @@ export function KpopEventCard({ data, meta, onAction }: CardProps) {
                 <p>{[data?.region, data?.venue, data?.date].filter(Boolean).join(' · ') || '장소와 일정 확인 중'}</p>
                 <p className="kpop-evidence">공식 또는 운영 검수 완료 링크를 기준으로 확인해 주세요.</p>
                 <div className="kpop-card-actions">
-                    <button
-                        type="button"
-                        onClick={() => onAction?.({
-                            ...meta,
-                            actionType: 'ROUTE',
-                            actionUrl: `/view/KPOP_EVENT_DETAIL/${data?.id}`,
-                        }, data)}
-                    >
-                        상세 보기
-                    </button>
+                    {!isDetail && (
+                        <button
+                            type="button"
+                            onClick={() => onAction?.({
+                                ...meta,
+                                actionType: 'ROUTE',
+                                actionUrl: `/view/KPOP_EVENT_DETAIL/${data?.id}`,
+                            }, data)}
+                        >
+                            상세 보기
+                        </button>
+                    )}
                     <button type="button" aria-pressed={bookmarked} aria-busy={busy} disabled={busy} onClick={toggleBookmark}>
                         {busy ? '저장 중...' : bookmarked ? '저장 취소' : '일정 저장'}
                     </button>

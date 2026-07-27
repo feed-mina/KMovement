@@ -1,6 +1,7 @@
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import DynamicEngine from '@/components/DynamicEngine/DynamicEngine';
+import { KpopArtistCard } from '@/components/plugins/kpop/KpopCards';
 import { registerKpopPlugin } from '@/components/plugins/kpop/register';
 import { renderWithProviders } from '@/tests/test-utils';
 
@@ -65,6 +66,19 @@ describe('K-POP internal SDUI cards', () => {
             expect.objectContaining({ actionUrl: '/view/KPOP_EVENT_DETAIL/11' }),
             expect.objectContaining({ id: 11 }),
         );
+    });
+
+    it('removes the self-referencing detail action from artist detail cards', () => {
+        renderWithProviders(
+            <KpopArtistCard
+                data={{ id: 7, nameKo: 'BTS', profile: '서울 팬 여행' }}
+                meta={{ componentId: 'kpop_artist_detail' }}
+                onAction={jest.fn()}
+            />,
+        );
+
+        expect(screen.queryByRole('button', { name: '상세 보기' })).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: '팔로우' })).toBeInTheDocument();
     });
 
     it('uploads a consented image and routes the AI job result internally', async () => {
