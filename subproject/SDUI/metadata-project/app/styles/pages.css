@@ -4643,6 +4643,118 @@ button:hover {
     color: #cbd5e1;
 }
 
+.kpop-product-panel {
+    display: grid;
+    gap: 20px;
+    width: min(100%, 900px);
+    color: #f8fafc;
+}
+
+.kpop-product-panel h2,
+.kpop-product-panel p {
+    margin: 0;
+}
+
+.kpop-product-panel>div:first-child p {
+    margin-top: 8px;
+    color: #cbd5e1;
+    line-height: 1.6;
+}
+
+.kpop-product-filters {
+    display: grid;
+    gap: 8px;
+    padding: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    background: #1f1f1f;
+}
+
+.kpop-product-filters>div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+}
+
+.kpop-product-filters input {
+    min-width: 0;
+    min-height: 46px;
+    padding: 0 14px;
+    border: 1px solid #52525b;
+    border-radius: 6px;
+    background: #111111;
+    color: #ffffff;
+    font: inherit;
+}
+
+.kpop-product-filters input:focus-visible {
+    border-color: #fb7185;
+    outline: 2px solid rgba(251, 113, 133, 0.35);
+    outline-offset: 2px;
+}
+
+.kpop-product-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.kpop-product-card {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    background: #1f1f1f;
+}
+
+.kpop-product-card h3,
+.kpop-product-card p {
+    margin: 0;
+}
+
+.kpop-product-card p {
+    color: #cbd5e1;
+    line-height: 1.55;
+}
+
+.kpop-product-card .kpop-card-actions a {
+    color: #fecdd3;
+    font-weight: 700;
+}
+
+.kpop-evidence-badge {
+    justify-self: start;
+    padding: 5px 8px;
+    border: 1px solid #52525b;
+    border-radius: 4px;
+    color: #e2e8f0;
+    font-weight: 800;
+}
+
+.kpop-evidence-badge.is-exact_candidate {
+    border-color: #4ade80;
+    color: #bbf7d0;
+}
+
+.kpop-evidence-badge.is-similar {
+    border-color: #facc15;
+    color: #fef08a;
+}
+
+@media (max-width: 640px) {
+    .kpop-product-filters>div,
+    .kpop-product-list {
+        grid-template-columns: 1fr;
+    }
+
+    .kpop-product-filters .kpop-primary-btn {
+        width: 100%;
+    }
+}
+
 @media (max-width: 767px) {
     .kpop-screen {
         min-height: calc(100vh - 140px);

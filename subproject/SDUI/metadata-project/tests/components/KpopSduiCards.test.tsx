@@ -78,7 +78,7 @@ describe('K-POP internal SDUI cards', () => {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' },
             }));
-        Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: jest.fn(() => 'blob:preview') });
+        Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: jest.fn(() => 'data:image/gif;base64,R0lGODlhAQABAAAAACw=') });
         Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: jest.fn() });
 
         renderWithProviders(
@@ -102,6 +102,48 @@ describe('K-POP internal SDUI cards', () => {
             expect.objectContaining({ jobId: 22 }),
         ));
         expect(fetchMock).toHaveBeenCalledTimes(3);
+        fetchMock.mockRestore();
+    });
+
+    it('renders product candidates and only exposes rights-checked HTTPS sources', async () => {
+        const fetchMock = jest.spyOn(global, 'fetch')
+            .mockResolvedValueOnce(new Response(JSON.stringify({ data: [
+                {
+                    id: 31,
+                    name: '공식 후보',
+                    evidenceGrade: 'SIMILAR',
+                    evidenceText: '공식 카탈로그 색상과 형태가 유사함',
+                    officialUrl: 'https://shop.example/product/31',
+                    rightsChecked: true,
+                },
+                {
+                    id: 32,
+                    name: '미확인 후보',
+                    officialUrl: 'http://unsafe.example/product/32',
+                    rightsChecked: true,
+                },
+            ] }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+            .mockResolvedValueOnce(new Response(JSON.stringify({ data: [] }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            }));
+
+        renderWithProviders(
+            <DynamicEngine
+                metadata={[{ componentId: 'product-search', componentType: 'PRODUCT_SEARCH' }]}
+                screenId="KPOP_PRODUCTS"
+                pageData={{}}
+                formData={{}}
+                onChange={jest.fn()}
+                onAction={jest.fn()}
+            />,
+        );
+
+        expect(await screen.findByRole('heading', { name: '공식 후보' })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: '미확인 후보' })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /권리 확인된 공식 출처/ })).toHaveAttribute('href', 'https://shop.example/product/31');
+        expect(screen.getAllByRole('link')).toHaveLength(1);
+        expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('/api/v1/kpop/product-candidates?limit=30'), expect.any(Object));
         fetchMock.mockRestore();
     });
 });
