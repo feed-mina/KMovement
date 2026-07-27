@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { SCREEN_MAP } from "@/components/constants/screenMap";
 import { normalizeNode } from "@/components/DynamicEngine/normalizeNode";
 import { useDynamicEngine } from "@/components/DynamicEngine/useDynamicEngine";
-import { resolveDataApiUrl } from "@/components/DynamicEngine/hook/usePageMetadata";
+import { buildExecuteParams, resolveDataApiUrl } from "@/components/DynamicEngine/hook/usePageMetadata";
 import Chart from "@/components/fields/stats/Chart";
 import StatCard from "@/components/fields/stats/StatCard";
 import { normalizeChartData, readMetaProps } from "@/components/fields/stats/statsUtils";
@@ -197,6 +197,20 @@ describe("MY_PAGE SDUI config helpers", () => {
             "/kride-api/users/mina%40example.com/summary"
         );
         expect(resolveDataApiUrl("/kride-api/users/{userSqno}/summary", {})).toBeNull();
+    });
+
+    it("keeps server identity out of K-POP SQL payloads", () => {
+        const context = {
+            pageSize: 5,
+            offset: 0,
+            filterId: "member@example.com",
+            contentId: null,
+        };
+
+        expect(buildExecuteParams("kpop_artist_cards", {}, context)).toEqual({});
+        expect(buildExecuteParams("kpop_artist_detail", {}, { ...context, contentId: 7 })).toEqual({
+            contentId: 7,
+        });
     });
 
     it("renders travel history and recommend-again action", () => {

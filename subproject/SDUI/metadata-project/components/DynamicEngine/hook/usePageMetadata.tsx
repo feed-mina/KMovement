@@ -25,6 +25,31 @@ export function resolveDataApiUrl(
     return missingValue ? null : resolved;
 }
 
+export function buildExecuteParams(
+    sqlKey: string,
+    parsedParams: Record<string, unknown>,
+    context: {
+        pageSize: number;
+        offset: number;
+        filterId?: string;
+        contentId?: string | number | null;
+    },
+): Record<string, unknown> {
+    if (sqlKey.startsWith('kpop_')) {
+        return sqlKey.endsWith('_detail') && context.contentId != null
+            ? { ...parsedParams, contentId: context.contentId }
+            : { ...parsedParams };
+    }
+
+    return {
+        ...parsedParams,
+        pageSize: context.pageSize,
+        offset: context.offset,
+        filterId: context.filterId || '',
+        contentId: context.contentId ?? null,
+    };
+}
+
 export const usePageMetadata = (
     screenId: string,
     currentPage: number,
@@ -194,6 +219,14 @@ export const usePageMetadata = (
                         userSqno: user?.userSqno,
                         contentId: refId || null //  (백엔드 :contentId와 매핑)
                     };
+                    const executeParams = sqlKey
+                        ? buildExecuteParams(sqlKey, parsedParams, {
+                            pageSize,
+                            offset: (currentPage - 1) * pageSize,
+                            filterId: isOnlyMine ? user?.userId : '',
+                            contentId: refId,
+                        })
+                        : finalParams;
 
                     if (!sqlKey && directApiUrl) {
                         const resolvedApiUrl = resolveDataApiUrl(String(directApiUrl), finalParams);
@@ -211,10 +244,10 @@ export const usePageMetadata = (
                         res = await axios.get(apiUrl, { params: finalParams });
                     } else if (finalScreenId?.includes("CONTENT_DETAIL") || finalScreenId?.includes("CONTENT_MODIFY") || isOnlyMine) {
                         // 상세 조회나 수정 하기 전에 보이는 부분, 내 글 목록은 GET 방식 사용
-                        res = await axios.get(apiUrl, { params: finalParams });
+                        res = await axios.get(apiUrl, { params: executeParams });
                     } else {
                         // 그 외 일반 목록 등은 POST 방식 사용
-                        res = await axios.post(apiUrl, finalParams);
+                        res = await axios.post(apiUrl, executeParams);
                     }
                     return {
                         id: source.refDataId || source.ref_data_id || source.componentId || source.component_id,
