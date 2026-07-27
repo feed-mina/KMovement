@@ -206,6 +206,32 @@
     margin-top: 8px;
 }
 
+/* 모바일 헤더의 아코디언 토글은 데스크톱과 같은 compact 버튼을 유지한다. */
+.time-card .record-time-widget {
+    width: 100%;
+}
+
+.time-card .record-time-summary-copy {
+    flex: 1 1 auto;
+    width: 0;
+}
+
+.time-card .record-time-summary-copy strong {
+    white-space: nowrap;
+}
+
+.time-card .record-time-toggle {
+    width: auto;
+    height: 44px;
+    min-width: 84px;
+    margin-top: 0;
+    padding: 0 14px;
+    background: var(--kride-bg-card);
+    color: var(--kride-text-main);
+    border: 1px solid var(--kride-border);
+    border-radius: 999px;
+}
+
 /* time-card RecordTimeComponent: sticky/z-index 해제 + 텍스트 줄바꿈 방지 */
 .time-card .time-record-container {
     position: relative !important;
