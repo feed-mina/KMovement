@@ -2833,12 +2833,16 @@ button:hover {
 /* ── 3열 그리드 컨테이너 ── */
 .main-bento {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: auto auto;
-    gap: var(--kride-space-4);
-    padding: var(--kride-space-6);
+    gap: 18px;
+    width: min(100%, 1180px);
+    margin: 0 auto;
+    padding: 28px;
     box-sizing: border-box;
-    background: var(--kride-bg-cream);
+    background-color: #f7f7f5;
+    background-image: radial-gradient(#deded9 0.7px, transparent 0.7px);
+    background-size: 18px 18px;
 }
 
 /* TIME_RECORD_WIDGET은 GROUP이 아닌 컴포넌트라서 css_class가 엔진에서 적용되지 않음.
@@ -2859,7 +2863,7 @@ button:hover {
 /* ── 카드 공통 ──
    overflow: visible 필수 — goal-list-popup이 position: absolute라 overflow: hidden이면 클리핑됨 */
 .bento-card {
-    border-radius: 16px;
+    border-radius: 8px;
     padding: 24px;
     min-height: 160px;
     display: flex;
@@ -3061,9 +3065,9 @@ button:hover {
 @media (max-width: 999px) {
     .main-bento {
         grid-template-columns: 1fr;
-        padding: var(--kride-space-4);
-        padding-bottom: calc(var(--kride-space-4) + var(--kride-safe-bottom));
-        gap: var(--kride-space-3);
+        padding: 18px 16px;
+        padding-bottom: calc(18px + var(--kride-safe-bottom));
+        gap: 12px;
     }
 
     .main-bento> :first-child,
@@ -3793,9 +3797,9 @@ button:hover {
         radial-gradient(120% 100% at 100% 50%, rgba(229, 9, 20, 0.45), transparent 55%),
         linear-gradient(135deg, #0A0A0A 0%, #1a0a0c 60%, #2a0a0c 100%);
     color: #ffffff;
-    border-radius: 16px;
-    padding: 28px;
-    min-height: 180px;
+    border-radius: 8px;
+    padding: 32px;
+    min-height: 240px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -3807,6 +3811,32 @@ button:hover {
         0 8px 28px rgba(229, 9, 20, 0.18),
         0 1px 0 rgba(255, 255, 255, 0.04) inset;
     transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.group-main_bento_kride_grp {
+    grid-column: 1 / 3;
+}
+
+.group-main_bento_kpop_grp {
+    grid-column: 3 / 4;
+    background:
+        linear-gradient(145deg, rgba(229, 9, 20, 0.94), rgba(120, 5, 13, 0.98)),
+        #8B0610;
+}
+
+.group-main_bento_kpop_grp .bento-card-kride__kicker {
+    color: #ffffff;
+    opacity: 0.72;
+}
+
+.group-main_bento_kpop_grp .bento-card-kride__title {
+    font-size: 30px;
+}
+
+.group-main_bento_kpop_grp .bento-card-kride__cta {
+    background: #ffffff;
+    color: #8B0610;
+    box-shadow: 0 6px 16px rgba(42, 0, 4, 0.28);
 }
 
 .bento-card-kride:hover {
@@ -3883,14 +3913,30 @@ button:hover {
     box-shadow: 0 10px 22px rgba(229, 9, 20, 0.55);
 }
 
-@media (max-width: 768px) {
-    .bento-card-kride {
-        padding: 20px;
-        min-height: 140px;
+.bento-card-kride__cta:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 3px;
+}
+
+@media (max-width: 999px) {
+    .group-main_bento_kride_grp,
+    .group-main_bento_kpop_grp {
+        grid-column: 1;
     }
+
+    .bento-card-kride {
+        padding: 24px 22px;
+        min-height: 190px;
+    }
+
     .bento-card-kride__title {
         font-size: 28px;
     }
+
+    .group-main_bento_kpop_grp .bento-card-kride__title {
+        font-size: 28px;
+    }
+
     .bento-card-kride__desc {
         font-size: 12.5px;
     }
