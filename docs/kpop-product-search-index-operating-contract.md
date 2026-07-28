@@ -297,13 +297,13 @@ future 테스트는 최소한 다음을 증명해야 한다.
 
 ### #171 MVP 완료
 
-- [ ] 상품 후보의 출처·권리·승인 상태가 PostgreSQL에 저장되고 migration이 실제 PostgreSQL에서 적용된다.
-- [ ] `GET /api/v1/kpop/product-candidates`가 PG lexical search, allowlist, page limit을 제공한다.
-- [ ] 공개 쿼리가 `approved_yn = 'Y'`를 SQL에서 강제하고 `officialUrl`은 현재 `rights_checked` 값으로 fail-closed projection한다.
-- [ ] 응답 데이터와 링크는 PG 값만 사용하며 권리 미확인 링크가 노출되지 않는다.
-- [ ] 분석 결과 candidate ref와 SavedItem이 PG 후보 및 사용자 소유권을 재검증한다.
-- [ ] evidence 부족 결과가 정확한 상품으로 과장되지 않는다.
-- [ ] 집중 backend 테스트와 migration 검증이 통과한다.
+- [x] 상품 후보의 출처·권리·승인 상태가 PostgreSQL에 저장되고 migration이 실제 PostgreSQL에서 적용된다.
+- [x] `GET /api/v1/kpop/product-candidates`가 PG lexical search, allowlist, page limit을 제공한다.
+- [x] 공개 쿼리가 `approved_yn = 'Y'`를 SQL에서 강제하고 `officialUrl`은 현재 `rights_checked` 값으로 fail-closed projection한다.
+- [x] 응답 데이터와 링크는 PG 값만 사용하며 권리 미확인 링크가 노출되지 않는다.
+- [x] 분석 결과 candidate ref와 SavedItem이 PG 후보 및 사용자 소유권을 재검증한다.
+- [x] evidence 부족 결과가 정확한 상품으로 과장되지 않는다.
+- [x] 집중 backend 테스트와 migration 검증이 통과한다.
 
 ### 파생 vector gate 완료
 

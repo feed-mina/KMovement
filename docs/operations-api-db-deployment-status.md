@@ -97,8 +97,8 @@ Cloud Run 배포 워크플로는 구 프로젝트 `quartz-kiba`를 명시적으�
 
 ## 6. 운영 상태 확정 체크리스트
 
-- [ ] GitHub Actions에서 최근 성공한 `deploy-ec2.yml` 실행을 확인한다. (2026-07-26 확인: 마지막 성공은 2026-07-16 `331217277`, 이후 10회 연속 실패)
-- [ ] EC2에서 `sdui-frontend`, `sdui-backend`, `sdui-redis`, `kride-fastapi`의 실행 상태와 이미지 태그를 확인한다.
+- [x] GitHub Actions에서 최근 성공한 `deploy-ec2.yml` 실행을 확인한다. (2026-07-26 확인: 마지막 성공은 2026-07-16 `331217277`, 이후 10회 연속 실패)
+- [x] EC2에서 `sdui-frontend`, `sdui-backend`, `sdui-redis`, `kride-fastapi`의 실행 상태와 이미지 태그를 확인한다.
 - [ ] EC2 `sdui-db`의 `SDUI_TD`에 읽기 전용으로 연결해 Flyway 버전과 `ROLE_ADMIN` 계정을 확인한다.
 - [ ] Cloud Run `kmovement`의 최신 리비전·트래픽 비율·`/api/health` 응답을 확인한다.
 - [ ] RunPod의 Media/Tora endpoint가 현재 이미지 태그로 실행 중인지와 최근 작업 성공 여부를 확인한다.
