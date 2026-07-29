@@ -12,9 +12,10 @@ import { withKakaoAppState } from '../src/kakaoLogin';
 import { publicApiOrigin, summarizeMobileFailure } from '../src/mobileDiagnostics';
 
 // Stable references. `useBaseActions` in @kride/core resets form state during
-// render whenever `metadata`/`routeParams`/`initialData` change *by reference*.
-// Passing fresh literals (`data ?? []`, `{ screenId }`, `{}`) every render made
-// those guards fire on every render → "Too many re-renders" infinite loop.
+// render when `metadata`/`routeParams`/`initialData` change. Its guards now
+// compare by content (fresh-but-equal references are ignored — the old
+// reference compare looped web /kpop with React #301), but stable refs here
+// still skip that guard work and avoid needless engine re-renders.
 const EMPTY_METADATA: any[] = [];
 const EMPTY_OBJ = {};
 
