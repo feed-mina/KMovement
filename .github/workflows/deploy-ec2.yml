@@ -158,15 +158,23 @@ jobs:
             exit 1
           fi
           NEWLINE_ERRORS=""
+          SED_ERRORS=""
           for entry in "DB_PASSWORD:$DEPLOY_DB_PASSWORD" "JWT_SECRET_KEY:$DEPLOY_JWT_SECRET_KEY" "MAIL_PASSWORD:$DEPLOY_MAIL_PASSWORD"; do
             name="${entry%%:*}"
             value="${entry#*:}"
             if [[ "$value" == *$'\n'* || "$value" == *$'\r'* ]]; then
               NEWLINE_ERRORS="$NEWLINE_ERRORS $name"
             fi
+            if [[ "$value" == *'|'* || "$value" == *'&'* || "$value" == *'\\'* ]]; then
+              SED_ERRORS="$SED_ERRORS $name"
+            fi
           done
           if [ -n "$NEWLINE_ERRORS" ]; then
             echo "::error::Backend deployment secrets must be single-line values (no embedded newlines):$NEWLINE_ERRORS"
+            exit 1
+          fi
+          if [ -n "$SED_ERRORS" ]; then
+            echo "::error::Backend deployment secrets contain characters unsafe for sed substitution (|, &, \\):$SED_ERRORS"
             exit 1
           fi
 
@@ -400,6 +408,35 @@ jobs:
           DEPLOY_CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
           DEPLOY_CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           DEPLOY_CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          DEPLOY_DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DEPLOY_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DEPLOY_MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          DEPLOY_JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          DEPLOY_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEPLOY_TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
+          DEPLOY_KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+          DEPLOY_KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
+          DEPLOY_WEB_URL: ${{ secrets.WEB_URL }}
+          DEPLOY_AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          DEPLOY_AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          DEPLOY_NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          DEPLOY_NEO4J_USERNAME: ${{ secrets.NEO4J_USERNAME }}
+          DEPLOY_NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          DEPLOY_NEO4J_DATABASE: ${{ secrets.NEO4J_DATABASE }}
+          DEPLOY_GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          DEPLOY_RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+          DEPLOY_RUNPOD_ENDPOINT_ID: ${{ secrets.RUNPOD_ENDPOINT_ID }}
+          DEPLOY_RUNPOD_MEDIA_ENDPOINT_ID: ${{ secrets.RUNPOD_MEDIA_ENDPOINT_ID }}
+          DEPLOY_RUNPOD_TORA_ENDPOINT_ID: ${{ secrets.RUNPOD_TORA_ENDPOINT_ID }}
+          DEPLOY_GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          DEPLOY_SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DEPLOY_SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          DEPLOY_SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          DEPLOY_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          DEPLOY_GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          DEPLOY_GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+          DEPLOY_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          DEPLOY_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           cat > /tmp/deploy.sh << 'DEPLOY_EOF'
           set -e
@@ -819,6 +856,35 @@ jobs:
           CLOUDINARY_CLOUD_NAME_ESCAPED="$(escape_sed_replacement "$DEPLOY_CLOUDINARY_CLOUD_NAME")"
           CLOUDINARY_API_KEY_ESCAPED="$(escape_sed_replacement "$DEPLOY_CLOUDINARY_API_KEY")"
           CLOUDINARY_API_SECRET_ESCAPED="$(escape_sed_replacement "$DEPLOY_CLOUDINARY_API_SECRET")"
+          DB_USERNAME_ESCAPED="$(escape_sed_replacement "$DEPLOY_DB_USERNAME")"
+          DB_PASSWORD_ESCAPED="$(escape_sed_replacement "$DEPLOY_DB_PASSWORD")"
+          MAIL_PASSWORD_ESCAPED="$(escape_sed_replacement "$DEPLOY_MAIL_PASSWORD")"
+          JWT_SECRET_KEY_ESCAPED="$(escape_sed_replacement "$DEPLOY_JWT_SECRET_KEY")"
+          OPENAI_API_KEY_ESCAPED="$(escape_sed_replacement "$DEPLOY_OPENAI_API_KEY")"
+          TOUR_API_KEY_ESCAPED="$(escape_sed_replacement "$DEPLOY_TOUR_API_KEY")"
+          KAKAO_CLIENT_ID_ESCAPED="$(escape_sed_replacement "$DEPLOY_KAKAO_CLIENT_ID")"
+          KAKAO_REDIRECT_URI_ESCAPED="$(escape_sed_replacement "$DEPLOY_KAKAO_REDIRECT_URI")"
+          WEB_URL_ESCAPED="$(escape_sed_replacement "$DEPLOY_WEB_URL")"
+          AWS_ACCESS_KEY_ESCAPED="$(escape_sed_replacement "$DEPLOY_AWS_ACCESS_KEY")"
+          AWS_SECRET_KEY_ESCAPED="$(escape_sed_replacement "$DEPLOY_AWS_SECRET_KEY")"
+          NEO4J_URI_ESCAPED="$(escape_sed_replacement "$DEPLOY_NEO4J_URI")"
+          NEO4J_USERNAME_ESCAPED="$(escape_sed_replacement "$DEPLOY_NEO4J_USERNAME")"
+          NEO4J_PASSWORD_ESCAPED="$(escape_sed_replacement "$DEPLOY_NEO4J_PASSWORD")"
+          NEO4J_DATABASE_ESCAPED="$(escape_sed_replacement "$DEPLOY_NEO4J_DATABASE")"
+          GROQ_API_KEY_ESCAPED="$(escape_sed_replacement "$DEPLOY_GROQ_API_KEY")"
+          RUNPOD_API_KEY_ESCAPED="$(escape_sed_replacement "$DEPLOY_RUNPOD_API_KEY")"
+          RUNPOD_ENDPOINT_ID_ESCAPED="$(escape_sed_replacement "$DEPLOY_RUNPOD_ENDPOINT_ID")"
+          RUNPOD_MEDIA_ENDPOINT_ID_ESCAPED="$(escape_sed_replacement "$DEPLOY_RUNPOD_MEDIA_ENDPOINT_ID")"
+          RUNPOD_TORA_ENDPOINT_ID_ESCAPED="$(escape_sed_replacement "$DEPLOY_RUNPOD_TORA_ENDPOINT_ID")"
+          GCP_PROJECT_ID_ESCAPED="$(escape_sed_replacement "$DEPLOY_GCP_PROJECT_ID")"
+          SLACK_WEBHOOK_URL_ESCAPED="$(escape_sed_replacement "$DEPLOY_SLACK_WEBHOOK_URL")"
+          SLACK_BOT_TOKEN_ESCAPED="$(escape_sed_replacement "$DEPLOY_SLACK_BOT_TOKEN")"
+          SLACK_CHANNEL_ID_ESCAPED="$(escape_sed_replacement "$DEPLOY_SLACK_CHANNEL_ID")"
+          GOOGLE_CLIENT_ID_ESCAPED="$(escape_sed_replacement "$DEPLOY_GOOGLE_CLIENT_ID")"
+          GOOGLE_CLIENT_SECRET_ESCAPED="$(escape_sed_replacement "$DEPLOY_GOOGLE_CLIENT_SECRET")"
+          GOOGLE_REDIRECT_URI_ESCAPED="$(escape_sed_replacement "$DEPLOY_GOOGLE_REDIRECT_URI")"
+          SUPABASE_URL_ESCAPED="$(escape_sed_replacement "$DEPLOY_SUPABASE_URL")"
+          SUPABASE_KEY_ESCAPED="$(escape_sed_replacement "$DEPLOY_SUPABASE_KEY")"
 
           sed -i "s|__SDUI_IMAGE__|${{ env.SDUI_IMAGE }}|g" /tmp/deploy.sh
           sed -i "s|__FRONTEND_IMAGE__|${{ env.FRONTEND_IMAGE }}|g" /tmp/deploy.sh
@@ -828,41 +894,41 @@ jobs:
           sed -i "s|__CONTAINER_NAME__|${{ env.CONTAINER_NAME }}|g" /tmp/deploy.sh
           sed -i "s|__TARGET_PORT__|${{ env.TARGET_PORT }}|g" /tmp/deploy.sh
           sed -i "s|__DB_NAME__|${{ env.DB_NAME }}|g" /tmp/deploy.sh
-          sed -i "s|__DB_USERNAME__|${{ secrets.DB_USERNAME }}|g" /tmp/deploy.sh
-          sed -i "s|__DB_PASSWORD__|${{ secrets.DB_PASSWORD }}|g" /tmp/deploy.sh
-          sed -i "s|__MAIL_PASSWORD__|${{ secrets.MAIL_PASSWORD }}|g" /tmp/deploy.sh
-          sed -i "s|__JWT_SECRET_KEY__|${{ secrets.JWT_SECRET_KEY }}|g" /tmp/deploy.sh
-          sed -i "s|__OPENAI_API_KEY__|${{ secrets.OPENAI_API_KEY }}|g" /tmp/deploy.sh
-          sed -i "s|__TOUR_API_KEY__|${{ secrets.TOUR_API_KEY }}|g" /tmp/deploy.sh
-          sed -i "s|__KAKAO_CLIENT_ID__|${{ secrets.KAKAO_CLIENT_ID }}|g" /tmp/deploy.sh
-          sed -i "s|__KAKAO_REDIRECT_URI__|${{ secrets.KAKAO_REDIRECT_URI }}|g" /tmp/deploy.sh
-          sed -i "s|__WEB_URL__|${{ secrets.WEB_URL }}|g" /tmp/deploy.sh
-          sed -i "s|__S3_ACCESS_KEY__|${{ secrets.AWS_ACCESS_KEY }}|g" /tmp/deploy.sh
-          sed -i "s|__S3_SECRET_KEY__|${{ secrets.AWS_SECRET_KEY }}|g" /tmp/deploy.sh
+          sed -i "s|__DB_USERNAME__|$DB_USERNAME_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__DB_PASSWORD__|$DB_PASSWORD_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__MAIL_PASSWORD__|$MAIL_PASSWORD_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__JWT_SECRET_KEY__|$JWT_SECRET_KEY_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__OPENAI_API_KEY__|$OPENAI_API_KEY_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__TOUR_API_KEY__|$TOUR_API_KEY_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__KAKAO_CLIENT_ID__|$KAKAO_CLIENT_ID_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__KAKAO_REDIRECT_URI__|$KAKAO_REDIRECT_URI_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__WEB_URL__|$WEB_URL_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__S3_ACCESS_KEY__|$AWS_ACCESS_KEY_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__S3_SECRET_KEY__|$AWS_SECRET_KEY_ESCAPED|g" /tmp/deploy.sh
           sed -i "s|__KRIDE_FASTAPI_URL__|${{ env.KRIDE_FASTAPI_URL }}|g" /tmp/deploy.sh
           sed -i "s|__FASTAPI_INTERNAL_API_KEY__|$FASTAPI_INTERNAL_API_KEY_ESCAPED|g" /tmp/deploy.sh
-          sed -i "s|__NEO4J_URI__|${{ secrets.NEO4J_URI }}|g" /tmp/deploy.sh
-          sed -i "s|__NEO4J_USERNAME__|${{ secrets.NEO4J_USERNAME }}|g" /tmp/deploy.sh
-          sed -i "s|__NEO4J_PASSWORD__|${{ secrets.NEO4J_PASSWORD }}|g" /tmp/deploy.sh
-          sed -i "s|__NEO4J_DATABASE__|${{ secrets.NEO4J_DATABASE }}|g" /tmp/deploy.sh
-          sed -i "s|__GROQ_API_KEY__|${{ secrets.GROQ_API_KEY }}|g" /tmp/deploy.sh
-          sed -i "s|__RUNPOD_API_KEY__|${{ secrets.RUNPOD_API_KEY }}|g" /tmp/deploy.sh
-          sed -i "s|__RUNPOD_ENDPOINT_ID__|${{ secrets.RUNPOD_ENDPOINT_ID }}|g" /tmp/deploy.sh
-          sed -i "s|__RUNPOD_MEDIA_ENDPOINT_ID__|${{ secrets.RUNPOD_MEDIA_ENDPOINT_ID }}|g" /tmp/deploy.sh
-          sed -i "s|__RUNPOD_TORA_ENDPOINT_ID__|${{ secrets.RUNPOD_TORA_ENDPOINT_ID }}|g" /tmp/deploy.sh
+          sed -i "s|__NEO4J_URI__|$NEO4J_URI_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__NEO4J_USERNAME__|$NEO4J_USERNAME_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__NEO4J_PASSWORD__|$NEO4J_PASSWORD_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__NEO4J_DATABASE__|$NEO4J_DATABASE_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__GROQ_API_KEY__|$GROQ_API_KEY_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__RUNPOD_API_KEY__|$RUNPOD_API_KEY_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__RUNPOD_ENDPOINT_ID__|$RUNPOD_ENDPOINT_ID_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__RUNPOD_MEDIA_ENDPOINT_ID__|$RUNPOD_MEDIA_ENDPOINT_ID_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__RUNPOD_TORA_ENDPOINT_ID__|$RUNPOD_TORA_ENDPOINT_ID_ESCAPED|g" /tmp/deploy.sh
           sed -i "s|__CLOUDINARY_URL__|$CLOUDINARY_URL_ESCAPED|g" /tmp/deploy.sh
           sed -i "s|__CLOUDINARY_CLOUD_NAME__|$CLOUDINARY_CLOUD_NAME_ESCAPED|g" /tmp/deploy.sh
           sed -i "s|__CLOUDINARY_API_KEY__|$CLOUDINARY_API_KEY_ESCAPED|g" /tmp/deploy.sh
           sed -i "s|__CLOUDINARY_API_SECRET__|$CLOUDINARY_API_SECRET_ESCAPED|g" /tmp/deploy.sh
-          sed -i "s|__GCP_PROJECT_ID__|${{ secrets.GCP_PROJECT_ID }}|g" /tmp/deploy.sh
-          sed -i "s|__SLACK_WEBHOOK_URL__|${{ secrets.SLACK_WEBHOOK_URL }}|g" /tmp/deploy.sh
-          sed -i "s|__SLACK_BOT_TOKEN__|${{ secrets.SLACK_BOT_TOKEN }}|g" /tmp/deploy.sh
-          sed -i "s|__SLACK_CHANNEL_ID__|${{ secrets.SLACK_CHANNEL_ID }}|g" /tmp/deploy.sh
-          sed -i "s|__GOOGLE_CLIENT_ID__|${{ secrets.GOOGLE_CLIENT_ID }}|g" /tmp/deploy.sh
-          sed -i "s|__GOOGLE_CLIENT_SECRET__|${{ secrets.GOOGLE_CLIENT_SECRET }}|g" /tmp/deploy.sh
-          sed -i "s|__GOOGLE_REDIRECT_URI__|${{ secrets.GOOGLE_REDIRECT_URI }}|g" /tmp/deploy.sh
-          sed -i "s|__SUPABASE_URL__|${{ secrets.SUPABASE_URL }}|g" /tmp/deploy.sh
-          sed -i "s|__SUPABASE_KEY__|${{ secrets.SUPABASE_KEY }}|g" /tmp/deploy.sh
+          sed -i "s|__GCP_PROJECT_ID__|$GCP_PROJECT_ID_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__SLACK_WEBHOOK_URL__|$SLACK_WEBHOOK_URL_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__SLACK_BOT_TOKEN__|$SLACK_BOT_TOKEN_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__SLACK_CHANNEL_ID__|$SLACK_CHANNEL_ID_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__GOOGLE_CLIENT_ID__|$GOOGLE_CLIENT_ID_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__GOOGLE_CLIENT_SECRET__|$GOOGLE_CLIENT_SECRET_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__GOOGLE_REDIRECT_URI__|$GOOGLE_REDIRECT_URI_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__SUPABASE_URL__|$SUPABASE_URL_ESCAPED|g" /tmp/deploy.sh
+          sed -i "s|__SUPABASE_KEY__|$SUPABASE_KEY_ESCAPED|g" /tmp/deploy.sh
           sed -i "s|__DEPLOY_BACKEND__|${{ steps.changes.outputs.backend }}|g" /tmp/deploy.sh
           sed -i "s|__DEPLOY_FRONTEND__|${{ steps.changes.outputs.frontend }}|g" /tmp/deploy.sh
           sed -i "s|__DEPLOY_FASTAPI__|${{ steps.changes.outputs.fastapi }}|g" /tmp/deploy.sh
