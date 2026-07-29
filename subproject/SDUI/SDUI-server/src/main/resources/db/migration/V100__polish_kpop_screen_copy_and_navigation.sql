@@ -20,6 +20,12 @@ SET is_visible = 'false'
 WHERE screen_id IN ('KPOP_AI_FIND', 'KPOP_AI_RESULT')
   AND component_id IN ('kpop_ai_find_title', 'kpop_ai_result_title');
 
+DELETE FROM ui_metadata 
+WHERE screen_id = 'KPOP_ARTIST_DETAIL' AND component_id IN ('kpop_artist_detail_title', 'kpop_artist_detail_back');
+
+DELETE FROM ui_metadata 
+WHERE screen_id = 'KPOP_EVENT_DETAIL' AND component_id IN ('kpop_event_detail_title', 'kpop_event_detail_back');
+
 INSERT INTO ui_metadata (
     screen_id, component_id, component_type, label_text, sort_order,
     ref_data_id, parent_group_id, group_direction, css_class,
@@ -37,16 +43,7 @@ VALUES
  NULL, NULL, NULL, true, 'true', '{}'),
 ('KPOP_EVENT_DETAIL', 'kpop_event_detail_back', 'BUTTON', '이벤트 목록으로 돌아가기', 4,
  NULL, 'kpop_event_detail_root', NULL, 'kpop-back-btn',
- 'ROUTE', '/view/KPOP_EVENTS', NULL, false, 'true', '{}')
-ON CONFLICT (screen_id, component_id) DO UPDATE SET
-    label_text = EXCLUDED.label_text,
-    sort_order = EXCLUDED.sort_order,
-    parent_group_id = EXCLUDED.parent_group_id,
-    css_class = EXCLUDED.css_class,
-    action_type = EXCLUDED.action_type,
-    action_url = EXCLUDED.action_url,
-    is_readonly = EXCLUDED.is_readonly,
-    is_visible = EXCLUDED.is_visible;
+ 'ROUTE', '/view/KPOP_EVENTS', NULL, false, 'true', '{}');
 
 UPDATE ui_metadata
 SET sort_order = 3
