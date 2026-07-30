@@ -105,6 +105,43 @@ describe('K-POP internal SDUI cards', () => {
         expect(screen.getByRole('link', { name: 'BTS X (새 창)' })).toHaveAttribute('href', 'https://x.com/BTS_twt');
     });
 
+    it('binds the repeater row when the leaf shares its refDataId and formData mirrors pageData', () => {
+        // KPOP_ARTIST_DETAIL 실제 메타데이터: 루트 GROUP과 카드가 모두 ref_data_id='artist' 이고,
+        // useBaseActions가 pageData를 formData로 복사하므로 formData.artist는 "배열"이 된다.
+        const artist = {
+            id: 9,
+            slug: 'aespa',
+            nameKo: 'aespa',
+            profile: '가상 세계관 콘셉트로 전시·팝업 연계 일정이 많은 그룹입니다.',
+            instagramUrl: 'https://www.instagram.com/aespa_official/',
+        };
+
+        renderWithProviders(
+            <DynamicEngine
+                metadata={[{
+                    componentId: 'kpop_artist_detail_root',
+                    componentType: 'GROUP',
+                    refDataId: 'artist',
+                    cssClass: 'kpop-screen',
+                    children: [{
+                        componentId: 'kpop_artist_detail',
+                        componentType: 'ARTIST_CARD',
+                        refDataId: 'artist',
+                    }],
+                }]}
+                screenId="KPOP_ARTIST_DETAIL"
+                pageData={{ artist: [artist] }}
+                formData={{ artist: [artist] }}
+                onChange={jest.fn()}
+                onAction={jest.fn()}
+            />,
+        );
+
+        expect(screen.getByRole('heading', { name: 'aespa' })).toBeInTheDocument();
+        expect(screen.getByText(artist.profile)).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'aespa Instagram (새 창)' })).toBeInTheDocument();
+    });
+
     it('shows the artist summary and labelled brand links on the detail card', () => {
         const { container } = renderWithProviders(
             <KpopArtistCard
