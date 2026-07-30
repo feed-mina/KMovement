@@ -15,10 +15,6 @@ on:
       - "dataset/models/route_graph.pkl"
       - "chroma_db/**"
       - ".dockerignore"
-      # 이 워크플로 자신의 변경도 배포를 트리거해야 한다. 아래 "Detect changed
-      # paths"는 이미 이 경로를 전체 재배포로 처리하지만, paths 필터에 없으면
-      # 워크플로가 시작조차 하지 않아 워크플로 수정본이 영영 실행되지 않는다.
-      - ".github/workflows/deploy-ec2.yml"
   workflow_dispatch:
     inputs:
       cleanup_logs_and_caches:
@@ -874,7 +870,7 @@ jobs:
       # 배포 스크립트의 fail-closed 가드가 진단과 함께 최종 판정한다.
       # workflow_dispatch 에서 cleanup_logs_and_caches=true 면 이 단계에서 즉시
       # 실패시켜 원인을 배포 전에 드러낸다.
-      - name: Reclaim safe logs and caches before container recreation
+      - name: Clean approved logs and caches before container recreation
         if: steps.changes.outputs.backend == 'true' || steps.changes.outputs.fastapi == 'true' || steps.changes.outputs.frontend == 'true'
         shell: bash
         env:
@@ -946,7 +942,6 @@ jobs:
           # 4. Docker build cache 와 dangling image. 태그된 이미지와 named
           #    volume 은 대상이 아니다.
           docker builder prune -af || true
-          docker image prune -f || true
 
           sync
           report_space "after"

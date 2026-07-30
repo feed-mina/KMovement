@@ -11,8 +11,7 @@ WHERE sql_key = 'kpop_artist_detail';
 
 UPDATE ui_metadata
 SET data_sql_key = NULL,
-    data_api_url = '/api/v1/kpop/events',
-    updated_at = NOW()
+    data_api_url = '/api/v1/kpop/events'
 WHERE screen_id = 'KPOP_EVENTS'
   AND component_id = 'kpop_events_grid';
 

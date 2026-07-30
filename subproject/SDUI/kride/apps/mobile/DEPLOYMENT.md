@@ -159,7 +159,8 @@ eas build:list `
 - `finished`이면 기존 artifact와 build ID를 재사용합니다.
 - `errored` 또는 `canceled`이면 실패 원인을 수정하고 이전 build ID를
   이슈/PR에 기록한 뒤 한 작업자만 재시도합니다.
-- 가드가 `pnpm run eas:build:preview` 직전에 같은 조회를 자동으로 다시 실행하므로,
+- 실제 `pnpm run eas:build:preview` 직전에 같은 조회를 다시 실행하며,
+  가드가 이를 자동으로 수행하므로,
   조회와 시작 사이에 생긴 중복 요청도 차단됩니다.
 - 의도적으로 중복 빌드가 필요하면 `node scripts/guard-eas-build.mjs preview --allow-duplicate`
   로 이유를 남기고 우회합니다.
