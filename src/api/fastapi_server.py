@@ -28,6 +28,7 @@ import os
 import pickle
 import hmac
 import re
+import time
 from typing import Literal, Optional
 import httpx
 
@@ -229,6 +230,14 @@ def nearest_node(graph: nx.Graph, lat: float, lon: float) -> tuple:
 
 
 _GEOCODE_CACHE: dict[str, dict | None] = {}
+# Nominatim 이용 정책상 초당 1회를 넘기면 안 되므로 호출 자체에서 간격을 강제한다.
+# 캐시 적중은 네트워크를 타지 않으므로 대기하지 않는다.
+_GEOCODE_MIN_INTERVAL_SEC = 1.1
+_GEOCODE_LOCK = asyncio.Lock()
+_geocode_last_request_at = 0.0
+# 한 요청에서 지오코딩을 시도할 장소 수 상한. 간격 강제 때문에 장소 하나당 약 1초가
+# 추가되므로, 비정상적으로 긴 일정이 응답 시간을 끌지 않도록 제한한다.
+GEOCODE_BUDGET_PER_REQUEST = max(0, int(os.getenv("ITINERARY_GEOCODE_BUDGET", "8")))
 _LAT_KEYS = ("lat", "latitude", "mapy", "y")
 _LNG_KEYS = ("lng", "lon", "longitude", "mapx", "x")
 
@@ -309,6 +318,7 @@ def _marker(place: dict, coord: dict, source: str) -> dict:
 
 async def geocode_address(address: str) -> dict | None:
     """Nominatim으로 한국 주소/장소 검색어를 lat/lng로 변환한다."""
+    global _geocode_last_request_at
     query = " ".join(str(address or "").split())
     if not query:
         return None
@@ -317,14 +327,25 @@ async def geocode_address(address: str) -> dict | None:
     url = "https://nominatim.openstreetmap.org/search"
     params = {"q": query, "format": "json", "limit": 1, "countrycodes": "kr"}
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.get(url, params=params, headers={"User-Agent": "KRide/1.0"})
-            resp.raise_for_status()
-            data = resp.json()
+        async with _GEOCODE_LOCK:
+            # 락을 기다리는 동안 다른 호출이 같은 질의를 채웠을 수 있다.
+            if query in _GEOCODE_CACHE:
+                return _GEOCODE_CACHE[query]
+            wait = _GEOCODE_MIN_INTERVAL_SEC - (time.monotonic() - _geocode_last_request_at)
+            if wait > 0:
+                await asyncio.sleep(wait)
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                resp = await client.get(url, params=params, headers={"User-Agent": "KRide/1.0"})
+                _geocode_last_request_at = time.monotonic()
+                resp.raise_for_status()
+                data = resp.json()
             if data:
                 coord = extract_coordinates(data[0])
                 _GEOCODE_CACHE[query] = coord
                 return coord
+            # 조회는 성공했는데 결과가 없는 경우다. 같은 요청 안에서 반복 조회하지 않도록
+            # 실패도 기억한다. 예외(일시적 장애)는 캐시하지 않는다.
+            _GEOCODE_CACHE[query] = None
     except Exception as exc:
         logger.warning("itinerary_geocode_error query=%r error=%s", query, exc)
     return None
@@ -343,7 +364,9 @@ async def resolve_itinerary_markers(itinerary: list, source_pois: list, regions:
     used_source_ids: set[str] = set()
     marker_keys: set[str] = set()
     resolved_itinerary_count = 0
-    should_geocode = not source_markers
+    # 좌표를 가진 source POI가 하나라도 있으면 지오코딩을 통째로 건너뛰던 동작 때문에,
+    # 이름이 매칭되지 않은 장소가 곧바로 미해석 처리됐다. 이제 장소별로 판단한다.
+    geocode_budget = GEOCODE_BUDGET_PER_REQUEST
 
     def append_marker(value: dict) -> None:
         key = value.get("id") or f"{_normalize_place_key(value.get('name'))}:{value.get('lat')}:{value.get('lng')}"
@@ -361,21 +384,27 @@ async def resolve_itinerary_markers(itinerary: list, source_pois: list, regions:
             coord = extract_coordinates(matched_poi)
             coordinate_source = "poi"
 
-        if coord is None and should_geocode:
+        geocode_query = ""
+        geocode_attempted = False
+        if coord is None:
             address = str(place.get("address") or "").strip()
-            query = address or " ".join([_place_name(place), *(regions or [])]).strip()
-            coord = await geocode_address(query)
-            coordinate_source = "geocode"
-            if query:
-                await asyncio.sleep(1.1)
+            geocode_query = address or " ".join([_place_name(place), *(regions or [])]).strip()
+            if geocode_query and geocode_budget > 0:
+                geocode_budget -= 1
+                geocode_attempted = True
+                coord = await geocode_address(geocode_query)
+                coordinate_source = "geocode"
 
         if coord is None:
-            reason = "missing_address" if not place.get("address") else "geocode_failed"
+            # 일정 장소는 이름이 있어야 수집되므로 질의는 항상 만들어진다.
+            # 따라서 남은 실패 경로는 "지오코딩 실패"와 "예산 소진" 둘뿐이다.
+            reason = "geocode_failed" if geocode_attempted else "geocode_budget_exhausted"
             unresolved.append({
                 "id": _place_id(place) or None,
                 "name": _place_name(place),
                 "address": place.get("address") or "",
                 "reason": reason,
+                "geocodeQuery": geocode_query,
             })
             continue
 
