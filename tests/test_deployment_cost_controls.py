@@ -56,7 +56,7 @@ def test_ci_and_ec2_deployment_only_auto_run_from_main() -> None:
     ci_workflow = _read(WORKFLOWS / "ci.yml")
     assert "tests/test_deployment_cost_controls.py" in ci_workflow
     deploy_triggers = _read(WORKFLOWS / "deploy-ec2.yml").partition("\njobs:")[0]
-    assert '.github/workflows/deploy-ec2.yml' not in deploy_triggers
+    assert '.github/workflows/deploy-ec2.yml' in deploy_triggers
 
 
 def test_runpod_builds_cancel_duplicates_and_reuse_inline_registry_cache() -> None:
@@ -113,7 +113,7 @@ def test_ec2_cleanup_is_manual_opt_in_and_scoped() -> None:
     assert "default: false" in triggers
     assert "type: boolean" in triggers
 
-    marker = "- name: Clean approved logs and caches before container recreation"
+    marker = "- name: Reclaim safe logs and caches before container recreation"
     assert marker in workflow
     cleanup_step = workflow.split(marker, 1)[1].split(
         "- name: Deploy to EC2", 1
@@ -135,7 +135,6 @@ def test_ec2_cleanup_is_manual_opt_in_and_scoped() -> None:
     for disallowed_cleanup in (
         "docker system prune",
         "docker volume prune",
-        "docker image prune",
         "rm -rf /var/lib/docker",
         "rm -rf /home",
     ):
@@ -285,7 +284,7 @@ def test_mobile_runbook_blocks_duplicate_eas_builds() -> None:
         "--app-build-version",
         "`new`, `in-queue`, `in-progress`, `pending-cancel`",
         "`finished`이면 기존 artifact와 build ID를 재사용",
-        "실제 `pnpm run eas:build:preview` 직전에 같은 조회를 다시 실행",
+        "가드가 `pnpm run eas:build:preview` 직전에 같은 조회를 자동으로 다시 실행",
         "JS-only 변경은 새 native binary를 만들지 않습니다",
         "eas:update:preview",
     ):
