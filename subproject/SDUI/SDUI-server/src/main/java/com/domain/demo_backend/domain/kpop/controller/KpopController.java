@@ -70,7 +70,8 @@ public class KpopController {
     ) {
         String sql = """
                 SELECT artist_id AS id, slug, name_ko AS "nameKo", name_en AS "nameEn",
-                       profile, image_url AS "imageUrl", official_url AS "officialUrl"
+                       profile, image_url AS "imageUrl", official_url AS "officialUrl",
+                       instagram_url AS "instagramUrl", youtube_url AS "youtubeUrl", x_url AS "xUrl"
                 FROM artist
                 WHERE approved_yn = 'Y'
                   AND (:q IS NULL OR name_ko ILIKE CONCAT('%', :q, '%') OR name_en ILIKE CONCAT('%', :q, '%'))
@@ -87,35 +88,36 @@ public class KpopController {
         return ResponseEntity.ok(ApiResponse.success(rows));
     }
 
-    @GetMapping("/artists/{artistId}")
-        public ResponseEntity<ApiResponse<Map<String, Object>>> artist(@PathVariable String artistId) {
+                @GetMapping("/artists/{artistId}")
+                public ResponseEntity<ApiResponse<Map<String, Object>>> artist(@PathVariable String artistId) {
         Map<String, Object> artist = cachedCatalog(
                 "artist_detail",
-                                Map.of("artistRef", artistId),
+                                                                Map.of("artistRef", artistId),
                 Duration.ofMinutes(5),
                 new TypeReference<Map<String, Object>>() {},
                 () -> {
                     Map<String, Object> loaded = new LinkedHashMap<>(one("""
                             SELECT artist_id AS id, slug, name_ko AS "nameKo", name_en AS "nameEn",
-                                   profile, image_url AS "imageUrl", official_url AS "officialUrl"
+                                                                                                                                         profile, image_url AS "imageUrl", official_url AS "officialUrl",
+                                                                                                                                         instagram_url AS "instagramUrl", youtube_url AS "youtubeUrl", x_url AS "xUrl"
                             FROM artist
-                                                        WHERE approved_yn = 'Y'
-                                                          AND (
-                                                                  slug = :artistRef
+                                                                                                                WHERE approved_yn = 'Y'
+                                                                                                                        AND (
+                                                                                                                                        slug = :artistRef
                                                                                                                                         OR CASE
                                                                                                                                                         WHEN :artistRef ~ '^[0-9]+$' THEN artist_id = CAST(:artistRef AS BIGINT)
                                                                                                                                                         ELSE FALSE
                                                                                                                                         END
-                                                          )
-                                                        """, params("artistRef", artistId)));
-                                                                                                                            Long resolvedArtistId = ((Number) loaded.get("id")).longValue();
+                                                                                                                        )
+                                                                                                                """, params("artistRef", artistId)));
+                                                                                Long resolvedArtistId = ((Number) loaded.get("id")).longValue();
                     loaded.put("events", jdbcTemplate.queryForList("""
                             SELECT event_id AS id, artist_id AS "artistId", title_ko AS "titleKo", title_en AS "titleEn",
                                    region, venue, event_date AS date, official_url AS "officialUrl"
                             FROM event
-                                                                                                                                    WHERE artist_id = :artistId AND approved_yn = 'Y'
+                                                                                                                WHERE artist_id = :artistId AND approved_yn = 'Y'
                             ORDER BY event_date ASC
-                                                                                                                                    """, params("artistId", resolvedArtistId)));
+                                                                                                                """, params("artistId", resolvedArtistId)));
                     return loaded;
                 }
         );

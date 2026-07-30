@@ -2,7 +2,7 @@
 -- and KPOP_AI_FIND exposes the direct product search panel in the screen metadata.
 
 UPDATE query_master
-SET query_text = 'SELECT artist_id AS id, slug, name_ko AS "nameKo", name_en AS "nameEn", profile, image_url AS "imageUrl", official_url AS "officialUrl" FROM artist WHERE approved_yn = ''Y'' AND (slug = :contentId OR CASE WHEN :contentId ~ ''^[0-9]+$'' THEN artist_id = CAST(:contentId AS BIGINT) ELSE FALSE END)',
+SET query_text = 'SELECT artist_id AS id, slug, name_ko AS "nameKo", name_en AS "nameEn", profile, image_url AS "imageUrl", official_url AS "officialUrl", instagram_url AS "instagramUrl", youtube_url AS "youtubeUrl", x_url AS "xUrl" FROM artist WHERE approved_yn = ''Y'' AND (slug = :contentId OR CASE WHEN :contentId ~ ''^[0-9]+$'' THEN artist_id = CAST(:contentId AS BIGINT) ELSE FALSE END)',
     return_type = 'MULTI',
     required_params = '["contentId"]',
     param_mapping = '{"contentId":"string"}',

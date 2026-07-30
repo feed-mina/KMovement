@@ -82,6 +82,29 @@ describe('K-POP internal SDUI cards', () => {
         expect(screen.getByRole('button', { name: '팔로우' })).toBeInTheDocument();
     });
 
+    it('renders official and SNS links only when valid https URLs exist', () => {
+        renderWithProviders(
+            <KpopArtistCard
+                data={{
+                    id: 7,
+                    nameKo: 'BTS',
+                    officialUrl: 'https://ibighit.com/bts',
+                    instagramUrl: 'https://www.instagram.com/bts.bighitofficial/',
+                    youtubeUrl: 'https://www.youtube.com/@BTS',
+                    xUrl: 'https://x.com/BTS_twt',
+                    profile: '서울 팬 여행',
+                }}
+                meta={{ componentId: 'kpop_artist_card' }}
+                onAction={jest.fn()}
+            />,
+        );
+
+        expect(screen.getByRole('link', { name: 'BTS 공식 (새 창)' })).toHaveAttribute('href', 'https://ibighit.com/bts');
+        expect(screen.getByRole('link', { name: 'BTS Instagram (새 창)' })).toHaveAttribute('href', 'https://www.instagram.com/bts.bighitofficial/');
+        expect(screen.getByRole('link', { name: 'BTS YouTube (새 창)' })).toHaveAttribute('href', 'https://www.youtube.com/@BTS');
+        expect(screen.getByRole('link', { name: 'BTS X (새 창)' })).toHaveAttribute('href', 'https://x.com/BTS_twt');
+    });
+
     it('uploads a consented image and routes the AI job result internally', async () => {
         const onAction = jest.fn();
         const fetchMock = jest.spyOn(global, 'fetch')

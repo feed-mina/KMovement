@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Stub engine/SDUI dependencies — rendering logic is covered elsewhere
@@ -9,10 +9,12 @@ jest.mock("@kride/core", () => ({
     if (screenId !== "KPOP_EXPLORE") return { data: {}, isLoading: false, error: null };
     return {
       data: {
-        artists: [
-          { id: 1, nameKo: "BTS", nameEn: "BTS", imageUrl: "" },
-          { id: 2, nameKo: "BLACKPINK", nameEn: "BLACKPINK", imageUrl: "" },
-        ],
+        artists: Array.from({ length: 9 }, (_, index) => ({
+          id: index + 1,
+          nameKo: `ARTIST ${index + 1}`,
+          nameEn: `ARTIST ${index + 1}`,
+          imageUrl: "",
+        })),
         events: [
           { id: 10, titleKo: "서울 팬 이벤트", region: "서울", date: "2026-08-15" },
         ],
@@ -66,11 +68,15 @@ describe("KpopExplorePage 통합 테스트", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("dynamic-engine")).toBeInTheDocument();
-      expect(screen.getAllByTestId("artist-item").length).toBeGreaterThan(0);
+      expect(screen.getAllByTestId("artist-item").length).toBe(8);
     });
 
-    expect(screen.getByText("BTS")).toBeInTheDocument();
-    expect(screen.getByText("BLACKPINK")).toBeInTheDocument();
+    expect(screen.getByText("ARTIST 1")).toBeInTheDocument();
+    expect(screen.getByText("ARTIST 8")).toBeInTheDocument();
+    expect(screen.queryByText("ARTIST 9")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    await waitFor(() => expect(screen.getByText("ARTIST 9")).toBeInTheDocument());
   });
 
   it("KPOP_EXPLORE 화면이 이벤트 목록을 렌더링한다", async () => {

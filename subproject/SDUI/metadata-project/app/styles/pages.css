@@ -4494,6 +4494,31 @@ button:hover {
     gap: 8px;
 }
 
+.kpop-social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.kpop-social-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 6px 12px;
+    border: 1px solid rgba(253, 164, 175, 0.45);
+    border-radius: 999px;
+    color: #fecdd3;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.kpop-social-links a:hover,
+.kpop-social-links a:focus-visible {
+    border-color: #fda4af;
+    color: #ffffff;
+}
+
 .kpop-card-actions button,
 .kpop-primary-btn {
     width: fit-content;

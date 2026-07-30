@@ -29,10 +29,11 @@ services:
 
   # 머신러닝 추론 서버
   ml_server:
-    build: ./ml-server
+    build: ./subproject/ml-server
     container_name: kride_ml
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
     volumes:
-      - .:/app
+      - ./subproject/ml-server:/app
       - ./data:/app/data  # 데이터셋 폴더 연결
     ports:
       - "8000:8000"

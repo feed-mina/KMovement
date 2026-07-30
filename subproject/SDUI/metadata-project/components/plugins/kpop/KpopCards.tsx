@@ -8,6 +8,12 @@ type CardProps = {
     onAction?: (meta: Record<string, any>, data?: Record<string, any>) => void;
 };
 
+type SocialLink = {
+    key: 'official' | 'instagram' | 'youtube' | 'x';
+    label: string;
+    href: string;
+};
+
 const artistName = (data?: Record<string, any>) =>
     data?.nameKo || data?.name_ko || data?.nameEn || data?.name || 'K-POP';
 
@@ -20,6 +26,30 @@ async function updateSavedState(url: string, method: 'POST' | 'DELETE') {
     if (!response.ok) throw new Error(String(response.status));
 }
 
+function isValidHttpsUrl(url: unknown) {
+    if (!url) return false;
+    try {
+        return new URL(String(url)).protocol === 'https:';
+    } catch {
+        return false;
+    }
+}
+
+function socialLinks(data?: Record<string, any>): SocialLink[] {
+    const links: SocialLink[] = [];
+    const officialUrl = data?.officialUrl || data?.official_url;
+    const instagramUrl = data?.instagramUrl || data?.instagram_url;
+    const youtubeUrl = data?.youtubeUrl || data?.youtube_url;
+    const xUrl = data?.xUrl || data?.x_url;
+
+    if (isValidHttpsUrl(officialUrl)) links.push({ key: 'official', label: '공식', href: String(officialUrl) });
+    if (isValidHttpsUrl(instagramUrl)) links.push({ key: 'instagram', label: 'Instagram', href: String(instagramUrl) });
+    if (isValidHttpsUrl(youtubeUrl)) links.push({ key: 'youtube', label: 'YouTube', href: String(youtubeUrl) });
+    if (isValidHttpsUrl(xUrl)) links.push({ key: 'x', label: 'X', href: String(xUrl) });
+
+    return links;
+}
+
 export function KpopArtistCard({ data, meta, onAction }: CardProps) {
     const titleId = useId();
     const [followed, setFollowed] = useState(Boolean(data?.followed));
@@ -27,6 +57,7 @@ export function KpopArtistCard({ data, meta, onAction }: CardProps) {
     const [status, setStatus] = useState('');
     const name = artistName(data);
     const imageUrl = data?.imageUrl || data?.image_url;
+    const links = socialLinks(data);
     const isDetail = String(meta?.componentId || '').includes('_detail');
 
     const toggleFollow = async () => {
@@ -56,6 +87,15 @@ export function KpopArtistCard({ data, meta, onAction }: CardProps) {
                 <span className="kpop-eyebrow">ARTIST</span>
                 <h3 id={titleId}>{name}</h3>
                 <p>{data?.profile || '이벤트와 팬 여행 정보를 확인해 보세요.'}</p>
+                {links.length > 0 && (
+                    <div className="kpop-social-links" aria-label={`${name} 공식 및 SNS 링크`}>
+                        {links.map((link) => (
+                            <a key={link.key} href={link.href} target="_blank" rel="noreferrer" aria-label={`${name} ${link.label} (새 창)`}>
+                                {link.label}
+                            </a>
+                        ))}
+                    </div>
+                )}
                 <div className="kpop-card-actions">
                     {!isDetail && (
                         <button
@@ -63,7 +103,7 @@ export function KpopArtistCard({ data, meta, onAction }: CardProps) {
                             onClick={() => onAction?.({
                                 ...meta,
                                 actionType: 'ROUTE',
-                                actionUrl: `/view/KPOP_ARTIST_DETAIL/${data?.id}`,
+                                actionUrl: `/view/KPOP_ARTIST_DETAIL/${encodeURIComponent(String(data?.slug || data?.id || ''))}`,
                             }, data)}
                         >
                             상세 보기
