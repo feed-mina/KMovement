@@ -88,10 +88,10 @@ public class KpopController {
     }
 
     @GetMapping("/artists/{artistId}")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> artist(@PathVariable Long artistId) {
+        public ResponseEntity<ApiResponse<Map<String, Object>>> artist(@PathVariable String artistId) {
         Map<String, Object> artist = cachedCatalog(
                 "artist_detail",
-                Map.of("artistId", artistId),
+                                Map.of("artistRef", artistId),
                 Duration.ofMinutes(5),
                 new TypeReference<Map<String, Object>>() {},
                 () -> {
@@ -99,15 +99,23 @@ public class KpopController {
                             SELECT artist_id AS id, slug, name_ko AS "nameKo", name_en AS "nameEn",
                                    profile, image_url AS "imageUrl", official_url AS "officialUrl"
                             FROM artist
-                            WHERE artist_id = :artistId AND approved_yn = 'Y'
-                            """, params("artistId", artistId)));
+                                                        WHERE approved_yn = 'Y'
+                                                          AND (
+                                                                  slug = :artistRef
+                                                                                                                                        OR CASE
+                                                                                                                                                        WHEN :artistRef ~ '^[0-9]+$' THEN artist_id = CAST(:artistRef AS BIGINT)
+                                                                                                                                                        ELSE FALSE
+                                                                                                                                        END
+                                                          )
+                                                        """, params("artistRef", artistId)));
+                                                                                                                            Long resolvedArtistId = ((Number) loaded.get("id")).longValue();
                     loaded.put("events", jdbcTemplate.queryForList("""
                             SELECT event_id AS id, artist_id AS "artistId", title_ko AS "titleKo", title_en AS "titleEn",
                                    region, venue, event_date AS date, official_url AS "officialUrl"
                             FROM event
-                            WHERE artist_id = :artistId AND approved_yn = 'Y'
+                                                                                                                                    WHERE artist_id = :artistId AND approved_yn = 'Y'
                             ORDER BY event_date ASC
-                            """, params("artistId", artistId)));
+                                                                                                                                    """, params("artistId", resolvedArtistId)));
                     return loaded;
                 }
         );
@@ -118,7 +126,8 @@ public class KpopController {
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> events(
             @RequestParam(name = "region", required = false) String region,
             @RequestParam(name = "from", required = false) String from,
-            @RequestParam(name = "to", required = false) String to
+            @RequestParam(name = "to", required = false) String to,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
         String sql = """
                 SELECT e.event_id AS id, e.artist_id AS "artistId", a.name_ko AS "artistNameKo",
@@ -126,20 +135,26 @@ public class KpopController {
                        e.event_date AS date, e.official_url AS "officialUrl"
                 FROM event e
                 JOIN artist a ON a.artist_id = e.artist_id
+                LEFT JOIN artist_follow af
+                  ON af.artist_id = e.artist_id
+                 AND af.user_sqno = :userSqno
                 WHERE e.approved_yn = 'Y'
                   AND (:region IS NULL OR e.region = :region)
                   AND (:fromDate IS NULL OR e.event_date >= CAST(:fromDate AS date))
                   AND (:toDate IS NULL OR e.event_date <= CAST(:toDate AS date))
+                  AND (:userSqno IS NULL OR af.artist_id IS NOT NULL)
                 ORDER BY e.event_date ASC, e.event_id ASC
                 """;
         MapSqlParameterSource p = new MapSqlParameterSource()
                 .addValue("region", blankToNull(region))
                 .addValue("fromDate", blankToNull(from))
-                .addValue("toDate", blankToNull(to));
+                .addValue("toDate", blankToNull(to))
+                .addValue("userSqno", user == null ? null : user.getUserSqno());
         Map<String, Object> keyParts = new LinkedHashMap<>();
         keyParts.put("region", blankToNull(region));
         keyParts.put("from", blankToNull(from));
         keyParts.put("to", blankToNull(to));
+        keyParts.put("userSqno", user == null ? null : user.getUserSqno());
         return ResponseEntity.ok(ApiResponse.success(cachedCatalog(
                 "events", keyParts, Duration.ofMinutes(3),
                 new TypeReference<List<Map<String, Object>>>() {},

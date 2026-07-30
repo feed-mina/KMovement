@@ -25,7 +25,7 @@ describe('K-POP internal SDUI cards', () => {
                     children: [{ componentId: 'artist-card', componentType: 'ARTIST_CARD' }],
                 }]}
                 screenId="KPOP_EXPLORE"
-                pageData={{ artists: [{ id: 7, nameKo: 'BTS', profile: '서울 팬 여행' }] }}
+                pageData={{ artists: [{ id: 7, slug: 'BTS', nameKo: 'BTS', profile: '서울 팬 여행' }] }}
                 formData={{}}
                 onChange={jest.fn()}
                 onAction={onAction}
@@ -37,7 +37,7 @@ describe('K-POP internal SDUI cards', () => {
         expect(onAction).toHaveBeenCalledWith(
             expect.objectContaining({
                 actionType: 'ROUTE',
-                actionUrl: '/view/KPOP_ARTIST_DETAIL/7',
+                actionUrl: '/view/KPOP_ARTIST_DETAIL/BTS',
             }),
             expect.objectContaining({ id: 7 }),
         );
@@ -188,6 +188,37 @@ describe('K-POP internal SDUI cards', () => {
         expect(screen.getByRole('heading', { name: '직접 상품 후보 검색' })).toBeInTheDocument();
         expect(screen.getByRole('searchbox', { name: '상품명 또는 브랜드' })).toBeInTheDocument();
         expect(fetchMock).toHaveBeenCalledTimes(1);
+        fetchMock.mockRestore();
+    });
+
+    it('renders the direct product search panel on the AI find screen', async () => {
+        const fetchMock = jest.spyOn(global, 'fetch')
+            .mockResolvedValueOnce(new Response(JSON.stringify({ data: [] }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            }))
+            .mockResolvedValueOnce(new Response(JSON.stringify({ data: [] }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            }));
+
+        renderWithProviders(
+            <DynamicEngine
+                metadata={[
+                    { componentId: 'ai-upload', componentType: 'UPLOAD_CONSENT' },
+                    { componentId: 'ai-product-search', componentType: 'PRODUCT_SEARCH' },
+                ]}
+                screenId="KPOP_AI_FIND"
+                pageData={{}}
+                formData={{}}
+                onChange={jest.fn()}
+                onAction={jest.fn()}
+            />,
+        );
+
+        expect(await screen.findByRole('searchbox', { name: '상품명 또는 브랜드' })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: '상품 후보 검색' })).toBeInTheDocument();
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         fetchMock.mockRestore();
     });
 });

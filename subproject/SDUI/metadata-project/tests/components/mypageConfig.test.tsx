@@ -207,9 +207,16 @@ describe("MY_PAGE SDUI config helpers", () => {
             contentId: null,
         };
 
-        expect(buildExecuteParams("kpop_artist_cards", {}, context)).toEqual({});
+        expect(buildExecuteParams("kpop_artist_cards", {}, context)).toEqual({
+            pageSize: 5,
+            offset: 0,
+        });
         expect(buildExecuteParams("kpop_artist_detail", {}, { ...context, contentId: 7 })).toEqual({
             contentId: 7,
+        });
+        expect(buildExecuteParams("kpop_artist_cards", {}, { ...context, pageSize: 8, offset: 16 })).toEqual({
+            pageSize: 8,
+            offset: 16,
         });
     });
 

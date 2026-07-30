@@ -36,6 +36,13 @@ export function buildExecuteParams(
     },
 ): Record<string, unknown> {
     if (sqlKey.startsWith('kpop_')) {
+        if (sqlKey === 'kpop_artist_cards') {
+            return {
+                ...parsedParams,
+                pageSize: context.pageSize,
+                offset: context.offset,
+            };
+        }
         return sqlKey.endsWith('_detail') && context.contentId != null
             ? { ...parsedParams, contentId: context.contentId }
             : { ...parsedParams };
@@ -65,7 +72,8 @@ export const usePageMetadata = (
     currentPage: number,
     isOnlyMine: boolean,
     refId: string | number | null,
-    showPassword?: boolean
+    showPassword?: boolean,
+    pageSizeOverride = 5,
 ) => {
     const router = useRouter();
     const { user, isLoggedIn } = useAuth();
@@ -117,7 +125,7 @@ export const usePageMetadata = (
         loadMetadata();
     }, [screenId, providerScreenId, menuTree]); // 의존성 배열에 인자로 받은 screenId 추가
 
-    const pageSize = 5;
+    const pageSize = pageSizeOverride;
 
     // ** 로직2: 필터링된 메타데이터 생성 : 재귀탐색 함수를 통해 트리구조를 분석한다.
     // filteredMetadata : 필터링된 메타데이터
@@ -335,10 +343,11 @@ export const usePageMetadata = (
 
                             combinedData[res.id] = unifiedList;
 
-                            // 페이징 카운트 로직 유지- 위에서 formattedDate 초기화 값 0
-                            if (res.id === "content_list_source" || res.id === "content_total_count") {
-                                detectedTotalCount = rawResponse.total || rawResponse.totalCount || rawResponse.total_count ||
-                                    (unifiedList[0] && (unifiedList[0].total_count || unifiedList[0].totalCount)) || 0;
+                            // 목록 응답에 totalCount/total_count가 있으면 공통 페이징 카운트로 사용한다.
+                            const responseTotal = rawResponse.total || rawResponse.totalCount || rawResponse.total_count ||
+                                (unifiedList[0] && (unifiedList[0].total_count || unifiedList[0].totalCount));
+                            if (responseTotal) {
+                                detectedTotalCount = responseTotal;
                             }
                         }
                     }

@@ -10,16 +10,19 @@ import type { RefId } from "./types";
 export function useSduiScreen(
     screenId: string,
     refId: RefId,
-    opts?: { isOnlyMine?: boolean; currentPage?: number }
+    opts?: { isOnlyMine?: boolean; currentPage?: number; pageSize?: number }
 ) {
     const currentPage = opts?.currentPage ?? 1;
     const isOnlyMine = opts?.isOnlyMine ?? false;
+    const pageSize = opts?.pageSize ?? 5;
 
     const { metadata, pageData, totalCount, loading } = usePageMetadata(
         screenId,
         currentPage,
         isOnlyMine,
-        refId
+        refId,
+        false,
+        pageSize
     );
 
     const {
