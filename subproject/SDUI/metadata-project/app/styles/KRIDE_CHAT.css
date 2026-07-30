@@ -293,6 +293,18 @@
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
+/*
+ * .kride-rai-panel 은 flex:1 + min-height:0 이라, 스크롤 컨테이너 안에서 높이가 모자라면
+ * 콘텐츠보다 작게 압축된다. 그러면 패널 내용이 박스 밖으로 넘쳐 아래 추천 칩과 겹친다.
+ * 콘텐츠 높이 아래로는 줄어들지 않게 해서, 압축 대신 컨테이너가 스크롤되도록 한다.
+ */
+.kride-chat-empty > .kride-rai-panel {
+  flex: 1 0 auto;
+  min-height: min-content;
+}
+.kride-chat-empty > .kride-chat-suggestions {
+  flex: 0 0 auto;
+}
 .kride-chat-empty > .kride-loading-state {
   margin: auto 20px;
 }

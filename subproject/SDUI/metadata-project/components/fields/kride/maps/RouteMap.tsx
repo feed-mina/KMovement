@@ -138,7 +138,7 @@ export default function RouteMap({ data }: Props) {
           </div>
         )}
         {data.markers.length > 0 && hasUnresolvedPlaces && (
-          <div role="status" className="absolute left-1/2 top-20 z-[400] -translate-x-1/2 rounded-full bg-black/75 px-4 py-2 text-xs font-semibold text-white shadow-lg pointer-events-none">
+          <div role="status" className="absolute left-1/2 top-20 z-[400] -translate-x-1/2 whitespace-nowrap rounded-full bg-black/75 px-4 py-2 text-xs font-semibold text-white shadow-lg pointer-events-none">
             {data.unresolvedPlaceCount}개 장소의 위치를 확인하지 못했습니다.
           </div>
         )}
