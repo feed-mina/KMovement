@@ -165,6 +165,17 @@ export const renderNode = (
         return null;
     }
 
+    if (list.length === 0) {
+        if (refId === 'events' && node.componentId === 'kpop_events_grid') {
+            return (
+                <div key={`${uId}-empty`} className={className}>
+                    {renderNodes(node.children, context, null)}
+                </div>
+            );
+        }
+        return null;
+    }
+
     const customClass = node.cssClass;
     const isGridLayout = customClass && /\bgrid\b|\bflex-wrap\b/.test(customClass);
     return isGridLayout

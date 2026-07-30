@@ -91,7 +91,7 @@ export function KpopArtistCard({ data, meta, onAction }: CardProps) {
                     <div className="kpop-social-links" aria-label={`${name} 공식 및 SNS 링크`}>
                         {links.map((link) => (
                             <a key={link.key} href={link.href} target="_blank" rel="noreferrer" aria-label={`${name} ${link.label} (새 창)`}>
-                                {link.label}
+                                [{link.label}]
                             </a>
                         ))}
                     </div>
@@ -120,6 +120,18 @@ export function KpopArtistCard({ data, meta, onAction }: CardProps) {
 }
 
 export function KpopEventCard({ data, meta, onAction }: CardProps) {
+    if (meta?.componentId === 'kpop_event_card' && !data) {
+        return (
+            <article className="kpop-card kpop-event-card kpop-empty-state" aria-live="polite">
+                <div className="kpop-card-body">
+                    <span className="kpop-eyebrow">EVENT</span>
+                    <h3>다가오는 일정 안내</h3>
+                    <p>팔로우한 아티스트의 다가오는 일정만 표시됩니다. 먼저 아티스트를 팔로우해 주세요.</p>
+                </div>
+            </article>
+        );
+    }
+
     const titleId = useId();
     const [bookmarked, setBookmarked] = useState(Boolean(data?.bookmarked));
     const [busy, setBusy] = useState(false);

@@ -4519,6 +4519,12 @@ button:hover {
     color: #ffffff;
 }
 
+.kpop-empty-state {
+    border-style: dashed;
+    border-color: rgba(253, 164, 175, 0.45);
+    background: rgba(15, 23, 42, 0.38);
+}
+
 .kpop-card-actions button,
 .kpop-primary-btn {
     width: fit-content;

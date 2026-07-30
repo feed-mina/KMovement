@@ -131,32 +131,38 @@ public class KpopController {
             @RequestParam(name = "to", required = false) String to,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
+        if (user == null) {
+            return ResponseEntity.ok(ApiResponse.success(List.of()));
+        }
+
         String sql = """
                 SELECT e.event_id AS id, e.artist_id AS "artistId", a.name_ko AS "artistNameKo",
                        e.title_ko AS "titleKo", e.title_en AS "titleEn", e.region, e.venue,
                        e.event_date AS date, e.official_url AS "officialUrl"
                 FROM event e
                 JOIN artist a ON a.artist_id = e.artist_id
-                LEFT JOIN artist_follow af
-                  ON af.artist_id = e.artist_id
-                 AND af.user_sqno = :userSqno
                 WHERE e.approved_yn = 'Y'
                   AND (:region IS NULL OR e.region = :region)
                   AND (:fromDate IS NULL OR e.event_date >= CAST(:fromDate AS date))
                   AND (:toDate IS NULL OR e.event_date <= CAST(:toDate AS date))
-                  AND (:userSqno IS NULL OR af.artist_id IS NOT NULL)
+                  AND EXISTS (
+                    SELECT 1
+                    FROM artist_follow af
+                    WHERE af.artist_id = e.artist_id
+                      AND af.user_sqno = :userSqno
+                  )
                 ORDER BY e.event_date ASC, e.event_id ASC
                 """;
         MapSqlParameterSource p = new MapSqlParameterSource()
                 .addValue("region", blankToNull(region))
                 .addValue("fromDate", blankToNull(from))
                 .addValue("toDate", blankToNull(to))
-                .addValue("userSqno", user == null ? null : user.getUserSqno());
+                .addValue("userSqno", user.getUserSqno());
         Map<String, Object> keyParts = new LinkedHashMap<>();
         keyParts.put("region", blankToNull(region));
         keyParts.put("from", blankToNull(from));
         keyParts.put("to", blankToNull(to));
-        keyParts.put("userSqno", user == null ? null : user.getUserSqno());
+        keyParts.put("userSqno", user.getUserSqno());
         return ResponseEntity.ok(ApiResponse.success(cachedCatalog(
                 "events", keyParts, Duration.ofMinutes(3),
                 new TypeReference<List<Map<String, Object>>>() {},
