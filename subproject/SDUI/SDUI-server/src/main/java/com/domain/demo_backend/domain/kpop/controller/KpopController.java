@@ -90,26 +90,27 @@ public class KpopController {
 
                 @GetMapping("/artists/{artistId}")
                 public ResponseEntity<ApiResponse<Map<String, Object>>> artist(@PathVariable String artistId) {
+                        String artistRef = normalizeArtistRef(artistId);
         Map<String, Object> artist = cachedCatalog(
                 "artist_detail",
-                                                                Map.of("artistRef", artistId),
+                                Map.of("artistRef", artistRef),
                 Duration.ofMinutes(5),
                 new TypeReference<Map<String, Object>>() {},
                 () -> {
                     Map<String, Object> loaded = new LinkedHashMap<>(one("""
                             SELECT artist_id AS id, slug, name_ko AS "nameKo", name_en AS "nameEn",
-                                                                                                                                         profile, image_url AS "imageUrl", official_url AS "officialUrl",
-                                                                                                                                         instagram_url AS "instagramUrl", youtube_url AS "youtubeUrl", x_url AS "xUrl"
+                                                   profile, image_url AS "imageUrl", official_url AS "officialUrl",
+                                                   instagram_url AS "instagramUrl", youtube_url AS "youtubeUrl", x_url AS "xUrl"
                             FROM artist
                                                                                                                 WHERE approved_yn = 'Y'
                                                                                                                         AND (
-                                                                                                                                        slug = :artistRef
+                                                    LOWER(slug) = LOWER(:artistRef)
                                                                                                                                         OR CASE
                                                                                                                                                         WHEN :artistRef ~ '^[0-9]+$' THEN artist_id = CAST(:artistRef AS BIGINT)
                                                                                                                                                         ELSE FALSE
                                                                                                                                         END
                                                                                                                         )
-                                                                                                                """, params("artistRef", artistId)));
+                                            """, params("artistRef", artistRef)));
                                                                                 Long resolvedArtistId = ((Number) loaded.get("id")).longValue();
                     loaded.put("events", jdbcTemplate.queryForList("""
                             SELECT event_id AS id, artist_id AS "artistId", title_ko AS "titleKo", title_en AS "titleEn",
@@ -395,6 +396,10 @@ public class KpopController {
     private Object blankToNull(String value) {
         return value == null || value.isBlank() ? null : value;
     }
+
+        private String normalizeArtistRef(String value) {
+                return value == null ? "" : value.trim();
+        }
 
     private Map<String, Object> nullableParts(String name, Object value) {
         Map<String, Object> parts = new LinkedHashMap<>();
