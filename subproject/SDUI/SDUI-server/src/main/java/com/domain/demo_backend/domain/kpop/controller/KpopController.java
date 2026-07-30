@@ -74,7 +74,9 @@ public class KpopController {
                        instagram_url AS "instagramUrl", youtube_url AS "youtubeUrl", x_url AS "xUrl"
                 FROM artist
                 WHERE approved_yn = 'Y'
-                  AND (:q IS NULL OR name_ko ILIKE CONCAT('%', :q, '%') OR name_en ILIKE CONCAT('%', :q, '%'))
+                  AND (CAST(:q AS text) IS NULL
+                       OR name_ko ILIKE CONCAT('%', :q, '%')
+                       OR name_en ILIKE CONCAT('%', :q, '%'))
                 ORDER BY sort_order ASC, name_ko ASC
                 """;
         Map<String, Object> keyParts = nullableParts("q", blankToNull(q));
@@ -88,37 +90,33 @@ public class KpopController {
         return ResponseEntity.ok(ApiResponse.success(rows));
     }
 
-                @GetMapping("/artists/{artistId}")
-                public ResponseEntity<ApiResponse<Map<String, Object>>> artist(@PathVariable String artistId) {
-                        String artistRef = normalizeArtistRef(artistId);
+    @GetMapping("/artists/{artistId}")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> artist(@PathVariable String artistId) {
+        String artistRef = normalizeArtistRef(artistId);
         Map<String, Object> artist = cachedCatalog(
                 "artist_detail",
-                                Map.of("artistRef", artistRef),
+                Map.of("artistRef", artistRef),
                 Duration.ofMinutes(5),
                 new TypeReference<Map<String, Object>>() {},
                 () -> {
+                    // artist_id를 파라미터로 캐스팅하면 slug 요청("aespa")이 bind 단계에서
+                    // bigint 변환에 실패한다. 파라미터가 아니라 컬럼을 text로 캐스팅한다.
                     Map<String, Object> loaded = new LinkedHashMap<>(one("""
                             SELECT artist_id AS id, slug, name_ko AS "nameKo", name_en AS "nameEn",
-                                                   profile, image_url AS "imageUrl", official_url AS "officialUrl",
-                                                   instagram_url AS "instagramUrl", youtube_url AS "youtubeUrl", x_url AS "xUrl"
+                                   profile, image_url AS "imageUrl", official_url AS "officialUrl",
+                                   instagram_url AS "instagramUrl", youtube_url AS "youtubeUrl", x_url AS "xUrl"
                             FROM artist
-                                                                                                                WHERE approved_yn = 'Y'
-                                                                                                                        AND (
-                                                    LOWER(slug) = LOWER(:artistRef)
-                                                                                                                                        OR CASE
-                                                                                                                                                        WHEN :artistRef ~ '^[0-9]+$' THEN artist_id = CAST(:artistRef AS BIGINT)
-                                                                                                                                                        ELSE FALSE
-                                                                                                                                        END
-                                                                                                                        )
-                                            """, params("artistRef", artistRef)));
-                                                                                Long resolvedArtistId = ((Number) loaded.get("id")).longValue();
+                            WHERE approved_yn = 'Y'
+                              AND (LOWER(slug) = LOWER(:artistRef) OR CAST(artist_id AS text) = :artistRef)
+                            """, params("artistRef", artistRef)));
+                    Long resolvedArtistId = ((Number) loaded.get("id")).longValue();
                     loaded.put("events", jdbcTemplate.queryForList("""
                             SELECT event_id AS id, artist_id AS "artistId", title_ko AS "titleKo", title_en AS "titleEn",
                                    region, venue, event_date AS date, official_url AS "officialUrl"
                             FROM event
-                                                                                                                WHERE artist_id = :artistId AND approved_yn = 'Y'
+                            WHERE artist_id = :artistId AND approved_yn = 'Y'
                             ORDER BY event_date ASC
-                                                                                                                """, params("artistId", resolvedArtistId)));
+                            """, params("artistId", resolvedArtistId)));
                     return loaded;
                 }
         );
@@ -132,38 +130,37 @@ public class KpopController {
             @RequestParam(name = "to", required = false) String to,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        if (user == null) {
-            return ResponseEntity.ok(ApiResponse.success(List.of()));
-        }
+        Long userSqno = user == null ? null : user.getUserSqno();
 
+        // 각 named parameter는 NamedParameterJdbcTemplate에서 등장 위치마다 별도의 placeholder로
+        // 전개된다. `:param IS NULL` 형태는 PostgreSQL이 해당 placeholder의 타입을 추론할 수 없어
+        // "could not determine data type of parameter"로 실패하므로 항상 명시적으로 캐스팅한다.
         String sql = """
                 SELECT e.event_id AS id, e.artist_id AS "artistId", a.name_ko AS "artistNameKo",
                        e.title_ko AS "titleKo", e.title_en AS "titleEn", e.region, e.venue,
-                       e.event_date AS date, e.official_url AS "officialUrl"
+                       e.event_date AS date, e.official_url AS "officialUrl",
+                       (af.artist_id IS NOT NULL) AS followed
                 FROM event e
                 JOIN artist a ON a.artist_id = e.artist_id
+                LEFT JOIN artist_follow af
+                       ON af.artist_id = e.artist_id
+                      AND af.user_sqno = CAST(:userSqno AS bigint)
                 WHERE e.approved_yn = 'Y'
-                  AND (:region IS NULL OR e.region = :region)
-                  AND (:fromDate IS NULL OR e.event_date >= CAST(:fromDate AS date))
-                  AND (:toDate IS NULL OR e.event_date <= CAST(:toDate AS date))
-                  AND EXISTS (
-                    SELECT 1
-                    FROM artist_follow af
-                    WHERE af.artist_id = e.artist_id
-                      AND af.user_sqno = :userSqno
-                  )
-                ORDER BY e.event_date ASC, e.event_id ASC
+                  AND (CAST(:region AS text) IS NULL OR e.region = :region)
+                  AND (CAST(:fromDate AS date) IS NULL OR e.event_date >= CAST(:fromDate AS date))
+                  AND (CAST(:toDate AS date) IS NULL OR e.event_date <= CAST(:toDate AS date))
+                ORDER BY (af.artist_id IS NOT NULL) DESC, e.event_date ASC, e.event_id ASC
                 """;
         MapSqlParameterSource p = new MapSqlParameterSource()
                 .addValue("region", blankToNull(region))
                 .addValue("fromDate", blankToNull(from))
                 .addValue("toDate", blankToNull(to))
-                .addValue("userSqno", user.getUserSqno());
+                .addValue("userSqno", userSqno);
         Map<String, Object> keyParts = new LinkedHashMap<>();
         keyParts.put("region", blankToNull(region));
         keyParts.put("from", blankToNull(from));
         keyParts.put("to", blankToNull(to));
-        keyParts.put("userSqno", user.getUserSqno());
+        keyParts.put("userSqno", userSqno);
         return ResponseEntity.ok(ApiResponse.success(cachedCatalog(
                 "events", keyParts, Duration.ofMinutes(3),
                 new TypeReference<List<Map<String, Object>>>() {},
