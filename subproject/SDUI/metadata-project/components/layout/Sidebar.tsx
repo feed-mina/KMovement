@@ -64,7 +64,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     // 메타데이터 매핑 (디버깅을 위해 콘솔 대신 대체 UI 렌더링 활용)
     const logoutId = user?.socialType === 'K' ? 'header_kakao_logout' : 'header_general_logout';
     const logoutMeta = flatMeta.find(m => getVal(m, 'component_id', 'componentId') === logoutId);
-    const loginBtnMeta = flatMeta.find(m => getVal(m, 'component_id', 'componentId') === 'header_login_btn');
+    const loginBtnMeta = flatMeta.find(m => getVal(m, 'component_id', 'componentId') === 'header_login_btn') || {
+        componentId: 'header_login_btn_fallback',
+        labelText: '로그인',
+        actionType: 'ROUTE',
+        actionUrl: '/view/LOGIN_PAGE',
+    };
 
     return (
         <aside className={`pc-sidebar flex flex-col justify-between h-screen bg-white border-r${collapsed ? ' is-collapsed' : ''}${isAdmin ? ' is-admin' : ''}`}>
@@ -171,9 +176,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                                 커뮤니티
                             </button>
                         </nav>
-                    ) : (
-                        <div className="text-red-500 text-sm text-center">로그인 메타데이터 누락</div>
-                    )
+                    ) : null
                 )}
                 </div>
 
@@ -195,9 +198,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                             onClick={() => handleAction(loginBtnMeta)}>
                             {getVal(loginBtnMeta, 'label_text', 'labelText')}
                         </button>
-                    ) : (
-                        <div className="text-red-500 text-sm text-center">로그인 메타데이터 누락</div>
-                    )
+                    ) : null
                 )}
             </div>
         </aside>

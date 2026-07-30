@@ -1,6 +1,8 @@
 export const SCREEN_MAP: Record<string, string> = {
     "/": "MAIN_PAGE",
     "/MAIN_PAGE": "MAIN_PAGE",
+    "/kpop": "KPOP_EXPLORE",
+    "/KPOP": "KPOP_EXPLORE",
     "/LOGIN_PAGE": "LOGIN_PAGE",
     "/SET_TIME_PAGE": "SET_TIME_PAGE" ,
     "/TUTORIAL_PAGE" : "TUTORIAL_PAGE",
