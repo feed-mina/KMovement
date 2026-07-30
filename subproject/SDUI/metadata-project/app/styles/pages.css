@@ -4503,20 +4503,65 @@ button:hover {
 .kpop-social-links a {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 36px;
     min-height: 36px;
-    padding: 6px 12px;
+    padding: 6px 10px;
     border: 1px solid rgba(253, 164, 175, 0.45);
     border-radius: 999px;
     color: #fecdd3;
     font-size: 0.85rem;
     font-weight: 700;
     text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
 
 .kpop-social-links a:hover,
 .kpop-social-links a:focus-visible {
     border-color: #fda4af;
     color: #ffffff;
+}
+
+.kpop-social-icon {
+    flex: none;
+    display: block;
+}
+
+.kpop-social-link-instagram:hover,
+.kpop-social-link-instagram:focus-visible {
+    background: rgba(225, 48, 108, 0.18);
+    border-color: #e1306c;
+}
+
+.kpop-social-link-youtube:hover,
+.kpop-social-link-youtube:focus-visible {
+    background: rgba(255, 0, 0, 0.18);
+    border-color: #ff0000;
+}
+
+.kpop-social-link-x:hover,
+.kpop-social-link-x:focus-visible {
+    background: rgba(226, 232, 240, 0.18);
+    border-color: #e2e8f0;
+}
+
+.kpop-followed-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(229, 9, 20, 0.22);
+    color: #fecdd3;
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+}
+
+.kpop-card-subtitle {
+    margin: 0;
+    color: rgba(254, 205, 211, 0.75);
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
 }
 
 .kpop-empty-state {

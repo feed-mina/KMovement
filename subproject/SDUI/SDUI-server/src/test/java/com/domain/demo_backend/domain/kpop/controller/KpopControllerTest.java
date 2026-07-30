@@ -57,6 +57,61 @@ class KpopControllerTest {
     }
 
     @Test
+    void artistSearchCastsTheOptionalKeywordSoNullBindsKeepTheirType() {
+        when(jdbcTemplate.queryForList(anyString(), any(MapSqlParameterSource.class))).thenReturn(List.of());
+
+        controller.artists(null);
+
+        // `:q IS NULL` 만 쓰면 PostgreSQL이 placeholder 타입을 추론하지 못하고 42P18로 실패한다.
+        verify(jdbcTemplate).queryForList(contains("CAST(:q AS text) IS NULL"), any(MapSqlParameterSource.class));
+    }
+
+    @Test
+    void artistDetailResolvesSlugsWithoutCastingTheParameterToBigint() {
+        when(jdbcTemplate.queryForList(anyString(), any(MapSqlParameterSource.class)))
+                .thenReturn(List.of(Map.of("id", 7L, "slug", "aespa", "nameKo", "aespa")))
+                .thenReturn(List.of());
+
+        ResponseEntity<ApiResponse<Map<String, Object>>> response = controller.artist("aespa");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getData()).containsEntry("slug", "aespa");
+        // 파라미터를 bigint로 캐스팅하면 slug 값이 bind 단계에서 실패하므로 컬럼을 캐스팅해야 한다.
+        verify(jdbcTemplate).queryForList(
+                contains("CAST(artist_id AS text) = :artistRef"), any(MapSqlParameterSource.class));
+    }
+
+    @Test
+    void eventsListStaysPublicAndRanksFollowedArtistsFirst() {
+        CustomUserDetails user = mock(CustomUserDetails.class);
+        when(user.getUserSqno()).thenReturn(42L);
+        when(jdbcTemplate.queryForList(anyString(), any(MapSqlParameterSource.class))).thenReturn(List.of(
+                Map.of("id", 11L, "titleKo", "팬미팅", "followed", true)
+        ));
+
+        ResponseEntity<ApiResponse<List<Map<String, Object>>>> response = controller.events(null, null, null, user);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getData()).hasSize(1);
+        verify(jdbcTemplate).queryForList(
+                contains("CAST(:region AS text) IS NULL"), any(MapSqlParameterSource.class));
+    }
+
+    @Test
+    void anonymousEventsRequestStillReturnsTheApprovedSchedule() {
+        when(jdbcTemplate.queryForList(anyString(), any(MapSqlParameterSource.class))).thenReturn(List.of(
+                Map.of("id", 11L, "titleKo", "팬미팅", "followed", false)
+        ));
+
+        ResponseEntity<ApiResponse<List<Map<String, Object>>>> response = controller.events(null, null, null, null);
+
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getData()).hasSize(1);
+    }
+
+    @Test
     void createAnalysisJobRequiresAuthentication() {
         assertThatThrownBy(() -> controller.createAnalysisJob(Map.of("consented", false), null))
                 .isInstanceOf(ResponseStatusException.class)

@@ -99,10 +99,34 @@ describe('K-POP internal SDUI cards', () => {
             />,
         );
 
-        expect(screen.getByRole('link', { name: 'BTS 공식 (새 창)' })).toHaveAttribute('href', 'https://ibighit.com/bts');
+        expect(screen.getByRole('link', { name: 'BTS 공식 사이트 (새 창)' })).toHaveAttribute('href', 'https://ibighit.com/bts');
         expect(screen.getByRole('link', { name: 'BTS Instagram (새 창)' })).toHaveAttribute('href', 'https://www.instagram.com/bts.bighitofficial/');
         expect(screen.getByRole('link', { name: 'BTS YouTube (새 창)' })).toHaveAttribute('href', 'https://www.youtube.com/@BTS');
         expect(screen.getByRole('link', { name: 'BTS X (새 창)' })).toHaveAttribute('href', 'https://x.com/BTS_twt');
+    });
+
+    it('shows the artist summary and labelled brand links on the detail card', () => {
+        const { container } = renderWithProviders(
+            <KpopArtistCard
+                data={{
+                    id: 7,
+                    slug: 'aespa',
+                    nameKo: 'aespa',
+                    nameEn: 'aespa',
+                    profile: '가상 세계관 콘셉트로 전시·팝업 연계 일정이 많은 그룹입니다.',
+                    instagramUrl: 'https://www.instagram.com/aespa_official/',
+                    youtubeUrl: 'https://www.youtube.com/@aespa',
+                }}
+                meta={{ componentId: 'kpop_artist_detail' }}
+                onAction={jest.fn()}
+            />,
+        );
+
+        expect(screen.getByText('가상 세계관 콘셉트로 전시·팝업 연계 일정이 많은 그룹입니다.')).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'aespa Instagram (새 창)' })).toBeInTheDocument();
+        // 텍스트 대괄호 표기 대신 브랜드 로고 SVG를 렌더한다.
+        expect(container.querySelectorAll('svg.kpop-social-icon')).toHaveLength(2);
+        expect(screen.queryByText('[Instagram]')).not.toBeInTheDocument();
     });
 
     it('uploads a consented image and routes the AI job result internally', async () => {
