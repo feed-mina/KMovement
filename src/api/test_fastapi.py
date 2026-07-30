@@ -331,3 +331,94 @@ class TestRouteHistoryAnalytics:
         body = res.json()
         assert body["regions"][0]["value"] == 5
         assert body["artists"][0]["label"] == "BTS"
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# 9. 일정 마커 해소 — 장소별 지오코딩
+# ═════════════════════════════════════════════════════════════════════════════
+class TestItineraryMarkerResolution:
+    """
+    좌표를 가진 source POI가 하나라도 있으면 지오코딩을 통째로 건너뛰던 동작 때문에,
+    이름이 매칭되지 않은 장소가 곧바로 미해석 처리됐다. 이제 장소별로 판단한다.
+    """
+
+    @staticmethod
+    def _itinerary(*names):
+        return [{
+            "day": 1,
+            "morning": {"places": [{"name": name} for name in names]},
+            "afternoon": {"places": []},
+        }]
+
+    def _resolve(self, itinerary, source_pois, geocode_result, budget=None):
+        import asyncio
+
+        async def fake_geocode(address):
+            return geocode_result(address) if callable(geocode_result) else geocode_result
+
+        original_budget = _module.GEOCODE_BUDGET_PER_REQUEST
+        original_geocode = _module.geocode_address
+        if budget is not None:
+            _module.GEOCODE_BUDGET_PER_REQUEST = budget
+        _module.geocode_address = fake_geocode
+        try:
+            return asyncio.run(_module.resolve_itinerary_markers(itinerary, source_pois))
+        finally:
+            _module.GEOCODE_BUDGET_PER_REQUEST = original_budget
+            _module.geocode_address = original_geocode
+
+    def test_geocodes_unmatched_place_even_when_source_pois_have_coordinates(self):
+        source_pois = [{"poi_id": "p1", "name": "경복궁", "lat": 37.58, "lon": 126.97}]
+
+        result = self._resolve(
+            self._itinerary("경복궁", "이름이 다른 장소"),
+            source_pois,
+            {"lat": 37.55, "lng": 126.98},
+        )
+
+        assert result["markerResolutionStatus"] == "complete"
+        assert result["unresolvedPlaces"] == []
+        sources = {marker["name"]: marker["coordinateSource"] for marker in result["markers"]}
+        assert sources["경복궁"] == "poi"
+        assert sources["이름이 다른 장소"] == "geocode"
+
+    def test_reports_geocode_failure_with_the_query_that_was_tried(self):
+        source_pois = [{"poi_id": "p1", "name": "경복궁", "lat": 37.58, "lon": 126.97}]
+
+        result = self._resolve(self._itinerary("경복궁", "없는 장소"), source_pois, None)
+
+        assert result["markerResolutionStatus"] == "partial"
+        assert len(result["unresolvedPlaces"]) == 1
+        unresolved = result["unresolvedPlaces"][0]
+        assert unresolved["name"] == "없는 장소"
+        assert unresolved["reason"] == "geocode_failed"
+        assert unresolved["geocodeQuery"] == "없는 장소"
+
+    def test_budget_caps_how_many_places_are_geocoded(self):
+        result = self._resolve(
+            self._itinerary("장소1", "장소2", "장소3"),
+            [],
+            {"lat": 37.55, "lng": 126.98},
+            budget=1,
+        )
+
+        assert len(result["markers"]) == 1
+        reasons = [place["reason"] for place in result["unresolvedPlaces"]]
+        assert reasons == ["geocode_budget_exhausted", "geocode_budget_exhausted"]
+
+    def test_places_with_their_own_coordinates_do_not_consume_the_budget(self):
+        itinerary = [{
+            "day": 1,
+            "morning": {"places": [
+                {"name": "좌표 있는 장소", "latitude": "37.58", "longitude": "126.97"},
+                {"name": "좌표 없는 장소"},
+            ]},
+        }]
+
+        result = self._resolve(itinerary, [], {"lat": 37.55, "lng": 126.98}, budget=1)
+
+        assert result["markerResolutionStatus"] == "complete"
+        assert result["unresolvedPlaces"] == []
+        sources = {marker["name"]: marker["coordinateSource"] for marker in result["markers"]}
+        assert sources["좌표 있는 장소"] == "itinerary"
+        assert sources["좌표 없는 장소"] == "geocode"
