@@ -1,5 +1,6 @@
 import { registerComponent } from '@/components/constants/componentMap';
 import { registerScreenPaths } from '@/components/constants/screenMap';
+import { registerScreenAccess } from '@/components/screens/screenAccess';
 import { KpopArtistCard, KpopEventCard } from './KpopCards';
 import { KpopAiResultCard, KpopUploadConsent } from './KpopAnalysis';
 import { KpopProductSearch, KpopSavedItemList } from './KpopProducts';
@@ -26,4 +27,9 @@ export function registerKpopPlugin(): void {
         '/KPOP_PRODUCTS': 'KPOP_PRODUCTS',
         '/KPOP_SAVED_ITEMS': 'KPOP_SAVED_ITEMS',
     });
+
+    registerScreenAccess(
+        (id) => ['KPOP_AI_FIND', 'KPOP_AI_RESULT', 'KPOP_PRODUCTS', 'KPOP_SAVED_ITEMS'].includes(id),
+        { requireAuth: true, loginAlert: true }
+    );
 }

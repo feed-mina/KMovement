@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useId, useMemo, useState } from 'react';
+import { KpopProductSearch, ProductCard, normalizeCandidate } from './KpopProducts';
 
 type LeafProps = {
     meta?: Record<string, any>;
@@ -136,8 +137,8 @@ export function KpopUploadConsent({ meta, onAction }: LeafProps) {
     return (
         <section className="kpop-analysis-panel" aria-labelledby="kpop-upload-title">
             <div>
-                <span className="kpop-eyebrow">AI OUTFIT FINDER</span>
-                <h2 id="kpop-upload-title">내가 소유한 의상 사진을 선택해 주세요</h2>
+                <span className="kpop-eyebrow">AI PRODUCT FINDER</span>
+                <h2 id="kpop-upload-title">내 사진으로 상품 후보를 찾아보세요</h2>
                 <p>AI가 비슷한 상품 후보와 확인 근거를 정리합니다. 동일 상품이나 정품을 확정하지 않습니다.</p>
             </div>
             <label className="kpop-file-picker" htmlFor={inputId}>
@@ -158,7 +159,7 @@ export function KpopUploadConsent({ meta, onAction }: LeafProps) {
             )}
             <label className="kpop-consent-row">
                 <input type="checkbox" checked={consented} onChange={(event) => setConsented(event.target.checked)} />
-                <span>이 사진을 사용할 권한이 있으며 의상 후보 분석을 위한 업로드에 동의합니다.</span>
+                <span>이 사진을 사용할 권한이 있으며 상품 후보 분석을 위한 업로드에 동의합니다.</span>
             </label>
             <button type="button" className="kpop-primary-btn" disabled={!file || !consented || busy} aria-busy={busy} onClick={submit}>
                 {busy ? '분석 준비 중...' : '후보 분석 시작'}
@@ -168,14 +169,15 @@ export function KpopUploadConsent({ meta, onAction }: LeafProps) {
     );
 }
 
-export function KpopAiResultCard() {
-    const [jobId, setJobId] = useState('');
+export function KpopAiResultCard({ initialJobId }: { initialJobId?: string } = {}) {
+    const [jobId] = useState(() => (
+        initialJobId
+            || (typeof window === 'undefined'
+                ? ''
+                : new URLSearchParams(window.location.search).get('jobId') || '')
+    ));
     const [job, setJob] = useState<AnalysisJob | null>(null);
     const [message, setMessage] = useState('');
-
-    useEffect(() => {
-        setJobId(new URLSearchParams(window.location.search).get('jobId') || '');
-    }, []);
 
     useEffect(() => {
         if (!jobId) return;
@@ -196,34 +198,56 @@ export function KpopAiResultCard() {
         return () => { active = false; if (timer) clearTimeout(timer); };
     }, [jobId]);
 
+    const candidates = useMemo(
+        () => (Array.isArray(job?.result?.candidates) ? job.result.candidates : []).map(normalizeCandidate),
+        [job?.result?.candidates]
+    );
+    const suggestedQuery = candidates[0]?.name || candidates[0]?.brand || '';
+
     if (!jobId) {
-        return <section className="kpop-analysis-panel"><p>분석 작업 번호가 없습니다. 사진을 다시 선택해 주세요.</p></section>;
+        return (
+            <>
+                <section className="kpop-analysis-panel"><p>분석 작업 번호가 없습니다. 사진을 다시 선택해 주세요.</p></section>
+                <KpopProductSearch
+                    autoSearchOnMount={false}
+                    eyebrow="TEXT SEARCH"
+                    title="직접 상품 후보 검색"
+                    description="상품명 또는 브랜드로 직접 후보를 다시 찾아볼 수 있습니다."
+                    ariaLabel="직접 검색 상품 후보"
+                />
+            </>
+        );
     }
 
-    const candidates = Array.isArray(job?.result?.candidates) ? job.result.candidates : [];
     return (
-        <section className="kpop-analysis-panel" aria-busy={Boolean(job && !TERMINAL_STATUSES.has(job.status))}>
-            <span className="kpop-eyebrow">작업 #{jobId}</span>
-            <h2>{job?.status === 'SUCCEEDED' ? '의상 후보 분석이 완료됐어요' : '의상 후보를 분석하고 있어요'}</h2>
-            {job && !TERMINAL_STATUSES.has(job.status) && (
-                <div className="kpop-progress" role="progressbar" aria-valuenow={job.progressPct} aria-valuemin={0} aria-valuemax={100}>
-                    <span style={{ width: `${Math.max(0, Math.min(100, job.progressPct))}%` }} />
-                </div>
-            )}
-            {job?.status === 'FAILED' && <p role="alert">{job.errorMessage || '분석을 완료하지 못했습니다.'}</p>}
-            {candidates.length > 0 && (
-                <div className="kpop-candidate-list">
-                    {candidates.map((candidate: Record<string, any>, index: number) => (
-                        <article key={String(candidate.id ?? index)}>
-                            <strong>{candidate.name || '이름 미확인 후보'}</strong>
-                            <span>{candidate.brand || '브랜드 확인 중'}</span>
-                            <small>{candidate.evidenceGrade || 'INSUFFICIENT_EVIDENCE'}</small>
-                        </article>
-                    ))}
-                </div>
-            )}
-            {job?.status === 'SUCCEEDED' && candidates.length === 0 && <p>제시할 만한 후보가 없습니다. 근거 부족도 정상적인 결과입니다.</p>}
-            {message && <p className="kpop-analysis-message" role="status">{message}</p>}
-        </section>
+        <>
+            <section className="kpop-analysis-panel" aria-busy={Boolean(job && !TERMINAL_STATUSES.has(job.status))}>
+                <span className="kpop-eyebrow">작업 #{jobId}</span>
+                <h2>{job?.status === 'SUCCEEDED' ? '사진 기반 상품 후보 분석이 완료됐어요' : '사진 기반 상품 후보를 분석하고 있어요'}</h2>
+                {job && !TERMINAL_STATUSES.has(job.status) && (
+                    <div className="kpop-progress" role="progressbar" aria-valuenow={job.progressPct} aria-valuemin={0} aria-valuemax={100}>
+                        <span style={{ width: `${Math.max(0, Math.min(100, job.progressPct))}%` }} />
+                    </div>
+                )}
+                {job?.status === 'FAILED' && <p role="alert">{job.errorMessage || '분석을 완료하지 못했습니다.'}</p>}
+                {candidates.length > 0 && (
+                    <div className="kpop-product-list" role="list" aria-label="AI 분석 상품 후보">
+                        {candidates.map((candidate, index) => (
+                            <ProductCard key={String(candidate.id || index)} candidate={candidate} />
+                        ))}
+                    </div>
+                )}
+                {job?.status === 'SUCCEEDED' && candidates.length === 0 && <p>제시할 만한 후보가 없습니다. 근거 부족도 정상적인 결과입니다.</p>}
+                {message && <p className="kpop-analysis-message" role="status">{message}</p>}
+            </section>
+            <KpopProductSearch
+                initialQuery={suggestedQuery}
+                autoSearchOnMount={false}
+                eyebrow="TEXT SEARCH"
+                title="직접 상품 후보 검색"
+                description="AI 결과와 별개로 상품명 또는 브랜드로 후보를 다시 찾아볼 수 있습니다."
+                ariaLabel="직접 검색 상품 후보"
+            />
+        </>
     );
 }

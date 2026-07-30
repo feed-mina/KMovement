@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useId, useState } from 'react';
 
-type ProductCandidate = {
+export type ProductCandidate = {
     id: string | number;
     name: string;
     brand?: string;
@@ -37,7 +37,7 @@ async function requestJson<T>(url: string, init: RequestInit = {}): Promise<T> {
 
 const valueText = (value: unknown) => value == null ? undefined : String(value);
 
-function normalizeCandidate(value: unknown): ProductCandidate {
+export function normalizeCandidate(value: unknown): ProductCandidate {
     const raw = (value && typeof value === 'object' ? value : {}) as Record<string, any>;
     const grade = String(raw.evidenceGrade ?? raw.evidence_grade ?? raw.grade ?? '').toUpperCase();
     return {
@@ -93,7 +93,7 @@ function gradeCopy(grade: ProductCandidate['evidenceGrade']) {
     return '근거 부족 · 상품을 단정할 수 없음';
 }
 
-function ProductCard({ candidate, onRemoved }: { candidate: ProductCandidate; onRemoved?: () => void }) {
+export function ProductCard({ candidate, onRemoved }: { candidate: ProductCandidate; onRemoved?: () => void }) {
     const titleId = useId();
     const [savedItemId, setSavedItemId] = useState(candidate.savedItemId);
     const [busy, setBusy] = useState(false);
@@ -144,7 +144,23 @@ function ProductCard({ candidate, onRemoved }: { candidate: ProductCandidate; on
     );
 }
 
-export function KpopProductSearch() {
+type KpopProductSearchProps = {
+    initialQuery?: string;
+    autoSearchOnMount?: boolean;
+    eyebrow?: string;
+    title?: string;
+    description?: string;
+    ariaLabel?: string;
+};
+
+export function KpopProductSearch({
+    initialQuery,
+    autoSearchOnMount = true,
+    eyebrow = 'EVIDENCE-FIRST SEARCH',
+    title = '상품 후보 검색',
+    description = '검색 결과는 후보이며 동일 상품·정품·구매 적합성을 보증하지 않습니다.',
+    ariaLabel = '상품 검색 후보',
+}: KpopProductSearchProps = {}) {
     const helpId = useId();
     const [query, setQuery] = useState('');
     const [products, setProducts] = useState<ProductCandidate[]>([]);
@@ -155,7 +171,7 @@ export function KpopProductSearch() {
         setBusy(true);
         setMessage('상품 후보를 찾고 있어요.');
         try {
-            const params = new URLSearchParams(window.location.search);
+            const params = new URLSearchParams();
             if (nextQuery.trim()) params.set('q', nextQuery.trim()); else params.delete('q');
             params.set('limit', '30');
             const [rows, savedRows] = await Promise.all([
@@ -179,10 +195,15 @@ export function KpopProductSearch() {
     };
 
     useEffect(() => {
-        const initialQuery = new URLSearchParams(window.location.search).get('q') || '';
-        setQuery(initialQuery);
-        void search(initialQuery);
-    }, []);
+        const mountQuery = initialQuery ?? (new URLSearchParams(window.location.search).get('q') || '');
+        setQuery(mountQuery);
+        if (autoSearchOnMount) {
+            void search(mountQuery);
+        } else {
+            setProducts([]);
+            setMessage('');
+        }
+    }, [initialQuery, autoSearchOnMount]);
 
     const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -192,9 +213,9 @@ export function KpopProductSearch() {
     return (
         <section className="kpop-product-panel" aria-labelledby="kpop-product-title">
             <div>
-                <span className="kpop-eyebrow">EVIDENCE-FIRST SEARCH</span>
-                <h2 id="kpop-product-title">상품 후보 검색</h2>
-                <p id={helpId}>검색 결과는 후보이며 동일 상품·정품·구매 적합성을 보증하지 않습니다.</p>
+                <span className="kpop-eyebrow">{eyebrow}</span>
+                <h2 id="kpop-product-title">{title}</h2>
+                <p id={helpId}>{description}</p>
             </div>
             <form className="kpop-product-filters" role="search" onSubmit={submit}>
                 <label htmlFor="kpop-product-query">상품명 또는 브랜드</label>
@@ -204,7 +225,7 @@ export function KpopProductSearch() {
                 </div>
             </form>
             {message && <p className="kpop-analysis-message" role="status">{message}</p>}
-            <div className="kpop-product-list" role="list" aria-label="상품 검색 후보">
+            <div className="kpop-product-list" role="list" aria-label={ariaLabel}>
                 {products.map((candidate) => <ProductCard key={String(candidate.id)} candidate={candidate} />)}
             </div>
         </section>

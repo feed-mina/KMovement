@@ -2,6 +2,7 @@ import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import DynamicEngine from '@/components/DynamicEngine/DynamicEngine';
 import { KpopArtistCard } from '@/components/plugins/kpop/KpopCards';
+import { KpopAiResultCard } from '@/components/plugins/kpop/KpopAnalysis';
 import { registerKpopPlugin } from '@/components/plugins/kpop/register';
 import { renderWithProviders } from '@/tests/test-utils';
 
@@ -158,6 +159,35 @@ describe('K-POP internal SDUI cards', () => {
         expect(screen.getByRole('link', { name: /권리 확인된 공식 출처/ })).toHaveAttribute('href', 'https://shop.example/product/31');
         expect(screen.getAllByRole('link')).toHaveLength(1);
         expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('/api/v1/kpop/product-candidates?limit=30'), expect.any(Object));
+        fetchMock.mockRestore();
+    });
+
+    it('shows AI result candidates with the integrated direct search panel', async () => {
+        const fetchMock = jest.spyOn(global, 'fetch')
+            .mockResolvedValueOnce(new Response(JSON.stringify({
+                data: {
+                    jobId: 22,
+                    status: 'SUCCEEDED',
+                    result: {
+                        candidates: [{
+                            id: 31,
+                            name: '공식 후보',
+                            brand: 'Sample Brand',
+                            evidenceGrade: 'SIMILAR',
+                            evidenceText: 'AI 근거 설명',
+                            rightsChecked: true,
+                            officialUrl: 'https://shop.example/product/31',
+                        }],
+                    },
+                },
+            }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+
+        renderWithProviders(<KpopAiResultCard initialJobId="22" />);
+
+        expect(await screen.findByRole('heading', { name: '공식 후보' })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: '직접 상품 후보 검색' })).toBeInTheDocument();
+        expect(screen.getByRole('searchbox', { name: '상품명 또는 브랜드' })).toBeInTheDocument();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
         fetchMock.mockRestore();
     });
 });
