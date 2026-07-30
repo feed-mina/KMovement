@@ -867,13 +867,7 @@ jobs:
           sed -i "s|__DEPLOY_FRONTEND__|${{ steps.changes.outputs.frontend }}|g" /tmp/deploy.sh
           sed -i "s|__DEPLOY_FASTAPI__|${{ steps.changes.outputs.fastapi }}|g" /tmp/deploy.sh
 
-      # 이 정리는 매 배포마다 돌린다. 배포 스크립트의 assert_minimum_docker_space
-      # 4GiB 가드가 정리 전 여유공간(2.666GiB 관측)으로는 항상 실패하기 때문이다.
-      # 대상은 재생성 가능한 로그·캐시뿐이며 활성 컨테이너·이미지·DB 볼륨·named
-      # volume 은 건드리지 않는다. 여기서 바닥을 못 채워도 실패시키지 않고,
-      # 배포 스크립트의 fail-closed 가드가 진단과 함께 최종 판정한다.
-      # workflow_dispatch 에서 cleanup_logs_and_caches=true 면 이 단계에서 즉시
-      # 실패시켜 원인을 배포 전에 드러낸다.
+      # Reclaim only safe-to-regenerate logs/caches before deploy; never touch live containers, images, or volumes.
       - name: Reclaim safe logs and caches before container recreation
         if: steps.changes.outputs.backend == 'true' || steps.changes.outputs.fastapi == 'true' || steps.changes.outputs.frontend == 'true'
         shell: bash
