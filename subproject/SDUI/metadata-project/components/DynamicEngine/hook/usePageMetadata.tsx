@@ -41,6 +41,10 @@ export function buildExecuteParams(
             : { ...parsedParams };
     }
 
+    if (sqlKey.startsWith('mypage_')) {
+        return { ...parsedParams };
+    }
+
     return {
         ...parsedParams,
         pageSize: context.pageSize,
@@ -48,6 +52,12 @@ export function buildExecuteParams(
         filterId: context.filterId || '',
         contentId: context.contentId ?? null,
     };
+}
+
+export function buildDirectApiParams(
+    parsedParams: Record<string, unknown>
+): Record<string, unknown> {
+    return { ...parsedParams };
 }
 
 export const usePageMetadata = (
@@ -227,6 +237,7 @@ export const usePageMetadata = (
                             contentId: refId,
                         })
                         : finalParams;
+                    const directApiParams = buildDirectApiParams(parsedParams);
 
                     if (!sqlKey && directApiUrl) {
                         const resolvedApiUrl = resolveDataApiUrl(String(directApiUrl), finalParams);
@@ -241,7 +252,7 @@ export const usePageMetadata = (
                     //** 로직4: 데이터 가공 및 바인딩 : screenId(페이지 파라미터 기준) 조건으로get을 사용하는지 post를 방식 결정한다. 서버에서 받아온 rawData를 화면에 쓰기 편하게 가공한다
                     const usesDirectApi = !sqlKey && !!directApiUrl;
                     if (usesDirectApi) {
-                        res = await axios.get(apiUrl, { params: finalParams });
+                        res = await axios.get(apiUrl, { params: directApiParams });
                     } else if (finalScreenId?.includes("CONTENT_DETAIL") || finalScreenId?.includes("CONTENT_MODIFY") || isOnlyMine) {
                         // 상세 조회나 수정 하기 전에 보이는 부분, 내 글 목록은 GET 방식 사용
                         res = await axios.get(apiUrl, { params: executeParams });

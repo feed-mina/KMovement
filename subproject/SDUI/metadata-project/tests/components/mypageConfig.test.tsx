@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { SCREEN_MAP } from "@/components/constants/screenMap";
 import { normalizeNode } from "@/components/DynamicEngine/normalizeNode";
 import { useDynamicEngine } from "@/components/DynamicEngine/useDynamicEngine";
-import { buildExecuteParams, resolveDataApiUrl } from "@/components/DynamicEngine/hook/usePageMetadata";
+import { buildDirectApiParams, buildExecuteParams, resolveDataApiUrl } from "@/components/DynamicEngine/hook/usePageMetadata";
 import Chart from "@/components/fields/stats/Chart";
 import StatCard from "@/components/fields/stats/StatCard";
 import { normalizeChartData, readMetaProps } from "@/components/fields/stats/statsUtils";
@@ -210,6 +210,28 @@ describe("MY_PAGE SDUI config helpers", () => {
         expect(buildExecuteParams("kpop_artist_cards", {}, context)).toEqual({});
         expect(buildExecuteParams("kpop_artist_detail", {}, { ...context, contentId: 7 })).toEqual({
             contentId: 7,
+        });
+    });
+
+    it("keeps framework-generated params out of MY_PAGE SQL payloads", () => {
+        const context = {
+            pageSize: 5,
+            offset: 10,
+            filterId: "member@example.com",
+            contentId: 99,
+        };
+
+        expect(buildExecuteParams("mypage_profile", {}, context)).toEqual({});
+        expect(buildExecuteParams("mypage_goal_stats", { locale: "ko" }, context)).toEqual({
+            locale: "ko",
+        });
+    });
+
+    it("keeps framework-generated query params out of direct API requests", () => {
+        expect(buildDirectApiParams({})).toEqual({});
+        expect(buildDirectApiParams({ limit: 8, locale: "ko" })).toEqual({
+            limit: 8,
+            locale: "ko",
         });
     });
 
