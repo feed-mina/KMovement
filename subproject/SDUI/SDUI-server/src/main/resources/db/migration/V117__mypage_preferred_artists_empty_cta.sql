@@ -6,8 +6,8 @@
 -- 같은 화면의 HISTORY_LIST(mypage_route_timeline)는 이미
 -- emptyText/actionText/actionUrl 로 빈 상태에 진입 버튼을 둔다. 같은 계약을 쓴다.
 --
--- 배포 위치: SDUI/SDUI-server/src/main/resources/db/migration/
--- (현재 최신 마이그레이션은 V116 이므로 V117 로 둔다. 옮긴 뒤 파일명 충돌만 확인하면 된다.)
+-- component_props 를 통째로 다시 쓰므로, 기존 차트 설정(type/dataPath/labelKey/
+-- valueKey/caption/limit)을 빠짐없이 유지한 채 빈 상태 키만 더한다.
 
 BEGIN;
 
