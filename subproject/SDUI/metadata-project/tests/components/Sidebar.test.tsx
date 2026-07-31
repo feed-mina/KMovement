@@ -1,24 +1,32 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import Sidebar from '@/components/layout/Sidebar';
 
 const mockHandleAction = jest.fn();
 
+let mockPathname = '/view/MAIN_PAGE';
 jest.mock('next/navigation', () => ({
-    usePathname: () => '/view/MAIN_PAGE',
+    usePathname: () => mockPathname,
 }));
 
 jest.mock('@/hooks/useDeviceType', () => ({
     useDeviceType: () => ({ isMobile: false }),
 }));
 
+let mockAuth: { user: { role?: string; socialType?: string } | null; isLoggedIn: boolean } = {
+    user: null,
+    isLoggedIn: false,
+};
 jest.mock('@/context/AuthContext', () => ({
-    useAuth: () => ({ user: null, isLoggedIn: false }),
+    useAuth: () => mockAuth,
 }));
 
 jest.mock('@/components/DynamicEngine/hook/usePageMetadata', () => ({
     usePageMetadata: () => ({
-        metadata: [{ componentId: 'header_login_btn', labelText: '로그인' }],
+        metadata: [
+            { componentId: 'header_login_btn', labelText: '로그인' },
+            { componentId: 'header_general_logout', labelText: '로그아웃' },
+        ],
         pageData: null,
         loading: false,
     }),
@@ -31,6 +39,8 @@ jest.mock('@/components/DynamicEngine/hook/usePageHook', () => ({
 describe('Sidebar logo toggle', () => {
     beforeEach(() => {
         mockHandleAction.mockClear();
+        mockPathname = '/view/MAIN_PAGE';
+        mockAuth = { user: null, isLoggedIn: false };
     });
 
     it('exposes an accessible collapse control and invokes the toggle handler', () => {
@@ -58,6 +68,75 @@ describe('Sidebar logo toggle', () => {
         expect(mockHandleAction).toHaveBeenCalledWith({
             actionType: 'ROUTE',
             actionUrl: '/view/COMMUNITY_LIST',
+        });
+    });
+
+    it('로고를 누르면 접기가 아니라 홈으로 이동한다', () => {
+        const onToggle = jest.fn();
+        render(<Sidebar collapsed={false} onToggle={onToggle} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'KRIDE 홈으로 이동' }));
+
+        expect(mockHandleAction).toHaveBeenCalledWith({
+            actionType: 'ROUTE',
+            actionUrl: '/view/MAIN_PAGE',
+        });
+        // 하나의 버튼이 두 일을 하던 구조라, 로고 클릭이 사이드바를 접으면 안 된다.
+        expect(onToggle).not.toHaveBeenCalled();
+    });
+});
+
+describe('Sidebar — 로그인 사용자 메뉴', () => {
+    beforeEach(() => {
+        mockHandleAction.mockClear();
+        mockPathname = '/view/TOUR_EXPLORE';
+        mockAuth = { user: { role: 'ROLE_USER' }, isLoggedIn: true };
+    });
+
+    it('동행 대신 K-POP 코스를 노출한다', () => {
+        render(<Sidebar collapsed={false} onToggle={jest.fn()} />);
+
+        expect(screen.queryByRole('button', { name: '동행' })).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: 'K-POP 코스' }));
+        // 코스는 흐름의 첫 단계로 들어간다.
+        expect(mockHandleAction).toHaveBeenCalledWith({
+            actionType: 'ROUTE',
+            actionUrl: '/view/INTRO1',
+        });
+    });
+
+    it('INTRO1~5와 FOCUS를 순서 있는 단계 목록으로 보여준다', () => {
+        render(<Sidebar collapsed={false} onToggle={jest.fn()} />);
+
+        const steps = screen.getByRole('list', { name: 'K-POP 코스 단계' });
+        expect(steps.tagName).toBe('OL');
+        expect(within(steps).getAllByRole('listitem')).toHaveLength(6);
+
+        fireEvent.click(within(steps).getByRole('button', { name: /지도로 보기/ }));
+        expect(mockHandleAction).toHaveBeenCalledWith({
+            actionType: 'ROUTE',
+            actionUrl: '/view/FOCUS',
+        });
+    });
+
+    it('현재 단계를 코스 메뉴와 단계 목록 양쪽에 표시한다', () => {
+        mockPathname = '/view/INTRO3';
+        render(<Sidebar collapsed={false} onToggle={jest.fn()} />);
+
+        expect(screen.getByRole('button', { name: 'K-POP 코스' })).toHaveAttribute('aria-current', 'page');
+        const steps = screen.getByRole('list', { name: 'K-POP 코스 단계' });
+        expect(within(steps).getByRole('button', { name: /지역 고르기/ })).toHaveAttribute('aria-current', 'step');
+    });
+
+    it('탐색과 동선은 그대로 둔다', () => {
+        render(<Sidebar collapsed={false} onToggle={jest.fn()} />);
+
+        expect(screen.getByRole('button', { name: '탐색' })).toHaveAttribute('aria-current', 'page');
+        fireEvent.click(screen.getByRole('button', { name: '동선' }));
+        expect(mockHandleAction).toHaveBeenCalledWith({
+            actionType: 'ROUTE',
+            actionUrl: '/view/ROUTE_PLANNER',
         });
     });
 });
