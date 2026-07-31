@@ -346,6 +346,20 @@
     line-height: 1.45;
 }
 
+/* 빈 차트에서 데이터를 만들 수 있는 화면으로 보내는 버튼 */
+.stats-chart__empty-action {
+    margin-top: 2px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--danger, #e50914);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 750;
+    text-decoration: none;
+}
+
+.stats-chart__empty-action:hover { filter: brightness(0.94); }
+
 .stats-empty-illustration {
     width: 42px;
     height: 42px;
