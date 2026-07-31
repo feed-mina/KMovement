@@ -25,40 +25,75 @@ export function resolveDataApiUrl(
     return missingValue ? null : resolved;
 }
 
+/**
+ * 프레임워크가 채워 주는 파라미터. 화면 상태(페이지 위치·상세 대상)에서 나오므로
+ * 메타데이터에 값을 적어 둘 수 없고, 쓰겠다는 선언만 할 수 있다.
+ */
+export const FRAMEWORK_PARAMS = ['pageSize', 'offset', 'filterId', 'contentId'] as const;
+export type FrameworkParam = typeof FRAMEWORK_PARAMS[number];
+
+export interface ExecuteContext {
+    pageSize: number;
+    offset: number;
+    filterId?: string;
+    contentId?: string | number | null;
+}
+
+function isFrameworkParam(name: string): name is FrameworkParam {
+    return (FRAMEWORK_PARAMS as readonly string[]).includes(name);
+}
+
+/**
+ * DATA_SOURCE 의 component_props.frameworkParams 를 읽는다.
+ *
+ * 예: {"frameworkParams": ["pageSize", "offset"]}
+ *
+ * 선언하지 않은 소스에는 아무것도 얹지 않는다. 백엔드(QueryParameterPolicy)가
+ * param_mapping 에 없는 파라미터를 거절하기 때문에, 추측해서 보내면 화면이 통째로
+ * 실패한다. 모르면 보내지 않는 쪽이 안전하다.
+ */
+export function readFrameworkParams(props: unknown): FrameworkParam[] {
+    const declared = (props as { frameworkParams?: unknown } | null | undefined)?.frameworkParams;
+    if (!Array.isArray(declared)) return [];
+    const unique = new Set<FrameworkParam>();
+    declared.forEach((name) => {
+        if (typeof name === 'string' && isFrameworkParam(name)) unique.add(name);
+    });
+    return [...unique];
+}
+
+/**
+ * 쿼리에 실려 나갈 파라미터를 만든다.
+ *
+ * 규칙은 하나다 — 메타데이터가 선언한 것만 보낸다.
+ * data_params 의 값은 그대로, component_props.frameworkParams 로 선언한 것은
+ * 현재 화면 상태에서 채워 넣는다. sql_key 접두사로 추측하지 않는다.
+ */
 export function buildExecuteParams(
-    sqlKey: string,
     parsedParams: Record<string, unknown>,
-    context: {
-        pageSize: number;
-        offset: number;
-        filterId?: string;
-        contentId?: string | number | null;
-    },
+    context: ExecuteContext,
+    declaredFrameworkParams: readonly FrameworkParam[] = [],
 ): Record<string, unknown> {
-    if (sqlKey.startsWith('kpop_')) {
-        if (sqlKey === 'kpop_artist_cards') {
-            return {
-                ...parsedParams,
-                pageSize: context.pageSize,
-                offset: context.offset,
-            };
+    const params: Record<string, unknown> = { ...parsedParams };
+
+    declaredFrameworkParams.forEach((name) => {
+        switch (name) {
+            case 'pageSize':
+                params.pageSize = context.pageSize;
+                break;
+            case 'offset':
+                params.offset = context.offset;
+                break;
+            case 'filterId':
+                params.filterId = context.filterId || '';
+                break;
+            case 'contentId':
+                params.contentId = context.contentId ?? null;
+                break;
         }
-        return sqlKey.endsWith('_detail') && context.contentId != null
-            ? { ...parsedParams, contentId: context.contentId }
-            : { ...parsedParams };
-    }
+    });
 
-    if (sqlKey.startsWith('mypage_')) {
-        return { ...parsedParams };
-    }
-
-    return {
-        ...parsedParams,
-        pageSize: context.pageSize,
-        offset: context.offset,
-        filterId: context.filterId || '',
-        contentId: context.contentId ?? null,
-    };
+    return params;
 }
 
 export function buildDirectApiParams(
@@ -237,13 +272,15 @@ export const usePageMetadata = (
                         userSqno: user?.userSqno,
                         contentId: refId || null //  (백엔드 :contentId와 매핑)
                     };
+                    // 어떤 프레임워크 파라미터를 쓸지는 메타데이터가 선언한다.
+                    const declaredFrameworkParams = readFrameworkParams(source.props ?? source.componentProps);
                     const executeParams = sqlKey
-                        ? buildExecuteParams(sqlKey, parsedParams, {
+                        ? buildExecuteParams(parsedParams, {
                             pageSize,
                             offset: (currentPage - 1) * pageSize,
                             filterId: isOnlyMine ? user?.userId : '',
                             contentId: refId,
-                        })
+                        }, declaredFrameworkParams)
                         : finalParams;
                     const directApiParams = buildDirectApiParams(parsedParams);
 
