@@ -1,3 +1,4 @@
+import { safeHttpUrl } from '@/lib/media/safeImageUrl';
 import type { FoodAreaGuide } from './travelContent';
 
 // 시·도 맛집 페이지의 장소 목록을 서버에서 채운다.
@@ -13,6 +14,10 @@ export interface FoodSpotView {
     tag: string;
     district: string;
     body: string;
+    /** 썸네일. 검증에 실패한 URL은 아예 담지 않아 잘못된 src가 HTML에 나가지 않게 한다. */
+    image?: string;
+    imageSourceUrl?: string;
+    imageCredit?: string;
 }
 
 export interface AreaFoodSpots {
@@ -27,12 +32,15 @@ interface TourPoiResponse {
     title?: string;
     addr?: string;
     tel?: string;
+    firstImage?: string;
 }
 
 interface HolyPoiResponse extends TourPoiResponse {
     artist?: string;
     fandomInfo?: string;
     recommendReason?: string;
+    imageSourceUrl?: string;
+    imageCredit?: string;
 }
 
 /** 한 지역 페이지가 보여줄 최대 장소 수. */
@@ -67,18 +75,25 @@ function toSpotView(poi: TourPoiResponse, area: FoodAreaGuide, index: number): F
         tag: '맛집',
         district: districtFromAddress(poi.addr, area),
         body: poi.addr?.trim() || `${area.fullName}의 음식점입니다.`,
+        image: safeHttpUrl(poi.firstImage, true),
     };
 }
 
 function toHolySpotView(poi: HolyPoiResponse, area: FoodAreaGuide, index: number): FoodSpotView | null {
     const name = poi.title?.trim();
     if (!name) return null;
+    const imageSourceUrl = safeHttpUrl(poi.imageSourceUrl);
+    const credit = poi.imageCredit?.trim();
     return {
         key: poi.contentId || `${area.slug}-holy-${index}`,
         name,
         tag: poi.artist?.trim() || '성지 맛집',
         district: districtFromAddress(poi.addr, area),
         body: poi.recommendReason?.trim() || poi.fandomInfo?.trim() || poi.addr?.trim() || `${area.fullName}의 촬영지 식당입니다.`,
+        image: safeHttpUrl(poi.firstImage, true),
+        // 출처 링크와 표기가 모두 있을 때만 권리 표기를 붙인다. 한쪽만으로는 표기가 성립하지 않는다.
+        imageSourceUrl: credit ? imageSourceUrl : undefined,
+        imageCredit: imageSourceUrl ? credit : undefined,
     };
 }
 

@@ -72,6 +72,57 @@ describe('loadAreaFoodSpots', () => {
         expect(result.holySpots[0].body).toBe('골목 전망대와 이어집니다.');
     });
 
+    it('썸네일 URL을 검증해 담고, 성지는 권리 표기를 함께 싣는다', async () => {
+        global.fetch = mockFetch({
+            poi: [
+                poi('자갈치시장', '부산광역시 중구', { firstImage: 'http://tong.visitkorea.or.kr/a.jpg' }),
+                poi('국제시장', '부산광역시 중구', { firstImage: 'javascript:alert(1)' }),
+                poi('전포카페거리', '부산광역시 부산진구'),
+            ],
+            holy: [poi('감천문화마을 카페', '부산광역시 사하구', {
+                firstImage: 'https://images.example.com/g.jpg',
+                imageSourceUrl: 'https://commons.wikimedia.org/wiki/File:G.jpg',
+                imageCredit: 'Bgag · CC0 1.0',
+            })],
+        }) as unknown as typeof fetch;
+
+        const result = await loadAreaFoodSpots(busan);
+
+        // http는 https로 올리고, http(s)가 아닌 값과 부재는 담지 않는다.
+        expect(result.spots[0].image).toBe('https://tong.visitkorea.or.kr/a.jpg');
+        expect(result.spots[1].image).toBeUndefined();
+        expect(result.spots[2].image).toBeUndefined();
+
+        expect(result.holySpots[0]).toMatchObject({
+            image: 'https://images.example.com/g.jpg',
+            imageSourceUrl: 'https://commons.wikimedia.org/wiki/File:G.jpg',
+            imageCredit: 'Bgag · CC0 1.0',
+        });
+    });
+
+    it('출처 링크와 표기 중 하나만 있으면 권리 표기를 붙이지 않는다', async () => {
+        global.fetch = mockFetch({
+            holy: [
+                poi('출처만', '부산광역시 중구', { imageSourceUrl: 'https://example.com/src' }),
+                poi('표기만', '부산광역시 중구', { imageCredit: 'Someone' }),
+            ],
+        }) as unknown as typeof fetch;
+
+        const result = await loadAreaFoodSpots(busan);
+
+        expect(result.holySpots[0].imageCredit).toBeUndefined();
+        expect(result.holySpots[1].imageSourceUrl).toBeUndefined();
+    });
+
+    it('큐레이션 폴백에는 썸네일이 없다', async () => {
+        global.fetch = mockFetch({ poi: [], holy: [] }) as unknown as typeof fetch;
+
+        const result = await loadAreaFoodSpots(busan);
+
+        expect(result.spots.every((spot) => spot.image === undefined)).toBe(true);
+        expect(result.holySpots.every((spot) => spot.image === undefined)).toBe(true);
+    });
+
     it('네트워크 오류에는 큐레이션으로 되돌린다', async () => {
         global.fetch = mockFetch({ failPoi: true, failHoly: true }) as unknown as typeof fetch;
 

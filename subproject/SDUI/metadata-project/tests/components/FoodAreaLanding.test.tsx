@@ -83,11 +83,34 @@ describe('시·도 맛집 페이지', () => {
         );
 
         expect(screen.getByText(/TourAPI 실시간 · 1곳/)).toBeInTheDocument();
+        // 썸네일이 없는 목록에는 이미지 자리를 만들지 않는다.
+        expect(screen.queryByRole('img', { name: /이미지 없음/ })).toBeNull();
         expect(screen.getByText(/한국관광공사 TourAPI 음식점 정보를 한 시간 주기로 갱신/)).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: '자갈치시장' })).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: '청사포 조개구이' })).toBeInTheDocument();
         // 큐레이션 항목은 실시간 목록으로 대체된다.
         expect(screen.queryByRole('heading', { name: '부평깡통야시장' })).toBeNull();
+    });
+
+    it('썸네일이 있으면 카드에 렌더하고, 없는 카드에는 자리표시자를 둔다', () => {
+        render(
+            <FoodAreaLanding
+                area={busan}
+                spots={{
+                    spots: [
+                        { key: 'a', name: '자갈치시장', tag: '맛집', district: '중구', body: '부산광역시 중구', image: 'https://tong.visitkorea.or.kr/a.jpg' },
+                        { key: 'b', name: '전포카페거리', tag: '맛집', district: '부산진구', body: '부산광역시 부산진구' },
+                    ],
+                    spotSource: 'tourapi',
+                    holySpots: [{ key: 'c', name: '청사포 조개구이', tag: '드라마 촬영지', district: '해운대구', body: '포구와 붙어 있습니다.' }],
+                    holySource: 'tourapi',
+                }}
+            />,
+        );
+
+        expect(screen.getByAltText('자갈치시장')).toHaveAttribute('src', 'https://tong.visitkorea.or.kr/a.jpg');
+        // 같은 목록 안에서 카드 높이가 어긋나지 않도록 자리표시자를 둔다.
+        expect(screen.getByRole('img', { name: '전포카페거리 이미지 없음' })).toBeInTheDocument();
     });
 
     it('출발 전 체크리스트를 모든 지역에서 공유한다', () => {

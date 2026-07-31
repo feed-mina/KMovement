@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import MarketingNav from '@/components/marketing/MarketingNav';
+import SpotThumbnail from '@/components/marketing/SpotThumbnail';
 import TrackedLink from '@/components/analytics/TrackedLink';
 import JsonLd from '@/components/seo/JsonLd';
 import { breadcrumbJsonLd, itemListJsonLd } from '@/lib/seo/structuredData';
@@ -25,16 +26,29 @@ const SOURCE_LABEL: Record<FoodSpotSource, string> = {
 };
 
 function SpotList({ spots, holy }: { spots: FoodSpotView[]; holy?: boolean }) {
+    // 한 장이라도 썸네일이 있으면 목록 전체에 자리를 만들어 카드 높이를 맞춘다.
+    const withThumbnails = spots.some((spot) => Boolean(spot.image));
+
     return (
         <div className={styles.spotGrid}>
             {spots.map((spot) => (
                 <article className={styles.spot} key={spot.key}>
-                    <div className={styles.spotMeta}>
-                        <span className={holy ? `${styles.tag} ${styles.holyTag}` : styles.tag}>{spot.tag}</span>
-                        <span className={styles.spotWhere}>{spot.district}</span>
+                    {withThumbnails && (
+                        <SpotThumbnail
+                            src={spot.image}
+                            title={spot.name}
+                            sourceUrl={spot.imageSourceUrl}
+                            credit={spot.imageCredit}
+                        />
+                    )}
+                    <div className={styles.spotBody}>
+                        <div className={styles.spotMeta}>
+                            <span className={holy ? `${styles.tag} ${styles.holyTag}` : styles.tag}>{spot.tag}</span>
+                            <span className={styles.spotWhere}>{spot.district}</span>
+                        </div>
+                        <h3>{spot.name}</h3>
+                        <p>{spot.body}</p>
                     </div>
-                    <h3>{spot.name}</h3>
-                    <p>{spot.body}</p>
                 </article>
             ))}
         </div>
