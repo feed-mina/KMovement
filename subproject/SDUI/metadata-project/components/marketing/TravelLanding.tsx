@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import MarketingNav from '@/components/marketing/MarketingNav';
 import TrackedLink from '@/components/analytics/TrackedLink';
 import JsonLd from '@/components/seo/JsonLd';
 import { breadcrumbJsonLd, itemListJsonLd } from '@/lib/seo/structuredData';
@@ -12,13 +13,7 @@ export default function TravelLanding({ content, path }: { content: TravelGuideC
                 breadcrumbJsonLd([{ name: 'KRIDE', path: '/' }, { name: content.title, path }]),
                 itemListJsonLd(content.title, content.highlights),
             ]} />
-            <nav className={styles.nav} aria-label="주요 메뉴">
-                <Link className={styles.brand} href="/">KRIDE</Link>
-                <div className={styles.navLinks}>
-                    <Link href="/travel/seoul-kpop">K-POP 여행</Link>
-                    <Link href="/travel/seoul-food">서울 맛집</Link>
-                </div>
-            </nav>
+            <MarketingNav />
             <header className={styles.hero}>
                 <span className={styles.eyebrow}>{content.eyebrow}</span>
                 <h1>{content.title}</h1>

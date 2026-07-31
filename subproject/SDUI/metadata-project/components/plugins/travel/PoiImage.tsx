@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useMemo, useState} from 'react';
+import {safeHttpUrl} from '@/lib/media/safeImageUrl';
 
 interface PoiImageProps {
     src?: string;
@@ -8,18 +9,6 @@ interface PoiImageProps {
     variant: 'card' | 'modal';
     sourceUrl?: string;
     credit?: string;
-}
-
-function safeHttpUrl(value?: string, upgradeHttp = false): string | undefined {
-    if (!value?.trim()) return undefined;
-    try {
-        const parsed = new URL(value.trim());
-        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return undefined;
-        if (upgradeHttp && parsed.protocol === 'http:') parsed.protocol = 'https:';
-        return parsed.toString();
-    } catch {
-        return undefined;
-    }
 }
 
 export default function PoiImage({src, title, variant, sourceUrl, credit}: PoiImageProps) {
