@@ -35,7 +35,16 @@ def fetch_user_route_history(
 def fetch_user_route_summary(user_id: str) -> dict[str, Any]:
     """Aggregate route history for a single user's MY_PAGE widgets."""
     rows = _read_history_rows_for_user(user_id, limit=500, offset=0)
-    return _aggregate_history(rows)
+    summary = _aggregate_history(rows)
+    # MY_PAGE 카드가 비어 보일 때, 이력이 없는 것인지 이력은 있는데 아티스트가
+    # 안 잡힌 것인지를 여기서 가른다.
+    _log(
+        "summary",
+        rows=len(rows),
+        artists=len(summary["preferred_artists"]),
+        regions=len(summary["visited_regions"]),
+    )
+    return summary
 
 
 def fetch_travel_trends(*, limit: int = 10, sample_size: int = 1000) -> dict[str, Any]:
@@ -50,6 +59,41 @@ def fetch_travel_trends(*, limit: int = 10, sample_size: int = 1000) -> dict[str
     }
 
 
+LOG_PREFIX = "[K-Ride:history]"
+
+
+def _log(event: str, **fields: Any) -> None:
+    """진단용 한 줄 로그.
+
+    저장·조회가 실패해도 API 응답은 그대로 나가므로, 로그가 유일한 단서다.
+    `[K-Ride:history]` 로 grep 하면 한 요청의 결말을 모두 볼 수 있다.
+    값이 없는 필드는 빼서 줄을 짧게 유지한다. 비밀값은 절대 넣지 않는다.
+    """
+    parts = [f"{key}={value}" for key, value in fields.items() if value is not None]
+    print(f"{LOG_PREFIX} {event} {' '.join(parts)}".rstrip())
+
+
+def describe_history_config() -> dict[str, Any]:
+    """저장 설정 스냅샷. 키·URL 같은 비밀값 대신 '설정됐는지'만 담는다."""
+    store = os.environ.get("KRIDE_ROUTE_HISTORY_STORE", "auto").strip().lower()
+    local_path = os.environ.get("KRIDE_ROUTE_HISTORY_LOCAL_PATH", "").strip()
+    return {
+        "store": store,
+        "disabled": store in DISABLED_VALUES,
+        "supabase_configured": _has_supabase_env(),
+        "local_path_configured": bool(local_path),
+        "capture_anonymous": _capture_anonymous(),
+        "table": os.environ.get("KRIDE_ROUTE_HISTORY_TABLE", DEFAULT_TABLE_NAME),
+    }
+
+
+def log_history_config() -> dict[str, Any]:
+    """설정을 한 번 찍어 둔다. '저장이 아예 꺼져 있었다'를 나중에 확인하기 위한 것."""
+    config = describe_history_config()
+    _log("config", **{key: value for key, value in config.items()})
+    return config
+
+
 def save_user_route_history(
     activity_type: str,
     request: Any,
@@ -58,7 +102,38 @@ def save_user_route_history(
     resolved_regions: list[str] | None = None,
     route_metrics: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Persist a compact activity-history row without affecting API responses."""
+    """Persist a compact activity-history row without affecting API responses.
+
+    호출부는 반환값을 쓰지 않는다. 저장이 조용히 실패하면 MY_PAGE 통계가
+    영영 비어 있는 채로 남으므로, 모든 결말을 여기서 한 줄로 남긴다.
+    """
+    result = _save_user_route_history(
+        activity_type,
+        request,
+        response,
+        resolved_regions=resolved_regions,
+        route_metrics=route_metrics,
+    )
+    _log(
+        "save.stored" if result.get("stored") else "save.skipped",
+        activity_type=activity_type,
+        reason=result.get("reason"),
+        store=result.get("store"),
+        artists=result.get("artist_count"),
+        regions=result.get("region_count"),
+        pois=result.get("poi_count"),
+    )
+    return result
+
+
+def _save_user_route_history(
+    activity_type: str,
+    request: Any,
+    response: dict[str, Any],
+    *,
+    resolved_regions: list[str] | None = None,
+    route_metrics: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     if _is_disabled():
         return {"stored": False, "reason": "disabled"}
 
@@ -84,21 +159,40 @@ def save_user_route_history(
     store = os.environ.get("KRIDE_ROUTE_HISTORY_STORE", "auto").strip().lower()
     local_path = os.environ.get("KRIDE_ROUTE_HISTORY_LOCAL_PATH", "").strip()
 
+    # 무엇이 실제로 담겼는지 세어 둔다. 아티스트가 0이면 Preferred artists 는
+    # 저장이 성공해도 비어 있으므로, 두 원인을 로그에서 갈라 볼 수 있어야 한다.
+    counts = _row_counts(row)
+
     if store in SUCCESS_STORE_VALUES and _has_supabase_env():
         result = _insert_supabase(row)
         if result.get("stored"):
-            return result
+            return {**result, **counts}
         if not local_path:
-            return result
+            return {**result, **counts}
 
     if store in LOCAL_STORE_VALUES or local_path:
-        return _append_jsonl(row, local_path)
+        return {**_append_jsonl(row, local_path), **counts}
 
-    return {"stored": False, "reason": "no_store_configured"}
+    return {"stored": False, "reason": "no_store_configured", **counts}
+
+
+def _row_counts(row: dict[str, Any]) -> dict[str, int]:
+    request_payload = _ensure_dict(row.get("request_payload"))
+    response_payload = _ensure_dict(row.get("response_payload"))
+    pois = row.get("recommended_pois")
+    return {
+        "artist_count": len(_extract_artists(row, request_payload, response_payload)),
+        "region_count": len(_extract_regions(row, request_payload, response_payload)),
+        "poi_count": len(pois) if isinstance(pois, list) else 0,
+    }
 
 
 def _read_history_rows_for_user(user_id: str, *, limit: int, offset: int) -> list[dict[str, Any]]:
-    if not _has_supabase_env() or _is_blank_user(user_id):
+    if not _has_supabase_env():
+        _log("read.skipped", reason="supabase_not_configured")
+        return []
+    if _is_blank_user(user_id):
+        _log("read.skipped", reason="blank_user")
         return []
 
     table_name = os.environ.get("KRIDE_ROUTE_HISTORY_TABLE", DEFAULT_TABLE_NAME)
@@ -124,7 +218,7 @@ def _read_history_rows_for_user(user_id: str, *, limit: int, offset: int) -> lis
         resp = query.execute()
         return list(resp.data or [])
     except Exception as exc:
-        print(f"[K-Ride] route history read skipped: {str(exc)[:500]}")
+        _log("read.failed", error=str(exc)[:300])
         return []
 
 
@@ -149,7 +243,7 @@ def _read_recent_history_rows(*, limit: int) -> list[dict[str, Any]]:
         )
         return list(resp.data or [])
     except Exception as exc:
-        print(f"[K-Ride] route trend read skipped: {str(exc)[:500]}")
+        _log("trend_read.failed", error=str(exc)[:300])
         return []
 
 
@@ -499,7 +593,7 @@ def _insert_supabase(row: dict[str, Any]) -> dict[str, Any]:
                 f" — table '{table_name}' is missing; apply the user_route_history DDL"
                 " from db_schema.sql in the Supabase SQL editor"
             )
-        print(f"[K-Ride] route history Supabase save skipped: {message}{hint}")
+        _log("save.supabase_error", error=f"{message[:300]}{hint}")
         return {"stored": False, "reason": "supabase_error", "error": message[:500]}
 
 
@@ -511,7 +605,7 @@ def _append_jsonl(row: dict[str, Any], configured_path: str) -> dict[str, Any]:
             handle.write(json.dumps(row, ensure_ascii=False, default=str) + "\n")
         return {"stored": True, "store": "jsonl", "path": str(path)}
     except Exception as exc:
-        print(f"[K-Ride] route history local save skipped: {exc}")
+        _log("save.local_error", error=str(exc)[:300])
         return {"stored": False, "reason": "jsonl_error", "error": str(exc)[:500]}
 
 
