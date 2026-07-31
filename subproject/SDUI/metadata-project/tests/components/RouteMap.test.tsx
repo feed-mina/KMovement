@@ -17,7 +17,9 @@ describe('RouteMap empty and partial states', () => {
     expect(screen.queryByText('표시할 장소가 없습니다.')).toBeNull();
   });
 
-  it('shows unresolved count while keeping resolved markers visible', () => {
+  it('찾은 장소가 하나라도 있으면 지도를 가리지 않는다', () => {
+    // 위치를 못 찾은 장소는 지도 위 배너가 아니라 일정 목록의 해당 장소 옆에 표시한다.
+    // 배너는 지도를 가리면서도 어느 장소가 문제인지는 알려주지 못했다.
     render(<RouteMap data={{
       ...base,
       hasItinerary: true,
@@ -26,6 +28,18 @@ describe('RouteMap empty and partial states', () => {
       markers: [{ id: 'p1', index: 0, name: '경복궁', lat: 37.58, lng: 126.97 }],
     }} />);
 
-    expect(screen.getByText('2개 장소의 위치를 확인하지 못했습니다.')).toBeTruthy();
+    expect(screen.queryByText(/장소의 위치를 확인하지 못했습니다/)).toBeNull();
+  });
+
+  it('한 곳도 찾지 못했을 때는 안내를 유지한다', () => {
+    render(<RouteMap data={{
+      ...base,
+      hasItinerary: true,
+      markerResolutionStatus: 'failed',
+      unresolvedPlaceCount: 3,
+      markers: [],
+    }} />);
+
+    expect(screen.getByText('일정은 생성되었지만 장소 위치를 확인하지 못했습니다.')).toBeTruthy();
   });
 });

@@ -45,9 +45,11 @@ load_dotenv()
 logger = logging.getLogger("kride.itinerary")
 
 from src.api.route_history import (
+    describe_history_config,
     fetch_travel_trends,
     fetch_user_route_history,
     fetch_user_route_summary,
+    log_history_config,
     save_user_route_history,
 )
 
@@ -156,6 +158,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 여행 이력 저장 설정을 부팅 때 한 번 남긴다. MY_PAGE 통계가 비어 있을 때
+# "저장이 애초에 꺼져 있었다"를 로그만으로 판별할 수 있어야 한다.
+log_history_config()
+
+
+@app.get("/api/diagnostics/route-history")
+def route_history_diagnostics():
+    """여행 이력 저장 설정 스냅샷. 키·URL 같은 비밀값은 담지 않는다."""
+    return describe_history_config()
 
 
 # ══════════════════════════════════════════════════════════════════════════════

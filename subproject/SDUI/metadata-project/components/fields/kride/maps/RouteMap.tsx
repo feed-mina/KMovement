@@ -84,7 +84,6 @@ export default function RouteMap({ data }: Props) {
   }, [data.markers]);
 
   const hasSelectedProviderKey = providerStatus[provider];
-  const hasUnresolvedPlaces = (data.unresolvedPlaceCount ?? 0) > 0;
   const map = hasSelectedProviderKey && provider === 'kakao'
     ? (
       <KakaoRouteMap
@@ -137,11 +136,11 @@ export default function RouteMap({ data }: Props) {
             </span>
           </div>
         )}
-        {data.markers.length > 0 && hasUnresolvedPlaces && (
-          <div role="status" className="absolute left-1/2 top-20 z-[400] -translate-x-1/2 whitespace-nowrap rounded-full bg-black/75 px-4 py-2 text-xs font-semibold text-white shadow-lg pointer-events-none">
-            {data.unresolvedPlaceCount}개 장소의 위치를 확인하지 못했습니다.
-          </div>
-        )}
+        {/*
+          위치를 못 찾은 장소가 있어도 지도 위에 배너를 띄우지 않는다.
+          지도를 가리는 데다 "어느 장소가 문제인지"를 알려주지 못해서다.
+          대신 일정 목록의 해당 장소 옆에 표시한다(RouteNode).
+        */}
       </div>
     </div>
   );

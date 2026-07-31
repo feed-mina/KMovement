@@ -43,7 +43,18 @@ export default function RouteNode({ data, index = 0, onSelect }: Props) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-white text-sm font-medium truncate">{name}</p>
-          {desc && <p className="text-gray-400 text-xs truncate">{desc}</p>}
+          {/*
+            좌표를 못 찾은 장소는 지도에 찍히지 않는다. 지도 위 배너로 개수만 알리면
+            어느 장소가 문제인지 알 수 없어, 주소 옆에 바로 붙여 준다.
+          */}
+          <p className="flex items-center gap-1.5 min-w-0">
+            {desc && <span className="text-gray-400 text-xs truncate">{desc}</span>}
+            {!urls && (
+              <span className="route-node__unresolved flex-shrink-0 text-[11px] text-amber-300/90">
+                위치가 정확하지 않아요
+              </span>
+            )}
+          </p>
           {reason && <p className="text-yellow-400/80 text-[11px] mt-0.5 truncate">{reason}</p>}
         </div>
       </button>
