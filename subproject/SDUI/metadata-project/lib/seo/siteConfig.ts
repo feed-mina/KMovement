@@ -1,3 +1,5 @@
+import { foodAreaPath, foodAreaSlugs } from './travelContent';
+
 const FALLBACK_SITE_URL = 'https://yerin.duckdns.org';
 
 function normalizeSiteUrl(value?: string) {
@@ -15,7 +17,7 @@ function normalizeSiteUrl(value?: string) {
 export const siteConfig = {
     name: 'KRIDE',
     title: 'KRIDE | AI K-컬처 여행 플래너',
-    description: 'K-POP 성지와 서울 맛집을 찾고, 취향에 맞는 여행 동선을 만드는 AI K-컬처 여행 서비스입니다.',
+    description: 'K-POP 성지와 전국 맛집을 찾고, 취향에 맞는 여행 동선을 만드는 AI K-컬처 여행 서비스입니다.',
     url: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
     locale: 'ko_KR',
     image: '/icons/icon-512x512.png',
@@ -31,7 +33,12 @@ export function isSearchIndexingEnabled() {
     return process.env.NODE_ENV === 'production';
 }
 
-export const publicMarketingPaths = ['/', '/travel/seoul-kpop', '/travel/seoul-food'] as const;
+export const publicMarketingPaths = [
+    '/',
+    '/travel/seoul-kpop',
+    '/travel/food',
+    ...foodAreaSlugs.map(foodAreaPath),
+];
 
 export function isPublicMarketingPath(pathname?: string | null) {
     if (!pathname) return false;
