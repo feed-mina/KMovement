@@ -14,20 +14,20 @@ interface SidebarProps {
 }
 
 /**
- * K-POP 코스는 INTRO1 → … → INTRO5 → FOCUS 로 이어지는 한 줄기 흐름이다.
- * 목록으로 펼쳐 두되 순서를 드러내는 <ol> 로 두어, 여섯 개의 별도 메뉴가 아니라
- * 한 코스의 단계임을 보이게 한다.
+ * K-POP 코스는 INTRO1 → … → INTRO5 → FOCUS 로 이어지는 한 줄기 흐름이고,
+ * FOCUS 의 추천은 INTRO1~5 에서 모은 선택값에 기대고 있다.
+ * 그래서 메뉴는 진입점(INTRO1) 하나만 두고, 중간 단계로 바로 들어가는 길은 만들지 않는다.
+ * 다만 코스를 진행하는 동안에는 메뉴가 현재 위치로 보이도록 경로만 함께 인식한다.
  */
-const KPOP_COURSE_STEPS = [
-    { url: '/view/INTRO1', mark: '1', label: '기간 고르기' },
-    { url: '/view/INTRO2', mark: '2', label: '아티스트 고르기' },
-    { url: '/view/INTRO3', mark: '3', label: '지역 고르기' },
-    { url: '/view/INTRO4', mark: '4', label: '취향 고르기' },
-    { url: '/view/INTRO5', mark: '5', label: '코스 확인' },
-    { url: '/view/FOCUS', mark: '★', label: '지도로 보기' },
-] as const;
-
-const KPOP_COURSE_PATHS: string[] = KPOP_COURSE_STEPS.map((step) => step.url);
+const KPOP_COURSE_ENTRY = '/view/INTRO1';
+const KPOP_COURSE_PATHS: string[] = [
+    KPOP_COURSE_ENTRY,
+    '/view/INTRO2',
+    '/view/INTRO3',
+    '/view/INTRO4',
+    '/view/INTRO5',
+    '/view/FOCUS',
+];
 
 // 로고와 접기 버튼을 분리한다. 하나의 버튼이 두 가지 일을 하면
 // 홈으로 가려던 클릭이 사이드바를 접는다.
@@ -157,22 +157,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                                 <button type="button"
                                     aria-current={KPOP_COURSE_PATHS.includes(pathname ?? '') ? 'page' : undefined}
                                     className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${KPOP_COURSE_PATHS.includes(pathname ?? '') ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}
-                                    onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: KPOP_COURSE_STEPS[0].url })}>
+                                    onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: KPOP_COURSE_ENTRY })}>
                                     K-POP 코스
                                 </button>
-                                <ol className="sidebar-substeps" aria-label="K-POP 코스 단계">
-                                    {KPOP_COURSE_STEPS.map((step) => (
-                                        <li key={step.url}>
-                                            <button type="button"
-                                                aria-current={pathname === step.url ? 'step' : undefined}
-                                                className={`sidebar-substep${pathname === step.url ? ' is-active' : ''}`}
-                                                onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: step.url })}>
-                                                <span className="sidebar-substep-mark" aria-hidden="true">{step.mark}</span>
-                                                {step.label}
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ol>
                                 <button type="button"
                                     aria-current={pathname === '/view/MY_PAGE' ? 'page' : undefined}
                                     className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname === '/view/MY_PAGE' ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}

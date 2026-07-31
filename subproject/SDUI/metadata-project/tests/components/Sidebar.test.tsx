@@ -106,27 +106,21 @@ describe('Sidebar — 로그인 사용자 메뉴', () => {
         });
     });
 
-    it('INTRO1~5와 FOCUS를 순서 있는 단계 목록으로 보여준다', () => {
+    it('중간 단계로 바로 들어가는 길은 만들지 않는다', () => {
+        // FOCUS 의 추천은 INTRO1~5 에서 모은 선택값에 기대므로, 중간 진입은 빈 추천이 된다.
         render(<Sidebar collapsed={false} onToggle={jest.fn()} />);
 
-        const steps = screen.getByRole('list', { name: 'K-POP 코스 단계' });
-        expect(steps.tagName).toBe('OL');
-        expect(within(steps).getAllByRole('listitem')).toHaveLength(6);
-
-        fireEvent.click(within(steps).getByRole('button', { name: /지도로 보기/ }));
-        expect(mockHandleAction).toHaveBeenCalledWith({
-            actionType: 'ROUTE',
-            actionUrl: '/view/FOCUS',
+        expect(screen.queryByRole('list', { name: 'K-POP 코스 단계' })).toBeNull();
+        ['/view/INTRO2', '/view/INTRO3', '/view/INTRO4', '/view/INTRO5', '/view/FOCUS'].forEach((url) => {
+            expect(mockHandleAction).not.toHaveBeenCalledWith({ actionType: 'ROUTE', actionUrl: url });
         });
     });
 
-    it('현재 단계를 코스 메뉴와 단계 목록 양쪽에 표시한다', () => {
+    it('코스 진행 중에는 메뉴가 현재 위치로 보인다', () => {
         mockPathname = '/view/INTRO3';
         render(<Sidebar collapsed={false} onToggle={jest.fn()} />);
 
         expect(screen.getByRole('button', { name: 'K-POP 코스' })).toHaveAttribute('aria-current', 'page');
-        const steps = screen.getByRole('list', { name: 'K-POP 코스 단계' });
-        expect(within(steps).getByRole('button', { name: /지역 고르기/ })).toHaveAttribute('aria-current', 'step');
     });
 
     it('탐색과 동선은 그대로 둔다', () => {
