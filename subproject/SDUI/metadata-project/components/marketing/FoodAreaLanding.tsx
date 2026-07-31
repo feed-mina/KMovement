@@ -10,12 +10,48 @@ import {
     foodChecklist,
     type FoodAreaGuide,
 } from '@/lib/seo/travelContent';
+import {
+    curatedHolyViews,
+    curatedSpotViews,
+    type AreaFoodSpots,
+    type FoodSpotSource,
+    type FoodSpotView,
+} from '@/lib/seo/foodAreaSpots';
 import styles from './marketing.module.css';
+
+const SOURCE_LABEL: Record<FoodSpotSource, string> = {
+    tourapi: 'TourAPI 실시간',
+    curated: '에디터 추천',
+};
+
+function SpotList({ spots, holy }: { spots: FoodSpotView[]; holy?: boolean }) {
+    return (
+        <div className={styles.spotGrid}>
+            {spots.map((spot) => (
+                <article className={styles.spot} key={spot.key}>
+                    <div className={styles.spotMeta}>
+                        <span className={holy ? `${styles.tag} ${styles.holyTag}` : styles.tag}>{spot.tag}</span>
+                        <span className={styles.spotWhere}>{spot.district}</span>
+                    </div>
+                    <h3>{spot.name}</h3>
+                    <p>{spot.body}</p>
+                </article>
+            ))}
+        </div>
+    );
+}
 
 // 시·도 맛집 페이지(/travel/food/{slug}).
 // 시·군·구는 별도 페이지를 만들지 않고, 목록 표시 + TOUR_EXPLORE 필터로 넘긴다.
-export default function FoodAreaLanding({ area }: { area: FoodAreaGuide }) {
+// spots를 넘기지 않으면 정적 큐레이션으로 렌더한다 — 서버 조회 없이도 페이지가 성립해야 한다.
+export default function FoodAreaLanding({ area, spots }: { area: FoodAreaGuide; spots?: AreaFoodSpots }) {
     const path = foodAreaPath(area.slug);
+    const resolved: AreaFoodSpots = spots ?? {
+        spots: curatedSpotViews(area),
+        spotSource: 'curated',
+        holySpots: curatedHolyViews(area),
+        holySource: 'curated',
+    };
     const neighbors = area.neighbors
         .map((slug) => findFoodArea(slug))
         .filter((neighbor): neighbor is FoodAreaGuide => Boolean(neighbor));
@@ -63,42 +99,22 @@ export default function FoodAreaLanding({ area }: { area: FoodAreaGuide }) {
             <section className={styles.section}>
                 <div className={styles.sectionHead}>
                     <h2>{area.name} 대표 맛집</h2>
-                    <span className={styles.sectionNote}>{area.signatureSpots.length}곳</span>
+                    <span className={styles.sectionNote}>{SOURCE_LABEL[resolved.spotSource]} · {resolved.spots.length}곳</span>
                 </div>
-                <div className={styles.spotGrid}>
-                    {area.signatureSpots.map((spot) => (
-                        <article className={styles.spot} key={spot.name}>
-                            <div className={styles.spotMeta}>
-                                <span className={styles.tag}>{spot.category}</span>
-                                <span className={styles.spotWhere}>{spot.district}</span>
-                            </div>
-                            <h3>{spot.name}</h3>
-                            <p>{spot.reason}</p>
-                        </article>
-                    ))}
-                </div>
+                <SpotList spots={resolved.spots} />
                 <p className={styles.sourceNote}>
-                    각 장소의 영업시간과 휴무일은 방문 전 공식 채널에서 확인하세요. 실시간 목록은 탐색 화면에서 시·군·구별로 볼 수 있습니다.
+                    {resolved.spotSource === 'tourapi'
+                        ? '한국관광공사 TourAPI 음식점 정보를 한 시간 주기로 갱신합니다. 영업시간과 휴무일은 방문 전 공식 채널에서 확인하세요.'
+                        : '실시간 목록을 불러오지 못해 에디터 추천으로 표시하고 있습니다. 영업시간과 휴무일은 방문 전 공식 채널에서 확인하세요.'}
                 </p>
             </section>
 
             <section className={styles.section}>
                 <div className={styles.sectionHead}>
                     <h2>{area.name} 성지 맛집</h2>
-                    <span className={styles.sectionNote}>작품·아티스트 연결</span>
+                    <span className={styles.sectionNote}>{SOURCE_LABEL[resolved.holySource]} · 작품·아티스트 연결</span>
                 </div>
-                <div className={styles.spotGrid}>
-                    {area.holySpots.map((spot) => (
-                        <article className={styles.spot} key={spot.name}>
-                            <div className={styles.spotMeta}>
-                                <span className={`${styles.tag} ${styles.holyTag}`}>{spot.content}</span>
-                                <span className={styles.spotWhere}>{spot.district}</span>
-                            </div>
-                            <h3>{spot.name}</h3>
-                            <p>{spot.note}</p>
-                        </article>
-                    ))}
-                </div>
+                <SpotList spots={resolved.holySpots} holy />
             </section>
 
             <section className={styles.section}>

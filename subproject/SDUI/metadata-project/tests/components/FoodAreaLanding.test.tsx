@@ -62,6 +62,34 @@ describe('시·도 맛집 페이지', () => {
         expect(payload).toContain('부산 맛집');
     });
 
+    it('spots 없이 렌더하면 에디터 추천으로 표시한다', () => {
+        render(<FoodAreaLanding area={busan} />);
+
+        expect(screen.getByText(/에디터 추천 · 5곳/)).toBeInTheDocument();
+        expect(screen.getByText(/실시간 목록을 불러오지 못해/)).toBeInTheDocument();
+    });
+
+    it('TourAPI 목록을 받으면 출처를 실시간으로 표시한다', () => {
+        render(
+            <FoodAreaLanding
+                area={busan}
+                spots={{
+                    spots: [{ key: 'a', name: '자갈치시장', tag: '맛집', district: '중구', body: '부산광역시 중구 자갈치해안로' }],
+                    spotSource: 'tourapi',
+                    holySpots: [{ key: 'b', name: '청사포 조개구이', tag: '드라마 촬영지', district: '해운대구', body: '포구 구간과 붙어 있습니다.' }],
+                    holySource: 'tourapi',
+                }}
+            />,
+        );
+
+        expect(screen.getByText(/TourAPI 실시간 · 1곳/)).toBeInTheDocument();
+        expect(screen.getByText(/한국관광공사 TourAPI 음식점 정보를 한 시간 주기로 갱신/)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: '자갈치시장' })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: '청사포 조개구이' })).toBeInTheDocument();
+        // 큐레이션 항목은 실시간 목록으로 대체된다.
+        expect(screen.queryByRole('heading', { name: '부평깡통야시장' })).toBeNull();
+    });
+
     it('출발 전 체크리스트를 모든 지역에서 공유한다', () => {
         const { unmount } = render(<FoodAreaLanding area={busan} />);
         const checklistHeading = screen.getByRole('heading', { name: '출발 전 체크리스트' });
