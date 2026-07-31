@@ -30,7 +30,7 @@ export default function HomePage() {
             <section className={styles.section}>
                 <h2>어떤 여행을 찾고 있나요?</h2>
                 <div className={styles.cardGrid}>
-                    <article className={styles.card}><h3>서울 K-POP 성지</h3><p>홍대, 성수, 잠실의 공연·팝업·굿즈 탐색 동선을 준비합니다.</p><Link href="/travel/seoul-kpop">K-POP 여행 가이드 보기 →</Link></article>
+                    <article className={styles.card}><h3>K-POP 성지 코스</h3><p>서울, 부산, 강원 등 공연장과 촬영지가 모인 지역의 탐색 동선을 준비합니다.</p><Link href="/travel/kpop">K-POP 여행 가이드 보기 →</Link></article>
                     <article className={styles.card}><h3>전국 맛집 코스</h3><p>17개 시·도의 시장과 골목, 카페를 이동 부담이 적은 하루 코스로 연결합니다.</p><Link href="/travel/food">전국 맛집 가이드 보기 →</Link></article>
                     <article className={styles.card}><h3>나만의 AI 동선</h3><p>지역, 여행 목적, 기간을 선택하고 맞춤형 방문 순서를 추천받습니다.</p><TrackedLink href="/view/ROUTE_PLANNER" entryPoint="seo_home_card">AI 코스 만들기 →</TrackedLink></article>
                 </div>

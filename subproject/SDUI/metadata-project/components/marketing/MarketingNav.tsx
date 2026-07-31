@@ -8,7 +8,7 @@ export default function MarketingNav() {
         <nav className={styles.nav} aria-label="주요 메뉴">
             <Link className={styles.brand} href="/">KRIDE</Link>
             <div className={styles.navLinks}>
-                <Link href="/travel/seoul-kpop">K-POP 여행</Link>
+                <Link href="/travel/kpop">K-POP 여행</Link>
                 <Link href="/travel/food">전국 맛집</Link>
             </div>
         </nav>

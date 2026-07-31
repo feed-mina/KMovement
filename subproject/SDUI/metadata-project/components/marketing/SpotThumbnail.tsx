@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { safeHttpUrl } from '@/lib/media/safeImageUrl';
+import { placeholderThumbnail } from '@/lib/media/placeholderThumbnail';
 import styles from './marketing.module.css';
 
 // 맛집 카드 썸네일.
@@ -24,10 +25,15 @@ export default function SpotThumbnail({
     const [failedUrl, setFailedUrl] = useState<string | undefined>(undefined);
 
     const showImage = Boolean(imageUrl) && failedUrl !== imageUrl;
+    // 사진이 없는 장소도 카드가 서로 구분되도록 이름 기반 썸네일을 만든다.
+    const placeholder = useMemo(() => placeholderThumbnail(title), [title]);
 
     return (
         <figure className={styles.thumb}>
-            <span className={styles.thumbFrame}>
+            <span
+                className={styles.thumbFrame}
+                style={showImage ? undefined : { background: placeholder.background }}
+            >
                 {showImage ? (
                     // 외부 호스트(TourAPI 등) 이미지라 next/image 대신 img를 쓴다 — PoiImage와 같은 방식.
                     // eslint-disable-next-line @next/next/no-img-element
@@ -40,8 +46,13 @@ export default function SpotThumbnail({
                         className={styles.thumbImage}
                     />
                 ) : (
-                    <span className={styles.thumbEmpty} role="img" aria-label={`${title} 이미지 없음`}>
-                        이미지 없음
+                    <span
+                        className={styles.thumbEmpty}
+                        role="img"
+                        aria-label={`${title} 이미지 없음`}
+                        style={{ color: placeholder.ink }}
+                    >
+                        <span aria-hidden="true">{placeholder.initial}</span>
                     </span>
                 )}
             </span>

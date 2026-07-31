@@ -20,6 +20,11 @@ describe('SpotThumbnail', () => {
         expect(screen.queryByAltText('망원시장')).not.toBeInTheDocument();
     });
 
+    it('자리표시자에 장소명 첫 글자를 얹는다', () => {
+        render(<SpotThumbnail title="감천문화마을" />);
+        expect(screen.getByRole('img', { name: '감천문화마을 이미지 없음' })).toHaveTextContent('감');
+    });
+
     it('로딩에 실패하면 깨진 이미지 대신 자리표시자로 바꾼다', () => {
         render(<SpotThumbnail src="https://tong.visitkorea.or.kr/missing.jpg" title="동문재래시장" />);
 

@@ -34,6 +34,20 @@ public class HolyReviewController {
         return ApiResponse.success(tourService.getPendingHolyPois());
     }
 
+    /**
+     * POST /api/admin/tour/holy/backfill-images?limit=100&radius=300
+     * 사진 없는 성지에 TourAPI 대표 이미지를 채운다.
+     *
+     * <p>POI 당 TourAPI 를 1회 호출하므로 한 번에 전부 돌리면 일일 쿼터를 넘긴다.
+     * limit 을 나눠 여러 번 실행하는 것을 전제로 한다.</p>
+     */
+    @PostMapping("/backfill-images")
+    public ApiResponse<TourService.HolyImageBackfillResult> backfillImages(
+            @RequestParam(defaultValue = "100") int limit,
+            @RequestParam(defaultValue = "300") int radius) {
+        return ApiResponse.success(tourService.backfillHolyImages(limit, radius));
+    }
+
     /** 검수 액션 요청 바디. action: APPROVE | REJECT */
     public record ReviewActionRequest(String action) {}
 
