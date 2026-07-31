@@ -1,0 +1,1633 @@
+<title>전국 맛집 페이지 구조 프로토타입 · KRIDE</title>
+
+<style>
+  :root {
+    --bg: #FBF8F8;
+    --surface: #FFFFFF;
+    --surface-2: #F5EFEF;
+    --ink: #1B1416;
+    --ink-2: #6E5F62;
+    --ink-3: #9C8C8F;
+    --line: #E9DFE0;
+    --line-strong: #D8C9CB;
+    --accent: #E50914;
+    --accent-ink: #8E1116;
+    --accent-soft: #FDECEC;
+    --shadow: 0 1px 2px rgba(27, 20, 22, .05), 0 8px 24px rgba(27, 20, 22, .05);
+    --radius: 14px;
+
+    --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", "Menlo", "Consolas", "D2Coding", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131011;
+      --surface: #1C1718;
+      --surface-2: #241D1F;
+      --ink: #F6F0F0;
+      --ink-2: #B3A4A6;
+      --ink-3: #877A7C;
+      --line: #322A2C;
+      --line-strong: #453A3C;
+      --accent: #FF4A52;
+      --accent-ink: #FFB0B4;
+      --accent-soft: #2C181A;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #131011;
+    --surface: #1C1718;
+    --surface-2: #241D1F;
+    --ink: #F6F0F0;
+    --ink-2: #B3A4A6;
+    --ink-3: #877A7C;
+    --line: #322A2C;
+    --line-strong: #453A3C;
+    --accent: #FF4A52;
+    --accent-ink: #FFB0B4;
+    --accent-soft: #2C181A;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+  }
+
+  :root[data-theme="light"] {
+    --bg: #FBF8F8;
+    --surface: #FFFFFF;
+    --surface-2: #F5EFEF;
+    --ink: #1B1416;
+    --ink-2: #6E5F62;
+    --ink-3: #9C8C8F;
+    --line: #E9DFE0;
+    --line-strong: #D8C9CB;
+    --accent: #E50914;
+    --accent-ink: #8E1116;
+    --accent-soft: #FDECEC;
+    --shadow: 0 1px 2px rgba(27, 20, 22, .05), 0 8px 24px rgba(27, 20, 22, .05);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  * { box-sizing: border-box; }
+
+  a { color: inherit; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  .shell {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 20px 96px;
+  }
+
+  /* ---------- 헤더 + URL 바 ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topbar__inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: var(--accent);
+    font-size: 18px;
+  }
+
+  .brand small {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+
+  .urlbar {
+    flex: 1 1 260px;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-2);
+    overflow: hidden;
+  }
+
+  .urlbar__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #34A853;
+    flex: none;
+  }
+
+  .urlbar__path { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .urlbar__path b { color: var(--ink); font-weight: 600; }
+
+  .theme-toggle {
+    flex: none;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-2);
+    border-radius: 999px;
+    padding: 7px 13px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+  }
+
+  .theme-toggle:hover { border-color: var(--line-strong); color: var(--ink); }
+
+  /* ---------- 공지 ---------- */
+  .notice {
+    margin: 18px 0 0;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+    border-radius: 12px;
+    padding: 11px 14px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--accent-ink);
+  }
+
+  .notice b { font-weight: 700; }
+
+  /* ---------- 히어로 ---------- */
+  .hero { padding: 44px 0 8px; }
+
+  .eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 44px);
+    line-height: 1.18;
+    letter-spacing: -.035em;
+    font-weight: 800;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+
+  .hero p {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--ink-2);
+    font-size: 15.5px;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  .btn {
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .btn--ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--line-strong);
+  }
+
+  .btn--ghost:hover { background: var(--surface-2); }
+
+  /* ---------- 집계 ---------- */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 34px;
+  }
+
+  .stat { background: var(--surface); padding: 16px 18px; }
+
+  .stat__num {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -.03em;
+    font-variant-numeric: tabular-nums;
+    display: block;
+    line-height: 1.1;
+  }
+
+  .stat__label {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 5px;
+    display: block;
+  }
+
+  /* ---------- 섹션 공통 ---------- */
+  .block { margin-top: 56px; }
+
+  .block__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+
+  .block__head h2 {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -.025em;
+    margin: 0;
+  }
+
+  .block__note {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+
+  .block__lead {
+    margin: 0 0 20px;
+    color: var(--ink-2);
+    font-size: 14px;
+    max-width: 66ch;
+  }
+
+  /* ---------- 지도형 시·도 그리드 ---------- */
+  .map-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .tile {
+    grid-row: var(--r);
+    grid-column: var(--c);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 15px 15px 13px;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 104px;
+    transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+  }
+
+  .tile:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .tile__code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-3);
+    letter-spacing: .05em;
+  }
+
+  .tile__name {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+  }
+
+  .tile__meta {
+    margin-top: auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tile__meta span { color: var(--accent); }
+
+  /* ---------- 구조 비교표 ---------- */
+  .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  table { border-collapse: collapse; width: 100%; min-width: 660px; font-size: 13.5px; }
+
+  th, td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+
+  thead th {
+    font-size: 11px;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tr.is-pick td { background: var(--accent-soft); }
+  tr.is-pick td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+
+  td code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+
+  .pill {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    margin-left: 6px;
+    vertical-align: 2px;
+  }
+
+  /* ---------- 지역 페이지 ---------- */
+  .crumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-3);
+    padding-top: 26px;
+    flex-wrap: wrap;
+  }
+
+  .crumb button {
+    border: none;
+    background: none;
+    padding: 0;
+    font: inherit;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .rail {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 -4px 10px;
+  }
+
+  .rail__scroll {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 4px;
+    scrollbar-width: none;
+  }
+
+  .rail__scroll::-webkit-scrollbar { display: none; }
+
+  .rail__ctrl {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-2);
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .rail__ctrl:disabled { opacity: .3; cursor: default; }
+
+  .chip {
+    flex: none;
+    font-size: 12.5px;
+    padding: 7px 15px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+
+  .chip:hover { color: var(--ink); border-color: var(--ink-3); }
+
+  .chip[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .filter-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 8px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 17px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .card h3 { margin: 0; font-size: 15.5px; font-weight: 700; letter-spacing: -.015em; }
+  .card p { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+
+  .card__tip {
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line-strong);
+    font-size: 12.5px;
+    color: var(--ink-3);
+  }
+
+  .eats { display: grid; grid-template-columns: repeat(auto-fill, minmax(212px, 1fr)); gap: 12px; }
+
+  .eat {
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 15px 16px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+
+  .eat:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+  .eat__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+  .tag {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    border: 1px solid var(--line);
+    white-space: nowrap;
+  }
+
+  .tag--holy { background: var(--accent-soft); color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .tag--sample { background: transparent; color: var(--ink-3); border-style: dashed; }
+
+  .eat__name { font-size: 15px; font-weight: 700; letter-spacing: -.015em; line-height: 1.3; }
+  .eat__where { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+  .eat__why { font-size: 12.5px; color: var(--ink-2); line-height: 1.5; }
+
+  .saved-mark { color: var(--accent); font-size: 14px; }
+
+  .checklist {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+  }
+
+  .checklist ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+
+  .checklist li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13.5px;
+    color: var(--ink-2);
+  }
+
+  .checklist li::before {
+    content: "";
+    flex: none;
+    width: 15px;
+    height: 15px;
+    margin-top: 3px;
+    border-radius: 4px;
+    border: 1.5px solid var(--accent);
+  }
+
+  .cta {
+    margin-top: 56px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .cta h2 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -.02em; text-wrap: balance; }
+
+  .meta-block {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.85;
+    color: var(--ink-2);
+    overflow-x: auto;
+  }
+
+  .meta-block b { color: var(--ink); font-weight: 600; }
+  .meta-block .k { color: var(--accent); }
+
+  .foot {
+    margin-top: 60px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-3);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- 모달 ---------- */
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 14, 15, .5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 90;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 400px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px;
+    max-height: 86vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+  }
+
+  .modal__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .modal h3 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
+
+  .modal__close {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .modal__why {
+    background: var(--accent-soft);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 16px;
+  }
+
+  .modal__why dt { font-size: 12px; font-weight: 600; color: var(--accent-ink); margin-bottom: 4px; }
+  .modal__why dd { margin: 0; font-size: 13px; color: var(--accent-ink); line-height: 1.55; }
+
+  .modal__row { display: flex; gap: 8px; margin-top: 18px; }
+  .modal__row .btn { flex: 1; justify-content: center; }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    z-index: 120;
+    box-shadow: var(--shadow);
+  }
+
+  [hidden] { display: none !important; }
+
+  @media (max-width: 640px) {
+    .map-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tile { grid-row: auto; grid-column: auto; min-height: 92px; }
+    .hero { padding-top: 32px; }
+    .shell { padding-bottom: 64px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+    .rail__scroll { scroll-behavior: auto; }
+  }
+</style>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <span class="brand">KRIDE <small>food ia prototype</small></span>
+    <div class="urlbar">
+      <span class="urlbar__dot" aria-hidden="true"></span>
+      <span class="urlbar__path" id="urlPath" aria-live="polite">yerin.duckdns.org<b>/travel/food</b></span>
+    </div>
+    <button type="button" class="theme-toggle" id="themeToggle">theme</button>
+  </div>
+</header>
+
+<main class="shell">
+  <p class="notice">
+    <span aria-hidden="true">◆</span>
+    <span><b>레이아웃 검증용 프로토타입입니다.</b> 지역·권역 구성은 실제 지명을 기준으로 작성했지만, 카드에 표시되는 맛집 목록과 성지 연결 정보는 화면 구조를 확인하기 위한 <b>샘플</b>입니다. 실제 페이지에서는 TourAPI(<code>contentTypeId=39</code>)와 성지 DB(<code>HOLY_FOOD</code>)에서 채워집니다.</span>
+  </p>
+
+  <!-- ============ 허브 ============ -->
+  <section id="hubView">
+    <div class="hero">
+      <span class="eyebrow">전국 맛집 여행 가이드</span>
+      <h1>전국 맛집, 시·도부터 고르고 구·군으로 좁히기</h1>
+      <p>서울에서 시작한 맛집 가이드를 17개 시·도로 넓혔습니다. 지역을 고르면 권역별 동선, 대표 맛집, 그리고 작품·아티스트와 이어지는 성지 맛집을 한 화면에서 볼 수 있습니다.</p>
+      <div class="actions">
+        <button type="button" class="btn" data-goto="/view/ROUTE_PLANNER">무료로 여행 동선 만들기</button>
+        <button type="button" class="btn btn--ghost" data-goto="/view/TOUR_EXPLORE">여행지 탐색하기</button>
+      </div>
+    </div>
+
+    <div class="stats" id="hubStats"></div>
+
+    <section class="block">
+      <div class="block__head">
+        <h2>지역 고르기</h2>
+        <span class="block__note">17 areas · tourapi areaCode</span>
+      </div>
+      <p class="block__lead">각 타일은 독립된 페이지입니다. 시·군·구는 페이지를 더 쪼개지 않고 지역 페이지 안의 칩 필터로 처리합니다.</p>
+      <div class="map-grid" id="mapGrid"></div>
+    </section>
+
+    <section class="block">
+      <div class="block__head">
+        <h2>어떤 구조를 고를까</h2>
+        <span class="block__note">url structure</span>
+      </div>
+      <p class="block__lead">세 가지 안을 놓고 비교했습니다. 지역 키워드 검색 유입을 살리면서 페이지 수를 관리 가능한 범위에 두는 안을 권장합니다.</p>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">안</th>
+              <th scope="col">URL</th>
+              <th scope="col">페이지 수</th>
+              <th scope="col">검색 유입</th>
+              <th scope="col">운영 부담</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>전국 단일 페이지</b></td>
+              <td><code>/travel/food</code></td>
+              <td><code>1</code></td>
+              <td>"부산 맛집" 같은 지역 키워드를 전부 놓칩니다.</td>
+              <td>가장 낮음</td>
+            </tr>
+            <tr class="is-pick">
+              <td><b>허브 + 시·도</b><span class="pill">권장</span></td>
+              <td><code>/travel/food/{area}</code></td>
+              <td><code>1 + 17</code></td>
+              <td>지역 키워드 대부분이 시·도 단위에서 발생합니다.</td>
+              <td>지역당 권역 3개만 관리하면 됩니다.</td>
+            </tr>
+            <tr>
+              <td><b>시·군·구 전부</b></td>
+              <td><code>/travel/food/{area}/{sigungu}</code></td>
+              <td><code>250+</code></td>
+              <td>롱테일까지 잡지만 대부분 검색량이 없습니다.</td>
+              <td>내용이 얇으면 저품질 페이지로 평가됩니다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="block" style="margin-top: 20px;">
+        <div class="meta-block">
+          <b># 기존 경로 처리</b><br>
+          <span class="k">/travel/seoul-food</span> → 301 → <span class="k">/travel/food/seoul</span><br>
+          <span class="k">/travel/seoul-kpop</span> 은 그대로 유지 (K-POP 가이드는 별도 확장)<br>
+          <br>
+          <b># 내부 링크</b><br>
+          허브 → 17개 시·도 (지도형 그리드)<br>
+          시·도 → 허브 + 인접 시·도 2곳 + <span class="k">/view/TOUR_EXPLORE?area={code}</span><br>
+          <br>
+          <b># sitemap.xml</b><br>
+          18개 URL 추가, 지역 페이지 priority 0.7 / 허브 0.9
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <h2>지역을 고르면 실제 페이지 구성을 볼 수 있습니다.</h2>
+      <button type="button" class="btn" id="ctaSeoul">서울 페이지 열어보기</button>
+    </section>
+  </section>
+
+  <!-- ============ 지역 페이지 ============ -->
+  <section id="areaView" hidden>
+    <nav class="crumb" aria-label="위치">
+      <button type="button" id="crumbHome">전국 맛집</button>
+      <span aria-hidden="true">›</span>
+      <span id="crumbArea"></span>
+    </nav>
+
+    <div class="hero">
+      <span class="eyebrow" id="areaEyebrow"></span>
+      <h1 id="areaTitle"></h1>
+      <p id="areaLead"></p>
+      <div class="actions">
+        <button type="button" class="btn" data-goto="/view/ROUTE_PLANNER">무료로 여행 동선 만들기</button>
+        <button type="button" class="btn btn--ghost" id="areaExplore">이 지역 탐색하기</button>
+      </div>
+    </div>
+
+    <section class="block" aria-label="시·군·구 필터">
+      <p class="filter-label" id="railLabel">시·군·구 선택</p>
+      <div class="rail">
+        <button type="button" class="rail__ctrl" id="railPrev" aria-label="이전 항목">‹</button>
+        <div class="rail__scroll" id="railScroll" role="group" aria-label="시·군·구 선택"></div>
+        <button type="button" class="rail__ctrl" id="railNext" aria-label="다음 항목">›</button>
+      </div>
+    </section>
+
+    <section class="block" style="margin-top: 28px;">
+      <div class="block__head">
+        <h2>권역별 동선</h2>
+        <span class="block__note">정적 콘텐츠 · travelContent.ts</span>
+      </div>
+      <p class="block__lead" id="zoneLead"></p>
+      <div class="grid-3" id="zoneGrid"></div>
+    </section>
+
+    <section class="block">
+      <div class="block__head">
+        <h2>대표 맛집</h2>
+        <span class="block__note" id="eatCount"></span>
+      </div>
+      <p class="block__lead">TourAPI 음식점(contentTypeId=39) 자리입니다. 위 칩으로 시·군·구를 좁힐 수 있습니다.</p>
+      <div class="eats" id="eatGrid"></div>
+      <p id="eatEmpty" class="block__lead" hidden style="margin-top: 14px;">이 시·군·구에는 표시할 장소가 없어요. 다른 지역을 선택해 보세요.</p>
+    </section>
+
+    <section class="block">
+      <div class="block__head">
+        <h2>성지 맛집</h2>
+        <span class="block__note">성지 DB · HOLY_FOOD</span>
+      </div>
+      <p class="block__lead">드라마·영화·K-POP과 이어지는 식당과 카페입니다. 이 섹션이 일반 맛집 페이지와 KRIDE를 구분합니다.</p>
+      <div class="eats" id="holyGrid"></div>
+      <p id="holyEmpty" class="block__lead" hidden style="margin-top: 14px;">이 시·군·구에 등록된 성지 맛집이 아직 없어요.</p>
+    </section>
+
+    <section class="block">
+      <div class="block__head">
+        <h2>출발 전 체크리스트</h2>
+      </div>
+      <div class="checklist">
+        <ul id="checkList"></ul>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block__head">
+        <h2>페이지 메타</h2>
+        <span class="block__note">seo</span>
+      </div>
+      <div class="meta-block" id="metaBlock"></div>
+    </section>
+
+    <section class="block">
+      <div class="block__head">
+        <h2>다른 지역</h2>
+      </div>
+      <div class="rail">
+        <div class="rail__scroll" id="siblingRail"></div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <h2 id="ctaTitle"></h2>
+      <button type="button" class="btn" data-goto="/view/ROUTE_PLANNER">KRIDE 시작하기</button>
+    </section>
+  </section>
+
+  <footer class="foot">
+    <span>© KRIDE · AI K-컬처 여행 플래너</span>
+    <span style="font-family: var(--font-mono);">nationwide food · IA prototype</span>
+  </footer>
+</main>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CHECKLIST = [
+    "영업시간과 휴무일 확인 (전통시장은 격주 휴무가 잦습니다)",
+    "브레이크타임과 재료 소진 시간 확인",
+    "대기 시간을 포함해 한 끼당 90분으로 잡기",
+    "알레르기·식단 조건 미리 확인",
+    "대중교통 막차와 귀가 경로 확보"
+  ];
+
+  var AREAS = [
+    {
+      slug: "seoul", code: "1", name: "서울", full: "서울특별시", pos: [1, 2],
+      tagline: "시장과 골목을 한 코스로",
+      lead: "메뉴만 고르기보다 시장, 산책, 카페처럼 경험을 섞고 식사 사이에 충분한 이동 시간을 두는 것이 좋습니다.",
+      districts: ["종로구", "중구", "용산구", "성동구", "광진구", "동대문구", "중랑구", "성북구", "강북구", "도봉구", "노원구", "은평구", "서대문구", "마포구", "양천구", "강서구", "구로구", "금천구", "영등포구", "동작구", "관악구", "서초구", "강남구", "송파구", "강동구"],
+      zones: [
+        { name: "광장시장·종로 권역", desc: "전통시장 먹거리와 도심 산책을 함께 구성하기 좋은 지역입니다.", tip: "혼잡 시간을 피해 여러 메뉴를 나눠 맛보세요." },
+        { name: "망원·합정 권역", desc: "시장, 골목 식당, 카페를 도보로 연결하기 좋은 지역입니다.", tip: "시장 휴무와 재료 소진 시간을 확인하세요." },
+        { name: "을지로 권역", desc: "오래된 골목과 새로운 식문화를 한 번에 경험하기 좋은 지역입니다.", tip: "저녁에는 대기 시간을 일정에 넉넉히 반영하세요." }
+      ],
+      eats: [
+        { name: "광장시장 먹거리 골목", d: "중구", cat: "전통시장", why: "빈대떡·마약김밥·육회를 한 줄에서 나눠 먹기 좋습니다." },
+        { name: "망원시장", d: "마포구", cat: "전통시장", why: "포장 위주로 사서 한강공원까지 걸어가기 좋습니다." },
+        { name: "을지로 노포 골목", d: "중구", cat: "노포", why: "퇴근 시간 이후 대기가 길어 이른 저녁이 유리합니다." },
+        { name: "신당동 떡볶이 타운", d: "중구", cat: "분식", why: "즉석떡볶이 한 판을 2~3인이 나눠 먹는 구성입니다." },
+        { name: "연남동 카페 거리", d: "마포구", cat: "카페", why: "식사 사이 휴식 지점으로 넣기 좋은 밀집 구역입니다." }
+      ],
+      holy: [
+        { name: "광장시장 일대", d: "중구", work: "예능·다큐 촬영지", note: "국내외 음식 프로그램에 자주 등장한 시장 구간입니다." },
+        { name: "성수동 카페 거리", d: "성동구", work: "아이돌 팝업 상권", note: "아티스트 팝업이 열릴 때 카페 동선과 함께 묶입니다." }
+      ]
+    },
+    {
+      slug: "incheon", code: "2", name: "인천", full: "인천광역시", pos: [1, 1],
+      tagline: "개항장과 포구를 잇는 미식 동선",
+      lead: "차이나타운의 근대 음식 문화와 서해 포구의 제철 해산물을 하루 안에 묶을 수 있습니다.",
+      districts: ["중구", "동구", "미추홀구", "연수구", "남동구", "부평구", "계양구", "서구", "강화군", "옹진군"],
+      zones: [
+        { name: "차이나타운·개항장 권역", desc: "근대 건축과 화교 음식 문화를 도보로 연결하는 구간입니다.", tip: "주말 오후는 혼잡하니 오전에 시작하세요." },
+        { name: "소래포구 권역", desc: "제철 해산물을 사서 바로 맛보는 구성이 가능한 지역입니다.", tip: "물때와 조업 상황에 따라 품목이 달라집니다." },
+        { name: "강화 권역", desc: "5일장과 향토 음식을 중심으로 반나절 코스를 만들기 좋습니다.", tip: "장이 서는 날짜를 먼저 확인하세요." }
+      ],
+      eats: [
+        { name: "차이나타운 짜장면 거리", d: "중구", cat: "중식", why: "역에서 바로 이어져 첫 끼로 배치하기 좋습니다." },
+        { name: "신포국제시장", d: "중구", cat: "전통시장", why: "닭강정과 분식을 포장해 개항장 산책과 묶습니다." },
+        { name: "소래포구 어시장", d: "남동구", cat: "해산물", why: "구입 후 초장집 이용까지 시간을 넉넉히 잡으세요." },
+        { name: "강화 풍물시장", d: "강화군", cat: "향토음식", why: "속노랑고구마·젓국갈비 등 지역 품목이 모입니다." },
+        { name: "송도 카페 거리", d: "연수구", cat: "카페", why: "저녁 전 휴식 지점으로 넣기 좋은 구간입니다." }
+      ],
+      holy: [
+        { name: "개항장 근대건축 거리", d: "중구", work: "시대극 촬영지", note: "붉은 벽돌 창고 구간이 배경으로 자주 쓰입니다." },
+        { name: "월미도 문화의거리", d: "중구", work: "예능 촬영지", note: "야경 구간이 방송에 반복해 등장했습니다." }
+      ]
+    },
+    {
+      slug: "gyeonggi", code: "31", name: "경기", full: "경기도", pos: [1, 3],
+      tagline: "수원에서 파주까지, 당일 미식 반경",
+      lead: "서울에서 한 시간 안팎이면 닿는 도시들이라 반나절 단위로 끊어 계획하기 좋습니다.",
+      districts: ["수원시", "성남시", "고양시", "용인시", "부천시", "안산시", "남양주시", "파주시", "가평군", "양평군"],
+      zones: [
+        { name: "수원 화성 권역", desc: "성곽 산책과 노포 식당을 한 동선으로 묶기 좋습니다.", tip: "왕갈비와 통닭은 저녁 대기가 깁니다." },
+        { name: "파주·헤이리 권역", desc: "책과 전시 공간 사이에 카페를 배치하기 좋은 지역입니다.", tip: "월요일 휴관 시설이 많습니다." },
+        { name: "가평·양평 권역", desc: "강변 드라이브와 식사를 함께 계획하는 구간입니다.", tip: "주말 오후 정체를 감안해 이른 출발이 좋습니다." }
+      ],
+      eats: [
+        { name: "수원 통닭거리", d: "수원시", cat: "치킨", why: "화성 야간 개장과 이어 붙이기 좋은 위치입니다." },
+        { name: "수원 왕갈비 상권", d: "수원시", cat: "고기", why: "1인 기준 양이 많아 인원수를 조절해 주문하세요." },
+        { name: "안산 다문화음식거리", d: "안산시", cat: "세계음식", why: "동남아·중앙아시아 식당이 한 블록에 모여 있습니다." },
+        { name: "헤이리 예술마을 카페", d: "파주시", cat: "카페", why: "전시 관람 사이 휴식 지점으로 적합합니다." },
+        { name: "두물머리 일대", d: "양평군", cat: "향토음식", why: "연잎밥·두부 요리 중심으로 점심 코스를 짭니다." }
+      ],
+      holy: [
+        { name: "가평 쁘띠프랑스", d: "가평군", work: "드라마 촬영지", note: "여러 드라마·예능이 촬영된 테마 마을입니다." },
+        { name: "파주 감악산 일대", d: "파주시", work: "예능 촬영지", note: "출렁다리 구간이 방송에 반복 등장했습니다." }
+      ]
+    },
+    {
+      slug: "gangwon", code: "32", name: "강원", full: "강원특별자치도", pos: [1, 4],
+      tagline: "동해안 시장과 산자락 향토음식",
+      lead: "바다와 산이 가까워 이동 시간이 길어지기 쉽습니다. 하루에 한 권역만 잡는 편이 안전합니다.",
+      districts: ["춘천시", "원주시", "강릉시", "속초시", "동해시", "삼척시", "평창군", "양양군", "고성군", "정선군"],
+      zones: [
+        { name: "강릉·주문진 권역", desc: "시장과 해변 카페를 한 줄로 연결할 수 있는 구간입니다.", tip: "초당순두부는 오전에 재료가 소진되기도 합니다." },
+        { name: "속초·양양 권역", desc: "수산시장과 해변 산책을 묶기 좋은 지역입니다.", tip: "성수기 주말은 주차 시간을 별도로 잡으세요." },
+        { name: "춘천 권역", desc: "역세권에 먹거리 골목이 모여 있어 뚜벅이 여행에 맞습니다.", tip: "닭갈비 후 막국수까지 한 번에 계획하세요." }
+      ],
+      eats: [
+        { name: "강릉 중앙시장", d: "강릉시", cat: "전통시장", why: "역에서 도보 거리라 도착 직후 첫 끼로 적합합니다." },
+        { name: "초당순두부마을", d: "강릉시", cat: "향토음식", why: "오전 방문이 대기와 재료 면에서 유리합니다." },
+        { name: "속초관광수산시장", d: "속초시", cat: "해산물", why: "닭강정 포장과 회 시식을 함께 구성합니다." },
+        { name: "춘천 닭갈비 골목", d: "춘천시", cat: "고기", why: "2인 이상 기준 주문이 대부분입니다." },
+        { name: "정선 아리랑시장", d: "정선군", cat: "5일장", why: "장날에만 열리는 좌판이 많아 날짜 확인이 필수입니다." }
+      ],
+      holy: [
+        { name: "주문진 방파제 일대", d: "강릉시", work: "BTS 앨범 재킷 촬영지", note: "인근 카페·회센터와 묶어 반나절 동선이 됩니다." },
+        { name: "속초 아바이마을", d: "속초시", work: "드라마 촬영지", note: "갯배 구간이 드라마 배경으로 알려졌습니다." }
+      ]
+    },
+    {
+      slug: "chungnam", code: "34", name: "충남", full: "충청남도", pos: [2, 1],
+      tagline: "백제 도읍과 서해안 제철 밥상",
+      lead: "내륙의 향토 음식과 서해안 해산물이 계절에 따라 갈립니다. 방문 시기를 먼저 정하세요.",
+      districts: ["천안시", "공주시", "보령시", "아산시", "서산시", "논산시", "당진시", "태안군", "홍성군", "예산군"],
+      zones: [
+        { name: "공주·백제 권역", desc: "유적 관람과 시장 먹거리를 함께 구성하기 좋습니다.", tip: "유적지는 오후 늦게 입장이 마감됩니다." },
+        { name: "서해안 권역", desc: "제철 해산물 중심으로 한 끼를 크게 잡는 구간입니다.", tip: "대하·꽃게 등은 시기가 정해져 있습니다." },
+        { name: "예산·홍성 권역", desc: "시장 골목에서 여러 가게를 옮겨 다니는 방식이 어울립니다.", tip: "현금 결제만 받는 좌판이 남아 있습니다." }
+      ],
+      eats: [
+        { name: "병천순대거리", d: "천안시", cat: "향토음식", why: "순대국밥 중심이라 이른 아침 식사로도 가능합니다." },
+        { name: "공주 산성시장", d: "공주시", cat: "전통시장", why: "공산성 관람과 도보로 이어집니다." },
+        { name: "예산시장", d: "예산군", cat: "전통시장", why: "여러 점포 음식을 한 자리에서 먹는 구조입니다." },
+        { name: "대천항 수산시장", d: "보령시", cat: "해산물", why: "구입 후 손질·조리 시간을 따로 잡으세요." },
+        { name: "서산 동부시장", d: "서산시", cat: "전통시장", why: "게국지·어리굴젓 등 지역 품목이 모입니다." }
+      ],
+      holy: [
+        { name: "공산성 일원", d: "공주시", work: "사극 촬영지", note: "성벽 구간이 시대극 배경으로 쓰였습니다." },
+        { name: "외암민속마을", d: "아산시", work: "사극 촬영지", note: "돌담길 구간이 촬영지로 알려져 있습니다." }
+      ]
+    },
+    {
+      slug: "sejong", code: "8", name: "세종", full: "세종특별자치시", pos: [2, 2],
+      tagline: "신도시 상권과 조치원 구도심",
+      lead: "행정도시 상권과 조치원 구도심의 결이 달라 두 곳을 나눠 계획하는 편이 좋습니다.",
+      districts: ["조치원읍", "한솔동", "도담동", "아름동", "종촌동", "새롬동", "보람동", "소담동", "어진동"],
+      zones: [
+        { name: "조치원 권역", desc: "오래된 시장과 노포가 남아 있는 구도심 구간입니다.", tip: "평일 낮에 문을 여는 가게가 많습니다." },
+        { name: "호수공원 권역", desc: "산책과 카페를 묶기 좋은 신도시 구간입니다.", tip: "저녁 시간대 상가 혼잡을 감안하세요." },
+        { name: "금강 수변 권역", desc: "강변 카페와 식당이 이어지는 지역입니다.", tip: "도보 이동 거리가 길어 대중교통을 확인하세요." }
+      ],
+      eats: [
+        { name: "조치원전통시장", d: "조치원읍", cat: "전통시장", why: "복숭아 철에는 지역 농산물 좌판이 늘어납니다." },
+        { name: "세종전통시장", d: "한솔동", cat: "전통시장", why: "상설 구간과 장날 구간이 나뉘어 있습니다." },
+        { name: "도담동 상가 먹자골목", d: "도담동", cat: "먹자골목", why: "저녁 시간 회식 수요가 몰립니다." },
+        { name: "보람동 강변 카페", d: "보람동", cat: "카페", why: "일몰 시간대에 자리 확보가 어렵습니다." },
+        { name: "아름동 로컬 식당가", d: "아름동", cat: "먹자골목", why: "점심 특선 위주라 낮 방문이 유리합니다." }
+      ],
+      holy: [
+        { name: "세종호수공원 일대", d: "보람동", work: "예능 촬영지", note: "수변 무대 구간이 공연·방송에 쓰입니다." },
+        { name: "국립세종수목원 주변", d: "어진동", work: "화보 촬영지", note: "온실 구간이 촬영 배경으로 자주 등장합니다." }
+      ]
+    },
+    {
+      slug: "chungbuk", code: "33", name: "충북", full: "충청북도", pos: [2, 3],
+      tagline: "내륙의 시장과 약초 밥상",
+      lead: "바다가 없는 대신 시장·약초·민물 요리가 지역 색을 만듭니다. 이동은 청주를 기점으로 잡으세요.",
+      districts: ["청주시", "충주시", "제천시", "보은군", "옥천군", "영동군", "단양군", "괴산군"],
+      zones: [
+        { name: "청주 권역", desc: "종합시장과 도심 골목을 함께 도는 구성이 어울립니다.", tip: "성안길은 저녁에 사람이 몰립니다." },
+        { name: "단양 권역", desc: "시장 먹거리와 강변 산책을 이어 붙이기 좋습니다.", tip: "마늘 품목 중심이라 취향을 확인하세요." },
+        { name: "충주·제천 권역", desc: "약초와 민물 요리를 중심으로 한 끼를 크게 잡습니다.", tip: "약령시는 요일별로 규모가 다릅니다." }
+      ],
+      eats: [
+        { name: "육거리종합시장", d: "청주시", cat: "전통시장", why: "규모가 커서 목표 품목을 정하고 들어가는 편이 낫습니다." },
+        { name: "성안길 먹자골목", d: "청주시", cat: "먹자골목", why: "도보 이동 거리가 짧아 두 끼를 붙이기 좋습니다." },
+        { name: "단양 구경시장", d: "단양군", cat: "전통시장", why: "마늘 요리 위주라 한 코스로 묶기 쉽습니다." },
+        { name: "충주 자유시장", d: "충주시", cat: "전통시장", why: "장날 좌판이 늘어 방문일을 맞추면 좋습니다." },
+        { name: "제천 약초시장", d: "제천시", cat: "향토음식", why: "약재 향이 강해 호불호를 미리 확인하세요." }
+      ],
+      holy: [
+        { name: "도담삼봉 일원", d: "단양군", work: "화보·MV 촬영지", note: "강 위 바위 구간이 영상 배경으로 쓰입니다." },
+        { name: "청남대", d: "청주시", work: "다큐 촬영지", note: "정원 구간이 방송에 반복 등장했습니다." }
+      ]
+    },
+    {
+      slug: "gyeongbuk", code: "35", name: "경북", full: "경상북도", pos: [2, 4],
+      tagline: "천년 고도와 동해안 대게",
+      lead: "경주 도심과 동해안은 차로 한 시간 이상 떨어져 있습니다. 하루에 둘 다 넣지 않는 편이 좋습니다.",
+      districts: ["포항시", "경주시", "안동시", "구미시", "영주시", "문경시", "상주시", "영덕군", "울진군", "울릉군"],
+      zones: [
+        { name: "경주 권역", desc: "유적 산책과 카페 거리를 붙이기 좋은 구간입니다.", tip: "황리단길은 오후에 가장 붐빕니다." },
+        { name: "안동 권역", desc: "종가 음식과 시장 먹거리를 함께 경험하는 지역입니다.", tip: "찜닭은 2인 기준 양이 많습니다." },
+        { name: "동해안 권역", desc: "대게와 물회 중심으로 한 끼를 크게 구성합니다.", tip: "대게는 시세가 매일 달라집니다." }
+      ],
+      eats: [
+        { name: "황리단길", d: "경주시", cat: "카페", why: "식사보다 디저트·간식 위주로 배치하는 편이 낫습니다." },
+        { name: "경주 중앙시장", d: "경주시", cat: "전통시장", why: "야시장 운영일을 확인하면 저녁 코스가 됩니다." },
+        { name: "안동 구시장 찜닭골목", d: "안동시", cat: "향토음식", why: "가게마다 맵기 조절이 가능합니다." },
+        { name: "포항 죽도시장", d: "포항시", cat: "해산물", why: "물회와 회를 한 자리에서 비교하기 좋습니다." },
+        { name: "강구항 대게거리", d: "영덕군", cat: "해산물", why: "시세를 두세 곳 비교한 뒤 결정하세요." }
+      ],
+      holy: [
+        { name: "대릉원 돌담길", d: "경주시", work: "드라마 촬영지", note: "돌담 구간이 여러 작품에 등장했습니다." },
+        { name: "하회마을", d: "안동시", work: "사극 촬영지", note: "고택 구간이 시대극 배경으로 쓰였습니다." }
+      ]
+    },
+    {
+      slug: "jeonbuk", code: "37", name: "전북", full: "전북특별자치도", pos: [3, 1],
+      tagline: "한식의 기준이 되는 상차림",
+      lead: "한 끼 자체가 목적이 되는 지역입니다. 하루 두 끼 이상을 무리하게 넣지 마세요.",
+      districts: ["전주시", "군산시", "익산시", "정읍시", "남원시", "김제시", "완주군", "고창군", "부안군", "순창군"],
+      zones: [
+        { name: "전주 한옥마을 권역", desc: "골목 식당과 간식을 이어 붙이기 좋은 구간입니다.", tip: "주말 오후는 대기가 길어집니다." },
+        { name: "군산 근대문화 권역", desc: "근대 건축과 오래된 가게를 함께 도는 지역입니다.", tip: "월요일 휴무 시설이 많습니다." },
+        { name: "남원·순창 권역", desc: "향토 음식 한 가지를 목적으로 잡는 구간입니다.", tip: "이동 시간이 길어 왕복 경로를 먼저 확인하세요." }
+      ],
+      eats: [
+        { name: "전주 남부시장", d: "전주시", cat: "전통시장", why: "야시장 운영일에는 저녁 코스로 바꿀 수 있습니다." },
+        { name: "객리단길", d: "전주시", cat: "카페", why: "식사 사이 휴식 지점으로 배치하기 좋습니다." },
+        { name: "군산 근대문화거리 상권", d: "군산시", cat: "노포", why: "오래된 빵집과 중식당이 한 구간에 모여 있습니다." },
+        { name: "남원 추어탕 거리", d: "남원시", cat: "향토음식", why: "점심 시간대에 회전이 빠릅니다." },
+        { name: "순창 고추장민속마을", d: "순창군", cat: "향토음식", why: "장 담그기 체험과 식사를 함께 구성합니다." }
+      ],
+      holy: [
+        { name: "초원사진관", d: "군산시", work: "영화 8월의 크리스마스", note: "촬영지 주변 노포와 묶어 반나절 동선이 됩니다." },
+        { name: "전주 한옥마을 일대", d: "전주시", work: "드라마·예능 촬영지", note: "한옥 골목 구간이 여러 작품에 등장했습니다." }
+      ]
+    },
+    {
+      slug: "daejeon", code: "3", name: "대전", full: "대전광역시", pos: [3, 2],
+      tagline: "역세권에서 끝나는 미식 동선",
+      lead: "주요 상권이 역에서 가까워 짐을 들고도 움직일 수 있습니다. 환승 여행에 잘 맞습니다.",
+      districts: ["동구", "중구", "서구", "유성구", "대덕구"],
+      zones: [
+        { name: "중앙시장·중동 권역", desc: "역에서 도보로 닿는 시장 구간입니다.", tip: "구역이 넓어 목표 골목을 정하고 들어가세요." },
+        { name: "은행동 권역", desc: "빵집과 노포가 함께 모여 있는 도심 구간입니다.", tip: "주말 오후 대기 줄이 깁니다." },
+        { name: "유성 권역", desc: "온천과 5일장을 함께 계획하기 좋은 지역입니다.", tip: "장날은 4·9로 끝나는 날입니다." }
+      ],
+      eats: [
+        { name: "대전 중앙시장", d: "동구", cat: "전통시장", why: "대전역에서 도보권이라 첫 일정으로 적합합니다." },
+        { name: "은행동 먹자골목", d: "중구", cat: "먹자골목", why: "빵집 대기 시간에 주변을 둘러보기 좋습니다." },
+        { name: "유성 5일장", d: "유성구", cat: "5일장", why: "장날에만 규모가 커집니다." },
+        { name: "도마큰시장", d: "서구", cat: "전통시장", why: "현지 수요 중심이라 가격대가 낮습니다." },
+        { name: "오정동 먹자상권", d: "대덕구", cat: "먹자골목", why: "저녁 회식 수요가 몰리는 시간대를 피하세요." }
+      ],
+      holy: [
+        { name: "대동하늘공원", d: "동구", work: "MV·화보 촬영지", note: "야경 구간이 영상 배경으로 쓰입니다." },
+        { name: "성심당 일대 골목", d: "중구", work: "예능 촬영지", note: "방송 이후 대기 줄이 길어진 구간입니다." }
+      ]
+    },
+    {
+      slug: "daegu", code: "4", name: "대구", full: "대구광역시", pos: [3, 4],
+      tagline: "골목마다 한 가지 메뉴",
+      lead: "메뉴별로 골목이 형성돼 있어 동선을 메뉴 기준으로 짜는 편이 효율적입니다.",
+      districts: ["중구", "동구", "서구", "남구", "북구", "수성구", "달서구", "달성군"],
+      zones: [
+        { name: "서문시장 권역", desc: "야시장과 도심 상권을 함께 도는 구간입니다.", tip: "야시장은 일몰 이후에 문을 엽니다." },
+        { name: "동성로 권역", desc: "분식과 카페가 밀집한 도심 구간입니다.", tip: "주말 저녁은 이동 속도가 크게 느려집니다." },
+        { name: "수성못 권역", desc: "산책과 식사를 함께 계획하기 좋은 지역입니다.", tip: "저녁 시간대 주차가 어렵습니다." }
+      ],
+      eats: [
+        { name: "서문시장 야시장", d: "중구", cat: "야시장", why: "소량씩 여러 가지를 맛보는 구성에 맞습니다." },
+        { name: "안지랑 곱창골목", d: "남구", cat: "고기", why: "가격이 표준화돼 있어 비교 부담이 적습니다." },
+        { name: "평화시장 닭똥집골목", d: "동구", cat: "고기", why: "튀김·양념·간장을 나눠 주문하는 방식입니다." },
+        { name: "김광석길 주변 상권", d: "중구", cat: "카페", why: "거리 관람과 카페를 자연스럽게 잇습니다." },
+        { name: "수성못 상권", d: "수성구", cat: "먹자골목", why: "산책 후 저녁 식사로 배치하기 좋습니다." }
+      ],
+      holy: [
+        { name: "김광석다시그리기길", d: "중구", work: "음악 성지", note: "벽화 거리와 인근 카페가 함께 묶입니다." },
+        { name: "앞산 전망대", d: "남구", work: "드라마 촬영지", note: "야경 구간이 배경으로 쓰였습니다." }
+      ]
+    },
+    {
+      slug: "jeonnam", code: "38", name: "전남", full: "전라남도", pos: [4, 1],
+      tagline: "남해와 서해가 함께 차리는 밥상",
+      lead: "도시 간 거리가 멀어 하나의 권역을 골라 깊게 도는 편이 만족도가 높습니다.",
+      districts: ["여수시", "순천시", "목포시", "나주시", "광양시", "담양군", "보성군", "구례군", "완도군", "해남군"],
+      zones: [
+        { name: "여수 권역", desc: "바다 전망과 포차 거리를 함께 계획하는 구간입니다.", tip: "성수기 주말은 숙소를 먼저 잡으세요." },
+        { name: "목포 권역", desc: "수산시장과 근대 거리를 붙이기 좋은 지역입니다.", tip: "해산물은 계절에 따라 품목이 바뀝니다." },
+        { name: "담양·순천 권역", desc: "정원·대숲 산책과 향토 음식을 잇는 구간입니다.", tip: "입장 마감 시간을 먼저 확인하세요." }
+      ],
+      eats: [
+        { name: "여수 교동시장", d: "여수시", cat: "해산물", why: "새벽 경매 이후 오전이 가장 활발합니다." },
+        { name: "목포 종합수산시장", d: "목포시", cat: "해산물", why: "세발낙지·민어 등 품목별 시기가 다릅니다." },
+        { name: "담양 국수거리", d: "담양군", cat: "면요리", why: "죽녹원 산책과 도보로 이어집니다." },
+        { name: "나주 곰탕거리", d: "나주시", cat: "향토음식", why: "아침 식사로도 가능한 몇 안 되는 선택지입니다." },
+        { name: "벌교 꼬막 상권", d: "보성군", cat: "해산물", why: "제철은 겨울이며 그 외 시기는 품목이 제한됩니다." }
+      ],
+      holy: [
+        { name: "여수 낭만포차거리", d: "여수시", work: "노래·예능 배경", note: "야간 해안 구간이 방송에 자주 등장합니다." },
+        { name: "순천만국가정원", d: "순천시", work: "드라마 촬영지", note: "정원 구간이 배경으로 쓰였습니다." }
+      ]
+    },
+    {
+      slug: "gwangju", code: "5", name: "광주", full: "광주광역시", pos: [4, 2],
+      tagline: "한 상 차림과 골목 카페",
+      lead: "기본 상차림이 푸짐해 인원수보다 적게 주문하는 편이 좋습니다.",
+      districts: ["동구", "서구", "남구", "북구", "광산구"],
+      zones: [
+        { name: "양동시장 권역", desc: "규모가 큰 시장에서 품목별로 나눠 도는 구간입니다.", tip: "닭전·어물전 등 구역이 나뉘어 있습니다." },
+        { name: "동명동 권역", desc: "골목 카페와 식당이 섞여 있는 지역입니다.", tip: "저녁 시간대 주차가 어렵습니다." },
+        { name: "송정 권역", desc: "역과 붙어 있어 환승 여행에 어울리는 구간입니다.", tip: "떡갈비는 포장 수요가 많습니다." }
+      ],
+      eats: [
+        { name: "양동시장", d: "서구", cat: "전통시장", why: "구역이 넓어 목표 품목을 정하고 들어가세요." },
+        { name: "1913송정역시장", d: "광산구", cat: "전통시장", why: "역 바로 앞이라 기차 시간과 맞추기 쉽습니다." },
+        { name: "동명동 카페거리", d: "동구", cat: "카페", why: "식사 사이 휴식 지점으로 적합합니다." },
+        { name: "무등산 보리밥 상권", d: "북구", cat: "향토음식", why: "등산 후 점심으로 배치하기 좋습니다." },
+        { name: "충장로 분식 골목", d: "동구", cat: "분식", why: "소량씩 여러 가지를 맛보기 좋습니다." }
+      ],
+      holy: [
+        { name: "양림동 근대역사문화마을", d: "남구", work: "드라마 촬영지", note: "근대 가옥 구간이 배경으로 쓰였습니다." },
+        { name: "국립아시아문화전당 일대", d: "동구", work: "공연·팬 행사장", note: "공연 전후 식사 동선과 함께 묶입니다." }
+      ]
+    },
+    {
+      slug: "gyeongnam", code: "36", name: "경남", full: "경상남도", pos: [4, 3],
+      tagline: "항구 도시의 아침 밥상",
+      lead: "항구 도시는 아침이 가장 활발합니다. 첫 끼를 시장에서 시작하는 구성이 잘 맞습니다.",
+      districts: ["창원시", "진주시", "통영시", "사천시", "김해시", "거제시", "양산시", "남해군", "하동군", "합천군"],
+      zones: [
+        { name: "통영·거제 권역", desc: "시장과 섬 여행을 붙이기 좋은 구간입니다.", tip: "배 시간에 맞춰 식사 시간을 조정하세요." },
+        { name: "진주 권역", desc: "성곽 산책과 향토 음식을 함께 도는 지역입니다.", tip: "비빔밥은 점심 시간대에 회전이 빠릅니다." },
+        { name: "남해·하동 권역", desc: "해안 드라이브와 식사를 이어 붙이는 구간입니다.", tip: "이동 거리가 길어 주유·휴게 계획이 필요합니다." }
+      ],
+      eats: [
+        { name: "통영 중앙시장", d: "통영시", cat: "해산물", why: "충무김밥과 회를 한 구간에서 해결할 수 있습니다." },
+        { name: "서호시장 아침 상권", d: "통영시", cat: "향토음식", why: "새벽부터 문을 열어 이른 아침 식사가 가능합니다." },
+        { name: "진주 중앙시장", d: "진주시", cat: "전통시장", why: "비빔밥과 냉면을 함께 비교하기 좋습니다." },
+        { name: "마산 어시장", d: "창원시", cat: "해산물", why: "아귀찜 상권이 인근에 이어져 있습니다." },
+        { name: "남해 죽방렴 상권", d: "남해군", cat: "향토음식", why: "멸치쌈밥 위주라 취향 확인이 필요합니다." }
+      ],
+      holy: [
+        { name: "동피랑 벽화마을", d: "통영시", work: "드라마·예능 촬영지", note: "언덕 골목이 배경으로 자주 쓰입니다." },
+        { name: "합천영상테마파크", d: "합천군", work: "드라마·영화 세트장", note: "촬영 세트 관람 후 인근 식당과 묶습니다." }
+      ]
+    },
+    {
+      slug: "ulsan", code: "7", name: "울산", full: "울산광역시", pos: [4, 4],
+      tagline: "고래와 한우가 나뉘는 두 방향",
+      lead: "해안과 내륙의 성격이 뚜렷하게 다릅니다. 한 방향을 골라 반나절씩 잡으세요.",
+      districts: ["중구", "남구", "동구", "북구", "울주군"],
+      zones: [
+        { name: "태화강 권역", desc: "대숲 산책과 시장 먹거리를 잇는 구간입니다.", tip: "여름 저녁은 산책로가 붐빕니다." },
+        { name: "장생포 권역", desc: "고래문화마을과 해안 식당을 묶는 지역입니다.", tip: "관람 시설 입장 마감을 확인하세요." },
+        { name: "언양·봉계 권역", desc: "불고기 특구를 목적지로 잡는 구간입니다.", tip: "1인분 기준 양이 많아 인원 조절이 필요합니다." }
+      ],
+      eats: [
+        { name: "울산 중앙전통시장", d: "중구", cat: "전통시장", why: "도심에 있어 첫 일정으로 넣기 좋습니다." },
+        { name: "장생포 상권", d: "남구", cat: "향토음식", why: "관람 시설과 도보로 이어집니다." },
+        { name: "언양불고기 거리", d: "울주군", cat: "고기", why: "특구로 지정돼 가게 밀집도가 높습니다." },
+        { name: "봉계 한우불고기 특구", d: "울주군", cat: "고기", why: "언양과 조리 방식이 달라 비교해 볼 만합니다." },
+        { name: "정자항 상권", d: "북구", cat: "해산물", why: "대게·가자미 등 계절 품목이 바뀝니다." }
+      ],
+      holy: [
+        { name: "태화강 국가정원", d: "중구", work: "MV·화보 촬영지", note: "대숲 구간이 영상 배경으로 쓰입니다." },
+        { name: "간절곶", d: "울주군", work: "드라마 촬영지", note: "일출 구간이 배경으로 자주 등장합니다." }
+      ]
+    },
+    {
+      slug: "jeju", code: "39", name: "제주", full: "제주특별자치도", pos: [5, 1],
+      tagline: "동서로 갈리는 하루 코스",
+      lead: "제주시와 서귀포를 하루에 왕복하면 식사 시간이 무너집니다. 동선을 한쪽으로 몰아 잡으세요.",
+      districts: ["제주시", "서귀포시", "애월읍", "조천읍", "성산읍", "한림읍", "대정읍", "표선면"],
+      zones: [
+        { name: "제주시 권역", desc: "재래시장과 고깃집 상권이 도심에 모여 있습니다.", tip: "공항 도착 직후 첫 끼로 넣기 좋습니다." },
+        { name: "서귀포·성산 권역", desc: "일출 관람과 아침 식사를 붙이는 구간입니다.", tip: "성산 일출 시간은 계절마다 크게 다릅니다." },
+        { name: "애월·한림 권역", desc: "해안도로 카페와 식당이 이어지는 지역입니다.", tip: "주말 오후에는 주차 대기가 깁니다." }
+      ],
+      eats: [
+        { name: "동문재래시장", d: "제주시", cat: "전통시장", why: "회·간식·기념품을 한 번에 해결할 수 있습니다." },
+        { name: "흑돼지거리", d: "제주시", cat: "고기", why: "저녁 대기가 길어 예약 가능 여부를 확인하세요." },
+        { name: "서귀포 매일올레시장", d: "서귀포시", cat: "전통시장", why: "포장 위주로 사서 숙소에서 먹기 좋습니다." },
+        { name: "애월 해안도로 카페", d: "애월읍", cat: "카페", why: "일몰 시간에 맞추면 자리 경쟁이 심합니다." },
+        { name: "모슬포항 상권", d: "대정읍", cat: "해산물", why: "방어는 겨울에만 제철입니다." }
+      ],
+      holy: [
+        { name: "성산일출봉 일대", d: "성산읍", work: "드라마·MV 촬영지", note: "해안 구간이 여러 영상에 등장했습니다." },
+        { name: "협재해변 주변", d: "한림읍", work: "화보 촬영지", note: "해변 카페와 묶어 오후 동선이 됩니다." }
+      ]
+    },
+    {
+      slug: "busan", code: "6", name: "부산", full: "부산광역시", pos: [5, 4],
+      tagline: "항구 시장에서 시작하는 하루",
+      lead: "지하철로 대부분의 권역이 연결됩니다. 아침은 시장, 저녁은 해변 쪽으로 옮기는 구성이 편합니다.",
+      districts: ["중구", "서구", "동구", "영도구", "부산진구", "동래구", "남구", "북구", "해운대구", "사하구", "수영구", "기장군"],
+      zones: [
+        { name: "남포동·자갈치 권역", desc: "수산시장과 먹자골목이 도보로 이어지는 구간입니다.", tip: "야시장은 저녁에 열립니다." },
+        { name: "해운대·광안리 권역", desc: "해변 산책과 저녁 식사를 붙이기 좋은 지역입니다.", tip: "불꽃축제 기간에는 예약이 필수입니다." },
+        { name: "서면 권역", desc: "카페와 식당이 밀집한 도심 구간입니다.", tip: "지하상가 구조가 복잡해 출구를 미리 확인하세요." }
+      ],
+      eats: [
+        { name: "자갈치시장", d: "중구", cat: "해산물", why: "2층 식당가에서 손질까지 이어집니다." },
+        { name: "국제시장 먹자골목", d: "중구", cat: "먹자골목", why: "씨앗호떡·비빔당면을 나눠 먹기 좋습니다." },
+        { name: "부평깡통야시장", d: "중구", cat: "야시장", why: "저녁에만 열려 야간 일정으로 배치합니다." },
+        { name: "전포카페거리", d: "부산진구", cat: "카페", why: "식사 사이 휴식 지점으로 적합합니다." },
+        { name: "기장 대변항 상권", d: "기장군", cat: "해산물", why: "멸치는 봄, 대게는 겨울로 시기가 갈립니다." }
+      ],
+      holy: [
+        { name: "감천문화마을", d: "사하구", work: "드라마·MV 촬영지", note: "골목 전망대 구간이 배경으로 쓰입니다." },
+        { name: "청사포 해안", d: "해운대구", work: "드라마 촬영지", note: "포구 구간과 조개구이 상권이 붙어 있습니다." }
+      ]
+    }
+  ];
+
+  var BY_SLUG = {};
+  AREAS.forEach(function (a) { BY_SLUG[a.slug] = a; });
+
+  var saved = Object.create(null);
+  var state = { slug: null, district: "" };
+
+  var el = {
+    hub: document.getElementById("hubView"),
+    area: document.getElementById("areaView"),
+    urlPath: document.getElementById("urlPath"),
+    mapGrid: document.getElementById("mapGrid"),
+    hubStats: document.getElementById("hubStats"),
+    crumbArea: document.getElementById("crumbArea"),
+    areaEyebrow: document.getElementById("areaEyebrow"),
+    areaTitle: document.getElementById("areaTitle"),
+    areaLead: document.getElementById("areaLead"),
+    railScroll: document.getElementById("railScroll"),
+    railLabel: document.getElementById("railLabel"),
+    railPrev: document.getElementById("railPrev"),
+    railNext: document.getElementById("railNext"),
+    zoneGrid: document.getElementById("zoneGrid"),
+    zoneLead: document.getElementById("zoneLead"),
+    eatGrid: document.getElementById("eatGrid"),
+    eatEmpty: document.getElementById("eatEmpty"),
+    eatCount: document.getElementById("eatCount"),
+    holyGrid: document.getElementById("holyGrid"),
+    holyEmpty: document.getElementById("holyEmpty"),
+    checkList: document.getElementById("checkList"),
+    metaBlock: document.getElementById("metaBlock"),
+    siblingRail: document.getElementById("siblingRail"),
+    ctaTitle: document.getElementById("ctaTitle"),
+    modalRoot: document.getElementById("modalRoot"),
+    toastRoot: document.getElementById("toastRoot")
+  };
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  /* ---------- 토스트 ---------- */
+  var toastTimer = null;
+  function toast(msg) {
+    el.toastRoot.innerHTML = '<div class="toast" role="status">' + esc(msg) + "</div>";
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.toastRoot.innerHTML = ""; }, 2600);
+  }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-goto]");
+    if (!t) return;
+    toast("실제 서비스에서는 " + t.getAttribute("data-goto") + " 로 이동합니다");
+  });
+
+  /* ---------- 테마 ---------- */
+  var themeBtn = document.getElementById("themeToggle");
+  themeBtn.addEventListener("click", function () {
+    var root = document.documentElement;
+    var current = root.getAttribute("data-theme");
+    if (!current) {
+      current = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    root.setAttribute("data-theme", current === "dark" ? "light" : "dark");
+  });
+
+  /* ---------- 허브 ---------- */
+  function renderHub() {
+    var zones = 0, eats = 0, holy = 0, districts = 0;
+    AREAS.forEach(function (a) {
+      zones += a.zones.length;
+      eats += a.eats.length;
+      holy += a.holy.length;
+      districts += a.districts.length;
+    });
+
+    el.hubStats.innerHTML = [
+      ["17", "시·도 페이지"],
+      [String(districts), "시·군·구 필터"],
+      [String(zones), "권역 가이드"],
+      [String(eats), "대표 맛집 슬롯"],
+      [String(holy), "성지 맛집 슬롯"]
+    ].map(function (s) {
+      return '<div class="stat"><span class="stat__num">' + s[0] + '</span><span class="stat__label">' + s[1] + "</span></div>";
+    }).join("");
+
+    el.mapGrid.innerHTML = AREAS.map(function (a) {
+      return '<button type="button" class="tile" data-slug="' + a.slug + '" style="--r:' + a.pos[0] + ';--c:' + a.pos[1] + '">' +
+        '<span class="tile__code">area ' + a.code + "</span>" +
+        '<span class="tile__name">' + esc(a.name) + "</span>" +
+        '<span class="tile__meta">권역 <span>' + a.zones.length + "</span> · 맛집 <span>" + a.eats.length + "</span> · 성지 <span>" + a.holy.length + "</span></span>" +
+        "</button>";
+    }).join("");
+  }
+
+  el.mapGrid.addEventListener("click", function (e) {
+    var t = e.target.closest(".tile");
+    if (t) go(t.getAttribute("data-slug"));
+  });
+
+  document.getElementById("ctaSeoul").addEventListener("click", function () { go("seoul"); });
+  document.getElementById("crumbHome").addEventListener("click", function () { go(null); });
+
+  /* ---------- 지역 페이지 ---------- */
+  function eatCardHtml(item, isHoly) {
+    var id = (isHoly ? "h:" : "e:") + state.slug + ":" + item.name;
+    var mark = saved[id] ? '<span class="saved-mark" aria-hidden="true">♥</span>' : "";
+    return '<button type="button" class="eat" data-id="' + esc(id) + '">' +
+      '<span class="eat__top">' +
+        '<span class="tag' + (isHoly ? " tag--holy" : "") + '">' + esc(isHoly ? item.work : item.cat) + "</span>" + mark +
+      "</span>" +
+      '<span class="eat__name">' + esc(item.name) + "</span>" +
+      '<span class="eat__where">' + esc(item.d) + "</span>" +
+      '<span class="eat__why">' + esc(isHoly ? item.note : item.why) + "</span>" +
+      (isHoly ? '<span class="tag tag--sample" style="align-self:flex-start">샘플 연결</span>' : "") +
+      "</button>";
+  }
+
+  var lookup = Object.create(null);
+
+  function renderArea() {
+    var a = BY_SLUG[state.slug];
+    if (!a) return;
+
+    el.crumbArea.textContent = a.name;
+    el.areaEyebrow.textContent = a.full + " 맛집 여행 가이드";
+    el.areaTitle.textContent = a.name + " 맛집, " + a.tagline;
+    el.areaLead.textContent = a.lead;
+    el.zoneLead.textContent = a.lead;
+    el.railLabel.textContent = a.name + " 시·군·구 선택";
+    document.getElementById("areaExplore").setAttribute("data-goto", "/view/TOUR_EXPLORE?area=" + a.code);
+    el.ctaTitle.textContent = a.name + " 일정에 맞춰 코스를 만들어 보세요.";
+
+    // 시·군·구 칩
+    var chips = ['<button type="button" class="chip" data-d="" aria-pressed="' + (state.district === "") + '">' + esc(a.name) + " 전체</button>"];
+    a.districts.forEach(function (d) {
+      chips.push('<button type="button" class="chip" data-d="' + esc(d) + '" aria-pressed="' + (state.district === d) + '">' + esc(d) + "</button>");
+    });
+    el.railScroll.innerHTML = chips.join("");
+    updateRail();
+
+    // 권역
+    el.zoneGrid.innerHTML = a.zones.map(function (z) {
+      return '<article class="card"><h3>' + esc(z.name) + "</h3><p>" + esc(z.desc) + '</p><p class="card__tip">' + esc(z.tip) + "</p></article>";
+    }).join("");
+
+    // 맛집 / 성지
+    lookup = Object.create(null);
+    var eats = a.eats.filter(function (x) { return !state.district || x.d === state.district; });
+    var holies = a.holy.filter(function (x) { return !state.district || x.d === state.district; });
+
+    a.eats.forEach(function (x) { lookup["e:" + a.slug + ":" + x.name] = { item: x, holy: false }; });
+    a.holy.forEach(function (x) { lookup["h:" + a.slug + ":" + x.name] = { item: x, holy: true }; });
+
+    el.eatCount.textContent = eats.length + " / " + a.eats.length + " places";
+    el.eatGrid.innerHTML = eats.map(function (x) { return eatCardHtml(x, false); }).join("");
+    el.eatEmpty.hidden = eats.length > 0;
+    el.holyGrid.innerHTML = holies.map(function (x) { return eatCardHtml(x, true); }).join("");
+    el.holyEmpty.hidden = holies.length > 0;
+
+    // 체크리스트
+    el.checkList.innerHTML = CHECKLIST.map(function (c) { return "<li>" + esc(c) + "</li>"; }).join("");
+
+    // 메타
+    var scope = state.district ? a.name + " " + state.district : a.name;
+    el.metaBlock.innerHTML =
+      '<b>title</b>  ' + esc(scope) + ' 맛집 여행 가이드 | KRIDE<br>' +
+      '<b>desc</b>   ' + esc(a.name) + ' 권역별 맛집 동선과 성지 맛집을 한 번에. 이동 시간까지 고려한 코스를 만들어 보세요.<br>' +
+      '<b>canon</b>  <span class="k">https://yerin.duckdns.org/travel/food/' + a.slug + "</span><br>" +
+      '<b>og</b>     summary_large_image · 권역 대표 이미지<br>' +
+      '<b>jsonld</b> BreadcrumbList + ItemList(권역 ' + a.zones.length + ')<br>' +
+      '<b>api</b>    <span class="k">GET /api/tour/pois?areaCode=' + a.code + '&amp;contentTypeId=39</span><br>' +
+      '<b>api</b>    <span class="k">GET /api/holy/pois?areaCode=' + a.code + "&amp;kind=FOOD</span>";
+
+    // 다른 지역
+    var idx = AREAS.indexOf(a);
+    var sibs = [];
+    for (var i = 1; sibs.length < 6; i++) {
+      if (AREAS[(idx + i) % AREAS.length] === a) break;
+      sibs.push(AREAS[(idx + i) % AREAS.length]);
+    }
+    el.siblingRail.innerHTML = sibs.map(function (s) {
+      return '<button type="button" class="chip" data-slug="' + s.slug + '">' + esc(s.name) + " 맛집</button>";
+    }).join("");
+  }
+
+  el.siblingRail.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-slug]");
+    if (t) { go(t.getAttribute("data-slug")); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  });
+
+  el.railScroll.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-d]");
+    if (!t) return;
+    state.district = t.getAttribute("data-d");
+    renderArea();
+    setUrl();
+  });
+
+  /* ---------- 칩 레일 스크롤 ---------- */
+  function updateRail() {
+    var r = el.railScroll;
+    var max = r.scrollWidth - r.clientWidth;
+    el.railPrev.disabled = r.scrollLeft <= 2;
+    el.railNext.disabled = max - r.scrollLeft <= 2;
+  }
+
+  el.railScroll.addEventListener("scroll", updateRail, { passive: true });
+  window.addEventListener("resize", updateRail);
+  el.railPrev.addEventListener("click", function () {
+    el.railScroll.scrollBy({ left: -Math.max(el.railScroll.clientWidth * 0.7, 200) });
+  });
+  el.railNext.addEventListener("click", function () {
+    el.railScroll.scrollBy({ left: Math.max(el.railScroll.clientWidth * 0.7, 200) });
+  });
+
+  /* ---------- 상세 모달 ---------- */
+  var lastFocus = null;
+
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest(".eat");
+    if (!t) return;
+    lastFocus = t;
+    openModal(t.getAttribute("data-id"));
+  });
+
+  function openModal(id) {
+    var rec = lookup[id];
+    if (!rec) return;
+    var item = rec.item;
+    var a = BY_SLUG[state.slug];
+    var mapsUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(a.name + " " + item.name);
+    var isSaved = !!saved[id];
+
+    el.modalRoot.innerHTML =
+      '<div class="backdrop" data-close><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">' +
+        '<div class="modal__head">' +
+          "<div>" +
+            '<span class="tag' + (rec.holy ? " tag--holy" : "") + '">' + esc(rec.holy ? item.work : item.cat) + "</span>" +
+            '<h3 id="mTitle" style="margin-top:8px">' + esc(item.name) + "</h3>" +
+            '<p style="margin:4px 0 0;font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3)">' + esc(a.full + " " + item.d) + "</p>" +
+          "</div>" +
+          '<button type="button" class="modal__close" data-close aria-label="닫기">✕</button>' +
+        "</div>" +
+        '<dl class="modal__why"><dt>' + (rec.holy ? "어떤 작품과 이어지나요?" : "왜 추천하나요?") + "</dt><dd>" + esc(rec.holy ? item.note : item.why) + "</dd></dl>" +
+        '<p style="margin:14px 0 0;font-size:11.5px;color:var(--ink-3);font-family:var(--font-mono)">sample data · 실제 화면은 TourAPI 응답으로 채워집니다</p>' +
+        '<div class="modal__row">' +
+          '<a class="btn" href="' + mapsUrl + '" target="_blank" rel="noopener noreferrer">구글지도에서 보기</a>' +
+          '<button type="button" class="btn btn--ghost" data-save="' + esc(id) + '" style="flex:0 0 auto" aria-label="' + esc(item.name) + (isSaved ? " 저장 취소" : " 저장") + '">' + (isSaved ? "♥" : "♡") + "</button>" +
+        "</div>" +
+      "</div></div>";
+
+    var closeBtn = el.modalRoot.querySelector(".modal__close");
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function closeModal() {
+    if (!el.modalRoot.innerHTML) return;
+    el.modalRoot.innerHTML = "";
+    if (lastFocus && lastFocus.isConnected) lastFocus.focus();
+  }
+
+  el.modalRoot.addEventListener("click", function (e) {
+    if (e.target.closest("[data-save]")) {
+      var id = e.target.closest("[data-save]").getAttribute("data-save");
+      saved[id] = !saved[id];
+      renderArea();
+      openModal(id);
+      toast(saved[id] ? "저장했습니다" : "저장을 취소했습니다");
+      return;
+    }
+    if (e.target.hasAttribute("data-close") || e.target.closest(".modal__close")) closeModal();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (!el.modalRoot.innerHTML) return;
+    if (e.key === "Escape") { e.preventDefault(); closeModal(); return; }
+    if (e.key !== "Tab") return;
+    var nodes = Array.prototype.slice.call(
+      el.modalRoot.querySelectorAll('a[href], button:not([disabled])')
+    );
+    if (!nodes.length) return;
+    var first = nodes[0], last = nodes[nodes.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+
+  /* ---------- 라우팅 ---------- */
+  function setUrl() {
+    var path = state.slug ? "/travel/food/" + state.slug : "/travel/food";
+    var q = state.slug && state.district ? "?sigungu=" + encodeURIComponent(state.district) : "";
+    el.urlPath.innerHTML = "yerin.duckdns.org<b>" + esc(path) + "</b>" +
+      (q ? '<span style="color:var(--ink-3)">' + esc(q) + "</span>" : "");
+  }
+
+  function go(slug) {
+    closeModal();
+    state.slug = slug && BY_SLUG[slug] ? slug : null;
+    state.district = "";
+    if (state.slug) {
+      el.hub.hidden = true;
+      el.area.hidden = false;
+      renderArea();
+    } else {
+      el.area.hidden = true;
+      el.hub.hidden = false;
+    }
+    setUrl();
+    if (location.hash.slice(1) !== (state.slug || "")) {
+      location.hash = state.slug || "";
+    }
+  }
+
+  window.addEventListener("hashchange", function () {
+    var slug = location.hash.slice(1);
+    if ((slug || null) !== state.slug) go(slug || null);
+  });
+
+  renderHub();
+  go(location.hash.slice(1) || null);
+})();
+</script>
