@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { SCREEN_MAP } from "@/components/constants/screenMap";
 import { normalizeNode } from "@/components/DynamicEngine/normalizeNode";
 import { useDynamicEngine } from "@/components/DynamicEngine/useDynamicEngine";
-import { buildDirectApiParams, buildExecuteParams, resolveDataApiUrl } from "@/components/DynamicEngine/hook/usePageMetadata";
+import { buildDirectApiParams, buildExecuteParams, readFrameworkParams, resolveDataApiUrl } from "@/components/DynamicEngine/hook/usePageMetadata";
 import Chart from "@/components/fields/stats/Chart";
 import StatCard from "@/components/fields/stats/StatCard";
 import { normalizeChartData, readMetaProps } from "@/components/fields/stats/statsUtils";
@@ -199,73 +199,34 @@ describe("MY_PAGE SDUI config helpers", () => {
         expect(resolveDataApiUrl("/kride-api/users/{userSqno}/summary", {})).toBeNull();
     });
 
-    it("keeps server identity out of K-POP SQL payloads", () => {
-        const context = {
-            pageSize: 5,
-            offset: 0,
-            filterId: "member@example.com",
-            contentId: null,
-        };
+    it("메타데이터가 선언한 프레임워크 파라미터만 싣는다", () => {
+        const context = { pageSize: 5, offset: 10, filterId: "member@example.com", contentId: 7 };
 
-        expect(buildExecuteParams("kpop_artist_cards", {}, context)).toEqual({
-            pageSize: 5,
-            offset: 0,
-        });
-        expect(buildExecuteParams("kpop_artist_detail", {}, { ...context, contentId: 7 })).toEqual({
-            contentId: 7,
-        });
-        expect(buildExecuteParams("kpop_artist_cards", {}, { ...context, pageSize: 8, offset: 16 })).toEqual({
-            pageSize: 8,
-            offset: 16,
-        });
-    });
+        // 선언이 없으면 아무것도 얹지 않는다. 백엔드가 거절하는 쪽이 기본값이면 안 된다.
+        expect(buildExecuteParams({}, context)).toEqual({});
+        expect(buildExecuteParams({ locale: "ko" }, context)).toEqual({ locale: "ko" });
 
-    it("keeps framework-generated params out of MY_PAGE SQL payloads", () => {
-        const context = {
+        // 선언한 것만 채운다.
+        expect(buildExecuteParams({}, context, ["pageSize", "offset"])).toEqual({
             pageSize: 5,
             offset: 10,
-            filterId: "member@example.com",
-            contentId: 99,
-        };
-
-        expect(buildExecuteParams("mypage_profile", {}, context)).toEqual({});
-        expect(buildExecuteParams("mypage_goal_stats", { locale: "ko" }, context)).toEqual({
+        });
+        expect(buildExecuteParams({}, context, ["contentId"])).toEqual({ contentId: 7 });
+        expect(buildExecuteParams({ locale: "ko" }, context, ["filterId"])).toEqual({
             locale: "ko",
+            filterId: "member@example.com",
         });
     });
 
-    it("keeps framework-generated params out of admin dashboard SQL payloads", () => {
-        // 관리자 대시보드 쿼리(admin_community_stats 등)는 인자를 받지 않는다.
-        // pageSize·offset·filterId·contentId 를 얹으면 백엔드가
-        // QUERY_PARAMETER_NOT_ALLOWED 로 거절해 로그인 직후 화면이 통째로 실패한다.
-        const context = {
-            pageSize: 5,
-            offset: 10,
-            filterId: "admin@example.com",
-            contentId: 99,
-        };
-
-        expect(buildExecuteParams("admin_community_stats", {}, context)).toEqual({});
-        expect(buildExecuteParams("admin_media_usage", {}, context)).toEqual({});
-        expect(buildExecuteParams("admin_goal_success", { locale: "ko" }, context)).toEqual({
-            locale: "ko",
-        });
-    });
-
-    it("still paginates ordinary list queries", () => {
-        // 목록 화면은 여전히 페이징 파라미터가 필요하다. 위 예외가 전체 기본값을
-        // 바꾸지 않았는지 함께 고정한다.
-        expect(buildExecuteParams("community_list", {}, {
-            pageSize: 5,
-            offset: 10,
-            filterId: "member@example.com",
-            contentId: 3,
-        })).toEqual({
-            pageSize: 5,
-            offset: 10,
-            filterId: "member@example.com",
-            contentId: 3,
-        });
+    it("선언이 비었거나 알 수 없는 이름은 무시한다", () => {
+        expect(readFrameworkParams(null)).toEqual([]);
+        expect(readFrameworkParams({})).toEqual([]);
+        expect(readFrameworkParams({ frameworkParams: "pageSize" })).toEqual([]);
+        expect(readFrameworkParams({ frameworkParams: ["pageSize", "dropTable", 7] })).toEqual([
+            "pageSize",
+        ]);
+        // 중복 선언은 한 번만 남는다.
+        expect(readFrameworkParams({ frameworkParams: ["offset", "offset"] })).toEqual(["offset"]);
     });
 
     it("keeps framework-generated query params out of direct API requests", () => {
