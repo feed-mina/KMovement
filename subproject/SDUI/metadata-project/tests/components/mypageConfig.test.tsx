@@ -234,6 +234,40 @@ describe("MY_PAGE SDUI config helpers", () => {
         });
     });
 
+    it("keeps framework-generated params out of admin dashboard SQL payloads", () => {
+        // 관리자 대시보드 쿼리(admin_community_stats 등)는 인자를 받지 않는다.
+        // pageSize·offset·filterId·contentId 를 얹으면 백엔드가
+        // QUERY_PARAMETER_NOT_ALLOWED 로 거절해 로그인 직후 화면이 통째로 실패한다.
+        const context = {
+            pageSize: 5,
+            offset: 10,
+            filterId: "admin@example.com",
+            contentId: 99,
+        };
+
+        expect(buildExecuteParams("admin_community_stats", {}, context)).toEqual({});
+        expect(buildExecuteParams("admin_media_usage", {}, context)).toEqual({});
+        expect(buildExecuteParams("admin_goal_success", { locale: "ko" }, context)).toEqual({
+            locale: "ko",
+        });
+    });
+
+    it("still paginates ordinary list queries", () => {
+        // 목록 화면은 여전히 페이징 파라미터가 필요하다. 위 예외가 전체 기본값을
+        // 바꾸지 않았는지 함께 고정한다.
+        expect(buildExecuteParams("community_list", {}, {
+            pageSize: 5,
+            offset: 10,
+            filterId: "member@example.com",
+            contentId: 3,
+        })).toEqual({
+            pageSize: 5,
+            offset: 10,
+            filterId: "member@example.com",
+            contentId: 3,
+        });
+    });
+
     it("keeps framework-generated query params out of direct API requests", () => {
         expect(buildDirectApiParams({})).toEqual({});
         expect(buildDirectApiParams({ limit: 8, locale: "ko" })).toEqual({

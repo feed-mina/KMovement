@@ -48,7 +48,11 @@ export function buildExecuteParams(
             : { ...parsedParams };
     }
 
-    if (sqlKey.startsWith('mypage_')) {
+    // 백엔드(QueryParameterPolicy)는 param_mapping 에 없는 파라미터를 거절한다.
+    // 목록/페이징이 없는 화면에 pageSize·offset·filterId·contentId 를 얹으면
+    // QUERY_PARAMETER_NOT_ALLOWED 로 화면 전체가 실패한다.
+    // 대시보드·마이페이지 쿼리는 인자를 받지 않으므로 선언된 것만 보낸다.
+    if (sqlKey.startsWith('mypage_') || sqlKey.startsWith('admin_')) {
         return { ...parsedParams };
     }
 
