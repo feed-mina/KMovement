@@ -35,12 +35,23 @@ interface TourPoiResponse {
     firstImage?: string;
 }
 
-interface HolyPoiResponse extends TourPoiResponse {
+export interface HolyPoiResponse extends TourPoiResponse {
     artist?: string;
     fandomInfo?: string;
     recommendReason?: string;
     imageSourceUrl?: string;
     imageCredit?: string;
+}
+
+/**
+ * 지역 조회에 필요한 최소 정보. FoodAreaGuide 와 KpopAreaGuide 가 모두 만족한다.
+ * 두 가이드가 같은 성지 API 를 쓰므로 매핑 로직을 공유하기 위한 것이다.
+ */
+export interface AreaLike {
+    slug: string;
+    name: string;
+    fullName: string;
+    districts: string[];
 }
 
 /** 한 지역 페이지가 보여줄 최대 장소 수. */
@@ -59,7 +70,7 @@ export function resolveBackendBaseUrl(): string {
  * TourAPI 주소는 '부산광역시 중구 …' 형태라 지역 목록과 대조하면 칩 표기를 맞출 수 있다.
  * 찾지 못하면 시·도 이름으로 되돌린다 — 빈 칸을 두지 않기 위해서다.
  */
-export function districtFromAddress(addr: string | undefined, area: FoodAreaGuide): string {
+export function districtFromAddress(addr: string | undefined, area: AreaLike): string {
     if (!addr) return area.name;
     // 긴 이름부터 확인해야 '중구'가 '서중구' 같은 이름을 가로채지 않는다.
     const ordered = [...area.districts].sort((a, b) => b.length - a.length);
@@ -79,7 +90,20 @@ function toSpotView(poi: TourPoiResponse, area: FoodAreaGuide, index: number): F
     };
 }
 
-function toHolySpotView(poi: HolyPoiResponse, area: FoodAreaGuide, index: number): FoodSpotView | null {
+/** 작품·아티스트 값이 비어 있을 때 쓸 기본 표기. 맛집과 K-POP 이 다른 문구를 쓴다. */
+export interface HolyViewDefaults {
+    tag: string;
+    body: string;
+}
+
+const FOOD_HOLY_DEFAULTS: HolyViewDefaults = { tag: '성지 맛집', body: '촬영지 식당입니다.' };
+
+export function toHolySpotView(
+    poi: HolyPoiResponse,
+    area: AreaLike,
+    index: number,
+    defaults: HolyViewDefaults = FOOD_HOLY_DEFAULTS,
+): FoodSpotView | null {
     const name = poi.title?.trim();
     if (!name) return null;
     const imageSourceUrl = safeHttpUrl(poi.imageSourceUrl);
@@ -87,9 +111,9 @@ function toHolySpotView(poi: HolyPoiResponse, area: FoodAreaGuide, index: number
     return {
         key: poi.contentId || `${area.slug}-holy-${index}`,
         name,
-        tag: poi.artist?.trim() || '성지 맛집',
+        tag: poi.artist?.trim() || defaults.tag,
         district: districtFromAddress(poi.addr, area),
-        body: poi.recommendReason?.trim() || poi.fandomInfo?.trim() || poi.addr?.trim() || `${area.fullName}의 촬영지 식당입니다.`,
+        body: poi.recommendReason?.trim() || poi.fandomInfo?.trim() || poi.addr?.trim() || `${area.fullName}의 ${defaults.body}`,
         image: safeHttpUrl(poi.firstImage, true),
         // 출처 링크와 표기가 모두 있을 때만 권리 표기를 붙인다. 한쪽만으로는 표기가 성립하지 않는다.
         imageSourceUrl: credit ? imageSourceUrl : undefined,
@@ -121,7 +145,7 @@ export function curatedHolyViews(area: FoodAreaGuide): FoodSpotView[] {
  * 백엔드 ApiResponse의 data 배열을 꺼낸다.
  * 네트워크 오류·비정상 응답·타임아웃은 모두 빈 배열로 흡수한다 — 호출 측이 큐레이션으로 되돌리도록.
  */
-async function fetchList<T>(path: string, params: Record<string, string>): Promise<T[]> {
+export async function fetchList<T>(path: string, params: Record<string, string>): Promise<T[]> {
     const url = new URL(path, resolveBackendBaseUrl());
     Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
 

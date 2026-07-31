@@ -54,4 +54,23 @@ public interface TourPoiRepository extends JpaRepository<TourPoi, Long> {
             Pageable pageable);
 
     Optional<TourPoi> findFirstBySourceUrlAndReviewStatus(String sourceUrl, String reviewStatus);
+
+    /**
+     * 사진 보강 대상: 승인된 성지 중 대표 이미지가 없고 좌표가 있는 행.
+     * 좌표가 없으면 TourAPI 반경 검색을 걸 수 없으므로 애초에 제외한다.
+     * 한 번에 다 돌리면 TourAPI 쿼터를 넘기므로 Pageable 로 나눠 처리한다.
+     */
+    @Query("""
+            SELECT p FROM TourPoi p
+            WHERE p.source <> :excludedSource
+              AND p.reviewStatus = :reviewStatus
+              AND (p.firstImage IS NULL OR TRIM(p.firstImage) = '')
+              AND p.mapX IS NOT NULL
+              AND p.mapY IS NOT NULL
+            ORDER BY p.poiSqno ASC
+            """)
+    List<TourPoi> findHolyPoisMissingImage(
+            @Param("excludedSource") String excludedSource,
+            @Param("reviewStatus") String reviewStatus,
+            Pageable pageable);
 }

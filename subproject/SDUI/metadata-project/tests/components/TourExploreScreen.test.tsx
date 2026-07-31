@@ -16,6 +16,12 @@ jest.mock('@/services/tourApi', () => ({
 
 jest.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { socialType: 'K' }, isLoggedIn: true }) }));
 
+// 진입 URL의 ?area= 를 테스트마다 갈아끼운다.
+let mockSearchParams = new URLSearchParams();
+jest.mock('next/navigation', () => ({
+    useSearchParams: () => mockSearchParams,
+}));
+
 const mockedFetch = fetchTourPois as jest.Mock;
 const mockedHolyFetch = fetchHolyPois as jest.Mock;
 const mockedContentFetch = fetchHolyContents as jest.Mock;
@@ -29,6 +35,7 @@ const sample = [
 
 describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
     beforeEach(() => {
+        mockSearchParams = new URLSearchParams();
         mockedFetch.mockReset();
         mockedFetch.mockResolvedValue(sample);
         mockedHolyFetch.mockReset();
@@ -163,6 +170,39 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         // 전국 시드(V90)는 시·군·구 코드가 없어 주소 매칭용 이름도 함께 보낸다.
         await waitFor(() => expect(mockedHolyFetch).toHaveBeenCalledWith(
             { areaCode: '31', sigunguCode: '13', sigunguName: '수원시' }));
+    });
+
+    it('?area= 로 들어오면 해당 시·도로 열린다', async () => {
+        // 맛집 랜딩(/travel/food/busan)의 "부산 탐색하기" 진입 경로.
+        mockSearchParams = new URLSearchParams('area=6');
+        renderScreen();
+
+        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '6' })));
+        // 시·군·구 목록도 같은 지역으로 따라간다.
+        await waitFor(() => expect(mockedDistrictFetch).toHaveBeenCalledWith('6'));
+        expect(mockedFetch).not.toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1' }));
+    });
+
+    it('?area= 가 없거나 모르는 코드면 기본 지역으로 연다', async () => {
+        mockSearchParams = new URLSearchParams('area=9999');
+        const { unmount } = renderScreen();
+        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1' })));
+        unmount();
+
+        mockedFetch.mockClear();
+        mockSearchParams = new URLSearchParams();
+        renderScreen();
+        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1' })));
+    });
+
+    it('?area= 로 열어도 이후 칩 선택이 URL에 묶이지 않는다', async () => {
+        mockSearchParams = new URLSearchParams('area=6');
+        renderScreen();
+        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '6' })));
+
+        fireEvent.click(await screen.findByRole('button', { name: '경기도' }));
+
+        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '31' })));
     });
 
     it('성지 맛집 칩은 kind=FOOD로 조회하고 작품 필터를 함께 쓸 수 있다', async () => {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import type { ScreenControllerProps } from '@/components/screens/types';
 import {
     fetchHolyContents,
@@ -62,6 +63,19 @@ const FALLBACK_SEOUL_DISTRICTS: TourRegion[] = [
     { code: '23', name: '종로구' }, { code: '24', name: '중구' },
     { code: '25', name: '중랑구' },
 ];
+
+const DEFAULT_AREA_CODE = '1';
+
+/**
+ * ?area= 로 들어온 시·도 코드를 검증한다.
+ * 맛집 랜딩(/travel/food/{area})에서 지역을 물고 넘어올 때 쓴다.
+ * 모르는 값·빈 값은 기본 지역으로 둔다 — 잘못된 코드로 빈 목록을 보여주지 않기 위해서다.
+ */
+export function resolveAreaParam(value?: string | null): string {
+    const code = value?.trim();
+    if (!code) return DEFAULT_AREA_CODE;
+    return FALLBACK_AREAS.some((area) => area.code === code) ? code : DEFAULT_AREA_CODE;
+}
 
 const SORTS = [
     { code: 'A', label: '이름순' },
@@ -167,8 +181,10 @@ function HorizontalFilterRail({
 }
 
 export default function TourExploreScreen(_props: ScreenControllerProps) {
+    const searchParams = useSearchParams();
     const [category, setCategory] = useState('39');
-    const [areaCode, setAreaCode] = useState('1');
+    // 진입 시점의 ?area= 만 반영한다. 이후 칩 선택은 URL과 무관하게 움직인다.
+    const [areaCode, setAreaCode] = useState(() => resolveAreaParam(searchParams?.get('area')));
     const [sigungu, setSigungu] = useState('');
     const [areas, setAreas] = useState<TourRegion[]>(FALLBACK_AREAS);
     const [districts, setDistricts] = useState<TourRegion[]>(FALLBACK_SEOUL_DISTRICTS);

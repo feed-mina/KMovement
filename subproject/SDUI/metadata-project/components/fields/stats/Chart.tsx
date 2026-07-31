@@ -1,5 +1,6 @@
 'use client';
 
+import Link from "next/link";
 import { KrideSkeleton } from "@/components/fields/kride/atoms/KridePrimitives";
 import { formatMetric, normalizeChartData, readClassName, readLabel, readMetaProps, selectDataPath } from "./statsUtils";
 
@@ -13,12 +14,30 @@ function chartTypeFrom(metaClass: string, explicitType?: unknown) {
   return "bar";
 }
 
-function EmptyChart({ title }: { title: string }) {
+// 빈 차트는 기다리라고만 말하기 쉽다. 데이터를 만들 수 있는 화면이 있으면
+// 그 입구를 함께 두어, 빈 카드가 다음 행동으로 이어지게 한다.
+// HISTORY_LIST가 쓰는 emptyText/actionText/actionUrl 계약을 그대로 따른다.
+function EmptyChart({
+  title,
+  emptyText,
+  actionText,
+  actionUrl,
+}: {
+  title: string;
+  emptyText?: string;
+  actionText?: string;
+  actionUrl?: string;
+}) {
   return (
     <div className="stats-chart__empty" role="status">
       <span className="stats-empty-illustration" aria-hidden="true" />
       <strong>{title || "Chart"}</strong>
-      <p>데이터가 쌓이면 라이와 함께 흐름을 보여드릴게요.</p>
+      <p>{emptyText || "데이터가 쌓이면 라이와 함께 흐름을 보여드릴게요."}</p>
+      {actionText && actionUrl && (
+        <Link className="stats-chart__empty-action" href={actionUrl}>
+          {actionText}
+        </Link>
+      )}
     </div>
   );
 }
@@ -193,7 +212,12 @@ export default function Chart({ id, meta, data }: any) {
         {caption && <p>{caption}</p>}
       </div>
       {points.length === 0 ? (
-        <EmptyChart title={title} />
+        <EmptyChart
+          title={title}
+          emptyText={props.emptyText === undefined || props.emptyText === null ? undefined : String(props.emptyText)}
+          actionText={props.actionText === undefined || props.actionText === null ? undefined : String(props.actionText)}
+          actionUrl={props.actionUrl === undefined || props.actionUrl === null ? undefined : String(props.actionUrl)}
+        />
       ) : type === "line" ? (
         <LineChart points={points} />
       ) : type === "donut" ? (

@@ -1,4 +1,4 @@
-import { foodAreaPath, foodAreaSlugs } from './travelContent';
+import { foodAreaPath, foodAreaSlugs, kpopAreaPath, kpopAreaSlugs } from './travelContent';
 
 const FALLBACK_SITE_URL = 'https://yerin.duckdns.org';
 
@@ -35,7 +35,8 @@ export function isSearchIndexingEnabled() {
 
 export const publicMarketingPaths = [
     '/',
-    '/travel/seoul-kpop',
+    '/travel/kpop',
+    ...kpopAreaSlugs.map(kpopAreaPath),
     '/travel/food',
     ...foodAreaSlugs.map(foodAreaPath),
 ];

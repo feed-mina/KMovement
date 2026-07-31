@@ -62,10 +62,15 @@ const nextConfig: NextConfig = {
     },
     async redirects() {
         return [
-            // 서울 한정이던 맛집 가이드가 전국으로 확장되면서 시·도별 경로로 옮겼다.
+            // 서울 한정이던 가이드가 시·도별 경로로 옮겨졌다.
             {
                 source: '/travel/seoul-food',
                 destination: '/travel/food/seoul',
+                permanent: true,
+            },
+            {
+                source: '/travel/seoul-kpop',
+                destination: '/travel/kpop/seoul',
                 permanent: true,
             },
         ];

@@ -228,6 +228,77 @@ public class TourService {
         return HolyReviewItemDto.from(tourPoiRepository.save(poi));
     }
 
+    /** 사진 보강 1회 실행 결과. */
+    public record HolyImageBackfillResult(int scanned, int filled, int skippedNoCandidate, int failed) {}
+
+    /** 반경 검색 기본값(m). 좌표 정밀도 편차와 건물 규모를 감안한 값. */
+    static final int BACKFILL_RADIUS_METERS = 300;
+    private static final int BACKFILL_CANDIDATES = 20;
+
+    /**
+     * 사진 없는 성지에 TourAPI 대표 이미지를 채운다.
+     *
+     * <p>전국 시드 9,017곳 중 대표 이미지가 있는 곳은 127곳뿐이라 목록이 자리표시자로 채워진다.
+     * 성지 시드는 TourAPI content_id 를 갖고 있지 않으므로 좌표 반경으로 후보를 좁힌 뒤
+     * 이름이 충분히 일치할 때만 사진을 옮긴다 — 옆 가게 사진이 붙는 편이 빈 카드보다 나쁘다.</p>
+     *
+     * <p>한 번에 전부 돌리지 않고 {@code limit} 만큼만 처리한다. TourAPI 는 POI 당 1회 호출이라
+     * 일일 쿼터를 넘기기 쉽다. 운영에서는 나눠 여러 번 실행한다.</p>
+     */
+    @Transactional
+    public HolyImageBackfillResult backfillHolyImages(int limit, int radiusMeters) {
+        int size = Math.max(1, Math.min(limit, 500));
+        int radius = Math.max(50, Math.min(radiusMeters, 20000));
+        List<TourPoi> targets = tourPoiRepository
+                .findHolyPoisMissingImage(SOURCE_TOURAPI, REVIEW_APPROVED, PageRequest.of(0, size));
+
+        int filled = 0;
+        int skipped = 0;
+        int failed = 0;
+
+        for (TourPoi poi : targets) {
+            try {
+                List<TourPoiDto> candidates = tourApiClient
+                        .locationBasedList(poi.getMapX(), poi.getMapY(), radius, BACKFILL_CANDIDATES);
+                TourPoiDto match = bestImageMatch(poi.getTitle(), candidates);
+                if (match == null) {
+                    skipped += 1;
+                    continue;
+                }
+                poi.setFirstImage(match.firstImage());
+                // TourAPI 이미지는 출처가 명확하므로 별도 권리 표기 URL 없이 제공처만 남긴다.
+                poi.setImageCredit("한국관광공사 TourAPI");
+                poi.setUpdatedAt(LocalDateTime.now());
+                filled += 1;
+            } catch (RuntimeException e) {
+                // 한 건 실패로 배치 전체를 멈추지 않는다. 남은 건은 다음 실행에서 다시 잡힌다.
+                failed += 1;
+                log.warn("성지 사진 보강 실패 poiSqno={} title={}", poi.getPoiSqno(), poi.getTitle(), e);
+            }
+        }
+
+        log.info("성지 사진 보강 완료 scanned={} filled={} skipped={} failed={}",
+                targets.size(), filled, skipped, failed);
+        return new HolyImageBackfillResult(targets.size(), filled, skipped, failed);
+    }
+
+    /** 반경 후보 중 이미지가 있고 이름이 가장 잘 맞는 하나. 기준 미달이면 null. */
+    static TourPoiDto bestImageMatch(String title, List<TourPoiDto> candidates) {
+        if (title == null || candidates == null) return null;
+        TourPoiDto best = null;
+        double bestScore = 0d;
+        for (TourPoiDto candidate : candidates) {
+            String image = candidate.firstImage();
+            if (image == null || image.isBlank()) continue;
+            double score = PoiTitleMatcher.similarity(title, candidate.title());
+            if (score > bestScore) {
+                bestScore = score;
+                best = candidate;
+            }
+        }
+        return bestScore >= PoiTitleMatcher.MIN_SIMILARITY ? best : null;
+    }
+
     private String required(String value, String field, int max) {
         if (value == null || value.isBlank()) throw new IllegalArgumentException(field + " is required");
         String clean = value.trim();

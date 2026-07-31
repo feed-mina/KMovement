@@ -86,6 +86,42 @@ public class TourApiClient {
     }
 
     /**
+     * 위치기반 관광정보 조회(locationBasedList2).
+     *
+     * <p>성지 시드는 TourAPI content_id 가 없어 ID 로 이어 붙일 수 없다. 좌표 반경으로
+     * 후보를 좁힌 뒤 이름으로 같은 장소인지 확인하는 사진 보강 경로에서 쓴다.</p>
+     *
+     * @param mapX   경도(lng)
+     * @param mapY   위도(lat)
+     * @param radius 반경(m). TourAPI 최대 20000
+     */
+    public List<TourPoiDto> locationBasedList(double mapX, double mapY, int radius, int numOfRows) {
+        if (serviceKey == null || serviceKey.isBlank()) {
+            throw new IllegalStateException("TOUR_API_KEY가 설정되지 않았습니다.");
+        }
+
+        Map<String, Object> res = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/locationBasedList2")
+                        .queryParam("serviceKey", serviceKey)
+                        .queryParam("MobileOS", "ETC")
+                        .queryParam("MobileApp", mobileApp)
+                        .queryParam("_type", "json")
+                        .queryParam("arrange", "E") // E=거리순
+                        .queryParam("mapX", mapX)
+                        .queryParam("mapY", mapY)
+                        .queryParam("radius", radius)
+                        .queryParam("numOfRows", numOfRows)
+                        .queryParam("pageNo", 1)
+                        .build())
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                .block();
+
+        return parseItems(res);
+    }
+
+    /**
      * Returns TourAPI area codes. Without {@code areaCode}, this returns provinces;
      * with an area code, it returns that province's districts.
      */

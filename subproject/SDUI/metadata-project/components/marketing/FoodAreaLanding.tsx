@@ -92,7 +92,7 @@ export default function FoodAreaLanding({ area, spots }: { area: FoodAreaGuide; 
                 <p>{area.description}</p>
                 <div className={styles.actions}>
                     <TrackedLink className={styles.primaryButton} href="/view/ROUTE_PLANNER" entryPoint={foodAreaEntryPoint(area.slug)}>무료로 여행 동선 만들기</TrackedLink>
-                    <Link className={styles.secondaryButton} href="/view/TOUR_EXPLORE">{area.name} 탐색하기</Link>
+                    <Link className={styles.secondaryButton} href={`/view/TOUR_EXPLORE?area=${area.areaCode}`}>{area.name} 탐색하기</Link>
                 </div>
             </header>
 
@@ -136,7 +136,9 @@ export default function FoodAreaLanding({ area, spots }: { area: FoodAreaGuide; 
                     <h2>{area.name} 시·군·구</h2>
                     <span className={styles.sectionNote}>{area.districts.length}개 지역</span>
                 </div>
-                <p className={styles.lead}>탐색 화면에서 아래 지역으로 좁혀 실시간 맛집과 성지를 볼 수 있습니다.</p>
+                <p className={styles.lead}>
+                    <Link href={`/view/TOUR_EXPLORE?area=${area.areaCode}`}>{area.name} 탐색 화면</Link>에서 아래 지역으로 좁혀 실시간 맛집과 성지를 볼 수 있습니다.
+                </p>
                 <ul className={styles.districtList} aria-label={`${area.name} 시·군·구 목록`}>
                     {area.districts.map((district) => <li key={district}>{district}</li>)}
                 </ul>

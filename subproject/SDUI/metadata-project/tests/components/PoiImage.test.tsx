@@ -19,6 +19,16 @@ describe('PoiImage', () => {
         expect(screen.getByRole('img', {name: '북촌 이미지 없음'})).toBeInTheDocument();
     });
 
+    it('사진이 없으면 장소별로 다른 썸네일을 그린다', () => {
+        // 성지 대부분이 사진 없이 들어오므로, 회색 상자 하나로 뭉치면 목록이 읽히지 않는다.
+        const {rerender} = render(<PoiImage title="자갈치시장" variant="card"/>);
+        const first = screen.getByRole('img', {name: '자갈치시장 이미지 없음'});
+        expect(first).toHaveTextContent('자');
+
+        rerender(<PoiImage title="광장시장" variant="card"/>);
+        expect(screen.getByRole('img', {name: '광장시장 이미지 없음'})).toHaveTextContent('광');
+    });
+
     it('이미지 로딩 실패 시 깨진 이미지 대신 fallback으로 한 번 전환한다', () => {
         render(<PoiImage src="https://images.example.com/missing.jpg" title="DDP" variant="card"/>);
 

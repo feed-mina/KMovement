@@ -1,27 +1,3 @@
-export interface TravelGuideContent {
-    eyebrow: string;
-    title: string;
-    description: string;
-    intro: string;
-    highlights: Array<{ name: string; description: string; tip: string }>;
-    checklist: string[];
-    entryPoint: string;
-}
-
-export const kpopGuide: TravelGuideContent = {
-    eyebrow: '서울 K-POP 여행 가이드',
-    title: '서울 K-POP 성지, 하루 동선으로 가볍게',
-    description: '홍대, 성수, 잠실 등 서울의 K-POP 여행 권역을 취향에 맞춰 묶어 보세요.',
-    intro: '처음부터 장소를 많이 담기보다 같은 권역을 중심으로 공연, 팝업, 카페를 연결하면 이동 시간을 줄일 수 있습니다.',
-    highlights: [
-        { name: '홍대·연남 권역', description: '버스킹과 음반·굿즈 탐색을 함께 즐기기 좋은 지역입니다.', tip: '도보 이동을 중심으로 2~3곳을 묶어 보세요.' },
-        { name: '성수 권역', description: '브랜드와 아티스트 팝업이 열리는 공간을 탐색하기 좋은 지역입니다.', tip: '방문 전 공식 채널에서 운영 일정을 확인하세요.' },
-        { name: '잠실 권역', description: '대형 공연 관람 전후 식사와 산책 동선을 만들기 좋은 지역입니다.', tip: '공연 종료 시간과 막차 시간을 먼저 반영하세요.' },
-    ],
-    checklist: ['운영 시간과 휴무일 확인', '공식 예약·입장 안내 확인', '한 권역당 핵심 장소 2~3곳 선택', '공연 종료 후 귀가 동선 확보'],
-    entryPoint: 'seo_seoul_kpop',
-};
-
 /** 지역 대표 맛집 카드. TourAPI 음식점(contentTypeId=39) 연동 전까지 정적 큐레이션으로 채운다. */
 export interface FoodSpot {
     name: string;
@@ -30,13 +6,16 @@ export interface FoodSpot {
     reason: string;
 }
 
-/** 성지 맛집 카드. 성지 DB(HOLY_FOOD) 연동 전까지 정적 큐레이션으로 채운다. */
-export interface FoodHolySpot {
+/** 성지 카드. 성지 DB 연동이 비었을 때 쓰는 정적 큐레이션 — 맛집·K-POP 공용. */
+export interface HolySpot {
     name: string;
     district: string;
     content: string;
     note: string;
 }
+
+/** @deprecated HolySpot 을 쓸 것. 맛집 전용이던 시절의 이름을 호환용으로 남긴다. */
+export type FoodHolySpot = HolySpot;
 
 export interface FoodAreaGuide {
     /** URL 세그먼트 — /travel/food/{slug} */
@@ -546,4 +525,177 @@ export function foodAreaPath(slug: string) {
 
 export function foodAreaEntryPoint(slug: string, suffix?: string) {
     return `seo_food_${slug}${suffix ? `_${suffix}` : ''}`;
+}
+
+// ─── K-POP 여행 가이드 ───────────────────────────────────────────────
+// 맛집과 달리 17개 시·도를 모두 만들지 않는다. 공연장·성지가 실제로 모여 있는
+// 지역만 페이지를 두고, 성지 데이터가 쌓이는 만큼 늘린다.
+// 내용 없는 지역 페이지를 미리 찍어 두면 저품질 페이지만 늘어난다.
+
+export interface KpopAreaGuide {
+    slug: string;
+    areaCode: string;
+    name: string;
+    fullName: string;
+    tagline: string;
+    description: string;
+    intro: string;
+    districts: string[];
+    highlights: Array<{ name: string; description: string; tip: string }>;
+    holySpots: HolySpot[];
+    neighbors: string[];
+}
+
+export const kpopChecklist: string[] = [
+    '공연·팝업 일정과 예매 조건을 공식 채널에서 확인',
+    '입장 대기와 굿즈 판매 시작 시간을 별도로 확보',
+    '한 권역당 핵심 장소 2~3곳으로 압축',
+    '공연 종료 시간과 대중교통 막차 대조',
+    '촬영지 방문 시 주변 주민·상점에 폐를 끼치지 않기',
+];
+
+export const kpopHub = {
+    eyebrow: 'K-POP 여행 가이드',
+    title: 'K-POP 성지, 공연장이 있는 도시부터',
+    description: '서울·경기·인천·부산·강원·대구의 K-POP 권역과 성지를 지역별로 정리했습니다.',
+    intro: '아레나와 대형 공연장이 있는 도시를 중심으로 먼저 정리했습니다. 성지 데이터가 쌓이는 지역부터 순차적으로 추가합니다.',
+    entryPoint: 'seo_kpop_hub',
+};
+
+export const kpopAreas: KpopAreaGuide[] = [
+    {
+        slug: 'seoul',
+        areaCode: '1',
+        name: '서울',
+        fullName: '서울특별시',
+        tagline: '하루 동선으로 가볍게',
+        description: '홍대, 성수, 잠실 등 서울의 K-POP 여행 권역을 이동 시간까지 고려해 묶어 보세요.',
+        intro: '처음부터 장소를 많이 담기보다 같은 권역을 중심으로 공연, 팝업, 카페를 연결하면 이동 시간을 줄일 수 있습니다.',
+        districts: ['마포구', '서대문구', '성동구', '광진구', '송파구', '강남구', '서초구', '용산구', '중구', '종로구', '영등포구'],
+        highlights: [
+            { name: '홍대·연남 권역', description: '버스킹과 음반·굿즈 탐색을 함께 즐기기 좋은 지역입니다.', tip: '도보 이동을 중심으로 2~3곳을 묶어 보세요.' },
+            { name: '성수 권역', description: '브랜드와 아티스트 팝업이 열리는 공간을 탐색하기 좋은 지역입니다.', tip: '방문 전 공식 채널에서 운영 일정을 확인하세요.' },
+            { name: '잠실 권역', description: '대형 공연 관람 전후 식사와 산책 동선을 만들기 좋은 지역입니다.', tip: '공연 종료 시간과 막차 시간을 먼저 반영하세요.' },
+        ],
+        holySpots: [
+            { name: '홍대 걷고싶은거리', district: '마포구', content: '버스킹 성지', note: '주말 저녁에 거리 공연이 가장 많습니다.' },
+            { name: '올림픽공원·KSPO돔 일대', district: '송파구', content: '대형 공연장', note: '공연일에는 주변 식당 대기가 길어집니다.' },
+            { name: '성수동 팝업 상권', district: '성동구', content: '아티스트 팝업', note: '팝업은 기간 한정이라 방문 전 확인이 필요합니다.' },
+        ],
+        neighbors: ['gyeonggi', 'incheon'],
+    },
+    {
+        slug: 'gyeonggi',
+        areaCode: '31',
+        name: '경기',
+        fullName: '경기도',
+        tagline: '대형 공연장이 모인 수도권 외곽',
+        description: '킨텍스와 고양종합운동장 등 대형 공연이 열리는 경기 권역을 이동 시간에 맞춰 계획해 보세요.',
+        intro: '서울 도심보다 공연장 규모가 커 이동과 귀가에 시간이 더 걸립니다. 공연 전후 동선을 먼저 잡는 편이 안전합니다.',
+        districts: ['고양시', '성남시', '수원시', '용인시', '파주시', '부천시', '안양시', '하남시', '남양주시', '가평군'],
+        highlights: [
+            { name: '고양·일산 권역', description: '전시장과 대형 경기장이 붙어 있어 시상식·팬미팅이 자주 열립니다.', tip: '행사일에는 주변 숙소가 빠르게 찹니다.' },
+            { name: '성남·분당 권역', description: '공연장과 상권이 가까워 공연 전후 식사를 붙이기 좋습니다.', tip: '지하철 막차 시간을 먼저 확인하세요.' },
+            { name: '파주 권역', description: '촬영지와 전시 공간을 함께 도는 구성이 어울립니다.', tip: '월요일 휴관 시설이 많습니다.' },
+        ],
+        holySpots: [
+            { name: '킨텍스 일대', district: '고양시', content: '시상식·팬미팅', note: '행사 종료 시간에 맞춰 셔틀과 지하철이 붐빕니다.' },
+            { name: '고양종합운동장', district: '고양시', content: '대형 콘서트', note: '공연 후 귀가 동선을 미리 정해 두는 편이 좋습니다.' },
+        ],
+        neighbors: ['seoul', 'incheon'],
+    },
+    {
+        slug: 'incheon',
+        areaCode: '2',
+        name: '인천',
+        fullName: '인천광역시',
+        tagline: '아레나와 공항이 가까운 도시',
+        description: '영종도 아레나와 송도 축제 공간 등 인천의 K-POP 권역을 공항 동선과 함께 계획해 보세요.',
+        intro: '공항에서 가까워 입·출국 일정과 붙이기 좋습니다. 다만 도심과 영종도는 거리가 있어 하루에 묶기 어렵습니다.',
+        districts: ['중구', '연수구', '미추홀구', '남동구', '부평구', '계양구', '서구', '동구'],
+        highlights: [
+            { name: '영종도 아레나 권역', description: 'K-POP 공연을 염두에 두고 지어진 아레나가 있는 구간입니다.', tip: '공항철도 막차 시간을 먼저 확인하세요.' },
+            { name: '송도 권역', description: '대형 야외 페스티벌이 열리는 공원과 상권이 붙어 있습니다.', tip: '야외 행사는 날씨에 따라 일정이 바뀝니다.' },
+            { name: '개항장 권역', description: '근대 건축 거리가 촬영 배경으로 자주 쓰이는 구간입니다.', tip: '주말 오후는 혼잡하니 오전에 시작하세요.' },
+        ],
+        holySpots: [
+            { name: '인스파이어 아레나 일대', district: '중구', content: 'K-POP 아레나', note: '공항과 가까워 출국 전날 일정으로 넣기 좋습니다.' },
+            { name: '송도달빛축제공원', district: '연수구', content: '대형 페스티벌', note: '야외 공연이라 우천 대비가 필요합니다.' },
+        ],
+        neighbors: ['seoul', 'gyeonggi'],
+    },
+    {
+        slug: 'busan',
+        areaCode: '6',
+        name: '부산',
+        fullName: '부산광역시',
+        tagline: '바다와 공연장을 한 동선으로',
+        description: '벡스코와 해운대, 광안리 등 부산의 K-POP 권역을 해변 동선과 함께 계획해 보세요.',
+        intro: '공연장과 해변이 지하철로 이어져 공연 전후 시간을 채우기 좋습니다.',
+        districts: ['해운대구', '수영구', '부산진구', '중구', '남구', '사하구', '동래구', '기장군'],
+        highlights: [
+            { name: '해운대·벡스코 권역', description: '대형 공연과 팬미팅이 열리는 전시장이 해변과 가깝습니다.', tip: '행사일에는 인근 숙소를 미리 잡으세요.' },
+            { name: '서면 권역', description: '공연 전후 식사와 카페를 붙이기 좋은 도심 구간입니다.', tip: '지하상가 구조가 복잡해 출구를 확인하세요.' },
+            { name: '광안리·기장 권역', description: '해안 풍경이 영상 배경으로 자주 쓰이는 구간입니다.', tip: '일몰 시간대에 사람이 몰립니다.' },
+        ],
+        holySpots: [
+            { name: '벡스코 일대', district: '해운대구', content: '대형 공연·팬미팅', note: '행사 종료 후 지하철이 크게 붐빕니다.' },
+            { name: '광안리 해변', district: '수영구', content: 'MV·화보 촬영지', note: '광안대교 야경 구간이 배경으로 자주 등장합니다.' },
+        ],
+        neighbors: ['daegu', 'seoul'],
+    },
+    {
+        slug: 'gangwon',
+        areaCode: '32',
+        name: '강원',
+        fullName: '강원특별자치도',
+        tagline: '앨범 재킷 속 바다',
+        description: '주문진과 속초, 춘천 등 앨범·MV 촬영지로 알려진 강원 권역을 계획해 보세요.',
+        intro: '촬영지가 해안을 따라 흩어져 있어 하루에 한 권역만 잡는 편이 안전합니다.',
+        districts: ['강릉시', '속초시', '춘천시', '원주시', '양양군', '고성군', '평창군', '정선군'],
+        highlights: [
+            { name: '강릉·주문진 권역', description: '앨범 재킷 촬영지와 해변 카페를 한 줄로 잇는 구간입니다.', tip: '버스정류장 앞은 촬영 대기가 길어질 수 있습니다.' },
+            { name: '속초 권역', description: '항구와 해변을 함께 도는 구성이 어울립니다.', tip: '성수기 주말은 주차 시간을 별도로 잡으세요.' },
+            { name: '춘천 권역', description: '드라마 촬영지와 호반 산책을 붙이기 좋은 지역입니다.', tip: '역세권에 상권이 모여 있어 뚜벅이 여행에 맞습니다.' },
+        ],
+        holySpots: [
+            { name: '주문진 방파제 버스정류장', district: '강릉시', content: 'BTS 앨범 재킷 촬영지', note: '주민 통행로이므로 촬영 순서를 지켜 주세요.' },
+            { name: '향호해변', district: '강릉시', content: '팬 방문지', note: '주문진 방파제와 도보로 이어집니다.' },
+        ],
+        neighbors: ['seoul', 'gyeonggi'],
+    },
+    {
+        slug: 'daegu',
+        areaCode: '4',
+        name: '대구',
+        fullName: '대구광역시',
+        tagline: '음악 거리와 스타디움',
+        description: '대구스타디움과 김광석길 등 대구의 음악·공연 권역을 도심 동선으로 계획해 보세요.',
+        intro: '대형 공연장은 도심에서 떨어져 있고 음악 거리는 중구에 모여 있습니다. 두 축을 나눠 잡으세요.',
+        districts: ['중구', '수성구', '달서구', '동구', '남구', '북구', '서구', '달성군'],
+        highlights: [
+            { name: '수성·스타디움 권역', description: '대형 콘서트가 열리는 경기장이 있는 구간입니다.', tip: '공연 후 귀가 교통편을 미리 확인하세요.' },
+            { name: '동성로 권역', description: '공연 전후 식사와 카페가 밀집한 도심 구간입니다.', tip: '주말 저녁은 이동 속도가 크게 느려집니다.' },
+            { name: '김광석길 권역', description: '음악을 주제로 한 거리와 벽화가 이어지는 구간입니다.', tip: '평일 낮이 가장 한산합니다.' },
+        ],
+        holySpots: [
+            { name: '대구스타디움 일대', district: '수성구', content: '대형 콘서트', note: '도심에서 떨어져 있어 이동 시간을 넉넉히 잡으세요.' },
+            { name: '김광석다시그리기길', district: '중구', content: '음악 성지', note: '벽화 거리와 인근 카페가 함께 묶입니다.' },
+        ],
+        neighbors: ['busan', 'seoul'],
+    },
+];
+
+export const kpopAreaSlugs = kpopAreas.map((area) => area.slug);
+
+export function findKpopArea(slug: string): KpopAreaGuide | undefined {
+    return kpopAreas.find((area) => area.slug === slug);
+}
+
+export function kpopAreaPath(slug: string) {
+    return `/travel/kpop/${slug}`;
+}
+
+export function kpopAreaEntryPoint(slug: string, suffix?: string) {
+    return `seo_kpop_${slug}${suffix ? `_${suffix}` : ''}`;
 }

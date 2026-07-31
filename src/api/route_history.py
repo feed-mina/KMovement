@@ -157,7 +157,7 @@ def _format_history_item(row: dict[str, Any]) -> dict[str, Any]:
     request_payload = _ensure_dict(row.get("request_payload"))
     response_payload = _ensure_dict(row.get("response_payload"))
     regions = _extract_regions(row, request_payload, response_payload)
-    artists = _extract_artists(request_payload, response_payload)
+    artists = _extract_artists(row, request_payload, response_payload)
     pois = row.get("recommended_pois") if isinstance(row.get("recommended_pois"), list) else []
     activity_type = str(row.get("activity_type") or "route")
     activity_date = _date_string(row.get("activity_date") or row.get("created_at"))
@@ -205,7 +205,7 @@ def _aggregate_history(rows: list[dict[str, Any]], *, top_limit: int = 10) -> di
         request_payload = _ensure_dict(row.get("request_payload"))
         response_payload = _ensure_dict(row.get("response_payload"))
         region_counter.update(_extract_regions(row, request_payload, response_payload))
-        artist_counter.update(_extract_artists(request_payload, response_payload))
+        artist_counter.update(_extract_artists(row, request_payload, response_payload))
 
         distance = _to_float_or_none(row.get("distance_km"))
         safety = _to_float_or_none(row.get("safety_score"))
@@ -244,12 +244,30 @@ def _extract_regions(
     return _unique_labels(values)
 
 
-def _extract_artists(request_payload: dict[str, Any], response_payload: dict[str, Any]) -> list[str]:
+def _extract_artists(
+    row: dict[str, Any],
+    request_payload: dict[str, Any],
+    response_payload: dict[str, Any],
+) -> list[str]:
+    """추천 요청에 명시된 아티스트뿐 아니라, 실제로 추천된 성지가 달고 있는
+    아티스트까지 모은다. 명시 선택만 세면 'Preferred artists'가 좀처럼 채워지지 않는다."""
     values: list[Any] = []
-    for key in ("artists", "artist_ids", "selected_artists", "selectedArtists"):
+    for key in ("artists", "artist_ids", "selected_artists", "selectedArtists", "artist", "artistName"):
         values.extend(_listish(request_payload.get(key)))
         values.extend(_listish(response_payload.get(key)))
+
+    # 저장된 POI가 성지면 artist 를 갖고 있다(V76 tour_poi 확장).
+    for poi in _listish_pois(row.get("recommended_pois")):
+        for key in ("artist", "artist_name", "fandom_info"):
+            values.extend(_listish(poi.get(key)))
+
     return _unique_labels(values)
+
+
+def _listish_pois(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    return [item for item in value if isinstance(item, dict)]
 
 
 def _history_title(activity_type: str, regions: list[str], artists: list[str]) -> str:
@@ -457,7 +475,9 @@ def _iter_itinerary_places(value: Any):
 def _compact_poi(item: dict[str, Any]) -> dict[str, Any]:
     return {
         key: _json_safe(item.get(key))
-        for key in ("poi_id", "id", "name", "title", "category", "address", "sido", "lat", "lon")
+        # artist/fandom_info 는 성지 POI 의 아티스트 집계에 쓰인다.
+        for key in ("poi_id", "id", "name", "title", "category", "address", "sido", "lat", "lon",
+                    "artist", "artist_name", "fandom_info")
         if item.get(key) not in (None, "")
     }
 
