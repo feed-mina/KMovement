@@ -38,6 +38,44 @@ def test_worker_changes_trigger_the_ec2_kride_build() -> None:
     assert "Dockerfile\\.worker|deploy/media_motion/" in workflow
 
 
+def test_deploy_pre_evicts_running_services_to_free_disk_space() -> None:
+    """Services being redeployed are stopped and their images removed before
+    assert_minimum_docker_space so that a nearly-full disk (where every current
+    image is still referenced by a running container) does not block deployment."""
+    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+
+    free_space_gate = workflow.index("assert_minimum_docker_space 4194304")
+
+    # FastAPI and Celery containers and images must be removed before the check
+    fastapi_evict = workflow.index("remove_container kride-fastapi")
+    assert fastapi_evict < free_space_gate
+
+    celery_worker_evict = workflow.index("remove_container kride-celery-worker")
+    assert celery_worker_evict < free_space_gate
+
+    fastapi_img_rm = workflow.index(
+        "docker image rm __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__"
+    )
+    celery_img_rm = workflow.index(
+        "docker image rm __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__"
+    )
+    assert fastapi_img_rm < free_space_gate
+    assert celery_img_rm < free_space_gate
+
+    # Backend and frontend images must also be removed before the check
+    backend_img_rm = workflow.index(
+        "docker image rm __SDUI_IMAGE__:__BRANCH_TAG__"
+    )
+    frontend_img_rm = workflow.index(
+        "docker image rm __FRONTEND_IMAGE__:__BRANCH_TAG__"
+    )
+    assert backend_img_rm < free_space_gate
+    assert frontend_img_rm < free_space_gate
+
+    # docker image rm -f must never be used (avoids force-removing referenced layers)
+    assert "docker image rm -f" not in workflow
+
+
 def test_deploy_pulls_services_sequentially_and_preserves_volumes() -> None:
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
