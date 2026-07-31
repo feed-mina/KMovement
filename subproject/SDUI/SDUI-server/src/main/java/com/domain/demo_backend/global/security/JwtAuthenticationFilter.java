@@ -93,8 +93,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (email != null) {
                     User user = userRepository.findByEmail(email)
                             .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-                    // JWT 클레임에서 role 읽기 (DB 역할 체계 반영)
-                    String role = claims.get("role", String.class);
+                    // DB에서 최신 role 읽기 — JWT 클레임의 role은 발급 시점의 스냅샷이므로
+                    // 관리자가 DB에서 권한을 변경해도 재로그인 전까지 반영되지 않는 버그를 방지한다.
+                    String role = user.getRole();
                     if (role == null || role.isBlank()) {
                         role = "ROLE_USER"; // 폴백 (기존 토큰 호환)
                     }

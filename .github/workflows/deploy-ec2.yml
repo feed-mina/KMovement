@@ -491,6 +491,27 @@ jobs:
             fi
           }
 
+          # ── Pre-evict: stop containers and remove images for services being
+          #    redeployed so that assert_minimum_docker_space can pass on a
+          #    nearly-full disk where every current image is referenced by a
+          #    running container and therefore cannot be pruned automatically. ──
+          if [ "__DEPLOY_FASTAPI__" = "true" ]; then
+            remove_container kride-fastapi
+            remove_container kride-celery-worker
+            remove_container kride-celery-maintenance
+            remove_container kride-celery-beat
+            docker image rm __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__ __KRIDE_FASTAPI_IMAGE__:latest 2>/dev/null || true
+            docker image rm __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__ __KRIDE_CELERY_IMAGE__:latest 2>/dev/null || true
+          fi
+          if [ "__DEPLOY_BACKEND__" = "true" ]; then
+            remove_container __CONTAINER_NAME__
+            docker image rm __SDUI_IMAGE__:__BRANCH_TAG__ __SDUI_IMAGE__:latest 2>/dev/null || true
+          fi
+          if [ "__DEPLOY_FRONTEND__" = "true" ]; then
+            remove_container sdui-frontend
+            docker image rm __FRONTEND_IMAGE__:__BRANCH_TAG__ __FRONTEND_IMAGE__:latest 2>/dev/null || true
+          fi
+
           # ── Pull images ──
           docker system df || true
           prune_unreferenced_service_images \
