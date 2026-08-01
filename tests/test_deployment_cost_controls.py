@@ -60,6 +60,27 @@ def test_ci_and_ec2_deployment_only_auto_run_from_main() -> None:
     assert '.github/workflows/deploy-ec2.yml' not in deploy_triggers
 
 
+def test_deploy_script_changes_reach_the_host() -> None:
+    """The deploy script runs on the host, so changes to it must deploy.
+
+    The trigger deliberately excludes the workflow file itself — editing CI
+    orchestration should not cost a redeploy. deploy/ec2/ is the opposite case:
+    it is the procedure that runs on EC2, in the same category as src/api. It
+    only sat outside the trigger because it used to be inlined in the workflow
+    file (#210), which is an accident of layout rather than a cost decision.
+    """
+    workflow = _read(WORKFLOWS / "deploy-ec2.yml")
+    triggers, separator, _jobs = workflow.partition("\njobs:")
+    assert separator
+    assert '- "deploy/ec2/**"' in triggers
+
+    # A changed deploy procedure applies to every service, so all three deploy
+    # again regardless of which service directories changed.
+    assert (
+        r"grep -Eq '^(\.github/workflows/deploy-ec2\.yml|deploy/ec2/)'" in workflow
+    )
+
+
 def test_runpod_builds_cancel_duplicates_and_reuse_inline_registry_cache() -> None:
     for workflow_name in ("deploy-runpod.yml", "deploy-runpod-tora.yml"):
         workflow = _read(WORKFLOWS / workflow_name)
