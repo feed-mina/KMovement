@@ -99,6 +99,89 @@ assert_frontend_page() {
   echo "Frontend page ${FRONTEND_PATH} is serving rendered Next.js output."
 }
 
+# Neo4j 와 ChromaDB 는 실패해도 애플리케이션이 하드코딩 fallback 으로 조용히
+# 넘어간다. /api/regions 는 FALLBACK_REGIONS 를, 추천 경로는 빈 리스트를 쓰고
+# 배포는 그대로 성공한다. 추천 품질만 떨어지므로 아무도 모른 채 지나간다.
+#
+# 실제로 Neo4j Aura 인스턴스가 사라진 뒤(DNS 미해석) 한동안 그 상태로 운영됐고,
+# 배포 로그에는 아무 흔적도 남지 않았다. 여기서 상태를 남겨 저하가 드러나게 한다.
+#
+# 배포를 실패시키지 않는다. 두 소스가 모두 없어도 서비스는 동작하며, 여기서
+# 막으면 무관한 변경의 배포까지 멈춘다. 경고로만 알린다.
+report_optional_datasource_health() {
+  if ! docker inspect kride-fastapi >/dev/null 2>&1; then
+    echo "kride-fastapi is not present; skipping optional datasource diagnostics."
+    return 0
+  fi
+
+  DATASOURCE_REPORT="$(docker exec kride-fastapi python -c '
+import os, re
+
+uri = os.environ.get("NEO4J_URI", "")
+
+def redact(text):
+    # 공개 저장소의 Actions 로그에 호스트가 남지 않도록 가린다.
+    match = re.search(r"//([^/:@]+)", uri)
+    if match:
+        text = text.replace(match.group(1), "<neo4j-host>")
+    return text
+
+if not uri:
+    print("neo4j=NOT_CONFIGURED")
+else:
+    try:
+        from neo4j import GraphDatabase
+        driver = GraphDatabase.driver(
+            uri, auth=(os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
+        )
+        driver.verify_connectivity()
+        database = os.environ.get("NEO4J_DATABASE", "") or None
+        with driver.session(database=database) as session:
+            regions = session.run("MATCH (r:Region) RETURN count(r) AS c").single()["c"]
+        driver.close()
+        print("neo4j=OK regions=" + str(regions))
+    except Exception as exc:
+        print("neo4j=UNREACHABLE " + type(exc).__name__ + ": " + redact(str(exc))[:200])
+
+try:
+    import chromadb
+    client = chromadb.PersistentClient(path=os.environ.get("CHROMA_PATH", "/app/chroma_db"))
+    names = sorted(getattr(c, "name", str(c)) for c in client.list_collections())
+    docs = 0
+    for name in names:
+        try:
+            docs += client.get_collection(name).count()
+        except Exception:
+            pass
+    print("chroma=OK collections=" + str(len(names)) + " docs=" + str(docs) + " " + ",".join(names))
+except Exception as exc:
+    print("chroma=UNAVAILABLE " + type(exc).__name__ + ": " + str(exc)[:200])
+' 2>&1 || true)"
+
+  echo "--- optional datasource health ---"
+  echo "$DATASOURCE_REPORT"
+
+  case "$DATASOURCE_REPORT" in
+    *neo4j=OK\ regions=0*)
+      echo "::warning::Neo4j is reachable but has no Region nodes; /api/regions serves the hardcoded fallback list."
+      ;;
+    *neo4j=OK*) ;;
+    *)
+      echo "::warning::Neo4j is not serving data; /api/regions falls back to a hardcoded list and GraphRAG POI expansion is skipped."
+      ;;
+  esac
+
+  case "$DATASOURCE_REPORT" in
+    *chroma=OK\ collections=0\ *)
+      echo "::warning::ChromaDB has no collections; purpose-based POI search returns nothing. The deploy bakes an empty chroma_db into the image because the directory is gitignored."
+      ;;
+    *chroma=OK*) ;;
+    *)
+      echo "::warning::ChromaDB is not readable inside kride-fastapi."
+      ;;
+  esac
+}
+
 pull_service_image() {
   echo "Pulling $1"
   df -h /var/lib/docker 2>/dev/null || df -h / || true
@@ -482,6 +565,8 @@ if ! grep -q '^data: \[DONE\]$' "$SSE_SMOKE_BODY"; then
 fi
 rm -f "$SSE_SMOKE_HEADERS" "$SSE_SMOKE_BODY"
 echo "Celery media/maintenance workers, beat, result backend, and authenticated SSE route are healthy."
+
+report_optional_datasource_health
 
 echo "=== Deployment complete ==="
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
