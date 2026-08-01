@@ -1,13 +1,64 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from textwrap import dedent
 
 
 ROOT = Path(__file__).resolve().parents[1]
-WORKFLOW_PATH = ROOT / ".github" / "workflows" / "deploy-ec2.yml"
+WORKFLOWS_DIR = ROOT / ".github" / "workflows"
+WORKFLOW_PATH = WORKFLOWS_DIR / "deploy-ec2.yml"
+DEPLOY_SCRIPT_PATH = ROOT / "deploy" / "ec2" / "deploy.sh"
 COMPOSE_PATHS = (ROOT / "docker-compose.local.yml", ROOT / "docker-compose.gpu.yml")
 SHARED_DOCKERFILE_BOUNDARY = "# End of the shared K-Ride dependency layers."
+
+# GitHub Actions rejects the whole workflow file — startup failure, zero jobs —
+# when a single run block exceeds this many characters. Observed verbatim on
+# 2026-07-31: "(Line: 399, Col: 14): Exceeded max expression length 21000".
+GITHUB_MAX_EXPRESSION_LENGTH = 21_000
+
+# Stay well under the hard limit so that adding a few diagnostic lines can never
+# disable deployment. The deploy script lives in deploy/ec2/deploy.sh precisely
+# so that no run block has to grow anywhere near this.
+RUN_BLOCK_SOFT_LIMIT = 16_000
+
+
+def _deploy_script() -> str:
+    return DEPLOY_SCRIPT_PATH.read_text(encoding="utf-8")
+
+
+def _deploy_pipeline() -> str:
+    """Workflow and deploy script together.
+
+    Use for "this command must never run" assertions, which must hold wherever
+    the command might have been written.
+    """
+    return WORKFLOW_PATH.read_text(encoding="utf-8") + "\n" + _deploy_script()
+
+
+def _run_blocks(workflow: str) -> list[tuple[int, str]]:
+    """Every `run: |` block in a workflow, as (line number, dedented body)."""
+    blocks: list[tuple[int, str]] = []
+    lines = workflow.split("\n")
+    index = 0
+    while index < len(lines):
+        header = re.match(r"^(\s*)run:\s*\|[-+]?\d*\s*$", lines[index])
+        if not header:
+            index += 1
+            continue
+        indent = len(header.group(1))
+        start = index + 1
+        cursor = start
+        body: list[str] = []
+        while cursor < len(lines):
+            line = lines[cursor]
+            if line.strip() and len(line) - len(line.lstrip()) <= indent:
+                break
+            body.append(line)
+            cursor += 1
+        blocks.append((index + 1, dedent("\n".join(body))))
+        index = cursor
+    return blocks
 
 
 def _shared_dockerfile_prefix(path: Path) -> str:
@@ -42,107 +93,147 @@ def test_deploy_pre_evicts_running_services_to_free_disk_space() -> None:
     """Services being redeployed are stopped and their images removed before
     assert_minimum_docker_space so that a nearly-full disk (where every current
     image is still referenced by a running container) does not block deployment."""
-    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+    script = _deploy_script()
 
-    free_space_gate = workflow.index("assert_minimum_docker_space 4194304")
+    free_space_gate = script.index("assert_minimum_docker_space 4194304")
 
     # FastAPI and Celery containers and images must be removed before the check
-    fastapi_evict = workflow.index("remove_container kride-fastapi")
+    fastapi_evict = script.index("remove_container kride-fastapi")
     assert fastapi_evict < free_space_gate
 
-    celery_worker_evict = workflow.index("remove_container kride-celery-worker")
+    celery_worker_evict = script.index("remove_container kride-celery-worker")
     assert celery_worker_evict < free_space_gate
 
-    fastapi_img_rm = workflow.index(
+    fastapi_img_rm = script.index(
         "docker image rm __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__"
     )
-    celery_img_rm = workflow.index(
+    celery_img_rm = script.index(
         "docker image rm __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__"
     )
     assert fastapi_img_rm < free_space_gate
     assert celery_img_rm < free_space_gate
 
     # Backend and frontend images must also be removed before the check
-    backend_img_rm = workflow.index(
+    backend_img_rm = script.index(
         "docker image rm __SDUI_IMAGE__:__BRANCH_TAG__"
     )
-    frontend_img_rm = workflow.index(
+    frontend_img_rm = script.index(
         "docker image rm __FRONTEND_IMAGE__:__BRANCH_TAG__"
     )
     assert backend_img_rm < free_space_gate
     assert frontend_img_rm < free_space_gate
 
     # docker image rm -f must never be used (avoids force-removing referenced layers)
-    assert "docker image rm -f" not in workflow
+    assert "docker image rm -f" not in _deploy_pipeline()
 
 
 def test_deploy_pulls_services_sequentially_and_preserves_volumes() -> None:
-    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+    script = _deploy_script()
 
-    stale_cleanup = workflow.index("prune_unreferenced_service_images \\")
-    free_space_gate = workflow.index("assert_minimum_docker_space 4194304")
-    backend_pull = workflow.index("pull_service_image __SDUI_IMAGE__:__BRANCH_TAG__")
-    frontend_pull = workflow.index("pull_service_image __FRONTEND_IMAGE__:__BRANCH_TAG__")
-    api_pull = workflow.index("pull_service_image __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__")
-    api_replace = workflow.index("remove_container kride-fastapi", api_pull)
-    release_old_api = workflow.index("docker image prune -f || true", api_replace)
-    celery_pull = workflow.index("pull_service_image __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__")
-    celery_replace = workflow.index("drain_celery_worker kride-celery-worker media", celery_pull)
+    stale_cleanup = script.index("prune_unreferenced_service_images \\")
+    free_space_gate = script.index("assert_minimum_docker_space 4194304")
+    backend_pull = script.index("pull_service_image __SDUI_IMAGE__:__BRANCH_TAG__")
+    frontend_pull = script.index("pull_service_image __FRONTEND_IMAGE__:__BRANCH_TAG__")
+    api_pull = script.index("pull_service_image __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__")
+    api_replace = script.index("remove_container kride-fastapi", api_pull)
+    release_old_api = script.index("docker image prune -f || true", api_replace)
+    celery_pull = script.index("pull_service_image __KRIDE_CELERY_IMAGE__:__BRANCH_TAG__")
+    celery_replace = script.index("drain_celery_worker kride-celery-worker media", celery_pull)
 
     assert stale_cleanup < free_space_gate < backend_pull
     assert backend_pull < frontend_pull < api_pull < api_replace < release_old_api < celery_pull < celery_replace
-    assert "docker volume prune" not in workflow
-    assert "docker image prune -af" not in workflow
+
+    pipeline = _deploy_pipeline()
+    assert "docker volume prune" not in pipeline
+    assert "docker image prune -af" not in pipeline
 
 
 def test_disk_recovery_only_removes_unreferenced_owned_service_images() -> None:
+    script = _deploy_script()
+
+    assert "prune_unreferenced_service_images()" in script
+    assert "docker ps -aq" in script
+    assert "docker inspect --format '{{.Image}}'" in script
+    assert "grep -Fxq \"$IMAGE_ID\"" in script
+    assert 'docker image ls "$SERVICE_REPOSITORY" --no-trunc' in script
+    assert 'docker image rm "$IMAGE_REF"' in script
+    assert "__KRIDE_FASTAPI_IMAGE__" in script
+    assert "__KRIDE_CELERY_IMAGE__" in script
+    assert "docker system df -v" in script
+
+    pipeline = _deploy_pipeline()
+    assert "docker image rm -f" not in pipeline
+    assert "docker container prune" not in pipeline
+    assert "docker system prune" not in pipeline
+
+
+def test_the_deploy_script_is_a_file_rather_than_an_inline_heredoc() -> None:
+    """The deploy script must stay out of the workflow YAML.
+
+    Inlining it is what broke deployment on 2026-07-31: the script sat 913
+    characters below GitHub's 21,000-character run-block limit, and a 1,040
+    character diagnostic addition (#209) pushed it 127 characters over. GitHub
+    then rejected the whole workflow file, so every job — including the fix
+    itself — stopped running.
+    """
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
-    assert "prune_unreferenced_service_images()" in workflow
-    assert "docker ps -aq" in workflow
-    assert "docker inspect --format '{{.Image}}'" in workflow
-    assert "grep -Fxq \"$IMAGE_ID\"" in workflow
-    assert 'docker image ls "$SERVICE_REPOSITORY" --no-trunc' in workflow
-    assert 'docker image rm "$IMAGE_REF"' in workflow
-    assert "docker image rm -f" not in workflow
-    assert "docker container prune" not in workflow
-    assert "docker system prune" not in workflow
-    assert "__KRIDE_FASTAPI_IMAGE__" in workflow
-    assert "__KRIDE_CELERY_IMAGE__" in workflow
-    assert "docker system df -v" in workflow
+    assert DEPLOY_SCRIPT_PATH.is_file()
+    assert "cp deploy/ec2/deploy.sh /tmp/deploy.sh" in workflow
+    assert "DEPLOY_EOF" not in workflow
+
+    # Placeholders are substituted by the workflow, so the script must not try
+    # to resolve GitHub expressions itself.
+    assert "${{" not in _deploy_script()
 
 
-def test_create_deploy_script_stays_below_github_expression_limit() -> None:
+def test_every_placeholder_in_the_deploy_script_is_substituted_by_the_workflow() -> None:
+    """An unsubstituted __TOKEN__ reaches the remote host verbatim."""
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
-    step = workflow.index("      - name: Create deploy script")
-    run_marker = "        run: |\n"
-    run_start = workflow.index(run_marker, step) + len(run_marker)
-    run_end = workflow.index("\n      - name:", run_start)
-    run_body = dedent(workflow[run_start:run_end])
+    used = set(re.findall(r"__[A-Z0-9_]+__", _deploy_script()))
+    substituted = set(re.findall(r'sed -i "s\|(__[A-Z0-9_]+__)\|', workflow))
 
-    # GitHub rejects a single run expression at 64KB characters. Keep enough
-    # headroom that a small diagnostic addition cannot disable the workflow. We use 24,000 as a reasonable soft limit.. Keep enough
-    # headroom that a small diagnostic addition cannot disable the workflow.
-    assert len(run_body) < 24_000
+    missing = sorted(used - substituted)
+    assert not missing, f"deploy script uses placeholders the workflow never substitutes: {missing}"
+
+
+def test_no_workflow_run_block_approaches_the_github_expression_limit() -> None:
+    """Guards every workflow, not just the one that has already failed."""
+    oversized = []
+    for workflow_path in sorted(WORKFLOWS_DIR.glob("*.yml")):
+        workflow = workflow_path.read_text(encoding="utf-8")
+        for line_number, body in _run_blocks(workflow):
+            assert len(body) < GITHUB_MAX_EXPRESSION_LENGTH, (
+                f"{workflow_path.name}:{line_number} run block is {len(body)} characters; "
+                f"GitHub rejects the entire workflow file above {GITHUB_MAX_EXPRESSION_LENGTH}"
+            )
+            if len(body) >= RUN_BLOCK_SOFT_LIMIT:
+                oversized.append(f"{workflow_path.name}:{line_number} ({len(body)} chars)")
+
+    assert not oversized, (
+        "run blocks are close enough to GitHub's "
+        f"{GITHUB_MAX_EXPRESSION_LENGTH}-character limit that a small addition could "
+        f"disable the workflow; move the script into a file: {oversized}"
+    )
 
 
 def test_media_worker_is_warm_drained_before_replacement() -> None:
-    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+    script = _deploy_script()
 
-    assert "drain_celery_worker()" in workflow
-    assert '--timeout=5 cancel_consumer "$QUEUE_NAME"' in workflow
-    assert '--timeout=5 shutdown' in workflow
-    assert "sleep 1900; docker rm -f" in workflow
+    assert "drain_celery_worker()" in script
+    assert '--timeout=5 cancel_consumer "$QUEUE_NAME"' in script
+    assert '--timeout=5 shutdown' in script
+    assert "sleep 1900; docker rm -f" in script
 
 
 def test_ec2_workers_only_consume_reachable_media_and_maintenance_queues() -> None:
-    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+    script = _deploy_script()
 
-    assert "-e CELERY_ML_TASKS_ENABLED=false" in workflow
-    assert "celery -A src.api.celery_app worker -l info -c 1 -Q media" in workflow
-    assert "celery -A src.api.celery_app worker -l info -c 1 -Q maintenance" in workflow
-    assert "-Q ml,media" not in workflow
+    assert "-e CELERY_ML_TASKS_ENABLED=false" in script
+    assert "celery -A src.api.celery_app worker -l info -c 1 -Q media" in script
+    assert "celery -A src.api.celery_app worker -l info -c 1 -Q maintenance" in script
+    assert "-Q ml,media" not in _deploy_pipeline()
 
 
 def test_local_and_gpu_stacks_consume_the_maintenance_queue() -> None:
@@ -153,38 +244,41 @@ def test_local_and_gpu_stacks_consume_the_maintenance_queue() -> None:
 
 
 def test_deploy_smoke_checks_celery_processes_and_authenticated_sse() -> None:
-    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+    script = _deploy_script()
 
-    assert "assert_container_running kride-celery-worker" in workflow
-    assert "assert_container_running kride-celery-maintenance" in workflow
-    assert "assert_container_running kride-celery-beat" in workflow
-    assert 'schedule["cleanup-orphaned-media-temp-hourly"]' in workflow
-    assert "inspect active_queues --timeout=10" in workflow
-    assert "celery.backend.store_result" in workflow
-    assert "UUID task id" in workflow
-    assert "--header 'X-Internal-Api-Key: __FASTAPI_INTERNAL_API_KEY__'" in workflow
-    assert "SSE_HTTP_STATUS" in workflow
-    assert "text/event-stream" in workflow
-    assert '\"SUCCESS\"' in workflow
-    assert "^data: \\[DONE\\]$" in workflow
+    assert "assert_container_running kride-celery-worker" in script
+    assert "assert_container_running kride-celery-maintenance" in script
+    assert "assert_container_running kride-celery-beat" in script
+    assert 'schedule["cleanup-orphaned-media-temp-hourly"]' in script
+    assert "inspect active_queues --timeout=10" in script
+    assert "celery.backend.store_result" in script
+    assert "UUID task id" in script
+    assert "--header 'X-Internal-Api-Key: __FASTAPI_INTERNAL_API_KEY__'" in script
+    assert "SSE_HTTP_STATUS" in script
+    assert "text/event-stream" in script
+    assert '\"SUCCESS\"' in script
+    assert "^data: \\[DONE\\]$" in script
 
 
 def test_deploy_requires_internal_auth_and_durable_media_delivery() -> None:
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
+    # Preflight and secret substitution stay in the workflow, which is the only
+    # place that can read ${{ secrets }}.
     assert "Validate Celery production secrets" in workflow
     assert "FASTAPI_INTERNAL_API_KEY must be configured" in workflow
     assert "Configure CLOUDINARY_URL or all three individual Cloudinary credentials" in workflow
     assert "escape_sed_replacement" in workflow
     assert 'DEPLOY_FASTAPI_INTERNAL_API_KEY: ${{ secrets.FASTAPI_INTERNAL_API_KEY }}' in workflow
     assert 's|__CLOUDINARY_URL__|$CLOUDINARY_URL_ESCAPED|g' in workflow
-    assert "Cloudinary credentials are not usable" in workflow
-    assert "Cloudinary delivery smoke failed" in workflow
-    assert 'folder="kride/deploy-smoke"' in workflow
-    assert "-e KRIDE_RESULT_URL_REQUIRED=true" in workflow
+
+    # Runtime enforcement lives in the deploy script.
+    script = _deploy_script()
+    assert "Cloudinary credentials are not usable" in script
+    assert "Cloudinary delivery smoke failed" in script
+    assert 'folder="kride/deploy-smoke"' in script
+    assert "-e KRIDE_RESULT_URL_REQUIRED=true" in script
 
 
 def test_frontend_ownership_preflight_uses_the_deployed_backend_container() -> None:
-    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
-
-    assert "-e BACKEND_URL=http://__CONTAINER_NAME__:8080" in workflow
+    assert "-e BACKEND_URL=http://__CONTAINER_NAME__:8080" in _deploy_script()

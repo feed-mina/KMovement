@@ -13,6 +13,7 @@ MOBILE_DEPLOYMENT = (
     ROOT / "subproject" / "SDUI" / "kride" / "apps" / "mobile" / "DEPLOYMENT.md"
 )
 COST_RUNBOOK = ROOT / "docs" / "deployment-cost-optimization.md"
+EC2_DEPLOY_SCRIPT = ROOT / "deploy" / "ec2" / "deploy.sh"
 
 LEGACY_WORKFLOWS = (
     "deploy-cloud-run.yml",
@@ -76,12 +77,12 @@ def test_runpod_builds_cancel_duplicates_and_reuse_inline_registry_cache() -> No
 
 
 def test_ec2_deploy_rotates_container_logs() -> None:
-    workflow = _read(WORKFLOWS / "deploy-ec2.yml")
+    deploy_script = _read(EC2_DEPLOY_SCRIPT)
 
-    assert "run_with_log_rotation() {" in workflow
+    assert "run_with_log_rotation() {" in deploy_script
     assert (
         'docker run --log-opt max-size=10m --log-opt max-file=3 "$@"'
-        in workflow
+        in deploy_script
     )
     for container_name in (
         "sdui-redis",
@@ -93,7 +94,7 @@ def test_ec2_deploy_rotates_container_logs() -> None:
         "kride-celery-beat",
     ):
         assert (
-            f"run_with_log_rotation -d --name {container_name}" in workflow
+            f"run_with_log_rotation -d --name {container_name}" in deploy_script
         ), container_name
 
     break_glass = _read(WORKFLOWS / "ec2-deploy-frontend.yml")
