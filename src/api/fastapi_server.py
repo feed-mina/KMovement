@@ -1476,14 +1476,26 @@ async def recommend_itinerary(req: ItineraryRequest):
                 pid = p.get("poi_id") or p.get("id") or ""
                 if pid:
                     existing_ids.add(pid)
-            # 아티스트 ID 추출 (artist_XX 형태)
-            artist_graph_ids = [f"artist_{i+1}" for i in range(len(search_artists))]
-            graphrag_pois = get_graphrag_pois(
-                artist_ids=artist_graph_ids,
-                existing_poi_ids=existing_ids,
-                max_pois=10,
+            # 이름으로 graph artist_id 를 찾는다. 예전에는 요청한 아티스트
+            # 개수만큼 artist_1, artist_2 ... 를 기계적으로 만들었는데, 그건
+            # 이름과 무관한 노드를 가리켰다. ["BTS"] 가 artist_1(선재 업고
+            # 튀어)이 되는 식이다. /api/recommend/ai 와 같은 방식으로 맞춘다.
+            artist_graph_ids = (
+                search_artists_by_name(search_artists) if search_artists_by_name else []
             )
-            print(f"[K-Ride] graphrag_pois: {len(graphrag_pois)}건")
+            graphrag_pois = (
+                get_graphrag_pois(
+                    artist_ids=artist_graph_ids,
+                    existing_poi_ids=existing_ids,
+                    max_pois=10,
+                )
+                if artist_graph_ids
+                else []
+            )
+            print(
+                f"[K-Ride] graphrag_pois: {len(graphrag_pois)}건 "
+                f"(artists={search_artists} → {artist_graph_ids})"
+            )
         except Exception as e:
             print(f"[K-Ride] ❌ GraphRAG 실패: {e}")
 

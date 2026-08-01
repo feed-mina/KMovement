@@ -24,6 +24,15 @@ COPY dataset/data/raw_ml/facility_clean.csv /app/dataset/data/raw_ml/facility_cl
 COPY dataset/data/raw_ml/tour_poi.csv /app/dataset/data/raw_ml/tour_poi.csv
 COPY chroma_db/ /app/chroma_db/
 
+# graphrag_client 는 /app/models/kride_graph.json 을, ensemble_client 는
+# /app/models/ensemble_ranker.pkl 을 읽는다. 두 파일이 이미지에 없으면 각각
+# 조용히 빈 결과와 단순 합산으로 떨어져 추천 근거가 사라진다. 실제로 그
+# 상태로 운영됐다(#217). models/ 전체가 아니라 런타임이 쓰는 두 파일만
+# 넣는다. kride_graph.graphml 과 kride_graph_delta.json 은 빌드·보정
+# 스크립트 전용이라 이미지에 필요 없다.
+COPY models/kride_graph.json /app/models/kride_graph.json
+COPY models/ensemble_ranker.pkl /app/models/ensemble_ranker.pkl
+
 ENV KRIDE_MODELS_DIR=/app/dataset/models \
     KRIDE_RAW_DATA_DIR=/app/dataset/data/raw_ml \
     CHROMA_MODE=persistent \
