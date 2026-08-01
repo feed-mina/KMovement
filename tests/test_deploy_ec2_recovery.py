@@ -260,6 +260,38 @@ def test_deploy_smoke_checks_celery_processes_and_authenticated_sse() -> None:
     assert "^data: \\[DONE\\]$" in script
 
 
+def test_deploy_smoke_checks_that_frontend_pages_actually_render() -> None:
+    """A green deploy must mean the site serves pages, not just APIs.
+
+    Every other smoke check targets an API route, so Next.js could be down and
+    the deployment would still finish green — the failure would only surface
+    when someone opened the site.
+    """
+    script = _deploy_script()
+
+    assert "assert_container_running sdui-frontend" in script
+    # Exact lines, so that "/" is not satisfied by the "/kpop" call.
+    assert "\nassert_frontend_page /\n" in script
+    assert "\nassert_frontend_page /kpop\n" in script
+
+    start = script.index("assert_frontend_page() {")
+    body = script[start : script.index("\npull_service_image() {", start)]
+
+    # Routed through nginx under the real host name rather than straight at
+    # :3000, so the check covers proxy config too.
+    assert "--resolve yerin.duckdns.org:443:127.0.0.1" in body
+    assert '"https://yerin.duckdns.org${FRONTEND_PATH}"' in body
+    assert 'FRONTEND_STATUS" = "200"' in body
+
+    # HTTP 200 alone is not enough: an nginx default page or an empty shell
+    # also returns 200, so the body must carry server-rendered Next.js output.
+    assert "'/_next/static'" in body
+
+    # Next.js needs time to boot after container replacement.
+    assert "sleep 5" in body
+    assert "docker logs --tail 100 sdui-frontend" in body
+
+
 def test_deploy_requires_internal_auth_and_durable_media_delivery() -> None:
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
