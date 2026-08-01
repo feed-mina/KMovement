@@ -96,6 +96,7 @@ except ImportError:
 try:
     from src.api.graphrag_client import (
         get_graphrag_pois,
+        get_region_pois_from_graph,
         search_artists_by_name,
         get_graphrag_context_for_chat,
     )
@@ -103,6 +104,7 @@ try:
 except ImportError:
     HAS_GRAPHRAG = False
     get_graphrag_pois = None
+    get_region_pois_from_graph = None
     search_artists_by_name = None
     get_graphrag_context_for_chat = None
 # 날씨 모듈 (KMA API 키 없어도 서버 기동 가능)
@@ -1243,6 +1245,9 @@ FALLBACK_ARTISTS = [
     {"id": "nuest",            "name": "NU'EST",           "name_ko": "뉴이스트",    "imageUrl": "/artists/NU'EST.jpg"},
     {"id": "kangdaniel",       "name": "Kang Daniel",      "name_ko": "강다니엘",    "imageUrl": "/artists/Kang Daniel.jpg"},
     {"id": "straykids",        "name": "Stray Kids",       "name_ko": "스트레이키즈", "imageUrl": "/artists/Stray Kids.jpg"},
+    # 그래프에 노드가 있는데 목록에 없어 고를 수 없던 둘. 이미지 자산도 있다.
+    {"id": "itzy",             "name": "ITZY",             "name_ko": "있지",        "imageUrl": "/artists/ITZY.jpg"},
+    {"id": "ive",              "name": "IVE",              "name_ko": "아이브",      "imageUrl": "/artists/IVE.jpg"},
 ]
 
 # 영문 → 한글 아티스트 이름 매핑 (Neo4j에 한글명으로 저장됨)
@@ -1353,16 +1358,32 @@ def recommend_ai(req: RecommendAIRequest):
 
     # 3.5 GraphRAG — 2-hop + community 기반 POI 확장
     graphrag_pois = []
-    if HAS_GRAPHRAG and req.artists:
+    if HAS_GRAPHRAG:
         try:
             search_names = list(set(
                 req.artists + [ARTIST_NAME_MAP.get(a, a) for a in req.artists]
             ))
-            artist_ids = search_artists_by_name(search_names)
+            artist_ids = search_artists_by_name(search_names) if search_names else []
             existing_ids = {p.get("poi_id") or p.get("name", "") for p in neo4j_pois + region_pois + chroma_pois}
             if artist_ids:
                 graphrag_pois = get_graphrag_pois(artist_ids, existing_ids, max_pois=10)
                 print(f"[K-Ride] recommend/ai graphrag_pois: {len(graphrag_pois)}건")
+            elif search_names:
+                print(
+                    f"[K-Ride] ⚠️ recommend/ai 그래프에 없는 아티스트: {search_names}"
+                )
+            # 아티스트 기반으로 못 찾으면 지역으로 대체한다. 아티스트를 아예
+            # 고르지 않은 요청도 여기서 커버된다.
+            if not graphrag_pois and regions and get_region_pois_from_graph:
+                graphrag_pois = get_region_pois_from_graph(
+                    region_names=regions,
+                    existing_poi_ids={i for i in existing_ids if i},
+                    max_pois=10,
+                )
+                print(
+                    f"[K-Ride] recommend/ai graphrag 지역 대체: "
+                    f"{len(graphrag_pois)}건 (regions={regions})"
+                )
         except Exception as e:
             print(f"[K-Ride] recommend/ai graphrag fallback: {e}")
 
@@ -1496,6 +1517,25 @@ async def recommend_itinerary(req: ItineraryRequest):
                 f"[K-Ride] graphrag_pois: {len(graphrag_pois)}건 "
                 f"(artists={search_artists} → {artist_graph_ids})"
             )
+            if search_artists and not artist_graph_ids:
+                # UI 목록에는 있으나 그래프에 노드가 없는 아티스트다. 어떤
+                # 이름이 데이터 없이 나갔는지 남겨야 나중에 채울 수 있다.
+                print(
+                    f"[K-Ride] ⚠️ 그래프에 없는 아티스트: {search_artists} "
+                    f"— 지역 기반으로 대체한다"
+                )
+            # 아티스트로 아무것도 못 찾았고 지역이 선택돼 있으면 지역 POI 로
+            # 대체한다. 아티스트 특화는 아니지만 장소 없는 일정보다 낫다.
+            if not graphrag_pois and regions and get_region_pois_from_graph:
+                graphrag_pois = get_region_pois_from_graph(
+                    region_names=regions,
+                    existing_poi_ids=existing_ids,
+                    max_pois=10,
+                )
+                print(
+                    f"[K-Ride] graphrag 지역 대체: {len(graphrag_pois)}건 "
+                    f"(regions={regions})"
+                )
         except Exception as e:
             print(f"[K-Ride] ❌ GraphRAG 실패: {e}")
 
