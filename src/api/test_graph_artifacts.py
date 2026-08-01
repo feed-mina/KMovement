@@ -96,3 +96,53 @@ def test_english_artist_names_resolve_to_real_graph_nodes() -> None:
 
     # 한글 이름도 그대로 해석돼야 한다. 그래프에는 드라마 노드도 있다.
     assert id_to_name[search_artists_by_name(["도깨비(드라마)"])[0]] == "도깨비(드라마)"
+
+    # 그래프에 노드가 있으면 UI 목록에서도 고를 수 있어야 한다.
+    for requested, expected in (("ITZY", "Itzy"), ("IVE", "아이브")):
+        assert requested in name_to_ko, f"{requested} 가 FALLBACK_ARTISTS 에 없다"
+        ids = resolve(requested)
+        assert ids and id_to_name[ids[0]] == expected
+
+
+@pytest.mark.skipif(not GRAPH_PATH.exists(), reason="kride_graph.json 없음")
+def test_region_lookup_returns_pois_for_covered_regions() -> None:
+    """아티스트가 그래프에 없을 때 쓰는 대체 경로.
+
+    그래프 아티스트는 40종뿐이라 UI 목록의 상당수가 매칭되지 않는다. 그때
+    빈 일정 대신 선택한 지역의 POI 를 준다.
+    """
+    from src.api.graphrag_client import get_region_pois_from_graph
+
+    seoul = get_region_pois_from_graph(["서울"], max_pois=5)
+    assert len(seoul) == 5
+    for poi in seoul:
+        assert poi["source"] == "graphrag_region"
+        assert "서울" in poi["address"][:8]
+        assert poi["poi_id"] and poi["name"]
+
+    # 여러 지역을 함께 넘길 수 있다.
+    assert get_region_pois_from_graph(["강원", "부산"], max_pois=3)
+
+    # 이미 담긴 POI 는 제외한다.
+    first = seoul[0]["poi_id"]
+    again = get_region_pois_from_graph(["서울"], existing_poi_ids={first}, max_pois=5)
+    assert first not in {p["poi_id"] for p in again}
+
+    # 그래프가 덮지 않는 지역은 빈 리스트다. 없는 것을 지어내지 않는다.
+    assert get_region_pois_from_graph(["경남"], max_pois=5) == []
+    assert get_region_pois_from_graph([], max_pois=5) == []
+
+
+def test_recommend_paths_fall_back_to_region_when_artist_is_unknown() -> None:
+    server = FASTAPI_SERVER.read_text(encoding="utf-8")
+
+    assert "get_region_pois_from_graph" in server
+    # import 실패 시에도 서버가 뜨도록 스텁이 있어야 한다.
+    assert "get_region_pois_from_graph = None" in server
+
+    for endpoint in ('@app.post("/api/recommend/ai")', '@app.post("/api/recommend/itinerary")'):
+        start = server.index(endpoint)
+        block = server[start : server.index("\n@app.", start + 1)]
+        assert "not graphrag_pois and regions and get_region_pois_from_graph" in block
+        # 데이터 없이 나간 아티스트를 로그에 남겨야 나중에 채울 수 있다.
+        assert "그래프에 없는 아티스트" in block

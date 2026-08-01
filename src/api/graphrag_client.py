@@ -118,6 +118,62 @@ def get_graphrag_pois(
 
 
 # ─────────────────────────────────────────────
+# 지역 기반 POI (아티스트 매칭이 안 될 때의 대체 경로)
+# ─────────────────────────────────────────────
+
+# 그래프에 등록된 아티스트는 40종뿐이라 UI 목록의 상당수가 매칭되지 않는다.
+# 매칭이 안 되면 아티스트 기반 확장이 0건이 되고, Neo4j·ChromaDB 도 비어 있으면
+# 일정이 장소 없이 생성된다. 그때 최소한 선택한 지역의 POI 는 돌려준다.
+def get_region_pois_from_graph(
+    region_names: list[str],
+    existing_poi_ids: set[str] | None = None,
+    max_pois: int = 10,
+) -> list[dict]:
+    """지역명으로 그래프 POI 를 조회한다.
+
+    주소 앞부분을 시·도 이름과 대조한다. 그래프 POI 는 전국을 고르게 덮지
+    않으며 충북·충남·전남·경북·경남은 0건이다. 없는 지역은 빈 리스트를 준다.
+    """
+    if not region_names:
+        return []
+
+    existing = existing_poi_ids or set()
+    graph = _load_graph()
+
+    matched: list[dict] = []
+    for node in graph["nodes"].values():
+        if node.get("type") != "POI":
+            continue
+        if node.get("id") in existing:
+            continue
+        address = node.get("address") or ""
+        if not address:
+            continue
+        # 주소 선두만 본다. "서울특별시 ..." 를 "서울" 로 맞추되, 본문 안쪽에
+        # 우연히 등장하는 지역명은 집지 않는다.
+        head = address[:8]
+        if not any(region in head for region in region_names):
+            continue
+        matched.append(node)
+        if len(matched) >= max_pois:
+            break
+
+    return [
+        {
+            "poi_id": p.get("id", ""),
+            "name": p.get("name", ""),
+            "lat": p.get("lat"),
+            "lon": p.get("lon"),
+            "address": p.get("address", ""),
+            "category": p.get("category", ""),
+            "sido": (p.get("address") or "").split()[0] if p.get("address") else "",
+            "source": "graphrag_region",
+        }
+        for p in matched
+    ]
+
+
+# ─────────────────────────────────────────────
 # 이름 기반 아티스트 검색 (recommend/ai, chat/qa 용)
 # ─────────────────────────────────────────────
 
