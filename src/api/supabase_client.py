@@ -68,17 +68,17 @@ def get_artist_poi_map(artist_ids: list[str]) -> list[dict]:
     resp = (
         get_client()
         .table("edges")
-        .select("source, target, relation_type")
+        .select("source_id, target_id, relation_type")
         .eq("relation_type", "FILMING_AT")
         .execute()
     )
-    # edges: source=poi_*, target=artist_*
+    # edges: source_id=poi_*, target_id=artist_*
     # artist_ids는 name 기반이므로, target(artist id)으로 필터링
     # 호출부에서 artist id 목록을 넘겨줄 수도 있으므로 양쪽 모두 반환
     results = []
     for row in (resp.data or []):
         results.append({
-            "artist_id": row["target"],
-            "poi_id": row["source"],
+            "artist_id": row["target_id"],
+            "poi_id": row["source_id"],
         })
     return results

@@ -1590,18 +1590,27 @@ async def recommend_itinerary(req: ItineraryRequest):
             # 아티스트 기반 edges → POI 조회
             fallback_poi_ids = []
             if req.artists:
-                edge_resp = sb.table("edges").select("source, target").eq("relation_type", "FILMING_AT").execute()
-                # artist name → artist id 매핑
-                artist_resp = sb.table("nodes").select("id, metadata").like("id", "artist_%").execute()
-                name_to_id = {}
-                for row in (artist_resp.data or []):
-                    meta = row.get("metadata") or {}
-                    name_to_id[meta.get("name", "")] = row["id"]
-                    name_to_id[meta.get("name_en", "")] = row["id"]
-                target_artist_ids = {name_to_id.get(a) for a in req.artists if name_to_id.get(a)}
-                for edge in (edge_resp.data or []):
-                    if edge["target"] in target_artist_ids:
-                        fallback_poi_ids.append(edge["source"])
+                # 아티스트 조회가 실패해도 아래 지역 경로는 살려야 한다. 예전에는
+                # 이 블록의 예외가 바깥 except 로 빠져나가면서 지역 조회까지
+                # 통째로 건너뛰었다. 아티스트를 고르는 것이 주 흐름이라 사실상
+                # 대체 경로 전체가 죽어 있었다.
+                try:
+                    # 컬럼은 source_id / target_id 다. source / target 으로
+                    # 조회하면 PostgREST 가 42703 을 낸다.
+                    edge_resp = sb.table("edges").select("source_id, target_id").eq("relation_type", "FILMING_AT").execute()
+                    # artist name → artist id 매핑
+                    artist_resp = sb.table("nodes").select("id, metadata").like("id", "artist_%").execute()
+                    name_to_id = {}
+                    for row in (artist_resp.data or []):
+                        meta = row.get("metadata") or {}
+                        name_to_id[meta.get("name", "")] = row["id"]
+                        name_to_id[meta.get("name_en", "")] = row["id"]
+                    target_artist_ids = {name_to_id.get(a) for a in req.artists if name_to_id.get(a)}
+                    for edge in (edge_resp.data or []):
+                        if edge["target_id"] in target_artist_ids:
+                            fallback_poi_ids.append(edge["source_id"])
+                except Exception as artist_err:
+                    print(f"[K-Ride] Supabase 아티스트 경로 실패, 지역으로 계속: {artist_err}")
 
             # 지역 기반 POI 조회
             if regions and not fallback_poi_ids:
