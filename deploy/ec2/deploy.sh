@@ -413,7 +413,8 @@ curl -kfsS --resolve yerin.duckdns.org:443:127.0.0.1 https://yerin.duckdns.org/k
 
 assert_container_running sdui-frontend
 assert_frontend_page /
-assert_frontend_page /kpop
+assert_frontend_page /travel/kpop
+assert_frontend_page /travel/food
 
 assert_container_running kride-celery-worker
 assert_container_running kride-celery-maintenance

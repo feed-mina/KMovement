@@ -9,6 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS_DIR = ROOT / ".github" / "workflows"
 WORKFLOW_PATH = WORKFLOWS_DIR / "deploy-ec2.yml"
 DEPLOY_SCRIPT_PATH = ROOT / "deploy" / "ec2" / "deploy.sh"
+
+# yerin.duckdns.org serves this app. subproject/SDUI/kride is a different
+# frontend and its routes do not exist here.
+FRONTEND_APP_DIR = ROOT / "subproject" / "SDUI" / "metadata-project" / "app"
 COMPOSE_PATHS = (ROOT / "docker-compose.local.yml", ROOT / "docker-compose.gpu.yml")
 SHARED_DOCKERFILE_BOUNDARY = "# End of the shared K-Ride dependency layers."
 
@@ -270,9 +274,9 @@ def test_deploy_smoke_checks_that_frontend_pages_actually_render() -> None:
     script = _deploy_script()
 
     assert "assert_container_running sdui-frontend" in script
-    # Exact lines, so that "/" is not satisfied by the "/kpop" call.
+    # Exact lines, so that "/" is not satisfied by a longer path.
     assert "\nassert_frontend_page /\n" in script
-    assert "\nassert_frontend_page /kpop\n" in script
+    assert "\nassert_frontend_page /travel/kpop\n" in script
 
     start = script.index("assert_frontend_page() {")
     body = script[start : script.index("\npull_service_image() {", start)]
@@ -290,6 +294,32 @@ def test_deploy_smoke_checks_that_frontend_pages_actually_render() -> None:
     # Next.js needs time to boot after container replacement.
     assert "sleep 5" in body
     assert "docker logs --tail 100 sdui-frontend" in body
+
+
+def test_smoke_checked_frontend_paths_exist_in_the_deployed_app() -> None:
+    """Smoke paths must be routes of the app the workflow actually builds.
+
+    EC2 serves subproject/SDUI/metadata-project. subproject/SDUI/kride is a
+    separate frontend, and a path taken from it 404s here — which fails every
+    deploy on a fault that does not exist. That is exactly how /kpop (a kride
+    route; the deployed app has /travel/kpop) broke the 2026-08-01 deploy.
+    """
+    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+    assert "./subproject/SDUI/metadata-project" in workflow, (
+        "the frontend image no longer builds from metadata-project; "
+        "FRONTEND_APP_DIR in this test must follow it"
+    )
+
+    checked = re.findall(r"^assert_frontend_page (/\S*)$", _deploy_script(), re.MULTILINE)
+    assert checked
+
+    for path in checked:
+        relative = path.strip("/")
+        page = FRONTEND_APP_DIR / relative / "page.tsx" if relative else FRONTEND_APP_DIR / "page.tsx"
+        assert page.is_file(), (
+            f"deploy smoke checks {path}, but the deployed app has no route for it "
+            f"(expected {page.relative_to(ROOT)})"
+        )
 
 
 def test_deploy_requires_internal_auth_and_durable_media_delivery() -> None:
