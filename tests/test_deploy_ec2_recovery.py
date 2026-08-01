@@ -322,6 +322,45 @@ def test_smoke_checked_frontend_paths_exist_in_the_deployed_app() -> None:
         )
 
 
+def test_chroma_index_is_mounted_from_the_host_not_baked_into_the_image() -> None:
+    """chroma_db/ is gitignored, so a CI checkout never has it.
+
+    Copying it in the Dockerfile meant every deploy shipped an empty index and
+    purpose-based POI search returned nothing, while the deploy stayed green
+    (#217). The workflow even created the empty directory to keep the build
+    from failing on the missing COPY source. Mounting a host directory keeps
+    the index across deploys and out of the image.
+    """
+    dockerfile = (ROOT / "src" / "api" / "Dockerfile").read_text(encoding="utf-8")
+    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+    script = _deploy_script()
+
+    copied = [line for line in dockerfile.splitlines() if line.strip().startswith("COPY ")]
+    assert not [line for line in copied if "chroma_db" in line]
+
+    # Nothing may recreate the placeholder: a `mkdir -p chroma_db` in the build
+    # context would silently restore the empty-index deploy.
+    assert "mkdir -p chroma_db" not in workflow
+    assert "Prepare chroma_db build context" not in workflow
+
+    # The path the container reads must be the path the host directory lands on.
+    assert "CHROMA_HOST_DIR=" in script
+    assert 'mkdir -p "$CHROMA_HOST_DIR"' in script
+    assert '-v "$CHROMA_HOST_DIR":/app/chroma_db \\' in script
+    assert "-e CHROMA_PATH=/app/chroma_db \\" in script
+    assert "CHROMA_PATH=/app/chroma_db" in dockerfile
+
+    # Chroma writes to sqlite inside the mount, so it cannot be read-only.
+    assert ":/app/chroma_db:ro" not in script
+
+    # The mount belongs to kride-fastapi only. Celery does not read Chroma, and
+    # a second writer on the same sqlite file risks lock contention.
+    fastapi_run = script[script.index("run_with_log_rotation -d --name kride-fastapi") :]
+    fastapi_run = fastapi_run[: fastapi_run.index("\n\n")]
+    assert "/app/chroma_db" in fastapi_run
+    assert script.count(':/app/chroma_db') == 1
+
+
 def test_deploy_reports_optional_datasource_health_without_failing() -> None:
     """Neo4j and ChromaDB degrade silently, so the deploy must say so.
 

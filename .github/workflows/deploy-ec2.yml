@@ -14,7 +14,6 @@ on:
       - "dataset/data/raw_ml/facility_clean.csv"
       - "dataset/data/raw_ml/tour_poi.csv"
       - "dataset/models/route_graph.pkl"
-      - "chroma_db/**"
       - ".dockerignore"
   workflow_dispatch:
     inputs:
@@ -84,7 +83,7 @@ jobs:
             echo "$CHANGED" | grep -q '^subproject/SDUI/metadata-project/' && DEPLOY_FRONTEND="true"
             echo "$CHANGED" | grep -q '^src/api/' && DEPLOY_FASTAPI="true"
             echo "$CHANGED" | grep -Eq '^(Dockerfile\.worker|deploy/media_motion/)' && DEPLOY_FASTAPI="true"
-            echo "$CHANGED" | grep -Eq '^(dataset/data/raw_ml/(road_scored|facility_clean|tour_poi)\.csv|dataset/models/route_graph\.pkl|chroma_db/|\.dockerignore)' && DEPLOY_FASTAPI="true"
+            echo "$CHANGED" | grep -Eq '^(dataset/data/raw_ml/(road_scored|facility_clean|tour_poi)\.csv|dataset/models/route_graph\.pkl|\.dockerignore)' && DEPLOY_FASTAPI="true"
             # 배포 절차 자체가 바뀌면 서비스별 변경 여부와 무관하게 전부 다시
             # 올린다. deploy/ec2/ 는 워크플로 파일과 같은 취급이다. #210 에서
             # 스크립트를 파일로 뺐을 뿐, 호스트에서 도는 배포 절차라는 성격은
@@ -217,12 +216,6 @@ jobs:
 
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Prepare chroma_db build context
-        if: steps.changes.outputs.fastapi == 'true'
-        run: |
-          mkdir -p chroma_db
-          echo "Created empty chroma_db placeholder for Docker build context (directory is gitignored)."
 
       - name: Build and push K-Ride FastAPI image
         if: steps.changes.outputs.fastapi == 'true'

@@ -22,7 +22,13 @@ COPY dataset/models/route_graph.pkl /app/dataset/models/route_graph.pkl
 COPY dataset/data/raw_ml/road_scored.csv /app/dataset/data/raw_ml/road_scored.csv
 COPY dataset/data/raw_ml/facility_clean.csv /app/dataset/data/raw_ml/facility_clean.csv
 COPY dataset/data/raw_ml/tour_poi.csv /app/dataset/data/raw_ml/tour_poi.csv
-COPY chroma_db/ /app/chroma_db/
+
+# chroma_db/ 는 이미지에 넣지 않는다. gitignore 대상이라 CI 체크아웃에는 항상
+# 비어 있었고, 빈 디렉터리를 구운 이미지가 배포돼 목적 기반 POI 검색이
+# 계속 0건이었다(#217). 대신 EC2 호스트의 ~/kride-data/chroma_db 를
+# /app/chroma_db 로 마운트한다. deploy/ec2/deploy.sh 참고. 인덱스를 갱신할
+# 때 이미지를 다시 빌드할 필요가 없고, 100MB 대 인덱스가 이미지 크기에
+# 얹히지도 않는다.
 
 # graphrag_client 는 /app/models/kride_graph.json 을, ensemble_client 는
 # /app/models/ensemble_ranker.pkl 을 읽는다. 두 파일이 이미지에 없으면 각각
