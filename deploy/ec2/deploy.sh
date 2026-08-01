@@ -211,7 +211,7 @@ except Exception as exc:
 
   case "$DATASOURCE_REPORT" in
     *chroma=OK\ collections=0\ *)
-      echo "::warning::ChromaDB has no collections; purpose-based POI search returns nothing. The deploy bakes an empty chroma_db into the image because the directory is gitignored."
+      echo "::warning::ChromaDB has no collections; purpose-based POI search returns nothing. The index lives on the host at ~/kride-data/chroma_db and is mounted into kride-fastapi, so upload it there once instead of rebuilding the image. The container writes as root, so an existing directory may need sudo."
       ;;
     *chroma=OK*) ;;
     *)
@@ -409,8 +409,17 @@ fi
 if [ "__DEPLOY_FASTAPI__" = "true" ]; then
   pull_service_image __KRIDE_FASTAPI_IMAGE__:__BRANCH_TAG__
   remove_container kride-fastapi
+
+  # ChromaDB 인덱스는 이미지가 아니라 호스트에 둔다. gitignore 대상이라
+  # 이미지에 굽던 시절에는 항상 빈 디렉터리가 실려 나갔다(#217). 여기에
+  # 한 번 올려 두면 이후 배포는 같은 인덱스를 그대로 다시 마운트한다.
+  # 컨테이너가 sqlite 에 써야 하므로 읽기 전용으로 걸지 않는다.
+  CHROMA_HOST_DIR="$HOME/kride-data/chroma_db"
+  mkdir -p "$CHROMA_HOST_DIR"
+
   run_with_log_rotation -d --name kride-fastapi \
     -p 8000:8000 \
+    -v "$CHROMA_HOST_DIR":/app/chroma_db \
     --network sdui-network \
     --restart unless-stopped \
     -e PORT=8000 \
