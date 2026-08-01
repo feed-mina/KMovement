@@ -3,30 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@9.15.9",
-  "workspaces": ["packages/core", "apps/mobile"],
+  "workspaces": [
+    "packages/core",
+    "apps/mobile"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
     "lint": "eslint",
-    "test": "jest --passWithNoTests",
-    "test:watch": "jest --watch"
+    "test": "pnpm --filter @kride/mobile test"
   },
-  "//mobileHoist": "RN community modules with native code must also be declared in apps/mobile/package.json so React Native native autolinking (Gradle/CocoaPods) can discover them. Root declarations only provide npm workspace hoisting and do not replace app-local declarations. Expo Router and its Expo peers remain hoisted here so babel-preset-expo and Expo native modules can resolve them. The Next.js web app does not import these mobile dependencies.",
+  "//mobileHoist": "RN community modules with native code must also be declared in apps/mobile/package.json so React Native native autolinking (Gradle/CocoaPods) can discover them. Root declarations only provide npm workspace hoisting and do not replace app-local declarations. Expo Router and its Expo peers remain hoisted here so babel-preset-expo and Expo native modules can resolve them.",
   "dependencies": {
     "@kride/core": "workspace:*",
     "@tanstack/react-query": "^5.21.4",
-    "@tanstack/react-query-devtools": "^5.21.5",
-    "@types/leaflet": "^1.9.21",
     "expo-linking": "~6.3.1",
     "expo-router": "~3.5.23",
     "expo-status-bar": "~1.12.1",
-    "leaflet": "^1.9.4",
-    "next": "^14.1.0",
-    "next-pwa": "^5.6.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-leaflet": "^4.2.1",
     "react-native": "0.74.5",
     "react-native-reanimated": "~3.10.1",
     "react-native-safe-area-context": "4.10.5",
@@ -37,32 +29,18 @@
     "react-native": "0.74.5",
     "@react-native/virtualized-lists": "0.74.87"
   },
-  "//pnpmOverrides": "@types/minimatch 6.x는 d.ts 없는 deprecated 스텁이라 tsc의 암묵 @types 포함(next build 타입체크)이 깨진다. 실제 타입이 있는 마지막 버전 5.1.2로 고정한다.",
   "pnpm": {
     "overrides": {
       "react-native": "0.74.5",
-      "@react-native/virtualized-lists": "0.74.87",
-      "@types/minimatch": "5.1.2"
+      "@react-native/virtualized-lists": "0.74.87"
     }
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^14.3.1",
-    "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^20",
     "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "autoprefixer": "^10",
-    "daisyui": "^3.9.4",
     "eslint": "^8",
-    "eslint-config-next": "^14.1.0",
     "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
-    "postcss": "^8",
-    "tailwindcss": "^3.3.3",
-    "ts-jest": "^29.4.9",
-    "ts-node": "^10.9.2",
     "typescript": "^5.2"
   }
 }

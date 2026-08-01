@@ -27,9 +27,6 @@ export function isSearchIndexingEnabled() {
     if (process.env.NEXT_PUBLIC_SITE_ENV) {
         return process.env.NEXT_PUBLIC_SITE_ENV === 'production';
     }
-    if (process.env.VERCEL_ENV) {
-        return process.env.VERCEL_ENV === 'production';
-    }
     return process.env.NODE_ENV === 'production';
 }
 

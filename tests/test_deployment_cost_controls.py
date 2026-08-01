@@ -8,7 +8,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ROOT / ".github" / "workflows"
-VERCEL_CONFIG = ROOT / "subproject" / "SDUI" / "kride" / "vercel.json"
 MOBILE_DEPLOYMENT = (
     ROOT / "subproject" / "SDUI" / "kride" / "apps" / "mobile" / "DEPLOYMENT.md"
 )
@@ -29,16 +28,29 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def test_vercel_git_deployments_are_main_only() -> None:
-    config = json.loads(_read(VERCEL_CONFIG))
+def test_the_only_web_frontend_is_the_one_deployed_to_ec2() -> None:
+    """yerin.duckdns.org is the only web deployment target.
 
-    assert config["git"]["deploymentEnabled"] == {
-        "main": True,
-        "**": False,
-    }
-    assert config["ignoreCommand"] == (
-        "git diff HEAD^ HEAD --quiet -- . && exit 0 || exit 1"
-    )
+    subproject/SDUI/kride used to hold a second Next.js app deployed by Vercel.
+    Two frontends meant deploy checks could be written against the wrong one —
+    that is how a smoke check ended up asserting /kpop, a kride route absent
+    from the deployed app. The web app and its vercel.json are gone; kride now
+    holds only the Expo app and the shared core it ships with.
+    """
+    kride = ROOT / "subproject" / "SDUI" / "kride"
+
+    assert not (kride / "vercel.json").exists()
+    assert not (kride / "src").exists()
+    assert not (kride / "next.config.mjs").exists()
+
+    # The mobile app ships through EAS and is unaffected by the web cleanup.
+    assert (kride / "apps" / "mobile" / "package.json").is_file()
+    assert (kride / "packages" / "core" / "package.json").is_file()
+
+    root_manifest = json.loads(_read(kride / "package.json"))
+    combined = {**root_manifest["dependencies"], **root_manifest["devDependencies"]}
+    for web_only in ("next", "next-pwa", "react-dom", "eslint-config-next"):
+        assert web_only not in combined, web_only
 
 
 def test_legacy_mutating_deployment_workflows_are_removed() -> None:
