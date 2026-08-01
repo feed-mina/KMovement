@@ -59,6 +59,43 @@ assert_container_running() {
   fi
 }
 
+# nginx 의 location / 를 통해 프론트엔드 페이지가 실제로 렌더링되는지 확인한다.
+# API 스모크만 있던 시절에는 Next.js 가 뜨지 않아도 배포가 초록불로 끝났다.
+assert_frontend_page() {
+  FRONTEND_PATH="$1"
+  FRONTEND_BODY="$(mktemp)"
+  FRONTEND_STATUS=""
+  for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+    FRONTEND_STATUS="$(curl -ksS --max-time 20 \
+      --resolve yerin.duckdns.org:443:127.0.0.1 \
+      --output "$FRONTEND_BODY" \
+      --write-out '%{http_code}' \
+      "https://yerin.duckdns.org${FRONTEND_PATH}" 2>/dev/null || true)"
+    if [ "$FRONTEND_STATUS" = "200" ]; then
+      break
+    fi
+    if [ "$attempt" = "12" ]; then
+      echo "Frontend page ${FRONTEND_PATH} returned HTTP ${FRONTEND_STATUS:-unknown}."
+      docker logs --tail 100 sdui-frontend 2>/dev/null || true
+      rm -f "$FRONTEND_BODY"
+      exit 1
+    fi
+    sleep 5
+  done
+
+  # 200 이어도 nginx 기본 페이지나 빈 응답일 수 있다. Next.js 가 서버 렌더링한
+  # 문서인지 자산 참조로 확인한다.
+  if ! grep -q '/_next/static' "$FRONTEND_BODY"; then
+    echo "Frontend page ${FRONTEND_PATH} returned HTTP 200 without Next.js assets."
+    head -c 500 "$FRONTEND_BODY"
+    echo
+    rm -f "$FRONTEND_BODY"
+    exit 1
+  fi
+  rm -f "$FRONTEND_BODY"
+  echo "Frontend page ${FRONTEND_PATH} is serving rendered Next.js output."
+}
+
 pull_service_image() {
   echo "Pulling $1"
   df -h /var/lib/docker 2>/dev/null || df -h / || true
@@ -370,6 +407,10 @@ sudo nginx -t
 sudo systemctl restart nginx
 curl -fsS http://localhost:8000/api/health >/dev/null
 curl -kfsS --resolve yerin.duckdns.org:443:127.0.0.1 https://yerin.duckdns.org/kride-api/health >/dev/null
+
+assert_container_running sdui-frontend
+assert_frontend_page /
+assert_frontend_page /kpop
 
 assert_container_running kride-celery-worker
 assert_container_running kride-celery-maintenance
