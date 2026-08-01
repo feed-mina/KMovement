@@ -119,11 +119,16 @@ import os, re
 
 uri = os.environ.get("NEO4J_URI", "")
 
+# 공개 저장소의 Actions 로그에 호스트가 남지 않도록 가린다.
+_HOSTS = []
+for _var, _label in (("NEO4J_URI", "<neo4j-host>"), ("SUPABASE_URL", "<supabase-host>")):
+    _m = re.search(r"//([^/:@]+)", os.environ.get(_var, ""))
+    if _m:
+        _HOSTS.append((_m.group(1), _label))
+
 def redact(text):
-    # 공개 저장소의 Actions 로그에 호스트가 남지 않도록 가린다.
-    match = re.search(r"//([^/:@]+)", uri)
-    if match:
-        text = text.replace(match.group(1), "<neo4j-host>")
+    for _host, _label in _HOSTS:
+        text = text.replace(_host, _label)
     return text
 
 if not uri:
@@ -156,6 +161,39 @@ try:
     print("chroma=OK collections=" + str(len(names)) + " docs=" + str(docs) + " " + ",".join(names))
 except Exception as exc:
     print("chroma=UNAVAILABLE " + type(exc).__name__ + ": " + str(exc)[:200])
+
+# GraphRAG 는 이미지에 구운 models/kride_graph.json 을 읽는다. 파일이 빠져도
+# 호출부가 예외를 삼켜 조용히 0건이 된다(#217). 사용자가 실제로 타는 공개
+# 경로를 그대로 태워서 확인한다. 방탄소년단은 그래프에 있는 안정된 노드다.
+try:
+    from src.api.graphrag_client import search_artists_by_name, get_region_pois_from_graph
+    probe_ids = search_artists_by_name(["방탄소년단"])
+    probe_region = get_region_pois_from_graph(["서울"], max_pois=1)
+    print(
+        "graphrag=OK artist_probe=" + str(len(probe_ids))
+        + " region_probe=" + str(len(probe_region))
+    )
+except Exception as exc:
+    print("graphrag=UNAVAILABLE " + type(exc).__name__ + ": " + redact(str(exc))[:200])
+
+# 앙상블 랭커도 같은 이유로 이미지에서 빠져 있었다. 없으면 단순 합산으로
+# 떨어지므로 응답은 정상이고 순위 품질만 나빠진다.
+try:
+    from src.api.ensemble_client import _load_model
+    print("ensemble=" + ("OK" if _load_model() else "NO_MODEL"))
+except Exception as exc:
+    print("ensemble=UNAVAILABLE " + type(exc).__name__ + ": " + str(exc)[:200])
+
+# Supabase 는 그래프 미러이자 Neo4j/ChromaDB 실패 시의 마지막 대체 경로다.
+# nodes 가 비면 /api/artists 도 하드코딩 목록으로 떨어진다.
+try:
+    from src.api.supabase_client import get_client
+    sb = get_client()
+    node_count = sb.table("nodes").select("id", count="exact").limit(1).execute().count
+    edge_count = sb.table("edges").select("source_id", count="exact").limit(1).execute().count
+    print("supabase=OK nodes=" + str(node_count) + " edges=" + str(edge_count))
+except Exception as exc:
+    print("supabase=UNAVAILABLE " + type(exc).__name__ + ": " + redact(str(exc))[:200])
 ' 2>&1 || true)"
 
   echo "--- optional datasource health ---"
@@ -167,7 +205,7 @@ except Exception as exc:
       ;;
     *neo4j=OK*) ;;
     *)
-      echo "::warning::Neo4j is not serving data; /api/regions falls back to a hardcoded list and GraphRAG POI expansion is skipped."
+      echo "::warning::Neo4j is not serving data; /api/regions falls back to a hardcoded list and artist/region POI lookups return nothing. GraphRAG is a separate source and is reported below."
       ;;
   esac
 
@@ -178,6 +216,33 @@ except Exception as exc:
     *chroma=OK*) ;;
     *)
       echo "::warning::ChromaDB is not readable inside kride-fastapi."
+      ;;
+  esac
+
+  case "$DATASOURCE_REPORT" in
+    *graphrag=OK\ artist_probe=0*)
+      echo "::warning::GraphRAG loaded but the probe artist resolved to nothing; the graph file may be stale."
+      ;;
+    *graphrag=OK*) ;;
+    *)
+      echo "::warning::GraphRAG is unavailable; artist and region POI expansion returns nothing. Check that the image copies models/kride_graph.json."
+      ;;
+  esac
+
+  case "$DATASOURCE_REPORT" in
+    *ensemble=OK*) ;;
+    *)
+      echo "::warning::Ensemble ranker model is missing; POI ranking falls back to a plain union. Check that the image copies models/ensemble_ranker.pkl."
+      ;;
+  esac
+
+  case "$DATASOURCE_REPORT" in
+    *supabase=OK\ nodes=0*)
+      echo "::warning::Supabase nodes table is empty; /api/artists serves a hardcoded list and the itinerary fallback finds no POI."
+      ;;
+    *supabase=OK*) ;;
+    *)
+      echo "::warning::Supabase is not reachable from kride-fastapi."
       ;;
   esac
 }

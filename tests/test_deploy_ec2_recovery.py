@@ -346,11 +346,22 @@ def test_deploy_reports_optional_datasource_health_without_failing() -> None:
     assert "exit 1" not in body
     assert "|| true)" in body
 
-    # Degraded states must be visible in the Actions UI rather than buried.
-    assert body.count("::warning::") >= 3
+    # Every source the recommendation path depends on is reported. Each one
+    # degrades silently on its own, so a missing probe hides a real outage.
+    for source in ("neo4j=", "chroma=", "graphrag=", "ensemble=", "supabase="):
+        assert source in body, source
 
-    # The Neo4j host must not reach a public repository's Actions log.
+    # Degraded states must be visible in the Actions UI rather than buried.
+    assert body.count("::warning::") >= 5
+
+    # Secret hosts must not reach a public repository's Actions log.
     assert "<neo4j-host>" in body
+    assert "<supabase-host>" in body
+
+    # GraphRAG is exercised through the public API rather than a file check, so
+    # a present-but-unreadable graph is caught too.
+    assert "search_artists_by_name" in body
+    assert "get_region_pois_from_graph" in body
 
     # Missing container must skip rather than error.
     assert "docker inspect kride-fastapi" in body
