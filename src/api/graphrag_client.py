@@ -124,6 +124,39 @@ def get_graphrag_pois(
 # 그래프에 등록된 아티스트는 40종뿐이라 UI 목록의 상당수가 매칭되지 않는다.
 # 매칭이 안 되면 아티스트 기반 확장이 0건이 되고, Neo4j·ChromaDB 도 비어 있으면
 # 일정이 장소 없이 생성된다. 그때 최소한 선택한 지역의 POI 는 돌려준다.
+# UI 는 "경북" 같은 축약형을 쓰는데 주소는 "경상북도" 로 적혀 있다. 글자가
+# 떨어져 있어 단순 포함 검사로는 걸리지 않는다. 축약형마다 주소에 실제로
+# 등장하는 표기를 적어 둔다. 같은 시·도가 개편 전후 두 이름으로 남아 있는
+# 경우가 있어(강원도/강원특별자치도) 둘 다 넣는다.
+_REGION_ALIASES: dict[str, tuple[str, ...]] = {
+    "서울": ("서울",),
+    "경기": ("경기",),
+    "인천": ("인천",),
+    "강원": ("강원",),
+    "충북": ("충청북도",),
+    "충남": ("충청남도",),
+    "전북": ("전라북도", "전북특별자치도"),
+    "전남": ("전라남도",),
+    "경북": ("경상북도",),
+    "경남": ("경상남도",),
+    "부산": ("부산",),
+    "대구": ("대구",),
+    "광주": ("광주",),
+    "대전": ("대전",),
+    "울산": ("울산",),
+    "세종": ("세종",),
+    "제주": ("제주",),
+}
+
+
+def _address_patterns(region_names: list[str]) -> list[str]:
+    patterns: list[str] = []
+    for region in region_names:
+        # 축약형이면 실제 표기로 넓히고, 이미 정식 명칭이면 그대로 쓴다.
+        patterns.extend(_REGION_ALIASES.get(region, (region,)))
+    return patterns
+
+
 def get_region_pois_from_graph(
     region_names: list[str],
     existing_poi_ids: set[str] | None = None,
@@ -131,13 +164,13 @@ def get_region_pois_from_graph(
 ) -> list[dict]:
     """지역명으로 그래프 POI 를 조회한다.
 
-    주소 앞부분을 시·도 이름과 대조한다. 그래프 POI 는 전국을 고르게 덮지
-    않으며 충북·충남·전남·경북·경남은 0건이다. 없는 지역은 빈 리스트를 준다.
+    주소 선두를 시·도 표기와 대조한다. 그래프는 17개 시·도를 모두 덮는다.
     """
     if not region_names:
         return []
 
     existing = existing_poi_ids or set()
+    patterns = _address_patterns(region_names)
     graph = _load_graph()
 
     matched: list[dict] = []
@@ -149,10 +182,9 @@ def get_region_pois_from_graph(
         address = node.get("address") or ""
         if not address:
             continue
-        # 주소 선두만 본다. "서울특별시 ..." 를 "서울" 로 맞추되, 본문 안쪽에
-        # 우연히 등장하는 지역명은 집지 않는다.
-        head = address[:8]
-        if not any(region in head for region in region_names):
+        # 주소 선두만 본다. 본문 안쪽에 우연히 등장하는 지역명은 집지 않는다.
+        head = address.split()[0]
+        if not any(pattern in head for pattern in patterns):
             continue
         matched.append(node)
         if len(matched) >= max_pois:

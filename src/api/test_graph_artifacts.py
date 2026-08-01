@@ -128,9 +128,28 @@ def test_region_lookup_returns_pois_for_covered_regions() -> None:
     again = get_region_pois_from_graph(["서울"], existing_poi_ids={first}, max_pois=5)
     assert first not in {p["poi_id"] for p in again}
 
-    # 그래프가 덮지 않는 지역은 빈 리스트다. 없는 것을 지어내지 않는다.
-    assert get_region_pois_from_graph(["경남"], max_pois=5) == []
     assert get_region_pois_from_graph([], max_pois=5) == []
+
+
+@pytest.mark.skipif(not GRAPH_PATH.exists(), reason="kride_graph.json 없음")
+def test_every_ui_region_matches_its_address_spelling() -> None:
+    """UI 는 축약형을, 주소는 정식 명칭을 쓴다.
+
+    "경북" 은 "경상북도" 안에 글자가 떨어져 있어 단순 포함 검사로는 걸리지
+    않는다. 그 탓에 데이터가 있는데도 5개 시·도가 빈 결과를 내고 있었다.
+    """
+    from src.api.graphrag_client import get_region_pois_from_graph
+
+    # FALLBACK_REGIONS 와 같은 17개 시·도.
+    for region in (
+        "서울", "경기", "인천", "강원", "충북", "충남", "전북", "전남",
+        "경북", "경남", "부산", "대구", "광주", "대전", "울산", "세종", "제주",
+    ):
+        pois = get_region_pois_from_graph([region], max_pois=1)
+        assert pois, f"{region} 이 그래프 POI 와 매칭되지 않는다"
+
+    # 정식 명칭을 그대로 넘겨도 동작해야 한다.
+    assert get_region_pois_from_graph(["경상북도"], max_pois=1)
 
 
 def test_recommend_paths_fall_back_to_region_when_artist_is_unknown() -> None:
