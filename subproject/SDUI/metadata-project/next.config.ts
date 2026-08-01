@@ -96,7 +96,7 @@ const nextConfig: NextConfig = {
                         key: 'Content-Security-Policy',
                         value: [
                             "default-src 'self'",
-                            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://t1.daumcdn.net https://t1.daumcdn.net https://dapi.kakao.com https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net http://*.daumcdn.net https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com https://www.googletagmanager.com https://*.clarity.ms https://vercel.live https://*.vercel.app https://va.vercel-scripts.com",
+                            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://t1.daumcdn.net https://t1.daumcdn.net https://dapi.kakao.com https://*.kakao.com https://*.kakaocdn.net https://*.daumcdn.net http://*.daumcdn.net https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com https://www.googletagmanager.com https://*.clarity.ms",
                             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                             "img-src 'self' data: blob: https: http://*.daumcdn.net http://*.kakaocdn.net https://*.daumcdn.net https://*.kakao.com https://*.kakaocdn.net https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com https://*.supabase.co https://www.google-analytics.com https://*.clarity.ms https://c.bing.com",
                             `connect-src ${Array.from(new Set(connectSrc)).join(' ')}`,

@@ -1,9 +1,4 @@
-# ── Next.js build output ──
-.next/
-next-env.d.ts
-
 # ── TypeScript build info ──
-tsconfig.tsbuildinfo
 packages/core/tsconfig.tsbuildinfo
 apps/mobile/tsconfig.tsbuildinfo
 

@@ -90,18 +90,25 @@ endpoint의 실제 image tag/digest와 마지막 성공 job을 별도로 기록�
 
 ### Vercel
 
-Vercel dashboard에서 연결 repository, project root, Production Branch가
-예상과 일치하는지 확인한다. `git.deploymentEnabled`는 Git 자동 배포만
-제어하므로 Deploy Hook, CLI 배포, 재배포 이력도 별도로 확인한다.
+**저장소 쪽 정리는 끝났고, Vercel 콘솔 쪽은 남아 있다.**
 
-- Production Branch는 `main`이어야 한다.
-- Ignored Build Step은 선택된 K-Ride Root Directory에서 실행되므로
-  `git diff HEAD^ HEAD --quiet -- .`로 현재 앱 전체의 변경을 판정한다.
-- 최근 Production/Preview 수와 사용량을 변경 전후로 기록한다.
-- `main=true`, `"**=false"`가 적용된 다음 `/`를 포함한 중첩 브랜치를
-  포함해 non-main push가 새 Preview를 만들지 않는지 확인한다.
-- public domain이 현재 Production deployment를 가리키는지 확인한다.
-- 사용 중인 Vercel project와 Production deployment는 삭제하지 않는다.
+웹 배포 대상은 `yerin.duckdns.org`(EC2의 `subproject/SDUI/metadata-project`)
+하나로 정리했다. Vercel이 배포하던 `subproject/SDUI/kride`의 Next.js 앱과
+`vercel.json`은 저장소에서 제거했다. `subproject/SDUI/kride`에는 이제 Expo
+모바일 앱(`apps/mobile`)과 공유 코어(`packages/core`)만 남는다.
+
+이 문서의 원칙대로, **저장소에서 설정을 지웠다는 사실만으로 Vercel 자원이나
+과금이 중단됐다고 판단하지 않는다.** 콘솔에서 다음을 직접 확인해야 한다.
+
+- Vercel project가 아직 GitHub repository에 연결돼 있는지. 연결이 남아 있으면
+  `vercel.json`이 없어도 프레임워크 자동 감지로 빌드가 계속 트리거될 수 있다.
+- Git 연결을 끊거나 project를 삭제하기 전에 마지막 Production deployment와
+  사용량을 기록한다.
+- public domain이 이 project를 가리키고 있다면 어디로 옮길지 먼저 정한다.
+  정하기 전에는 domain을 떼지 않는다.
+- Deploy Hook, CLI 배포, 외부에서 호출하는 재배포 경로가 남아 있는지 확인한다.
+  Git 연결만 끊어도 이들은 계속 동작한다.
+- 확인 전에는 project를 삭제하지 않는다. 삭제는 되돌릴 수 없다.
 
 ### Expo EAS
 
