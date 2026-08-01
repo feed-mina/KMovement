@@ -322,6 +322,40 @@ def test_smoke_checked_frontend_paths_exist_in_the_deployed_app() -> None:
         )
 
 
+def test_deploy_reports_optional_datasource_health_without_failing() -> None:
+    """Neo4j and ChromaDB degrade silently, so the deploy must say so.
+
+    /api/regions falls back to a hardcoded 17-region list and the recommend
+    paths swallow the exception, so a dead datasource looks identical to a
+    healthy deploy. The Neo4j Aura instance was gone (DNS did not resolve) for
+    an unknown period and no deploy log showed it.
+
+    The check must not fail the deploy: the service works without either
+    datasource, and failing here would block unrelated changes from shipping.
+    """
+    script = _deploy_script()
+
+    assert "report_optional_datasource_health() {" in script
+    assert "\nreport_optional_datasource_health\n" in script
+
+    start = script.index("report_optional_datasource_health() {")
+    body = script[start : script.index("\npull_service_image() {", start)]
+
+    # Report-only: no exit inside the diagnostic, and the exec cannot abort the
+    # script under `set -e`.
+    assert "exit 1" not in body
+    assert "|| true)" in body
+
+    # Degraded states must be visible in the Actions UI rather than buried.
+    assert body.count("::warning::") >= 3
+
+    # The Neo4j host must not reach a public repository's Actions log.
+    assert "<neo4j-host>" in body
+
+    # Missing container must skip rather than error.
+    assert "docker inspect kride-fastapi" in body
+
+
 def test_deploy_requires_internal_auth_and_durable_media_delivery() -> None:
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
