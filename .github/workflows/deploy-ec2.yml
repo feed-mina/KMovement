@@ -307,15 +307,20 @@ jobs:
               # 갱신을 시도하지만 아무도 실패를 보지 못했다(2026-08-02 확인,
               # 인증서는 5/28 발급분 그대로였고 8/26 만료 예정이었다).
               #
-              # webroot 방식은 nginx 를 세우지 않고 이 경로의 파일만 노출하면
-              # 된다. server 단위 return 301 은 매칭되는 location 이 없을 때만
-              # 적용되므로, 이 블록이 있으면 챌린지 요청만 리다이렉트를 비켜간다.
+              # 리다이렉트는 반드시 location / 안에 둔다. server 단위 return 은
+              # ngx_http_rewrite_module 의 server rewrite 단계에서 실행되는데,
+              # 이 단계는 location 선택보다 먼저다. 그래서 챌린지 location 이
+              # 있어도 무조건 리다이렉트가 이겨서, 요청이 HTTPS 로 넘어간 뒤
+              # 그쪽에 챌린지 경로가 없어 404 가 났다(#227 의 첫 시도가 이렇게
+              # 실패했다. Detail: Invalid response from https://.../404).
               location ^~ /.well-known/acme-challenge/ {
                   root /var/www/certbot;
                   default_type "text/plain";
               }
 
-              return 301 https://$host$request_uri;
+              location / {
+                  return 301 https://$host$request_uri;
+              }
           }
 
           # HTTPS server

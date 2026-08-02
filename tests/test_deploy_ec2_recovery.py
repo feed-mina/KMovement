@@ -411,10 +411,13 @@ def test_nginx_leaves_a_path_for_certificate_renewal_on_port_80() -> None:
     timer's output. The certificate was still the one issued months earlier
     and was heading for expiry.
 
-    Serving the challenge from nginx removes the conflict. The catch is that
-    this server block redirects everything to HTTPS, and a server-level
-    `return` applies to any request no location matches — so the challenge
-    needs its own location or it is redirected away.
+    Serving the challenge from nginx removes the conflict, but only if the
+    redirect sits inside `location /`. A server-level `return` runs in the
+    server rewrite phase, which happens *before* nginx picks a location, so it
+    beats the challenge location no matter what order they appear in. The first
+    attempt at this fix left the redirect at server level and renewal failed
+    with "Invalid response from https://.../acme-challenge/...: 404" — the
+    challenge had been redirected to HTTPS, where no such location exists.
     """
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
     start = workflow.index("# HTTP → HTTPS redirect")
@@ -423,16 +426,24 @@ def test_nginx_leaves_a_path_for_certificate_renewal_on_port_80() -> None:
     assert "location ^~ /.well-known/acme-challenge/" in block
     assert "root /var/www/certbot;" in block
 
-    # Compare directives, not the prose around them — the comment explaining
-    # this ordering mentions `return 301` too.
+    # Ordering is not the property that matters — nesting is. Every `return
+    # 301` in this server block must live inside a location.
     directives = [
         line.strip()
         for line in block.splitlines()
         if line.strip() and not line.strip().startswith("#")
     ]
-    challenge = next(i for i, l in enumerate(directives) if "acme-challenge" in l)
-    redirect = next(i for i, l in enumerate(directives) if l.startswith("return 301"))
-    assert challenge < redirect
+    depth = 0
+    redirects = 0
+    for line in directives:
+        if line.startswith("return 301"):
+            redirects += 1
+            assert depth >= 2, (
+                "server-level return runs before location selection and would "
+                "swallow the ACME challenge"
+            )
+        depth += line.count("{") - line.count("}")
+    assert redirects == 1
 
     # The directory has to exist or nginx serves 404 into the challenge.
     assert "sudo mkdir -p /var/www/certbot" in _deploy_script()
