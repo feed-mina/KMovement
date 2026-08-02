@@ -163,6 +163,32 @@ try:
 except Exception as exc:
     print("ensemble=UNAVAILABLE " + type(exc).__name__ + ": " + str(exc)[:200])
 
+# 키 종류를 함께 남긴다. 값은 절대 찍지 않는다. publishable/anon 키는 RLS 를
+# 적용받는데, 정책이 SELECT 를 막으면 PostgREST 는 에러가 아니라 "0건"을 정상
+# 응답으로 돌려준다. 그래서 "권한 없음"과 "정말 비어 있음"이 구분되지 않았고,
+# 실제로 41,586건이 든 테이블을 여러 배포에 걸쳐 비었다고 보고했다. 그 보고를
+# 믿고 데이터를 적재했다면 기존 행을 덮어쓸 뻔했다.
+def supabase_key_kind():
+    key = os.environ.get("SUPABASE_KEY", "")
+    if not key:
+        return "missing"
+    if key.startswith("sb_secret_"):
+        return "secret"
+    if key.startswith("sb_publishable_"):
+        return "publishable"
+    if key.startswith("eyJ"):
+        # 구형 JWT 키는 payload 의 role 로 구분한다. 서명 검증 없이 읽기만 하며
+        # 키 자체는 출력하지 않는다.
+        try:
+            import base64, json as _json
+            body = key.split(".")[1]
+            body += "=" * (-len(body) % 4)
+            role = _json.loads(base64.urlsafe_b64decode(body)).get("role", "")
+            return "legacy-" + (role or "unknown")
+        except Exception:
+            return "legacy-unknown"
+    return "unknown"
+
 # Supabase 는 그래프 미러이자 GraphRAG/ChromaDB 실패 시의 마지막 대체 경로다.
 # nodes 가 비면 /api/artists 도 하드코딩 목록으로 떨어진다.
 try:
@@ -170,9 +196,27 @@ try:
     sb = get_client()
     node_count = sb.table("nodes").select("id", count="exact").limit(1).execute().count
     edge_count = sb.table("edges").select("source_id", count="exact").limit(1).execute().count
-    print("supabase=OK nodes=" + str(node_count) + " edges=" + str(edge_count))
+    print(
+        "supabase=OK nodes=" + str(node_count) + " edges=" + str(edge_count)
+        + " key=" + supabase_key_kind()
+    )
 except Exception as exc:
-    print("supabase=UNAVAILABLE " + type(exc).__name__ + ": " + redact(str(exc))[:200])
+    print(
+        "supabase=UNAVAILABLE key=" + supabase_key_kind() + " "
+        + type(exc).__name__ + ": " + redact(str(exc))[:200]
+    )
+
+# 경로 이력은 유일한 쓰기 경로다. RLS 가 INSERT 를 막으면 _insert_supabase 가
+# 예외를 잡아 로그만 남기고 넘어가므로, 저장이 실패해도 응답은 정상이다.
+# 읽기가 되는지라도 확인해 둔다. 진단에서 운영 테이블에 쓰지는 않는다.
+try:
+    from src.api.route_history import DEFAULT_TABLE_NAME
+    from src.api.supabase_client import get_client as _gc
+    table = os.environ.get("KRIDE_ROUTE_HISTORY_TABLE", DEFAULT_TABLE_NAME)
+    rows = _gc().table(table).select("id", count="exact").limit(1).execute().count
+    print("route_history=OK table=" + table + " rows=" + str(rows))
+except Exception as exc:
+    print("route_history=UNAVAILABLE " + type(exc).__name__ + ": " + redact(str(exc))[:200])
 ' 2>&1 || true)"
 
   echo "--- optional datasource health ---"
@@ -214,13 +258,26 @@ except Exception as exc:
       ;;
   esac
 
+  # 0건 보고는 두 가지 뜻이 될 수 있고 고쳐야 할 곳이 서로 다르다. 브라우저용
+  # 키로 0건이 나온 것은 대개 RLS 가 읽기를 막은 것이지 테이블이 빈 것이 아니다.
+  # 실제로 그 상태에서 41,586건이 든 테이블을 비었다고 보고했다.
   case "$DATASOURCE_REPORT" in
+    *supabase=OK\ nodes=0*key=publishable*|*supabase=OK\ nodes=0*key=legacy-anon*)
+      echo "::warning::Supabase returned 0 rows with a browser-safe key. That usually means an RLS policy is blocking reads, not that the table is empty — verify with a secret key before concluding anything, and do not load data on the strength of this number. Every SUPABASE_KEY consumer here is server-side (kride-fastapi, kride-celery, scripts), so pointing the secret at a secret key is safe; a read-only RLS policy would fix reads but still leave route history writes blocked."
+      ;;
     *supabase=OK\ nodes=0*)
       echo "::warning::Supabase nodes table is empty; /api/artists serves a hardcoded list and the itinerary fallback finds no POI."
       ;;
     *supabase=OK*) ;;
     *)
       echo "::warning::Supabase is not reachable from kride-fastapi."
+      ;;
+  esac
+
+  case "$DATASOURCE_REPORT" in
+    *route_history=OK*) ;;
+    *)
+      echo "::warning::The route history table is not readable from kride-fastapi; saving a route silently falls back to local JSONL and the history endpoints return nothing. Check the table exists and that the key may read it."
       ;;
   esac
 }
