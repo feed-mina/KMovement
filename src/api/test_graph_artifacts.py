@@ -140,7 +140,7 @@ def test_every_ui_region_matches_its_address_spelling() -> None:
     """
     from src.api.graphrag_client import get_region_pois_from_graph
 
-    # FALLBACK_REGIONS 와 같은 17개 시·도.
+    # REGIONS 와 같은 17개 시·도.
     for region in (
         "서울", "경기", "인천", "강원", "충북", "충남", "전북", "전남",
         "경북", "경남", "부산", "대구", "광주", "대전", "울산", "세종", "제주",
