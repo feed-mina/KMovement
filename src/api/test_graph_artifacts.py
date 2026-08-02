@@ -106,10 +106,10 @@ def test_english_artist_names_resolve_to_real_graph_nodes() -> None:
 
 @pytest.mark.skipif(not GRAPH_PATH.exists(), reason="kride_graph.json 없음")
 def test_region_lookup_returns_pois_for_covered_regions() -> None:
-    """아티스트가 그래프에 없을 때 쓰는 대체 경로.
+    """아티스트로 아무것도 못 찾았을 때 쓰는 대체 경로.
 
-    그래프 아티스트는 40종뿐이라 UI 목록의 상당수가 매칭되지 않는다. 그때
-    빈 일정 대신 선택한 지역의 POI 를 준다.
+    아티스트를 고르지 않은 요청, UI 목록 밖의 이름, 자유 텍스트에서 아무것도
+    추출되지 않은 경우가 여기로 온다. 빈 일정 대신 선택한 지역의 POI 를 준다.
     """
     from src.api.graphrag_client import get_region_pois_from_graph
 
@@ -150,6 +150,41 @@ def test_every_ui_region_matches_its_address_spelling() -> None:
 
     # 정식 명칭을 그대로 넘겨도 동작해야 한다.
     assert get_region_pois_from_graph(["경상북도"], max_pois=1)
+
+
+@pytest.mark.skipif(not GRAPH_PATH.exists(), reason="kride_graph.json 없음")
+def test_every_ui_artist_resolves_to_a_graph_node() -> None:
+    """UI 목록에 있는데 그래프에 없으면 그 이름을 고른 요청은 조용히 무너진다.
+
+    아티스트 확장이 0건이 되어 지역 대체로 떨어지고, 사용자는 자기가 고른
+    아티스트와 무관한 장소를 받는다. 응답은 200 이라 아무도 모른다.
+
+    실제로 32종 중 12종이 그 상태였다(인피니트·빅톤·지드래곤·프로미스나인·
+    청하·블락비·걸스데이·GOT7·하이라이트·비·뉴이스트·강다니엘). Supabase 의
+    성지 데이터를 병합해 해소했다(#229, #231, #232).
+
+    UI 목록에 이름을 추가할 때 그래프에도 있는지 여기서 걸린다.
+    """
+    from src.api.graphrag_client import search_artists_by_name
+
+    source = FASTAPI_SERVER.read_text(encoding="utf-8")
+    block = source[source.index("FALLBACK_ARTISTS = [") :]
+    block = block[: block.index("\n]") + 2]
+    ui_artists = re.findall(
+        r'"name":\s*"([^"]+)",\s*"name_ko":\s*"([^"]+)"', block
+    )
+    assert len(ui_artists) >= 32, len(ui_artists)
+
+    # fastapi_server 가 search_artists 를 만드는 방식 그대로.
+    unresolved = [
+        english
+        for english, korean in ui_artists
+        if not search_artists_by_name(list({english, korean}))
+    ]
+    assert not unresolved, (
+        f"UI 목록에 있으나 그래프에서 해석되지 않는 아티스트: {unresolved}. "
+        "이 이름을 고른 요청은 아티스트 확장이 0건이 되어 지역 대체로 떨어진다."
+    )
 
 
 def test_neo4j_is_retired_from_the_runtime() -> None:
