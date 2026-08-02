@@ -106,6 +106,33 @@ def test_dedupe_ignores_spacing_in_addresses() -> None:
     assert script.dedupe_key(a) != script.dedupe_key(other)
 
 
+def test_a_place_already_in_the_graph_still_gains_its_artist_link() -> None:
+    """중복 장소를 건너뛰면 아티스트 연결까지 함께 버려진다.
+
+    dry-run 결과 media 1,962건 중 882건(45%)이 이미 그래프에 있는 장소였다.
+    장소는 있지만 "누구의 성지인가" 는 media 쪽에만 있으므로, POI 를 건너뛰면서
+    엣지도 만들지 않으면 이번 작업의 목적인 아티스트 매칭에서 절반을 잃는다.
+    장소는 재사용하고 연결만 가져와야 한다.
+    """
+    source = SCRIPT_PATH.read_text(encoding="utf-8")
+
+    # 중복 장소를 통째로 건너뛰던 형태로 돌아가면 안 된다.
+    assert 'skipped["같은 이름·주소의 POI 존재"]' not in source
+
+    # 기존 POI 의 id 를 찾아 쓸 수 있어야 한다.
+    assert "place_to_id" in source
+    assert "place_to_id.get(key)" in source
+
+    # 같은 엣지를 두 번 넣지 않는다. 여러 번 돌려도 결과가 같아야 한다.
+    assert "existing_edges" in source
+    assert 'e.get("relationship")' in source
+
+    body = source[source.index("for row in media_rows:") :]
+    reuse = body.index("reused += 1")
+    link = body.index("poi_artists.append")
+    assert reuse < link, "재사용한 POI 도 아티스트 연결을 받아야 한다"
+
+
 def test_the_script_does_not_touch_the_graph_without_an_explicit_flag() -> None:
     source = SCRIPT_PATH.read_text(encoding="utf-8")
 

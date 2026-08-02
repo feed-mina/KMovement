@@ -154,9 +154,18 @@ def main() -> int:
         )
 
     existing_ids = {n["id"] for n in nodes}
-    existing_places = {dedupe_key(n) for n in nodes if n.get("type") == "POI"}
+    # 같은 장소가 이미 그래프에 있으면 POI 를 새로 만들지 않고 그 id 를 쓴다.
+    # 장소만 건너뛰고 끝내면 "이 장소가 누구의 성지인가" 라는 연결까지 함께
+    # 버려진다. media 노드 1,962건 중 882건이 여기 해당해서, 그렇게 하면 이번
+    # 작업의 목적인 아티스트 매칭에서 45% 를 잃는다.
+    place_to_id = {
+        dedupe_key(n): n["id"] for n in nodes if n.get("type") == "POI"
+    }
     artist_ids = {
         n["name"]: n["id"] for n in nodes if n.get("type") == "Artist" and n.get("name")
+    }
+    existing_edges = {
+        (e.get("source"), e.get("target"), e.get("relationship")) for e in edges
     }
     next_artist_no = max(
         (int(n["id"].split("_")[1]) for n in nodes if n.get("type") == "Artist"), default=0
@@ -167,6 +176,7 @@ def main() -> int:
     new_edges: list[dict] = []
     skipped = Counter()
     categories = Counter()
+    reused = 0
     poi_artists: list[tuple[str, str]] = []
 
     for row in media_rows:
@@ -177,17 +187,23 @@ def main() -> int:
         if node is None:
             skipped["이름·좌표 없음"] += 1
             continue
-        if dedupe_key(node) in existing_places:
-            skipped["같은 이름·주소의 POI 존재"] += 1
-            continue
 
-        existing_places.add(dedupe_key(node))
-        new_pois.append(node)
-        categories[node["category"]] += 1
+        key = dedupe_key(node)
+        poi_id = place_to_id.get(key)
+        if poi_id is None:
+            poi_id = node["id"]
+            place_to_id[key] = poi_id
+            new_pois.append(node)
+            categories[node["category"]] += 1
+        else:
+            # 장소는 그대로 두고 아티스트 연결만 가져온다.
+            reused += 1
 
         artist_name = ((row.get("metadata") or {}).get(K_ARTIST) or "").strip()
         if artist_name:
-            poi_artists.append((node["id"], artist_name))
+            poi_artists.append((poi_id, artist_name))
+        else:
+            skipped["아티스트 없음"] += 1
 
     # 아티스트 노드는 POI 를 다 추린 뒤에 만든다. 버려진 POI 때문에 아무 POI 도
     # 딸리지 않는 아티스트 노드가 생기지 않게 하려는 것이다.
@@ -206,12 +222,18 @@ def main() -> int:
                     "id": aid,
                 }
             )
+        edge = (poi_id, aid, "FILMING_AT")
+        if edge in existing_edges:
+            skipped["이미 있는 엣지"] += 1
+            continue
+        existing_edges.add(edge)
         new_edges.append(
             {"relationship": "FILMING_AT", "source": poi_id, "target": aid}
         )
 
     print()
     print(f"추가될 POI      {len(new_pois):,}건  {dict(categories)}")
+    print(f"기존 POI 재사용 {reused:,}건  (장소는 그대로 두고 아티스트 연결만 가져옴)")
     print(f"추가될 아티스트 {len(new_artists):,}종")
     print(f"추가될 엣지     {len(new_edges):,}건")
     if skipped:
