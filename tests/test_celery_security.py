@@ -21,8 +21,7 @@ def _stub(name: str) -> types.ModuleType:
     return module
 
 
-for _package in [
-    "neo4j",
+_STUBBED_PACKAGES = [
     "chromadb",
     "groq",
     "supabase",
@@ -30,8 +29,7 @@ for _package in [
     "lightgbm",
     "sklearn",
     "sklearn.model_selection",
-]:
-    _stub(_package)
+]
 
 try:
     import celery as _real_celery  # noqa: F401
@@ -83,12 +81,17 @@ except ModuleNotFoundError:
     sys.modules["celery.result"] = _celery_result_module
     sys.modules["celery.schedules"] = _celery_schedules_module
 
+from tests.module_stubs import stub_modules
+
+# stub 은 이 블록 안에서만 산다. 그대로 두면 뒤에 수집되는 테스트가 진짜 모듈
+# 대신 이것을 집는다 — 이 파일의 ensemble_client stub 이 test_ensemble.py 를
+# 통째로 무너뜨렸다(같은 파일만 돌리면 통과해서 원인을 찾기 어렵다).
 _ensemble = types.ModuleType("src.api.ensemble_client")
 _ensemble.rank_pois = MagicMock(return_value=[])
-sys.modules.setdefault("src.api.ensemble_client", _ensemble)
 
-import src.api.fastapi_server as server  # noqa: E402
-from src.api import tasks  # noqa: E402
+with stub_modules(_STUBBED_PACKAGES, {"src.api.ensemble_client": _ensemble}):
+    import src.api.fastapi_server as server  # noqa: E402
+    from src.api import tasks  # noqa: E402
 
 
 client = TestClient(server.app, raise_server_exceptions=False)

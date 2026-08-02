@@ -55,6 +55,13 @@ _groq_mod.Groq = MagicMock
 # ─────────────────────────────────────────────────────────────────────────────
 _config_mod = types.ModuleType("chatbot.config")
 _config_mod.CHROMA_PATH = "/tmp/chroma_test"
+# chatbot_chain 이 로컬 경로 대신 원격 Chroma 로 옮겨 가면서 CHROMA_HOST/PORT 와
+# TORCHSERVE_URL 을 읽기 시작했다. stub 이 따라가지 않아 이 파일은 수집 단계에서
+# 죽어 있었다 — 아래 test_chatbot_config_stub_covers_what_the_chain_imports 가
+# 다음번 표류를 잡는다.
+_config_mod.CHROMA_HOST = "localhost"
+_config_mod.CHROMA_PORT = 8100
+_config_mod.TORCHSERVE_URL = "http://localhost:8085"
 _config_mod.PDF_DIR = "/tmp/pdf_test"
 _config_mod.MODELS_DIR = "/tmp/models_test"
 _config_mod.PDF_COLLECTION = "test_pdf"
@@ -273,9 +280,6 @@ class TestChatbotChain:
 
     def test_chat_pipeline(self):
         """chat() 전체 파이프라인 mock 테스트"""
-        mock_embedder = MagicMock()
-        mock_embedder.encode.return_value = MagicMock(tolist=lambda: [0.1] * 384)
-
         mock_col = MagicMock()
         mock_col.query.return_value = {
             "documents": [["서울 맛집 정보"]],
@@ -290,17 +294,15 @@ class TestChatbotChain:
         mock_groq = MagicMock()
         mock_groq.chat.completions.create.return_value = mock_groq_resp
 
-        mock_reranker = MagicMock()
-        mock_reranker.rerank.side_effect = lambda q, p, **kw: p[:kw.get("top_k", 5)]
-
         # 싱글턴 교체
-        chain_mod._embedder = mock_embedder
         chain_mod._chroma = mock_chroma
         chain_mod._groq = mock_groq
-        chain_mod._reranker = mock_reranker
 
-        # multi_query mock
-        with patch.object(multi_query_mod, "generate_query_variants", return_value=["서울 맛집"]):
+        # 임베딩과 리랭킹은 TorchServe HTTP 호출이다. 로컬 싱글턴을 대신 넣으면
+        # 실제 요청이 나가 localhost:8085 로 붙으려다 죽는다.
+        with patch.object(chain_mod, "_embed_texts", return_value=[[0.1] * 384]), \
+                patch.object(chain_mod, "_rerank_via_torchserve", side_effect=lambda q, docs: [1.0] * len(docs)), \
+                patch.object(multi_query_mod, "generate_query_variants", return_value=["서울 맛집"]):
             result = chain_mod.chat("서울 맛집 추천해줘", session_id="test_pipe")
 
         assert "reply" in result
@@ -309,41 +311,33 @@ class TestChatbotChain:
         assert result["reply"] == "광장시장을 추천합니다!"
 
         # cleanup
-        chain_mod._embedder = None
         chain_mod._chroma = None
         chain_mod._groq = None
-        chain_mod._reranker = None
         chain_mod._sessions.clear()
 
     def test_chat_groq_failure(self):
         """Groq 호출 실패 시 오류 메시지 반환"""
-        mock_embedder = MagicMock()
-        mock_embedder.encode.return_value = MagicMock(tolist=lambda: [0.1] * 384)
-
         mock_chroma = MagicMock()
         mock_chroma.get_collection.side_effect = Exception("컬렉션 없음")
 
         mock_groq = MagicMock()
         mock_groq.chat.completions.create.side_effect = Exception("Groq 서버 오류")
 
-        chain_mod._embedder = mock_embedder
         chain_mod._chroma = mock_chroma
         chain_mod._groq = mock_groq
 
-        with patch.object(multi_query_mod, "generate_query_variants", return_value=["test"]):
+        with patch.object(chain_mod, "_embed_texts", return_value=[[0.1] * 384]), \
+                patch.object(multi_query_mod, "generate_query_variants", return_value=["test"]):
             result = chain_mod.chat("test", session_id="fail_test")
 
         assert "오류" in result["reply"]
 
-        chain_mod._embedder = None
         chain_mod._chroma = None
         chain_mod._groq = None
         chain_mod._sessions.clear()
 
     def test_session_history_trimming(self):
         """MAX_HISTORY_TURNS 이상이면 트리밍"""
-        mock_embedder = MagicMock()
-        mock_embedder.encode.return_value = MagicMock(tolist=lambda: [0.1] * 384)
         mock_chroma = MagicMock()
         mock_chroma.get_collection.side_effect = Exception("no col")
         mock_groq_resp = MagicMock()
@@ -351,19 +345,18 @@ class TestChatbotChain:
         mock_groq = MagicMock()
         mock_groq.chat.completions.create.return_value = mock_groq_resp
 
-        chain_mod._embedder = mock_embedder
         chain_mod._chroma = mock_chroma
         chain_mod._groq = mock_groq
 
         sid = "trim_test"
         # MAX_HISTORY_TURNS=3 → 최대 6개 메시지
-        with patch.object(multi_query_mod, "generate_query_variants", return_value=["q"]):
+        with patch.object(chain_mod, "_embed_texts", return_value=[[0.1] * 384]), \
+                patch.object(multi_query_mod, "generate_query_variants", return_value=["q"]):
             for i in range(5):
                 chain_mod.chat(f"msg {i}", session_id=sid)
 
         assert len(chain_mod._sessions[sid]) <= _config_mod.MAX_HISTORY_TURNS * 2
 
-        chain_mod._embedder = None
         chain_mod._chroma = None
         chain_mod._groq = None
         chain_mod._sessions.clear()
@@ -449,3 +442,49 @@ class TestChatbotServer:
         with patch.object(server_mod, "reset_session"):
             resp = client.post("/chat/reset", json={"session_id": "unknown"})
         assert resp.status_code == 200
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# 5. stub 표류 감지
+# ═════════════════════════════════════════════════════════════════════════════
+def test_chatbot_config_stub_covers_what_the_chain_imports():
+    """chatbot.config stub 이 실제 모듈과 어긋나면 수집 단계에서 죽는다.
+
+    chatbot_chain 이 원격 Chroma·TorchServe 로 옮겨 가며 CHROMA_HOST / CHROMA_PORT /
+    TORCHSERVE_URL 을 읽기 시작했는데 stub 이 따라가지 않아, 이 파일 전체가
+    ImportError 로 수집되지 못한 채 한동안 방치됐다. 파일이 통째로 빠지면 실패가
+    아니라 "테스트가 없는 것"으로 보여 눈에 띄지 않는다.
+
+    stub 을 진짜 모듈과 대조해 다음 표류를 이름으로 짚어 준다.
+    """
+    import ast
+    from pathlib import Path
+
+    chatbot_dir = Path(_NLP_DIR) / "chatbot"
+
+    # 진짜 config 는 여기서 import 할 수 없다(위에서 stub 으로 덮어썼다).
+    # 소스에서 최상위 대입 이름을 읽는다.
+    real_names = {
+        target.id
+        for node in ast.parse((chatbot_dir / "config.py").read_text(encoding="utf-8")).body
+        if isinstance(node, ast.Assign)
+        for target in node.targets
+        if isinstance(target, ast.Name) and not target.id.startswith("_")
+    }
+
+    # chatbot.config 에서 실제로 가져다 쓰는 이름만 요구한다. 설정 전부를
+    # 베끼라고 하면 stub 이 무의미하게 커진다.
+    imported: set[str] = set()
+    for source in chatbot_dir.glob("*.py"):
+        for node in ast.parse(source.read_text(encoding="utf-8")).body:
+            if isinstance(node, ast.ImportFrom) and node.module == "chatbot.config":
+                imported.update(alias.name for alias in node.names)
+
+    assert imported, "chatbot.config 를 쓰는 모듈을 찾지 못했다"
+    missing = sorted(name for name in imported if not hasattr(_config_mod, name))
+    assert not missing, f"stub 에 없는 설정: {missing}"
+
+    # 진짜 config 에 없는 이름을 stub 이 들고 있으면, 지워진 설정을 계속 쓰는
+    # 코드를 테스트가 통과시킨다.
+    stale = sorted(name for name in imported if name not in real_names)
+    assert not stale, f"진짜 config 에 없는 설정: {stale}"

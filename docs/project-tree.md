@@ -229,7 +229,7 @@
        ┌────────────────────┬───────────────────────────────────────────────────────────────────────────────┐
        │       Module       │                                    Purpose                                    │
        ├────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
-       │ neo4j_client.py    │ Neo4j AuraDB queries for artist POIs, region POIs, regions                    │
+       │ graphrag_client.py │ Graph queries over models/kride_graph.json: artist POIs, region POIs           │
        ├────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
        │ rag_client.py      │ RAG pipeline: purpose search, recommendation generation, itinerary generation │
        ├────────────────────┼───────────────────────────────────────────────────────────────────────────────┤
@@ -295,8 +295,6 @@
        │ PostgreSQL (SDUI)   │ 18      │ 5432     │ SDUI_TD  │ postgres/1234 │ Spring Boot metadata, UI, users, content │
        ├─────────────────────┼─────────┼──────────┼──────────┼───────────────┼──────────────────────────────────────────┤
        │ PostgreSQL (K-Ride) │ 16      │ (custom) │ kride DB │ (unchecked)   │ FastAPI POI, artist_poi (960k+ records)  │
-       ├─────────────────────┼─────────┼──────────┼──────────┼───────────────┼──────────────────────────────────────────┤
-       │ Neo4j AuraDB        │ Cloud   │ —        │ —        │ —             │ Artist-location knowledge graph          │
        ├─────────────────────┼─────────┼──────────┼──────────┼───────────────┼──────────────────────────────────────────┤
        │ Supabase            │ Cloud   │ —        │ —        │ —             │ Community image storage, user data       │
        ├─────────────────────┼─────────┼──────────┼──────────┼───────────────┼──────────────────────────────────────────┤
@@ -446,7 +444,7 @@
        K-Ride MSA (3 Services)
 
        1. Spring Boot (SDUI): Metadata, auth, community, user management
-       2. FastAPI (K-Ride): Recommendation engine, Neo4j queries, RAG pipelines
+       2. FastAPI (K-Ride): Recommendation engine, GraphRAG queries, RAG pipelines
        3. Frontend (Next.js): PWA, DynamicEngine, onboarding flow
 
        Data Flow: Onboarding → Recommendation
@@ -455,7 +453,7 @@
          → localStorage['kride_form']
          → GOTO_FOCUS action
          → POST /api/recommend/itinerary (to FastAPI port 8000)
-         → Neo4j (artist POIs) + ChromaDB (purpose vectors) + Groq LLM
+         → GraphRAG (artist POIs) + ChromaDB (purpose vectors) + Groq LLM
          → Itinerary + Map markers
          → FOCUS screen renders
 
@@ -463,7 +461,7 @@
 
        - SDUI (Spring Boot): PostgreSQL 5432/SDUI_TD (UI, users, queries)
        - K-Ride (FastAPI): PostgreSQL 16 (POI, artist data 960k+)
-       - Knowledge Graph: Neo4j AuraDB (artist-location relationships)
+       - Knowledge Graph: models/kride_graph.json, baked into the image (artist-location relationships)
        - Vector Search: ChromaDB local (purpose embeddings)
        - Cloud Storage: Supabase (community images)
        - Cache: Redis (SDUI metadata)
@@ -477,12 +475,11 @@
 
        Missing/Incomplete Configurations
 
-       1. Neo4j Connection: Credentials in .env (NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD)
-       2. Supabase: Credentials available but integration points unclear
-       3. GCP Document AI: Configured but usage context needs verification
-       4. FastAPI Deployment: Only locally configured (port 8000), not in EC2 docker-compose
-       5. Kubernetes: No k8s manifests found (Docker Compose only)
-       6. TLS/SSL: Both local and production use HTTP (no SSL termination config visible)
+       1. Supabase: Credentials available but integration points unclear
+       2. GCP Document AI: Configured but usage context needs verification
+       3. FastAPI Deployment: Only locally configured (port 8000), not in EC2 docker-compose
+       4. Kubernetes: No k8s manifests found (Docker Compose only)
+       5. TLS/SSL: Both local and production use HTTP (no SSL termination config visible)
 
        ---
        File Paths Summary
