@@ -34,10 +34,6 @@ services:
       - CHROMA_HOST=chromadb
       - CHROMA_PORT=8000
       # 클라우드 DB — .env 파일에서 주입
-      - NEO4J_URI=${NEO4J_URI:-}
-      - NEO4J_USERNAME=${NEO4J_USERNAME:-}
-      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-}
-      - NEO4J_DATABASE=${NEO4J_DATABASE:-}
       - SUPABASE_URL=${SUPABASE_URL:-}
       - SUPABASE_KEY=${SUPABASE_KEY:-}
       - GROQ_API_KEY=${GROQ_API_KEY:-}
@@ -130,10 +126,6 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
       - CHROMA_HOST=chromadb
       - CHROMA_PORT=8000
-      - NEO4J_URI=${NEO4J_URI:-}
-      - NEO4J_USERNAME=${NEO4J_USERNAME:-}
-      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-}
-      - NEO4J_DATABASE=${NEO4J_DATABASE:-}
       - SUPABASE_URL=${SUPABASE_URL:-}
       - SUPABASE_KEY=${SUPABASE_KEY:-}
       - GROQ_API_KEY=${GROQ_API_KEY:-}

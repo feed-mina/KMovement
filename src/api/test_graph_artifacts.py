@@ -140,7 +140,7 @@ def test_every_ui_region_matches_its_address_spelling() -> None:
     """
     from src.api.graphrag_client import get_region_pois_from_graph
 
-    # FALLBACK_REGIONS 와 같은 17개 시·도.
+    # REGIONS 와 같은 17개 시·도.
     for region in (
         "서울", "경기", "인천", "강원", "충북", "충남", "전북", "전남",
         "경북", "경남", "부산", "대구", "광주", "대전", "울산", "세종", "제주",
@@ -150,6 +150,32 @@ def test_every_ui_region_matches_its_address_spelling() -> None:
 
     # 정식 명칭을 그대로 넘겨도 동작해야 한다.
     assert get_region_pois_from_graph(["경상북도"], max_pois=1)
+
+
+def test_neo4j_is_retired_from_the_runtime() -> None:
+    """Aura 인스턴스가 사라진 뒤 세 호출은 늘 예외를 내고 빈 리스트가 됐다.
+
+    같은 데이터를 GraphRAG 가 kride_graph.json 에서 제공하므로 드라이버째
+    걷어냈다. 되살리려면 인스턴스와 적재 절차부터 있어야 한다. 그때까지는
+    죽은 호출이 다시 들어오지 않도록 막는다.
+    """
+    assert not (ROOT / "src" / "api" / "neo4j_client.py").exists()
+
+    server = FASTAPI_SERVER.read_text(encoding="utf-8")
+    assert "neo4j_client" not in server
+    for gone in ("get_artist_pois", "get_region_pois(", "get_regions("):
+        assert gone not in server, gone
+
+    # 드라이버가 이미지에 남아 있으면 진단이 다시 붙기 쉽다.
+    for name in ("requirements-docker.txt", "requirements.txt"):
+        text = (ROOT / "src" / "api" / name).read_text(encoding="utf-8")
+        assert not re.search(r"^neo4j==", text, re.MULTILINE), name
+
+    # 배포에 자리표시자만 남으면 치환되지 않은 문자열이 원격에서 그대로 돈다.
+    deploy = (ROOT / "deploy" / "ec2" / "deploy.sh").read_text(encoding="utf-8")
+    workflow = (ROOT / ".github" / "workflows" / "deploy-ec2.yml").read_text(encoding="utf-8")
+    assert "NEO4J" not in deploy
+    assert "NEO4J" not in workflow
 
 
 def test_ensemble_ranker_dependency_is_pinned_for_the_image() -> None:

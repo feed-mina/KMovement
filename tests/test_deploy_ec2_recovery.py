@@ -362,12 +362,11 @@ def test_chroma_index_is_mounted_from_the_host_not_baked_into_the_image() -> Non
 
 
 def test_deploy_reports_optional_datasource_health_without_failing() -> None:
-    """Neo4j and ChromaDB degrade silently, so the deploy must say so.
+    """These sources degrade silently, so the deploy must say so.
 
-    /api/regions falls back to a hardcoded 17-region list and the recommend
-    paths swallow the exception, so a dead datasource looks identical to a
-    healthy deploy. The Neo4j Aura instance was gone (DNS did not resolve) for
-    an unknown period and no deploy log showed it.
+    The recommend paths swallow every exception, so a dead datasource looks
+    identical to a healthy deploy. All four were dead at once for an unknown
+    period and no deploy log showed it (#217).
 
     The check must not fail the deploy: the service works without either
     datasource, and failing here would block unrelated changes from shipping.
@@ -387,14 +386,13 @@ def test_deploy_reports_optional_datasource_health_without_failing() -> None:
 
     # Every source the recommendation path depends on is reported. Each one
     # degrades silently on its own, so a missing probe hides a real outage.
-    for source in ("neo4j=", "chroma=", "graphrag=", "ensemble=", "supabase="):
+    for source in ("chroma=", "graphrag=", "ensemble=", "supabase="):
         assert source in body, source
 
     # Degraded states must be visible in the Actions UI rather than buried.
     assert body.count("::warning::") >= 5
 
     # Secret hosts must not reach a public repository's Actions log.
-    assert "<neo4j-host>" in body
     assert "<supabase-host>" in body
 
     # GraphRAG is exercised through the public API rather than a file check, so

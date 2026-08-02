@@ -27,7 +27,7 @@
 
 1. 🗓️ **AI 맞춤형 여행 일정 생성**: 사용자의 선호 아티스트, 방문 목적, 체류 기간을 분석하여 동선이 최적화된 일별 여행 스케줄을 자동으로 구성합니다.
 2. 🗺️ **인터랙티브 지도 및 마커 시각화**: 추천된 일정과 장소들을 지도(Kakao/Google Maps) 위에 직관적인 마커로 시각화하여 사용자가 전체 여행 동선을 한눈에 파악할 수 있도록 돕습니다.
-3. 🕸️ **GraphRAG 기반 심층 장소 추천**: Neo4j 지식 그래프를 활용하여 아티스트와 촬영지 간의 복잡한 관계(FILMING_AT)를 추론해, 단순 검색을 넘어서는 깊이 있는 장소를 추천합니다.
+3. 🕸️ **GraphRAG 기반 심층 장소 추천**: 저장소에 담긴 지식 그래프(`models/kride_graph.json`)로 아티스트와 촬영지 간의 관계(FILMING_AT)를 2-hop·커뮤니티 확장해, 단순 검색을 넘어서는 깊이 있는 장소를 추천합니다.
 4. 🤖 **LLM 기반 대화형 챗봇 (AI Assistant)**: Groq API와 고속 대규모 언어 모델(LLM)을 연동하여, 사용자의 여행 관련 질문에 실시간으로 답변하고 소통하는 챗봇 가이드를 제공합니다.
 5. 🌐 **다국어 RAG 파이프라인**: 다국어 임베딩 모델과 벡터 검색 엔진(ChromaDB)을 결합한 RAG(검색 증강 생성) 기술로, 글로벌 사용자의 다양한 질의에 대해 환각(Hallucination) 없는 정확한 장소 데이터를 제공합니다.
 
@@ -38,9 +38,9 @@
 본 시스템은 빠른 응답 속도와 복잡한 AI 추론을 동시에 소화하기 위해 **투트랙 아키텍처(Two-track Architecture)**로 분리되어 있습니다.
 
 ### 🧠 1. 지식 그래프 및 LLM 기반 추천 시스템 (GraphRAG)
-- **DB 및 검색 엔진**: PostgreSQL + PostGIS (공간 쿼리 및 위치 기반 최적화), ChromaDB (Vector 검색), Neo4j (Graph DB)
+- **DB 및 검색 엔진**: PostgreSQL + PostGIS (공간 쿼리 및 위치 기반 최적화), ChromaDB (Vector 검색), Supabase (그래프 미러)
 - **자연어 처리 (NLP)**: `intfloat/multilingual-e5-small` 다국어 임베딩을 통한 벡터 변환
-- **GraphRAG**: Neo4j 기반으로 아티스트와 촬영지 간의 관계(FILMING_AT)를 추출하여 풍부한 여행 컨텍스트를 LLM에 전달
+- **GraphRAG**: `models/kride_graph.json` 에서 아티스트와 촬영지 간의 관계(FILMING_AT)를 추출하여 풍부한 여행 컨텍스트를 LLM에 전달
 - **LLM 추론**: Groq API 기반 고속 추론으로 최적의 여행 일정(JSON) 및 자연어 챗봇 응답 생성
 
 ### 🎬 2. 멀티모달 생성형 AI 미디어 파이프라인

@@ -61,6 +61,12 @@ MOCK_POIS = [
     {"poi_id": "poi_60", "name": "길상도예", "lat": 37.486, "lon": 127.032, "category": "tourism"},
 ]
 
+# 지역을 함께 고른 요청은 주소로 한 번 더 걸러진다. 주소 없는 POI 는 그
+# 필터에서 전부 떨어지므로, 지역 필터를 지나야 하는 테스트는 이쪽을 쓴다.
+MOCK_SEOUL_POIS = [
+    {**poi, "address": "서울 종로구", "sido": "서울"} for poi in MOCK_POIS
+]
+
 
 class TestRecommendAI:
     def test_recommend_ai_503_when_no_ai(self):
@@ -76,7 +82,9 @@ class TestRecommendAI:
     def test_recommend_ai_returns_pois_and_text(self):
         """HAS_AI=True 시 pois, recommendation_text, count 필드 반환"""
         with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=MOCK_POIS), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=MOCK_SEOUL_POIS), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_recommendation_text", return_value="추천 텍스트"):
             resp = client.post("/api/recommend/ai", json={
@@ -94,7 +102,9 @@ class TestRecommendAI:
     def test_recommend_ai_empty_request(self):
         """빈 요청도 에러 없이 처리"""
         with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=[]), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=[]), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_recommendation_text", return_value=""):
             resp = client.post("/api/recommend/ai", json={
@@ -110,7 +120,9 @@ class TestRecommendAI:
         """동일 POI가 Neo4j와 ChromaDB에서 중복 반환되면 하나만 남아야 함"""
         chroma_dup = [{"poi_id": "poi_14", "name": "경복궁", "lat": 37.576, "lon": 126.977}]
         with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=MOCK_POIS), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=MOCK_POIS), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=chroma_dup), \
              patch("src.api.fastapi_server.generate_recommendation_text", return_value=""):
             resp = client.post("/api/recommend/ai", json={
@@ -145,8 +157,9 @@ class TestRecommendItinerary:
             "source_pois": MOCK_POIS,
         }
         with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=MOCK_POIS), \
-             patch("src.api.fastapi_server.get_region_pois", return_value=[]), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=MOCK_POIS), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_itinerary", return_value=mock_itinerary_result), \
              patch("src.api.fastapi_server.HAS_ENSEMBLE", False):
@@ -177,11 +190,8 @@ class TestStaticEndpoints:
         assert len(body["artists"]) == 1
 
     def test_regions_returns_list(self):
-        with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_regions", return_value=[
-                 {"id": 1, "name": "서울"},
-                 {"id": 2, "name": "부산"},
-             ]):
+        """Neo4j 조회가 사라져 주입할 대상이 없다. 실제 응답을 그대로 본다."""
+        with patch("src.api.fastapi_server.HAS_AI", True):
             resp = client.get("/api/regions")
         assert resp.status_code == 200
         body = resp.json()

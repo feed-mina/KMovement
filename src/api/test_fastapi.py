@@ -10,7 +10,7 @@ FastAPI 서버 단위 / 통합 테스트 (pytest + FastAPI TestClient)
 의존 패키지:
     pip install pytest httpx
 
-외부 의존성(Neo4j / Supabase / ChromaDB / Groq)은 모두 monkeypatch로 mock 처리.
+외부 의존성(Supabase / ChromaDB / Groq)은 모두 monkeypatch로 mock 처리.
 서버가 꺼져 있어도 실행 가능.
 """
 
@@ -35,7 +35,6 @@ def _stub_module(name: str):
 
 
 for _pkg in [
-    "neo4j", "neo4j.exceptions",
     "chromadb",
     "groq",
     "supabase",
@@ -58,13 +57,8 @@ _ai_stubs = {
     "get_poi_details": lambda poi_id: None,
 }
 
-# neo4j_client / rag_client / supabase_client 를 stub 모듈로 등록
+# rag_client / supabase_client 를 stub 모듈로 등록
 for _mod_name, _funcs in {
-    "src.api.neo4j_client": {
-        "get_artist_pois": _ai_stubs["get_artist_pois"],
-        "get_region_pois": _ai_stubs["get_region_pois"],
-        "get_regions": _ai_stubs["get_regions"],
-    },
     "src.api.rag_client": {
         "search_pois_by_purpose": _ai_stubs["search_pois_by_purpose"],
         "generate_recommendation_text": _ai_stubs["generate_recommendation_text"],
@@ -172,7 +166,7 @@ class TestRegions:
         assert isinstance(body["regions"], list)
 
     def test_regions_not_empty(self):
-        """Neo4j fallback이 동작해서 최소 1개 이상"""
+        """REGIONS 목록이 그대로 나간다."""
         body = client.get("/api/regions").json()
         assert len(body["regions"]) >= 1
 
@@ -182,15 +176,14 @@ class TestRegions:
         assert "id" in item
         assert "name" in item
 
-    def test_fallback_when_neo4j_empty(self):
-        """Neo4j가 빈 목록을 반환할 때 하드코딩 fallback 동작"""
-        original = _module.get_regions
-        _module.get_regions = lambda limit=20: []
-        try:
-            body = client.get("/api/regions").json()
-            assert len(body["regions"]) >= 17  # fallback 목록 17개
-        finally:
-            _module.get_regions = original
+    def test_regions_cover_all_seventeen_sido(self):
+        """17개 시·도가 그대로 나간다.
+
+        Neo4j 분기가 있던 시절에는 조회 실패 시에만 이 목록이 나갔다. 이제
+        분기가 없어 항상 이것이 응답이다.
+        """
+        body = client.get("/api/regions").json()
+        assert len(body["regions"]) == 17
 
 
 # ═════════════════════════════════════════════════════════════════════════════

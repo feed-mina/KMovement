@@ -99,15 +99,13 @@ assert_frontend_page() {
   echo "Frontend page ${FRONTEND_PATH} is serving rendered Next.js output."
 }
 
-# Neo4j 와 ChromaDB 는 실패해도 애플리케이션이 하드코딩 fallback 으로 조용히
-# 넘어간다. /api/regions 는 FALLBACK_REGIONS 를, 추천 경로는 빈 리스트를 쓰고
-# 배포는 그대로 성공한다. 추천 품질만 떨어지므로 아무도 모른 채 지나간다.
+# 아래 소스들은 실패해도 애플리케이션이 조용히 빈 결과로 넘어간다. 호출부가
+# 예외를 삼키고 배포는 그대로 성공하므로, 추천 품질만 떨어진 채 아무도 모르고
+# 지나간다. 실제로 네 소스가 동시에 죽은 채 한동안 운영됐고 배포 로그에는 아무
+# 흔적도 없었다(#217). 여기서 상태를 남겨 저하가 드러나게 한다.
 #
-# 실제로 Neo4j Aura 인스턴스가 사라진 뒤(DNS 미해석) 한동안 그 상태로 운영됐고,
-# 배포 로그에는 아무 흔적도 남지 않았다. 여기서 상태를 남겨 저하가 드러나게 한다.
-#
-# 배포를 실패시키지 않는다. 두 소스가 모두 없어도 서비스는 동작하며, 여기서
-# 막으면 무관한 변경의 배포까지 멈춘다. 경고로만 알린다.
+# 배포를 실패시키지 않는다. 소스가 없어도 서비스는 동작하며, 여기서 막으면
+# 무관한 변경의 배포까지 멈춘다. 경고로만 알린다.
 report_optional_datasource_health() {
   if ! docker inspect kride-fastapi >/dev/null 2>&1; then
     echo "kride-fastapi is not present; skipping optional datasource diagnostics."
@@ -117,11 +115,9 @@ report_optional_datasource_health() {
   DATASOURCE_REPORT="$(docker exec kride-fastapi python -c '
 import os, re
 
-uri = os.environ.get("NEO4J_URI", "")
-
 # 공개 저장소의 Actions 로그에 호스트가 남지 않도록 가린다.
 _HOSTS = []
-for _var, _label in (("NEO4J_URI", "<neo4j-host>"), ("SUPABASE_URL", "<supabase-host>")):
+for _var, _label in (("SUPABASE_URL", "<supabase-host>"),):
     _m = re.search(r"//([^/:@]+)", os.environ.get(_var, ""))
     if _m:
         _HOSTS.append((_m.group(1), _label))
@@ -130,23 +126,6 @@ def redact(text):
     for _host, _label in _HOSTS:
         text = text.replace(_host, _label)
     return text
-
-if not uri:
-    print("neo4j=NOT_CONFIGURED")
-else:
-    try:
-        from neo4j import GraphDatabase
-        driver = GraphDatabase.driver(
-            uri, auth=(os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
-        )
-        driver.verify_connectivity()
-        database = os.environ.get("NEO4J_DATABASE", "") or None
-        with driver.session(database=database) as session:
-            regions = session.run("MATCH (r:Region) RETURN count(r) AS c").single()["c"]
-        driver.close()
-        print("neo4j=OK regions=" + str(regions))
-    except Exception as exc:
-        print("neo4j=UNREACHABLE " + type(exc).__name__ + ": " + redact(str(exc))[:200])
 
 try:
     import chromadb
@@ -184,7 +163,7 @@ try:
 except Exception as exc:
     print("ensemble=UNAVAILABLE " + type(exc).__name__ + ": " + str(exc)[:200])
 
-# Supabase 는 그래프 미러이자 Neo4j/ChromaDB 실패 시의 마지막 대체 경로다.
+# Supabase 는 그래프 미러이자 GraphRAG/ChromaDB 실패 시의 마지막 대체 경로다.
 # nodes 가 비면 /api/artists 도 하드코딩 목록으로 떨어진다.
 try:
     from src.api.supabase_client import get_client
@@ -198,16 +177,6 @@ except Exception as exc:
 
   echo "--- optional datasource health ---"
   echo "$DATASOURCE_REPORT"
-
-  case "$DATASOURCE_REPORT" in
-    *neo4j=OK\ regions=0*)
-      echo "::warning::Neo4j is reachable but has no Region nodes; /api/regions serves the hardcoded fallback list."
-      ;;
-    *neo4j=OK*) ;;
-    *)
-      echo "::warning::Neo4j is not serving data; /api/regions falls back to a hardcoded list and artist/region POI lookups return nothing. GraphRAG is a separate source and is reported below."
-      ;;
-  esac
 
   case "$DATASOURCE_REPORT" in
     *chroma=OK\ collections=0\ *)
@@ -443,10 +412,6 @@ if [ "__DEPLOY_FASTAPI__" = "true" ]; then
     -e KRIDE_RAW_DATA_DIR=/app/dataset/data/raw_ml \
     -e HF_HOME=/tmp/hf_cache \
     -e TRANSFORMERS_CACHE=/tmp/hf_cache/hub \
-    -e NEO4J_URI=__NEO4J_URI__ \
-    -e NEO4J_USERNAME=__NEO4J_USERNAME__ \
-    -e NEO4J_PASSWORD=__NEO4J_PASSWORD__ \
-    -e NEO4J_DATABASE=__NEO4J_DATABASE__ \
     -e SUPABASE_URL=__SUPABASE_URL__ \
     -e SUPABASE_KEY=__SUPABASE_KEY__ \
     -e GROQ_API_KEY=__GROQ_API_KEY__ \
