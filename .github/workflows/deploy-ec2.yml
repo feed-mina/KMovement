@@ -6,7 +6,16 @@ on:
     paths:
       - "subproject/SDUI/SDUI-server/**"
       - "subproject/SDUI/metadata-project/**"
-      - "src/api/**"
+      # src/api/Dockerfile 이 COPY 하는 것은 전부 여기 있어야 한다. 이미지에
+      # 들어가는데 트리거에 없으면, 그 파일만 바꾼 커밋은 배포가 돌지 않은 채
+      # 머지된다. tests/test_deploy_ec2_recovery.py 가 둘이 어긋나지 않는지 본다.
+      #
+      # COPY src/ 는 src/ 전체를 넣는다. src/api 만 적어 두면 src/ml 을 고쳐도
+      # 배포가 돌지 않는데, ensemble_client 가 src/ml/feature_engineering 을
+      # 런타임에 import 한다.
+      - "src/**"
+      - "models/kride_graph.json"
+      - "models/ensemble_ranker.pkl"
       - "Dockerfile.worker"
       - "deploy/ec2/**"
       - "deploy/media_motion/**"
@@ -81,9 +90,9 @@ jobs:
             fi
             echo "$CHANGED" | grep -q '^subproject/SDUI/SDUI-server/' && DEPLOY_BACKEND="true"
             echo "$CHANGED" | grep -q '^subproject/SDUI/metadata-project/' && DEPLOY_FRONTEND="true"
-            echo "$CHANGED" | grep -q '^src/api/' && DEPLOY_FASTAPI="true"
+            echo "$CHANGED" | grep -q '^src/' && DEPLOY_FASTAPI="true"
             echo "$CHANGED" | grep -Eq '^(Dockerfile\.worker|deploy/media_motion/)' && DEPLOY_FASTAPI="true"
-            echo "$CHANGED" | grep -Eq '^(dataset/data/raw_ml/(road_scored|facility_clean|tour_poi)\.csv|dataset/models/route_graph\.pkl|\.dockerignore)' && DEPLOY_FASTAPI="true"
+            echo "$CHANGED" | grep -Eq '^(dataset/data/raw_ml/(road_scored|facility_clean|tour_poi)\.csv|dataset/models/route_graph\.pkl|models/(kride_graph\.json|ensemble_ranker\.pkl)|\.dockerignore)' && DEPLOY_FASTAPI="true"
             # 배포 절차 자체가 바뀌면 서비스별 변경 여부와 무관하게 전부 다시
             # 올린다. deploy/ec2/ 는 워크플로 파일과 같은 취급이다. #210 에서
             # 스크립트를 파일로 뺐을 뿐, 호스트에서 도는 배포 절차라는 성격은

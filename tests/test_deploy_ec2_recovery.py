@@ -405,6 +405,54 @@ def test_deploy_reports_optional_datasource_health_without_failing() -> None:
     assert "docker inspect kride-fastapi" in body
 
 
+def test_everything_baked_into_the_image_triggers_a_deploy() -> None:
+    """A file the Dockerfile copies but the trigger ignores ships stale.
+
+    A commit touching only that file merges without a deploy, so the running
+    image keeps the old contents while the repository says otherwise. Two of
+    these existed at once:
+
+    - `models/kride_graph.json` and `models/ensemble_ranker.pkl` were copied in
+      but absent from the trigger. The graph-refresh workflow commits exactly
+      that one file, so its output would never have deployed on its own.
+    - `COPY src/` takes all of src/, but the trigger listed only `src/api/**`.
+      `src/ml/feature_engineering.py` computes the ensemble's features and is
+      imported at runtime by `ensemble_client`.
+
+    Both times a deploy happened only because an unrelated file in the same PR
+    was covered.
+    """
+    import yaml
+
+    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+    triggers = yaml.safe_load(workflow)[True]["push"]["paths"]
+    dockerfile = (ROOT / "src" / "api" / "Dockerfile").read_text(encoding="utf-8")
+
+    def covered(path: str) -> bool:
+        path = path.rstrip("/")
+        for entry in triggers:
+            if entry.endswith("/**"):
+                if path == entry[:-3] or path.startswith(entry[:-2]):
+                    return True
+            elif path == entry:
+                return True
+        return False
+
+    copied = [
+        line.split()[1]
+        for line in dockerfile.splitlines()
+        if line.startswith("COPY ") and len(line.split()) >= 3
+    ]
+    assert copied, "no COPY directives found"
+
+    uncovered = sorted({src for src in copied if not covered(src)})
+    assert not uncovered, (
+        f"src/api/Dockerfile copies {uncovered} into the image, but "
+        f"on.push.paths does not cover them — a commit touching only those "
+        f"files would merge without deploying"
+    )
+
+
 def test_the_nginx_config_lives_where_a_change_to_it_triggers_a_deploy() -> None:
     """nginx config is host state, not CI orchestration.
 
