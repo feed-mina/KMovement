@@ -1,0 +1,120 @@
+name: Refresh graph from Supabase
+
+# Supabase 의 media_location 노드를 models/kride_graph.json 에 병합하고 결과를
+# 브랜치에 커밋한다.
+#
+# 왜 CI 에서 하나: 병합에는 RLS 를 통과하는 secret 키가 필요하다. 그 키는 이미
+# SUPABASE_KEY 시크릿으로 여기 있고, 로컬에서 돌리려면 매번 키를 꺼내 환경변수에
+# 넣어야 한다. 병합 자체는 결정적이라 같은 데이터에 같은 스크립트를 돌리면 같은
+# 결과가 나온다.
+#
+# 두 소스는 앞으로도 어긋난다. 실제로 그래프 파일이 Supabase 보다 뒤처져 있어
+# 아티스트 연결 641개와 POI 1,962곳이 런타임에서 빠져 있었다(#229, #231).
+#
+# 범위를 좁게 둔다.
+#   - workflow_dispatch 전용. 푸시나 일정으로 저절로 돌지 않는다.
+#   - models/kride_graph.json 한 파일만 커밋한다. 다른 변경은 커밋에 넣지 않는다.
+#   - main 에는 커밋하지 않는다. 결과는 PR 로 검토한다.
+#
+# 이 워크플로가 그래프를 바꾸면 ChromaDB 컬렉션도 다시 만들어야 검색에 반영된다.
+#   python scripts/build_poi_collections_from_graph.py
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "커밋할 브랜치. main 은 거부한다."
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-graph-from-supabase
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Reject main
+        run: |
+          if [ "${{ inputs.branch }}" = "main" ]; then
+            echo "::error::Commit the refreshed graph to a branch and review it in a PR."
+            exit 1
+          fi
+
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Supabase client
+        run: pip install --no-cache-dir supabase
+
+      - name: Merge media POIs into the graph
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
+            echo "::error::SUPABASE_URL and SUPABASE_KEY must be configured."
+            exit 1
+          fi
+          python scripts/merge_media_pois_into_graph.py --apply
+
+      - name: Commit the graph if it changed
+        run: |
+          # 병합 스크립트가 남긴 백업은 커밋 대상이 아니다.
+          rm -f models/kride_graph.json.bak
+
+          if git diff --quiet -- models/kride_graph.json; then
+            echo "::notice::Graph already matches Supabase; nothing to commit."
+            exit 0
+          fi
+
+          # 한 파일만 담는다. 스크립트가 다른 것을 건드렸더라도 커밋에 넣지 않는다.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- models/kride_graph.json
+          git commit -m "data: Supabase 기준으로 그래프를 갱신한다
+
+          .github/workflows/refresh-graph-from-supabase.yml 이
+          scripts/merge_media_pois_into_graph.py 를 돌린 결과다.
+
+          ChromaDB 컬렉션도 다시 만들어야 검색에 반영된다.
+              python scripts/build_poi_collections_from_graph.py"
+          git push origin HEAD:${{ inputs.branch }}
+
+      - name: Report the resulting graph
+        run: |
+          python - <<'PY'
+          import json
+          from collections import Counter
+
+          graph = json.loads(open("models/kride_graph.json", encoding="utf-8").read())
+          nodes, edges = graph["nodes"], graph["edges"]
+          kinds = Counter(n.get("type") for n in nodes)
+          print(f"노드 {len(nodes):,}건 {dict(kinds)}")
+          print(f"엣지 {len(edges):,}건")
+
+          artists = {n["name"] for n in nodes if n.get("type") == "Artist"}
+          # UI 목록에 있으나 그래프에 없던 아티스트. 여기 남아 있으면 그 이름을
+          # 고른 요청은 아티스트 확장이 0건이 되어 지역 대체로 떨어진다.
+          watch = [
+              "인피니트", "빅톤", "지드래곤", "프로미스나인", "청하", "블락비",
+              "걸스데이", "GOT7", "하이라이트", "비", "뉴이스트", "강다니엘",
+          ]
+          missing = [a for a in watch if a not in artists]
+          print(f"UI 12종 매칭: {len(watch) - len(missing)} / {len(watch)}")
+          if missing:
+              print(f"::warning::그래프에 없는 UI 아티스트: {missing}")
+          PY
