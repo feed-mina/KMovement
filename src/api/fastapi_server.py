@@ -54,7 +54,6 @@ from src.api.route_history import (
 )
 
 try:
-    from src.api.neo4j_client import get_artist_pois, get_region_pois, get_regions
     from src.api.rag_client import (
         generate_chat_answer,
         generate_chat_answer_stream,
@@ -65,12 +64,9 @@ try:
     from src.api.supabase_client import get_all_artists, get_poi_details
     HAS_AI = True
 except ImportError as _e:
-    print(f"[K-Ride] AI 모듈 로드 실패 (pip install neo4j chromadb groq supabase): {_e}")
+    print(f"[K-Ride] AI 모듈 로드 실패 (pip install chromadb groq supabase): {_e}")
     HAS_AI = False
     get_all_artists = lambda: []
-    get_artist_pois = lambda artist_id: []
-    get_region_pois = lambda region: []
-    get_regions = lambda: []
     search_pois_by_purpose = lambda purpose, lat, lon, radius: []
     generate_recommendation_text = lambda purpose, pois: ""
     generate_itinerary = lambda pois, duration, theme: ""
@@ -1250,14 +1246,18 @@ FALLBACK_ARTISTS = [
     {"id": "ive",              "name": "IVE",              "name_ko": "아이브",      "imageUrl": "/artists/IVE.jpg"},
 ]
 
-# 영문 → 한글 아티스트 이름 매핑 (Neo4j에 한글명으로 저장됨)
+# 영문 → 한글 아티스트 이름 매핑 (그래프에 한글명으로 저장됨)
 ARTIST_NAME_MAP = {}
 for _a in FALLBACK_ARTISTS:
     ARTIST_NAME_MAP[_a["name"]] = _a.get("name_ko") or _a["name"]
     ARTIST_NAME_MAP[_a["name"].upper()] = _a.get("name_ko") or _a["name"]
     ARTIST_NAME_MAP[_a["name"].lower()] = _a.get("name_ko") or _a["name"]
 
-FALLBACK_REGIONS = [
+# /api/regions 가 내보내는 시·도 목록. 이름이 FALLBACK_ 이던 시절에는 Neo4j
+# Region 노드가 먼저였고 이건 대체 경로였다. Neo4j 를 걷어낸 지금은 이것이
+# 유일한 소스라 이름도 그에 맞춘다. graphrag_client._REGION_ALIASES 와 같은
+# 17개여야 지역 선택이 POI 조회로 이어진다.
+REGIONS = [
     {"id": str(i), "name": name, "imageUrl": None, "safety_score": None}
     for i, name in enumerate(
         [
@@ -1271,7 +1271,7 @@ FALLBACK_REGIONS = [
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 신규 엔드포인트 — AI 추천 (Neo4j + ChromaDB + Groq)
+# 신규 엔드포인트 — AI 추천 (GraphRAG + ChromaDB + Groq)
 # ══════════════════════════════════════════════════════════════════════════════
 
 # ─────────────────────────────────────────────
@@ -1295,18 +1295,14 @@ def list_artists():
 # ─────────────────────────────────────────────
 @app.get("/api/regions")
 def list_regions():
-    """지역 목록 반환 (Neo4j Region 노드, 안전점수 내림차순)"""
-    if not HAS_AI:
-        return {"regions": FALLBACK_REGIONS}
-    try:
-        regions = get_regions(limit=20)
-        # Neo4j에 Region 노드가 없으면 하드코딩 fallback
-        if not regions:
-            regions = FALLBACK_REGIONS
-        return {"regions": regions}
-    except Exception as e:
-        print(f"[K-Ride] Neo4j regions fallback: {e}")
-        return {"regions": FALLBACK_REGIONS}
+    """지역 목록 반환.
+
+    예전에는 Neo4j Region 노드를 먼저 조회하고 실패하면 이 목록으로 떨어졌다.
+    Aura 인스턴스가 사라진 뒤로는 항상 이쪽만 나갔고, 이제 Neo4j 를 걷어냈으니
+    이 목록이 유일한 소스다. 그래프에서 시·도와 POI 개수를 파생하는 건 별도
+    작업으로 둔다.
+    """
+    return {"regions": REGIONS}
 
 
 # ─────────────────────────────────────────────
@@ -1316,7 +1312,7 @@ def list_regions():
 def recommend_ai(req: RecommendAIRequest):
     """
     온보딩 기반 POI 추천
-    파이프라인: Neo4j(아티스트 촬영지) → ChromaDB(목적 유사 POI) → Groq(추천 이유)
+    파이프라인: ChromaDB(목적 유사 POI) → GraphRAG(아티스트·지역 POI) → Groq(추천 이유)
     """
     if not HAS_AI:
         raise HTTPException(status_code=503, detail="AI 모듈 미설치")
@@ -1326,25 +1322,9 @@ def recommend_ai(req: RecommendAIRequest):
     purpose_keys = _normalize_purpose_keys(purposes)
     print(f"[K-Ride] recommend/ai message='{req.message}' regions={regions} purposes={purposes} purpose_keys={purpose_keys}")
 
-    # 1. Neo4j — 아티스트 촬영지 POI
-    neo4j_pois = []
-    if req.artists:
-        search_names = list(set(
-            req.artists + [ARTIST_NAME_MAP.get(a, a) for a in req.artists]
-        ))
-        try:
-            neo4j_pois = get_artist_pois(search_names, limit=15)
-        except Exception:
-            pass
-
-    # 2. Neo4j — 지역 기반 POI
-    region_pois = []
-    if regions:
-        try:
-            region_pois = get_region_pois(regions, limit=15)
-            print(f"[K-Ride] recommend/ai region_pois: {len(region_pois)}건 (regions={regions})")
-        except Exception as e:
-            print(f"[K-Ride] recommend/ai region_pois fallback: {e}")
+    # 아티스트·지역 POI 는 아래 GraphRAG 단계가 담당한다. 예전에는 Neo4j 를
+    # 먼저 조회했으나 Aura 인스턴스가 사라진 뒤 그 두 블록은 항상 빈 리스트를
+    # 만들고 예외를 삼켰다.
 
     # 3. ChromaDB — 목적 기반 유사 POI
     chroma_pois = []
@@ -1364,7 +1344,7 @@ def recommend_ai(req: RecommendAIRequest):
                 req.artists + [ARTIST_NAME_MAP.get(a, a) for a in req.artists]
             ))
             artist_ids = search_artists_by_name(search_names) if search_names else []
-            existing_ids = {p.get("poi_id") or p.get("name", "") for p in neo4j_pois + region_pois + chroma_pois}
+            existing_ids = {p.get("poi_id") or p.get("name", "") for p in chroma_pois}
             if artist_ids:
                 graphrag_pois = get_graphrag_pois(artist_ids, existing_ids, max_pois=10)
                 print(f"[K-Ride] recommend/ai graphrag_pois: {len(graphrag_pois)}건")
@@ -1389,13 +1369,12 @@ def recommend_ai(req: RecommendAIRequest):
 
     # 4. 선택 지역이 있으면 보강 후보도 같은 지역으로 제한
     if regions:
-        neo4j_pois = [p for p in neo4j_pois if _matches_any_region(p, regions)]
         chroma_pois = [p for p in chroma_pois if _matches_any_region(p, regions)]
         graphrag_pois = [p for p in graphrag_pois if _matches_any_region(p, regions)]
 
     # 5. 합산 + 중복 제거
     merged: dict[str, dict] = {}
-    for p in neo4j_pois + chroma_pois + region_pois + graphrag_pois:
+    for p in chroma_pois + graphrag_pois:
         key = p.get("poi_id") or p.get("name", "")
         if key not in merged:
             merged[key] = p
@@ -1441,7 +1420,7 @@ def recommend_ai(req: RecommendAIRequest):
 async def recommend_itinerary(req: ItineraryRequest):
     """
     AI 일정 생성
-    파이프라인: Neo4j(아티스트+지역 POI) → ChromaDB(목적 유사 POI) → Groq(일정 JSON)
+    파이프라인: ChromaDB(목적 유사 POI) → GraphRAG(아티스트+지역 POI) → Groq(일정 JSON)
     """
     if not HAS_AI:
         raise HTTPException(status_code=503, detail="AI 모듈 미설치")
@@ -1450,7 +1429,7 @@ async def recommend_itinerary(req: ItineraryRequest):
     regions, purposes = _extract_from_message(req.message, req.regions, req.purposes)
     print(f"[K-Ride] itinerary message='{req.message}' regions={regions} purposes={purposes}")
 
-    # 0.5 아티스트 이름 변환 (영문 → 한글, Neo4j는 한글명으로 저장)
+    # 0.5 아티스트 이름 변환 (영문 → 한글, 그래프는 한글명으로 저장)
     resolved_artists = []
     for a in req.artists:
         resolved = ARTIST_NAME_MAP.get(a, a)
@@ -1460,23 +1439,8 @@ async def recommend_itinerary(req: ItineraryRequest):
     if resolved_artists != req.artists:
         print(f"[K-Ride] 아티스트 이름 변환: {req.artists} → {resolved_artists}")
 
-    # 1. Neo4j — 아티스트 촬영지
-    artist_pois = []
-    if search_artists:
-        try:
-            artist_pois = get_artist_pois(search_artists, limit=10)
-            print(f"[K-Ride] artist_pois: {len(artist_pois)}건 (artists={search_artists})")
-        except Exception as e:
-            print(f"[K-Ride] ❌ Neo4j artist_pois 실패: {e}")
-
-    # 2. Neo4j — 지역 POI
-    region_pois = []
-    if regions:
-        try:
-            region_pois = get_region_pois(regions, limit=10)
-            print(f"[K-Ride] region_pois: {len(region_pois)}건 (regions={regions})")
-        except Exception as e:
-            print(f"[K-Ride] ❌ Neo4j region_pois 실패: {e}")
+    # 아티스트·지역 POI 는 아래 GraphRAG 단계가 담당한다. Neo4j 를 먼저
+    # 조회하던 두 블록은 Aura 인스턴스가 사라진 뒤 늘 빈 리스트였다.
 
     # 3. ChromaDB — 목적 기반 POI
     chroma_pois = []
@@ -1493,7 +1457,7 @@ async def recommend_itinerary(req: ItineraryRequest):
     if HAS_GRAPHRAG and get_graphrag_pois:
         try:
             existing_ids = set()
-            for p in artist_pois + region_pois + chroma_pois:
+            for p in chroma_pois:
                 pid = p.get("poi_id") or p.get("id") or ""
                 if pid:
                     existing_ids.add(pid)
@@ -1546,16 +1510,16 @@ async def recommend_itinerary(req: ItineraryRequest):
     # 4. 앙상블 랭킹 또는 단순 합산
     # 지역 필터링 (선택한 지역이 있을 경우 다른 지역 POI 배제)
     if regions:
-        artist_pois = [p for p in artist_pois if any(r in (p.get("address") or p.get("sido") or "") for r in regions)]
         chroma_pois = [p for p in chroma_pois if any(r in (p.get("address") or p.get("sido") or "") for r in regions)]
         graphrag_pois = [p for p in graphrag_pois if any(r in (p.get("address") or p.get("sido") or "") for r in regions)]
 
-    neo4j_pois = artist_pois + region_pois
-    all_source_pois = neo4j_pois + chroma_pois + graphrag_pois
+    all_source_pois = chroma_pois + graphrag_pois
     if HAS_ENSEMBLE and ensemble_rank_pois:
         try:
+            # 인자 이름은 rank_pois 의 시그니처를 그대로 따른다. 그래프 출처
+            # POI 를 받는 자리라는 뜻이고, 이제 GraphRAG 결과만 들어간다.
             all_pois = ensemble_rank_pois(
-                neo4j_pois=neo4j_pois + graphrag_pois,
+                neo4j_pois=graphrag_pois,
                 chroma_pois=chroma_pois,
                 artists=req.artists,
                 regions=regions,
@@ -1563,7 +1527,7 @@ async def recommend_itinerary(req: ItineraryRequest):
                 budget=req.budget.model_dump(),
                 top_k=dynamic_top_k,
             )
-            print(f"[K-Ride] 앙상블 랭킹: {len(all_pois)}건 (neo4j={len(neo4j_pois)} + chroma={len(chroma_pois)} + graphrag={len(graphrag_pois)}, top_k={dynamic_top_k})")
+            print(f"[K-Ride] 앙상블 랭킹: {len(all_pois)}건 (chroma={len(chroma_pois)} + graphrag={len(graphrag_pois)}, top_k={dynamic_top_k})")
         except Exception as e:
             print(f"[K-Ride] 앙상블 fallback → union: {e}")
             merged: dict[str, dict] = {}
@@ -1579,9 +1543,9 @@ async def recommend_itinerary(req: ItineraryRequest):
             if key not in merged:
                 merged[key] = p
         all_pois = list(merged.values())[:dynamic_top_k]
-        print(f"[K-Ride] 총 POI: {len(all_pois)}건 (artist={len(artist_pois)} + region={len(region_pois)} + chroma={len(chroma_pois)} + graphrag={len(graphrag_pois)}, top_k={dynamic_top_k})")
+        print(f"[K-Ride] 총 POI: {len(all_pois)}건 (chroma={len(chroma_pois)} + graphrag={len(graphrag_pois)}, top_k={dynamic_top_k})")
 
-    # 4-1. Supabase fallback — Neo4j/ChromaDB 모두 실패 시 Supabase에서 POI 조회
+    # 4-1. Supabase fallback — GraphRAG/ChromaDB 모두 실패 시 Supabase에서 POI 조회
     if not all_pois:
         print("[K-Ride] ⚠️ all_pois=0 → Supabase fallback 시도")
         try:

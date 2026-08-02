@@ -428,10 +428,6 @@ jobs:
           sed -i "s|__S3_SECRET_KEY__|${{ secrets.AWS_SECRET_KEY }}|g" /tmp/deploy.sh
           sed -i "s|__KRIDE_FASTAPI_URL__|${{ env.KRIDE_FASTAPI_URL }}|g" /tmp/deploy.sh
           sed -i "s|__FASTAPI_INTERNAL_API_KEY__|$FASTAPI_INTERNAL_API_KEY_ESCAPED|g" /tmp/deploy.sh
-          sed -i "s|__NEO4J_URI__|${{ secrets.NEO4J_URI }}|g" /tmp/deploy.sh
-          sed -i "s|__NEO4J_USERNAME__|${{ secrets.NEO4J_USERNAME }}|g" /tmp/deploy.sh
-          sed -i "s|__NEO4J_PASSWORD__|${{ secrets.NEO4J_PASSWORD }}|g" /tmp/deploy.sh
-          sed -i "s|__NEO4J_DATABASE__|${{ secrets.NEO4J_DATABASE }}|g" /tmp/deploy.sh
           sed -i "s|__GROQ_API_KEY__|${{ secrets.GROQ_API_KEY }}|g" /tmp/deploy.sh
           sed -i "s|__RUNPOD_API_KEY__|${{ secrets.RUNPOD_API_KEY }}|g" /tmp/deploy.sh
           sed -i "s|__RUNPOD_ENDPOINT_ID__|${{ secrets.RUNPOD_ENDPOINT_ID }}|g" /tmp/deploy.sh

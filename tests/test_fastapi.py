@@ -11,7 +11,7 @@ test_fastapi.py — K-Ride FastAPI 단위 테스트
 
 배포 환경 대응:
   - TestClient는 실제 HTTP 서버 없이 ASGI 앱을 직접 호출 (Vercel/EC2 불필요)
-  - 외부 서비스(Neo4j, ChromaDB, Groq, Supabase)는 모두 patch로 격리
+  - 외부 서비스(ChromaDB, Groq, Supabase)는 모두 patch로 격리
   - HAS_AI=True 경로와 False 경로 모두 검증
 """
 
@@ -32,7 +32,7 @@ def _stub(name: str):
     sys.modules.setdefault(name, mod)
     return mod
 
-for _pkg in ["neo4j", "chromadb", "groq", "supabase", "sentence_transformers"]:
+for _pkg in ["chromadb", "groq", "supabase", "sentence_transformers"]:
     _stub(_pkg)
 
 # FastAPI 앱 임포트 (stub 설정 이후에 해야 ImportError 방지)
@@ -116,44 +116,27 @@ class TestArtists:
 # ══════════════════════════════════════════════════════════════════════════════
 # 3. GET /api/regions
 # ══════════════════════════════════════════════════════════════════════════════
-MOCK_REGIONS = [
-    {"id": "1", "name": "서울", "imageUrl": None, "safety_score": 0.87},
-    {"id": "2", "name": "부산", "imageUrl": None, "safety_score": 0.82},
-]
-
 class TestRegions:
-    def test_regions_fallback_when_no_ai(self):
-        """HAS_AI=False → FALLBACK_REGIONS 반환 (200)"""
+    def test_regions_served_without_ai_modules(self):
+        """AI 모듈이 없어도 지역 목록은 나가야 한다.
+
+        예전에는 Neo4j Region 노드를 먼저 조회하고 실패하면 하드코딩 목록으로
+        떨어졌다. Neo4j 를 걷어낸 지금은 분기 없이 REGIONS 하나만 나간다.
+        """
         with patch("src.api.fastapi_server.HAS_AI", False):
             resp = client.get("/api/regions")
         assert resp.status_code == 200
-        body = resp.json()
-        assert "regions" in body
-        assert len(body["regions"]) > 0
+        assert len(resp.json()["regions"]) == 17
 
-    def test_regions_from_neo4j(self):
-        """Neo4j에 Region 노드 있으면 그대로 반환"""
-        with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_regions", return_value=MOCK_REGIONS):
-            resp = client.get("/api/regions")
-        assert resp.status_code == 200
-        assert len(resp.json()["regions"]) == 2
-
-    def test_regions_fallback_when_neo4j_empty(self):
-        """Neo4j 결과 없으면 하드코딩 17개 반환"""
-        with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_regions", return_value=[]):
-            body = client.get("/api/regions").json()
+    def test_regions_cover_all_seventeen_sido(self):
+        body = client.get("/api/regions").json()
         assert len(body["regions"]) == 17
         names = [r["name"] for r in body["regions"]]
         assert "서울" in names
         assert "제주" in names
 
-    def test_regions_fallback_item_has_id_and_name(self):
-        with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_regions", return_value=[]):
-            regions = client.get("/api/regions").json()["regions"]
-        for r in regions:
+    def test_region_item_has_id_and_name(self):
+        for r in client.get("/api/regions").json()["regions"]:
             assert "id" in r
             assert "name" in r
 
@@ -176,7 +159,9 @@ class TestRecommendAI:
 
     def test_recommend_ai_returns_structure(self):
         with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=MOCK_POIS), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=MOCK_POIS), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_recommendation_text", return_value="추천 이유"):
             resp = client.post("/api/recommend/ai", json={
@@ -194,7 +179,9 @@ class TestRecommendAI:
     def test_recommend_ai_budget_filter(self):
         """avg_cost 없는 POI는 예산 필터에서 제외되지 않음"""
         with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=MOCK_POIS), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=MOCK_POIS), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_recommendation_text", return_value=""):
             body = client.post("/api/recommend/ai", json={
@@ -205,9 +192,11 @@ class TestRecommendAI:
         assert body["count"] == len(MOCK_POIS)
 
     def test_recommend_ai_empty_request(self):
-        """빈 요청도 200 반환 (neo4j/chroma 결과 없으면 count=0)"""
+        """빈 요청도 200 반환 (graphrag/chroma 결과 없으면 count=0)"""
         with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=[]), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=[]), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_recommendation_text", return_value=""):
             resp = client.post("/api/recommend/ai", json={})
@@ -218,7 +207,9 @@ class TestRecommendAI:
         """같은 poi_id POI는 중복 제거"""
         dup = MOCK_POIS + [MOCK_POIS[0]]   # p1 중복
         with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=dup), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=dup), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_recommendation_text", return_value=""):
             body = client.post("/api/recommend/ai", json={
@@ -288,8 +279,9 @@ class TestItinerary:
 
     def test_itinerary_returns_structure(self):
         with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=MOCK_POIS), \
-             patch("src.api.fastapi_server.get_region_pois", return_value=[]), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=MOCK_POIS), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_itinerary", return_value=MOCK_ITINERARY):
             resp = client.post("/api/recommend/itinerary", json={
@@ -315,8 +307,9 @@ class TestItinerary:
             ]
         }
         with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=[]), \
-             patch("src.api.fastapi_server.get_region_pois", return_value=[]), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=[]), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_itinerary", return_value=two_day):
             body = client.post("/api/recommend/itinerary", json={"duration": "1박2일"}).json()
@@ -327,8 +320,9 @@ class TestItinerary:
         no_coord_poi = {"poi_id": "p3", "name": "좌표없음", "category": "food"}
         pois_mixed = MOCK_POIS + [no_coord_poi]
         with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=pois_mixed), \
-             patch("src.api.fastapi_server.get_region_pois", return_value=[]), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=pois_mixed), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_itinerary", return_value=MOCK_ITINERARY):
             markers = client.post("/api/recommend/itinerary", json={}).json()["mapData"]["markers"]
@@ -339,8 +333,9 @@ class TestItinerary:
     def test_itinerary_fallback_on_groq_failure(self):
         """Groq 호출 실패 → fallback 빈 일정 반환 (200)"""
         with patch("src.api.fastapi_server.HAS_AI", True), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=[]), \
-             patch("src.api.fastapi_server.get_region_pois", return_value=[]), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=[]), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_itinerary", side_effect=Exception("Groq 오류")):
             resp = client.post("/api/recommend/itinerary", json={})
@@ -363,8 +358,9 @@ class TestItineraryEnsemble:
         with patch("src.api.fastapi_server.HAS_AI", True), \
              patch("src.api.fastapi_server.HAS_ENSEMBLE", True), \
              patch("src.api.fastapi_server.ensemble_rank_pois", return_value=mock_ranked), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=MOCK_POIS), \
-             patch("src.api.fastapi_server.get_region_pois", return_value=[]), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=MOCK_POIS), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_itinerary", return_value=MOCK_ITINERARY):
             resp = client.post("/api/recommend/itinerary", json={
@@ -382,8 +378,9 @@ class TestItineraryEnsemble:
         with patch("src.api.fastapi_server.HAS_AI", True), \
              patch("src.api.fastapi_server.HAS_ENSEMBLE", True), \
              patch("src.api.fastapi_server.ensemble_rank_pois", side_effect=Exception("모델 오류")), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=MOCK_POIS), \
-             patch("src.api.fastapi_server.get_region_pois", return_value=[]), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=MOCK_POIS), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_itinerary", return_value=MOCK_ITINERARY):
             resp = client.post("/api/recommend/itinerary", json={})
@@ -393,8 +390,9 @@ class TestItineraryEnsemble:
         """HAS_ENSEMBLE=False → 기존 union 방식"""
         with patch("src.api.fastapi_server.HAS_AI", True), \
              patch("src.api.fastapi_server.HAS_ENSEMBLE", False), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=MOCK_POIS), \
-             patch("src.api.fastapi_server.get_region_pois", return_value=[]), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=MOCK_POIS), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_itinerary", return_value=MOCK_ITINERARY):
             resp = client.post("/api/recommend/itinerary", json={})
@@ -409,8 +407,9 @@ class TestItineraryEnsemble:
         with patch("src.api.fastapi_server.HAS_AI", True), \
              patch("src.api.fastapi_server.HAS_ENSEMBLE", True), \
              patch("src.api.fastapi_server.ensemble_rank_pois", return_value=mock_ranked), \
-             patch("src.api.fastapi_server.get_artist_pois", return_value=[]), \
-             patch("src.api.fastapi_server.get_region_pois", return_value=[]), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=[]), \
              patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
              patch("src.api.fastapi_server.generate_itinerary", return_value=MOCK_ITINERARY):
             markers = client.post("/api/recommend/itinerary", json={}).json()["mapData"]["markers"]

@@ -129,7 +129,6 @@ narwhals==2.18.1
 nbclient==0.10.4
 nbconvert==7.17.1
 nbformat==5.10.4
-neo4j==6.2.0
 nest-asyncio==1.6.0
 networkx==3.4.2
 notebook==7.5.5
