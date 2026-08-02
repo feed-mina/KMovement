@@ -404,6 +404,40 @@ def test_deploy_reports_optional_datasource_health_without_failing() -> None:
     assert "docker inspect kride-fastapi" in body
 
 
+def test_nginx_leaves_a_path_for_certificate_renewal_on_port_80() -> None:
+    """Renewal was configured with the standalone authenticator, which binds
+    port 80 itself. This nginx already holds it, so every attempt failed with
+    "Could not bind TCP port 80" — silently, since nothing reads the certbot
+    timer's output. The certificate was still the one issued months earlier
+    and was heading for expiry.
+
+    Serving the challenge from nginx removes the conflict. The catch is that
+    this server block redirects everything to HTTPS, and a server-level
+    `return` applies to any request no location matches — so the challenge
+    needs its own location or it is redirected away.
+    """
+    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+    start = workflow.index("# HTTP → HTTPS redirect")
+    block = workflow[start : workflow.index("# HTTPS server", start)]
+
+    assert "location ^~ /.well-known/acme-challenge/" in block
+    assert "root /var/www/certbot;" in block
+
+    # Compare directives, not the prose around them — the comment explaining
+    # this ordering mentions `return 301` too.
+    directives = [
+        line.strip()
+        for line in block.splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    ]
+    challenge = next(i for i, l in enumerate(directives) if "acme-challenge" in l)
+    redirect = next(i for i, l in enumerate(directives) if l.startswith("return 301"))
+    assert challenge < redirect
+
+    # The directory has to exist or nginx serves 404 into the challenge.
+    assert "sudo mkdir -p /var/www/certbot" in _deploy_script()
+
+
 def _embedded_diagnostic_python() -> str:
     """The Python the diagnostic runs inside kride-fastapi."""
     script = _deploy_script()
