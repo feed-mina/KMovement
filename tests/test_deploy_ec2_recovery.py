@@ -404,6 +404,108 @@ def test_deploy_reports_optional_datasource_health_without_failing() -> None:
     assert "docker inspect kride-fastapi" in body
 
 
+def _embedded_diagnostic_python() -> str:
+    """The Python the diagnostic runs inside kride-fastapi."""
+    script = _deploy_script()
+    marker = "docker exec kride-fastapi python -c '"
+    start = script.index(marker) + len(marker)
+    return script[start : script.index("' 2>&1 || true)\"", start)]
+
+
+def test_diagnostic_python_is_valid_and_shell_safe() -> None:
+    """It is passed through `python -c '...'`, so a stray quote ends the string.
+
+    A broken diagnostic does not fail the deploy — it is wrapped in `|| true` —
+    so nothing else would catch this.
+    """
+    import ast
+
+    code = _embedded_diagnostic_python()
+    assert "'" not in code, "single quote would terminate the shell string early"
+    ast.parse(code)
+
+
+def test_supabase_probe_reports_the_key_kind_without_leaking_the_key() -> None:
+    """A row count of 0 means two different things and they need different fixes.
+
+    Publishable and anon keys are subject to RLS, and when a policy blocks the
+    read PostgREST answers 200 with count 0 rather than an error. The deploy
+    reported nodes=0 for a table holding 41,586 rows, and acting on that number
+    would have overwritten live data. The key kind separates the two cases.
+    """
+    import base64
+    import json as _json
+    import os
+
+    code = _embedded_diagnostic_python()
+    assert "def supabase_key_kind():" in code
+    assert "key=" in code
+
+    # The key itself must never reach a public Actions log.
+    assert "os.environ.get(\"SUPABASE_KEY\", \"\")" in code
+    assert "print(key" not in code
+    assert "+ key" not in code
+
+    namespace: dict[str, object] = {"os": os}
+    start = code.index("def supabase_key_kind():")
+    exec(code[start : code.index("\n# Supabase", start)], namespace)  # noqa: S102
+    classify = namespace["supabase_key_kind"]
+
+    def legacy(role: str) -> str:
+        body = base64.urlsafe_b64encode(_json.dumps({"role": role}).encode()).decode()
+        return "eyJhbGciOiJIUzI1NiJ9." + body.rstrip("=") + ".signature"
+
+    original = os.environ.get("SUPABASE_KEY")
+    try:
+        for key, expected in (
+            ("", "missing"),
+            ("sb_secret_abc", "secret"),
+            ("sb_publishable_abc", "publishable"),
+            (legacy("anon"), "legacy-anon"),
+            (legacy("service_role"), "legacy-service_role"),
+            ("eyJnot-a-jwt", "legacy-unknown"),
+            ("something-else", "unknown"),
+        ):
+            os.environ["SUPABASE_KEY"] = key
+            assert classify() == expected, key[:20]
+    finally:
+        if original is None:
+            os.environ.pop("SUPABASE_KEY", None)
+        else:
+            os.environ["SUPABASE_KEY"] = original
+
+
+def test_zero_rows_on_a_browser_safe_key_is_reported_as_probable_rls() -> None:
+    script = _deploy_script()
+    start = script.index("*supabase=OK\\ nodes=0")
+    block = script[start : script.index("esac", start)]
+
+    assert "key=publishable" in block
+    assert "key=legacy-anon" in block
+    # The RLS branch must come before the plain empty-table branch, otherwise
+    # the generic pattern swallows it.
+    assert block.index("key=publishable") < block.index(
+        "Supabase nodes table is empty"
+    )
+    assert "do not load data" in block.lower()
+
+
+def test_route_history_write_path_is_probed() -> None:
+    """Saving a route is the only write. An RLS block there is caught and logged,
+    so the response stays 200 and the row is quietly lost."""
+    code = _embedded_diagnostic_python()
+    assert "route_history=OK" in code
+    assert "KRIDE_ROUTE_HISTORY_TABLE" in code
+
+    # The diagnostic must not write to the production table.
+    probe = code[code.index("route_history") :]
+    for write in (".insert(", ".upsert(", ".delete("):
+        assert write not in probe, write
+
+    script = _deploy_script()
+    assert "*route_history=OK*) ;;" in script
+
+
 def test_ensemble_warning_separates_a_missing_file_from_a_missing_dependency() -> None:
     """The two causes need different fixes, so one message cannot serve both.
 
