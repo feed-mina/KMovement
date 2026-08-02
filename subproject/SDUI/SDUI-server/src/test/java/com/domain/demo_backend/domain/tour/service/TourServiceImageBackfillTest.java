@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TourServiceImageBackfillTest {
 
     private TourPoiDto candidate(String title, String image) {
-        return new TourPoiDto("c-" + title, "39", title, "주소", 127.0, 37.0, image, null, null, null, null, "1");
+        return new TourPoiDto("c-" + title, "39", title, "주소", 127.0, 37.0, image, null, null, null, null, null, "1");
     }
 
     @Test

@@ -109,6 +109,59 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         expect(screen.getAllByText('근처 공연장과 함께 들르기 좋아요.')).toHaveLength(2);
     });
 
+    it('썸네일이 오면 카드는 썸네일을, 모달은 원본을 쓴다', async () => {
+        mockedFetch.mockResolvedValue([{
+            contentId: '9', title: '남산타워', addr: '서울 용산구',
+            firstImage: 'https://img/original.jpg', thumbnail: 'https://img/thumb.jpg',
+        }]);
+        renderScreen();
+
+        const cardImage = await screen.findByAltText('남산타워') as HTMLImageElement;
+        expect(cardImage.src).toBe('https://img/thumb.jpg');
+
+        fireEvent.click(screen.getByRole('button', { name: '남산타워 상세 보기' }));
+        const images = await screen.findAllByAltText('남산타워') as HTMLImageElement[];
+        expect(images[1].src).toBe('https://img/original.jpg');
+    });
+
+    it('목록이 길면 끊어서 그리고 더 보기로 이어 붙인다', async () => {
+        // 성지는 서버가 최대 300건을 한 번에 내려준다. 전부 펼치면 카드 300장과
+        // 사진 300장이 한꺼번에 붙는다.
+        mockedFetch.mockResolvedValue(
+            Array.from({ length: 30 }, (_, i) => ({
+                contentId: String(100 + i), title: `장소${i}`, addr: '서울 강남구',
+            })),
+        );
+        renderScreen();
+
+        await waitFor(() => expect(screen.getByText('장소0')).toBeInTheDocument());
+        expect(screen.getByText('장소23')).toBeInTheDocument();
+        expect(screen.queryByText('장소24')).not.toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole('button', { name: /더 보기/ }));
+
+        expect(await screen.findByText('장소29')).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: /더 보기/ })).not.toBeInTheDocument();
+    });
+
+    it('카테고리를 바꾸면 목록이 첫 페이지로 돌아간다', async () => {
+        mockedFetch.mockResolvedValue(
+            Array.from({ length: 30 }, (_, i) => ({
+                contentId: String(200 + i), title: `장소${i}`, addr: '서울 강남구',
+            })),
+        );
+        renderScreen();
+
+        await waitFor(() => expect(screen.getByText('장소0')).toBeInTheDocument());
+        fireEvent.click(screen.getByRole('button', { name: /더 보기/ }));
+        expect(await screen.findByText('장소29')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByText('관광지'));
+
+        await waitFor(() => expect(screen.queryByText('장소29')).not.toBeInTheDocument());
+        expect(screen.getByRole('button', { name: /더 보기/ })).toBeInTheDocument();
+    });
+
     it('조회 실패 시 안내 문구를 표시해야 함', async () => {
         mockedFetch.mockRejectedValueOnce(new Error('network'));
         renderScreen();

@@ -6,13 +6,15 @@ import PoiImage from '@/components/plugins/travel/PoiImage';
 interface TourPoiCardProps {
     poi: TourPoi;
     isSaved: boolean;
+    /** 첫 화면에 보이는 카드. lazy 를 끄고 우선순위를 올린다. */
+    priority?: boolean;
     onOpen: (poi: TourPoi, trigger: HTMLElement) => void;
     onToggleSave: (contentId?: string) => void;
 }
 
 const RED = '#E50914';
 
-export default function TourPoiCard({poi, isSaved, onOpen, onToggleSave}: TourPoiCardProps) {
+export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onToggleSave}: TourPoiCardProps) {
     const recommendReason = poi.recommendReason?.trim();
 
     return (
@@ -25,7 +27,7 @@ export default function TourPoiCard({poi, isSaved, onOpen, onToggleSave}: TourPo
                 style={{display: 'block', width: '100%', padding: 0, border: 'none', background: 'transparent', color: 'inherit', textAlign: 'left', cursor: 'pointer'}}
             >
                 <span style={{height: 100, background: '#f5f5f5', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <PoiImage src={poi.firstImage} title={poi.title} variant="card"/>
+                    <PoiImage src={poi.firstImage} thumbnail={poi.thumbnail} title={poi.title} variant="card" priority={priority}/>
                     {poi.contentTypeId === 'HOLY' && (
                         <span style={{position: 'absolute', top: 6, left: 6, fontSize: 10, background: RED, color: '#fff', padding: '2px 7px', borderRadius: 20}}>성지</span>
                     )}

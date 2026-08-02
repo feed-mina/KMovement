@@ -160,6 +160,9 @@ public class TourService {
                 log.warn("[TourService] 지역 코드 조회 실패, 전국 시/도 상수로 폴백", error);
                 return NATIONWIDE_AREAS;
             }
+            // 시·군·구는 폴백할 상수가 없어 그대로 올린다. 여기서 남기지 않으면
+            // 화면에는 "시·군·구 목록을 불러오지 못했어요"만 뜨고 이유는 로그에 없다.
+            log.error("[TourService] 시·군·구 조회 실패 - areaCode={}", normalizedAreaCode, error);
             throw error;
         }
     }

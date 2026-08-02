@@ -35,6 +35,11 @@ const CATEGORIES = [
 /** 성지 계열(공용 tour_poi 데이터) 카테고리 여부 — 작품 필터를 공유한다. */
 const isHolyCategory = (category: string) => category === 'HOLY' || category === 'HOLY_FOOD';
 
+/** 한 번에 그리는 카드 수. TourAPI 조회의 numOfRows(24)와 맞춘다. */
+const PAGE_SIZE = 24;
+/** lazy 를 끄고 우선순위를 올릴 카드 수 — 첫 화면에 실제로 보이는 만큼만. */
+const EAGER_CARD_COUNT = 6;
+
 // 서버(TourService.NATIONWIDE_AREAS)와 동일한 TourAPI 시/도 코드 체계.
 // /areas 응답 실패 시에도 전국 성지(V90 시드)를 탐색할 수 있어야 한다.
 const FALLBACK_AREAS: TourRegion[] = [
@@ -192,6 +197,9 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const [regionError, setRegionError] = useState<string | null>(null);
     const [arrange, setArrange] = useState('A');
     const [pois, setPois] = useState<TourPoi[]>([]);
+    // 성지는 서버가 최대 300건(TourService.HOLY_MAX_RESULTS)을 한 번에 내려준다.
+    // 전부 펼치면 카드 300장과 사진 300장이 한꺼번에 붙는다. 화면에는 끊어서 그린다.
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     // 작품/아티스트 성지 필터 (V91): 검색어 → 자동완성 → 선택 칩.
@@ -271,6 +279,8 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             if (!alive) return;
             setLoading(true);
             setError(null);
+            // 조건이 바뀌면 목록도 처음부터다. 이전 페이지 수를 물려받으면 안 된다.
+            setVisibleCount(PAGE_SIZE);
             try {
                 if (isHolyCategory(category)) {
                     const list = await fetchHolyPois({
@@ -566,17 +576,34 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             {!loading && !error && pois.length === 0 && <div style={{ padding: 24, color: '#888' }}>표시할 장소가 없어요.</div>}
 
             {!loading && !error && pois.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 }}>
-                    {pois.map((poi, index) => (
-                        <TourPoiCard
-                            key={poi.contentId ?? index}
-                            poi={poi}
-                            isSaved={Boolean(poi.contentId && saved.has(poi.contentId))}
-                            onOpen={openPlace}
-                            onToggleSave={toggleSave}
-                        />
-                    ))}
-                </div>
+                <>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 }}>
+                        {pois.slice(0, visibleCount).map((poi, index) => (
+                            <TourPoiCard
+                                key={poi.contentId ?? index}
+                                poi={poi}
+                                isSaved={Boolean(poi.contentId && saved.has(poi.contentId))}
+                                priority={index < EAGER_CARD_COUNT}
+                                onOpen={openPlace}
+                                onToggleSave={toggleSave}
+                            />
+                        ))}
+                    </div>
+                    {visibleCount < pois.length && (
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+                            <button
+                                type="button"
+                                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                                style={{
+                                    padding: '10px 22px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                                    border: '0.5px solid #ddd', borderRadius: 10, background: '#fff', color: '#333',
+                                }}
+                            >
+                                {`더 보기 (${visibleCount}/${pois.length})`}
+                            </button>
+                        </div>
+                    )}
+                </>
             )}
 
             {selected && (
