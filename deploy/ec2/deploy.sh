@@ -591,6 +591,10 @@ fi
 docker stop sdui-nginx 2>/dev/null || true
 docker rm sdui-nginx 2>/dev/null || true
 
+# certbot 이 webroot 방식으로 챌린지 파일을 놓는 자리. 없으면 nginx 의 acme
+# location 이 존재하지 않는 디렉터리를 가리켜 갱신이 404 로 실패한다.
+sudo mkdir -p /var/www/certbot
+
 # Host Nginx config 적용 + 재시작
 sudo ln -sf /etc/nginx/sites-available/yerin.duckdns.org /etc/nginx/sites-enabled/yerin.duckdns.org
 sudo rm -f /etc/nginx/sites-enabled/default

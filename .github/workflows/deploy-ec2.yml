@@ -300,6 +300,21 @@ jobs:
           server {
               listen 80;
               server_name yerin.duckdns.org;
+
+              # Let's Encrypt 갱신 통로. 갱신은 standalone 방식으로 설정돼 있어
+              # certbot 이 80 포트를 직접 열려 하는데, 이 nginx 가 이미 쓰고 있어
+              # 매번 "Could not bind TCP port 80" 으로 실패했다. 만료 30일 전부터
+              # 갱신을 시도하지만 아무도 실패를 보지 못했다(2026-08-02 확인,
+              # 인증서는 5/28 발급분 그대로였고 8/26 만료 예정이었다).
+              #
+              # webroot 방식은 nginx 를 세우지 않고 이 경로의 파일만 노출하면
+              # 된다. server 단위 return 301 은 매칭되는 location 이 없을 때만
+              # 적용되므로, 이 블록이 있으면 챌린지 요청만 리다이렉트를 비켜간다.
+              location ^~ /.well-known/acme-challenge/ {
+                  root /var/www/certbot;
+                  default_type "text/plain";
+              }
+
               return 301 https://$host$request_uri;
           }
 
