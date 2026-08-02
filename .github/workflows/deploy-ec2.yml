@@ -294,117 +294,14 @@ jobs:
       # ── Create Nginx config ──
       - name: Write Host Nginx SSL config to EC2
         run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            ${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }} "sudo tee /etc/nginx/sites-available/yerin.duckdns.org > /dev/null" << 'NGINX_EOF'
-          # HTTP → HTTPS redirect
-          server {
-              listen 80;
-              server_name yerin.duckdns.org;
-
-              # Let's Encrypt 갱신 통로. 갱신은 standalone 방식으로 설정돼 있어
-              # certbot 이 80 포트를 직접 열려 하는데, 이 nginx 가 이미 쓰고 있어
-              # 매번 "Could not bind TCP port 80" 으로 실패했다. 만료 30일 전부터
-              # 갱신을 시도하지만 아무도 실패를 보지 못했다(2026-08-02 확인,
-              # 인증서는 5/28 발급분 그대로였고 8/26 만료 예정이었다).
-              #
-              # 리다이렉트는 반드시 location / 안에 둔다. server 단위 return 은
-              # ngx_http_rewrite_module 의 server rewrite 단계에서 실행되는데,
-              # 이 단계는 location 선택보다 먼저다. 그래서 챌린지 location 이
-              # 있어도 무조건 리다이렉트가 이겨서, 요청이 HTTPS 로 넘어간 뒤
-              # 그쪽에 챌린지 경로가 없어 404 가 났다(#227 의 첫 시도가 이렇게
-              # 실패했다. Detail: Invalid response from https://.../404).
-              location ^~ /.well-known/acme-challenge/ {
-                  root /var/www/certbot;
-                  default_type "text/plain";
-              }
-
-              location / {
-                  return 301 https://$host$request_uri;
-              }
-          }
-
-          # HTTPS server
-          server {
-              listen 443 ssl;
-              server_name yerin.duckdns.org;
-
-              ssl_certificate /etc/letsencrypt/live/yerin.duckdns.org/fullchain.pem;
-              ssl_certificate_key /etc/letsencrypt/live/yerin.duckdns.org/privkey.pem;
-              include /etc/letsencrypt/options-ssl-nginx.conf;
-              ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
-
-              client_max_body_size 50M;
-
-              # ── Next.js API Route (KRIDE 프록시) — /api/ 보다 긴 prefix이므로 우선 매칭 ──
-              location /api/kride/ {
-                  proxy_pass http://localhost:3000;
-                  proxy_http_version 1.1;
-                  proxy_set_header Host $host;
-                  proxy_set_header X-Real-IP $remote_addr;
-                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                  proxy_set_header X-Forwarded-Proto $scheme;
-                  proxy_read_timeout 120s;
-                  proxy_send_timeout 120s;
-              }
-
-              # ── Celery job status/SSE — Next.js injects the server-only internal key ──
-              location /jobs/celery/ {
-                  proxy_pass http://localhost:3000;
-                  proxy_http_version 1.1;
-                  proxy_set_header Host $host;
-                  proxy_set_header X-Real-IP $remote_addr;
-                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                  proxy_set_header X-Forwarded-Proto $scheme;
-                  proxy_read_timeout 3600s;
-                  proxy_send_timeout 3600s;
-                  proxy_buffering off;
-                  proxy_cache off;
-                  chunked_transfer_encoding on;
-              }
-
-              # ── Spring Boot API (쿠키 직접 전달 + SSE 지원) ──
-              location /api/ {
-                  proxy_pass http://localhost:8080;
-                  proxy_set_header Host $host;
-                  proxy_set_header X-Real-IP $remote_addr;
-                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                  proxy_set_header X-Forwarded-Proto $scheme;
-                  proxy_set_header Cookie $http_cookie;
-                  proxy_read_timeout 120s;
-                  proxy_send_timeout 120s;
-                  proxy_buffering off;
-                  proxy_cache off;
-                  chunked_transfer_encoding on;
-              }
-
-              # AWS internal FastAPI (KRIDE AI)
-              location /kride-api/ {
-                  proxy_pass ${{ env.KRIDE_FASTAPI_HOST_URL }}/api/;
-                  proxy_http_version 1.1;
-                  proxy_set_header Host $host;
-                  proxy_set_header X-Forwarded-Host $host;
-                  proxy_set_header X-Real-IP $remote_addr;
-                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                  proxy_set_header X-Forwarded-Proto $scheme;
-                  proxy_read_timeout 120s;
-                  proxy_send_timeout 120s;
-                  proxy_buffering off;
-                  proxy_cache off;
-              }
-
-              # ── Frontend (Next.js) — default ──
-              location / {
-                  proxy_pass http://localhost:3000;
-                  proxy_http_version 1.1;
-                  proxy_set_header Upgrade $http_upgrade;
-                  proxy_set_header Connection "upgrade";
-                  proxy_set_header Host $host;
-                  proxy_set_header X-Real-IP $remote_addr;
-                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                  proxy_set_header X-Forwarded-Proto $scheme;
-              }
-          }
-          NGINX_EOF
+          # 설정 본문은 deploy/ec2/nginx.conf 에 있다. 워크플로 파일은 배포
+          # 트리거에서 의도적으로 빠져 있어, 여기에 인라인으로 두면 설정만
+          # 고쳤을 때 배포가 돌지 않는다(#228 이 그렇게 누락됐다).
+          sed "s|__KRIDE_FASTAPI_HOST_URL__|${{ env.KRIDE_FASTAPI_HOST_URL }}|g" \
+            deploy/ec2/nginx.conf \
+            | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+              ${{ secrets.AWS_USERNAME }}@${{ secrets.AWS_HOST }} \
+              "sudo tee /etc/nginx/sites-available/yerin.duckdns.org > /dev/null"
 
       # ── Deploy script ──
       - name: Create deploy script

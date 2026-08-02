@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS_DIR = ROOT / ".github" / "workflows"
 WORKFLOW_PATH = WORKFLOWS_DIR / "deploy-ec2.yml"
 DEPLOY_SCRIPT_PATH = ROOT / "deploy" / "ec2" / "deploy.sh"
+NGINX_CONF_PATH = ROOT / "deploy" / "ec2" / "nginx.conf"
 
 # yerin.duckdns.org serves this app. subproject/SDUI/kride is a different
 # frontend and its routes do not exist here.
@@ -404,6 +405,34 @@ def test_deploy_reports_optional_datasource_health_without_failing() -> None:
     assert "docker inspect kride-fastapi" in body
 
 
+def test_the_nginx_config_lives_where_a_change_to_it_triggers_a_deploy() -> None:
+    """nginx config is host state, not CI orchestration.
+
+    The workflow file is deliberately outside `on.push.paths` so that editing
+    CI orchestration does not cost a full redeploy (see
+    tests/test_deployment_cost_controls.py). Inlining the nginx config there
+    put host state behind that exclusion: #228 changed only the config and no
+    deploy ran, so a certificate-renewal fix sat unshipped until an unrelated
+    PR happened to trigger one. deploy/ec2/ is in the trigger and is already
+    the home of "the procedure that runs on EC2", so the config belongs there.
+    """
+    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+    config = NGINX_CONF_PATH.read_text(encoding="utf-8")
+
+    assert '- "deploy/ec2/**"' in workflow.partition("\njobs:")[0]
+    assert "deploy/ec2/nginx.conf" in workflow
+
+    # The workflow must not carry a server block of its own again.
+    assert "server_name yerin.duckdns.org" not in workflow
+    assert "NGINX_EOF" not in workflow
+
+    # Placeholders must be substituted, or nginx gets the literal string.
+    for placeholder in re.findall(r"__[A-Z0-9_]+__", config):
+        assert f"s|{placeholder}|" in workflow, placeholder
+
+    assert "ssl_certificate /etc/letsencrypt/live/yerin.duckdns.org/" in config
+
+
 def test_nginx_leaves_a_path_for_certificate_renewal_on_port_80() -> None:
     """Renewal was configured with the standalone authenticator, which binds
     port 80 itself. This nginx already holds it, so every attempt failed with
@@ -419,9 +448,9 @@ def test_nginx_leaves_a_path_for_certificate_renewal_on_port_80() -> None:
     with "Invalid response from https://.../acme-challenge/...: 404" — the
     challenge had been redirected to HTTPS, where no such location exists.
     """
-    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
-    start = workflow.index("# HTTP → HTTPS redirect")
-    block = workflow[start : workflow.index("# HTTPS server", start)]
+    config = NGINX_CONF_PATH.read_text(encoding="utf-8")
+    start = config.index("# HTTP → HTTPS redirect")
+    block = config[start : config.index("# HTTPS server", start)]
 
     assert "location ^~ /.well-known/acme-challenge/" in block
     assert "root /var/www/certbot;" in block
