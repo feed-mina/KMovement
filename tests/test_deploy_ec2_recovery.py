@@ -406,6 +406,29 @@ def test_deploy_reports_optional_datasource_health_without_failing() -> None:
     assert "docker inspect kride-fastapi" in body
 
 
+def test_ensemble_warning_separates_a_missing_file_from_a_missing_dependency() -> None:
+    """The two causes need different fixes, so one message cannot serve both.
+
+    The ranker pickle was present in the image and the warning still told the
+    reader to check that the image copies it. The real cause was that lightgbm
+    was not installed, so unpickling raised ModuleNotFoundError — and the
+    message pointed at the wrong file.
+    """
+    script = _deploy_script()
+    start = script.index("*ensemble=OK*) ;;")
+    block = script[start : script.index("esac", start)]
+
+    assert "*ensemble=NO_MODEL*)" in block
+    assert "*ensemble=UNAVAILABLE\\ ModuleNotFoundError*)" in block
+
+    # Only the missing-file branch may send the reader to the COPY line.
+    file_branch = block[block.index("*ensemble=NO_MODEL*)") : block.index("*ensemble=UNAVAILABLE")]
+    dependency_branch = block[block.index("*ensemble=UNAVAILABLE") :]
+    assert "models/ensemble_ranker.pkl" in file_branch
+    assert "models/ensemble_ranker.pkl" not in dependency_branch
+    assert "requirements-docker.txt" in dependency_branch
+
+
 def test_deploy_requires_internal_auth_and_durable_media_delivery() -> None:
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
