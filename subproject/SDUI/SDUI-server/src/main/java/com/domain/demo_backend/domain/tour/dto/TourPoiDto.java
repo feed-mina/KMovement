@@ -10,7 +10,8 @@ package com.domain.demo_backend.domain.tour.dto;
  * @param addr          주소(addr1)
  * @param mapX          경도(lng)
  * @param mapY          위도(lat)
- * @param firstImage    대표 이미지 URL
+ * @param firstImage    대표 이미지 URL(원본)
+ * @param thumbnail     대표 이미지 썸네일 URL(firstimage2). 카드처럼 작게 그리는 자리에 쓴다.
  * @param tel           전화
  * @param cat1          대분류
  * @param cat2          중분류
@@ -25,6 +26,7 @@ public record TourPoiDto(
         Double mapX,
         Double mapY,
         String firstImage,
+        String thumbnail,
         String tel,
         String cat1,
         String cat2,

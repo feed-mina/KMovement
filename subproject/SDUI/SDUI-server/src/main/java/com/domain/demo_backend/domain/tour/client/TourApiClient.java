@@ -2,16 +2,22 @@ package com.domain.demo_backend.domain.tour.client;
 
 import com.domain.demo_backend.domain.tour.dto.TourPoiDto;
 import com.domain.demo_backend.domain.tour.dto.TourRegionDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriBuilder;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * 한국관광공사 TourAPI(국문 관광정보) 클라이언트.
@@ -27,6 +33,10 @@ public class TourApiClient {
     private final WebClient webClient;
     private final String serviceKey;
     private final String mobileApp;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    /** 로그에 남길 응답 본문 길이 상한. 오류 봉투는 이 안에 다 들어온다. */
+    private static final int BODY_PREVIEW_LIMIT = 400;
 
     public TourApiClient(
             @Value("${tour.base-url:https://apis.data.go.kr/B551011/KorService2}") String baseUrl,
@@ -64,23 +74,19 @@ public class TourApiClient {
         // arrange: A=제목순, C=수정일순, D=생성일순 (기본 A)
         String arrangeCode = (arrange != null && !arrange.isBlank()) ? arrange : "A";
 
-        Map<String, Object> res = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/areaBasedList2")
-                        .queryParam("serviceKey", serviceKey)
-                        .queryParam("MobileOS", "ETC")
-                        .queryParam("MobileApp", mobileApp)
-                        .queryParam("_type", "json")
-                        .queryParam("arrange", arrangeCode)
-                        .queryParam("numOfRows", numOfRows)
-                        .queryParam("pageNo", pageNo)
-                        .queryParamIfPresent("areaCode", area)
-                        .queryParamIfPresent("sigunguCode", sigungu)
-                        .queryParamIfPresent("contentTypeId", type)
-                        .build())
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                .block();
+        Map<String, Object> res = requestJson("areaBasedList2", uriBuilder -> uriBuilder
+                .path("/areaBasedList2")
+                .queryParam("serviceKey", serviceKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", mobileApp)
+                .queryParam("_type", "json")
+                .queryParam("arrange", arrangeCode)
+                .queryParam("numOfRows", numOfRows)
+                .queryParam("pageNo", pageNo)
+                .queryParamIfPresent("areaCode", area)
+                .queryParamIfPresent("sigunguCode", sigungu)
+                .queryParamIfPresent("contentTypeId", type)
+                .build());
 
         return parseItems(res);
     }
@@ -100,23 +106,19 @@ public class TourApiClient {
             throw new IllegalStateException("TOUR_API_KEY가 설정되지 않았습니다.");
         }
 
-        Map<String, Object> res = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/locationBasedList2")
-                        .queryParam("serviceKey", serviceKey)
-                        .queryParam("MobileOS", "ETC")
-                        .queryParam("MobileApp", mobileApp)
-                        .queryParam("_type", "json")
-                        .queryParam("arrange", "E") // E=거리순
-                        .queryParam("mapX", mapX)
-                        .queryParam("mapY", mapY)
-                        .queryParam("radius", radius)
-                        .queryParam("numOfRows", numOfRows)
-                        .queryParam("pageNo", 1)
-                        .build())
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                .block();
+        Map<String, Object> res = requestJson("locationBasedList2", uriBuilder -> uriBuilder
+                .path("/locationBasedList2")
+                .queryParam("serviceKey", serviceKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", mobileApp)
+                .queryParam("_type", "json")
+                .queryParam("arrange", "E") // E=거리순
+                .queryParam("mapX", mapX)
+                .queryParam("mapY", mapY)
+                .queryParam("radius", radius)
+                .queryParam("numOfRows", numOfRows)
+                .queryParam("pageNo", 1)
+                .build());
 
         return parseItems(res);
     }
@@ -131,22 +133,111 @@ public class TourApiClient {
         }
 
         Optional<String> area = Optional.ofNullable(areaCode).filter(s -> !s.isBlank());
-        Map<String, Object> res = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/areaCode2")
-                        .queryParam("serviceKey", serviceKey)
-                        .queryParam("MobileOS", "ETC")
-                        .queryParam("MobileApp", mobileApp)
-                        .queryParam("_type", "json")
-                        .queryParam("numOfRows", 100)
-                        .queryParam("pageNo", 1)
-                        .queryParamIfPresent("areaCode", area)
-                        .build())
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                .block();
+        Map<String, Object> res = requestJson("areaCode2", uriBuilder -> uriBuilder
+                .path("/areaCode2")
+                .queryParam("serviceKey", serviceKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", mobileApp)
+                .queryParam("_type", "json")
+                .queryParam("numOfRows", 100)
+                .queryParam("pageNo", 1)
+                .queryParamIfPresent("areaCode", area)
+                .build());
 
         return parseRegions(res);
+    }
+
+    /**
+     * TourAPI 를 호출해 JSON 본문을 Map 으로 돌려준다. 실패하면 이유를 로그에 남긴다.
+     *
+     * <p>본문을 {@code String} 으로 받아 직접 파싱한다. 바로 Map 으로 역직렬화하면
+     * 서비스키가 거부됐을 때 {@code UnsupportedMediaTypeException} 만 올라오고 이유가
+     * 사라진다 — data.go.kr 은 키가 미등록·미승인이거나 한도를 넘으면 {@code _type=json}
+     * 을 무시하고 XML 오류 봉투를 돌려주기 때문이다. 그 봉투에 원인이 적혀 있다
+     * (SERVICE_KEY_IS_NOT_REGISTERED_ERROR, LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS 등).</p>
+     *
+     * <p>이 저장소는 공개다. 본문에 서비스키가 섞여 나올 수 있으므로 가린 뒤 남긴다.</p>
+     */
+    private Map<String, Object> requestJson(String operation, Function<UriBuilder, URI> uriFunction) {
+        String body;
+        try {
+            body = webClient.get().uri(uriFunction).retrieve().bodyToMono(String.class).block();
+        } catch (WebClientResponseException e) {
+            log.error("[TourApiClient] {} HTTP 오류 - status={}, body={}",
+                    operation, e.getStatusCode(), preview(e.getResponseBodyAsString(), serviceKey));
+            throw e;
+        }
+
+        return parseJsonBody(operation, body, serviceKey);
+    }
+
+    /**
+     * 응답 본문을 Map 으로 만든다. 실패하면 원인을 로그에 남기고 예외를 던진다.
+     *
+     * <p>예외 메시지에는 본문을 넣지 않는다. 메시지는 응답으로 새어 나갈 수 있고,
+     * 진단에 필요한 본문은 로그에 있다.</p>
+     */
+    static Map<String, Object> parseJsonBody(String operation, String body, String serviceKey) {
+        if (body == null || body.isBlank()) {
+            log.error("[TourApiClient] {} 응답 본문이 비어 있습니다.", operation);
+            throw new IllegalStateException("TourAPI 응답이 비어 있습니다: " + operation);
+        }
+
+        String trimmed = body.stripLeading();
+        if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+            log.error("[TourApiClient] {} 가 JSON 이 아닌 응답을 돌려줬습니다. 서비스키가 거부됐을 가능성이 큽니다"
+                            + " (Encoded 대신 Decoded 키인지, KorService2 활용신청이 승인됐는지 확인). body={}",
+                    operation, preview(body, serviceKey));
+            throw new IllegalStateException("TourAPI 가 JSON 이 아닌 응답을 돌려줬습니다: " + operation);
+        }
+
+        Map<String, Object> parsed;
+        try {
+            parsed = OBJECT_MAPPER.readValue(body, new TypeReference<Map<String, Object>>() {});
+        } catch (JsonProcessingException e) {
+            log.error("[TourApiClient] {} 응답 JSON 파싱 실패 - body={}", operation, preview(body, serviceKey));
+            throw new IllegalStateException("TourAPI 응답을 해석하지 못했습니다: " + operation, e);
+        }
+
+        String abnormal = abnormalResultCode(parsed);
+        if (abnormal != null) {
+            log.error("[TourApiClient] {} 응답 코드가 정상이 아닙니다 - {}", operation, abnormal);
+        }
+        return parsed;
+    }
+
+    /**
+     * JSON 으로 오는 오류도 있다. 이때 resultCode 는 "0000" 이 아니고 body 가 비어 있어
+     * 파서가 빈 목록을 돌려준다 — 예외가 아니라 "결과 0건" 으로 보인다.
+     *
+     * @return 이상이 있으면 "resultCode=..., resultMsg=..." 형태, 정상이면 null
+     */
+    @SuppressWarnings("unchecked")
+    static String abnormalResultCode(Map<String, Object> parsed) {
+        if (!(parsed.get("response") instanceof Map<?, ?> response)) return null;
+        if (!(((Map<String, Object>) response).get("header") instanceof Map<?, ?> header)) return null;
+
+        Map<String, Object> head = (Map<String, Object>) header;
+        String resultCode = str(head.get("resultCode"));
+        if (resultCode == null || "0000".equals(resultCode)) return null;
+
+        return "resultCode=" + resultCode + ", resultMsg=" + str(head.get("resultMsg"));
+    }
+
+    /**
+     * 서비스키를 가리고 길이를 잘라 한 줄로 만든다.
+     * 이 저장소는 공개고 배포 로그도 공개다. 본문에 키가 섞여 나올 수 있다.
+     */
+    static String preview(String body, String serviceKey) {
+        if (body == null || body.isBlank()) return "<empty>";
+        String masked = body;
+        if (serviceKey != null && !serviceKey.isBlank()) {
+            masked = masked.replace(serviceKey, "***");
+        }
+        masked = masked.replaceAll("\\s+", " ").trim();
+        return masked.length() <= BODY_PREVIEW_LIMIT
+                ? masked
+                : masked.substring(0, BODY_PREVIEW_LIMIT) + "…(생략)";
     }
 
     @SuppressWarnings("unchecked")
@@ -182,7 +273,7 @@ public class TourApiClient {
     }
 
     @SuppressWarnings("unchecked")
-    private List<TourPoiDto> parseItems(Map<String, Object> res) {
+    static List<TourPoiDto> parseItems(Map<String, Object> res) {
         List<TourPoiDto> out = new ArrayList<>();
         if (res == null) return out;
 
@@ -210,6 +301,9 @@ public class TourApiClient {
                     parseDouble(it.get("mapx")),
                     parseDouble(it.get("mapy")),
                     str(it.get("firstimage")),
+                    // firstimage2 는 같은 사진의 썸네일이다. 카드는 150×100 으로 그리는데
+                    // 원본은 수백 KB~수 MB 라 첫 화면에서만 몇 MB 를 받게 된다.
+                    str(it.get("firstimage2")),
                     str(it.get("tel")),
                     str(it.get("cat1")),
                     str(it.get("cat2")),

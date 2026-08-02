@@ -12,6 +12,8 @@ export interface TourPoi {
     mapX?: number; // 경도(lng)
     mapY?: number; // 위도(lat)
     firstImage?: string;
+    /** 원본(firstImage)의 썸네일. TourAPI firstimage2. 카드처럼 작게 그리는 자리에 쓴다. */
+    thumbnail?: string;
     imageSourceUrl?: string;
     imageCredit?: string;
     tel?: string;
