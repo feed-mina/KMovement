@@ -16,6 +16,11 @@ pandas==2.3.3
 numpy==2.2.6
 networkx==3.4.2
 scikit-learn==1.7.2
+# models/ensemble_ranker.pkl 안에 LGBMRanker(objective=lambdarank)가 들어 있다.
+# 이 패키지가 없으면 pickle.load 가 ModuleNotFoundError 를 내고, ensemble_client
+# 가 그것을 삼켜 rank_pois 가 candidates[:top_k] 로 떨어진다. 즉 추천 순위가
+# 합쳐진 순서 그대로 나간다. 실제로 그 상태로 운영됐다(#217).
+lightgbm==4.7.0
 scipy==1.15.3
 sentence-transformers==5.4.1
 transformers==5.7.0

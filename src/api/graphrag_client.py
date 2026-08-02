@@ -36,10 +36,20 @@ def _load_graph() -> dict:
         if n.get("type") == "POI" and n.get("community") is not None:
             community_pois[n["community"]].append(n)
 
+    # POI → 출연 아티스트 이름. FILMING_AT 은 poi → artist 방향이다.
+    # 앙상블 랭커의 neo4j_artist_count 피처가 POI 의 artists 길이를 읽는데,
+    # 여기서 채우지 않으면 항상 0 이 들어가 피처 하나가 죽는다.
+    poi_artists: dict[str, list[str]] = defaultdict(list)
+    for e in raw.get("edges", []):
+        artist = nodes_by_id.get(e["target"])
+        if artist and artist.get("type") == "Artist" and artist.get("name"):
+            poi_artists[e["source"]].append(artist["name"])
+
     _graph = {
         "nodes": nodes_by_id,
         "adj": adj,
         "community_pois": community_pois,
+        "poi_artists": poi_artists,
     }
     return _graph
 
@@ -101,6 +111,7 @@ def get_graphrag_pois(
     result = list(found_pois.values())[:max_pois]
 
     # 표준 POI 형식으로 변환
+    poi_artists = g["poi_artists"]
     formatted = []
     for p in result:
         formatted.append({
@@ -111,6 +122,7 @@ def get_graphrag_pois(
             "address": p.get("address", ""),
             "category": p.get("category", ""),
             "sido": p.get("address", "").split()[0] if p.get("address") else "",
+            "artists": poi_artists.get(p.get("id", ""), []),
             "source": "graphrag",
         })
 
@@ -190,6 +202,7 @@ def get_region_pois_from_graph(
         if len(matched) >= max_pois:
             break
 
+    poi_artists = graph["poi_artists"]
     return [
         {
             "poi_id": p.get("id", ""),
@@ -199,6 +212,7 @@ def get_region_pois_from_graph(
             "address": p.get("address", ""),
             "category": p.get("category", ""),
             "sido": (p.get("address") or "").split()[0] if p.get("address") else "",
+            "artists": poi_artists.get(p.get("id", ""), []),
             "source": "graphrag_region",
         }
         for p in matched

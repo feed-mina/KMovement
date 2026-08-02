@@ -229,10 +229,19 @@ except Exception as exc:
       ;;
   esac
 
+  # 원인마다 고쳐야 할 곳이 다르다. 파일이 멀쩡히 있는데도 "이미지가 파일을
+  # 복사하는지 확인하라"고 안내해서 엉뚱한 곳을 보게 만든 적이 있다. 실제
+  # 원인은 lightgbm 미설치였고, 그 상태로 배포가 계속 초록이었다.
   case "$DATASOURCE_REPORT" in
     *ensemble=OK*) ;;
+    *ensemble=NO_MODEL*)
+      echo "::warning::Ensemble ranker model file is missing; POI ranking falls back to a plain union. Check that the image copies models/ensemble_ranker.pkl."
+      ;;
+    *ensemble=UNAVAILABLE\ ModuleNotFoundError*)
+      echo "::warning::Ensemble ranker cannot be unpickled because a dependency is missing; POI ranking falls back to a plain union. The model is a LightGBM LGBMRanker, so src/api/requirements-docker.txt must pin lightgbm. See the module name in the report line above."
+      ;;
     *)
-      echo "::warning::Ensemble ranker model is missing; POI ranking falls back to a plain union. Check that the image copies models/ensemble_ranker.pkl."
+      echo "::warning::Ensemble ranker failed to load; POI ranking falls back to a plain union. See the report line above for the error."
       ;;
   esac
 

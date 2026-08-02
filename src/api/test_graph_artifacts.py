@@ -152,6 +152,60 @@ def test_every_ui_region_matches_its_address_spelling() -> None:
     assert get_region_pois_from_graph(["경상북도"], max_pois=1)
 
 
+def test_ensemble_ranker_dependency_is_pinned_for_the_image() -> None:
+    """산출물을 이미지에 넣는 것만으로는 부족하다.
+
+    ensemble_ranker.pkl 은 LightGBM LGBMRanker 라서 unpickle 에 lightgbm 이
+    필요하다. #218 에서 파일은 넣었지만 의존성이 없어 ModuleNotFoundError 가
+    났고, ensemble_client 가 그것을 삼켜 rank_pois 가 candidates[:top_k] 로
+    떨어졌다. 순위 없이 합쳐진 순서 그대로 나가는 상태가 배포마다 반복됐다.
+    """
+    requirements = (ROOT / "src" / "api" / "requirements-docker.txt").read_text(
+        encoding="utf-8"
+    )
+    assert re.search(r"^lightgbm==", requirements, re.MULTILINE), (
+        "ensemble_ranker.pkl 을 열려면 lightgbm 이 필요하다"
+    )
+
+    model_path = ROOT / "models" / "ensemble_ranker.pkl"
+    if model_path.exists():
+        # 모델을 다른 라이브러리로 다시 학습하면 이 핀도 같이 바뀌어야 한다.
+        blob = model_path.read_bytes()
+        assert b"lightgbm" in blob, (
+            "모델이 더는 LightGBM 이 아니다. requirements 의 핀을 맞춰야 한다"
+        )
+
+
+@pytest.mark.skipif(not GRAPH_PATH.exists(), reason="kride_graph.json 없음")
+def test_graphrag_pois_carry_artist_names_for_the_ranker() -> None:
+    """앙상블의 neo4j_artist_count 피처가 POI 의 artists 길이를 읽는다.
+
+    호출부는 graphrag POI 를 neo4j_pois 인자로 넘긴다. 그런데 graphrag POI 에
+    artists 키가 없어 그 피처가 항상 0 이었다. 8개 중 1개가 죽은 채로 랭킹이
+    돌던 셈이다.
+    """
+    from src.api.graphrag_client import (
+        get_graphrag_pois,
+        get_region_pois_from_graph,
+        search_artists_by_name,
+    )
+
+    artist_ids = search_artists_by_name(["방탄소년단"])
+    assert artist_ids
+
+    pois = get_graphrag_pois(artist_ids, set(), max_pois=10)
+    assert pois
+    for poi in pois:
+        assert isinstance(poi["artists"], list)
+    # 커뮤니티 확장으로 딸려온 POI 는 비어 있을 수 있다. 요청한 아티스트의
+    # 촬영지는 최소 한 건 이름을 달고 있어야 한다.
+    assert any(poi["artists"] for poi in pois)
+
+    # 지역 경로도 같은 형식을 지켜야 랭커가 두 소스를 같게 다룬다.
+    for poi in get_region_pois_from_graph(["서울"], max_pois=5):
+        assert isinstance(poi["artists"], list)
+
+
 def test_recommend_paths_fall_back_to_region_when_artist_is_unknown() -> None:
     server = FASTAPI_SERVER.read_text(encoding="utf-8")
 
