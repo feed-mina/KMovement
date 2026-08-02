@@ -282,6 +282,72 @@ except Exception as exc:
   esac
 }
 
+# TourAPI 는 실패해도 화면에 "장소를 불러오지 못했어요" 만 뜨고 배포는 초록으로
+# 지나간다. 원인을 알려면 화면을 열어 요청을 한 번 만든 뒤 SSH 로 컨테이너 로그를
+# 봐야 했다(#236). 여기서 대신 한 번 부르고 그 결과를 배포 로그에 남긴다.
+#
+# 다른 진단과 마찬가지로 배포를 실패시키지 않는다. TourAPI 가 죽어도 성지 탐색과
+# 나머지 서비스는 동작한다.
+report_tour_api_health() {
+  TOUR_CONTAINER="$1"
+  TOUR_PORT="$2"
+
+  if ! docker inspect "$TOUR_CONTAINER" >/dev/null 2>&1; then
+    echo "$TOUR_CONTAINER is not present; skipping TourAPI diagnostics."
+    return 0
+  fi
+
+  # 시·도 목록은 실패해도 서버가 상수로 폴백해서 언제나 200 이다. 시·군·구는
+  # 폴백할 상수가 없어 상류가 거부하면 그대로 5xx 가 된다 — 이쪽을 본다.
+  TOUR_PROBE_CODE="$(
+    curl -s -o /dev/null -m 20 -w '%{http_code}' \
+      "http://localhost:${TOUR_PORT}/api/v1/tour/areas?areaCode=1" 2>/dev/null || echo "000"
+  )"
+
+  # 컨테이너가 남긴 진단 줄만 집는다. TourApiClient 가 서비스키를 가린 뒤
+  # 기록하므로(#235) 이 줄들은 공개 로그에 그대로 올려도 된다. 로그 전체를
+  # 흘리면 그 보장이 사라진다.
+  #
+  # --since 는 절대 시각 대신 상대 시간을 쓴다. 호스트와 컨테이너의 시계가
+  # 어긋나면 절대 시각은 아무것도 집지 못한다.
+  TOUR_PROBE_LOG="$(
+    docker logs "$TOUR_CONTAINER" --since 120s 2>&1 \
+      | grep -E '\[TourApiClient\]|\[TourService\]' | tail -5 || true
+  )"
+
+  echo "--- TourAPI health ---"
+  echo "tour_districts_http=$TOUR_PROBE_CODE"
+  [ -n "$TOUR_PROBE_LOG" ] && echo "$TOUR_PROBE_LOG"
+
+  if [ "$TOUR_PROBE_CODE" = "200" ]; then
+    echo "TourAPI district lookup is healthy."
+    return 0
+  fi
+
+  # 원인마다 고쳐야 할 곳이 다르다. data.go.kr 은 키를 거부할 때 _type=json 을
+  # 무시하고 XML 오류 봉투를 돌려주므로, 봉투 문구가 그대로 단서가 된다.
+  case "$TOUR_PROBE_LOG" in
+    *SERVICE_KEY_IS_NOT_REGISTERED*)
+      echo "::warning::TourAPI rejected the service key as unregistered. tour.base-url points at KorService2, and data.go.kr approves KorService1 and KorService2 separately — an approval for KorService1 does not cover this. Apply for KorService2, or confirm TOUR_API_KEY holds the Decoded value (TourApiClient encodes it once)."
+      ;;
+    *LIMITED_NUMBER_OF_SERVICE_REQUESTS*)
+      echo "::warning::TourAPI daily request quota is exhausted. Places and districts stay empty until it resets or the quota is raised."
+      ;;
+    *"JSON 이 아닌 응답"*)
+      echo "::warning::TourAPI returned a non-JSON body, which is how data.go.kr reports a rejected key. See the report line above for the envelope."
+      ;;
+    *"응답 코드가 정상이 아닙니다"*)
+      echo "::warning::TourAPI answered with an abnormal resultCode. See the report line above — this response would otherwise be indistinguishable from an empty result."
+      ;;
+    "")
+      echo "::warning::TourAPI district lookup returned HTTP $TOUR_PROBE_CODE but the backend logged nothing. The request may not have reached TourApiClient at all."
+      ;;
+    *)
+      echo "::warning::TourAPI district lookup failed with HTTP $TOUR_PROBE_CODE. See the report line above for the cause."
+      ;;
+  esac
+}
+
 pull_service_image() {
   echo "Pulling $1"
   df -h /var/lib/docker 2>/dev/null || df -h / || true
@@ -676,6 +742,7 @@ rm -f "$SSE_SMOKE_HEADERS" "$SSE_SMOKE_BODY"
 echo "Celery media/maintenance workers, beat, result backend, and authenticated SSE route are healthy."
 
 report_optional_datasource_health
+report_tour_api_health __CONTAINER_NAME__ __TARGET_PORT__
 
 echo "=== Deployment complete ==="
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"

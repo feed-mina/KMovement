@@ -8,10 +8,13 @@
 | 레이어 | 위치 | 스택 |
 |--------|------|------|
 | 백엔드 | `SDUI-server/` | Spring Boot 3 (Java 17) |
-| 웹 프론트 | `metadata-project/`, `kride/` | Next.js 14 (React 18) |
+| 웹 프론트 | `metadata-project/` | Next.js 14 (React 18) |
 | 모바일 | `kride/apps/mobile/` | Expo 51 (React Native 0.74) |
 | 공유 엔진 | `kride/packages/core/` | 플랫폼 중립 SDUI 엔진 (웹·모바일 공유) |
 | AI 챗봇 | 외부 FastAPI | RAG + LLM (`kridechat` 도메인이 프록시) |
+
+> `kride/` 아래에는 이제 모바일 앱과 공유 엔진만 있습니다. 별도 웹앱(`kride/apps/web`, Vercel 배포)은
+> #214 에서 걷어냈고 웹 배포 대상은 `metadata-project` 하나입니다.
 
 ---
 
@@ -20,7 +23,7 @@
 ```mermaid
 graph TB
     subgraph Clients["클라이언트"]
-        Web["웹 (Next.js)<br/>metadata-project · kride"]
+        Web["웹 (Next.js)<br/>metadata-project"]
         Mobile["모바일 (Expo / React Native)<br/>kride/apps/mobile"]
     end
 
@@ -267,7 +270,7 @@ flowchart LR
 | 문서화 | springdoc-openapi (Swagger UI) |
 | 테스트 | JUnit 5, Spring Security Test, H2, embedded-redis |
 
-### 웹 프론트 — `metadata-project` · `kride`
+### 웹 프론트 — `metadata-project`
 
 | 분류 | 기술 |
 |------|------|

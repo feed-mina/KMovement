@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 import types
 from unittest.mock import MagicMock
@@ -13,23 +14,27 @@ def _stub(name: str) -> types.ModuleType:
     return mod
 
 
-for _package in [
-    "neo4j",
-    "chromadb",
-    "groq",
-    "supabase",
-    "sentence_transformers",
-    "lightgbm",
-    "sklearn",
-    "sklearn.model_selection",
-]:
-    _stub(_package)
+from tests.module_stubs import stub_modules
 
+# stub 은 이 블록 안에서만 산다. 그대로 두면 뒤에 수집되는 테스트가 진짜 모듈
+# 대신 이것을 집는다 — sklearn stub 하나가 test_ensemble.py 의 sklearn.metrics
+# import 를 깨뜨렸다.
 _ensemble = types.ModuleType("src.api.ensemble_client")
 _ensemble.rank_pois = MagicMock(return_value=[])
-sys.modules["src.api.ensemble_client"] = _ensemble
 
-import src.api.fastapi_server as server  # noqa: E402
+with stub_modules(
+    [
+        "chromadb",
+        "groq",
+        "supabase",
+        "sentence_transformers",
+        "lightgbm",
+        "sklearn",
+        "sklearn.model_selection",
+    ],
+    {"src.api.ensemble_client": _ensemble},
+):
+    import src.api.fastapi_server as server  # noqa: E402
 
 
 client = TestClient(server.app, raise_server_exceptions=False)
@@ -185,9 +190,53 @@ def test_recommend_itinerary_endpoint_accepts_spring_duration_and_returns_map(mo
     assert body["source_pois"][0]["poi_id"] == "poi_1"
 
 
-def test_chat_stream_endpoint_returns_plain_text_stream():
+def test_chat_stream_endpoint_speaks_sse_the_way_spring_reads_it():
+    """The consumer is Spring's `bodyToFlux(String.class)` on this endpoint.
+
+    That decoder only strips the `data: ` framing when the response is
+    `text/event-stream`; on `text/plain` it hands back raw chunks and the client
+    sees the framing as content. This test used to assert `text/plain`, which
+    stopped matching the endpoint and had been failing on main ever since.
+    """
     response = client.post("/api/chat/stream", json={"message": "hello kride"})
 
     assert response.status_code == 200
-    assert response.headers["content-type"].startswith("text/plain")
-    assert "hello kride" in response.text
+    assert response.headers["content-type"].startswith("text/event-stream")
+
+    # Every payload is one `data:` frame, and the stream terminates with the
+    # sentinel Spring forwards to the browser (KrideChatService).
+    lines = [line for line in response.text.splitlines() if line]
+    assert all(line.startswith("data: ") for line in lines), lines
+    assert lines[-1] == "data: [DONE]"
+
+    # Frames before the sentinel carry JSON with a content field.
+    payload = json.loads(lines[0].removeprefix("data: "))
+    assert "content" in payload
+
+
+def test_chat_stream_stub_matches_the_real_function_signature():
+    """The AI-module fallback must accept what the endpoint actually passes.
+
+    `chat_stream` calls `generate_chat_answer_stream(message, graphrag_context=...)`.
+    When the AI modules fail to import, the stub took `message` only, so the call
+    raised TypeError and the endpoint fell into its exception branch instead of
+    the intended "준비 중" message — the reason was only visible in stdout.
+    """
+    import ast
+    import inspect
+    from pathlib import Path
+
+    # rag_client cannot be imported here — its dependencies are stubbed above,
+    # which is exactly the condition that selects the fallback. Read the real
+    # signatures from source instead.
+    source = Path(__file__).resolve().parents[1] / "src" / "api" / "rag_client.py"
+    real_parameters = {
+        node.name: {argument.arg for argument in node.args.args}
+        for node in ast.parse(source.read_text(encoding="utf-8")).body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    }
+
+    for name in ("generate_chat_answer", "generate_chat_answer_stream"):
+        stub_parameters = set(inspect.signature(getattr(server, name)).parameters)
+        assert "graphrag_context" in stub_parameters, name
+        assert real_parameters[name] <= stub_parameters, name

@@ -11,29 +11,27 @@ from fastapi.testclient import TestClient
 os.environ.setdefault("FASTAPI_INTERNAL_API_KEY", "test-internal-api-key-for-runpod-routing")
 
 
-def _stub(name: str) -> types.ModuleType:
-    mod = types.ModuleType(name)
-    sys.modules.setdefault(name, mod)
-    return mod
+from tests.module_stubs import stub_modules
 
-
-for _package in [
-    "neo4j",
-    "chromadb",
-    "groq",
-    "supabase",
-    "sentence_transformers",
-    "lightgbm",
-    "sklearn",
-    "sklearn.model_selection",
-]:
-    _stub(_package)
-
+# stub 은 이 블록 안에서만 산다. 그대로 두면 뒤에 수집되는 테스트가 진짜 모듈
+# 대신 이것을 집는다 — sklearn stub 하나가 test_ensemble.py 의 sklearn.metrics
+# import 를 깨뜨렸다.
 _ensemble = types.ModuleType("src.api.ensemble_client")
 _ensemble.rank_pois = MagicMock(return_value=[])
-sys.modules["src.api.ensemble_client"] = _ensemble
 
-import src.api.fastapi_server as server  # noqa: E402
+with stub_modules(
+    [
+        "chromadb",
+        "groq",
+        "supabase",
+        "sentence_transformers",
+        "lightgbm",
+        "sklearn",
+        "sklearn.model_selection",
+    ],
+    {"src.api.ensemble_client": _ensemble},
+):
+    import src.api.fastapi_server as server  # noqa: E402
 
 
 client = TestClient(server.app, raise_server_exceptions=False)

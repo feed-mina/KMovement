@@ -70,8 +70,11 @@ except ImportError as _e:
     search_pois_by_purpose = lambda purpose, lat, lon, radius: []
     generate_recommendation_text = lambda purpose, pois: ""
     generate_itinerary = lambda pois, duration, theme: ""
-    generate_chat_answer = lambda message: f"AI 서비스가 현재 준비 중입니다. 잠시 후 다시 시도해주세요.\n\n회원님의 질문: {message}"
-    def generate_chat_answer_stream(message): yield f"AI 서비스가 현재 준비 중입니다. 잠시 후 다시 시도해주세요.\n\n회원님의 질문: {message}"
+    # 스텁은 진짜 함수와 인자를 맞춰야 한다. 호출부가 graphrag_context 를 넘기는데
+    # 스텁이 받지 않으면 TypeError 가 나고, 준비 중 안내 대신 예외 처리 경로로
+    # 떨어져 무슨 일이 일어났는지 알 수 없게 된다.
+    generate_chat_answer = lambda message, graphrag_context="": f"AI 서비스가 현재 준비 중입니다. 잠시 후 다시 시도해주세요.\n\n회원님의 질문: {message}"
+    def generate_chat_answer_stream(message, graphrag_context=""): yield f"AI 서비스가 현재 준비 중입니다. 잠시 후 다시 시도해주세요.\n\n회원님의 질문: {message}"
     get_poi_details = lambda poi_id: None
 
 # POI 클러스터링 (math만 의존, 외부 모듈 불필요)

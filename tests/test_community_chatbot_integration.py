@@ -21,34 +21,33 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# ── 외부 패키지 stub (import 전에 설정) ──
-def _stub(name: str):
-    if name not in sys.modules:
-        mod = types.ModuleType(name)
-        mod.__dict__.setdefault("__all__", [])
-        sys.modules[name] = mod
-    return sys.modules[name]
-
-for _pkg in [
-    "neo4j", "chromadb", "groq", "supabase", "sentence_transformers",
-    "lightgbm", "sklearn", "sklearn.model_selection",
-]:
-    _stub(_pkg)
-
-# ensemble_client를 가짜 모듈로 대체 (pickle 모델 로드 방지)
-_ens = types.ModuleType("src.api.ensemble_client")
-_ens.rank_pois = MagicMock(return_value=[])
-sys.modules["src.api.ensemble_client"] = _ens
-
-# feature_engineering도 stub (numpy import 지연 방지)
-_fe = types.ModuleType("src.ml.feature_engineering")
-_fe.compute_features = MagicMock(return_value=[])
-sys.modules["src.ml.feature_engineering"] = _fe
-
 from fastapi.testclient import TestClient
 
-# FastAPI 앱 임포트 (stub 설정 이후에 해야 ImportError/hang 방지)
-from src.api.fastapi_server import app  # noqa: E402
+from tests.module_stubs import stub_modules
+
+# ── 외부 패키지 stub ──
+# stub 은 이 블록 안에서만 산다. 그대로 두면 뒤에 수집되는 테스트가 진짜 모듈
+# 대신 이것을 집는다 — 실제로 test_ensemble.py 가 이 파일의
+# src.ml.feature_engineering stub 때문에 수집 단계에서 죽었다.
+_ens = types.ModuleType("src.api.ensemble_client")
+_ens.rank_pois = MagicMock(return_value=[])
+_fe = types.ModuleType("src.ml.feature_engineering")
+_fe.compute_features = MagicMock(return_value=[])
+
+with stub_modules(
+    [
+        "chromadb", "groq", "supabase", "sentence_transformers",
+        "lightgbm", "sklearn", "sklearn.model_selection",
+    ],
+    {
+        # pickle 모델 로드 방지
+        "src.api.ensemble_client": _ens,
+        # numpy import 지연 방지
+        "src.ml.feature_engineering": _fe,
+    },
+):
+    # FastAPI 앱 임포트 (stub 설정 이후에 해야 ImportError/hang 방지)
+    from src.api.fastapi_server import app  # noqa: E402
 
 client = TestClient(app, raise_server_exceptions=False)
 

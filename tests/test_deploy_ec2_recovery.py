@@ -378,7 +378,7 @@ def test_deploy_reports_optional_datasource_health_without_failing() -> None:
     assert "\nreport_optional_datasource_health\n" in script
 
     start = script.index("report_optional_datasource_health() {")
-    body = script[start : script.index("\npull_service_image() {", start)]
+    body = script[start : script.index("\nreport_tour_api_health() {", start)]
 
     # Report-only: no exit inside the diagnostic, and the exec cannot abort the
     # script under `set -e`.
@@ -673,3 +673,52 @@ def test_deploy_requires_internal_auth_and_durable_media_delivery() -> None:
 
 def test_frontend_ownership_preflight_uses_the_deployed_backend_container() -> None:
     assert "-e BACKEND_URL=http://__CONTAINER_NAME__:8080" in _deploy_script()
+
+
+def test_tour_api_failure_reaches_the_deploy_log_instead_of_needing_an_ssh_session() -> None:
+    """TourAPI fails silently from the deploy's point of view.
+
+    The screen says "장소를 불러오지 못했어요" and the deploy stays green, so the
+    cause was only reachable by opening the page and then reading container logs
+    over SSH (#236). The probe makes the request here instead.
+    """
+    script = _deploy_script()
+
+    assert "report_tour_api_health() {" in script
+    assert "\nreport_tour_api_health __CONTAINER_NAME__ __TARGET_PORT__\n" in script
+
+    start = script.index("report_tour_api_health() {")
+    body = script[start : script.index("\npull_service_image() {", start)]
+
+    # Report-only, like the other diagnostics. TourAPI being down must not stop
+    # an unrelated change from shipping.
+    assert "exit 1" not in body
+
+    # The district lookup is the one that fails loudly. The province list falls
+    # back to a server constant and answers 200 even when the key is rejected,
+    # so probing it would report health that isn't there.
+    assert "/api/v1/tour/areas?areaCode=1" in body
+
+    # The lab branch runs on a different port; a hardcoded 8080 would probe the
+    # wrong container.
+    assert "localhost:8080" not in body
+    assert "${TOUR_PORT}" in body
+
+    # Only the masked diagnostic lines may reach a public Actions log. Dumping
+    # the whole container log would lose the masking TourApiClient applies.
+    assert r"grep -E '\[TourApiClient\]|\[TourService\]'" in body
+    assert "docker logs" in body
+    assert "--since 120s" in body
+
+    # Each cause needs a different fix, so the warnings must not collapse into
+    # one generic message.
+    for cause in (
+        "SERVICE_KEY_IS_NOT_REGISTERED",
+        "LIMITED_NUMBER_OF_SERVICE_REQUESTS",
+        "KorService2",
+    ):
+        assert cause in body, cause
+    assert body.count("::warning::") >= 4
+
+    # Missing container must skip rather than error.
+    assert 'docker inspect "$TOUR_CONTAINER"' in body
