@@ -299,10 +299,21 @@ report_tour_api_health() {
 
   # 시·도 목록은 실패해도 서버가 상수로 폴백해서 언제나 200 이다. 시·군·구는
   # 폴백할 상수가 없어 상류가 거부하면 그대로 5xx 가 된다 — 이쪽을 본다.
+  #
+  # 상태 코드만으로는 부족하다. getAreas 는 시·군·구 조회가 0건이면 예외 없이
+  # 빈 목록으로 200 을 돌려준다(TourService). 화면에는 시·군·구가 하나도 없는데
+  # 진단은 정상이라고 말하게 된다. 본문이 실제로 채워졌는지까지 본다.
+  TOUR_PROBE_BODY="$(mktemp)"
   TOUR_PROBE_CODE="$(
-    curl -s -o /dev/null -m 20 -w '%{http_code}' \
+    curl -s -o "$TOUR_PROBE_BODY" -m 20 -w '%{http_code}' \
       "http://localhost:${TOUR_PORT}/api/v1/tour/areas?areaCode=1" 2>/dev/null || echo "000"
   )"
+  # ApiResponse 는 결과를 data 배열에 담는다. 공백을 지운 뒤 빈 배열인지 본다.
+  TOUR_PROBE_EMPTY="no"
+  if tr -d ' \n' < "$TOUR_PROBE_BODY" | grep -q '"data":\[\]'; then
+    TOUR_PROBE_EMPTY="yes"
+  fi
+  rm -f "$TOUR_PROBE_BODY"
 
   # 컨테이너가 남긴 진단 줄만 집는다. TourApiClient 가 서비스키를 가린 뒤
   # 기록하므로(#235) 이 줄들은 공개 로그에 그대로 올려도 된다. 로그 전체를
@@ -316,11 +327,16 @@ report_tour_api_health() {
   )"
 
   echo "--- TourAPI health ---"
-  echo "tour_districts_http=$TOUR_PROBE_CODE"
+  echo "tour_districts_http=$TOUR_PROBE_CODE empty_result=$TOUR_PROBE_EMPTY"
   [ -n "$TOUR_PROBE_LOG" ] && echo "$TOUR_PROBE_LOG"
 
-  if [ "$TOUR_PROBE_CODE" = "200" ]; then
+  if [ "$TOUR_PROBE_CODE" = "200" ] && [ "$TOUR_PROBE_EMPTY" = "no" ]; then
     echo "TourAPI district lookup is healthy."
+    return 0
+  fi
+
+  if [ "$TOUR_PROBE_CODE" = "200" ]; then
+    echo "::warning::TourAPI answered 200 with an empty district list for 서울(areaCode=1), which is never correct — Seoul has 25 districts. getAreas returns an empty list rather than raising when the upstream result is empty, so this reads as success everywhere else. Check the report line above; if nothing was logged, the upstream answered without an error but carried no items."
     return 0
   fi
 
