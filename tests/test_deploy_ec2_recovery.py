@@ -699,6 +699,13 @@ def test_tour_api_failure_reaches_the_deploy_log_instead_of_needing_an_ssh_sessi
     # so probing it would report health that isn't there.
     assert "/api/v1/tour/areas?areaCode=1" in body
 
+    # 200 alone is not health. getAreas returns an empty list rather than
+    # raising when the upstream result is empty, so a silent rejection also
+    # answers 200 — the first run of this probe reported "healthy" on a status
+    # code with nothing behind it.
+    assert '"data":\\[\\]' in body or '"data":[]' in body
+    assert "empty_result=" in body
+
     # The lab branch runs on a different port; a hardcoded 8080 would probe the
     # wrong container.
     assert "localhost:8080" not in body
