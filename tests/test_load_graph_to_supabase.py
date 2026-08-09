@@ -226,3 +226,205 @@ def test_inputs_never_reach_the_shell_directly() -> None:
     for step in _workflow()["jobs"]["load"]["steps"]:
         run = step.get("run", "")
         assert "${{ inputs." not in run, step.get("name")
+
+
+def test_the_safest_scope_is_the_default() -> None:
+    """엣지 추가는 순수 추가지만 노드 덮어쓰기는 metadata 를 지운다."""
+    scope = _workflow()[True]["workflow_dispatch"]["inputs"]["scope"]
+
+    assert scope["default"] == "edges-only"
+    assert scope["options"] == ["edges-only", "edges-and-new-nodes", "overwrite-nodes"]
+
+
+def test_every_scope_maps_to_a_flag() -> None:
+    """이름과 실제 인자가 어긋나면 고른 것과 다른 일이 벌어진다."""
+    load = next(
+        step
+        for step in _workflow()["jobs"]["load"]["steps"]
+        if step.get("name") == "Load the graph"
+    )
+
+    assert "edges-only)          SCOPE_ARGS=\"--skip-nodes\"" in load["run"]
+    assert "edges-and-new-nodes) SCOPE_ARGS=\"\"" in load["run"]
+    assert "overwrite-nodes)     SCOPE_ARGS=\"--update-existing-nodes\"" in load["run"]
+    # 알 수 없는 값이 빈 인자로 떨어지면 조용히 전체 적재가 된다.
+    assert "unknown scope" in load["run"]
+
+
+# ── 쓰기 범위 ────────────────────────────────────────────────────────────────
+class _FakeTable:
+    def __init__(self, name: str, log: list[tuple[str, str, int]]):
+        self._name = name
+        self._log = log
+
+    def select(self, *_a, **_k):
+        return self
+
+    def range(self, *_a, **_k):
+        return self
+
+    def upsert(self, rows):
+        self._log.append((self._name, "upsert", len(rows)))
+        return self
+
+    def insert(self, rows):
+        self._log.append((self._name, "insert", len(rows)))
+        return self
+
+    def execute(self):
+        return type("R", (), {"data": []})()
+
+
+class _FakeClient:
+    def __init__(self) -> None:
+        self.writes: list[tuple[str, str, int]] = []
+
+    def table(self, name: str) -> _FakeTable:
+        return _FakeTable(name, self.writes)
+
+
+def _run(monkeypatch, argv: list[str]) -> _FakeClient:
+    """빈 Supabase 를 가정하고 main() 을 돌려 쓰기 호출을 기록한다."""
+    import sys
+    import types
+
+    mod = _module()
+    client = _FakeClient()
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_KEY", "sb_secret_test")
+    monkeypatch.setattr("sys.argv", ["load_graph_to_supabase.py", *argv])
+
+    fake = types.ModuleType("supabase")
+    fake.create_client = lambda *a, **k: client
+    monkeypatch.setitem(sys.modules, "supabase", fake)
+
+    assert mod.main() == 0
+    return client
+
+
+def test_default_apply_writes_both_tables(monkeypatch) -> None:
+    client = _run(monkeypatch, ["--limit", "10", "--apply"])
+    written = {(table, op) for table, op, _ in client.writes}
+
+    assert ("nodes", "upsert") in written
+    assert ("edges", "insert") in written
+
+
+def test_skip_nodes_writes_only_edges(monkeypatch) -> None:
+    """가장 안전한 경로. 엣지 추가는 순수 추가다."""
+    client = _run(monkeypatch, ["--limit", "10", "--apply", "--skip-nodes"])
+
+    assert {table for table, _, _ in client.writes} == {"edges"}
+
+
+def test_skip_edges_writes_only_nodes(monkeypatch) -> None:
+    client = _run(monkeypatch, ["--limit", "10", "--apply", "--skip-edges"])
+
+    assert {table for table, _, _ in client.writes} == {"nodes"}
+
+
+def test_existing_nodes_are_left_alone_unless_asked(monkeypatch) -> None:
+    """기본 적재가 기존 40,704행을 덮어쓰면 안 된다.
+
+    Supabase 에는 그래프에 없는 노드가 있다 — 두 소스가 갈라져 있다는 뜻이고,
+    metadata 를 통째로 upsert 하면 Supabase 쪽에만 있는 필드가 사라진다.
+    """
+    import sys
+    import types
+
+    mod = _module()
+    client = _FakeClient()
+    graph_nodes, _ = mod.load_graph()
+    already_there = {str(node["id"]) for node in graph_nodes[:6]}
+
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_KEY", "sb_secret_test")
+    monkeypatch.setattr(
+        "sys.argv",
+        ["load_graph_to_supabase.py", "--limit", "10", "--apply", "--skip-edges"],
+    )
+    monkeypatch.setattr(
+        mod,
+        "fetch_all",
+        lambda _c, table, _cols: (
+            [{"id": node_id} for node_id in already_there] if table == "nodes" else []
+        ),
+    )
+
+    fake = types.ModuleType("supabase")
+    fake.create_client = lambda *a, **k: client
+    monkeypatch.setitem(sys.modules, "supabase", fake)
+    assert mod.main() == 0
+
+    # 10건 중 6건은 이미 있다. 새 4건만 써야 한다.
+    assert sum(count for _, _, count in client.writes) == 4
+
+
+def test_update_existing_nodes_writes_every_row(monkeypatch) -> None:
+    """명시하면 전체를 덮는다. 그때는 그것이 의도다."""
+    import sys
+    import types
+
+    mod = _module()
+    client = _FakeClient()
+    graph_nodes, _ = mod.load_graph()
+    already_there = {str(node["id"]) for node in graph_nodes[:6]}
+
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_KEY", "sb_secret_test")
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "load_graph_to_supabase.py",
+            "--limit", "10", "--apply", "--skip-edges", "--update-existing-nodes",
+        ],
+    )
+    monkeypatch.setattr(
+        mod,
+        "fetch_all",
+        lambda _c, table, _cols: (
+            [{"id": node_id} for node_id in already_there] if table == "nodes" else []
+        ),
+    )
+
+    fake = types.ModuleType("supabase")
+    fake.create_client = lambda *a, **k: client
+    monkeypatch.setitem(sys.modules, "supabase", fake)
+    assert mod.main() == 0
+
+    assert sum(count for _, _, count in client.writes) == 10
+
+
+def test_diff_reports_metadata_keys_that_would_disappear(capsys) -> None:
+    """사라지는 키가 실제 손실이다. 숫자만으로는 보이지 않는다."""
+    mod = _module()
+
+    class _Client:
+        def table(self, _name):
+            return self
+
+        def select(self, *_a, **_k):
+            return self
+
+        def range(self, *_a, **_k):
+            return self
+
+        def execute(self):
+            return type("R", (), {"data": []})()
+
+    existing = [{
+        "id": "poi_1",
+        "name": "경복궁",
+        "category": "kculture",
+        "community_id": 0,
+        # 그래프에는 없는 필드다. upsert 하면 사라진다.
+        "metadata": {"id": "poi_1", "image_url": "https://example/x.jpg"},
+    }]
+
+    mod.fetch_all = lambda *_a, **_k: existing
+    node_rows = [mod.to_node_row({"id": "poi_1", "name": "경복궁", "category": "kculture"})]
+    mod.report_node_diff(_Client(), node_rows)
+
+    out = capsys.readouterr().out
+    assert "image_url" in out
+    assert "사라지는 metadata 키" in out

@@ -19,8 +19,14 @@ SELECT 를 막으면 PostgREST 는 에러가 아니라 "0건"을 정상 응답�
     export SUPABASE_URL=... SUPABASE_KEY=...   # 쓰려면 sb_secret_... 키
 
     python scripts/load_graph_to_supabase.py                 # 현황만 확인
-    python scripts/load_graph_to_supabase.py --limit 20 --apply   # 소량 시험
-    python scripts/load_graph_to_supabase.py --apply         # 전체 적재
+    python scripts/load_graph_to_supabase.py --diff-nodes    # 덮으면 뭐가 바뀌나
+    python scripts/load_graph_to_supabase.py --skip-nodes --apply   # 엣지만
+    python scripts/load_graph_to_supabase.py --apply         # 엣지 + 새 노드
+
+기본은 새 노드만 넣는다. 이미 있는 노드를 그래프 값으로 덮으려면
+--update-existing-nodes 를 명시해야 한다. 두 소스는 갈라져 있고(Supabase 에
+그래프에 없는 노드가 있다) upsert 는 metadata 를 통째로 갈아치우므로, 무엇이
+사라지는지 --diff-nodes 로 먼저 본다.
 
 스키마 (dataset/노드마이그레이션.py 가 만든 것과 동일)
 
@@ -129,6 +135,59 @@ def fetch_all(client, table: str, columns: str) -> list[dict]:
         start += PAGE
 
 
+def report_node_diff(client, node_rows: list[dict]) -> None:
+    """이미 있는 노드를 그래프 값으로 덮으면 무엇이 바뀌는지 보고한다.
+
+    두 소스는 갈라져 있다 — Supabase 에는 그래프에 없는 노드가 있고, 그렇다면
+    같은 노드의 metadata 에도 그래프에 없는 필드가 있을 수 있다. upsert 는 그
+    필드를 조용히 지운다. 지우기 전에 무엇을 지우는지 본다.
+    """
+    print("\n기존 노드 비교 중... (metadata 까지 읽는다)")
+    existing = {
+        row["id"]: row
+        for row in fetch_all(client, "nodes", "id, name, category, community_id, metadata")
+    }
+
+    changed = 0
+    dropped_keys: dict[str, int] = {}
+    samples: list[str] = []
+
+    for row in node_rows:
+        before = existing.get(row["id"])
+        if before is None:
+            continue
+
+        fields = [
+            field
+            for field in ("name", "category", "community_id", "metadata")
+            if before.get(field) != row[field]
+        ]
+        if not fields:
+            continue
+        changed += 1
+
+        # 사라지는 metadata 키가 실제 손실이다. 값 변경보다 먼저 본다.
+        old_meta = before.get("metadata") or {}
+        if isinstance(old_meta, dict):
+            for key in set(old_meta) - set(row["metadata"]):
+                dropped_keys[key] = dropped_keys.get(key, 0) + 1
+
+        if len(samples) < 3:
+            samples.append(f"  {row['id']}: {', '.join(fields)}")
+
+    print(f"바뀌는 노드 {changed:,}건 / 이미 있는 노드 {len(existing):,}건")
+    for sample in samples:
+        print(sample)
+    if dropped_keys:
+        top = sorted(dropped_keys.items(), key=lambda kv: -kv[1])[:10]
+        print("⚠️ upsert 로 사라지는 metadata 키:")
+        for key, count in top:
+            print(f"   {key}: {count:,}건")
+        print("   이 값이 필요하면 --update-existing-nodes 를 주지 않는다.")
+    else:
+        print("사라지는 metadata 키는 없다.")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -141,6 +200,21 @@ def main() -> int:
         type=int,
         default=0,
         help="노드·엣지를 각각 N개까지만 처리한다. 0이면 전체.",
+    )
+    parser.add_argument("--skip-nodes", action="store_true", help="노드는 건드리지 않는다.")
+    parser.add_argument("--skip-edges", action="store_true", help="엣지는 건드리지 않는다.")
+    parser.add_argument(
+        "--update-existing-nodes",
+        action="store_true",
+        help=(
+            "이미 있는 노드도 그래프 값으로 덮어쓴다. 주지 않으면 새 노드만 넣는다. "
+            "먼저 --diff-nodes 로 무엇이 바뀌는지 본다."
+        ),
+    )
+    parser.add_argument(
+        "--diff-nodes",
+        action="store_true",
+        help="이미 있는 노드가 어떻게 바뀌는지 보고한다. metadata 까지 읽어 느리다.",
     )
     args = parser.parse_args()
 
@@ -192,8 +266,23 @@ def main() -> int:
     ]
     new_nodes = [row for row in node_rows if row["id"] not in existing_nodes]
 
+    # 실제로 쓸 노드를 여기서 정한다. 기본은 새 노드만이다 — 기존 행 덮어쓰기는
+    # metadata 를 통째로 갈아치우므로 명시적으로 골라야 한다.
+    write_nodes = node_rows if args.update_existing_nodes else new_nodes
+
     print(f"추가될 노드 {len(new_nodes):,}건, 갱신될 노드 {len(node_rows) - len(new_nodes):,}건")
     print(f"추가될 엣지 {len(new_edges):,}건, 이미 있는 엣지 {len(edge_rows) - len(new_edges):,}건")
+    print(
+        "쓰기 대상: "
+        + ("노드 건너뜀" if args.skip_nodes else f"노드 {len(write_nodes):,}건")
+        + " · "
+        + ("엣지 건너뜀" if args.skip_edges else f"엣지 {len(new_edges):,}건")
+    )
+    if not args.skip_nodes and not args.update_existing_nodes and new_nodes != node_rows:
+        print(
+            "기존 노드는 그대로 둔다. 그래프 값으로 덮으려면 --update-existing-nodes "
+            "를 준다."
+        )
 
     # 참조 무결성 확인. 엣지가 가리키는 노드가 없으면 조회가 빈 결과를 낸다.
     node_ids = {row["id"] for row in node_rows} | existing_nodes
@@ -205,21 +294,30 @@ def main() -> int:
     if dangling:
         print(f"⚠️ 양쪽 노드가 없는 엣지 {len(dangling)}건 — 예: {dangling[0]}")
 
+    if args.diff_nodes:
+        report_node_diff(client, node_rows)
+
     if not args.apply:
         print("\ndry-run 이다. 실제로 쓰려면 --apply 를 준다.")
         return 0
 
-    print("\n노드 적재 중...")
-    for i in range(0, len(node_rows), NODE_BATCH):
-        batch = node_rows[i : i + NODE_BATCH]
-        client.table("nodes").upsert(batch).execute()
-        print(f"  {min(i + NODE_BATCH, len(node_rows)):,}/{len(node_rows):,}")
+    if args.skip_nodes:
+        print("\n노드 건너뜀.")
+    else:
+        print("\n노드 적재 중...")
+        for i in range(0, len(write_nodes), NODE_BATCH):
+            batch = write_nodes[i : i + NODE_BATCH]
+            client.table("nodes").upsert(batch).execute()
+            print(f"  {min(i + NODE_BATCH, len(write_nodes)):,}/{len(write_nodes):,}")
 
-    print("엣지 적재 중...")
-    for i in range(0, len(new_edges), EDGE_BATCH):
-        batch = new_edges[i : i + EDGE_BATCH]
-        client.table("edges").insert(batch).execute()
-        print(f"  {min(i + EDGE_BATCH, len(new_edges)):,}/{len(new_edges):,}")
+    if args.skip_edges:
+        print("엣지 건너뜀.")
+    else:
+        print("엣지 적재 중...")
+        for i in range(0, len(new_edges), EDGE_BATCH):
+            batch = new_edges[i : i + EDGE_BATCH]
+            client.table("edges").insert(batch).execute()
+            print(f"  {min(i + EDGE_BATCH, len(new_edges)):,}/{len(new_edges):,}")
 
     after_nodes = len(fetch_all(client, "nodes", "id"))
     after_edges = len(fetch_all(client, "edges", "source_id"))

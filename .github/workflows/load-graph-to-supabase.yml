@@ -29,6 +29,20 @@ on:
         required: true
         type: boolean
         default: false
+      scope:
+        description: "무엇을 쓸지. edges-only 가 가장 안전하다."
+        required: true
+        type: choice
+        default: edges-only
+        options:
+          - edges-only
+          - edges-and-new-nodes
+          - overwrite-nodes
+      diff_nodes:
+        description: "기존 노드를 덮으면 무엇이 바뀌는지 먼저 본다."
+        required: false
+        type: boolean
+        default: false
       limit:
         description: "노드·엣지를 각각 N건까지만 처리한다. 0 이면 전체."
         required: false
@@ -66,6 +80,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           LIMIT: ${{ inputs.limit }}
+          DIFF_NODES: ${{ inputs.diff_nodes }}
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
             echo "::error::SUPABASE_URL and SUPABASE_KEY must be configured."
@@ -76,7 +91,9 @@ jobs:
           esac
           # apply 여부와 무관하게 먼저 현황을 남긴다. 적재 후 로그만 남으면
           # 무엇이 있던 자리에 무엇을 넣었는지 되짚을 수 없다.
-          python scripts/load_graph_to_supabase.py --limit "$LIMIT"
+          DIFF=""
+          [ "$DIFF_NODES" = "true" ] && DIFF="--diff-nodes"
+          python scripts/load_graph_to_supabase.py --limit "$LIMIT" $DIFF
 
       - name: Load the graph
         if: ${{ inputs.apply }}
@@ -84,8 +101,15 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           LIMIT: ${{ inputs.limit }}
+          SCOPE: ${{ inputs.scope }}
         run: |
-          python scripts/load_graph_to_supabase.py --limit "$LIMIT" --apply
+          case "$SCOPE" in
+            edges-only)          SCOPE_ARGS="--skip-nodes" ;;
+            edges-and-new-nodes) SCOPE_ARGS="" ;;
+            overwrite-nodes)     SCOPE_ARGS="--update-existing-nodes" ;;
+            *) echo "::error::unknown scope: $SCOPE"; exit 1 ;;
+          esac
+          python scripts/load_graph_to_supabase.py --limit "$LIMIT" $SCOPE_ARGS --apply
 
       - name: Explain the dry run
         if: ${{ !inputs.apply }}
