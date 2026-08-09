@@ -1,0 +1,93 @@
+name: Load graph into Supabase
+
+# models/kride_graph.json 을 Supabase nodes/edges 로 적재한다.
+# scripts/load_graph_to_supabase.py 를 돌리는 것이 전부다.
+#
+# 왜 CI 에서 하나: 적재에는 RLS 를 우회하는 secret 키가 필요하다. 그 키는 이미
+# SUPABASE_KEY 시크릿으로 여기 있고, 로컬에서 돌리려면 매번 운영 키를 꺼내
+# 환경변수에 넣어야 한다. 운영 데이터에 쓰는 경로일수록 꺼낼 일을 줄인다.
+#
+# 방향에 주의한다. refresh-graph-from-supabase.yml 은 반대 방향이다.
+#   이 워크플로  : 그래프 파일 → Supabase
+#   refresh-...  : Supabase    → 그래프 파일
+#
+# 범위를 좁게 둔다.
+#   - workflow_dispatch 전용.
+#   - 기본은 dry-run. 쓰기는 apply=true 를 명시해야 한다.
+#   - 저장소에 쓰지 않는다(contents: read). 산출물은 Supabase 쪽에만 생긴다.
+#
+# 먼저 apply 없이 한 번 돌려서 실제 건수를 확인한다. 배포 진단이 nodes=0 이라고
+# 말한 적이 있지만 그것은 browser-safe 키로 본 숫자였고, 같은 테이블에
+# 41,586건이 들어 있었다(#226). 비어 있다는 판단은 secret 키로 본 숫자로만
+# 내린다.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "실제로 적재한다. 끄면 현황만 보고한다."
+        required: true
+        type: boolean
+        default: false
+      limit:
+        description: "노드·엣지를 각각 N건까지만 처리한다. 0 이면 전체."
+        required: false
+        type: string
+        default: "0"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: load-graph-to-supabase
+  cancel-in-progress: false
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Supabase client
+        run: pip install --no-cache-dir supabase
+
+      - name: Report current state
+        # 입력은 env 로 넘긴다. run 에 ${{ }} 로 박으면 입력 문자열이 쉘에
+        # 그대로 붙어 명령이 된다.
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          LIMIT: ${{ inputs.limit }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
+            echo "::error::SUPABASE_URL and SUPABASE_KEY must be configured."
+            exit 1
+          fi
+          case "$LIMIT" in
+            ''|*[!0-9]*) echo "::error::limit must be a non-negative integer."; exit 1 ;;
+          esac
+          # apply 여부와 무관하게 먼저 현황을 남긴다. 적재 후 로그만 남으면
+          # 무엇이 있던 자리에 무엇을 넣었는지 되짚을 수 없다.
+          python scripts/load_graph_to_supabase.py --limit "$LIMIT"
+
+      - name: Load the graph
+        if: ${{ inputs.apply }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          LIMIT: ${{ inputs.limit }}
+        run: |
+          python scripts/load_graph_to_supabase.py --limit "$LIMIT" --apply
+
+      - name: Explain the dry run
+        if: ${{ !inputs.apply }}
+        run: |
+          echo "::notice::Dry run only. Re-run with apply=true to write, and read the counts above first — a 0 seen through a browser-safe key means the read was blocked, not that the table is empty."
