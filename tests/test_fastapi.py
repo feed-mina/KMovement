@@ -299,6 +299,43 @@ class TestItinerary:
         assert "markerResolutionStatus" in body
         assert "unresolvedPlaces" in body
 
+    def test_itinerary_marks_grounding_when_pois_found(self):
+        with patch("src.api.fastapi_server.HAS_AI", True), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=["artist_1"]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=MOCK_POIS), \
+             patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
+             patch("src.api.fastapi_server.generate_itinerary", return_value=MOCK_ITINERARY):
+            body = client.post("/api/recommend/itinerary", json={
+                "duration": "당일치기",
+                "artists": ["BTS"],
+            }).json()
+        assert body["poiGrounded"] is True
+        assert body["sourcePoiCount"] == len(MOCK_POIS)
+
+    def test_itinerary_flags_ungrounded_when_every_source_is_empty(self):
+        """POI 0건으로 만든 일정은 정상 일정과 구분돼야 한다 (#217).
+
+        모든 소스가 비면 Supabase 대체까지 실패하고 LLM 만 남는다. 그래도 200 이
+        나가므로, 응답에 근거 없음이 표시되지 않으면 소비자가 구분할 수 없다.
+        """
+        with patch("src.api.fastapi_server.HAS_AI", True), \
+             patch("src.api.fastapi_server.HAS_GRAPHRAG", True), \
+             patch("src.api.fastapi_server.search_artists_by_name", return_value=[]), \
+             patch("src.api.fastapi_server.get_graphrag_pois", return_value=[]), \
+             patch("src.api.fastapi_server.search_pois_by_purpose", return_value=[]), \
+             patch("src.api.fastapi_server.generate_itinerary", return_value=MOCK_ITINERARY):
+            resp = client.post("/api/recommend/itinerary", json={
+                "duration": "당일치기",
+                "artists": ["BTS"],
+            })
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["poiGrounded"] is False
+        assert body["sourcePoiCount"] == 0
+        # 일정 자체는 그대로 나간다 — 표시만 붙는다.
+        assert body["itinerary"]
+
     def test_itinerary_day_count_onenight(self):
         two_day = {
             "itinerary": [

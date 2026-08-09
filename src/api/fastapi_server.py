@@ -1611,6 +1611,21 @@ async def recommend_itinerary(req: ItineraryRequest):
     all_pois = _cluster_pois_by_proximity(all_pois)
     print(f"[K-Ride] 클러스터링 완료: {len(all_pois)}건 POI → LLM 전달")
 
+    # 4-3. 근거 없는 일정을 표시한다.
+    #
+    # POI 가 0건이어도 Groq 는 그럴듯한 일정을 만들어 낸다. 그 응답은 지금까지
+    # 정상 일정과 구분되지 않았다 — 데이터 소스가 전부 비어 있어도 200 이
+    # 나가고 화면도 로그도 조용했다(#217). 소비자가 구분할 수 있게 응답에
+    # 남기고, 배포 로그에서도 보이게 한다.
+    poi_grounded = bool(all_pois)
+    if not poi_grounded:
+        print(
+            "[K-Ride] ❌ POI 0건으로 LLM 호출 — 이 일정에는 장소 근거가 없다. "
+            f"chroma={len(chroma_pois)} graphrag={len(graphrag_pois)} "
+            "supabase_fallback=0 "
+            f"(artists={req.artists} regions={regions} purposes={purposes})"
+        )
+
     # 5. Groq — 일정 생성
     try:
         itinerary_result = generate_itinerary(
@@ -1656,6 +1671,8 @@ async def recommend_itinerary(req: ItineraryRequest):
         "resolvedMarkerCount": marker_result["resolvedMarkerCount"],
         "unresolvedPlaces": marker_result["unresolvedPlaces"],
         "source_pois": all_pois[:15],
+        "poiGrounded": poi_grounded,
+        "sourcePoiCount": len(all_pois),
     }
     save_user_route_history(
         "itinerary",
@@ -1669,10 +1686,14 @@ async def recommend_itinerary(req: ItineraryRequest):
 def _build_graphrag_chat_context(message: str) -> str:
     """채팅 메시지에서 GraphRAG POI 컨텍스트를 텍스트로 생성"""
     if not HAS_GRAPHRAG:
+        # 챗봇도 POI 근거 없이 답한다. 일정과 달리 응답 형태로 드러낼 자리가
+        # 없으므로 로그에만 남긴다(#217).
+        print("[K-Ride] ⚠️ chat graphrag 미탑재 — POI 컨텍스트 없이 답변한다")
         return ""
     try:
         pois = get_graphrag_context_for_chat(message, max_pois=5)
         if not pois:
+            print("[K-Ride] ⚠️ chat graphrag_pois: 0건 — POI 컨텍스트 없이 답변한다")
             return ""
         lines = []
         for p in pois:
