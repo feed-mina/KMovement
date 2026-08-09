@@ -135,6 +135,34 @@ def fetch_all(client, table: str, columns: str) -> list[dict]:
         start += PAGE
 
 
+def write_batches(client, table: str, rows: list[dict], op: str, size: int) -> None:
+    """배치로 쓰되, 실패하면 어느 행 때문인지 찾아서 알려 준다.
+
+    PostgREST 는 배치 하나가 실패하면 그 배치 전체를 되돌린다. 예전에는 예외가
+    그대로 올라가 워크플로 로그에 트레이스백만 남았다 — 500행 중 무엇이
+    문제였는지, 어디까지 썼는지 알 수 없었다.
+    """
+    done = 0
+    for i in range(0, len(rows), size):
+        batch = rows[i : i + size]
+        try:
+            getattr(client.table(table), op)(batch).execute()
+        except Exception as batch_error:
+            print(f"\n❌ {table} 배치 실패 ({i:,}~{i + len(batch):,}): {batch_error}")
+            # 한 행씩 다시 넣어 원인 행을 찾는다. 앞쪽 정상 행은 그대로 들어간다.
+            for row in batch:
+                try:
+                    getattr(client.table(table), op)([row]).execute()
+                    done += 1
+                except Exception as row_error:
+                    print(f"   문제 행: {row}")
+                    print(f"   사유: {row_error}")
+                    sys.exit(f"{table} 적재를 중단한다. {done:,}건까지 반영됐다.")
+            continue
+        done += len(batch)
+        print(f"  {done:,}/{len(rows):,}")
+
+
 def report_node_diff(client, node_rows: list[dict]) -> None:
     """이미 있는 노드를 그래프 값으로 덮으면 무엇이 바뀌는지 보고한다.
 
@@ -284,15 +312,41 @@ def main() -> int:
             "를 준다."
         )
 
-    # 참조 무결성 확인. 엣지가 가리키는 노드가 없으면 조회가 빈 결과를 낸다.
-    node_ids = {row["id"] for row in node_rows} | existing_nodes
-    dangling = [
+    # 참조 무결성 확인.
+    #
+    # 이 검사는 "적재가 끝난 뒤" 노드가 무엇일지를 기준으로 해야 한다. 예전에는
+    # 그래프 노드가 전부 들어간다고 가정해서 node_rows 를 통째로 셌는데,
+    # --skip-nodes 로 노드를 건너뛰면 그 가정이 깨진다. 그러면 dry-run 은
+    # 조용히 통과하고 실제 INSERT 가 외래키에서 죽는다.
+    node_ids = existing_nodes | ({row["id"] for row in write_nodes} if not args.skip_nodes else set())
+    blocked = [
         row
-        for row in edge_rows
+        for row in new_edges
         if row["source_id"] not in node_ids or row["target_id"] not in node_ids
     ]
-    if dangling:
-        print(f"⚠️ 양쪽 노드가 없는 엣지 {len(dangling)}건 — 예: {dangling[0]}")
+    if blocked and not args.skip_edges:
+        missing = {
+            node_id
+            for row in blocked
+            for node_id in (row["source_id"], row["target_id"])
+            if node_id not in node_ids
+        }
+        print(
+            f"\n❌ 엣지 {len(blocked):,}건이 Supabase 에 없는 노드 {len(missing):,}개를 "
+            f"가리킨다 — 예: {sorted(missing)[:5]}"
+        )
+        print(
+            "   외래키가 있으면 INSERT 가 통째로 실패한다. 노드를 함께 넣어야 한다:\n"
+            "   워크플로 scope 를 edges-and-new-nodes 로 바꾼다 "
+            "(--skip-nodes 를 빼는 것과 같다).\n"
+            "   새 노드만 추가되고 기존 행은 덮이지 않는다."
+        )
+        if args.limit:
+            # --limit 는 노드와 엣지를 각각 앞에서 N개씩 자른다. 두 조각은 서로
+            # 맞물리지 않으므로 여기서 나온 숫자는 실제 상태가 아니다.
+            print("   (--limit 로 자른 조각이라 이 숫자는 신뢰할 수 없다. 중단하지 않는다.)")
+        elif args.apply:
+            sys.exit("적재를 중단한다.")
 
     if args.diff_nodes:
         report_node_diff(client, node_rows)
@@ -305,19 +359,13 @@ def main() -> int:
         print("\n노드 건너뜀.")
     else:
         print("\n노드 적재 중...")
-        for i in range(0, len(write_nodes), NODE_BATCH):
-            batch = write_nodes[i : i + NODE_BATCH]
-            client.table("nodes").upsert(batch).execute()
-            print(f"  {min(i + NODE_BATCH, len(write_nodes)):,}/{len(write_nodes):,}")
+        write_batches(client, "nodes", write_nodes, "upsert", NODE_BATCH)
 
     if args.skip_edges:
         print("엣지 건너뜀.")
     else:
         print("엣지 적재 중...")
-        for i in range(0, len(new_edges), EDGE_BATCH):
-            batch = new_edges[i : i + EDGE_BATCH]
-            client.table("edges").insert(batch).execute()
-            print(f"  {min(i + EDGE_BATCH, len(new_edges)):,}/{len(new_edges):,}")
+        write_batches(client, "edges", new_edges, "insert", EDGE_BATCH)
 
     after_nodes = len(fetch_all(client, "nodes", "id"))
     after_edges = len(fetch_all(client, "edges", "source_id"))

@@ -228,12 +228,16 @@ def test_inputs_never_reach_the_shell_directly() -> None:
         assert "${{ inputs." not in run, step.get("name")
 
 
-def test_the_safest_scope_is_the_default() -> None:
-    """엣지 추가는 순수 추가지만 노드 덮어쓰기는 metadata 를 지운다."""
+def test_the_default_scope_neither_fails_nor_overwrites() -> None:
+    """기본값은 실제로 동작하면서 잃을 것이 없는 쪽이어야 한다.
+
+    edges-only 는 엣지가 Supabase 에 없는 노드를 가리키면 외래키에서 죽는다 —
+    실제로 그렇게 죽었다. overwrite-nodes 는 기존 40,704행의 metadata 를 덮는다.
+    """
     scope = _workflow()[True]["workflow_dispatch"]["inputs"]["scope"]
 
-    assert scope["default"] == "edges-only"
-    assert scope["options"] == ["edges-only", "edges-and-new-nodes", "overwrite-nodes"]
+    assert scope["default"] == "edges-and-new-nodes"
+    assert set(scope["options"]) == {"edges-only", "edges-and-new-nodes", "overwrite-nodes"}
 
 
 def test_every_scope_maps_to_a_flag() -> None:
@@ -393,6 +397,126 @@ def test_update_existing_nodes_writes_every_row(monkeypatch) -> None:
     assert mod.main() == 0
 
     assert sum(count for _, _, count in client.writes) == 10
+
+
+# ── 참조 무결성 ──────────────────────────────────────────────────────────────
+def _run_with_supabase(monkeypatch, argv: list[str], node_ids: set[str], edge_triples: set):
+    """Supabase 에 특정 노드·엣지만 있다고 가정하고 main() 을 돌린다."""
+    import sys
+    import types
+
+    mod = _module()
+    client = _FakeClient()
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_KEY", "sb_secret_test")
+    monkeypatch.setattr("sys.argv", ["load_graph_to_supabase.py", *argv])
+    monkeypatch.setattr(
+        mod,
+        "fetch_all",
+        lambda _c, table, _cols: (
+            [{"id": n} for n in node_ids]
+            if table == "nodes"
+            else [
+                {"source_id": s, "target_id": t, "relation_type": r}
+                for s, t, r in edge_triples
+            ]
+        ),
+    )
+    fake = types.ModuleType("supabase")
+    fake.create_client = lambda *a, **k: client
+    monkeypatch.setitem(sys.modules, "supabase", fake)
+    return mod, client
+
+
+def test_skip_nodes_refuses_when_edges_need_missing_nodes(monkeypatch, capsys) -> None:
+    """--skip-nodes 로 엣지만 넣으면 외래키에서 죽는다.
+
+    실제로 그렇게 죽었다. 무결성 검사가 "그래프 노드는 어차피 들어간다"고
+    가정해서 dry-run 이 통과했고, INSERT 가 첫 배치에서 실패했다. 검사는 적재
+    후의 노드 집합을 기준으로 해야 한다.
+    """
+    # --limit 없이 돈다. 자른 조각은 노드와 엣지가 서로 맞물리지 않아 이 검사가
+    # 의미를 잃는다.
+    mod, client = _run_with_supabase(
+        monkeypatch,
+        ["--apply", "--skip-nodes"],
+        node_ids=set(),          # Supabase 에 노드가 하나도 없다
+        edge_triples=set(),
+    )
+
+    with pytest.raises(SystemExit) as exit_info:
+        mod.main()
+
+    assert "적재를 중단한다" in str(exit_info.value)
+    out = capsys.readouterr().out
+    assert "없는 노드" in out
+    assert "edges-and-new-nodes" in out
+    # 중단은 쓰기 전에 일어나야 한다.
+    assert client.writes == []
+
+
+def test_including_nodes_clears_the_integrity_block(monkeypatch) -> None:
+    """노드를 함께 넣으면 같은 엣지가 통과한다."""
+    mod, client = _run_with_supabase(
+        monkeypatch,
+        ["--apply"],
+        node_ids=set(),
+        edge_triples=set(),
+    )
+
+    assert mod.main() == 0
+    assert {table for table, _, _ in client.writes} == {"nodes", "edges"}
+
+
+def test_dry_run_surfaces_the_block_without_exiting(monkeypatch, capsys) -> None:
+    """dry-run 이 조용히 통과하면 이 문제를 실행 전에 볼 수 없다."""
+    mod, _ = _run_with_supabase(
+        monkeypatch,
+        ["--skip-nodes"],
+        node_ids=set(),
+        edge_triples=set(),
+    )
+
+    assert mod.main() == 0
+    assert "없는 노드" in capsys.readouterr().out
+
+
+# ── 배치 실패 ────────────────────────────────────────────────────────────────
+def test_a_failing_batch_names_the_offending_row(capsys) -> None:
+    """트레이스백만 남으면 500행 중 무엇이 문제였는지 알 수 없다."""
+    mod = _module()
+
+    class _Table:
+        def __init__(self, rows_seen):
+            self._seen = rows_seen
+
+        def insert(self, rows):
+            self._rows = rows
+            return self
+
+        def execute(self):
+            if any(row.get("bad") for row in self._rows):
+                raise RuntimeError('violates foreign key constraint "edges_source_id_fkey"')
+            self._seen.extend(self._rows)
+            return type("R", (), {"data": []})()
+
+    seen: list[dict] = []
+
+    class _Client:
+        def table(self, _name):
+            return _Table(seen)
+
+    rows = [{"source_id": "a"}, {"source_id": "b", "bad": True}, {"source_id": "c"}]
+
+    with pytest.raises(SystemExit) as exit_info:
+        mod.write_batches(_Client(), "edges", rows, "insert", 3)
+
+    out = capsys.readouterr().out
+    assert "문제 행" in out
+    assert "foreign key" in out
+    # 문제 행 앞의 정상 행은 개별 재시도로 들어간다.
+    assert seen == [{"source_id": "a"}]
+    assert "1건까지 반영됐다" in str(exit_info.value)
 
 
 def test_diff_reports_metadata_keys_that_would_disappear(capsys) -> None:
