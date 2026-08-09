@@ -30,13 +30,16 @@ on:
         type: boolean
         default: false
       scope:
-        description: "무엇을 쓸지. edges-only 가 가장 안전하다."
+        # edges-only 는 엣지가 Supabase 에 없는 노드를 가리키면 외래키에서
+        # 죽는다. edges-and-new-nodes 는 그 노드를 함께 넣으면서도 기존 행은
+        # 덮지 않는다 — 잃을 것 없이 동작하는 쪽이 기본이다.
+        description: "무엇을 쓸지. edges-and-new-nodes 는 기존 행을 덮지 않는다."
         required: true
         type: choice
-        default: edges-only
+        default: edges-and-new-nodes
         options:
-          - edges-only
           - edges-and-new-nodes
+          - edges-only
           - overwrite-nodes
       diff_nodes:
         description: "기존 노드를 덮으면 무엇이 바뀌는지 먼저 본다."
