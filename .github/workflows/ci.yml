@@ -103,6 +103,8 @@ jobs:
             tests/test_deploy_ec2_recovery.py \
             tests/test_deployment_cost_controls.py \
             tests/test_fastapi_runpod_routing.py \
+            tests/test_graph_refresh_workflow.py \
+            tests/test_load_graph_to_supabase.py \
             tests/test_result_delivery.py \
             -v --tb=short
         env:

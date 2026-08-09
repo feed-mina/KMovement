@@ -8,9 +8,15 @@ Neo4j 인스턴스가 사라진 지금은 실행할 수 없다. 저장소의 그
 기본은 조회만 하는 dry-run 이다. 실제 쓰기는 --apply 를 줘야 한다. 운영
 데이터에 쓰는 스크립트가 실수로 도는 것을 막는다.
 
+쓰기는 secret 키로만 한다. publishable/anon 키는 RLS 를 적용받는데, 정책이
+SELECT 를 막으면 PostgREST 는 에러가 아니라 "0건"을 정상 응답으로 돌려준다.
+이 스크립트는 기존 행을 읽어서 무엇이 새 행인지 정하므로, 읽기가 막힌 채로
+쓰면 이미 있는 엣지를 전부 새 행으로 보고 통째로 중복 삽입한다. 실제로 배포
+진단이 41,586건이 든 테이블을 여러 번 "비었다"고 보고한 적이 있다(#226).
+
 사용법
 
-    export SUPABASE_URL=... SUPABASE_KEY=...
+    export SUPABASE_URL=... SUPABASE_KEY=...   # 쓰려면 sb_secret_... 키
 
     python scripts/load_graph_to_supabase.py                 # 현황만 확인
     python scripts/load_graph_to_supabase.py --limit 20 --apply   # 소량 시험
@@ -40,6 +46,36 @@ NODE_BATCH = 500
 EDGE_BATCH = 500
 # PostgREST 의 기본 응답 상한이 1000행이라 그보다 작게 끊어 읽는다.
 PAGE = 1000
+
+# RLS 를 우회해 실제 행을 보는 키만 쓰기를 허용한다. 나머지는 읽기가 조용히
+# 막힐 수 있고, 그러면 이 스크립트의 "새 행" 판정 자체가 무너진다.
+WRITABLE_KEY_KINDS = frozenset({"secret", "legacy-service_role"})
+
+
+def supabase_key_kind(key: str) -> str:
+    """키 값을 노출하지 않고 종류만 판정한다.
+
+    deploy/ec2/deploy.sh 의 같은 이름 함수와 분류가 일치해야 한다. 진단이
+    'publishable' 이라고 말한 키로 여기서 쓰기가 되면 안 된다.
+    """
+    if not key:
+        return "missing"
+    if key.startswith("sb_secret_"):
+        return "secret"
+    if key.startswith("sb_publishable_"):
+        return "publishable"
+    if key.startswith("eyJ"):
+        # 구형 JWT 키는 payload 의 role 로 구분한다. 서명은 검증하지 않는다 —
+        # 권한 판정이 아니라 사람에게 보여 줄 분류다.
+        try:
+            import base64
+            body = key.split(".")[1]
+            body += "=" * (-len(body) % 4)
+            role = json.loads(base64.urlsafe_b64decode(body)).get("role", "")
+            return "legacy-" + (role or "unknown")
+        except Exception:
+            return "legacy-unknown"
+    return "unknown"
 
 
 def load_graph() -> tuple[list[dict], list[dict]]:
@@ -118,6 +154,16 @@ def main() -> int:
         if not os.environ.get(var):
             sys.exit(f"{var} 가 설정돼 있지 않다.")
 
+    key_kind = supabase_key_kind(os.environ["SUPABASE_KEY"])
+    print(f"SUPABASE_KEY 종류: {key_kind}")
+    if args.apply and key_kind not in WRITABLE_KEY_KINDS:
+        sys.exit(
+            f"쓰기를 거부한다 — SUPABASE_KEY 가 {key_kind} 키다.\n"
+            "이 키는 RLS 를 적용받고, 정책이 SELECT 를 막으면 조회가 에러 없이\n"
+            "0건을 돌려준다. 그 상태로 쓰면 이미 있는 엣지를 전부 새 행으로 보고\n"
+            "중복 삽입한다. sb_secret_ 키로 다시 실행한다."
+        )
+
     from supabase import create_client
 
     client = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
@@ -128,6 +174,14 @@ def main() -> int:
         for r in fetch_all(client, "edges", "source_id, target_id, relation_type")
     }
     print(f"Supabase 현재: 노드 {len(existing_nodes):,}건, 엣지 {len(existing_edges):,}건")
+    if not existing_nodes and key_kind not in WRITABLE_KEY_KINDS:
+        # 이 0 은 "비었다"가 아니라 "안 보인다"일 수 있다. 이 구분 없이 숫자를
+        # 근거로 적재를 결정하면 안 된다(#226).
+        print(
+            "⚠️ 0건은 빈 테이블이라는 뜻이 아니다 — 이 키로는 RLS 가 읽기를 막았을\n"
+            "   때에도 같은 숫자가 나온다. secret 키로 다시 확인하기 전에는 아무\n"
+            "   결론도 내지 않는다."
+        )
 
     node_rows = [to_node_row(n) for n in nodes]
     edge_rows = [to_edge_row(e) for e in edges]
