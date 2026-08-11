@@ -7,10 +7,10 @@ export interface AnalyticsEventMap {
     /** 첫 요청이 끊겨 자동으로 한 번 다시 건 경우. 콜드 스타트 빈도를 보기 위한 것. */
     itinerary_retry: { source: string };
     view_item_list: { item_list_name: string; item_count: number; category: string; region: string };
-    select_item: { item_id: string; item_category: string; item_list_name: string };
+    select_item: { item_id: string; category: string; item_list_name: string };
     save_place: { item_id: string; item_category: string };
     share: { method: string; content_type: string; item_id: string };
-    map_open: { map_provider: string; item_id: string };
+    map_open: { provider: string; item_id: string };
     login: { method: string };
     sign_up: { method: string };
 }
