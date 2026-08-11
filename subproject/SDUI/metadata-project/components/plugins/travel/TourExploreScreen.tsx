@@ -386,7 +386,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         setSelected(place);
         trackEvent('select_item', {
             item_id: place.contentId || 'unknown',
-            item_category: category,
+            category,
             item_list_name: 'tour_explore',
         });
     };
@@ -654,7 +654,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             )}
 
                             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                                <a href={mapsUrl(selected)} target="_blank" rel="noreferrer" onClick={() => trackEvent('map_open', { map_provider: 'google_maps', item_id: selected.contentId || 'unknown' })} style={{ flex: 1, textAlign: 'center', fontSize: 13, fontWeight: 500, color: '#fff', background: RED, borderRadius: 10, padding: '11px 0', textDecoration: 'none' }}>
+                                <a href={mapsUrl(selected)} target="_blank" rel="noreferrer" onClick={() => trackEvent('map_open', { provider: 'google_maps', item_id: selected.contentId || 'unknown' })} style={{ flex: 1, textAlign: 'center', fontSize: 13, fontWeight: 500, color: '#fff', background: RED, borderRadius: 10, padding: '11px 0', textDecoration: 'none' }}>
                                     구글지도에서 보기
                                 </a>
                                 <button type="button" aria-label={selected.contentId && saved.has(selected.contentId) ? `${selected.title} 저장 취소` : `${selected.title} 저장`} onClick={() => toggleSave(selected.contentId)} style={{ border: '0.5px solid #ddd', background: 'transparent', borderRadius: 10, padding: '11px 16px', cursor: 'pointer', color: selected.contentId && saved.has(selected.contentId) ? RED : '#555', fontSize: 15 }}>
