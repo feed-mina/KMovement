@@ -1,0 +1,5770 @@
+{
+ "source": "K-POP · 크리에이터 활동 타임라인 2026.02 – 2027.02",
+ "note": "아티스트별 활동 일정 원본. scripts/build_kpop_event_seed.py 가 이 파일을 읽는다.",
+ "range": {
+  "from": "2026-01-07",
+  "to": "2027-02-27"
+ },
+ "events": [
+  {
+   "artist": "김창민",
+   "start": "2026-01-07",
+   "end": "2026-02-25",
+   "category": "영상",
+   "title": "BL 웹드라마 '팬서비스' 주연 (건우 역)",
+   "detail": "Fangle Studio 유튜브·Shortime / 인플루언서 김창민(1994)",
+   "url": "https://namu.wiki/w/%ED%8C%AC%EC%84%9C%EB%B9%84%EC%8A%A4(%EC%9B%B9%EB%93%9C%EB%9D%BC%EB%A7%88)",
+   "status": "확정"
+  },
+  {
+   "artist": "지코",
+   "start": "2026-01-15",
+   "end": "2026-04-02",
+   "category": "방송",
+   "title": "Mnet '쇼미더머니12' 프로듀서",
+   "detail": "크러쉬와 프로듀서 출연 / 김하온 최종 우승",
+   "url": "https://www.starnewskorea.com/broadcast-show/2026/04/03/2026040308493794837",
+   "status": "확정"
+  },
+  {
+   "artist": "빠니보틀",
+   "start": "2026-01-28",
+   "end": "2026-04-01",
+   "category": "방송",
+   "title": "넷플릭스 '데스게임: 천만원을 걸어라' 참가자",
+   "detail": "넷플릭스 오리지널 / 매주 수 17시",
+   "url": "https://namu.wiki/w/%EB%B9%A0%EB%8B%88%EB%B3%B4%ED%8B%80",
+   "status": "확정"
+  },
+  {
+   "artist": "유재석",
+   "start": "2026-02-01",
+   "end": "2027-02-28",
+   "category": "방송",
+   "title": "MBC '놀면 뭐하니?' 고정 MC",
+   "detail": "MBC 토 18시 30분 / 숏폼드라마 '찍어유' 시즌2 제작 중",
+   "url": "https://www.mk.co.kr/news/broadcasting-service/12114292",
+   "status": "예정"
+  },
+  {
+   "artist": "유재석",
+   "start": "2026-02-01",
+   "end": "2027-02-28",
+   "category": "방송",
+   "title": "SBS '런닝맨' 고정 MC",
+   "detail": "SBS 일요일 / 계속 방송 중",
+   "url": "https://www.starnewskorea.com/broadcast-show/2026/08/09/2026080919090249331",
+   "status": "예정"
+  },
+  {
+   "artist": "유재석",
+   "start": "2026-02-01",
+   "end": "2027-02-28",
+   "category": "방송",
+   "title": "tvN '유 퀴즈 온 더 블럭' 단독 MC",
+   "detail": "tvN 수 20시 45분 / 조세호 하차 후 단독 진행",
+   "url": "https://tvn.cjenm.com/ko/youquizontheblock/",
+   "status": "예정"
+  },
+  {
+   "artist": "유재석",
+   "start": "2026-02-01",
+   "end": "2027-02-28",
+   "category": "영상",
+   "title": "유튜브 '핑계고' 진행",
+   "detail": "유튜브 '뜬뜬' / 연말 '핑계고 시상식' 진행",
+   "url": "https://www.xportsnews.com/article/2115184",
+   "status": "예정"
+  },
+  {
+   "artist": "투모로우바이투게더",
+   "start": "2026-02-01",
+   "end": null,
+   "category": "콘서트",
+   "title": "<ACT : TOMORROW> 타이베이",
+   "detail": "타이베이 돔",
+   "url": "https://kpopofficial.com/schedule/txt/",
+   "status": "확정"
+  },
+  {
+   "artist": "지코",
+   "start": "2026-02-04",
+   "end": null,
+   "category": "앨범",
+   "title": "'Yin and Yang (FANXY CHILD Ver.)'",
+   "detail": "Feat. DEAN, PENOMECO / KOZ",
+   "url": "https://www.nc.press/news/articleView.html?idxno=606638",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-02-06",
+   "end": null,
+   "category": "앨범",
+   "title": "미니 13집 'GOLDEN HOUR : Part.4'",
+   "detail": "타이틀곡 'Adrenaline'",
+   "url": "https://en.wikipedia.org/wiki/Golden_Hour:_Part.4",
+   "status": "확정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-02-06",
+   "end": null,
+   "category": "콘서트",
+   "title": "호시노 겐 내한공연 게스트",
+   "detail": "인천 인스파이어 아레나",
+   "url": "https://www.newsis.com/view/NISX20260209_0003508012",
+   "status": "확정"
+  },
+  {
+   "artist": "임영웅",
+   "start": "2026-02-06",
+   "end": "2026-02-08",
+   "category": "콘서트",
+   "title": "전국투어 'IM HERO' 부산 (피날레)",
+   "detail": "부산 벡스코 / 전국투어 총 24회차 피날레",
+   "url": "https://www.newsis.com/view/NISX20260209_0003507304",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-02-06",
+   "end": "2026-02-08",
+   "category": "콘서트",
+   "title": "'FAM' MEETING 서울",
+   "detail": "KSPO DOME / 데뷔 첫 단독 팬미팅 / 3일 약 4만명",
+   "url": "https://www.osen.co.kr/article/G1112742117",
+   "status": "확정"
+  },
+  {
+   "artist": "데이식스",
+   "start": "2026-02-07",
+   "end": "2026-02-08",
+   "category": "콘서트",
+   "title": "10주년 투어 <The DECADE> 대구",
+   "detail": "대구 EXCO",
+   "url": "https://namu.wiki/w/The%20DECADE",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-02-07",
+   "end": null,
+   "category": "콘서트",
+   "title": "[RIIZING LOUD] 마카오",
+   "detail": "Galaxy Arena",
+   "url": "https://en.wikipedia.org/wiki/Riizing_Loud",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-02-07",
+   "end": "2026-02-08",
+   "category": "콘서트",
+   "title": "'SYNK : aeXIS LINE' 홍콩",
+   "detail": "AsiaWorld-Expo Arena / 2회",
+   "url": "https://namu.wiki/w/aespa",
+   "status": "확정"
+  },
+  {
+   "artist": "지코",
+   "start": "2026-02-07",
+   "end": null,
+   "category": "콘서트",
+   "title": "2026 ZICO LIVE : TOKYO DRIVE",
+   "detail": "게이오 아레나 도쿄 / 8년 만의 일본 단독",
+   "url": "https://keio-arena.tokyo/schedule/2026/0207_15415.php",
+   "status": "확정"
+  },
+  {
+   "artist": "투모로우바이투게더",
+   "start": "2026-02-07",
+   "end": "2026-02-08",
+   "category": "콘서트",
+   "title": "<ACT : TOMORROW> 오사카",
+   "detail": "교세라돔 / 2회",
+   "url": "https://kpopofficial.com/schedule/txt/",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-02-09",
+   "end": null,
+   "category": "앨범",
+   "title": "선공개 싱글 'BANG BANG'",
+   "detail": "정규 2집 선공개곡 / 스타쉽",
+   "url": "https://namu.wiki/w/IVE",
+   "status": "확정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-02-13",
+   "end": "2026-02-15",
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 서울 (개막)",
+   "detail": "잠실실내체육관 / 3회",
+   "url": "https://namu.wiki/w/ITZY",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-02-13",
+   "end": "2026-02-15",
+   "category": "콘서트",
+   "title": "'FAM' MEETING 요코하마",
+   "detail": "PIA ARENA MM",
+   "url": "https://news.tf.co.kr/read/entertain/2284403.htm",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-02-13",
+   "end": "2026-02-14",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 워싱턴 D.C.",
+   "detail": "캐피털 원 아레나 / 2회",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "투모로우바이투게더",
+   "start": "2026-02-14",
+   "end": null,
+   "category": "콘서트",
+   "title": "<ACT : TOMORROW> 쿠알라룸푸르",
+   "detail": "Axiata Arena",
+   "url": "https://www.songkick.com/artists/9982639-tomorrow-x-together/gigography",
+   "status": "확정"
+  },
+  {
+   "artist": "임영웅",
+   "start": "2026-02-15",
+   "end": null,
+   "category": "페스티벌",
+   "title": "한터뮤직어워즈 2025 3관왕",
+   "detail": "KSPO DOME / 후즈팬덤상·인기상·OST상",
+   "url": "https://www.bntnews.co.kr/article/view/bnt202602160063",
+   "status": "확정"
+  },
+  {
+   "artist": "쯔양",
+   "start": "2026-02-15",
+   "end": null,
+   "category": "방송",
+   "title": "MBN '알토란' 게스트 출연",
+   "detail": "MBN",
+   "url": "https://namu.wiki/w/%EC%AF%94%EC%96%91",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-02-16",
+   "end": null,
+   "category": "방송",
+   "title": "JTBC '뉴스룸' 출연",
+   "detail": "정규 2집 컴백 특별 출연",
+   "url": "https://v.daum.net/v/20260216085548084",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-02-17",
+   "end": null,
+   "category": "페스티벌",
+   "title": "KRAZY Super Concert 두바이 헤드라이너",
+   "detail": "UAE Dubai Media City Amphitheatre / 중동 첫 공연",
+   "url": "https://www.billboard.com/music/concerts/krazy-super-concert-2026-dubai-lineup-exclusive-1236162267/",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-02-18",
+   "end": "2026-02-19",
+   "category": "콘서트",
+   "title": "[IN YOUR FANTASY] 베를린",
+   "detail": "Uber Arena / 2회",
+   "url": "https://www.songkick.com/artists/9911549-ateez/gigography",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-02-18",
+   "end": "2026-02-21",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 뉴욕",
+   "detail": "UBS 아레나 / 3회",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-02-20",
+   "end": null,
+   "category": "방송",
+   "title": "MBC 예능 '굿데이' 시즌2 제작 공식화",
+   "detail": "김태호 PD / 빅뱅 20주년 연계",
+   "url": "https://www.cineplay.co.kr/ko-kr/articles/26105",
+   "status": "예정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-02-21",
+   "end": "2026-02-22",
+   "category": "콘서트",
+   "title": "[Syncopation] 서울 (개막)",
+   "detail": "KSPO DOME / 월드투어 개막",
+   "url": "https://namu.wiki/w/Syncopation",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (위시)",
+   "start": "2026-02-21",
+   "end": null,
+   "category": "콘서트",
+   "title": "NCT WISH 2주년 팬미팅",
+   "detail": "서울 잠실실내체육관",
+   "url": "https://kpopofficial.com/schedule/nct-wish/",
+   "status": "추정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-02-21",
+   "end": "2026-02-23",
+   "category": "콘서트",
+   "title": "[RIIZING LOUD] 도쿄돔 스페셜",
+   "detail": "도쿄돔 3회 / 보이그룹 최단기간 도쿄돔",
+   "url": "https://en.wikipedia.org/wiki/Riizing_Loud",
+   "status": "확정"
+  },
+  {
+   "artist": "유재석",
+   "start": "2026-02-21",
+   "end": null,
+   "category": "영상",
+   "title": "'풍향고' 시즌2 종영",
+   "detail": "유튜브 '뜬뜬' / ENA 방영 / 이성민·지석진·양세찬과 유럽 여행",
+   "url": "https://www.xportsnews.com/article/2115184",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-02-21",
+   "end": "2026-02-22",
+   "category": "콘서트",
+   "title": "'FAM' MEETING 방콕",
+   "detail": "태국 BITEC",
+   "url": "https://www.koreajoongangdaily.com/entertainment/g-dragons-fan-meet-and-greet-expands-to-japan-thailand/12002885",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-02-22",
+   "end": null,
+   "category": "콘서트",
+   "title": "[IN YOUR FANTASY] 파리",
+   "detail": "낭테르 Plenitude Arena",
+   "url": "https://www.songkick.com/artists/9911549-ateez/gigography",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (JNJM)",
+   "start": "2026-02-23",
+   "end": null,
+   "category": "앨범",
+   "title": "NCT JNJM 미니 1집 'BOTH SIDES' (유닛 데뷔)",
+   "detail": "NCT DREAM 재민·제노 유닛",
+   "url": "https://en.wikipedia.org/wiki/2026_in_South_Korean_music",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-02-23",
+   "end": null,
+   "category": "앨범",
+   "title": "정규 2집 'REVIVE+' 발매",
+   "detail": "타이틀곡 'BLACKHOLE' / 12곡 / 퍼펙트 올킬",
+   "url": "https://en.wikipedia.org/wiki/Revive%2B",
+   "status": "확정"
+  },
+  {
+   "artist": "장원영",
+   "start": "2026-02-23",
+   "end": null,
+   "category": "앨범",
+   "title": "솔로곡 '8' 수록·작사 참여",
+   "detail": "아이브 정규 2집 수록 솔로 트랙 / 가사 직접 집필",
+   "url": "https://www.marieclairekorea.com/fashion/2026/04/wonyoung/",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-02-24",
+   "end": null,
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 필라델피아",
+   "detail": "엑스피니티 모바일 아레나",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-02-25",
+   "end": null,
+   "category": "콘서트",
+   "title": "[IN YOUR FANTASY] 브뤼셀",
+   "detail": "ING Arena",
+   "url": "https://www.songkick.com/artists/9911549-ateez/gigography",
+   "status": "확정"
+  },
+  {
+   "artist": "블랙핑크",
+   "start": "2026-02-26",
+   "end": "2026-03-08",
+   "category": "방송",
+   "title": "'DEADLINE' 프리 리스닝 이벤트",
+   "detail": "서울 국립중앙박물관",
+   "url": "https://kpopofficial.com/schedule/blackpink/",
+   "status": "확정"
+  },
+  {
+   "artist": "블랙핑크",
+   "start": "2026-02-27",
+   "end": null,
+   "category": "앨범",
+   "title": "미니 3집 'DEADLINE' 발매",
+   "detail": "타이틀곡 'GO' / 3년 만의 완전체 신보 / YG",
+   "url": "https://www.billboard.com/music/music-news/blackpink-deadline-mini-album-here-listen-1236187919/",
+   "status": "확정"
+  },
+  {
+   "artist": "투모로우바이투게더",
+   "start": "2026-02-27",
+   "end": "2026-03-01",
+   "category": "콘서트",
+   "title": "2026 TXT MOA CON",
+   "detail": "KSPO DOME / 데뷔 7주년 / 라이브 밴드",
+   "url": "https://sports.khan.co.kr/en/article/202601081542117",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-02-27",
+   "end": null,
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 애틀랜타",
+   "detail": "스테이트팜 아레나",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "레드벨벳 (웬디)",
+   "start": "2026-02-28",
+   "end": "2026-03-01",
+   "category": "콘서트",
+   "title": "WENDY [W:EALIVE] ENCORE 서울",
+   "detail": "티켓링크 라이브 아레나 / 첫 월드투어 앙코르 최종회",
+   "url": "https://namu.wiki/w/W:EALIVE",
+   "status": "확정"
+  },
+  {
+   "artist": "빠니보틀",
+   "start": "2026-02-28",
+   "end": "2026-05-02",
+   "category": "방송",
+   "title": "ENA '크레이지 투어' 고정 출연",
+   "detail": "ENA / 10부작 / 비·김무열·이승훈과 공동",
+   "url": "https://namu.wiki/w/%EB%B9%A0%EB%8B%88%EB%B3%B4%ED%8B%80",
+   "status": "확정"
+  },
+  {
+   "artist": "세븐틴",
+   "start": "2026-02-28",
+   "end": "2026-03-01",
+   "category": "콘서트",
+   "title": "WORLD TOUR [NEW_] 홍콩",
+   "detail": "카이탁 스타디움 / 2회",
+   "url": "https://kpopofficial.com/schedule/seventeen/",
+   "status": "추정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-02-28",
+   "end": null,
+   "category": "앨범",
+   "title": "디지털 싱글 'ROBOT'",
+   "detail": "메인스트림 / 카카오엔터",
+   "url": "https://music.apple.com/us/artist/%EC%9D%B4%EC%98%81%EC%A7%80/1473765930?l=ko",
+   "status": "확정"
+  },
+  {
+   "artist": "입짧은햇님",
+   "start": "2026-03",
+   "end": null,
+   "category": "방송",
+   "title": "경기 파주 애견카페 대표 취임 (사업)",
+   "detail": "2025년 12월 이후 방송 활동 전면 중단 상태 유지",
+   "url": "https://namu.wiki/w/%EC%9E%85%EC%A7%A7%EC%9D%80%ED%96%87%EB%8B%98",
+   "status": "확정"
+  },
+  {
+   "artist": "장원영",
+   "start": "2026-03",
+   "end": null,
+   "category": "방송",
+   "title": "2026 F/W 파리 패션위크 미우미우 참석",
+   "detail": "프랑스 파리 / 미우미우 FW26 룩",
+   "url": "https://www.kstarfashion.com/ko-kr/articles/251257",
+   "status": "추정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-03-02",
+   "end": "2026-03-03",
+   "category": "콘서트",
+   "title": "[IN YOUR FANTASY] 멜버른",
+   "detail": "Rod Laver Arena / 2회",
+   "url": "https://www.frontiertouring.com/ateez",
+   "status": "확정"
+  },
+  {
+   "artist": "쯔양",
+   "start": "2026-03-02",
+   "end": null,
+   "category": "방송",
+   "title": "MBC '전국1등' VCR 출연",
+   "detail": "MBC",
+   "url": "https://namu.wiki/w/%EC%AF%94%EC%96%91",
+   "status": "확정"
+  },
+  {
+   "artist": "장원영",
+   "start": "2026-03-03",
+   "end": null,
+   "category": "방송",
+   "title": "타미 진스 2026 봄 캠페인 메인 모델",
+   "detail": "글로벌 앰버서더 / 런던 쇼어디치 배경",
+   "url": "https://www.meconomynews.com/news/articleView.html?idxno=128505",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-03-03",
+   "end": null,
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 몬트리올",
+   "detail": "캐나다 상트르 벨",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-03-04",
+   "end": null,
+   "category": "방송",
+   "title": "'엑소의 사다리 타고 세계여행' 시즌5 첫 방송",
+   "detail": "Mnet·웨이브 / 수 20시 / 6부작 제주도",
+   "url": "https://www.soompi.com/article/1816490wpp/exo-announces-premiere-date-for-exos-travel-the-world-on-a-ladder-season-5-with-new-poster",
+   "status": "확정"
+  },
+  {
+   "artist": "장원영",
+   "start": "2026-03-05",
+   "end": null,
+   "category": "방송",
+   "title": "짐빔 '원영이의 꿈' 9개 브랜드 통합 캠페인",
+   "detail": "짐빔·우리은행·다이슨·타미진스·메디큐브 등",
+   "url": "https://www.fnnews.com/news/202603050911520451",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-03-06",
+   "end": "2026-03-08",
+   "category": "콘서트",
+   "title": "[RIIZING LOUD] FINALE 서울",
+   "detail": "KSPO DOME 3회 / 월드투어 피날레",
+   "url": "https://en.wikipedia.org/wiki/Riizing_Loud",
+   "status": "확정"
+  },
+  {
+   "artist": "블랙핑크 (지수)",
+   "start": "2026-03-06",
+   "end": null,
+   "category": "영상",
+   "title": "넷플릭스 '월간 남친' 공개",
+   "detail": "서미래 역 주연 / 서인국 공동주연 / 10부작",
+   "url": "https://en.wikipedia.org/wiki/Boyfriend_on_Demand",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-03-06",
+   "end": null,
+   "category": "앨범",
+   "title": "일본 디지털 싱글 'ATTITUDE'",
+   "detail": "일본 활동용 디지털 싱글",
+   "url": "https://namu.wiki/w/aespa",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-03-06",
+   "end": "2026-03-07",
+   "category": "콘서트",
+   "title": "[IN YOUR FANTASY] 시드니",
+   "detail": "Qudos Bank Arena / 2회",
+   "url": "https://www.frontiertouring.com/ateez",
+   "status": "확정"
+  },
+  {
+   "artist": "지코",
+   "start": "2026-03-06",
+   "end": null,
+   "category": "앨범",
+   "title": "'TICK TOCK (Feat. ZICO)'",
+   "detail": "쇼미더머니12 음원 / 지코·크러쉬 프로듀싱",
+   "url": "https://www.bntnews.co.kr/article/view/bnt202604030041",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-03-06",
+   "end": "2026-03-07",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 해밀턴",
+   "detail": "캐나다 TD 콜리세움 / 2회",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-03-07",
+   "end": null,
+   "category": "콘서트",
+   "title": "[Syncopation] 타이베이",
+   "detail": "타이베이 돔",
+   "url": "https://namu.wiki/w/Syncopation",
+   "status": "확정"
+  },
+  {
+   "artist": "데이식스",
+   "start": "2026-03-07",
+   "end": "2026-03-08",
+   "category": "콘서트",
+   "title": "<The DECADE> 타이베이",
+   "detail": "NTSU Arena",
+   "url": "https://namu.wiki/w/The%20DECADE",
+   "status": "확정"
+  },
+  {
+   "artist": "세븐틴",
+   "start": "2026-03-07",
+   "end": null,
+   "category": "콘서트",
+   "title": "WORLD TOUR [NEW_] 싱가포르",
+   "detail": "내셔널 스타디움",
+   "url": "https://www.mhnse.com/news/articleView.html?idxno=484557",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-03-07",
+   "end": "2026-03-08",
+   "category": "콘서트",
+   "title": "'SYNK : aeXIS LINE' 마카오",
+   "detail": "Galaxy Arena / 2회",
+   "url": "https://namu.wiki/w/aespa",
+   "status": "확정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-03-07",
+   "end": "2026-03-08",
+   "category": "콘서트",
+   "title": "WORLD TOUR <2.0> 서울 (개막)",
+   "detail": "올림픽공원 올림픽홀 / 세 번째 월드투어 / 전석 매진",
+   "url": "https://tickets.interpark.com/contents/notice/detail/12748",
+   "status": "확정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-03-13",
+   "end": null,
+   "category": "앨범",
+   "title": "OST 참여곡 'Endless Sun'",
+   "detail": "OST 참여",
+   "url": "https://namu.wiki/w/Stray%20Kids",
+   "status": "추정"
+  },
+  {
+   "artist": "데이식스",
+   "start": "2026-03-14",
+   "end": "2026-03-15",
+   "category": "콘서트",
+   "title": "<The DECADE> 광주",
+   "detail": "김대중컨벤션센터",
+   "url": "https://namu.wiki/w/The%20DECADE",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-03-14",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Lollapalooza Argentina 2026",
+   "detail": "부에노스아이레스 / K팝 최초 남미 3개국",
+   "url": "https://namu.wiki/w/RIIZE",
+   "status": "확정"
+  },
+  {
+   "artist": "세븐틴",
+   "start": "2026-03-14",
+   "end": "2026-03-15",
+   "category": "콘서트",
+   "title": "WORLD TOUR [NEW_] 방콕",
+   "detail": "라자망갈라 국립경기장 / 2회",
+   "url": "https://www.mhnse.com/news/articleView.html?idxno=484557",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-03-14",
+   "end": null,
+   "category": "콘서트",
+   "title": "[IN YOUR FANTASY] 마닐라",
+   "detail": "필리핀 마닐라",
+   "url": "https://www.nme.com/news/music/ateez-announce-2026-asia-and-australia-tour-dates-3891005",
+   "status": "확정"
+  },
+  {
+   "artist": "이무진",
+   "start": "2026-03-14",
+   "end": null,
+   "category": "콘서트",
+   "title": "[Today's eMUtion] 타이베이",
+   "detail": "대만 Legacy TERA / 두 번째 타이베이 단독",
+   "url": "https://www.munhwa.com/article/11574588",
+   "status": "확정"
+  },
+  {
+   "artist": "쯔양",
+   "start": "2026-03-14",
+   "end": null,
+   "category": "방송",
+   "title": "MBC '전지적 참견 시점' 게스트",
+   "detail": "MBC",
+   "url": "https://namu.wiki/w/%EC%AF%94%EC%96%91",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-03-15",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Lollapalooza Chile 2026",
+   "detail": "산티아고 Parque Cerrillos",
+   "url": "https://www.songkick.com/artists/10301548-riize",
+   "status": "추정"
+  },
+  {
+   "artist": "곽튜브",
+   "start": "2026-03-16",
+   "end": null,
+   "category": "방송",
+   "title": "SBS '아니 근데 진짜!' 게스트",
+   "detail": "SBS 7회",
+   "url": "https://namu.wiki/w/%EA%B3%BD%ED%8A%9C%EB%B8%8C",
+   "status": "확정"
+  },
+  {
+   "artist": "악뮤",
+   "start": "2026-03-19",
+   "end": null,
+   "category": "영상",
+   "title": "미니 다큐 'AKMU: THE PAST YEAR'",
+   "detail": "악뮤 유튜브 채널",
+   "url": "https://www.donga.com/news/Entertainment/article/all/20260405/133674771/1",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-03-20",
+   "end": null,
+   "category": "앨범",
+   "title": "정규 5집 'ARIRANG' 발매",
+   "detail": "4년 만의 완전체 컴백 / 빅히트뮤직",
+   "url": "https://www.rollingstone.com/music/music-features/bts-album-tour-comeback-everything-we-know-1235498818/",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (드림)",
+   "start": "2026-03-20",
+   "end": "2026-03-22",
+   "category": "콘서트",
+   "title": "<THE DREAM SHOW 4> 서울",
+   "detail": "KSPO DOME / 3회",
+   "url": "https://en.wikipedia.org/wiki/The_Dream_Show_4:_Dream_the_Future",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-03-20",
+   "end": "2026-03-22",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 타이베이",
+   "detail": "타이베이 돔 / 3회 누적 12만",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-03-21",
+   "end": null,
+   "category": "콘서트",
+   "title": "[Syncopation] 방콕",
+   "detail": "IMPACT Arena",
+   "url": "https://www.soompi.com/article/1797016wpp/2026-k-pop-tour-masterlist-concerts-fan-meetings-and-more",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-03-21",
+   "end": null,
+   "category": "콘서트",
+   "title": "BTS COMEBACK LIVE 'ARIRANG'",
+   "detail": "서울 광화문광장 / 전석 무료 컴백 공연",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-03-21",
+   "end": null,
+   "category": "영상",
+   "title": "BTS The Comeback Live | Arirang",
+   "detail": "넷플릭스 라이브 컴백 공연 스페셜",
+   "url": "https://en.wikipedia.org/wiki/BTS:_The_Return",
+   "status": "확정"
+  },
+  {
+   "artist": "데이식스",
+   "start": "2026-03-21",
+   "end": "2026-03-22",
+   "category": "콘서트",
+   "title": "<The DECADE> 대전",
+   "detail": "대전컨벤션센터(DCC) 제2전시장",
+   "url": "https://namu.wiki/w/The%20DECADE",
+   "status": "확정"
+  },
+  {
+   "artist": "블랙핑크 (제니)",
+   "start": "2026-03-21",
+   "end": "2026-03-22",
+   "category": "페스티벌",
+   "title": "ComplexCon Hong Kong 2026",
+   "detail": "홍콩 AsiaWorld-Expo",
+   "url": "https://kpopofficial.com/schedule/blackpink/",
+   "status": "확정"
+  },
+  {
+   "artist": "세븐틴",
+   "start": "2026-03-21",
+   "end": null,
+   "category": "콘서트",
+   "title": "WORLD TOUR [NEW_] 불라칸",
+   "detail": "필리핀 Philippine Sports Stadium",
+   "url": "https://www.mhnse.com/news/articleView.html?idxno=484557",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-03-22",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Lollapalooza Brasil 2026",
+   "detail": "상파울루 Autódromo José Carlos Pace",
+   "url": "https://www.timespread.co.kr/community/riize/126583002",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-03-22",
+   "end": null,
+   "category": "콘서트",
+   "title": "[IN YOUR FANTASY] 쿠알라룸푸르",
+   "detail": "Unifi Arena",
+   "url": "https://www.songkick.com/artists/9911549-ateez/gigography",
+   "status": "확정"
+  },
+  {
+   "artist": "있지 (유나)",
+   "start": "2026-03-23",
+   "end": null,
+   "category": "앨범",
+   "title": "유나 솔로 데뷔 앨범 '아이스크림'",
+   "detail": "데뷔 7년 만의 첫 솔로",
+   "url": "https://www.news1.kr/entertain/music/6109847",
+   "status": "확정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-03-25",
+   "end": null,
+   "category": "앨범",
+   "title": "디지털 싱글 '별, 빛 (STAY)'",
+   "detail": "팬송 성격의 디지털 싱글",
+   "url": "https://namu.wiki/w/Stray%20Kids",
+   "status": "확정"
+  },
+  {
+   "artist": "침착맨",
+   "start": "2026-03-26",
+   "end": null,
+   "category": "방송",
+   "title": "SBS 파워FM '배성재의 TEN' 10주년 특집 게스트",
+   "detail": "SBS 파워FM",
+   "url": "https://namu.wiki/w/%EC%B9%A8%EC%B0%A9%EB%A7%A8",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-03-27",
+   "end": null,
+   "category": "영상",
+   "title": "다큐멘터리 'BTS: The Return'",
+   "detail": "넷플릭스 / 감독 바오 응우옌 / 군 복무 후 재결합 과정",
+   "url": "https://en.wikipedia.org/wiki/BTS:_The_Return",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (드림)",
+   "start": "2026-03-27",
+   "end": "2026-03-29",
+   "category": "콘서트",
+   "title": "<THE DREAM SHOW 4> 서울 앙코르 (피날레)",
+   "detail": "KSPO DOME / 3회 / 투어 총 26회 종료",
+   "url": "https://en.wikipedia.org/wiki/The_Dream_Show_4:_Dream_the_Future",
+   "status": "확정"
+  },
+  {
+   "artist": "성시경",
+   "start": "2026-03-27",
+   "end": null,
+   "category": "방송",
+   "title": "KBS2 '더 시즌즈 - 성시경의 고막남친' 첫 방송",
+   "detail": "KBS 2TV 금 22시 / MC / 1회 게스트 이소라·YB",
+   "url": "https://www.yna.co.kr/view/AKR20260327082700005",
+   "status": "확정"
+  },
+  {
+   "artist": "아이유",
+   "start": "2026-03-27",
+   "end": null,
+   "category": "콘서트",
+   "title": "9월 고양 스타디움 단독 콘서트 개최 발표",
+   "detail": "고양종합운동장 주경기장 / 2년 만의 단독 공연 예고",
+   "url": "https://www.newsis.com/view/NISX20260327_0003567052",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-03-27",
+   "end": "2026-03-28",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 올랜도",
+   "detail": "기아 센터 / 2회",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-03-28",
+   "end": "2026-04-05",
+   "category": "콘서트",
+   "title": "Stray Kids 팬미팅 인천",
+   "detail": "인스파이어 아레나 / 4회",
+   "url": "https://kpopofficial.com/schedule/stray-kids/",
+   "status": "추정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-03-28",
+   "end": null,
+   "category": "콘서트",
+   "title": "[IN YOUR FANTASY] 마카오",
+   "detail": "마카오",
+   "url": "https://www.nme.com/news/music/ateez-announce-2026-asia-and-australia-tour-dates-3891005",
+   "status": "확정"
+  },
+  {
+   "artist": "차은우",
+   "start": "2026-03-28",
+   "end": "2026-05-12",
+   "category": "방송",
+   "title": "일본 도쿄 긴자 사진전 '애프터이미지'",
+   "detail": "판타지오 IP 사업 / 군 복무로 본인 불참",
+   "url": "https://www.newsis.com/view/NISX20260316_0003549655",
+   "status": "확정"
+  },
+  {
+   "artist": "레드벨벳 (아이린)",
+   "start": "2026-03-30",
+   "end": null,
+   "category": "앨범",
+   "title": "아이린 솔로 정규 1집 'Biggest Fan'",
+   "detail": "1년 4개월 만 / 타이틀곡 'Biggest Fan'",
+   "url": "https://namu.wiki/w/Biggest%20Fan",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-03-31",
+   "end": null,
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 샬럿",
+   "detail": "스펙트럼 센터",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "악뮤",
+   "start": "2026-04-01",
+   "end": null,
+   "category": "방송",
+   "title": "tvN '유 퀴즈 온 더 블럭' 출연",
+   "detail": "이찬혁·이수현 출연 / 슬럼프·신보 이야기",
+   "url": "http://www.osen.co.kr/article/G1112772266",
+   "status": "확정"
+  },
+  {
+   "artist": "장원영",
+   "start": "2026-04-02",
+   "end": null,
+   "category": "방송",
+   "title": "미우미우 뷰티 향수 부문 앰버서더 발탁",
+   "detail": "미우미우 뷰티 화보 공개",
+   "url": "https://www.mk.co.kr/news/hot-issues/12006148",
+   "status": "확정"
+  },
+  {
+   "artist": "박효신",
+   "start": "2026-04-03",
+   "end": null,
+   "category": "앨범",
+   "title": "새 EP 'A & E' 발매",
+   "detail": "더블 타이틀 'AE'·'Any Love' / 7곡 / 9년 6개월 만",
+   "url": "https://www.yna.co.kr/view/AKR20260404026700005",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-04-03",
+   "end": null,
+   "category": "앨범",
+   "title": "일본 선공개 싱글 'Fashion'",
+   "detail": "일본 EP 4집 선공개곡",
+   "url": "https://namu.wiki/w/IVE",
+   "status": "확정"
+  },
+  {
+   "artist": "악뮤",
+   "start": "2026-04-03",
+   "end": null,
+   "category": "앨범",
+   "title": "선공개곡 '소문의 낙원'",
+   "detail": "정규 4집 선공개 / 뮤직비디오 공개",
+   "url": "https://www.ytn.co.kr/_ln/0106_202604030937366719",
+   "status": "확정"
+  },
+  {
+   "artist": "악뮤 (이찬혁)",
+   "start": "2026-04-03",
+   "end": null,
+   "category": "방송",
+   "title": "쿠팡플레이 '강호동네 서점' 출연",
+   "detail": "이찬혁 출연",
+   "url": "https://www.xportsnews.com/article/2131197",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-04-03",
+   "end": "2026-04-04",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 보스턴",
+   "detail": "TD 가든 / 2회",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "박효신",
+   "start": "2026-04-04",
+   "end": "2026-04-05",
+   "category": "콘서트",
+   "title": "박효신 LIVE A & E 2026 (1~2일차)",
+   "detail": "인천문학경기장 주경기장 / 7년 만의 단독 콘서트",
+   "url": "https://www.yna.co.kr/view/AKR20260130051600005",
+   "status": "확정"
+  },
+  {
+   "artist": "세븐틴",
+   "start": "2026-04-04",
+   "end": "2026-04-05",
+   "category": "콘서트",
+   "title": "WORLD TOUR [NEW_] ENCORE 인천",
+   "detail": "인천아시아드주경기장 / 2회 / 투어 피날레",
+   "url": "https://www.munhwa.com/article/11562701",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-04-04",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 쿠알라룸푸르",
+   "detail": "말레이시아 Axiata Arena",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-04-04",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : aeXIS LINE' 자카르타",
+   "detail": "ICE BSD Hall 5-6",
+   "url": "https://namu.wiki/w/aespa",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-04-04",
+   "end": null,
+   "category": "콘서트",
+   "title": "[IN YOUR FANTASY] 방콕 (최종회)",
+   "detail": "태국 방콕 / 투어 최종회차",
+   "url": "https://www.nme.com/news/music/ateez-announce-2026-asia-and-australia-tour-dates-3891005",
+   "status": "확정"
+  },
+  {
+   "artist": "침착맨",
+   "start": "2026-04-05",
+   "end": null,
+   "category": "방송",
+   "title": "KBS2 '개그콘서트' 특별출연",
+   "detail": "KBS 2TV",
+   "url": "https://namu.wiki/w/%EC%B9%A8%EC%B0%A9%EB%A7%A8",
+   "status": "확정"
+  },
+  {
+   "artist": "아이유",
+   "start": "2026-04-06",
+   "end": null,
+   "category": "방송",
+   "title": "MBC '21세기 대군부인' 제작발표회",
+   "detail": "조선 팰리스 서울 강남 / 변우석·노상현 참석",
+   "url": "https://www.yna.co.kr/view/AKR20260406120300005",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-04-06",
+   "end": "2026-04-07",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 시카고",
+   "detail": "유나이티드 센터 / 2회",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-04-07",
+   "end": null,
+   "category": "방송",
+   "title": "'달려라 방탄 2.0' 새 시즌 시작",
+   "detail": "BANGTANTV 유튜브·위버스",
+   "url": "https://www.usbtsarmy.com/filmography/run-bts-2-point-0",
+   "status": "확정"
+  },
+  {
+   "artist": "악뮤",
+   "start": "2026-04-07",
+   "end": null,
+   "category": "앨범",
+   "title": "정규 4집 '개화(FLOWERING)'",
+   "detail": "11곡 전곡 이찬혁 작사·작곡 / YG 독립 후 첫 앨범",
+   "url": "https://www.yna.co.kr/view/AKR20260407147300005",
+   "status": "확정"
+  },
+  {
+   "artist": "장원영",
+   "start": "2026-04-08",
+   "end": null,
+   "category": "방송",
+   "title": "다이슨 헤어 디바이스 APAC 앰배서더 선정",
+   "detail": "한국→아시아태평양 전역 확대",
+   "url": "https://sports.donga.com/news/article/all/20260408/133699847/1",
+   "status": "확정"
+  },
+  {
+   "artist": "차은우",
+   "start": "2026-04-08",
+   "end": null,
+   "category": "방송",
+   "title": "국세청 추징금 약 130억원 완납 및 사과",
+   "detail": "본인 인스타그램 입장 / 소속사 동반 사과",
+   "url": "https://www.mydaily.co.kr/page/view/2026041717274695800?ext=Y",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-04-09",
+   "end": "2026-04-12",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 고양",
+   "detail": "고양종합운동장 주경기장 / 3회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "아이유",
+   "start": "2026-04-10",
+   "end": null,
+   "category": "영상",
+   "title": "MBC 금토드라마 '21세기 대군부인' 첫 방송",
+   "detail": "MBC 밤 9시 40분 / 디즈니+ 동시 / 성희주 역 / 12부작",
+   "url": "https://program.imbc.com/perfectcrown",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-04-10",
+   "end": "2026-04-12",
+   "category": "콘서트",
+   "title": "EXO PLANET #6 서울 (개막)",
+   "detail": "KSPO DOME / 3회",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-04-10",
+   "end": null,
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 디트로이트",
+   "detail": "리틀 시저스 아레나",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "박효신",
+   "start": "2026-04-11",
+   "end": null,
+   "category": "콘서트",
+   "title": "박효신 LIVE A & E 2026 (3일차)",
+   "detail": "인천문학경기장 / 3일간 총 9만석 전석 매진",
+   "url": "https://sports.khan.co.kr/article/202604041514003",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-04-11",
+   "end": "2026-04-12",
+   "category": "콘서트",
+   "title": "'SYNK : aeXIS LINE' 오사카",
+   "detail": "교세라돔 / 4세대 걸그룹 최초 / 2회",
+   "url": "https://namu.wiki/w/aespa",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-04-12",
+   "end": null,
+   "category": "페스티벌",
+   "title": "LOVESOME Festival 2026",
+   "detail": "연세대학교 신촌캠퍼스",
+   "url": "https://namu.wiki/w/RIIZE",
+   "status": "확정"
+  },
+  {
+   "artist": "박효신",
+   "start": "2026-04-12",
+   "end": null,
+   "category": "영상",
+   "title": "'Any Love' 뮤직비디오 최초 공개",
+   "detail": "공식 SNS",
+   "url": "https://www.mk.co.kr/news/musics/12014986",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-04-12",
+   "end": "2026-04-19",
+   "category": "페스티벌",
+   "title": "빅뱅, 코첼라 페스티벌 출연",
+   "detail": "미국 인디오 Outdoor Theatre / 2주차 무대에서 투어 발표",
+   "url": "https://star.ytn.co.kr/_sn/0117_202604201728041466",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-04-12",
+   "end": null,
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 세인트폴",
+   "detail": "그랜드 카지노 아레나",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "투모로우바이투게더",
+   "start": "2026-04-13",
+   "end": null,
+   "category": "앨범",
+   "title": "미니 8집 '7TH YEAR'",
+   "detail": "타이틀곡 '하루에 하루만 더' / 재계약 후 첫 앨범",
+   "url": "https://en.wikipedia.org/wiki/7th_Year:_A_Moment_of_Stillness_in_the_Thorns",
+   "status": "확정"
+  },
+  {
+   "artist": "장원영",
+   "start": "2026-04-14",
+   "end": null,
+   "category": "방송",
+   "title": "마리끌레르 코리아 4월호 커버 스토리",
+   "detail": "미우미우 / 커버 및 인터뷰",
+   "url": "https://www.marieclairekorea.com/fashion/2026/04/wonyoung/",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-04-14",
+   "end": null,
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 덴버",
+   "detail": "볼 아레나",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-04-17",
+   "end": "2026-04-18",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 도쿄",
+   "detail": "일본 도쿄돔 / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "악뮤 (이수현)",
+   "start": "2026-04-17",
+   "end": null,
+   "category": "영상",
+   "title": "이수현 '개화 프로젝트의 모든 것'",
+   "detail": "이수현 개인 유튜브 채널",
+   "url": "https://sports.khan.co.kr/article/202604201512003",
+   "status": "확정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-04-17",
+   "end": null,
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 멜버른",
+   "detail": "John Cain Arena",
+   "url": "https://namu.wiki/w/ITZY",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-04-17",
+   "end": "2026-04-18",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 오스틴",
+   "detail": "무디 센터 / 2회",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "데이식스",
+   "start": "2026-04-18",
+   "end": null,
+   "category": "콘서트",
+   "title": "<The DECADE> 싱가포르",
+   "detail": "Singapore Indoor Stadium",
+   "url": "https://namu.wiki/w/The%20DECADE",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-04-18",
+   "end": null,
+   "category": "앨범",
+   "title": "OST 'Behind The Shine'",
+   "detail": "드라마 '21세기 대군부인' OST",
+   "url": "https://namu.wiki/w/RIIZE",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-04-18",
+   "end": "2026-04-19",
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 오사카",
+   "detail": "교세라돔 / 2회",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "악뮤",
+   "start": "2026-04-19",
+   "end": null,
+   "category": "콘서트",
+   "title": "정규 4집 청음회 AKKADEMY",
+   "detail": "마포 문화비축기지 T2 / 550석",
+   "url": "https://namu.wiki/w/%EA%B0%9C%ED%99%94(AKMU)",
+   "status": "확정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-04-19",
+   "end": null,
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 시드니",
+   "detail": "Ticketek Entertainment Centre",
+   "url": "https://namu.wiki/w/ITZY",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (위시)",
+   "start": "2026-04-20",
+   "end": null,
+   "category": "앨범",
+   "title": "NCT WISH 정규 1집 'Ode to Love'",
+   "detail": "타이틀곡 'Ode to Love'",
+   "url": "https://www.forbes.com/sites/jeffbenjamin/2026/04/16/2026-q2-release-calendar-of-new-kpop-albums-and-singles/",
+   "status": "확정"
+  },
+  {
+   "artist": "곽튜브",
+   "start": "2026-04-21",
+   "end": null,
+   "category": "방송",
+   "title": "JTBC '히든싱어8' 연예인 패널",
+   "detail": "JTBC 4회",
+   "url": "https://namu.wiki/w/%EA%B3%BD%ED%8A%9C%EB%B8%8C",
+   "status": "확정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-04-22",
+   "end": null,
+   "category": "앨범",
+   "title": "일본 디지털 싱글 'HIDE AND SEEK'",
+   "detail": "일본 활동 디지털 싱글",
+   "url": "https://namu.wiki/w/i-dle",
+   "status": "확정"
+  },
+  {
+   "artist": "곽튜브",
+   "start": "2026-04-22",
+   "end": "2026-06-17",
+   "category": "방송",
+   "title": "넷플릭스 '데스게임2' 참가자",
+   "detail": "넷플릭스 오리지널 시즌2",
+   "url": "https://namu.wiki/w/%EA%B3%BD%ED%8A%9C%EB%B8%8C",
+   "status": "확정"
+  },
+  {
+   "artist": "볼빨간사춘기",
+   "start": "2026-04-22",
+   "end": null,
+   "category": "앨범",
+   "title": "싱글 'Find You' 발매 (데뷔 10주년)",
+   "detail": "3곡 수록 / 소속사 켄버스",
+   "url": "https://news.tf.co.kr/read/entertain/2316105.htm",
+   "status": "확정"
+  },
+  {
+   "artist": "차은우",
+   "start": "2026-04-23",
+   "end": null,
+   "category": "방송",
+   "title": "육군 군악대 행사 무대 참석",
+   "detail": "국방부 근무지원단 군악대 오케스트라 행사",
+   "url": "https://www.donga.com/news/Culture/article/all/20260429/133831613/1",
+   "status": "확정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-04-24",
+   "end": null,
+   "category": "앨범",
+   "title": "리드 싱글 'CELEBRATION'",
+   "detail": "정규 2집 선공개 / 멜로딕 테크노",
+   "url": "https://en.wikipedia.org/wiki/Pureflow_Pt._1",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-04-24",
+   "end": null,
+   "category": "방송",
+   "title": "자체 콘텐츠 '앜아이브' 첫 공개",
+   "detail": "아이브 공식 유튜브",
+   "url": "https://www.asiaartistawards.com/news/detail/178511/all",
+   "status": "확정"
+  },
+  {
+   "artist": "장원영",
+   "start": "2026-04-24",
+   "end": null,
+   "category": "방송",
+   "title": "로라로라 26 썸머 컬렉션 캠페인 화보",
+   "detail": "로라로라 뮤즈",
+   "url": "https://fashionseoul.com/271482",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-04-25",
+   "end": "2026-04-28",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 탬파",
+   "detail": "미국 Raymond James Stadium / 3회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "데이식스",
+   "start": "2026-04-25",
+   "end": "2026-04-26",
+   "category": "콘서트",
+   "title": "<The DECADE> 도쿄",
+   "detail": "KEIO ARENA TOKYO",
+   "url": "https://namu.wiki/w/The%20DECADE",
+   "status": "확정"
+  },
+  {
+   "artist": "세븐틴",
+   "start": "2026-04-25",
+   "end": "2026-04-26",
+   "category": "콘서트",
+   "title": "WORLD TOUR [NEW_] 가오슝",
+   "detail": "대만 가오슝 아레나 / 2회",
+   "url": "https://www.timespread.co.kr/community/seventeen/126727693",
+   "status": "추정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-04-25",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 마닐라",
+   "detail": "SM Mall of Asia Arena",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-04-25",
+   "end": "2026-04-26",
+   "category": "콘서트",
+   "title": "'SYNK : aeXIS LINE' 도쿄 (피날레)",
+   "detail": "도쿄돔 / 일본 돔투어 누적 17만",
+   "url": "https://www.koreadaily.com/article/20260426120627097",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-04-25",
+   "end": null,
+   "category": "콘서트",
+   "title": "EXO PLANET #6 호치민",
+   "detail": "베트남 SECC",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-04-25",
+   "end": "2026-04-28",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 도쿄",
+   "detail": "도쿄 국립경기장 / 3회 누적 24만 / 해외 가수 최초",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "태연",
+   "start": "2026-04-26",
+   "end": null,
+   "category": "앨범",
+   "title": "JTBC 드라마 OST '조각' 발매",
+   "detail": "작곡 개미·Klozer·손디아",
+   "url": "https://music.bugs.co.kr/album/4146149",
+   "status": "확정"
+  },
+  {
+   "artist": "뉴진스",
+   "start": "2026-04-27",
+   "end": null,
+   "category": "앨범",
+   "title": "어도어 공식 입장 — 활동 재개 시동",
+   "detail": "코펜하겐 사전 프로덕션 / 구체 일정 미공개",
+   "url": "https://www.mt.co.kr/entertainment/2026/04/27/2026042714067299138",
+   "status": "예정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-05-01",
+   "end": "2026-05-03",
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 서울 (개막)",
+   "detail": "KSPO DOME / 3회 전석 매진",
+   "url": "https://kconcertguide.com/en/tour/enhypen-blood-saga/",
+   "status": "확정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-05-01",
+   "end": null,
+   "category": "영상",
+   "title": "'차린건 쥐뿔도 없지만' 시즌4",
+   "detail": "유튜브 웹예능 / 1년 6개월 만의 복귀",
+   "url": "https://www.xportsnews.com/article/2141119",
+   "status": "확정"
+  },
+  {
+   "artist": "태연",
+   "start": "2026-05-01",
+   "end": null,
+   "category": "방송",
+   "title": "엘르 코리아 x 아르마니 뷰티 화보",
+   "detail": "ELLE KOREA 뷰티 화보 및 영상",
+   "url": "https://www.topstarnews.net/news/articleView.html?idxno=16049492",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-05-02",
+   "end": "2026-05-03",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 엘패소",
+   "detail": "미국 Sun Bowl Stadium / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "성시경",
+   "start": "2026-05-02",
+   "end": "2026-05-05",
+   "category": "콘서트",
+   "title": "2026 성시경의 축가",
+   "detail": "연세대 노천극장 3회 / 게스트 권진아·로이킴 등",
+   "url": "https://www.yna.co.kr/view/AKR20260318126100005",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-05-02",
+   "end": "2026-05-03",
+   "category": "콘서트",
+   "title": "EXO PLANET #6 나고야",
+   "detail": "닛폰가이시홀 / 2회",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-05-02",
+   "end": null,
+   "category": "페스티벌",
+   "title": "HIPHOPPLAYA FESTIVAL 2026",
+   "detail": "고양 킨텍스 제2전시장",
+   "url": "https://www.topstarnews.net/news/articleView.html?idxno=16010818",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-05-02",
+   "end": null,
+   "category": "페스티벌",
+   "title": "K-SPARK IN MACAU 2026",
+   "detail": "Macao Outdoor Performance Venue",
+   "url": "https://www.setlist.fm/setlists/gdragon-23d5d4cf.html?year=2026",
+   "status": "확정"
+  },
+  {
+   "artist": "쯔양",
+   "start": "2026-05-03",
+   "end": null,
+   "category": "영상",
+   "title": "소속사 최초 공개 영상",
+   "detail": "유튜브 '쯔양밖정원' / 직원 7명 규모 회사 공개",
+   "url": "https://namu.wiki/w/%EC%AF%94%EC%96%91",
+   "status": "확정"
+  },
+  {
+   "artist": "볼빨간사춘기",
+   "start": "2026-05-06",
+   "end": null,
+   "category": "방송",
+   "title": "MBC '라디오스타' 출연",
+   "detail": "MBC 수 22시 30분",
+   "url": "https://www.xportsnews.com/article/2145378",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-05-07",
+   "end": "2026-05-10",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 멕시코시티",
+   "detail": "Estadio GNP Seguros / 3회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "뉴진스",
+   "start": "2026-05-07",
+   "end": null,
+   "category": "방송",
+   "title": "어도어, 민지 전속계약 논의 진행 발표",
+   "detail": "계약 협의 '긍정적 진행' 입장",
+   "url": "https://en.wikipedia.org/wiki/NewJeans",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-05-08",
+   "end": null,
+   "category": "페스티벌",
+   "title": "인천대학교 대동제",
+   "detail": "인천대 축제 3일차 무대",
+   "url": "https://namu.wiki/w/RIIZE",
+   "status": "확정"
+  },
+  {
+   "artist": "데이식스",
+   "start": "2026-05-09",
+   "end": null,
+   "category": "콘서트",
+   "title": "<The DECADE> 마카오",
+   "detail": "Galaxy Arena",
+   "url": "https://namu.wiki/w/The%20DECADE",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-05-09",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 싱가포르",
+   "detail": "Singapore Indoor Stadium",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-05-09",
+   "end": "2026-05-10",
+   "category": "콘서트",
+   "title": "EXO PLANET #6 타이베이",
+   "detail": "타이베이 아레나 / 2회",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-05-09",
+   "end": "2026-05-10",
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 도쿄",
+   "detail": "케이오 아레나 TOKYO / 2회",
+   "url": "https://namu.wiki/w/ITZY",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-05-09",
+   "end": null,
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 리스본",
+   "detail": "포르투갈 메오 아레나",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "태연",
+   "start": "2026-05-10",
+   "end": null,
+   "category": "페스티벌",
+   "title": "2026 [안녕, BANGKOK] MUSIC FESTIVAL",
+   "detail": "태국 방콕 Thunderdome Stadium",
+   "url": "https://www.timespread.co.kr/subscription-event/2026-%EC%95%88%EB%85%95-bangkok-music-festival-2026-05-10",
+   "status": "확정"
+  },
+  {
+   "artist": "레드벨벳 (예리)",
+   "start": "2026-05-11",
+   "end": "2026-05-26",
+   "category": "영상",
+   "title": "드라마 '아주르 스프링'",
+   "detail": "MBN+ / 웨이브·티빙 / 예리 주연 서안나 역",
+   "url": "https://namu.wiki/w/%EC%95%84%EC%A3%BC%EB%A5%B4%20%EC%8A%A4%ED%94%84%EB%A7%81",
+   "status": "확정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-05-11",
+   "end": null,
+   "category": "앨범",
+   "title": "선공개 싱글 '똑똑똑'",
+   "detail": "정규 1집 'HOME' 선공개곡",
+   "url": "https://www.news1.kr/entertain/music/6162189",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-05-11",
+   "end": null,
+   "category": "앨범",
+   "title": "선공개 'WDA' (Feat. G-DRAGON)",
+   "detail": "정규 2집 선공개곡 / 지드래곤 피처링",
+   "url": "https://en.wikipedia.org/wiki/Lemonade_(Aespa_album)",
+   "status": "확정"
+  },
+  {
+   "artist": "차은우",
+   "start": "2026-05-12",
+   "end": null,
+   "category": "영상",
+   "title": "넷플릭스 '원더풀스' 제작발표회",
+   "detail": "유인식 감독·박은빈 참석 / 차은우는 군 복무로 불참",
+   "url": "https://www.mt.co.kr/entertainment/2026/05/12/2026051213484651187",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-05-12",
+   "end": null,
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 바르셀로나",
+   "detail": "팔라우 산트 조르디",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-05-14",
+   "end": null,
+   "category": "페스티벌",
+   "title": "서강대학교 대동제",
+   "detail": "자료별 5/13~15 표기 상이",
+   "url": "https://www.wikitree.co.kr/articles/1135403",
+   "status": "추정"
+  },
+  {
+   "artist": "백예린",
+   "start": "2026-05-14",
+   "end": null,
+   "category": "콘서트",
+   "title": "2026 홍익대학교 축제",
+   "detail": "서울 홍익대학교",
+   "url": "https://namu.wiki/w/%EB%B0%B1%EC%98%88%EB%A6%B0",
+   "status": "추정"
+  },
+  {
+   "artist": "백예린",
+   "start": "2026-05-15",
+   "end": null,
+   "category": "콘서트",
+   "title": "2026 성균관대학교 축제",
+   "detail": "서울 성균관대학교",
+   "url": "https://namu.wiki/w/%EB%B0%B1%EC%98%88%EB%A6%B0",
+   "status": "추정"
+  },
+  {
+   "artist": "차은우",
+   "start": "2026-05-15",
+   "end": null,
+   "category": "영상",
+   "title": "넷플릭스 시리즈 '원더풀스' 전 세계 공개",
+   "detail": "특채 공무원 '이운정' 역 / 박은빈 주연",
+   "url": "https://www.netflix.com/kr/title/81948067",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-05-16",
+   "end": "2026-05-19",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 샌프란시스코",
+   "detail": "미국 Stanford Stadium / 3회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "데이식스",
+   "start": "2026-05-16",
+   "end": "2026-05-17",
+   "category": "콘서트",
+   "title": "<The DECADE> 부산",
+   "detail": "BEXCO 제1전시장",
+   "url": "https://namu.wiki/w/The%20DECADE",
+   "status": "확정"
+  },
+  {
+   "artist": "아이유",
+   "start": "2026-05-16",
+   "end": null,
+   "category": "영상",
+   "title": "'21세기 대군부인' 최종회 종영",
+   "detail": "최종회 시청률 13.8% 자체 최고",
+   "url": "https://www.yna.co.kr/view/AKR20260517013900005",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-05-16",
+   "end": "2026-05-17",
+   "category": "콘서트",
+   "title": "EXO PLANET #6 방콕",
+   "detail": "임팩트 아레나 / 2회",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "임영웅",
+   "start": "2026-05-16",
+   "end": "2026-05-17",
+   "category": "페스티벌",
+   "title": "ASEA 2026 3관왕",
+   "detail": "일본 사이타마 베루나돔 / BEST SOLO·BEST TROT·FAN CHOICE",
+   "url": "https://www.starnewskorea.com/music/2026/05/18/2026051804360287729",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-05-16",
+   "end": "2026-05-17",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 파리",
+   "detail": "아코르 아레나 / 2회",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-05-18",
+   "end": null,
+   "category": "앨범",
+   "title": "미니앨범 'Motto'",
+   "detail": "2026년 첫 완전체 컴백 / 멤버별 솔로곡 수록",
+   "url": "https://www.cbci.co.kr/news/articleView.html?idxno=573148",
+   "status": "확정"
+  },
+  {
+   "artist": "유재석",
+   "start": "2026-05-19",
+   "end": null,
+   "category": "방송",
+   "title": "넷플릭스 '유재석 캠프' 제작발표회",
+   "detail": "JW메리어트 동대문 / 이광수·변우석·지예은 참석",
+   "url": "https://www.yna.co.kr/view/AKR20260519109900005",
+   "status": "확정"
+  },
+  {
+   "artist": "감스트",
+   "start": "2026-05-20",
+   "end": null,
+   "category": "방송",
+   "title": "2026 FIFA 북중미 월드컵 홍보대사",
+   "detail": "JTBC 월드컵 홍보대사 위촉",
+   "url": "https://namu.wiki/w/%EA%B0%90%EC%8A%A4%ED%8A%B8",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-05-20",
+   "end": null,
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 토리노",
+   "detail": "이탈리아 이날피 아레나",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "장원영",
+   "start": "2026-05-21",
+   "end": null,
+   "category": "방송",
+   "title": "에스콰이어 코리아 6월호 커버 화보",
+   "detail": "불가리 브랜드 앰버서더",
+   "url": "https://www.cjknews.com/news/article.html?no=33600",
+   "status": "확정"
+  },
+  {
+   "artist": "태연",
+   "start": "2026-05-21",
+   "end": null,
+   "category": "방송",
+   "title": "동국제약 '마데카솔' 신규 TV 광고 공개",
+   "detail": "TV·유튜브·SNS",
+   "url": "https://www.dailypharm.com/user/news/338716",
+   "status": "확정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-05-22",
+   "end": null,
+   "category": "앨범",
+   "title": "정규 2집 'PUREFLOW pt.1'",
+   "detail": "타이틀곡 '붐팔라' / 11트랙 / 첫날 43만 장",
+   "url": "https://en.wikipedia.org/wiki/Pureflow_Pt._1",
+   "status": "확정"
+  },
+  {
+   "artist": "백예린",
+   "start": "2026-05-22",
+   "end": null,
+   "category": "콘서트",
+   "title": "2026 고려대학교 축제",
+   "detail": "서울 고려대학교",
+   "url": "https://namu.wiki/w/%EB%B0%B1%EC%98%88%EB%A6%B0",
+   "status": "추정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-05-22",
+   "end": "2026-05-23",
+   "category": "콘서트",
+   "title": "EXO PLANET #6 마카오",
+   "detail": "갤럭시 아레나 / 2회",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-05-23",
+   "end": "2026-05-28",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 라스베이거스",
+   "detail": "Allegiant Stadium / 4회",
+   "url": "https://www.allegiantstadium.com/events/detail/bts_world_tour_2026",
+   "status": "확정"
+  },
+  {
+   "artist": "백예린",
+   "start": "2026-05-23",
+   "end": null,
+   "category": "페스티벌",
+   "title": "제18회 서울재즈페스티벌 2026",
+   "detail": "올림픽공원 / 통산 네 번째 서재페 출연",
+   "url": "https://www.wkorea.com/2026/05/22/%eb%84%88%eb%a5%bc-%ec%b6%a4%ec%b6%94%ea%b2%8c-%ed%95%a0-%ea%b1%b0%ec%95%bc-%eb%b0%b1%ec%98%88%eb%a6%b0/",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-05-23",
+   "end": "2026-05-24",
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 마카오",
+   "detail": "The Venetian Arena / 2회",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "지코",
+   "start": "2026-05-23",
+   "end": null,
+   "category": "콘서트",
+   "title": "Lilas LIVE TOUR 2026 서울 게스트",
+   "detail": "올림픽공원 올림픽홀 / 이쿠타 리라 내한 스페셜 게스트",
+   "url": "https://www.starnewskorea.com/music/2026/04/01/2026040108510973850",
+   "status": "확정"
+  },
+  {
+   "artist": "침착맨",
+   "start": "2026-05-23",
+   "end": null,
+   "category": "방송",
+   "title": "tvN '요리는 괴로워! 컨설팅 프렌즈' 출연",
+   "detail": "tvN",
+   "url": "https://namu.wiki/w/%EC%B9%A8%EC%B0%A9%EB%A7%A8",
+   "status": "확정"
+  },
+  {
+   "artist": "투모로우바이투게더",
+   "start": "2026-05-23",
+   "end": "2026-05-24",
+   "category": "콘서트",
+   "title": "MOA CON IN JAPAN 아이치",
+   "detail": "일본 아이치 / 2회",
+   "url": "https://www.mhnse.com/news/articleView.html?idxno=514096",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-05-23",
+   "end": null,
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 베를린",
+   "detail": "우버 아레나",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-05-25",
+   "end": null,
+   "category": "방송",
+   "title": "2026 American Music Awards 특별 출연",
+   "detail": "라스베이거스 MGM Grand / CBS 생중계 / 3개 부문 후보",
+   "url": "https://www.billboard.com/music/awards/bts-2026-american-music-awards-1236252383/",
+   "status": "확정"
+  },
+  {
+   "artist": "감스트",
+   "start": "2026-05-26",
+   "end": null,
+   "category": "영상",
+   "title": "SOOP 파트너 스트리머 계약 발표",
+   "detail": "개인방송 중대발표 / 3년 만에 파트너 복귀",
+   "url": "https://namu.wiki/w/%EA%B0%90%EC%8A%A4%ED%8A%B8",
+   "status": "확정"
+  },
+  {
+   "artist": "유재석",
+   "start": "2026-05-26",
+   "end": null,
+   "category": "영상",
+   "title": "넷플릭스 '유재석 캠프' 1~5회 공개",
+   "detail": "데뷔 35년 만의 첫 자기 이름 예능 / 정효민 PD",
+   "url": "https://news.tf.co.kr/read/entertain/2317831.htm",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-05-26",
+   "end": null,
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 쾰른",
+   "detail": "랑세스 아레나",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-05-27",
+   "end": null,
+   "category": "콘서트",
+   "title": "[Syncopation] 멜버른",
+   "detail": "Rod Laver Arena",
+   "url": "https://namu.wiki/w/Syncopation",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-05-27",
+   "end": null,
+   "category": "앨범",
+   "title": "일본 EP 4집 'LUCID DREAM'",
+   "detail": "5월 19일 깜짝 선공개",
+   "url": "https://namu.wiki/w/IVE",
+   "status": "확정"
+  },
+  {
+   "artist": "투모로우바이투게더",
+   "start": "2026-05-27",
+   "end": "2026-05-28",
+   "category": "콘서트",
+   "title": "MOA CON IN JAPAN 치바",
+   "detail": "일본 치바 / 2회",
+   "url": "https://www.mhnse.com/news/articleView.html?idxno=514096",
+   "status": "확정"
+  },
+  {
+   "artist": "임영웅",
+   "start": "2026-05-28",
+   "end": null,
+   "category": "페스티벌",
+   "title": "제19회 NOL 골든티켓어워즈 2관왕",
+   "detail": "대상·베스트 콘서트 뮤지션상 / 2년 연속",
+   "url": "https://www.yna.co.kr/view/AKR20260528034300030",
+   "status": "확정"
+  },
+  {
+   "artist": "백예린",
+   "start": "2026-05-29",
+   "end": null,
+   "category": "콘서트",
+   "title": "2026 한양대학교 축제",
+   "detail": "서울 한양대학교",
+   "url": "https://namu.wiki/w/%EB%B0%B1%EC%98%88%EB%A6%B0",
+   "status": "추정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-05-29",
+   "end": null,
+   "category": "앨범",
+   "title": "정규 2집 'LEMONADE' 발매",
+   "detail": "SM / 11곡 / 타이틀곡 'LEMONADE'",
+   "url": "https://en.wikipedia.org/wiki/Lemonade_(Aespa_album)",
+   "status": "확정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-05-30",
+   "end": null,
+   "category": "콘서트",
+   "title": "[Syncopation] 시드니",
+   "detail": "Qudos Bank Arena",
+   "url": "https://namu.wiki/w/Syncopation",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-05-30",
+   "end": null,
+   "category": "콘서트",
+   "title": "RIIZE OFFICE - 1000 Days 팬파티",
+   "detail": "데뷔 1000일 기념",
+   "url": "https://namu.wiki/w/RIIZE",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-05-30",
+   "end": null,
+   "category": "페스티벌",
+   "title": "K-SPARK IN KAOHSIUNG 2026",
+   "detail": "대만 가오슝 국가체육장",
+   "url": "https://www.setlist.fm/setlists/gdragon-23d5d4cf.html?year=2026",
+   "status": "확정"
+  },
+  {
+   "artist": "쯔양",
+   "start": "2026-05-30",
+   "end": "2026-07-25",
+   "category": "방송",
+   "title": "'쯔양몇끼' 단독 진행",
+   "detail": "ENA·K-STAR·NXT 토 19시 50분 / 총 9화",
+   "url": "https://namu.wiki/w/%EC%AF%94%EC%96%91",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-05-30",
+   "end": "2026-05-31",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 암스테르담",
+   "detail": "지고 돔 / 2회",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "데이식스 (원필)",
+   "start": "2026-05-31",
+   "end": null,
+   "category": "페스티벌",
+   "title": "뷰티풀 민트 라이프 2026",
+   "detail": "서울 문화비축기지 / 원필 솔로 출연",
+   "url": "https://www.spotvnews.co.kr/news/articleView.html?idxno=812518",
+   "status": "추정"
+  },
+  {
+   "artist": "악뮤",
+   "start": "2026-05-31",
+   "end": null,
+   "category": "페스티벌",
+   "title": "뷰티풀 민트 라이프 2026 헤드라이너",
+   "detail": "서울 마포 문화비축기지 / 둘째 날",
+   "url": "https://www.yna.co.kr/view/AKR20260531053300005",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-06-01",
+   "end": "2026-06-03",
+   "category": "앨범",
+   "title": "'LEMONADE' 리믹스 3종 순차 발매",
+   "detail": "Zedd / Marlon Hoffstadt / 2Spade",
+   "url": "https://www.forbes.com/sites/jeffbenjamin/2026/04/16/2026-q2-release-calendar-of-new-kpop-albums-and-singles/",
+   "status": "확정"
+  },
+  {
+   "artist": "태연",
+   "start": "2026-06-01",
+   "end": null,
+   "category": "방송",
+   "title": "아르마니 뷰티 '파워 패브릭 쿠션' 화보",
+   "detail": "ELLE KOREA 웹·디지털",
+   "url": "https://www.topstarnews.net/news/articleView.html?idxno=16076868",
+   "status": "확정"
+  },
+  {
+   "artist": "성시경",
+   "start": "2026-06-02",
+   "end": null,
+   "category": "앨범",
+   "title": "싱글 '나의 하루처럼' 발매",
+   "detail": "카카오엔터테인먼트 유통",
+   "url": "https://music.apple.com/kr/album/day-dream-single/6773267523",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-06-02",
+   "end": "2026-06-03",
+   "category": "콘서트",
+   "title": "EXO PLANET #6 오사카",
+   "detail": "오사카성 홀 / 2회",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "유재석",
+   "start": "2026-06-02",
+   "end": null,
+   "category": "영상",
+   "title": "넷플릭스 '유재석 캠프' 6~10회 공개",
+   "detail": "이효리·이상순 깜짝 출연",
+   "url": "https://www.starnewskorea.com/broadcast-show/2026/05/28/2026052817065075853",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-06-03",
+   "end": "2026-06-04",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> 런던",
+   "detail": "O2 아레나 / 2회",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-06-04",
+   "end": "2026-06-13",
+   "category": "영상",
+   "title": "2026 BTS FESTA (데뷔 13주년)",
+   "detail": "퍼포먼스 비디오·13 SIDE FILM 등 순차 공개",
+   "url": "https://www.allkpop.com/article/2026/06/bts-unveils-full-schedule-for-2026-festa-including-return-of-run-bts-and-release-of-come-over",
+   "status": "확정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-06-05",
+   "end": null,
+   "category": "콘서트",
+   "title": "WORLD TOUR <2.0> 도쿄",
+   "detail": "Zepp Haneda",
+   "url": "https://news.joysound.com/article/664654",
+   "status": "확정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-06-06",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Governors Ball 2026 헤드라이너",
+   "detail": "미국 뉴욕 플러싱 메도스 코로나 파크",
+   "url": "https://www.forbes.com/sites/hannahabraham/2026/06/06/stray-kids-jennie-katseye-everyone-performing-at-gov-ball-2026/",
+   "status": "확정"
+  },
+  {
+   "artist": "이무진",
+   "start": "2026-06-06",
+   "end": "2026-06-07",
+   "category": "페스티벌",
+   "title": "코리아 메모리얼 페스타",
+   "detail": "서울 난지한강공원 젊음의광장",
+   "url": "https://www.stagepick.co.kr/artists/detail/2919",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-06-07",
+   "end": null,
+   "category": "콘서트",
+   "title": "EXO PLANET #6 자카르타",
+   "detail": "인도네시아 아레나",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-06-07",
+   "end": null,
+   "category": "콘서트",
+   "title": "WORLD TOUR <2.0> 오사카",
+   "detail": "Zepp Namba",
+   "url": "https://news.joysound.com/article/664654",
+   "status": "확정"
+  },
+  {
+   "artist": "태연",
+   "start": "2026-06-07",
+   "end": null,
+   "category": "영상",
+   "title": "유튜브 '집 나간 탱log' in Bangkok 공개",
+   "detail": "TAEYEON Official 유튜브",
+   "url": "https://www.youtube.com/watch?v=e4fPbvzfHNw",
+   "status": "확정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-06-08",
+   "end": null,
+   "category": "앨범",
+   "title": "첫 정규 1집 'HOME'",
+   "detail": "타이틀곡 'VIRAL' / KOZ",
+   "url": "https://en.wikipedia.org/wiki/BoyNextDoor",
+   "status": "확정"
+  },
+  {
+   "artist": "박효신",
+   "start": "2026-06-09",
+   "end": "2026-08-11",
+   "category": "콘서트",
+   "title": "뮤지컬 '베토벤' 루드비히 역 출연",
+   "detail": "세종문화회관 대극장 / 홍광호와 더블 캐스팅",
+   "url": "https://www.yna.co.kr/view/AKR20260618061500005",
+   "status": "확정"
+  },
+  {
+   "artist": "곽튜브",
+   "start": "2026-06-10",
+   "end": null,
+   "category": "방송",
+   "title": "KBS2 '슈퍼맨이 돌아왔다' 고정 출연 시작",
+   "detail": "KBS 2TV",
+   "url": "https://namu.wiki/w/%EA%B3%BD%ED%8A%9C%EB%B8%8C",
+   "status": "확정"
+  },
+  {
+   "artist": "침착맨",
+   "start": "2026-06-11",
+   "end": "2026-06-21",
+   "category": "방송",
+   "title": "2026 자낳대: 리그 오브 레전드 참가",
+   "detail": "온라인 대회 / TEAM 베릴 서포터 / 약 6년 만의 복귀",
+   "url": "https://namu.wiki/w/%EC%B9%A8%EC%B0%A9%EB%A7%A8",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-06-12",
+   "end": null,
+   "category": "앨범",
+   "title": "'Come Over' 디지털 발매",
+   "detail": "슈가 프로듀싱",
+   "url": "https://www.allkpop.com/article/2026/06/bts-unveils-full-schedule-for-2026-festa-including-return-of-run-bts-and-release-of-come-over",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-06-12",
+   "end": "2026-06-13",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 부산",
+   "detail": "부산아시아드주경기장 / 2회 전석 매진",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "침착맨",
+   "start": "2026-06-12",
+   "end": null,
+   "category": "페스티벌",
+   "title": "2026 유튜브 심포지엄 참석",
+   "detail": "에그이즈커밍 주최 행사",
+   "url": "https://namu.wiki/w/%EC%B9%A8%EC%B0%A9%EB%A7%A8",
+   "status": "확정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-06-13",
+   "end": null,
+   "category": "콘서트",
+   "title": "[Syncopation] 싱가포르",
+   "detail": "Singapore Indoor Stadium",
+   "url": "https://namu.wiki/w/Syncopation",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (JNJM)",
+   "start": "2026-06-13",
+   "end": "2026-06-14",
+   "category": "콘서트",
+   "title": "JNJM FANMEETING [DUALITY] 서울",
+   "detail": "잠실실내체육관 / 3회",
+   "url": "https://www.kotourlive.com/en/concerts/2026-nct-jnjm-fanmeeting-duality-seoul/",
+   "status": "확정"
+  },
+  {
+   "artist": "백예린",
+   "start": "2026-06-13",
+   "end": null,
+   "category": "페스티벌",
+   "title": "DMZ 피스트레인 뮤직 페스티벌 2026",
+   "detail": "강원 철원 고석정 / 밴드 The Volunteers",
+   "url": "https://www.hani.co.kr/arti/culture/music/1263016.html",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-06-13",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 시드니",
+   "detail": "Qudos Bank Arena",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-06-13",
+   "end": "2026-06-14",
+   "category": "콘서트",
+   "title": "EXO PLANET #6 홍콩",
+   "detail": "아시아월드 아레나 / 2회",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-06-14",
+   "end": "2026-06-15",
+   "category": "페스티벌",
+   "title": "2026 울산뮤직페스티벌",
+   "detail": "태화강국가정원 남구둔치",
+   "url": "https://www.stagepick.co.kr/artists/detail/164",
+   "status": "확정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-06-15",
+   "end": null,
+   "category": "앨범",
+   "title": "선공개 싱글 'Crow'",
+   "detail": "미니 9집 'We made' 선공개곡",
+   "url": "https://namu.wiki/w/i-dle",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-06-15",
+   "end": null,
+   "category": "앨범",
+   "title": "미니 2집 'II'",
+   "detail": "타이틀곡 'Do your dance' / 6곡",
+   "url": "https://namu.wiki/w/RIIZE",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-06-16",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 멜버른",
+   "detail": "Rod Laver Arena",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "투모로우바이투게더",
+   "start": "2026-06-16",
+   "end": "2026-06-17",
+   "category": "콘서트",
+   "title": "MOA CON IN JAPAN 후쿠오카",
+   "detail": "일본 후쿠오카 / 2회",
+   "url": "https://www.mhnse.com/news/articleView.html?idxno=514096",
+   "status": "확정"
+  },
+  {
+   "artist": "성시경",
+   "start": "2026-06-19",
+   "end": null,
+   "category": "앨범",
+   "title": "듀엣 싱글 'HEAVEN KNOWS' (with 라이사)",
+   "detail": "인도네시아 슈퍼스타 Raisa와 첫 듀엣 / 전 세계 동시",
+   "url": "https://www.starnewskorea.com/music/2026/06/19/2026061909541558689",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소 (디오)",
+   "start": "2026-06-19",
+   "end": null,
+   "category": "방송",
+   "title": "tvN 예능 '콩콩팜팜' 첫 방송",
+   "detail": "이광수·김우빈과 제주 팜스테이 예능",
+   "url": "https://mhnse.com/news/articleView.html?idxno=1392233",
+   "status": "확정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-06-20",
+   "end": "2026-06-21",
+   "category": "콘서트",
+   "title": "[Syncopation] 요코하마",
+   "detail": "K-Arena Yokohama / 2회",
+   "url": "https://namu.wiki/w/Syncopation",
+   "status": "확정"
+  },
+  {
+   "artist": "데이식스",
+   "start": "2026-06-20",
+   "end": "2026-06-21",
+   "category": "콘서트",
+   "title": "<The DECADE> 고베",
+   "detail": "GLION ARENA KOBE",
+   "url": "https://namu.wiki/w/The%20DECADE",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-06-20",
+   "end": null,
+   "category": "페스티벌",
+   "title": "RAPBEAT FESTIVAL 2026",
+   "detail": "서울 문화비축기지",
+   "url": "https://namu.wiki/w/RIIZE",
+   "status": "확정"
+  },
+  {
+   "artist": "세븐틴",
+   "start": "2026-06-20",
+   "end": "2026-06-21",
+   "category": "콘서트",
+   "title": "10TH FAN MEETING <SEVENTEEN in CARAT LAND>",
+   "detail": "인천아시아드주경기장 / 스타디움 팬미팅",
+   "url": "https://www.topstarnews.net/news/articleView.html?idxno=16102023",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-06-20",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 오클랜드",
+   "detail": "뉴질랜드 Spark Arena",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-06-20",
+   "end": null,
+   "category": "콘서트",
+   "title": "EXO PLANET #6 쿠알라룸푸르",
+   "detail": "내셔널 하키 스타디움",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "이무진",
+   "start": "2026-06-20",
+   "end": null,
+   "category": "페스티벌",
+   "title": "2026 부산원아시아페스티벌 PARK CONCERT",
+   "detail": "부산 화명생태공원",
+   "url": "https://www.stagepick.co.kr/artists/detail/2919",
+   "status": "확정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-06-20",
+   "end": null,
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 홍콩",
+   "detail": "AsiaWorld-Expo Arena",
+   "url": "https://namu.wiki/w/ITZY",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (위시)",
+   "start": "2026-06-21",
+   "end": null,
+   "category": "앨범",
+   "title": "NCT WISH 일본 싱글 'BOY MEETS GIRL'",
+   "detail": "일본 싱글 발매",
+   "url": "https://www.forbes.com/sites/jeffbenjamin/2026/04/16/2026-q2-release-calendar-of-new-kpop-albums-and-singles/",
+   "status": "확정"
+  },
+  {
+   "artist": "빠니보틀",
+   "start": "2026-06-21",
+   "end": null,
+   "category": "방송",
+   "title": "MBC '놀러코스터' 고정 출연 시작",
+   "detail": "MBC TV / 노홍철·고경표·최강록과 공동",
+   "url": "https://namu.wiki/w/%EB%B9%A0%EB%8B%88%EB%B3%B4%ED%8B%80",
+   "status": "확정"
+  },
+  {
+   "artist": "임영웅",
+   "start": "2026-06-23",
+   "end": null,
+   "category": "방송",
+   "title": "SBS 예능 '산골총각 영웅' 첫 방송",
+   "detail": "SBS 화 21시 / '섬총각 영웅' 시즌2 / 고정 출연",
+   "url": "https://www.yna.co.kr/view/AKR20260604061700005",
+   "status": "확정"
+  },
+  {
+   "artist": "투모로우바이투게더",
+   "start": "2026-06-23",
+   "end": "2026-06-24",
+   "category": "콘서트",
+   "title": "MOA CON IN JAPAN 효고",
+   "detail": "일본 효고 / 2회",
+   "url": "https://www.mhnse.com/news/articleView.html?idxno=514096",
+   "status": "확정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-06-24",
+   "end": null,
+   "category": "앨범",
+   "title": "선공개 디지털 싱글 'RUN IT'",
+   "detail": "뮤직비디오 동시 공개",
+   "url": "https://kpopnewswire.com/stray-kids-world-tour-run-it-2026-2027-dates-cities-tickets-comeback-details/",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-06-24",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 도쿄",
+   "detail": "도쿄돔 재입성",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-06-26",
+   "end": "2026-06-27",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 마드리드",
+   "detail": "스페인 Metropolitano / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-06-26",
+   "end": null,
+   "category": "페스티벌",
+   "title": "MyK FESTA 2026",
+   "detail": "고양 KINTEX 제1전시장",
+   "url": "https://namu.wiki/w/RIIZE",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-06-26",
+   "end": null,
+   "category": "방송",
+   "title": "자체 콘텐츠 '에스파티' 첫 공개",
+   "detail": "2년 만의 자체 예능 복귀 / SM 공식 채널",
+   "url": "https://www.news1.kr/entertain/music/6202425",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-06-26",
+   "end": null,
+   "category": "앨범",
+   "title": "미니 14집 'GOLDEN HOUR : Part.5'",
+   "detail": "타이틀곡 'BAD' (브라질리언 펑크)",
+   "url": "https://www.tenasia.co.kr/article/2026062691264",
+   "status": "확정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-06-27",
+   "end": "2026-06-28",
+   "category": "콘서트",
+   "title": "[Syncopation] 홍콩",
+   "detail": "카이탁 스포츠파크 / 2회",
+   "url": "https://namu.wiki/w/Syncopation",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (JNJM)",
+   "start": "2026-06-27",
+   "end": "2026-06-28",
+   "category": "콘서트",
+   "title": "JNJM [DUALITY] 도쿄",
+   "detail": "도쿄체육관 메인 아레나 / 2회",
+   "url": "https://en.wikipedia.org/wiki/2026_in_South_Korean_music",
+   "status": "예정"
+  },
+  {
+   "artist": "악뮤",
+   "start": "2026-06-27",
+   "end": null,
+   "category": "페스티벌",
+   "title": "2026 부산원아시아페스티벌 BIG 콘서트",
+   "detail": "부산아시아드주경기장 / 1일차",
+   "url": "https://www.sedaily.com/article/20040601",
+   "status": "확정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-06-27",
+   "end": "2026-06-28",
+   "category": "페스티벌",
+   "title": "2026 부산원아시아페스티벌 BIG 콘서트",
+   "detail": "부산아시아드주경기장",
+   "url": "https://www.stagepick.co.kr/artists/detail/164",
+   "status": "확정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-06-27",
+   "end": "2026-06-28",
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 가오슝",
+   "detail": "가오슝 아레나 / 2회",
+   "url": "https://namu.wiki/w/ITZY",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-06-28",
+   "end": null,
+   "category": "페스티벌",
+   "title": "2026 부산원아시아페스티벌(BOF)",
+   "detail": "부산 아시아드주경기장",
+   "url": "https://namu.wiki/w/RIIZE",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-06-28",
+   "end": null,
+   "category": "페스티벌",
+   "title": "BST Hyde Park",
+   "detail": "영국 런던 하이드파크",
+   "url": "https://festivaly.eu/en/artists/ateez/303360",
+   "status": "확정"
+  },
+  {
+   "artist": "세븐틴 (디에잇·버논)",
+   "start": "2026-06-29",
+   "end": null,
+   "category": "앨범",
+   "title": "유닛 V8 미니 1집 'V8' 발매",
+   "detail": "타이틀곡 'singsasong' / 여섯 번째 공식 유닛",
+   "url": "https://blog.namanecard.com/en/seventeen-v8-unit-album-tour-2026/",
+   "status": "확정"
+  },
+  {
+   "artist": "태연",
+   "start": "2026-06-29",
+   "end": null,
+   "category": "앨범",
+   "title": "'J-POP REMAKE' 첫 음원 '만찬가' 발매",
+   "detail": "원곡 츠키(tuki.) / MV에 리센느 출연",
+   "url": "https://www.xportsnews.com/article/2165987",
+   "status": "확정"
+  },
+  {
+   "artist": "이무진",
+   "start": "2026-07",
+   "end": null,
+   "category": "방송",
+   "title": "MBC every1 '위대한 가이드3' 출연",
+   "detail": "여행 리얼리티 / 회차 방영일 미확인",
+   "url": "http://www.tvdaily.co.kr/read.php3?aid=17836451211793496010",
+   "status": "추정"
+  },
+  {
+   "artist": "차은우",
+   "start": "2026-07",
+   "end": null,
+   "category": "방송",
+   "title": "국세청 과세 처분 불복, 조세심판 청구",
+   "detail": "조세심판원에 심판청구서 제출",
+   "url": "https://www.hankookilbo.com/news/article/A2026080211210003824",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-07-01",
+   "end": "2026-07-02",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 브뤼셀",
+   "detail": "벨기에 Stade Roi Baudouin / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "곽튜브",
+   "start": "2026-07-03",
+   "end": null,
+   "category": "방송",
+   "title": "'전현무계획 4' 고정 출연 시작",
+   "detail": "MBN·채널S",
+   "url": "https://namu.wiki/w/%EA%B3%BD%ED%8A%9C%EB%B8%8C",
+   "status": "확정"
+  },
+  {
+   "artist": "데이식스",
+   "start": "2026-07-03",
+   "end": "2026-07-05",
+   "category": "콘서트",
+   "title": "<The DECADE> FINALE 서울",
+   "detail": "KSPO DOME 3회 / 10개국 16개 도시 피날레",
+   "url": "https://namu.wiki/w/The%20DECADE",
+   "status": "확정"
+  },
+  {
+   "artist": "블랙핑크 (제니)",
+   "start": "2026-07-03",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Roskilde Festival 2026",
+   "detail": "덴마크 로스킬레",
+   "url": "https://kpopofficial.com/schedule/blackpink/",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-07-03",
+   "end": null,
+   "category": "방송",
+   "title": "유네스코 세계유산위원회(부산) 홍보대사 위촉",
+   "detail": "국가유산청 위촉",
+   "url": "https://www.yna.co.kr/view/AKR20260703021100005",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (JNJM)",
+   "start": "2026-07-04",
+   "end": null,
+   "category": "콘서트",
+   "title": "JNJM [DUALITY] 자카르타",
+   "detail": "Tennis Indoor Senayan",
+   "url": "https://en.wikipedia.org/wiki/2026_in_South_Korean_music",
+   "status": "예정"
+  },
+  {
+   "artist": "레드벨벳 (아이린)",
+   "start": "2026-07-04",
+   "end": null,
+   "category": "콘서트",
+   "title": "IRENE Asia Tour 'I-WILL' 싱가포르",
+   "detail": "The Theatre at Mediacorp",
+   "url": "https://kpopofficial.com/schedule/red-velvet/",
+   "status": "예정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-07-04",
+   "end": "2026-07-05",
+   "category": "콘서트",
+   "title": "EXO PLANET #6 마닐라",
+   "detail": "SM MOA 아레나 / 2회",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-07-04",
+   "end": null,
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 상파울루",
+   "detail": "Allianz Parque",
+   "url": "https://kconcertguide.com/en/tour/enhypen-blood-saga/",
+   "status": "확정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-07-04",
+   "end": null,
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 방콕",
+   "detail": "Impact Arena",
+   "url": "https://namu.wiki/w/ITZY",
+   "status": "확정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-07-06",
+   "end": null,
+   "category": "앨범",
+   "title": "미니 9집 'We made'",
+   "detail": "약 6개월 만의 국내 컴백 / 큐브",
+   "url": "https://namu.wiki/w/i-dle",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-07-06",
+   "end": "2026-07-07",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 런던",
+   "detail": "Tottenham Hotspur Stadium / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "아이유",
+   "start": "2026-07-07",
+   "end": null,
+   "category": "방송",
+   "title": "예거 르쿨트르 글로벌 브랜드 앰버서더 발탁",
+   "detail": "인터뷰 시리즈 공개 / 리베르소 캠페인 예정",
+   "url": "https://magazine.hankyung.com/money/article/202607082227c",
+   "status": "확정"
+  },
+  {
+   "artist": "세븐틴",
+   "start": "2026-07-08",
+   "end": null,
+   "category": "방송",
+   "title": "'고잉 세븐틴' 새 시즌 첫 공개",
+   "detail": "세븐틴 공식 유튜브 / 2026 시즌 리뉴얼",
+   "url": "https://www.allkpop.com/article/2026/07/seventeen-confirms-new-season-of-hit-web-series-going-seventeen-to-premiere-on-july-8",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-07-08",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Rock in Roma 2026",
+   "detail": "이탈리아 로마 Ippodromo delle Capannelle",
+   "url": "https://www.songkick.com/artists/9911549-ateez/gigography",
+   "status": "확정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-07-08",
+   "end": null,
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 리마",
+   "detail": "Estadio Universidad San Marcos",
+   "url": "https://kconcertguide.com/en/tour/enhypen-blood-saga/",
+   "status": "확정"
+  },
+  {
+   "artist": "블랙핑크 (제니)",
+   "start": "2026-07-09",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Mad Cool Festival 2026",
+   "detail": "스페인 마드리드",
+   "url": "https://kpopofficial.com/schedule/blackpink/",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-07-10",
+   "end": "2026-07-24",
+   "category": "콘서트",
+   "title": "JAPAN FANMEETING 'RPG'",
+   "detail": "후쿠오카·도쿄·효고 / 6회 약 5만 관객",
+   "url": "https://www.koreadaily.com/article/20260724183334806",
+   "status": "확정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-07-10",
+   "end": "2026-07-12",
+   "category": "콘서트",
+   "title": "<THIS IS FOR> FINALE 서울",
+   "detail": "KSPO DOME / 3회 / 19개국 81회 투어 피날레 전석 매진",
+   "url": "https://www.koreatimes.co.kr/entertainment/k-pop/20260602/twice-to-close-record-setting-world-tour-with-3-night-finale-in-seoul",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-07-11",
+   "end": "2026-07-12",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 뮌헨",
+   "detail": "독일 Allianz Arena / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (JNJM)",
+   "start": "2026-07-11",
+   "end": null,
+   "category": "콘서트",
+   "title": "JNJM [DUALITY] 마카오",
+   "detail": "The Londoner Arena",
+   "url": "https://en.wikipedia.org/wiki/2026_in_South_Korean_music",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-07-11",
+   "end": "2026-07-12",
+   "category": "콘서트",
+   "title": "TOUR 'PUREFLOW' 서울 (개막)",
+   "detail": "인천 인스파이어 아레나",
+   "url": "https://www.topstarnews.net/news/articleView.html?idxno=16126693",
+   "status": "확정"
+  },
+  {
+   "artist": "세븐틴 (디에잇·버논)",
+   "start": "2026-07-11",
+   "end": "2026-07-12",
+   "category": "콘서트",
+   "title": "VERNON THE8 [V8] LIVE 고양",
+   "detail": "킨텍스 제1전시장 / 2회",
+   "url": "https://blog.namanecard.com/en/seventeen-v8-unit-album-tour-2026/",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-07-11",
+   "end": "2026-07-12",
+   "category": "콘서트",
+   "title": "EXO PLANET #6 도쿄",
+   "detail": "라라 아레나 도쿄베이 / 2회",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-07-11",
+   "end": "2026-07-15",
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 멕시코시티",
+   "detail": "Arena CDMX / 4회",
+   "url": "https://www.songkick.com/artists/10143456-enhypen/gigography",
+   "status": "확정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-07-11",
+   "end": null,
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 마닐라",
+   "detail": "SM Mall of Asia Arena",
+   "url": "https://namu.wiki/w/ITZY",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (위시)",
+   "start": "2026-07-15",
+   "end": null,
+   "category": "앨범",
+   "title": "NCT WISH 일본 더블 싱글",
+   "detail": "'YO-I-DON! / BOY MEETS GIRL'",
+   "url": "https://www.forbes.com/sites/jeffbenjamin/2026/04/16/2026-q2-release-calendar-of-new-kpop-albums-and-singles/",
+   "status": "확정"
+  },
+  {
+   "artist": "빠니보틀",
+   "start": "2026-07-16",
+   "end": null,
+   "category": "영상",
+   "title": "웹예능 '파자마식탁' 진행",
+   "detail": "유튜브 '라꼰즈' / 김풍·권성준·넉살과 격주 목요일",
+   "url": "https://namu.wiki/w/%EB%B9%A0%EB%8B%88%EB%B3%B4%ED%8B%80",
+   "status": "확정"
+  },
+  {
+   "artist": "침착맨",
+   "start": "2026-07-16",
+   "end": null,
+   "category": "영상",
+   "title": "신규 채널 'CHAAK! 챡!' 개설",
+   "detail": "유튜브 신규 채널 / 매주 화·금 업로드",
+   "url": "https://namu.wiki/w/%EC%B9%A8%EC%B0%A9%EB%A7%A8",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-07-17",
+   "end": "2026-07-18",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 파리",
+   "detail": "프랑스 Stade de France / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-07-17",
+   "end": null,
+   "category": "앨범",
+   "title": "싱글 'NORMAL' 발매",
+   "detail": "뮤직비디오 및 한국어 버전 동시 공개",
+   "url": "https://www.koreaherald.com/article/10811068",
+   "status": "확정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-07-17",
+   "end": "2026-07-19",
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 서울 (개막)",
+   "detail": "KSPO DOME / 3회",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-07-17",
+   "end": "2026-07-19",
+   "category": "콘서트",
+   "title": "팬미팅 ATINY'S VOYAGE : TINY MYSTERY",
+   "detail": "서울 고려대 화정체육관 / 3일",
+   "url": "https://namu.wiki/w/ATEEZ",
+   "status": "확정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-07-17",
+   "end": "2026-07-18",
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 댈러스",
+   "detail": "American Airlines Center / 2회",
+   "url": "https://kconcertguide.com/en/tour/enhypen-blood-saga/",
+   "status": "확정"
+  },
+  {
+   "artist": "이무진",
+   "start": "2026-07-17",
+   "end": "2026-07-18",
+   "category": "페스티벌",
+   "title": "DEEPDIVE 2026 고양",
+   "detail": "경기 고양 킨텍스",
+   "url": "https://www.stagepick.co.kr/artists/detail/2919",
+   "status": "확정"
+  },
+  {
+   "artist": "세븐틴 (디에잇·버논)",
+   "start": "2026-07-18",
+   "end": "2026-07-19",
+   "category": "콘서트",
+   "title": "VERNON THE8 [V8] LIVE 홍콩",
+   "detail": "AsiaWorld-Expo Hall 10 / 2회",
+   "url": "https://blog.namanecard.com/en/seventeen-v8-unit-album-tour-2026/",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-07-18",
+   "end": null,
+   "category": "콘서트",
+   "title": "EXO PLANET #6 가오슝",
+   "detail": "가오슝 아레나",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "아이유",
+   "start": "2026-07-20",
+   "end": null,
+   "category": "방송",
+   "title": "건강 문제로 9월 공연·전국투어·정규 6집 연기 발표",
+   "detail": "EDAM 공식입장 및 팬 플랫폼 자필 공지",
+   "url": "https://www.hani.co.kr/arti/culture/music/1269104.html",
+   "status": "확정"
+  },
+  {
+   "artist": "뉴진스",
+   "start": "2026-07-21",
+   "end": null,
+   "category": "영상",
+   "title": "'2026 Summer of NewJeans' 티저 공개",
+   "detail": "공식 유튜브 / 멤버별 솔로 + 4인 재회 클립",
+   "url": "https://www.thefader.com/2026/07/21/newjeans-comeback-teasers-new-music",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-07-21",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 토론토",
+   "detail": "Scotiabank Arena",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-07-21",
+   "end": null,
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 샌디에이고",
+   "detail": "Snapdragon Stadium",
+   "url": "https://kconcertguide.com/en/tour/enhypen-blood-saga/",
+   "status": "확정"
+  },
+  {
+   "artist": "임영웅",
+   "start": "2026-07-21",
+   "end": null,
+   "category": "방송",
+   "title": "'산골총각 영웅' 미발표 자작곡 '또또' 공개",
+   "detail": "SBS / 로이킴·넉살과 리스닝 파티",
+   "url": "https://biz.chosun.com/entertainment/enter_general/2026/07/21/G5QTONZQMNQTCOBXMRQTIYTEGY/",
+   "status": "확정"
+  },
+  {
+   "artist": "뉴진스",
+   "start": "2026-07-22",
+   "end": null,
+   "category": "영상",
+   "title": "데뷔 4주년 스페셜 필름 공개",
+   "detail": "4인 단체 콘텐츠 / 약 2년 만의 4인 합류",
+   "url": "https://www.forbes.com/sites/jeffbenjamin/2026/07/21/newjeans-signal-return-as-4-members-with-new-photos-videos/",
+   "status": "확정"
+  },
+  {
+   "artist": "볼빨간사춘기",
+   "start": "2026-07-22",
+   "end": null,
+   "category": "앨범",
+   "title": "리메이크 싱글 '여름아 부탁해' 발매",
+   "detail": "인디고 원곡 / 적재 편곡 참여",
+   "url": "https://www.edaily.co.kr/News/Read?mediaCodeNo=257&newsId=03414486645517144",
+   "status": "확정"
+  },
+  {
+   "artist": "뉴진스",
+   "start": "2026-07-23",
+   "end": null,
+   "category": "방송",
+   "title": "어도어 손해배상 소송 4차 변론기일",
+   "detail": "서울중앙지법 / 청구액 약 330억9000만 원",
+   "url": "https://www.hankyung.com/article/202607230596H",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-07-23",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 몬트리올",
+   "detail": "Bell Centre",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "블랙핑크 (제니)",
+   "start": "2026-07-24",
+   "end": null,
+   "category": "앨범",
+   "title": "신곡 'Less than a Lover' 발매",
+   "detail": "제니 작사 및 MV 연출 참여",
+   "url": "https://www.koreadaily.com/article/20260720161649931",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-07-24",
+   "end": null,
+   "category": "앨범",
+   "title": "일본 미니 1집 'KISS N TELL'",
+   "detail": "일본 데뷔 미니앨범",
+   "url": "https://namu.wiki/w/aespa",
+   "status": "확정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-07-24",
+   "end": null,
+   "category": "페스티벌",
+   "title": "워터밤 서울 2026",
+   "detail": "일산 킨텍스 글로벌 스테이지 / 1일차",
+   "url": "https://www.sportschosun.com/entertainment/2026-07-24/202607240100151680009706",
+   "status": "확정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-07-25",
+   "end": "2026-07-26",
+   "category": "콘서트",
+   "title": "'PUREFLOW' 오사카",
+   "detail": "오사카성 홀 / 2회",
+   "url": "https://kr.trip.com/blog/lesserafim-jp-concert/",
+   "status": "확정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-07-25",
+   "end": "2026-08-02",
+   "category": "콘서트",
+   "title": "World Tour <RUN IT> 서울",
+   "detail": "KSPO DOME / 5회",
+   "url": "https://inmusicblog.com/k-pop/stray-kids-run-it-world-tour-dates-2026-2027/",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-07-25",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 뉴어크",
+   "detail": "Prudential Center",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-07-26",
+   "end": null,
+   "category": "페스티벌",
+   "title": "WATERBOMB SEOUL 2026",
+   "detail": "고양 KINTEX Global Stage",
+   "url": "https://namu.wiki/w/RIIZE",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소",
+   "start": "2026-07-26",
+   "end": null,
+   "category": "콘서트",
+   "title": "EXO PLANET #6 싱가포르 (최종회)",
+   "detail": "인도어 스타디움 / 투어 총 24회",
+   "url": "https://en.wikipedia.org/wiki/Exo_Planet_6_%E2%80%93_Exhorizon",
+   "status": "확정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-07-26",
+   "end": null,
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 타코마",
+   "detail": "Tacoma Dome",
+   "url": "https://kconcertguide.com/en/tour/enhypen-blood-saga/",
+   "status": "확정"
+  },
+  {
+   "artist": "지코",
+   "start": "2026-07-26",
+   "end": null,
+   "category": "페스티벌",
+   "title": "워터밤 서울 2026 헤드라이너",
+   "detail": "일산 킨텍스 글로벌 스테이지 / 3일차",
+   "url": "https://www.jnilbo.com/news/articleView.html?idxno=90000048889",
+   "status": "확정"
+  },
+  {
+   "artist": "데이식스 (영케이)",
+   "start": "2026-07-27",
+   "end": null,
+   "category": "앨범",
+   "title": "영케이 솔로 정규 2집 'YOUNGEST'",
+   "detail": "타이틀곡 'Shut The Door' / 15곡 전곡 참여",
+   "url": "https://namu.wiki/w/YOUNGEST",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-07-27",
+   "end": null,
+   "category": "앨범",
+   "title": "일본 싱글 타이틀곡 'Sunburst' 선공개",
+   "detail": "하우스 기반 댄스곡",
+   "url": "https://www.koreadaily.com/article/20260724183334806",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-07-28",
+   "end": null,
+   "category": "방송",
+   "title": "일본 신보 발매 기념 현지 쇼케이스",
+   "detail": "일본 현지 쇼케이스",
+   "url": "https://www.tenasia.co.kr/article/2026070826844",
+   "status": "확정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-07-28",
+   "end": "2026-07-29",
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 오클랜드",
+   "detail": "Oakland Arena / 2회",
+   "url": "https://kconcertguide.com/en/tour/enhypen-blood-saga/",
+   "status": "확정"
+  },
+  {
+   "artist": "빠니보틀",
+   "start": "2026-07-29",
+   "end": "2026-08-12",
+   "category": "방송",
+   "title": "디즈니+ '머더클럽' 출연",
+   "detail": "디즈니+ 오리지널 / 6부작 추리 게임쇼",
+   "url": "https://namu.wiki/w/%EB%B9%A0%EB%8B%88%EB%B3%B4%ED%8B%80",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-07-29",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 오스틴",
+   "detail": "Moody Center",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-07-29",
+   "end": null,
+   "category": "앨범",
+   "title": "일본 신보 발매",
+   "detail": "'BAD' 일본어 버전 등 6트랙",
+   "url": "https://www.tenasia.co.kr/article/2026070826844",
+   "status": "확정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-07-30",
+   "end": "2026-08-02",
+   "category": "콘서트",
+   "title": "'PUREFLOW' 가나가와",
+   "detail": "K아레나 요코하마 / 3회",
+   "url": "https://kr.trip.com/blog/lesserafim-jp-concert/",
+   "status": "확정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-07-31",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Lollapalooza Chicago 2026",
+   "detail": "그랜트파크 T-Mobile Stage",
+   "url": "https://www.allkpop.com/article/2026/07/i-dle-rocks-lollapalooza-chicago-with-explosive-live-performance",
+   "status": "확정"
+  },
+  {
+   "artist": "레드벨벳",
+   "start": "2026-07-31",
+   "end": "2026-08-02",
+   "category": "콘서트",
+   "title": "FAN-CON 'A Day in Red & Velvet'",
+   "detail": "고려대 화정체육관 / 3회 전석 매진 / Beyond LIVE",
+   "url": "https://namu.wiki/w/A%20Day%20in%20Red%20&%20Velvet",
+   "status": "확정"
+  },
+  {
+   "artist": "백예린",
+   "start": "2026-07-31",
+   "end": null,
+   "category": "페스티벌",
+   "title": "2026 인천펜타포트 락 페스티벌",
+   "detail": "송도달빛축제공원 / 밴드 The Volunteers",
+   "url": "https://www.sportalkorea.com/news/articleView.html?idxno=2025052909553423582",
+   "status": "확정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-07-31",
+   "end": "2026-08-02",
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 부산",
+   "detail": "사직실내체육관",
+   "url": "https://www.osen.co.kr/article/G1112851492",
+   "status": "확정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-07-31",
+   "end": null,
+   "category": "방송",
+   "title": "tvN '우주떡집' 첫 방송",
+   "detail": "tvN 금 20시 35분 / 나영석 PD / 메인 셰프 고정",
+   "url": "https://tvn.cjenm.com/ko/spacericecake/",
+   "status": "확정"
+  },
+  {
+   "artist": "뉴진스",
+   "start": "2026-08",
+   "end": null,
+   "category": "앨범",
+   "title": "4인 체제 컴백(신보) 예고",
+   "detail": "2024년 'Supernatural' 이후 첫 신보 / 발매일 미발표",
+   "url": "https://www.thefader.com/2026/07/21/newjeans-comeback-teasers-new-music",
+   "status": "추정"
+  },
+  {
+   "artist": "엑소 (디오)",
+   "start": "2026-08",
+   "end": null,
+   "category": "앨범",
+   "title": "도경수 솔로 신보 발매",
+   "detail": "1년 1개월 만의 솔로 컴백",
+   "url": "https://www.cineplay.co.kr/en-us/articles/28249",
+   "status": "예정"
+  },
+  {
+   "artist": "원지의 하루",
+   "start": "2026-08",
+   "end": null,
+   "category": "방송",
+   "title": "ENA '짐쌀라비움' 고정 출연",
+   "detail": "ENA / 가비·이시안·하리무와 공동",
+   "url": "https://namu.wiki/w/%EC%9B%90%EC%A7%80%EC%9D%98%ED%95%98%EB%A3%A8",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-08-01",
+   "end": "2026-08-02",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 뉴저지",
+   "detail": "MetLife Stadium / 2회",
+   "url": "https://www.metlifestadium.com/events/detail/bts-world-tour",
+   "status": "확정"
+  },
+  {
+   "artist": "블랙핑크 (제니)",
+   "start": "2026-08-01",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Lollapalooza Chicago 2026 헤드라이너",
+   "detail": "시카고 그랜트파크 / 3일차 마지막 무대",
+   "url": "https://www.timeout.com/chicago/news/jennie-at-lollapalooza-2026-start-time-and-everything-to-know-073126",
+   "status": "확정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-08-01",
+   "end": null,
+   "category": "앨범",
+   "title": "디지털 앨범 'SKZ-REPLAY 2026 Pt.1'",
+   "detail": "팬클럽 STAY 8주년 기념 / 17곡",
+   "url": "https://www.kfriday.net/posts/k-pop/1348",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-08-01",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 로스앤젤레스",
+   "detail": "Kia Forum",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-08-01",
+   "end": null,
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 라스베이거스",
+   "detail": "T-Mobile Arena",
+   "url": "https://www.axs.com/events/1380757/enhypen-tickets",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (웨이션브이)",
+   "start": "2026-08-02",
+   "end": null,
+   "category": "페스티벌",
+   "title": "SummerStage in Central Park",
+   "detail": "미국 뉴욕 센트럴파크",
+   "url": "https://www.allkpop.com/article/2026/07/wayv-to-open-born-this-way-tour-in-seoul-after-vision-wings-comeback",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-08-02",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Lollapalooza Chicago 2026",
+   "detail": "시카고 그랜트파크 Allianz Stage / 마지막 날",
+   "url": "https://www.kpopstarz.com/articles/323203/20260731/aespas-lollapalooza-2026-set-time-confirmed-when-how-watch.htm",
+   "status": "확정"
+  },
+  {
+   "artist": "레드벨벳",
+   "start": "2026-08-03",
+   "end": null,
+   "category": "앨범",
+   "title": "여름 미니앨범 'Velvet Summer'",
+   "detail": "2년 2개월 만의 완전체 컴백",
+   "url": "https://namu.wiki/w/Velvet%20Summer",
+   "status": "확정"
+  },
+  {
+   "artist": "백예린",
+   "start": "2026-08-03",
+   "end": null,
+   "category": "앨범",
+   "title": "정규 3집 'Flash and Core' 2LP 발매",
+   "detail": "소니뮤직 / 180g White 2LP 정식 출고",
+   "url": "https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=388311455",
+   "status": "확정"
+  },
+  {
+   "artist": "세븐틴 (디노)",
+   "start": "2026-08-03",
+   "end": null,
+   "category": "앨범",
+   "title": "디노 솔로 앨범 발매",
+   "detail": "개인 솔로 프로젝트 음반",
+   "url": "https://www.topstarnews.net/news/articleView.html?idxno=16102023",
+   "status": "예정"
+  },
+  {
+   "artist": "있지 (유나)",
+   "start": "2026-08-03",
+   "end": null,
+   "category": "영상",
+   "title": "tvN 드라마 '최애의 사원' 첫 방송",
+   "detail": "신유나 톱배우 역 / TVING 스트리밍",
+   "url": "https://v.daum.net/v/20260624135403171",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-08-04",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 오클랜드(미국)",
+   "detail": "Oakland Arena",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-08-04",
+   "end": "2026-08-06",
+   "category": "콘서트",
+   "title": "팬미팅 TINY MYSTERY in JAPAN",
+   "detail": "K-아레나 요코하마 / 3일",
+   "url": "https://namu.wiki/w/ATEEZ",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-08-05",
+   "end": "2026-08-06",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 폭스보로",
+   "detail": "Gillette Stadium / 2회",
+   "url": "https://www.gillettestadium.com/events/bts-world-tour/",
+   "status": "확정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-08-07",
+   "end": null,
+   "category": "앨범",
+   "title": "미니 10집 'THIS & THAT'",
+   "detail": "8트랙 수록",
+   "url": "https://kpopnewswire.com/stray-kids-world-tour-run-it-2026-2027-dates-cities-tickets-comeback-details/",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-08-07",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 시애틀",
+   "detail": "Climate Pledge Arena",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-08-07",
+   "end": "2026-08-08",
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 서울 (개막)",
+   "detail": "고척스카이돔 / 2회 / 신규 월드투어 25개 지역",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "확정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-08-08",
+   "end": "2026-08-09",
+   "category": "콘서트",
+   "title": "'PUREFLOW' 시즈오카",
+   "detail": "에코파 아레나 / 2회",
+   "url": "https://kr.trip.com/blog/lesserafim-jp-concert/",
+   "status": "확정"
+  },
+  {
+   "artist": "아이유",
+   "start": "2026-08-08",
+   "end": null,
+   "category": "방송",
+   "title": "공식 팬클럽 '유애나' 8기 종료·9기 모집 예고",
+   "detail": "EDAM엔터테인먼트 공지",
+   "url": "http://www.tvdaily.co.kr/read.php3?aid=17859983251796761010",
+   "status": "확정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-08-08",
+   "end": "2026-08-09",
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 부산",
+   "detail": "사직실내체육관 / 2회 / 신곡 최초 공개",
+   "url": "https://www.slist.kr/news/articleView.html?idxno=757444",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-08-09",
+   "end": null,
+   "category": "방송",
+   "title": "2026 SBS 가요대전 SUMMER",
+   "detail": "고양 KINTEX / SBS 생중계",
+   "url": "https://namu.wiki/w/2026%20SBS%20%EA%B0%80%EC%9A%94%EB%8C%80%EC%A0%84:%20SUMMER",
+   "status": "확정"
+  },
+  {
+   "artist": "레드벨벳",
+   "start": "2026-08-09",
+   "end": null,
+   "category": "방송",
+   "title": "2026 SBS 가요대전 SUMMER",
+   "detail": "고양 KINTEX / SBS 생중계",
+   "url": "https://namu.wiki/w/2026%20SBS%20%EA%B0%80%EC%9A%94%EB%8C%80%EC%A0%84:%20SUMMER",
+   "status": "확정"
+  },
+  {
+   "artist": "볼빨간사춘기",
+   "start": "2026-08-09",
+   "end": null,
+   "category": "페스티벌",
+   "title": "2026 SBS 가요대전 Summer",
+   "detail": "일산 킨텍스 / 공식 팬클럽 좌석 공지 기준",
+   "url": "https://bol4.bstage.in/surveys/6a65da62f15f77471cefe4fb",
+   "status": "예정"
+  },
+  {
+   "artist": "세븐틴",
+   "start": "2026-08-09",
+   "end": null,
+   "category": "페스티벌",
+   "title": "SBS 가요대전 SUMMER 2026",
+   "detail": "고양 킨텍스",
+   "url": "https://kpopofficial.com/schedule/seventeen/",
+   "status": "추정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-08-09",
+   "end": null,
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 밴쿠버",
+   "detail": "Rogers Arena",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "확정"
+  },
+  {
+   "artist": "(여자)아이들 (미연)",
+   "start": "2026-08-10",
+   "end": null,
+   "category": "앨범",
+   "title": "미연 일본 디지털 싱글 'RUN AWAY'",
+   "detail": "미연 개인 일본 싱글",
+   "url": "https://kpopofficial.com/schedule/i-dle/",
+   "status": "예정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-08-10",
+   "end": "2026-08-11",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 볼티모어",
+   "detail": "M&T Bank Stadium / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "NCT (웨이션브이)",
+   "start": "2026-08-10",
+   "end": null,
+   "category": "앨범",
+   "title": "WayV 미니 8집 'Vision Wings'",
+   "detail": "중국풍 힙합 타이틀곡 / 7곡",
+   "url": "https://www.allkpop.com/article/2026/07/wayv-to-open-born-this-way-tour-in-seoul-after-vision-wings-comeback",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-08-11",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 타이베이",
+   "detail": "타이베이돔",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "유재석",
+   "start": "2026-08-11",
+   "end": null,
+   "category": "방송",
+   "title": "SBS '틈만나면,' 시즌5 첫 방송",
+   "detail": "SBS 화 21시 / 유연석과 공동 MC / 첫 게스트 황정민·정호연",
+   "url": "https://www.starnewskorea.com/broadcast-show/2026/08/10/2026081008122059756",
+   "status": "확정"
+  },
+  {
+   "artist": "데이식스 (영케이)",
+   "start": "2026-08-14",
+   "end": "2026-08-16",
+   "category": "콘서트",
+   "title": "Young K 'YOUNGEST' 인천",
+   "detail": "인스파이어 아레나 3회 전석 매진 / Beyond LIVE",
+   "url": "https://namu.wiki/w/YOUNGEST",
+   "status": "확정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-08-14",
+   "end": null,
+   "category": "페스티벌",
+   "title": "SUMMER SONIC 2026 OSAKA",
+   "detail": "일본 오사카 / 최종일 라인업",
+   "url": "https://niewmedia.com/en/news/2603summersonic02/",
+   "status": "확정"
+  },
+  {
+   "artist": "투모로우바이투게더",
+   "start": "2026-08-14",
+   "end": "2026-08-16",
+   "category": "페스티벌",
+   "title": "KCON LA 2026 헤드라이너",
+   "detail": "Crypto.com Arena / NCT 127·ZB1 등과 합동",
+   "url": "https://www.songkick.com/festivals/2548134-kcon-la/id/43136370-kcon-la-2026",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-08-15",
+   "end": "2026-08-16",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 알링턴",
+   "detail": "AT&T Stadium / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "이무진",
+   "start": "2026-08-15",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Love and Peace Festival 2026 (출연 취소)",
+   "detail": "주최 측 사정으로 8월 4일 출연 취소 발표",
+   "url": "https://www.starnewskorea.com/star/2026/08/05/2026080510330743465",
+   "status": "확정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-08-15",
+   "end": null,
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 마카오",
+   "detail": "The Venetian Arena",
+   "url": "https://namu.wiki/w/ITZY",
+   "status": "확정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-08-16",
+   "end": null,
+   "category": "페스티벌",
+   "title": "SUMMER SONIC 2026 TOKYO",
+   "detail": "일본 지바 / 최종일 라인업",
+   "url": "https://niewmedia.com/en/news/2603summersonic02/",
+   "status": "확정"
+  },
+  {
+   "artist": "엑소 (디오)",
+   "start": "2026-08-16",
+   "end": null,
+   "category": "콘서트",
+   "title": "도경수 일본 솔로 팬미팅",
+   "detail": "일본 개최 / 장소 미공개",
+   "url": "https://www.cineplay.co.kr/en-us/articles/28249",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-08-18",
+   "end": "2026-08-19",
+   "category": "콘서트",
+   "title": "'PUREFLOW' 미야기",
+   "detail": "세키스이 하임 슈퍼 아레나 / 2회",
+   "url": "https://kr.trip.com/blog/lesserafim-jp-concert/",
+   "status": "확정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-08-18",
+   "end": null,
+   "category": "앨범",
+   "title": "일본 두 번째 디지털 싱글",
+   "detail": "타이틀 미공개",
+   "url": "https://www.osen.co.kr/article/G1112851492",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-08-19",
+   "end": null,
+   "category": "앨범",
+   "title": "빅뱅 디지털 싱글 'BiiiG' 발매",
+   "detail": "데뷔 20주년 당일 / 4년 4개월 만",
+   "url": "https://www.yna.co.kr/view/AKR20260810020900005",
+   "status": "확정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-08-21",
+   "end": "2026-08-23",
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 가나가와",
+   "detail": "K-Arena Yokohama / 3회",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "확정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-08-21",
+   "end": null,
+   "category": "앨범",
+   "title": "미니 8집 'THE SIN : BLISS'",
+   "detail": "6곡 / 6인 체제 첫 앨범",
+   "url": "https://www.mt.co.kr/amp/entertainment/2026/06/19/2026061916007284928",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-08-21",
+   "end": "2026-08-23",
+   "category": "콘서트",
+   "title": "BIGBANG [XX : COSMOS] 고양",
+   "detail": "고양종합운동장 주경기장 / 3회차 전석 매진",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-08-22",
+   "end": "2026-08-23",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 토론토",
+   "detail": "캐나다 Rogers Stadium / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "NCT (드림)",
+   "start": "2026-08-22",
+   "end": "2026-08-23",
+   "category": "콘서트",
+   "title": "DREAM 10주년 <더 스위트 드림 호텔>",
+   "detail": "인천 인스파이어 아레나 / 2회",
+   "url": "https://www.munhwa.com/article/11595674",
+   "status": "예정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-08-22",
+   "end": null,
+   "category": "페스티벌",
+   "title": "워터밤 속초 2026",
+   "detail": "한화리조트 설악 쏘라노",
+   "url": "http://www.tvdaily.co.kr/read.php3?aid=17848781541794979010",
+   "status": "예정"
+  },
+  {
+   "artist": "NCT (127)",
+   "start": "2026-08-24",
+   "end": null,
+   "category": "앨범",
+   "title": "NCT 127 정규 7집 'BLINGY'",
+   "detail": "9트랙 / 데뷔 10주년 기념작 / 5인 프로모션",
+   "url": "https://www.billboard.com/music/pop/nct-127-release-date-7th-full-length-album-blingy-details-1236303316/",
+   "status": "확정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-08-26",
+   "end": null,
+   "category": "앨범",
+   "title": "일본 싱글 3집 'Sunburst'",
+   "detail": "일본 정식 발매",
+   "url": "https://namu.wiki/w/RIIZE",
+   "status": "예정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-08-27",
+   "end": "2026-08-28",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 시카고",
+   "detail": "Soldier Field / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "(여자)아이들",
+   "start": "2026-08-29",
+   "end": null,
+   "category": "콘서트",
+   "title": "[Syncopation] 마카오 (최종회)",
+   "detail": "Galaxy Arena / 투어 최종회차",
+   "url": "https://www.fantopia.io/blog/en/2026-i-dle-world-tour-syncopation-macau.html",
+   "status": "확정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-08-29",
+   "end": "2026-08-30",
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 사가",
+   "detail": "SAGA아레나 / 2회",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "볼빨간사춘기",
+   "start": "2026-08-29",
+   "end": "2026-08-30",
+   "category": "페스티벌",
+   "title": "서스테이너블 웨이브 페스티벌 2026",
+   "detail": "인천문학경기장 / god·에픽하이·하이라이트 등 11팀",
+   "url": "https://www.bntnews.co.kr/article/view/bnt202607060111",
+   "status": "확정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-08-29",
+   "end": "2026-08-30",
+   "category": "콘서트",
+   "title": "<RUN IT> 도쿄",
+   "detail": "MUFG 스타디움 / 2회",
+   "url": "https://inmusicblog.com/k-pop/stray-kids-run-it-world-tour-dates-2026-2027/",
+   "status": "예정"
+  },
+  {
+   "artist": "블랙핑크 (리사)",
+   "start": "2026-09",
+   "end": null,
+   "category": "영상",
+   "title": "다큐 'Always Lalisa' 월드 프리미어",
+   "detail": "제51회 토론토국제영화제 갈라 부문",
+   "url": "https://www.billboard.com/music/pop/doc-blackpink-lisa-always-lalisa-world-premiere-toronto-fest-1236298190/",
+   "status": "예정"
+  },
+  {
+   "artist": "빠니보틀",
+   "start": "2026-09",
+   "end": null,
+   "category": "방송",
+   "title": "디즈니+ '술래게임' 출연",
+   "detail": "디즈니+ 오리지널 추격 서바이벌",
+   "url": "https://namu.wiki/w/%EB%B9%A0%EB%8B%88%EB%B3%B4%ED%8B%80",
+   "status": "예정"
+  },
+  {
+   "artist": "아이유",
+   "start": "2026-09",
+   "end": null,
+   "category": "콘서트",
+   "title": "고양 스타디움 단독 콘서트 — 연기됨",
+   "detail": "건강 문제로 연기 / 변경 일정 추후 공지",
+   "url": "https://www.nocutnews.co.kr/news/6550797",
+   "status": "추정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-09-01",
+   "end": "2026-09-06",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 로스앤젤레스",
+   "detail": "SoFi Stadium / 4회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-09-02",
+   "end": "2026-09-03",
+   "category": "콘서트",
+   "title": "'PUREFLOW' 후쿠오카",
+   "detail": "마린멧세 후쿠오카 / 2회",
+   "url": "https://kr.trip.com/blog/lesserafim-jp-concert/",
+   "status": "확정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-09-04",
+   "end": "2026-09-06",
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 홍콩",
+   "detail": "AsiaWorld Arena / 다회차",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-09-04",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 상파울루",
+   "detail": "Mercado Livre Arena Pacaembu",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "임영웅",
+   "start": "2026-09-04",
+   "end": "2026-09-06",
+   "category": "콘서트",
+   "title": "IM HERO - THE STADIUM 2 고양",
+   "detail": "고양종합운동장 주경기장 / 3일 / 물고기뮤직·CJ ENM",
+   "url": "https://www.cbci.co.kr/news/articleView.html?idxno=593942",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-09-04",
+   "end": "2026-09-05",
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 오클랜드",
+   "detail": "미국 Oakland Coliseum",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "성시경",
+   "start": "2026-09-05",
+   "end": "2026-09-06",
+   "category": "콘서트",
+   "title": "2026 성시경 with friends [자, 오늘은]",
+   "detail": "올림픽공원 88잔디마당 / 양희은·거미·권진아 등 합동",
+   "url": "https://www.bntnews.co.kr/article/view/bnt202607210213",
+   "status": "확정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-09-05",
+   "end": "2026-09-06",
+   "category": "콘서트",
+   "title": "<RUN IT> 나고야",
+   "detail": "반테린 돔 나고야 / 2회",
+   "url": "https://inmusicblog.com/k-pop/stray-kids-run-it-world-tour-dates-2026-2027/",
+   "status": "예정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-09-05",
+   "end": null,
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 타이베이",
+   "detail": "타이베이 아레나",
+   "url": "https://namu.wiki/w/ITZY",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-09-06",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 산티아고",
+   "detail": "칠레 Movistar Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-09-09",
+   "end": "2026-09-10",
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 오사카",
+   "detail": "오사카성홀 / 2회",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-09-09",
+   "end": null,
+   "category": "페스티벌",
+   "title": "STRAYCITY 보고타",
+   "detail": "콜롬비아 Vive Claro / JYP·라이브네이션 신설 페스티벌",
+   "url": "https://www.koreajoongangdaily.com/entertainment/live-nation-jyp-launch-straycity-festival-with-stray-kids-headlining-three-latin-american-cities/12602187",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-09-09",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 리마",
+   "detail": "페루 Costa 21",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-09-11",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Rock in Rio 2026 헤드라이너",
+   "detail": "브라질 리우 / K-POP 최초 헤드라이너",
+   "url": "https://www.koreajoongangdaily.com/entertainment/live-nation-jyp-launch-straycity-festival-with-stray-kids-headlining-three-latin-american-cities/12602187",
+   "status": "예정"
+  },
+  {
+   "artist": "아이브",
+   "start": "2026-09-11",
+   "end": "2026-09-13",
+   "category": "콘서트",
+   "title": "2ND WORLD TOUR 타이베이",
+   "detail": "타이베이 아레나 / 다회차",
+   "url": "https://ive.fandom.com/wiki/IVE_The_2nd_World_Tour_%22SHOW_WHAT_I_AM%22",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-09-11",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 멕시코시티",
+   "detail": "Palacio de los Deportes",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-09-11",
+   "end": null,
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 런던",
+   "detail": "OVO Arena Wembley",
+   "url": "https://www.songkick.com/artists/9863584-itzy/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-09-11",
+   "end": null,
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 이스트러더퍼드",
+   "detail": "MetLife Stadium",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (웨이션브이)",
+   "start": "2026-09-12",
+   "end": "2026-09-13",
+   "category": "콘서트",
+   "title": "WayV [BORN THIS Way] 서울",
+   "detail": "KBS아레나 / 2회",
+   "url": "https://www.allkpop.com/article/2026/07/wayv-to-open-born-this-way-tour-in-seoul-after-vision-wings-comeback",
+   "status": "예정"
+  },
+  {
+   "artist": "라이즈",
+   "start": "2026-09-12",
+   "end": "2026-09-13",
+   "category": "콘서트",
+   "title": "'Ch. RIIZE : ON AIR' 3주년 팬미팅",
+   "detail": "데뷔 3주년 기념",
+   "url": "https://namu.wiki/w/RIIZE",
+   "status": "예정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-09-12",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Music Bank World Tour 바르셀로나",
+   "detail": "Estadi Olímpic / ENHYPEN·NMIXX 등과 합동",
+   "url": "https://www.kpopconcertseurope.com/post/music-bank-barcelona",
+   "status": "확정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-09-12",
+   "end": null,
+   "category": "페스티벌",
+   "title": "Music Bank World Tour 바르셀로나",
+   "detail": "Estadi Olímpic / ATEEZ·NMIXX 등과 합동",
+   "url": "https://www.kpopconcertseurope.com/post/music-bank-barcelona",
+   "status": "예정"
+  },
+  {
+   "artist": "이영지",
+   "start": "2026-09-12",
+   "end": null,
+   "category": "페스티벌",
+   "title": "2026 이슬라이브 페스티벌",
+   "detail": "인천 송도 달빛축제공원",
+   "url": "https://www.newsinside.kr/news/articleView.html?idxno=4901368",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-09-13",
+   "end": null,
+   "category": "페스티벌",
+   "title": "BlizzCon 2026 폐막 공연",
+   "detail": "미국 / 3년 만의 재초청 메인 무대",
+   "url": "https://www.tenasia.co.kr/article/2026070703824",
+   "status": "예정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-09-13",
+   "end": null,
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 암스테르담",
+   "detail": "AFAS Live",
+   "url": "https://www.songkick.com/artists/9863584-itzy/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-09-14",
+   "end": null,
+   "category": "페스티벌",
+   "title": "STRAYCITY 부에노스아이레스",
+   "detail": "이포드로모 데 산 이시드로",
+   "url": "https://www.koreajoongangdaily.com/entertainment/live-nation-jyp-launch-straycity-festival-with-stray-kids-headlining-three-latin-american-cities/12602187",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-09-15",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 해밀턴",
+   "detail": "캐나다 TD Coliseum",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-09-15",
+   "end": null,
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 파리",
+   "detail": "Zénith Paris La Villette",
+   "url": "https://www.songkick.com/artists/9863584-itzy/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-09-16",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 로스앤젤레스 (북미 개막)",
+   "detail": "Crypto.com Arena",
+   "url": "https://www.songkick.com/artists/10225495-le-sserafim/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-09-17",
+   "end": null,
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 프랑크푸르트",
+   "detail": "Festhalle Frankfurt",
+   "url": "https://www.songkick.com/artists/9863584-itzy/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "NCT (127)",
+   "start": "2026-09-18",
+   "end": "2026-09-20",
+   "category": "콘서트",
+   "title": "127 'NEO CITY : SEOUL – THE REDLINE'",
+   "detail": "KSPO DOME / 3회 전석 매진",
+   "url": "https://www.billboard.com/music/pop/nct-127-release-date-7th-full-length-album-blingy-details-1236303316/",
+   "status": "확정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-09-18",
+   "end": null,
+   "category": "페스티벌",
+   "title": "2026 iHeartRadio Music Festival",
+   "detail": "라스베이거스 / K팝 걸그룹 최초",
+   "url": "https://www.etnews.com/20260702000154",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-09-18",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 뉴욕",
+   "detail": "UBS Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-09-19",
+   "end": "2026-09-20",
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 미야기",
+   "detail": "세키스이하임 슈퍼아레나 / 2회",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-09-19",
+   "end": "2026-09-20",
+   "category": "콘서트",
+   "title": "<RUN IT> 오사카",
+   "detail": "교세라 돔 / 2회",
+   "url": "https://inmusicblog.com/k-pop/stray-kids-run-it-world-tour-dates-2026-2027/",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-09-19",
+   "end": null,
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 파리",
+   "detail": "Stade de France",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-09-20",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 타코마",
+   "detail": "Tacoma Dome",
+   "url": "https://www.songkick.com/artists/10225495-le-sserafim/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "이무진",
+   "start": "2026-09-20",
+   "end": null,
+   "category": "페스티벌",
+   "title": "2026 Asia Top Artist Festival",
+   "detail": "서울 난지한강공원",
+   "url": "https://www.atafestival.com/",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-09-22",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 워싱턴 D.C.",
+   "detail": "Capital One Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-09-23",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 새너제이",
+   "detail": "SAP Center",
+   "url": "https://www.songkick.com/artists/10225495-le-sserafim/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-09-24",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 애틀랜타",
+   "detail": "State Farm Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-09-25",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 피닉스",
+   "detail": "Mortgage Matchup Center",
+   "url": "https://www.songkick.com/artists/10225495-le-sserafim/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-09-25",
+   "end": "2026-09-26",
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 나가노",
+   "detail": "빅햇 / 2회",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-09-25",
+   "end": null,
+   "category": "페스티벌",
+   "title": "STRAYCITY 멕시코시티",
+   "detail": "에스타디오 GNP 세구로스",
+   "url": "https://www.koreajoongangdaily.com/entertainment/live-nation-jyp-launch-straycity-festival-with-stray-kids-headlining-three-latin-american-cities/12602187",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-09-26",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 마이애미",
+   "detail": "Kaseya Center",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-09-26",
+   "end": null,
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 런던",
+   "detail": "Tottenham Hotspur Stadium",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "지코",
+   "start": "2026-09-26",
+   "end": null,
+   "category": "콘서트",
+   "title": "2026 ZICO LIVE : HONG KONG HIGHWAY",
+   "detail": "AsiaWorld-Expo 홀7 / 8년 만의 홍콩 단독",
+   "url": "https://www.chosun.com/entertainments/music/2026/07/14/MEZGKZTDGU3TQMLBMVSTKOBUGA/",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-09-27",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 포트워스",
+   "detail": "Dickies Arena",
+   "url": "https://www.songkick.com/artists/10225495-le-sserafim/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-09-28",
+   "end": null,
+   "category": "앨범",
+   "title": "정규 1집 리패키지 앨범",
+   "detail": "'HOME' 리패키지 국내 컴백",
+   "url": "https://www.osen.co.kr/article/G1112851492",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-09-29",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 댈러스",
+   "detail": "American Airlines Center",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-09-30",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 올랜도",
+   "detail": "Kia Center",
+   "url": "https://www.songkick.com/artists/10225495-le-sserafim/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "성시경",
+   "start": "2026-09-30",
+   "end": null,
+   "category": "앨범",
+   "title": "일본 리메이크 앨범 'LOVE' 발매",
+   "detail": "일본 명곡 리메이크",
+   "url": "https://www.yna.co.kr/view/AKR20260709168700005",
+   "status": "예정"
+  },
+  {
+   "artist": "곽튜브",
+   "start": "2026-10",
+   "end": null,
+   "category": "방송",
+   "title": "'지구마불 세계여행 4'",
+   "detail": "ENA·유튜브 / 빠니보틀·원지 동반 / MC 노홍철·주우재",
+   "url": "https://namu.wiki/w/%EC%A7%80%EA%B5%AC%EB%A7%88%EB%B6%88%20%EC%84%B8%EA%B3%84%EC%97%AC%ED%96%89%204",
+   "status": "예정"
+  },
+  {
+   "artist": "레드벨벳 (조이)",
+   "start": "2026-10",
+   "end": null,
+   "category": "영상",
+   "title": "드라마 '유일무이 로맨스'",
+   "detail": "TVING·Viu·ABEMA / 조이 주연 / 하반기 공개",
+   "url": "https://namu.wiki/w/%EC%9C%A0%EC%9D%BC%EB%AC%B4%EC%9D%B4%20%EB%A1%9C%EB%A7%A8%EC%8A%A4(%EB%93%9C%EB%9D%BC%EB%A7%88)",
+   "status": "추정"
+  },
+  {
+   "artist": "빠니보틀",
+   "start": "2026-10",
+   "end": null,
+   "category": "방송",
+   "title": "'지구마불 세계여행 4'",
+   "detail": "ENA·유튜브 / 곽튜브·원지 동반",
+   "url": "https://namu.wiki/w/%EC%A7%80%EA%B5%AC%EB%A7%88%EB%B6%88%20%EC%84%B8%EA%B3%84%EC%97%AC%ED%96%89%204",
+   "status": "예정"
+  },
+  {
+   "artist": "세븐틴 (정한·조슈아)",
+   "start": "2026-10",
+   "end": null,
+   "category": "앨범",
+   "title": "정한X조슈아 유닛 '비주얼즈' 데뷔",
+   "detail": "일곱 번째 유닛 / 정한 소집해제 후 첫 활동",
+   "url": "https://www.tenasia.co.kr/article/2026070680844",
+   "status": "예정"
+  },
+  {
+   "artist": "원지의 하루",
+   "start": "2026-10",
+   "end": null,
+   "category": "방송",
+   "title": "'지구마불 세계여행 4'",
+   "detail": "ENA·유튜브 / 빠니보틀·곽튜브 동반",
+   "url": "https://namu.wiki/w/%EC%A7%80%EA%B5%AC%EB%A7%88%EB%B6%88%20%EC%84%B8%EA%B3%84%EC%97%AC%ED%96%89%204",
+   "status": "예정"
+  },
+  {
+   "artist": "태연",
+   "start": "2026-10",
+   "end": null,
+   "category": "앨범",
+   "title": "정규 앨범 발매 예정",
+   "detail": "SM 2026년 4분기 라인업 포함",
+   "url": "https://www.starnewskorea.com/music/2026/08/05/2026080514240981299",
+   "status": "예정"
+  },
+  {
+   "artist": "트와이스",
+   "start": "2026-10",
+   "end": null,
+   "category": "앨범",
+   "title": "신보 발매 (보도)",
+   "detail": "JYP 내부 일정 기준 4분기 컴백설 / 공식 발표 없음",
+   "url": "https://en.wikipedia.org/wiki/This_Is_For_World_Tour",
+   "status": "추정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-10-02",
+   "end": "2026-10-03",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 보고타",
+   "detail": "콜롬비아 Estadio El Campín / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-10-02",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 시카고",
+   "detail": "United Center",
+   "url": "https://www.songkick.com/artists/10225495-le-sserafim/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "엑소 (디오)",
+   "start": "2026-10-02",
+   "end": "2026-10-04",
+   "category": "콘서트",
+   "title": "DOH KYUNG SOO [DAY OFF] 서울",
+   "detail": "티켓링크 라이브 아레나 / 3회 / 투어 개막",
+   "url": "https://www.beyondpost.co.kr/view.php?ud=202608101433587598d3244b4fed_30",
+   "status": "예정"
+  },
+  {
+   "artist": "NCT (127)",
+   "start": "2026-10-03",
+   "end": null,
+   "category": "콘서트",
+   "title": "127 'THE REDLINE' 자카르타",
+   "detail": "인도네시아",
+   "url": "https://www.billboard.com/music/pop/nct-127-release-date-7th-full-length-album-blingy-details-1236303316/",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-10-03",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 로스앤젤레스",
+   "detail": "Intuit Dome",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "있지",
+   "start": "2026-10-03",
+   "end": null,
+   "category": "콘서트",
+   "title": "<TUNNEL VISION> 싱가포르",
+   "detail": "Singapore Indoor Stadium",
+   "url": "https://www.songkick.com/artists/9863584-itzy/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "성시경",
+   "start": "2026-10-04",
+   "end": null,
+   "category": "콘서트",
+   "title": "성시경 일본 단독 공연",
+   "detail": "도쿄 가든 씨어터",
+   "url": "https://www.yna.co.kr/view/AKR20260709168700005",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-10-05",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 워싱턴 D.C.",
+   "detail": "Capital One Arena",
+   "url": "https://www.songkick.com/artists/10225495-le-sserafim/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-10-06",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 오클랜드",
+   "detail": "Oakland Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-10-07",
+   "end": "2026-10-10",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 리마",
+   "detail": "페루 Estadio San Marcos / 3회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-10-08",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 뉴어크",
+   "detail": "Prudential Center",
+   "url": "https://www.songkick.com/artists/10225495-le-sserafim/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "악뮤",
+   "start": "2026-10-09",
+   "end": "2026-10-11",
+   "category": "콘서트",
+   "title": "2026 AKMU CONCERT [소문의 낙원]",
+   "detail": "KSPO DOME / 3일간 단독 콘서트",
+   "url": "https://www.topstarnews.net/news/articleView.html?idxno=16154922",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-10-09",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 시애틀",
+   "detail": "Climate Pledge Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "NCT (127)",
+   "start": "2026-10-10",
+   "end": "2026-10-11",
+   "category": "콘서트",
+   "title": "127 'THE REDLINE' 홍콩",
+   "detail": "2회",
+   "url": "https://www.billboard.com/music/pop/nct-127-release-date-7th-full-length-album-blingy-details-1236303316/",
+   "status": "예정"
+  },
+  {
+   "artist": "데이식스 (영케이)",
+   "start": "2026-10-10",
+   "end": null,
+   "category": "콘서트",
+   "title": "Young K 'YOUNGEST' 방콕",
+   "detail": "Samyan Mitrtown Hall",
+   "url": "https://namu.wiki/w/YOUNGEST",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-10-10",
+   "end": "2026-10-11",
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 지바",
+   "detail": "LaLa arena TOKYO-BAY / 2회",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-10-10",
+   "end": "2026-10-11",
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 타이베이",
+   "detail": "타이베이 돔",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2026-10-11",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 밴쿠버",
+   "detail": "Rogers Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-10-14",
+   "end": "2026-10-17",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 산티아고",
+   "detail": "칠레 Estadio Nacional / 3회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-10-16",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 런던",
+   "detail": "The O2",
+   "url": "https://www.kpopconcertseurope.com/post/le-sserafim-pureflow-tour-2026",
+   "status": "예정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-10-16",
+   "end": "2026-10-18",
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 마카오",
+   "detail": "Galaxy Arena / 3회",
+   "url": "https://kconcertguide.com/en/tour/enhypen-blood-saga/",
+   "status": "예정"
+  },
+  {
+   "artist": "이무진",
+   "start": "2026-10-17",
+   "end": "2026-10-18",
+   "category": "페스티벌",
+   "title": "NOL FESTIVAL 2026",
+   "detail": "고양 킨텍스 / 슈퍼라이브 스테이지 1차 라인업",
+   "url": "https://www.yna.co.kr/view/AKR20260519066600030",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-10-17",
+   "end": null,
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 싱가포르",
+   "detail": "National Stadium",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (127)",
+   "start": "2026-10-18",
+   "end": null,
+   "category": "콘서트",
+   "title": "127 'THE REDLINE' 싱가포르",
+   "detail": "싱가포르",
+   "url": "https://www.billboard.com/music/pop/nct-127-release-date-7th-full-length-album-blingy-details-1236303316/",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-10-18",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 암스테르담",
+   "detail": "Ziggo Dome",
+   "url": "https://www.kpopconcertseurope.com/post/le-sserafim-pureflow-tour-2026",
+   "status": "예정"
+  },
+  {
+   "artist": "볼빨간사춘기",
+   "start": "2026-10-18",
+   "end": null,
+   "category": "페스티벌",
+   "title": "그랜드 민트 페스티벌 2026",
+   "detail": "올림픽공원 / 2차 라인업 합류",
+   "url": "https://www.bntnews.co.kr/article/view/bnt202608060205",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-10-21",
+   "end": "2026-10-24",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 부에노스아이레스",
+   "detail": "Estadio Único de La Plata / 3회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-10-21",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 파리",
+   "detail": "Accor Arena",
+   "url": "https://www.kpopconcertseurope.com/post/le-sserafim-pureflow-tour-2026",
+   "status": "예정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-10-23",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 코펜하겐",
+   "detail": "Royal Arena",
+   "url": "https://www.kpopconcertseurope.com/post/le-sserafim-pureflow-tour-2026",
+   "status": "예정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-10-24",
+   "end": null,
+   "category": "콘서트",
+   "title": "<RUN IT> 후쿠오카",
+   "detail": "미즈호 페이페이 돔",
+   "url": "https://inmusicblog.com/k-pop/stray-kids-run-it-world-tour-dates-2026-2027/",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-10-24",
+   "end": "2026-10-25",
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 하노이",
+   "detail": "베트남 미딘 국립경기장",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-10-26",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 베를린",
+   "detail": "Uber Arena",
+   "url": "https://www.kpopconcertseurope.com/post/le-sserafim-pureflow-tour-2026",
+   "status": "예정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-10-28",
+   "end": "2026-10-31",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 상파울루",
+   "detail": "브라질 Estádio do Morumbi / 3회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-10-30",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 댈러스 (북미 개막)",
+   "detail": "The Bomb Factory",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "NCT (127)",
+   "start": "2026-10-31",
+   "end": "2026-11-01",
+   "category": "콘서트",
+   "title": "127 'THE REDLINE' 방콕",
+   "detail": "2회",
+   "url": "https://www.billboard.com/music/pop/nct-127-release-date-7th-full-length-album-blingy-details-1236303316/",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-10-31",
+   "end": null,
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 시드니",
+   "detail": "Accor Stadium",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "NCT (드림)",
+   "start": "2026-11",
+   "end": null,
+   "category": "앨범",
+   "title": "NCT DREAM 정규 신보 발매 예정",
+   "detail": "SM 발표 4분기 컴백 / 일자 미공개",
+   "url": "https://en.wikipedia.org/wiki/2026_in_South_Korean_music",
+   "status": "예정"
+  },
+  {
+   "artist": "NCT (위시)",
+   "start": "2026-11",
+   "end": null,
+   "category": "앨범",
+   "title": "NCT WISH 신보 발매 예정",
+   "detail": "SM 발표 4분기 / 일자 미공개",
+   "url": "https://en.wikipedia.org/wiki/2026_in_South_Korean_music",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-11-01",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 폼파노비치",
+   "detail": "Pompano Beach Amphitheater",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-11-04",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 시카고",
+   "detail": "The Salt Shed Indoors",
+   "url": "https://www.livenation.com/artist/K8vZ917rG00/boynextdoor-events",
+   "status": "확정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-11-07",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 뉴욕",
+   "detail": "Infosys Theater at MSG",
+   "url": "https://www.livenation.com/artist/K8vZ917rG00/boynextdoor-events",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-11-07",
+   "end": null,
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 방콕",
+   "detail": "라차망칼라 국립경기장",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-11-10",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 토론토",
+   "detail": "Queen Elizabeth Theatre",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-11-13",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 밴쿠버",
+   "detail": "Queen Elizabeth Theatre",
+   "url": "https://www.livenation.com/artist/K8vZ917rG00/boynextdoor-events",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-11-13",
+   "end": "2026-11-15",
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 홍콩",
+   "detail": "카이탁 스타디움",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-11-15",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 시애틀",
+   "detail": "Showbox SoDo",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-11-17",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 샌프란시스코",
+   "detail": "The Warfield",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-11-19",
+   "end": "2026-11-22",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 가오슝",
+   "detail": "대만 국립경기장 / 3회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-11-20",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 로스앤젤레스",
+   "detail": "Peacock Theater",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-11-24",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 멕시코시티",
+   "detail": "Arena Ciudad de México",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-11-27",
+   "end": "2026-11-29",
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 오사카",
+   "detail": "교세라돔",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "르세라핌",
+   "start": "2026-11-28",
+   "end": null,
+   "category": "콘서트",
+   "title": "'PUREFLOW' 싱가포르",
+   "detail": "Singapore Expo",
+   "url": "https://www.songkick.com/artists/10225495-le-sserafim/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "데이식스 (영케이)",
+   "start": "2026-11-29",
+   "end": null,
+   "category": "콘서트",
+   "title": "Young K 'YOUNGEST' 타이베이",
+   "detail": "TICC",
+   "url": "https://namu.wiki/w/YOUNGEST",
+   "status": "예정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-12-01",
+   "end": "2026-12-02",
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 도쿄",
+   "detail": "도쿄돔 / 2회 / 첫 일본 4대 돔 투어",
+   "url": "https://onlyhit.us/en/news/enhypen-announces-2026-2027-blood-saga-world-tour-including-first-japanese-four",
+   "status": "예정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-12-03",
+   "end": "2026-12-06",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 방콕",
+   "detail": "Rajamangala Stadium / 3회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-12-05",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 자카르타",
+   "detail": "ICE BSD Hall 5-6",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-12-05",
+   "end": null,
+   "category": "콘서트",
+   "title": "<RUN IT> 홍콩",
+   "detail": "카이탁 스타디움",
+   "url": "https://inmusicblog.com/k-pop/stray-kids-run-it-world-tour-dates-2026-2027/",
+   "status": "예정"
+  },
+  {
+   "artist": "에이티즈",
+   "start": "2026-12-05",
+   "end": "2026-12-06",
+   "category": "페스티벌",
+   "title": "2026 Asia Artist Awards (AAA)",
+   "detail": "대만 가오슝 내셔널 스타디움",
+   "url": "https://www.starnewskorea.com/star/2026/07/29/2026072905102820913",
+   "status": "예정"
+  },
+  {
+   "artist": "장원영",
+   "start": "2026-12-05",
+   "end": "2026-12-06",
+   "category": "방송",
+   "title": "Asia Artist Awards 2026 MC",
+   "detail": "대만 가오슝 내셔널 스타디움 / 6년 연속 진행",
+   "url": "https://www.starnewskorea.com/music/2026/05/19/2026051804113064365",
+   "status": "확정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-12-05",
+   "end": "2026-12-06",
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 나고야",
+   "detail": "반테린돔",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-12-12",
+   "end": "2026-12-13",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 쿠알라룸푸르",
+   "detail": "TM Stadium Nasional / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2026-12-12",
+   "end": null,
+   "category": "콘서트",
+   "title": "<RUN IT> 타이베이",
+   "detail": "타이베이 돔",
+   "url": "https://inmusicblog.com/k-pop/stray-kids-run-it-world-tour-dates-2026-2027/",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-12-13",
+   "end": "2026-12-15",
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 도쿄",
+   "detail": "도쿄돔",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-12-17",
+   "end": "2026-12-22",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 싱가포르",
+   "detail": "National Stadium / 4회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2026-12-26",
+   "end": "2026-12-29",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 자카르타",
+   "detail": "Gelora Bung Karno / 3회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2026-12-26",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 쿠알라룸푸르",
+   "detail": "공연장 미확정",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2026-12-26",
+   "end": "2026-12-27",
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 나고야",
+   "detail": "반테린돔 나고야 / 2회",
+   "url": "https://onlyhit.us/en/news/enhypen-announces-2026-2027-blood-saga-world-tour-including-first-japanese-four",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2026-12-26",
+   "end": "2026-12-27",
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 후쿠오카",
+   "detail": "미즈호 페이페이돔",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "아이유",
+   "start": "2027-01",
+   "end": null,
+   "category": "앨범",
+   "title": "정규 6집 발매 (연기 후 목표 시점)",
+   "detail": "2021년 '라일락' 이후 첫 정규 / 녹음 완료",
+   "url": "https://www.donga.com/news/Entertainment/article/all/20260720/134331652/1",
+   "status": "추정"
+  },
+  {
+   "artist": "NCT (127)",
+   "start": "2027-01-02",
+   "end": null,
+   "category": "콘서트",
+   "title": "127 'THE REDLINE' 타이베이",
+   "detail": "대만",
+   "url": "https://www.billboard.com/music/pop/nct-127-release-date-7th-full-length-album-blingy-details-1236303316/",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2027-01-09",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 타이베이",
+   "detail": "NTSU Arena",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2027-01-09",
+   "end": null,
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 쿠알라룸푸르",
+   "detail": "TM Stadium Nasional",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2027-01-14",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 맨체스터",
+   "detail": "영국 AO Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "데이식스 (영케이)",
+   "start": "2027-01-15",
+   "end": null,
+   "category": "콘서트",
+   "title": "Young K 'YOUNGEST' 홍콩",
+   "detail": "AsiaWorld-Expo Hall 3",
+   "url": "https://namu.wiki/w/YOUNGEST",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2027-01-16",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 홍콩",
+   "detail": "AsiaWorld-Arena",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "스트레이 키즈",
+   "start": "2027-01-16",
+   "end": "2027-01-17",
+   "category": "콘서트",
+   "title": "<RUN IT> 방콕",
+   "detail": "임팩트 아레나 / 2회",
+   "url": "https://inmusicblog.com/k-pop/stray-kids-run-it-world-tour-dates-2026-2027/",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2027-01-16",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 런던",
+   "detail": "The O2 Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2027-01-16",
+   "end": null,
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 자카르타",
+   "detail": "Jakarta International Stadium",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2027-01-19",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 암스테르담",
+   "detail": "Ziggo Dome",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2027-01-22",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 스톡홀름",
+   "detail": "Avicii Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "데이식스 (영케이)",
+   "start": "2027-01-23",
+   "end": null,
+   "category": "콘서트",
+   "title": "Young K 'YOUNGEST' 싱가포르",
+   "detail": "The Star Theatre",
+   "url": "https://namu.wiki/w/YOUNGEST",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2027-01-23",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 싱가포르",
+   "detail": "Singapore Indoor Stadium",
+   "url": "https://kpopnewswire.com/boynextdoor-world-tour-knock-on-vol-2-dates-venues-tickets-and-more/",
+   "status": "예정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2027-01-23",
+   "end": null,
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 자카르타",
+   "detail": "Jakarta International Stadium",
+   "url": "https://kconcertguide.com/en/tour/enhypen-blood-saga/",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2027-01-24",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 코펜하겐",
+   "detail": "Royal Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2027-01-26",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 베를린",
+   "detail": "Uber Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "차은우",
+   "start": "2027-01-27",
+   "end": null,
+   "category": "방송",
+   "title": "육군 군악대 만기 전역 예정",
+   "detail": "2025년 7월 입대 / 국방부 근무지원단 군악대",
+   "url": "https://www.starnewskorea.com/star/2026/04/09/2026040910143981704",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2027-01-29",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 밀라노",
+   "detail": "Unipol Dome",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "보이넥스트도어",
+   "start": "2027-01-30",
+   "end": null,
+   "category": "콘서트",
+   "title": "'KNOCK ON Vol.2' 방콕 (최종회)",
+   "detail": "IMPACT Arena / 월드투어 최종회",
+   "url": "https://namu.wiki/w/BOYNEXTDOOR",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2027-01-31",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 바르셀로나",
+   "detail": "Palau Sant Jordi",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "에스파",
+   "start": "2027-02-02",
+   "end": null,
+   "category": "콘서트",
+   "title": "'SYNK : COMPLæXITY' 파리",
+   "detail": "Accor Arena",
+   "url": "https://en.wikipedia.org/wiki/Synk:_Complaexity",
+   "status": "예정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2027-02-06",
+   "end": "2027-02-07",
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 후쿠오카",
+   "detail": "미즈호 PayPay 돔 / 2회",
+   "url": "https://onlyhit.us/en/news/enhypen-announces-2026-2027-blood-saga-world-tour-including-first-japanese-four",
+   "status": "예정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2027-02-10",
+   "end": "2027-02-13",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 멜버른",
+   "detail": "호주 Marvel Stadium / 3회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2027-02-19",
+   "end": "2027-02-20",
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 오사카",
+   "detail": "교세라돔 / 2회",
+   "url": "https://onlyhit.us/en/news/enhypen-announces-2026-2027-blood-saga-world-tour-including-first-japanese-four",
+   "status": "예정"
+  },
+  {
+   "artist": "BTS",
+   "start": "2027-02-20",
+   "end": "2027-02-21",
+   "category": "콘서트",
+   "title": "WORLD TOUR 'ARIRANG' 시드니",
+   "detail": "호주 Accor Stadium / 2회",
+   "url": "https://namu.wiki/w/BTS",
+   "status": "예정"
+  },
+  {
+   "artist": "데이식스 (영케이)",
+   "start": "2027-02-20",
+   "end": null,
+   "category": "콘서트",
+   "title": "Young K 'YOUNGEST' 마닐라",
+   "detail": "New Frontier Theater",
+   "url": "https://namu.wiki/w/YOUNGEST",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2027-02-20",
+   "end": null,
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 마닐라",
+   "detail": "SMDC Festival Grounds",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2027-02-24",
+   "end": null,
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 밀라노",
+   "detail": "Unipol Dome",
+   "url": "https://www.songkick.com/artists/10143456-enhypen/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "엔하이픈",
+   "start": "2027-02-27",
+   "end": null,
+   "category": "콘서트",
+   "title": "'BLOOD SAGA' 파리",
+   "detail": "Paris La Défense Arena",
+   "url": "https://www.songkick.com/artists/10143456-enhypen/calendar",
+   "status": "예정"
+  },
+  {
+   "artist": "지드래곤",
+   "start": "2027-02-27",
+   "end": "2027-02-28",
+   "category": "콘서트",
+   "title": "[XX : COSMOS] 파이널 가오슝",
+   "detail": "국가체육장 / 투어 마지막 (19개 도시 33회)",
+   "url": "https://en.wikipedia.org/wiki/XX:_Cosmos_World_Tour",
+   "status": "확정"
+  }
+ ]
+}

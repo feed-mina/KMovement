@@ -110,12 +110,14 @@ public class KpopController {
                               AND (LOWER(slug) = LOWER(:artistRef) OR CAST(artist_id AS text) = :artistRef)
                             """, params("artistRef", artistRef)));
                     Long resolvedArtistId = ((Number) loaded.get("id")).longValue();
+                    // 상세는 활동 이력까지 보여주는 자리라 지난 일정도 함께 내려보낸다. 다만 목록이
+                    // 1년 전부터 시작하지 않도록 다가오는 일정을 앞으로 끌어올린다(V119 타임라인 적재).
                     loaded.put("events", jdbcTemplate.queryForList("""
                             SELECT event_id AS id, artist_id AS "artistId", title_ko AS "titleKo", title_en AS "titleEn",
                                    region, venue, event_date AS date, official_url AS "officialUrl"
                             FROM event
                             WHERE artist_id = :artistId AND approved_yn = 'Y'
-                            ORDER BY event_date ASC
+                            ORDER BY (event_date >= CURRENT_DATE) DESC, event_date ASC
                             """, params("artistId", resolvedArtistId)));
                     return loaded;
                 }
@@ -135,6 +137,9 @@ public class KpopController {
         // 각 named parameter는 NamedParameterJdbcTemplate에서 등장 위치마다 별도의 placeholder로
         // 전개된다. `:param IS NULL` 형태는 PostgreSQL이 해당 placeholder의 타입을 추론할 수 없어
         // "could not determine data type of parameter"로 실패하므로 항상 명시적으로 캐스팅한다.
+        //
+        // from을 주지 않으면 오늘부터 본다. event 테이블은 지난 활동까지 담은 타임라인이라(V119)
+        // 기본값이 없으면 목록이 1년 전 일정부터 열린다. 과거를 보려면 from을 명시하면 된다.
         String sql = """
                 SELECT e.event_id AS id, e.artist_id AS "artistId", a.name_ko AS "artistNameKo",
                        e.title_ko AS "titleKo", e.title_en AS "titleEn", e.region, e.venue,
@@ -147,7 +152,7 @@ public class KpopController {
                       AND af.user_sqno = CAST(:userSqno AS bigint)
                 WHERE e.approved_yn = 'Y'
                   AND (CAST(:region AS text) IS NULL OR e.region = :region)
-                  AND (CAST(:fromDate AS date) IS NULL OR e.event_date >= CAST(:fromDate AS date))
+                  AND e.event_date >= COALESCE(CAST(:fromDate AS date), CURRENT_DATE)
                   AND (CAST(:toDate AS date) IS NULL OR e.event_date <= CAST(:toDate AS date))
                 ORDER BY (af.artist_id IS NOT NULL) DESC, e.event_date ASC, e.event_id ASC
                 """;

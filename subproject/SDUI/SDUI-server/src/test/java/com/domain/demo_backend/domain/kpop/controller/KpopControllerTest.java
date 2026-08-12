@@ -7,6 +7,7 @@ import com.domain.demo_backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.mockito.ArgumentCaptor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.web.server.ResponseStatusException;
@@ -97,6 +98,29 @@ class KpopControllerTest {
         assertThat(response.getBody().getData()).hasSize(1);
         verify(jdbcTemplate).queryForList(
                 contains("CAST(:region AS text) IS NULL"), any(MapSqlParameterSource.class));
+    }
+
+    @Test
+    void eventsListDefaultsToUpcomingWhenFromIsOmitted() {
+        when(jdbcTemplate.queryForList(anyString(), any(MapSqlParameterSource.class))).thenReturn(List.of());
+
+        controller.events(null, null, null, null);
+
+        // event는 지난 활동까지 담은 타임라인이므로(V119), 기본값이 없으면 목록이 1년 전부터 열린다.
+        verify(jdbcTemplate).queryForList(
+                contains("e.event_date >= COALESCE(CAST(:fromDate AS date), CURRENT_DATE)"),
+                any(MapSqlParameterSource.class));
+    }
+
+    @Test
+    void eventsListStillHonoursAnExplicitFromSoPastSchedulesStayReachable() {
+        when(jdbcTemplate.queryForList(anyString(), any(MapSqlParameterSource.class))).thenReturn(List.of());
+
+        controller.events(null, "2026-01-01", null, null);
+
+        ArgumentCaptor<MapSqlParameterSource> params = ArgumentCaptor.forClass(MapSqlParameterSource.class);
+        verify(jdbcTemplate).queryForList(anyString(), params.capture());
+        assertThat(params.getValue().getValue("fromDate")).isEqualTo("2026-01-01");
     }
 
     @Test
