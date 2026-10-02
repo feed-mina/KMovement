@@ -116,4 +116,3 @@ pnpm test
 - 운영 PostgreSQL·Redis·Chroma·Supabase 데이터.
 - TourAPI, Groq, Kakao, Google, RunPod 등 외부 호출.
 - 운영 배포 버전과 사용자 수용.
-
