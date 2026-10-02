@@ -1,5 +1,10 @@
 # KMovement Hostinger web-only runbook
 
+For the exact 2026-10-02 Hostinger release commands in Korean, use
+[`VPS-DEPLOY-RUNBOOK-KO.md`](VPS-DEPLOY-RUNBOOK-KO.md). It pins the merged
+main SHA and image digest and separates preparation, deployment, verification,
+and first-deployment rollback.
+
 This runbook prepares the first parallel Hostinger slice. It supports two
 mutually exclusive edge profiles:
 

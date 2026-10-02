@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KMovement Hostinger 실배포 실행 지도</title>
+  <style>
+    :root{color-scheme:dark;--bg:#07101d;--panel:#101d31;--card:#172640;--line:#38506e;--text:#f2f7ff;--muted:#bccbe0;--blue:#87bbff;--green:#58da91;--yellow:#f4c05f;--red:#ff8383;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#040a12,var(--bg));color:var(--text);line-height:1.55}.page{max-width:1400px;margin:auto;padding:24px}.hero,.panel,.detail{background:rgba(16,29,49,.96);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 45px #0005}.hero,.panel{padding:22px}.section{margin-top:20px}h1,h2,h3{margin:0;line-height:1.2}p,li{color:var(--muted);max-width:80ch}.eyebrow{color:var(--blue);font-size:.82rem;letter-spacing:.08em;text-transform:uppercase}.summary,.flow,.compare,.checks{display:grid;gap:14px}.summary{grid-template-columns:repeat(auto-fit,minmax(210px,1fr));margin-top:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:15px}.card strong{display:block;margin-bottom:6px}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:.8rem;margin:3px}.ok{background:#174b35}.wait{background:#5a4116}.stop{background:#572529}.flow{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-top:14px}.step,.node,.tab,.copy{font:inherit;color:var(--text);background:#0a1627;border:1px solid var(--line);border-radius:13px;cursor:pointer}.step{padding:14px;text-align:left;min-height:125px}.step.current{outline:2px solid var(--yellow)}.step.selected,.node[aria-pressed=true],.tab[aria-selected=true]{border-color:var(--blue);box-shadow:0 0 0 2px #87bbff33}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.tab,.copy{padding:9px 13px}.tabpanel[hidden]{display:none}.map{display:grid;grid-template-columns:minmax(320px,.9fr) minmax(400px,1.1fr);gap:16px}.board{background:#081426;border:1px solid var(--line);border-radius:16px;padding:16px}.lane+.lane{margin-top:20px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.node{padding:11px;text-align:left}.node.change{border-color:#3c9c6b}.node.cause{border-color:#b78636}.node.test{border-style:dashed;border-color:#75adf3}.arrow{color:#a7b7cb;font-weight:700}.detail{padding:18px;min-height:500px}.cmd{position:relative;margin-top:12px}.cmd pre{background:#030a13;border:1px solid var(--line);border-radius:12px;padding:46px 12px 12px;overflow:auto;white-space:pre;color:#dfeeff}.copy{position:absolute;right:8px;top:8px}.compare{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}.arch{background:#071325;border:1px solid var(--line);border-radius:12px;padding:14px;white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace}.checks{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}details{background:#0a1627;border:1px solid var(--line);border-radius:13px;margin-top:12px}summary{cursor:pointer;padding:12px;font-weight:700}details>div{padding:0 12px 12px}a{color:#9cc8ff}code{font-family:ui-monospace,Consolas,monospace}@media(max-width:900px){.page{padding:14px}.map{grid-template-columns:1fr}.detail{min-height:auto}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="hero">
+    <p class="eyebrow">Work Map Guide · prepared-not-deployed · 2026-10-02 21:00 KST</p>
+    <h1>KMovement Hostinger 실배포 복사 실행 지도</h1>
+    <p>결론: 배포 대상 SHA와 digest는 고정됐고 명령형 런북도 준비됐다. 이 보고서 작성 시점에는 <strong>VPS 배포·HTTPS·주소검색 검증을 아직 실행하지 않았다.</strong></p>
+    <div class="summary">
+      <div class="card"><strong>릴리스 기준</strong><code>a51c52f4…1c8fc1</code><p>병합된 origin/main과 OCI revision이 일치한다.</p></div>
+      <div class="card"><strong>이미지</strong><code>sha256:5195aa97…1007</code><p>공개 pull 가능 · linux/amd64 · nextjs 사용자.</p></div>
+      <div class="card"><strong>운영 영향</strong><span class="pill ok">web 1개</span><span class="pill ok">공개 포트 0</span><p>기존 Traefik과 feedmina.tech는 유지한다.</p></div>
+      <div class="card"><strong>다음 행동</strong><span class="pill wait">Kakao 도메인 확인</span><p>그 뒤 런북의 1→8단계를 순서대로 실행한다.</p></div>
+    </div>
+  </header>
+
+  <section class="section panel">
+    <p class="eyebrow">진행상황</p><h2>실행 단계와 완료 증거</h2>
+    <div class="flow" id="flow">
+      <button class="step" data-detail="PR #247 병합, 이미지 발행, digest·non-root·revision·익명 pull 검증까지 완료됐다."><strong>1. 릴리스 고정</strong><br><span class="pill ok">완료</span><p>SHA와 digest 확인</p></button>
+      <button class="step" data-detail="한국어 복사 실행 런북과 prepared 릴리스 기록을 작성했다. 명령 구문·YAML·Compose를 정적으로 검증한다."><strong>2. 런북 준비</strong><br><span class="pill ok">완료</span><p>명령과 롤백 분리</p></button>
+      <button class="step current selected" data-detail="현재 단계. Kakao JavaScript 키에 임시 HTTPS 도메인을 등록한 뒤 SSH 접속 및 preflight부터 진행한다."><strong>3. 실행 전 확인</strong><br><span class="pill wait">사용자 확인</span><p>Kakao 도메인 등록</p></button>
+      <button class="step" data-detail="아직 미실행. 전용 폴더 생성, Compose 검증, image pull, non-root/revision 재검증, web 1개 up 순서다."><strong>4. VPS 배포</strong><br><span class="pill stop">미실행</span><p>전용 프로젝트만 변경</p></button>
+      <button class="step" data-detail="아직 미확인. /와 /holy/submit 200을 확인한 다음 실제 주소 선택·좌표·마커·모바일 화면 증거를 남긴다."><strong>5. 기능 검증</strong><br><span class="pill stop">미확인</span><p>제출·DB 저장 제외</p></button>
+    </div>
+    <div class="card" id="flow-detail" aria-live="polite">현재 단계: Kakao JavaScript 키 도메인 등록 확인 후 SSH preflight 실행.</div>
+  </section>
+
+  <section class="section panel">
+    <p class="eyebrow">코드·작업 지도</p><h2>항목을 선택해 실행 명령을 복사할 수 있다</h2>
+    <div class="tabs" role="tablist" aria-label="보고서 탭">
+      <button class="tab" role="tab" aria-selected="true" aria-controls="map-panel">실행 지도</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="compare-panel" tabindex="-1">전후 비교</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="check-panel" tabindex="-1">검증·롤백</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="evidence-panel" tabindex="-1">근거·파일</button>
+    </div>
+
+    <div class="tabpanel" id="map-panel" role="tabpanel">
+      <div class="map">
+        <div class="board">
+          <div class="lane"><strong>변경 전</strong><div class="row"><button class="node cause" data-node="connect">SSH·호스트 확인</button><span class="arrow">→</span><button class="node cause" data-node="preflight">기존 서비스 점검</button></div></div>
+          <div class="lane"><strong>배포</strong><div class="row"><button class="node change" data-node="vars">릴리스 변수</button><span class="arrow">→</span><button class="node change" data-node="prepare">전용 파일 준비</button><span class="arrow">→</span><button class="node change" data-node="up">web 실행</button></div></div>
+          <div class="lane"><strong>검증</strong><div class="row"><button class="node test" data-node="https">HTTPS 200</button><span class="arrow">→</span><button class="node test" data-node="browser">주소·좌표·마커</button><span class="arrow">→</span><button class="node test" data-node="rollback">최초 롤백</button></div></div>
+        </div>
+        <article class="detail" aria-labelledby="detail-title"><p class="eyebrow">선택 상세</p><h3 id="detail-title" tabindex="-1">릴리스 변수</h3><div id="detail-body"></div></article>
+      </div>
+    </div>
+
+    <div class="tabpanel" id="compare-panel" role="tabpanel" hidden>
+      <div class="compare">
+        <div class="card"><strong>확인된 배포 전</strong><span class="pill ok">실환경 확인</span><div class="arch">feedmina.tech
+  ↓ existing Traefik :80/:443
+  ↓ existing application
+
+KMovement project: 없음</div><p>기존 라우터와 서비스는 유지 대상이다.</p></div>
+        <div class="card"><strong>배포 후 기대 구조</strong><span class="pill wait">예상 모형</span><div class="arch">kmovement.srv1869569.hstgr.cloud
+  ↓ existing Traefik :443
+  ↓ Host rule / letsencrypt
+kmovement-web web :3000 (internal)</div><p>실제 배포 후 200·주소검색 증거로 확정해야 한다.</p></div>
+      </div>
+    </div>
+
+    <div class="tabpanel" id="check-panel" role="tabpanel" hidden>
+      <div class="checks">
+        <div class="card"><strong>자동 통과 기준</strong><ul><li>Compose service=web</li><li>image user=nextjs</li><li>revision=main SHA</li><li>/ 와 /holy/submit 200</li></ul></div>
+        <div class="card"><strong>수동 기능 기준</strong><ul><li>실제 주소 선택</li><li>주소 문자열 변경</li><li>좌표 변경</li><li>Kakao 마커 이동</li><li>모바일 폭 확인</li></ul></div>
+        <div class="card"><strong>최초 롤백</strong><p>이전 Hostinger KMovement digest가 없으므로 새 Compose 프로젝트만 내린다. Traefik과 다른 프로젝트는 중지하지 않는다.</p></div>
+      </div>
+      <details open><summary>절대 실행하지 않는 명령</summary><div><code>docker system prune</code>, 다른 프로젝트의 <code>docker compose down</code>, Traefik 중지, 볼륨 삭제, AWS 종료, feedmina.tech 변경.</div></details>
+    </div>
+
+    <div class="tabpanel" id="evidence-panel" role="tabpanel" hidden>
+      <div class="checks">
+        <div class="card"><strong>주 실행 문서</strong><p>deploy/hostinger/VPS-DEPLOY-RUNBOOK-KO.md:1-268</p></div>
+        <div class="card"><strong>준비 기록</strong><p>deploy/hostinger/release-record-20261002-a51c52f.prepared.yml</p></div>
+        <div class="card"><strong>배포 구성</strong><p>deploy/hostinger/web.traefik.compose.yml:1-45</p></div>
+        <div class="card"><strong>확인 상태</strong><p>이미지와 VPS preflight는 확인. 실제 Compose up과 브라우저는 미실행.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+const data={
+connect:{title:'1. Windows에서 SSH 접속',summary:'로컬 PC Git Bash에서 실행한다.',command:'ssh root@187.127.214.171',next:['접속 뒤 hostname이 srv1869569인지 확인']},
+preflight:{title:'2. VPS 읽기 전용 확인',summary:'기존 Compose와 80/443 점유를 바꾸지 않고 확인한다.',command:`set -eu
+test "$(hostname)" = "srv1869569"
+docker compose version
+docker compose ls --all
+docker ps --format 'table {{.Names}}\\t{{.Status}}\\t{{.Ports}}\\t{{.Image}}'
+ss -ltn '( sport = :80 or sport = :443 )'
+getent hosts kmovement.srv1869569.hstgr.cloud`,next:['traefik-y1qz 실행과 DNS 결과 확인']},
+vars:{title:'3. 릴리스 변수 설정',summary:'같은 SSH 세션에서 사용하며, 연결이 끊기면 다시 실행한다.',command:`KM_RELEASE_SHA='a51c52f4d4c34f4ffa36feed2363b7153a1c8fc1'
+KM_IMAGE='ghcr.io/feed-mina/kmovement-web@sha256:5195aa97b87f480089faf2c95ea1232d63b65a3efa0fc345c2e687077bbb1007'
+KM_HOST='kmovement.srv1869569.hstgr.cloud'
+KM_DIR='/docker/kmovement-web'
+KM_RELEASE_DIR="\${KM_DIR}/releases/\${KM_RELEASE_SHA}"
+KM_COMPOSE="\${KM_RELEASE_DIR}/web.traefik.compose.yml"
+KM_ENV="\${KM_DIR}/.env"`,next:['값 출력 후 SHA·digest·호스트를 대조']},
+prepare:{title:'4. 전용 배포 파일 준비',summary:'KMovement 폴더만 만들고 main SHA의 Compose를 받는다.',command:`test "$KM_DIR" = '/docker/kmovement-web'
+install -d -m 0750 "$KM_RELEASE_DIR"
+curl -fsSLo "$KM_COMPOSE" "https://raw.githubusercontent.com/feed-mina/KMovement/\${KM_RELEASE_SHA}/deploy/hostinger/web.traefik.compose.yml"
+umask 077
+printf 'KMOVEMENT_SITE_HOST=%s\\nKMOVEMENT_WEB_IMAGE=%s\\n' "$KM_HOST" "$KM_IMAGE" > "$KM_ENV"
+chmod 0600 "$KM_ENV"
+docker compose --env-file "$KM_ENV" -f "$KM_COMPOSE" config --quiet`,next:['config --services 결과가 web 하나인지 확인']},
+up:{title:'5. 이미지 pull·web 실행',summary:'digest 이미지와 revision을 확인한 후 web 한 개만 올린다.',command:`docker compose --env-file "$KM_ENV" -f "$KM_COMPOSE" pull
+docker image inspect "$KM_IMAGE" --format 'user={{.Config.User}} revision={{index .Config.Labels "org.opencontainers.image.revision"}}'
+docker compose --env-file "$KM_ENV" -f "$KM_COMPOSE" up -d
+docker compose --env-file "$KM_ENV" -f "$KM_COMPOSE" ps`,next:['user=nextjs와 정확한 main SHA 확인','health=healthy까지 대기']},
+https:{title:'6. HTTPS 자동 확인',summary:'TLS 발급 지연을 고려해 재시도하며 두 경로 200을 확인한다.',command:`curl -fsS --retry 12 --retry-delay 5 --retry-all-errors -o /dev/null -w 'home status=%{http_code}\\n' "https://\${KM_HOST}/"
+curl -fsS --retry 12 --retry-delay 5 --retry-all-errors -o /dev/null -w 'holy-submit status=%{http_code}\\n' "https://\${KM_HOST}/holy/submit"`,next:['두 출력 모두 status=200']},
+browser:{title:'7. 첫 기능 브라우저 검증',summary:'실제 캡처는 아직 없으며 배포 후 사람이 확인한다.',command:`https://kmovement.srv1869569.hstgr.cloud/holy/submit`,next:['주소 검색→실제 도로명 선택','주소·좌표·마커 변화','모바일 폭','Console/Network 증거에서 키와 쿠키 가리기','제출 버튼은 누르지 않기']},
+rollback:{title:'8. 최초 배포 롤백',summary:'이전 이미지가 없으므로 새 프로젝트만 내린다.',command:`test "$KM_DIR" = '/docker/kmovement-web'
+docker compose --env-file "$KM_ENV" -f "$KM_COMPOSE" down
+docker compose ls --all
+docker ps --format 'table {{.Names}}\\t{{.Status}}\\t{{.Ports}}\\t{{.Image}}'`,next:['기존 Traefik과 다른 컨테이너가 계속 실행 중인지 확인']}
+};
+async function copyCommand(value,button){try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(value)}else{const area=document.createElement('textarea');area.value=value;area.setAttribute('readonly','');area.style.position='fixed';area.style.opacity='0';document.body.append(area);area.select();if(!document.execCommand('copy'))throw new Error('copy failed');area.remove()}button.textContent='복사 완료'}catch{button.textContent='복사 실패 · 코드 직접 선택'}}
+function render(id,focus=false){const d=data[id];document.querySelectorAll('.node').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.node===id)));document.querySelector('#detail-title').textContent=d.title;const b=document.querySelector('#detail-body');b.textContent='';const p=document.createElement('p');p.textContent=d.summary;b.append(p);const wrap=document.createElement('div');wrap.className='cmd';const btn=document.createElement('button');btn.type='button';btn.className='copy';btn.textContent='명령 복사';const pre=document.createElement('pre');pre.textContent=d.command;btn.addEventListener('click',()=>copyCommand(d.command,btn));wrap.append(btn,pre);b.append(wrap);const h=document.createElement('h4');h.textContent='통과 기준·다음';const ul=document.createElement('ul');d.next.forEach(x=>{const li=document.createElement('li');li.textContent=x;ul.append(li)});b.append(h,ul);if(focus)document.querySelector('#detail-title').focus()}
+document.querySelectorAll('.node').forEach(n=>n.addEventListener('click',()=>render(n.dataset.node,true)));render('vars');
+document.querySelectorAll('.step').forEach(s=>s.addEventListener('click',()=>{document.querySelectorAll('.step').forEach(x=>x.classList.remove('selected'));s.classList.add('selected');document.querySelector('#flow-detail').textContent=s.dataset.detail}));
+const tabs=[...document.querySelectorAll('[role=tab]')];function activate(t,focus=false){tabs.forEach(x=>{const on=x===t;x.setAttribute('aria-selected',String(on));x.tabIndex=on?0:-1;document.getElementById(x.getAttribute('aria-controls')).hidden=!on});if(focus)t.focus()}tabs.forEach((t,i)=>{t.addEventListener('click',()=>activate(t));t.addEventListener('keydown',e=>{let j=i;if(e.key==='ArrowRight')j=(i+1)%tabs.length;else if(e.key==='ArrowLeft')j=(i-1+tabs.length)%tabs.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=tabs.length-1;else return;e.preventDefault();activate(tabs[j],true)})});
+</script>
+</body>
+</html>

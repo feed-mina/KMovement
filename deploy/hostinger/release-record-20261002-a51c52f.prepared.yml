@@ -1,0 +1,30 @@
+status: "prepared-not-deployed"
+releaseDate: "2026-10-02"
+gitSha: "a51c52f4d4c34f4ffa36feed2363b7153a1c8fc1"
+image: "ghcr.io/feed-mina/kmovement-web@sha256:5195aa97b87f480089faf2c95ea1232d63b65a3efa0fc345c2e687077bbb1007"
+configRevision: "a51c52f4d4c34f4ffa36feed2363b7153a1c8fc1"
+target:
+  provider: "hostinger"
+  vmId: "srv1869569"
+  project: "kmovement-web"
+  hostname: "kmovement.srv1869569.hstgr.cloud"
+rollback:
+  previousImage: null
+  reason: "First KMovement deployment on this Hostinger VPS"
+  mode: "remove-new-compose-project"
+  command: "docker compose --env-file /docker/kmovement-web/.env -f /docker/kmovement-web/releases/a51c52f4d4c34f4ffa36feed2363b7153a1c8fc1/web.traefik.compose.yml down"
+verification:
+  imagePullable: true
+  imageUser: "nextjs"
+  imageRevision: "a51c52f4d4c34f4ffa36feed2363b7153a1c8fc1"
+  homepage200: false
+  holySubmit200: false
+  addressSelected: false
+  coordinatesChanged: false
+  kakaoMarkerMoved: false
+  mobileViewportChecked: false
+  consoleAndNetworkCaptured: false
+  rollbackRehearsed: false
+notes:
+  - "Prepared record only; false fields must not be changed until evidence exists."
+  - "Submission and database persistence are outside the web-only release."
