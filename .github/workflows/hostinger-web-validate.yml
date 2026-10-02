@@ -5,6 +5,7 @@ name: Validate Hostinger web-only deployment
   pull_request:
     paths:
       - ".github/workflows/hostinger-web-validate.yml"
+      - ".github/workflows/hostinger-web-publish.yml"
       - "deploy/hostinger/**"
       - "subproject/SDUI/metadata-project/Dockerfile"
       - "subproject/SDUI/metadata-project/next.config.ts"
@@ -71,6 +72,59 @@ jobs:
           -v "${PWD}/deploy/hostinger/Caddyfile:/etc/caddy/Caddyfile:ro"
           caddy:2.10.2-alpine
           caddy validate --config /etc/caddy/Caddyfile
+
+  traefik-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Render existing-Traefik Compose configuration
+        run: >-
+          docker compose
+          --env-file deploy/hostinger/traefik.env.example
+          -f deploy/hostinger/web.traefik.compose.yml
+          config
+          --quiet
+
+      - name: Require a single web service with no published ports
+        shell: bash
+        run: |
+          set -euo pipefail
+          services="$(docker compose \
+            --env-file deploy/hostinger/traefik.env.example \
+            -f deploy/hostinger/web.traefik.compose.yml \
+            config --services | sort | paste -sd ' ' -)"
+          test "$services" = "web"
+
+          docker compose \
+            --env-file deploy/hostinger/traefik.env.example \
+            -f deploy/hostinger/web.traefik.compose.yml \
+            config --format json > /tmp/kmovement-traefik-compose.json
+
+          jq -e '
+            ((.services.web.ports // []) | length == 0) and
+            (.services.web.expose == ["3000"])
+          ' /tmp/kmovement-traefik-compose.json > /dev/null
+
+      - name: Require digest pin and the existing Traefik contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -e '
+            (.services.web.image
+              | test("^ghcr\\.io/feed-mina/kmovement-web@sha256:[0-9a-f]{64}$")) and
+            (.services.web.labels["traefik.enable"] == "true") and
+            (.services.web.labels["traefik.http.routers.kmovement-web.rule"]
+              == "Host(`kmovement.srv1869569.hstgr.cloud`)") and
+            (.services.web.labels["traefik.http.routers.kmovement-web.entrypoints"]
+              == "websecure") and
+            (.services.web.labels["traefik.http.routers.kmovement-web.tls"]
+              == "true") and
+            (.services.web.labels["traefik.http.routers.kmovement-web.tls.certresolver"]
+              == "letsencrypt") and
+            (.services.web.labels["traefik.http.services.kmovement-web.loadbalancer.server.port"]
+              == "3000")
+          ' /tmp/kmovement-traefik-compose.json > /dev/null
 
   web-image:
     runs-on: ubuntu-latest

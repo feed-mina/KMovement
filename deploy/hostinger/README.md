@@ -1,13 +1,21 @@
 # KMovement Hostinger web-only runbook
 
-This runbook prepares the first parallel Hostinger slice:
+This runbook prepares the first parallel Hostinger slice. It supports two
+mutually exclusive edge profiles:
 
 ```text
-Internet -> Caddy (80/443) -> Next.js web (internal 3000)
+Empty VPS: Internet -> Caddy (80/443) -> Next.js web (internal 3000)
+Current VPS: Internet -> existing Traefik (80/443) -> Next.js web (internal 3000)
 ```
 
 It intentionally does **not** deploy Spring, FastAPI, PostgreSQL, Redis,
 Celery, or RunPod. It also does not change production DNS or stop AWS.
+
+The 2026-10-02 read-only preflight found that `feedmina.tech` and host ports
+80/443 are already in use. Therefore the supplied VPS must use
+`web.traefik.compose.yml` with `kmovement.srv1869569.hstgr.cloud`. Do not run
+the standalone Caddy profile on that server. See
+`HOSTINGER-TRAEFIK-PREFLIGHT.md` for the confirmed boundary.
 
 ## 1. Release identity
 
@@ -41,6 +49,22 @@ real VM identifier:
 Use the exact `origin/main` checkout. The disabled backend hostnames satisfy
 the current production-build contract without bringing Spring or FastAPI into
 this slice. Do not use `/api` or `/kride-api` as success evidence.
+
+### Recommended after this PR is merged
+
+Run the manual **Publish Hostinger web image** workflow from `main`. Enter the
+freshly fetched 40-character `origin/main` SHA as `expected_main_sha`. The
+workflow refuses a stale or feature-branch SHA, builds for `linux/amd64`,
+publishes to GHCR, and records the immutable image digest without deploying the
+VPS. Copy the full `ghcr.io/feed-mina/kmovement-web@sha256:...` value from the
+workflow summary into the deployment record and the VPS environment file.
+
+GHCR packages are not assumed to be anonymously pullable. Before deployment,
+either authorize public package visibility separately or log the VPS in with a
+read-only package token. Do not copy a developer's broad GitHub credential to
+the server.
+
+### Manual equivalent
 
 ```bash
 docker buildx build \
@@ -88,6 +112,10 @@ values outside this first-feature scope unless they are explicitly required.
 Store real values on the VPS or in Hostinger/GitHub secret storage. Do not
 commit them.
 
+For the existing-Traefik profile, only `KMOVEMENT_SITE_HOST` and
+`KMOVEMENT_WEB_IMAGE` are required. The Caddy image and ACME contact values
+belong only to the empty-VPS profile.
+
 ## 4. Validate before any VPS change
 
 ```bash
@@ -111,6 +139,19 @@ docker image inspect \
 
 Expected output contains `nextjs` and the exact `MAIN_SHA`.
 
+For the supplied VPS, validate the existing-Traefik profile instead:
+
+```bash
+docker compose \
+  --env-file deploy/hostinger/traefik.env.example \
+  -f deploy/hostinger/web.traefik.compose.yml \
+  config
+```
+
+Its expected service list is exactly `web`. It must publish no host ports and
+must route only the temporary hostname to internal port 3000 through the
+already-running Traefik instance.
+
 ## 5. Hostinger preparation
 
 1. Use a Hostinger VPS with Docker/Compose available.
@@ -124,6 +165,24 @@ Expected output contains `nextjs` and the exact `MAIN_SHA`.
    application-level rollback record.
 
 ## 6. Deploy only after explicit approval
+
+### Supplied VPS with existing Traefik
+
+Keep the real environment file untracked. Copy only the Traefik Compose file
+and that environment file into a dedicated KMovement directory, then run:
+
+```bash
+docker compose --env-file .env -f web.traefik.compose.yml config
+docker compose --env-file .env -f web.traefik.compose.yml pull
+docker compose --env-file .env -f web.traefik.compose.yml up -d
+docker compose --env-file .env -f web.traefik.compose.yml ps
+```
+
+This profile adds only the `kmovement-web` project. It must not stop, recreate,
+or rename the existing Traefik and application projects. Confirm the temporary
+hostname route and certificate before browser testing.
+
+### Empty VPS with standalone Caddy
 
 Place `web.compose.yml`, `Caddyfile`, and a real untracked `.env` together on
 the VPS, then validate and apply:
