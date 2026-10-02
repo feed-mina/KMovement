@@ -1,0 +1,45 @@
+name: kmovement-web
+
+services:
+  web:
+    image: ${KMOVEMENT_WEB_IMAGE:?Set KMOVEMENT_WEB_IMAGE to a digest-pinned image}
+    init: true
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+    expose:
+      - "3000"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:3000/').then((response) => {
+            if (!response.ok) process.exit(1)
+          }).catch(() => process.exit(1))
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.kmovement-web.rule: Host(`${KMOVEMENT_SITE_HOST:?Set KMOVEMENT_SITE_HOST to the temporary hostname}`)
+      traefik.http.routers.kmovement-web.entrypoints: websecure
+      traefik.http.routers.kmovement-web.tls: "true"
+      traefik.http.routers.kmovement-web.tls.certresolver: letsencrypt
+      traefik.http.services.kmovement-web.loadbalancer.server.port: "3000"
+    networks:
+      - kmovement
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+networks:
+  kmovement:
+    driver: bridge

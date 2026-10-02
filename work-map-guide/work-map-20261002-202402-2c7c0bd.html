@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KMovement Hostinger Traefik 배포 작업 지도</title>
+  <style>
+    :root{color-scheme:dark;--bg:#07111f;--panel:#111c2f;--panel2:#17243a;--line:#334764;--text:#eef5ff;--muted:#b9c7da;--blue:#68a8ff;--green:#55d68a;--yellow:#f5bd55;--red:#ff7b7b;--gray:#a8b4c6;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#050b14,var(--bg));color:var(--text);line-height:1.55}.page{max-width:1380px;margin:auto;padding:24px}h1,h2,h3{line-height:1.2;margin:0}p,li{color:var(--muted);max-width:78ch}.hero,.panel,.detail{background:rgba(17,28,47,.94);border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 48px #0005}.hero,.panel{padding:22px}.eyebrow{color:#9dc7ff;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase}.headline{font-size:1.08rem}.grid,.summary,.flow,.compare,.verify{display:grid;gap:14px}.summary{grid-template-columns:repeat(auto-fit,minmax(210px,1fr));margin-top:18px}.card{background:var(--panel2);border:1px solid var(--line);border-radius:15px;padding:15px}.card strong{display:block;margin-bottom:6px}.section{margin-top:20px}.flow{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:14px}.flow button,.node,.tab{font:inherit;color:var(--text);background:#0c1729;border:1px solid var(--line);border-radius:14px;cursor:pointer}.flow button{padding:14px;text-align:left;min-height:130px}.flow button.current{outline:2px solid var(--yellow)}.flow button.selected,.node[aria-pressed=true],.tab[aria-selected=true]{border-color:var(--blue);box-shadow:0 0 0 2px #68a8ff33}.pill{display:inline-block;border-radius:999px;padding:3px 9px;margin:4px 4px 0 0;font-size:.8rem;border:1px solid var(--line)}.done{background:#174d35}.pending{background:#5a4217}.blocked{background:#562629}.confirmed{border-color:#528bd5}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.tab{padding:9px 13px}.tab-panel[hidden]{display:none}.map{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(390px,1.1fr);gap:16px}.map-board{background:#091426;border:1px solid var(--line);border-radius:16px;padding:16px}.lane+ .lane{margin-top:18px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:9px}.node{padding:11px 12px;text-align:left;max-width:260px}.node.change{border-color:#3a9b68}.node.reason{border-color:#b98534}.node.test{border-style:dashed;border-color:#6eaaf8}.arrow{color:var(--gray);font-weight:700}.detail{padding:18px;min-height:440px}.detail pre{background:#050b14;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;color:#dcecff;white-space:pre}.compare{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}.arch{font-family:ui-monospace,Consolas,monospace;background:#081324;border:1px solid var(--line);border-radius:12px;padding:14px;white-space:pre-wrap;color:#dcecff}.verify{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}details{background:#0b1628;border:1px solid var(--line);border-radius:13px;margin-top:12px}summary{cursor:pointer;padding:12px;font-weight:700}details>div{padding:0 12px 12px}.next{border-left:4px solid var(--yellow)}code{font-family:ui-monospace,Consolas,monospace}a{color:#9dc7ff}@media(max-width:900px){.page{padding:14px}.map{grid-template-columns:1fr}.detail{min-height:auto}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="hero">
+    <p class="eyebrow">Work Map Guide · 2026-10-02 20:24 KST · 원격 상태 20:32 갱신</p>
+    <h1>KMovement 기존 Hostinger Traefik 연결 준비</h1>
+    <p class="headline">결론: <strong>feedmina.tech는 유지</strong>하고, 기존 Traefik에 KMovement 웹 컨테이너 하나만 연결하는 구성을 만들었다. 실제 이미지 발행과 VPS 적용은 아직 실행하지 않았다.</p>
+    <div class="summary">
+      <div class="card"><strong>기준</strong><code>origin/main 8c484786</code><p>병합된 Hostinger web-only PR 이후 최신 기준점.</p></div>
+      <div class="card"><strong>확인 완료</strong><span class="pill done">사전 점검</span><span class="pill done">PR CI 6개</span><p>서비스 1개, 공개 포트 0개, Traefik 라벨과 전체 회귀 검사 통과.</p></div>
+      <div class="card"><strong>운영 상태</strong><span class="pill blocked">미배포</span><p>VPS 컨테이너·DNS·AWS는 변경하지 않음.</p></div>
+      <div class="card next"><strong>다음 행동 하나</strong><p><a href="https://github.com/feed-mina/KMovement/pull/247">PR #247</a>을 검토·병합한 뒤 수동 이미지 발행 워크플로를 정확한 main SHA로 실행한다.</p></div>
+    </div>
+  </header>
+
+  <section class="section panel" aria-labelledby="flow-title">
+    <p class="eyebrow">진행상황</p><h2 id="flow-title">단계별 증거</h2>
+    <div class="flow" id="flow">
+      <button data-detail="VPS 읽기 전용 점검 완료. feedmina.tech는 기존 앱이 사용하고 Traefik이 80/443을 점유한다. kmovement.srv1869569.hstgr.cloud는 같은 VPS를 가리키며 기존 라우터에는 없었다."><strong>1. 운영 사전 점검</strong><br><span class="pill done">완료</span><span class="pill confirmed">확인</span><p>기존 서비스와 포트 충돌 확인</p></button>
+      <button data-detail="web.traefik.compose.yml은 web 하나만 정의하고 호스트 ports를 만들지 않는다. 요청 호스트만 기존 websecure/letsencrypt 라우터에 연결한다."><strong>2. Traefik 구성</strong><br><span class="pill done">완료</span><span class="pill confirmed">확인</span><p>루트 도메인 비침범</p></button>
+      <button data-detail="Docker Compose config, YAML 파싱, 서비스·포트·라벨 계약, git diff --check가 로컬에서 통과했다. GitHub Actions 실행 결과는 PR 생성 후 별도 확인한다."><strong>3. 정적 검증</strong><br><span class="pill done">완료</span><span class="pill confirmed">확인</span><p>로컬 검사 통과</p></button>
+      <button data-detail="PR #247 생성 완료. compose, traefik-compose, web-image, nextjs, sdui-server, fastapi 체크가 모두 SUCCESS이며 PR은 MERGEABLE이다."><strong>4. PR·원격 CI</strong><br><span class="pill done">완료</span><span class="pill confirmed">원격 확인</span><p>PR #247 · CI 6개 통과</p></button>
+      <button class="current selected" data-detail="현재 단계. PR 병합 후 exact main SHA로 이미지를 발행한다. GHCR pull 권한을 확정하고 명시적 배포 승인 뒤 VPS에 적용한다. HTTPS와 /holy/submit 실제 주소 검색은 그 다음 단계다."><strong>5. 이미지·실배포</strong><br><span class="pill blocked">미실행</span><span class="pill">승인 필요</span><p>현재 완료 주장 금지</p></button>
+    </div>
+    <div class="card" id="flow-detail" aria-live="polite">현재 단계: 이미지·실배포 — PR #247의 CI는 통과했고, 병합·이미지 발행·배포 승인이 남아 있다.</div>
+  </section>
+
+  <section class="section panel">
+    <p class="eyebrow">코드·작업 지도</p><h2>파일을 누르면 오른쪽에서 역할과 근거를 확인할 수 있다</h2>
+    <div class="tabs" role="tablist" aria-label="보고서 탭">
+      <button class="tab" role="tab" aria-selected="true" aria-controls="map-panel">코드·작업 지도</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="compare-panel" tabindex="-1">전후 비교</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="verify-panel" tabindex="-1">검증·배포</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="history-panel" tabindex="-1">근거·이력</button>
+    </div>
+    <div class="tab-panel" id="map-panel" role="tabpanel">
+      <div class="map">
+        <div class="map-board">
+          <div class="lane"><strong>운영 판단</strong><div class="row"><button class="node reason" data-node="preflight">VPS preflight</button><span class="arrow">→</span><button class="node change" data-node="compose">Traefik Compose</button><span class="arrow">→</span><button class="node test" data-node="validate">CI contract</button></div></div>
+          <div class="lane"><strong>배포 공급망</strong><div class="row"><button class="node change" data-node="publish">수동 이미지 발행</button><span class="arrow">→</span><button class="node" data-node="record">SHA·digest 기록</button><span class="arrow">→</span><button class="node" data-node="deploy">승인 후 VPS 적용</button></div></div>
+          <div class="lane"><strong>사용자 기능 검증</strong><div class="row"><button class="node" data-node="page">/holy/submit 200</button><span class="arrow">→</span><button class="node" data-node="address">주소·좌표·지도 마커</button></div></div>
+        </div>
+        <article class="detail" aria-labelledby="detail-title"><p class="eyebrow">선택 상세</p><h3 id="detail-title" tabindex="-1">Traefik Compose</h3><div id="detail-body"></div></article>
+      </div>
+    </div>
+    <div class="tab-panel" id="compare-panel" role="tabpanel" hidden>
+      <div class="compare">
+        <div class="card"><strong>확인된 현재 구조</strong><span class="pill confirmed">실환경 점검</span><div class="arch">feedmina.tech
+  ↓ 기존 Traefik :80/:443
+  ↓ 기존 서비스
+KMovement 없음</div><p>루트 도메인과 기존 컨테이너는 그대로 유지한다.</p></div>
+        <div class="card"><strong>병합·승인 후 예상 구조</strong><span class="pill pending">구성 모형</span><div class="arch">kmovement.srv1869569.hstgr.cloud
+  ↓ 기존 Traefik :443
+  ↓ Host 규칙 / letsencrypt
+KMovement web :3000 (내부)</div><p>실제 화면 캡처가 아닌 코드 기반 예상 구조다.</p></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="verify-panel" role="tabpanel" hidden>
+      <div class="verify">
+        <div class="card"><strong>로컬 PASS</strong><ul><li>Compose config</li><li>서비스 정확히 web 1개</li><li>published ports 0개</li><li>Traefik Host/TLS/port 라벨</li><li>YAML parse와 diff check</li></ul></div>
+        <div class="card"><strong>PR 확인 완료</strong><ul><li>compose / traefik-compose / web-image PASS</li><li>nextjs / sdui-server / fastapi PASS</li><li>PR #247 MERGEABLE</li></ul></div>
+        <div class="card"><strong>병합 후 확인</strong><ul><li>exact main SHA 이미지</li><li>OCI digest와 revision label</li><li>GHCR pull 가능 여부</li><li>rollback digest 기록</li></ul></div>
+        <div class="card"><strong>배포 후 확인</strong><ul><li>임시 HTTPS 200</li><li>/holy/submit 200</li><li>주소 선택·좌표·마커 변화</li><li>모바일 폭·콘솔·네트워크 증거</li></ul></div>
+      </div>
+      <details open><summary>명시적으로 실행하지 않은 것</summary><div>VPS 파일 복사, Compose up, DNS 변경, feedmina.tech 라우팅 변경, AWS 종료, DB 제출, Spring/FastAPI 배포, GHCR package visibility 변경.</div></details>
+    </div>
+    <div class="tab-panel" id="history-panel" role="tabpanel" hidden>
+      <div class="verify">
+        <div class="card"><strong>기준 커밋</strong><p><code>8c484786dece2fec011dd1ff405611c731b746c0</code></p></div>
+        <div class="card"><strong>핵심 파일</strong><ul><li>deploy/hostinger/web.traefik.compose.yml:1-41</li><li>.github/workflows/hostinger-web-validate.yml:76-128</li><li>.github/workflows/hostinger-web-publish.yml:1-84</li><li>deploy/hostinger/README.md:53-68, 169-185</li></ul></div>
+        <div class="card"><strong>사전 점검 기록</strong><p>deploy/hostinger/HOSTINGER-TRAEFIK-PREFLIGHT.md</p></div>
+        <div class="card"><strong>원격 근거</strong><p><a href="https://github.com/feed-mina/KMovement/pull/247">PR #247</a> · head <code>cb6a35fe</code> · 2026-10-02 20:32 KST에 CI 6개 SUCCESS 확인. 실제 배포 상태는 미실행.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+const details={
+preflight:{title:'Hostinger existing-Traefik preflight',body:'확인 · deploy/hostinger/HOSTINGER-TRAEFIK-PREFLIGHT.md',done:['feedmina.tech가 기존 앱에 사용 중','Traefik이 80/443 점유','임시 Hostinger 호스트가 VPS로 해석'],next:['VPS 변경은 배포 승인까지 보류'],code:'Decision: standalone Caddy를 이 VPS에서 실행하지 않는다.'},
+compose:{title:'Traefik Compose',body:'변경 · deploy/hostinger/web.traefik.compose.yml:1-41',done:['web 서비스만 정의','published ports 없음','내부 3000만 expose','Host/TLS/letsencrypt 라벨'],next:['digest 고정 이미지를 환경 파일에 넣기'],code:'traefik.http.routers.kmovement-web.rule:\n  Host(`${KMOVEMENT_SITE_HOST}`)\ntraefik.http.services.kmovement-web.loadbalancer.server.port: "3000"'},
+validate:{title:'Compose CI contract',body:'테스트 · .github/workflows/hostinger-web-validate.yml:76-128',done:['서비스·포트·digest·Traefik 라벨을 jq로 검증'],next:['PR에서 GitHub-hosted runner 결과 확인'],code:'test "$services" = "web"\n(.services.web.ports // []) | length == 0'},
+publish:{title:'수동 이미지 발행',body:'변경 · .github/workflows/hostinger-web-publish.yml:1-84',done:['workflow_dispatch 전용','입력 SHA가 최신 origin/main과 같아야 진행','linux/amd64 GHCR 이미지와 digest 기록'],next:['PR 병합 뒤에만 수동 실행'],code:'test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"\ntags: ghcr.io/feed-mina/kmovement-web:${SHA}'},
+record:{title:'불변 배포 기록',body:'계획 · release-record.example.yml 사용',done:['필드 형식은 기존 PR에서 준비'],next:['main SHA, image digest, config revision, target, rollback digest를 한 기록에 채우기'],code:'gitSha + image digest + configRevision + target + rollback image'},
+deploy:{title:'VPS 적용',body:'미실행 · 사용자 승인 필요',done:['명령과 실패 경계 문서화'],next:['GHCR pull 방식 확정','명시적 배포 승인','기존 컨테이너 비변경 확인'],code:'docker compose --env-file .env -f web.traefik.compose.yml up -d'},
+page:{title:'임시 HTTPS 페이지',body:'미확인 · 실제 배포 후 측정',done:[],next:['/ 및 /holy/submit HTTP 200 확인','TLS 인증서와 라우터 증거 저장'],code:'curl -fsS https://${TEMP_HOSTNAME}/holy/submit'},
+address:{title:'첫 기능 브라우저 검증',body:'미확인 · 제출/DB 저장은 제외',done:[],next:['실제 도로명 주소 선택','주소 텍스트·위도·경도·마커 변화','모바일 폭과 콘솔/네트워크 캡처'],code:'주소 검색 → 선택 → Kakao geocoder → 좌표/마커 갱신'}
+};
+function renderNode(id,focus=false){const d=details[id];if(!d)return;document.querySelectorAll('.node').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.node===id)));document.querySelector('#detail-title').textContent=d.title;const b=document.querySelector('#detail-body');b.textContent='';const p=document.createElement('p');p.textContent=d.body;b.append(p);for(const [label,items] of [['완료',d.done],['다음',d.next]]){if(!items.length)continue;const h=document.createElement('h4');h.textContent=label;const ul=document.createElement('ul');items.forEach(x=>{const li=document.createElement('li');li.textContent=x;ul.append(li)});b.append(h,ul)}const pre=document.createElement('pre');pre.textContent=d.code;b.append(pre);if(focus)document.querySelector('#detail-title').focus()}
+document.querySelectorAll('.node').forEach(n=>n.addEventListener('click',()=>renderNode(n.dataset.node,true)));renderNode('compose');
+document.querySelectorAll('#flow button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#flow button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');document.querySelector('#flow-detail').textContent=b.dataset.detail}));
+const tabs=[...document.querySelectorAll('[role=tab]')];function activate(tab,focus=false){tabs.forEach(t=>{const on=t===tab;t.setAttribute('aria-selected',String(on));t.tabIndex=on?0:-1;document.getElementById(t.getAttribute('aria-controls')).hidden=!on});if(focus)tab.focus()}tabs.forEach((t,i)=>{t.addEventListener('click',()=>activate(t));t.addEventListener('keydown',e=>{let j=i;if(e.key==='ArrowRight')j=(i+1)%tabs.length;else if(e.key==='ArrowLeft')j=(i-1+tabs.length)%tabs.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=tabs.length-1;else return;e.preventDefault();activate(tabs[j],true)})});
+</script>
+</body>
+</html>
