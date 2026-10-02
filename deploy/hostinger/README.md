@@ -17,8 +17,14 @@ Run from a clean checkout immediately before the release build:
 git fetch origin --prune
 MAIN_SHA="$(git rev-parse origin/main)"
 test "$(git status --porcelain)" = ""
+test "$(git rev-parse HEAD)" = "$MAIN_SHA"
 printf '%s\n' "$MAIN_SHA"
 ```
+
+The third command is a hard release gate: build only from a checkout whose
+`HEAD` is the fetched `origin/main`. If it fails, switch to or create a clean
+release worktree at that exact SHA before building. Do not label a feature-branch
+working tree with the main SHA.
 
 The date is not the release identity. Record these values together in a copy
 of `release-record.example.yml` kept outside the repository if it contains a
@@ -93,7 +99,9 @@ docker compose \
 
 Expected services are exactly `proxy` and `web`. Only ports 80 and 443 may be
 published. Port 3000 is internal through `expose`. The application image's
-Dockerfile runs as user `nextjs`; verify the built image before release:
+Dockerfile runs as user `nextjs`. Both Compose images must use full
+`@sha256:<64 hexadecimal characters>` references; tags alone are rejected by
+the validation workflow. Verify the built web image before release:
 
 ```bash
 docker image inspect \
