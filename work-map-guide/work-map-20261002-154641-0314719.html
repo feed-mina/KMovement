@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>KMovement 브랜치 통합 완료 보고서</title>
+  <style>
+    :root{--bg:#08111f;--panel:#101d30;--panel2:#15253b;--ink:#f3f7fc;--muted:#b7c4d6;--line:#314765;--blue:#78a9ff;--green:#52d697;--amber:#ffc266;--red:#ff8b8b;--shadow:0 20px 45px rgba(0,0,0,.28)}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#07101c,#10223a);color:var(--ink);font:15px/1.65 "Malgun Gothic","Segoe UI",sans-serif}button{font:inherit}button:focus-visible,[tabindex]:focus-visible{outline:3px solid #fff;outline-offset:3px}.page{max-width:1320px;margin:auto;padding:26px}.card,.hero{background:rgba(16,29,48,.94);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}.hero{padding:26px}.eyebrow{margin:0 0 7px;color:var(--blue);font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}h1,h2,h3,h4{margin:0;line-height:1.25}h1{font-size:clamp(28px,4vw,44px)}p{color:var(--muted);max-width:78ch}.lead{font-size:17px;color:#dbe8f7}.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px;margin-top:20px}.summary article{padding:16px;border-radius:15px;background:var(--panel2);border:1px solid var(--line)}.summary strong{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}.summary span{font-weight:800}.ok{color:var(--green)}.next{color:var(--amber)}.section{margin-top:20px;padding:22px}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px}.flow button,.node{color:var(--ink);background:#0d1929;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:left;cursor:pointer}.flow button.done{border-top:4px solid var(--green)}.flow button.current{border-top:4px solid var(--blue)}.flow button[aria-pressed="true"],.node[aria-pressed="true"]{background:#193459;box-shadow:0 0 0 2px rgba(120,169,255,.45)}.flow small,.node small{display:block;color:var(--muted);margin-top:5px}.flow-detail{margin-top:14px;padding:16px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.tab{border:1px solid var(--line);border-radius:999px;background:#0d1929;color:var(--muted);padding:9px 14px;cursor:pointer}.tab[aria-selected="true"]{background:#244c80;color:white;border-color:var(--blue)}[hidden]{display:none!important}.map-layout{display:grid;grid-template-columns:minmax(330px,.9fr) minmax(360px,1.2fr);gap:18px}.map,.detail{background:#0b1726;border:1px solid var(--line);border-radius:18px;padding:18px}.lane+.lane{margin-top:20px}.node{display:block;width:100%;margin-top:9px}.node.change{border-left:5px solid var(--green)}.node.cause{border-left:5px solid var(--amber)}.node.test{border-style:dashed}.arrow{text-align:center;color:var(--muted);padding:5px}.detail{min-height:470px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.chip{border-radius:999px;padding:4px 9px;background:#1b304a;border:1px solid var(--line);font-size:12px}.chip.ok{background:#123c2d}.chip.warn{background:#4a3514}.detail ul{padding-left:20px;color:var(--muted)}.detail li+li{margin-top:8px}.mono{font-family:Consolas,monospace;overflow-wrap:anywhere}.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}.compare article{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel2)}.branch-list{padding-left:20px;color:var(--muted)}.branch-list li+li{margin-top:7px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:780px}th,td{padding:12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--muted);font-size:12px}.evidence-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:13px}.evidence-grid article{padding:16px;background:var(--panel2);border:1px solid var(--line);border-radius:15px}.evidence-grid p{margin-bottom:0}.footer{padding:22px 4px;color:var(--muted);font-size:12px}details{border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin-top:12px}summary{cursor:pointer;font-weight:700}.path{font-family:Consolas,monospace;color:#d9e8ff}.status-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.dot{width:9px;height:9px;border-radius:50%;background:var(--green);display:inline-block}@media(max-width:880px){.flow{grid-template-columns:1fr 1fr}.map-layout,.compare{grid-template-columns:1fr}.page{padding:14px}}@media(max-width:520px){.flow{grid-template-columns:1fr}.hero,.section{padding:17px}}
+    html,body{max-width:100%;overflow-x:hidden}.page,.card,.map-layout,.map,.detail,.node{min-width:0}.node strong,.node small,.mono,td,.path{overflow-wrap:anywhere;word-break:break-word}.table-wrap{max-width:100%}
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="hero">
+    <p class="eyebrow">Work Map Guide · KMovement · 2026-10-02 15:46 KST</p>
+    <h1>원격 브랜치 7개를 2개 이력 묶음으로 정리</h1>
+    <p class="lead">7개 원본 브랜치의 변경은 이미 PR을 통해 <span class="mono">main</span>에 반영되어 있었습니다. 코드를 중복 병합하지 않고, 파일 트리가 main과 동일한 통합 브랜치 2개에 원본 tip을 부모로 보존한 뒤 원본 7개를 삭제했습니다.</p>
+    <div class="summary">
+      <article><strong>현재 main</strong><span class="mono">c7a0703dd</span><p>로컬·GitHub API 일치</p></article>
+      <article><strong>통합 결과</strong><span class="ok">4개 → 1개 / 3개 → 1개</span><p>두 통합 브랜치 모두 원격 확인</p></article>
+      <article><strong>코드 영향</strong><span class="ok">0개 파일 변경</span><p>두 통합 tree가 main과 동일</p></article>
+      <article><strong>보존 상태</strong><span class="ok">원본 tip 7개 복구 가능</span><p>통합 커밋의 직접 부모로 보존</p></article>
+      <article><strong>남은 행동</strong><span class="next">없음</span><p>브랜치 정리 요청 완료</p></article>
+    </div>
+  </header>
+
+  <section class="card section" aria-labelledby="flow-title">
+    <p class="eyebrow">진행상황</p><h2 id="flow-title">확인 → 보존 → 원격 정리 → 검증 → 보고</h2>
+    <div class="flow" id="flow">
+      <button class="done" data-stage="inspect" aria-pressed="true"><strong>1. 현황 확인</strong><small>원격 ref·PR·파일 비교</small></button>
+      <button class="done" data-stage="preserve" aria-pressed="false"><strong>2. 이력 보존</strong><small>다중 부모 통합 커밋</small></button>
+      <button class="done" data-stage="cleanup" aria-pressed="false"><strong>3. 원본 정리</strong><small>정확히 7개 삭제</small></button>
+      <button class="done" data-stage="verify" aria-pressed="false"><strong>4. 원격 검증</strong><small>SHA·tree·ref 재확인</small></button>
+      <button class="current" data-stage="report" aria-pressed="false"><strong>5. 완료 보고</strong><small>독립 HTML 생성</small></button>
+    </div>
+    <div class="flow-detail" id="flow-detail" aria-live="polite"></div>
+  </section>
+
+  <section class="card section" aria-labelledby="map-title">
+    <p class="eyebrow">코드·작업 지도</p><h2 id="map-title">브랜치 관계와 확인 근거</h2>
+    <div class="tabs" role="tablist" aria-label="보고서 내용">
+      <button class="tab" id="tab-map" role="tab" aria-selected="true" aria-controls="panel-map" tabindex="0">작업 지도</button>
+      <button class="tab" id="tab-compare" role="tab" aria-selected="false" aria-controls="panel-compare" tabindex="-1">전후 비교</button>
+      <button class="tab" id="tab-verify" role="tab" aria-selected="false" aria-controls="panel-verify" tabindex="-1">검증·원격</button>
+      <button class="tab" id="tab-history" role="tab" aria-selected="false" aria-controls="panel-history" tabindex="-1">근거·이력</button>
+    </div>
+
+    <div id="panel-map" role="tabpanel" aria-labelledby="tab-map">
+      <div class="map-layout">
+        <div class="map">
+          <div class="lane"><h3>4개 묶음 · 일정/분석</h3>
+            <button class="node cause" data-node="group-a-sources" aria-pressed="false"><strong>원본 4개 브랜치</strong><small>이벤트 일정 · 분석 스키마 · 그래프 적재 · 진행 점검</small></button>
+            <div class="arrow">↓ tip 4개를 부모로 보존</div>
+            <button class="node change" data-node="group-a" aria-pressed="true"><strong>integration/kpop-schedule-analytics</strong><small>03147194d · main과 같은 tree</small></button>
+          </div>
+          <div class="lane"><h3>3개 묶음 · 데이터/서버</h3>
+            <button class="node cause" data-node="group-b-sources" aria-pressed="false"><strong>원본 3개 브랜치</strong><small>전국 맛집 · 서버 지오코딩 · 정리 기록</small></button>
+            <div class="arrow">↓ tip 3개를 부모로 보존</div>
+            <button class="node change" data-node="group-b" aria-pressed="false"><strong>integration/kpop-data-server</strong><small>6eab7afb3 · main과 같은 tree</small></button>
+          </div>
+          <div class="lane"><h3>검증 기준</h3>
+            <button class="node test" data-node="main" aria-pressed="false"><strong>main</strong><small>c7a0703dd · 로컬/원격 API 일치</small></button>
+          </div>
+        </div>
+        <article class="detail" aria-labelledby="detail-title">
+          <p class="eyebrow">선택 상세</p><h3 id="detail-title" tabindex="-1"></h3><div id="detail-body"></div>
+        </article>
+      </div>
+    </div>
+
+    <div id="panel-compare" role="tabpanel" aria-labelledby="tab-compare" hidden>
+      <p class="lead">실제 화면 캡처가 아니라, 작업 전후의 <strong>실제 원격 ref 목록</strong>을 텍스트로 재구성했습니다.</p>
+      <div class="compare">
+        <article><p class="eyebrow">Before · 실제 ref</p><h3>원본 7개가 개별 노출</h3><ul class="branch-list"><li>agent/nightly-20260811-analytics-event-schema</li><li>claude/branch-cleanup-backup-rezs6b</li><li>claude/korean-question-0y1los</li><li>claude/kpop-event-schedule-update-gcri3x</li><li>claude/kpop-events-server-error-qe8o99</li><li>claude/nationwide-restaurant-page-ro0khk</li><li>claude/progress-check-ow94bv</li></ul></article>
+        <article><p class="eyebrow">After · 실제 ref</p><h3>통합 2개로 정리</h3><ul class="branch-list"><li><strong>integration/kpop-schedule-analytics</strong></li><li><strong>integration/kpop-data-server</strong></li></ul><details><summary>그대로 유지된 브랜치</summary><ul class="branch-list"><li>main</li><li>backup/main-20260730</li><li>copilot/fix-github-actions-build-and-deploy</li></ul></details></article>
+      </div>
+    </div>
+
+    <div id="panel-verify" role="tabpanel" aria-labelledby="tab-verify" hidden>
+      <div class="table-wrap"><table><thead><tr><th>검증</th><th>결과</th><th>근거</th></tr></thead><tbody>
+        <tr><td>main 원격 SHA</td><td class="ok">통과</td><td class="mono">GitHub API = c7a0703dd8e7a83679c8b6513707d754b952944c</td></tr>
+        <tr><td>4개 통합 원격 SHA</td><td class="ok">통과</td><td class="mono">03147194d36bd7b98910118a51c0b040407ca0c5</td></tr>
+        <tr><td>3개 통합 원격 SHA</td><td class="ok">통과</td><td class="mono">6eab7afb3d385bd25a56ef83387d3ff14af01299</td></tr>
+        <tr><td>통합 tree ↔ main</td><td class="ok">통과</td><td>두 브랜치 모두 git diff --exit-code 결과 차이 없음</td></tr>
+        <tr><td>원본 tip 보존</td><td class="ok">통과</td><td>7개 모두 해당 통합 커밋의 직접 부모이며 ancestor 검사 통과</td></tr>
+        <tr><td>원본 ref 삭제</td><td class="ok">통과</td><td>git ls-remote에서 7개 원본 ref 없음</td></tr>
+        <tr><td>코드 테스트</td><td>미실행</td><td>파일 트리 변경이 0건이므로 코드 테스트 대신 tree 동일성으로 검증</td></tr>
+        <tr><td>Actions</td><td>실행 없음</td><td>두 통합 브랜치 기준 신규 run 없음; [skip ci] 이력 커밋</td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div id="panel-history" role="tabpanel" aria-labelledby="tab-history" hidden>
+      <div class="evidence-grid">
+        <article><h3>PR 병합 근거</h3><p>7개 브랜치와 연결된 PR은 모두 MERGED 상태였습니다. 주요 최종 PR: #244, #243, #242, #238, #208, #203, #197.</p></article>
+        <article><h3>로컬 main</h3><p><span class="mono">d47e9a251 → c7a0703dd</span>로 23커밋 fast-forward했습니다. 기존 미추적 <span class="mono">.codex-worktrees/</span>는 보존했습니다.</p></article>
+        <article><h3>삭제 안전장치</h3><p>삭제 직전 fetch 후 7개 원격 SHA가 조사 시점과 같은지 재검증하고, 각 tip이 통합 브랜치 ancestor인지 확인했습니다.</p></article>
+        <article><h3>복구 방법</h3><p>필요하면 통합 커밋의 부모 SHA에서 브랜치를 다시 만들 수 있습니다. 통합 브랜치를 삭제하지 않는 한 7개 tip 이력이 유지됩니다.</p></article>
+      </div>
+      <details><summary>확인에 사용한 핵심 명령</summary><ul class="branch-list mono"><li>git fetch origin --prune</li><li>git cherry -v origin/main &lt;branch&gt;</li><li>gh pr list --state all --head &lt;branch&gt;</li><li>git merge-base --is-ancestor &lt;source-tip&gt; &lt;integration&gt;</li><li>git diff --exit-code main integration/...</li><li>git ls-remote --heads origin</li><li>gh api repos/feed-mina/KMovement/git/ref/heads/...</li></ul></details>
+    </div>
+  </section>
+  <footer class="footer">WORK MAP GUIDE · 독립 HTML · 외부 폰트/CDN/네트워크 요청 없음 · 자동 갱신되지 않음</footer>
+</main>
+<script>
+  const stages={
+    inspect:{title:'현황 확인 완료',body:'원격 브랜치 전체 이름, main 대비 커밋, 실제 변경 파일, 연결 PR 상태를 확인했습니다.'},
+    preserve:{title:'이력 보존 완료',body:'현재 main tree를 유지한 다중 부모 커밋 2개를 만들어 원본 tip 7개를 직접 부모로 연결했습니다.'},
+    cleanup:{title:'원본 정리 완료',body:'삭제 직전 원격 SHA 드리프트와 ancestor 보존을 재확인한 뒤, 지정된 원본 7개 ref만 삭제했습니다.'},
+    verify:{title:'원격 검증 완료',body:'GitHub API와 ls-remote에서 main 및 통합 SHA를 재확인했고, 두 통합 tree가 main과 동일함을 확인했습니다.'},
+    report:{title:'완료 보고',body:'검증 근거와 복구 경로를 이 독립 HTML에 정리했습니다. 코드·배포 동작은 변경하지 않았습니다.'}
+  };
+  const nodes={
+    'group-a-sources':{title:'4개 원본 · 일정/분석',chips:['삭제 완료','tip 보존'],summary:'상단 4개 브랜치는 이미 main에 반영된 상태였습니다.',items:['claude/kpop-event-schedule-update-gcri3x · 561bf36e2','agent/nightly-20260811-analytics-event-schema · 614ef99f8','claude/korean-question-0y1los · a2bec84fc','claude/progress-check-ow94bv · 6108f5a12']},
+    'group-a':{title:'integration/kpop-schedule-analytics',chips:['원격 생성 완료','tree 일치'],summary:'4개 원본 tip과 origin/main을 부모로 가진 이력 통합 커밋입니다.',items:['SHA 03147194d36bd7b98910118a51c0b040407ca0c5','첫 부모: main c7a0703dd','추가 부모: 561bf36e2, 614ef99f8, a2bec84fc, 6108f5a12','main 대비 파일 변경 0건']},
+    'group-b-sources':{title:'3개 원본 · 데이터/서버',chips:['삭제 완료','tip 보존'],summary:'하단 3개 브랜치도 연결 PR이 모두 병합된 상태였습니다.',items:['claude/nationwide-restaurant-page-ro0khk · 9d884bda3','claude/kpop-events-server-error-qe8o99 · b5e41c47b','claude/branch-cleanup-backup-rezs6b · 8cbf5224b']},
+    'group-b':{title:'integration/kpop-data-server',chips:['원격 생성 완료','tree 일치'],summary:'3개 원본 tip과 origin/main을 부모로 가진 이력 통합 커밋입니다.',items:['SHA 6eab7afb3d385bd25a56ef83387d3ff14af01299','첫 부모: main c7a0703dd','추가 부모: 9d884bda3, b5e41c47b, 8cbf5224b','main 대비 파일 변경 0건']},
+    'main':{title:'main',chips:['로컬 동기화','원격 확인'],summary:'기존 PR 병합으로 7개 브랜치의 변경이 이미 반영되어 있어 새 코드 병합은 하지 않았습니다.',items:['SHA c7a0703dd8e7a83679c8b6513707d754b952944c','로컬 main을 23커밋 fast-forward','GitHub API SHA와 로컬 HEAD 일치','기존 보고서 파일도 fast-forward로 로컬에 반영']}
+  };
+  function renderStage(id){document.querySelectorAll('[data-stage]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.stage===id)));const s=stages[id];const box=document.getElementById('flow-detail');box.replaceChildren();const h=document.createElement('h3');h.textContent=s.title;const p=document.createElement('p');p.textContent=s.body;box.append(h,p)}
+  document.querySelectorAll('[data-stage]').forEach(b=>b.addEventListener('click',()=>renderStage(b.dataset.stage)));
+  function renderNode(id,focus=false){document.querySelectorAll('[data-node]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.node===id)));const n=nodes[id];const title=document.getElementById('detail-title');const body=document.getElementById('detail-body');title.textContent=n.title;body.replaceChildren();const chips=document.createElement('div');chips.className='chips';n.chips.forEach(x=>{const c=document.createElement('span');c.className='chip ok';c.textContent=x;chips.append(c)});const p=document.createElement('p');p.textContent=n.summary;const ul=document.createElement('ul');n.items.forEach(x=>{const li=document.createElement('li');li.textContent=x;ul.append(li)});body.append(chips,p,ul);if(focus)title.focus()}
+  document.querySelectorAll('[data-node]').forEach(b=>b.addEventListener('click',()=>renderNode(b.dataset.node,true)));
+  const tabs=[...document.querySelectorAll('[role="tab"]')];
+  function activate(tab,focus=false){tabs.forEach(t=>{const yes=t===tab;t.setAttribute('aria-selected',String(yes));t.tabIndex=yes?0:-1;document.getElementById(t.getAttribute('aria-controls')).hidden=!yes});if(focus)tab.focus()}
+  tabs.forEach((t,i)=>{t.addEventListener('click',()=>activate(t));t.addEventListener('keydown',e=>{let j;if(e.key==='ArrowRight')j=(i+1)%tabs.length;else if(e.key==='ArrowLeft')j=(i-1+tabs.length)%tabs.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=tabs.length-1;else return;e.preventDefault();activate(tabs[j],true)})});
+  renderStage('inspect');renderNode('group-a');
+</script>
+</body>
+</html>
