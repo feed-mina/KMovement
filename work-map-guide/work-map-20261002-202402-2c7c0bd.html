@@ -12,14 +12,14 @@
 <body>
 <main class="page">
   <header class="hero">
-    <p class="eyebrow">Work Map Guide · 2026-10-02 20:24 KST</p>
+    <p class="eyebrow">Work Map Guide · 2026-10-02 20:24 KST · 원격 상태 20:32 갱신</p>
     <h1>KMovement 기존 Hostinger Traefik 연결 준비</h1>
     <p class="headline">결론: <strong>feedmina.tech는 유지</strong>하고, 기존 Traefik에 KMovement 웹 컨테이너 하나만 연결하는 구성을 만들었다. 실제 이미지 발행과 VPS 적용은 아직 실행하지 않았다.</p>
     <div class="summary">
       <div class="card"><strong>기준</strong><code>origin/main 8c484786</code><p>병합된 Hostinger web-only PR 이후 최신 기준점.</p></div>
-      <div class="card"><strong>확인 완료</strong><span class="pill done">사전 점검</span><span class="pill done">Compose 렌더링</span><p>서비스 1개, 공개 포트 0개, Traefik 라벨 확인.</p></div>
+      <div class="card"><strong>확인 완료</strong><span class="pill done">사전 점검</span><span class="pill done">PR CI 6개</span><p>서비스 1개, 공개 포트 0개, Traefik 라벨과 전체 회귀 검사 통과.</p></div>
       <div class="card"><strong>운영 상태</strong><span class="pill blocked">미배포</span><p>VPS 컨테이너·DNS·AWS는 변경하지 않음.</p></div>
-      <div class="card next"><strong>다음 행동 하나</strong><p>PR 검토·병합 후 수동 이미지 발행 워크플로를 정확한 main SHA로 실행한다.</p></div>
+      <div class="card next"><strong>다음 행동 하나</strong><p><a href="https://github.com/feed-mina/KMovement/pull/247">PR #247</a>을 검토·병합한 뒤 수동 이미지 발행 워크플로를 정확한 main SHA로 실행한다.</p></div>
     </div>
   </header>
 
@@ -29,10 +29,10 @@
       <button data-detail="VPS 읽기 전용 점검 완료. feedmina.tech는 기존 앱이 사용하고 Traefik이 80/443을 점유한다. kmovement.srv1869569.hstgr.cloud는 같은 VPS를 가리키며 기존 라우터에는 없었다."><strong>1. 운영 사전 점검</strong><br><span class="pill done">완료</span><span class="pill confirmed">확인</span><p>기존 서비스와 포트 충돌 확인</p></button>
       <button data-detail="web.traefik.compose.yml은 web 하나만 정의하고 호스트 ports를 만들지 않는다. 요청 호스트만 기존 websecure/letsencrypt 라우터에 연결한다."><strong>2. Traefik 구성</strong><br><span class="pill done">완료</span><span class="pill confirmed">확인</span><p>루트 도메인 비침범</p></button>
       <button data-detail="Docker Compose config, YAML 파싱, 서비스·포트·라벨 계약, git diff --check가 로컬에서 통과했다. GitHub Actions 실행 결과는 PR 생성 후 별도 확인한다."><strong>3. 정적 검증</strong><br><span class="pill done">완료</span><span class="pill confirmed">확인</span><p>로컬 검사 통과</p></button>
-      <button class="current selected" data-detail="현재 단계. 변경 파일을 PR로 제출하고 원격 CI 결과를 확인해야 한다. 이 보고서 작성 시점에는 PR URL과 원격 CI가 아직 없다."><strong>4. PR·원격 CI</strong><br><span class="pill pending">진행</span><span class="pill">로컬 근거</span><p>커밋·푸시·PR 예정</p></button>
-      <button data-detail="병합 후 exact main SHA로 이미지를 발행한다. GHCR pull 권한을 확정하고 명시적 배포 승인 뒤 VPS에 적용한다. HTTPS와 /holy/submit 실제 주소 검색은 그 다음 단계다."><strong>5. 이미지·실배포</strong><br><span class="pill blocked">미실행</span><span class="pill">승인 필요</span><p>현재 완료 주장 금지</p></button>
+      <button data-detail="PR #247 생성 완료. compose, traefik-compose, web-image, nextjs, sdui-server, fastapi 체크가 모두 SUCCESS이며 PR은 MERGEABLE이다."><strong>4. PR·원격 CI</strong><br><span class="pill done">완료</span><span class="pill confirmed">원격 확인</span><p>PR #247 · CI 6개 통과</p></button>
+      <button class="current selected" data-detail="현재 단계. PR 병합 후 exact main SHA로 이미지를 발행한다. GHCR pull 권한을 확정하고 명시적 배포 승인 뒤 VPS에 적용한다. HTTPS와 /holy/submit 실제 주소 검색은 그 다음 단계다."><strong>5. 이미지·실배포</strong><br><span class="pill blocked">미실행</span><span class="pill">승인 필요</span><p>현재 완료 주장 금지</p></button>
     </div>
-    <div class="card" id="flow-detail" aria-live="polite">현재 단계: PR·원격 CI — 커밋·푸시·PR과 CI 확인이 남아 있다.</div>
+    <div class="card" id="flow-detail" aria-live="polite">현재 단계: 이미지·실배포 — PR #247의 CI는 통과했고, 병합·이미지 발행·배포 승인이 남아 있다.</div>
   </section>
 
   <section class="section panel">
@@ -68,7 +68,7 @@ KMovement web :3000 (내부)</div><p>실제 화면 캡처가 아닌 코드 기�
     <div class="tab-panel" id="verify-panel" role="tabpanel" hidden>
       <div class="verify">
         <div class="card"><strong>로컬 PASS</strong><ul><li>Compose config</li><li>서비스 정확히 web 1개</li><li>published ports 0개</li><li>Traefik Host/TLS/port 라벨</li><li>YAML parse와 diff check</li></ul></div>
-        <div class="card"><strong>PR 후 확인</strong><ul><li>Validate Hostinger workflow</li><li>기존 Next.js·FastAPI·Spring 회귀 검사</li><li>변경 파일만 포함됐는지 확인</li></ul></div>
+        <div class="card"><strong>PR 확인 완료</strong><ul><li>compose / traefik-compose / web-image PASS</li><li>nextjs / sdui-server / fastapi PASS</li><li>PR #247 MERGEABLE</li></ul></div>
         <div class="card"><strong>병합 후 확인</strong><ul><li>exact main SHA 이미지</li><li>OCI digest와 revision label</li><li>GHCR pull 가능 여부</li><li>rollback digest 기록</li></ul></div>
         <div class="card"><strong>배포 후 확인</strong><ul><li>임시 HTTPS 200</li><li>/holy/submit 200</li><li>주소 선택·좌표·마커 변화</li><li>모바일 폭·콘솔·네트워크 증거</li></ul></div>
       </div>
@@ -79,7 +79,7 @@ KMovement web :3000 (내부)</div><p>실제 화면 캡처가 아닌 코드 기�
         <div class="card"><strong>기준 커밋</strong><p><code>8c484786dece2fec011dd1ff405611c731b746c0</code></p></div>
         <div class="card"><strong>핵심 파일</strong><ul><li>deploy/hostinger/web.traefik.compose.yml:1-41</li><li>.github/workflows/hostinger-web-validate.yml:76-128</li><li>.github/workflows/hostinger-web-publish.yml:1-84</li><li>deploy/hostinger/README.md:53-68, 169-185</li></ul></div>
         <div class="card"><strong>사전 점검 기록</strong><p>deploy/hostinger/HOSTINGER-TRAEFIK-PREFLIGHT.md</p></div>
-        <div class="card"><strong>검증 시점</strong><p>2026-10-02 KST. 실제 PR·GitHub CI·배포 상태는 이후 갱신 대상.</p></div>
+        <div class="card"><strong>원격 근거</strong><p><a href="https://github.com/feed-mina/KMovement/pull/247">PR #247</a> · head <code>cb6a35fe</code> · 2026-10-02 20:32 KST에 CI 6개 SUCCESS 확인. 실제 배포 상태는 미실행.</p></div>
       </div>
     </div>
   </section>
