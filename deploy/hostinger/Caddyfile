@@ -1,0 +1,22 @@
+{
+  admin off
+  email {$ACME_CONTACT_EMAIL}
+}
+
+{$KMOVEMENT_SITE_HOST} {
+  encode zstd gzip
+
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    -Server
+  }
+
+  reverse_proxy web:3000
+
+  log {
+    output stdout
+    format json
+  }
+}

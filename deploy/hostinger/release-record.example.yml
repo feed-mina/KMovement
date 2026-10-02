@@ -1,0 +1,20 @@
+releaseDate: "2026-10-02"
+gitSha: "REPLACE_WITH_ORIGIN_MAIN_SHA"
+image: "ghcr.io/feed-mina/kmovement-web@sha256:REPLACE_WITH_64_HEX_DIGEST"
+configRevision: "REPLACE_WITH_COMMIT_CONTAINING_WEB_COMPOSE"
+target:
+  provider: "hostinger"
+  vmId: "REPLACE_WITH_NON_SECRET_VM_ID"
+  project: "kmovement-web"
+  hostname: "REPLACE_WITH_TEMPORARY_HOSTNAME"
+rollback:
+  image: "ghcr.io/feed-mina/kmovement-web@sha256:REPLACE_WITH_PREVIOUS_DIGEST"
+verification:
+  homepage200: false
+  holySubmit200: false
+  addressSelected: false
+  coordinatesChanged: false
+  kakaoMarkerMoved: false
+  mobileViewportChecked: false
+  consoleAndNetworkCaptured: false
+  rollbackRehearsed: false

@@ -1,0 +1,84 @@
+name: Validate Hostinger web-only deployment
+
+"on":
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/hostinger-web-validate.yml"
+      - "deploy/hostinger/**"
+      - "subproject/SDUI/metadata-project/Dockerfile"
+      - "subproject/SDUI/metadata-project/next.config.ts"
+      - "subproject/SDUI/metadata-project/app/holy/submit/**"
+      - "subproject/SDUI/metadata-project/components/fields/kride/maps/**"
+
+permissions:
+  contents: read
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Render Compose configuration
+        run: >-
+          docker compose
+          --env-file deploy/hostinger/.env.compose.example
+          -f deploy/hostinger/web.compose.yml
+          config
+          --quiet
+
+      - name: Require only web and proxy services
+        shell: bash
+        run: |
+          set -euo pipefail
+          services="$({ docker compose \
+            --env-file deploy/hostinger/.env.compose.example \
+            -f deploy/hostinger/web.compose.yml \
+            config --services; } | sort | paste -sd ' ' -)"
+          test "$services" = "proxy web"
+
+      - name: Require only ports 80 and 443 to be published
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose \
+            --env-file deploy/hostinger/.env.compose.example \
+            -f deploy/hostinger/web.compose.yml \
+            config --format json > /tmp/kmovement-web-compose.json
+          ports="$(jq -r '.services[].ports[]?.published' \
+            /tmp/kmovement-web-compose.json | sort -nu | paste -sd ' ' -)"
+          test "$ports" = "80 443"
+
+      - name: Validate Caddy configuration
+        run: >-
+          docker run --rm
+          -e KMOVEMENT_SITE_HOST=kmovement-preview.example.com
+          -e ACME_CONTACT_EMAIL=ops@example.com
+          -v "${PWD}/deploy/hostinger/Caddyfile:/etc/caddy/Caddyfile:ro"
+          caddy:2.10.2-alpine
+          caddy validate --config /etc/caddy/Caddyfile
+
+  web-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build web-only validation image
+        run: |
+          docker build \
+            --pull \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --build-arg "NEXT_PUBLIC_SITE_URL=https://kmovement-preview.example.com" \
+            --build-arg "NEXT_PUBLIC_BACKEND_URL=http://disabled-spring:8080" \
+            --build-arg "FASTAPI_URL=http://disabled-fastapi:8000" \
+            --build-arg "NEXT_PUBLIC_KAKAO_MAP_APP_KEY=ci-placeholder" \
+            --tag kmovement-web:validate \
+            subproject/SDUI/metadata-project
+
+      - name: Verify non-root user and revision label
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(docker image inspect kmovement-web:validate --format '{{.Config.User}}')" = "nextjs"
+          test "$(docker image inspect kmovement-web:validate --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "${GITHUB_SHA}"
