@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KMovement 전체 로직 · Easy Guide</title>
+  <style>
+    :root{--ink:#1f2937;--muted:#667085;--bg:#fffaf3;--card:#fff;--line:#eadfce;--purple:#6d4aff;--purple2:#efeaff;--green:#17805f;--green2:#e8f8f1;--orange:#b45d13;--orange2:#fff0de;--red:#a43f4b;--red2:#ffedf0;--shadow:0 16px 36px rgba(74,55,30,.10)}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#fffaf3,#f7f4ff);color:var(--ink);font:17px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif}.page{max-width:1280px;margin:auto;padding:24px}.hero{background:#fff;border:1px solid var(--line);border-radius:28px;padding:32px;box-shadow:var(--shadow)}.eyebrow{color:var(--purple);font-weight:900;letter-spacing:.08em}.hero h1{font-size:clamp(2rem,5vw,3.7rem);line-height:1.08;margin:.2em 0}.hero p{max-width:75ch;color:var(--muted)}.story{display:grid;gap:10px;margin-top:22px}.story-line{padding:14px 18px;border-radius:14px;font-weight:750}.story-line:nth-child(1){background:var(--orange2)}.story-line:nth-child(2){background:var(--purple2)}.story-line:nth-child(3){background:var(--green2)}.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.chip{border-radius:999px;padding:5px 11px;font-size:.82rem;font-weight:800}.now{background:var(--green2);color:var(--green)}.check{background:var(--orange2);color:var(--orange)}.unknown{background:var(--red2);color:var(--red)}.layout{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(360px,1.2fr);gap:18px;margin-top:20px}.map,.detail,.section{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:22px}.node{display:block;width:100%;text-align:left;border:1px solid var(--line);background:white;border-radius:16px;padding:15px;margin:10px 0;cursor:pointer;color:var(--ink);font:inherit}.node:hover,.node:focus-visible{border-color:var(--purple);outline:3px solid rgba(109,74,255,.12)}.node[aria-pressed="true"]{background:var(--purple2);border-color:var(--purple)}.node b{display:block;font-size:1.05rem}.node small{color:var(--muted)}.arrow{text-align:center;color:var(--purple);font-weight:900}.detail h2{margin-top:0}.action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.action{border:1px solid var(--line);border-radius:15px;padding:14px}.action h3{margin:.1em 0}.action p{color:var(--muted);margin:.35em 0}.journey{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0}.step{position:relative;background:#f8f5ff;border:1px solid #ddd4ff;border-radius:14px;padding:13px}.step:not(:last-child)::after{content:"→";position:absolute;right:-10px;top:40%;color:var(--purple);font-weight:900;z-index:2}.section{margin-top:20px}.section h2{margin-top:0}.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:12px}.check-card{border-radius:15px;padding:15px;background:#fafafa;border:1px solid var(--line)}.check-card strong{display:block}.good{border-left:5px solid var(--green)}.todo{border-left:5px solid var(--orange)}.warn{border-left:5px solid var(--red)}.callout{background:var(--purple2);border-left:6px solid var(--purple);padding:16px;border-radius:14px}.footer{color:var(--muted);font-size:.9rem;margin:20px 0}.detail [hidden]{display:none}@media(max-width:860px){.layout{grid-template-columns:1fr}.journey{grid-template-columns:1fr}.step:not(:last-child)::after{content:"↓";right:50%;top:auto;bottom:-20px}.page{padding:12px}.hero{padding:22px}}@media print{.layout{display:block}.map{display:none}.detail [hidden]{display:block}.section,.detail,.hero{box-shadow:none;break-inside:avoid}}
+  </style>
+</head>
+<body><main class="page">
+  <header class="hero">
+    <div class="eyebrow">KMovement 쉬운 전체 안내서</div>
+    <h1>여행을 고르면, 여러 일꾼이 차례로 도와주는 서비스</h1>
+    <p>복잡한 개발 말 대신 “내가 무엇을 누르고, 뒤에서는 무슨 일이 일어나며, 무엇을 확인하면 되는지”만 설명합니다.</p>
+    <div class="story" aria-label="세 줄 이야기">
+      <div class="story-line">기존: 화면, 여행 추천, 지도, 이야기방, 영상 만들기가 여러 곳에 나뉘어 있어 전체 흐름을 한눈에 보기 어려웠습니다.</div>
+      <div class="story-line">개선: 사용자의 선택이 화면 담당, 여행 담당, 인공지능 담당, 저장 담당에게 어떤 순서로 전달되는지 하나의 지도로 묶었습니다.</div>
+      <div class="story-line">결과: 문제가 생기면 “어느 일꾼까지 잘 갔는지”를 먼저 보고, 그 부분만 확인할 수 있습니다.</div>
+    </div>
+    <div class="legend"><span class="chip now">확인됨: 저장소 안의 현재 설계</span><span class="chip check">따로 확인: 실제 실행</span><span class="chip unknown">아직 모름: 운영 상태와 사용자 결과</span></div>
+  </header>
+
+  <div class="layout">
+    <aside class="map" aria-label="클릭하는 전체 지도">
+      <h2>다섯 부분을 눌러 보세요</h2>
+      <button class="node" data-id="start" aria-pressed="true"><b>1. 시작하고 로그인하기</b><small>누가 들어왔는지 확인하고 맞는 화면을 보여줘요.</small></button><div class="arrow">↓</div>
+      <button class="node" data-id="travel" aria-pressed="false"><b>2. 나만의 여행 만들기</b><small>기간, 좋아하는 가수, 지역, 목적, 예산을 모아요.</small></button><div class="arrow">↓</div>
+      <button class="node" data-id="explore" aria-pressed="false"><b>3. 장소와 케이팝 둘러보기</b><small>성지, 맛집, 행사, 상품을 찾아 저장해요.</small></button><div class="arrow">↓</div>
+      <button class="node" data-id="community" aria-pressed="false"><b>4. 이야기 나누고 만들기</b><small>글, 댓글, 사진, 영상 만들기를 다뤄요.</small></button><div class="arrow">↓</div>
+      <button class="node" data-id="manage" aria-pressed="false"><b>5. 안전하게 돌보기</b><small>검수, 관리자 화면, 검사, 배포와 복구를 맡아요.</small></button>
+    </aside>
+    <section class="detail" aria-live="polite">
+      <article data-panel="start"><span class="chip now">현재 설계 확인</span><h2>시작하고 로그인하기</h2><p>사용자가 들어오면 서비스는 로그인 여부와 역할을 확인합니다. 같은 화면 이름이어도 손님, 회원, 관리자에게 필요한 것만 골라 보여줍니다.</p><div class="action-grid"><div class="action"><h3>내가 할 일</h3><p>로그인하거나 손님으로 둘러봅니다.</p></div><div class="action"><h3>뒤에서 하는 일</h3><p>사용자에게 맞는 메뉴와 단추만 골라 화면을 조립합니다.</p></div><div class="action"><h3>완료 확인</h3><p>내 역할에 맞는 화면이 보이고, 들어갈 수 없는 곳은 막혀야 합니다.</p></div></div></article>
+      <article data-panel="travel" hidden><span class="chip now">대표 흐름 · 자세히 보기</span><h2>나만의 여행 만들기</h2><p>이 서비스의 가장 중요한 길입니다. 사용자가 고른 다섯 가지를 모아 여행 계획을 만들고, 지도와 상담창이 같은 결과를 함께 씁니다.</p><div class="journey"><div class="step"><b>① 기간</b><br>당일 또는 며칠</div><div class="step"><b>② 취향</b><br>좋아하는 가수와 지역</div><div class="step"><b>③ 조건</b><br>목적과 예산</div><div class="step"><b>④ 계획</b><br>장소를 묶어 날짜별로 정리</div><div class="step"><b>⑤ 사용</b><br>지도에서 보고 질문하기</div></div><div class="action-grid"><div class="action"><h3>내가 할 일</h3><p>원하는 항목을 고르고 다음으로 이동합니다. 결과에서 장소와 이동 순서를 살펴봅니다.</p></div><div class="action"><h3>뒤에서 하는 일</h3><p>관련 장소를 찾고, 서로 가까운 곳과 취향을 함께 생각해 날짜별 계획을 만듭니다.</p></div><div class="action"><h3>완료 확인</h3><p>일정의 장소와 지도 표시가 맞고, 질문했을 때 지금 여행 내용을 알고 답해야 합니다.</p></div></div><div class="callout"><strong>문제가 생기면:</strong> 먼저 선택값이 남아 있는지, 다음으로 여행 결과가 왔는지, 마지막으로 지도에 위치가 있는지 차례로 봅니다. 세 곳을 한꺼번에 고치지 않습니다.</div></article>
+      <article data-panel="explore" hidden><span class="chip now">현재 설계 확인</span><h2>장소와 케이팝 둘러보기</h2><p>전국 장소, 성지, 맛집, 가수, 행사와 상품을 조건에 맞춰 보여줍니다. 저장한 항목은 내 목록에서 다시 볼 수 있습니다.</p><div class="action-grid"><div class="action"><h3>내가 할 일</h3><p>지역과 종류를 고르고, 마음에 드는 항목을 저장합니다.</p></div><div class="action"><h3>뒤에서 하는 일</h3><p>공개가 허용된 자료만 골라 목록과 상세 정보를 합칩니다.</p></div><div class="action"><h3>완료 확인</h3><p>목록과 상세 내용이 같고, 저장과 해제가 내 계정에만 반영되어야 합니다.</p></div></div></article>
+      <article data-panel="community" hidden><span class="chip now">현재 설계 확인</span><h2>이야기 나누고 만들기</h2><p>게시글과 사진, 댓글과 좋아요를 연결합니다. 신고와 검수 기록을 남기고, 시간이 오래 걸리는 사진·영상 작업은 줄을 세워 따로 처리합니다.</p><div class="action-grid"><div class="action"><h3>내가 할 일</h3><p>글이나 사진을 올리고 처리 상태를 기다립니다.</p></div><div class="action"><h3>뒤에서 하는 일</h3><p>글의 주인과 공개 상태를 확인하고, 오래 걸리는 작업은 진행률을 알려줍니다.</p></div><div class="action"><h3>완료 확인</h3><p>내 글만 고칠 수 있고, 작업이 성공 또는 실패로 끝나며 결과가 연결되어야 합니다.</p></div></div></article>
+      <article data-panel="manage" hidden><span class="chip check">실행은 별도 확인</span><h2>안전하게 돌보기</h2><p>관리자는 사용자 역할, 제보, 게시물, 화면 구성을 살펴봅니다. 자동 검사는 큰 부분의 연결이 깨지지 않았는지 확인하고, 배포는 화면·업무·인공지능 작업을 나누어 진행합니다.</p><div class="action-grid"><div class="action"><h3>내가 할 일</h3><p>바꾼 부분에 맞는 검사를 고르고 결과를 기록합니다.</p></div><div class="action"><h3>작업자에게 전달</h3><p>어떤 화면에서 무엇을 눌렀고, 기대한 결과와 실제 결과가 무엇인지 알려줍니다.</p></div><div class="action"><h3>완료 확인</h3><p>검사 통과, 실제 화면 확인, 배포 확인을 서로 다른 증거로 남깁니다.</p></div></div></article>
+    </section>
+  </div>
+
+  <section class="section"><h2>현재 상태를 이렇게 이해하면 됩니다</h2><div class="checks"><div class="check-card good"><strong>확인된 것</strong>전체 구조와 주요 기능의 연결, 화면·업무·추천·저장·작업의 역할을 저장소에서 확인했습니다.</div><div class="check-card todo"><strong>이번에 하지 않은 것</strong>모든 검사를 실제로 돌리거나, 서비스 화면에서 처음부터 끝까지 여행을 만들어 보지는 않았습니다.</div><div class="check-card warn"><strong>아직 모르는 것</strong>현재 운영 서버와 외부 서비스가 정상인지, 실제 데이터가 최신인지, 사용자가 결과를 받아들였는지는 별도 확인이 필요합니다.</div></div></section>
+  <section class="section"><h2>완료 확인 네 가지</h2><div class="checks"><div class="check-card"><strong>① 선택 유지</strong>뒤로 갔다 와도 고른 값이 남아 있나요?</div><div class="check-card"><strong>② 결과 일치</strong>일정과 지도에 같은 장소가 보이나요?</div><div class="check-card"><strong>③ 내 정보 보호</strong>저장·글·작업 결과가 내 계정에만 연결되나요?</div><div class="check-card"><strong>④ 실패 안내</strong>문제가 생겼을 때 멈춘 곳과 다시 할 방법이 보이나요?</div></div></section>
+  <p class="footer">생성 기준: 2026-10-02 · 현재 저장소의 설계를 쉽게 설명한 문서입니다. 문서 작성 자체가 실제 실행, 배포 또는 운영 확인을 뜻하지 않습니다.</p>
+</main>
+<script>
+  const nodes=[...document.querySelectorAll('.node')],panels=[...document.querySelectorAll('[data-panel]')];
+  nodes.forEach(n=>n.addEventListener('click',()=>{nodes.forEach(x=>x.setAttribute('aria-pressed',String(x===n)));panels.forEach(p=>p.hidden=p.dataset.panel!==n.dataset.id);document.querySelector(`[data-panel="${n.dataset.id}"]`).querySelector('h2').focus?.()}));
+</script></body></html>

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KMovement 전체 로직 · Screen Code Handover</title>
+  <style>
+    :root{--ink:#152238;--muted:#5d6b7c;--paper:#f6f8fb;--card:#fff;--line:#dfe6ef;--blue:#1261a0;--sky:#eaf5ff;--green:#147d64;--mint:#e9f8f3;--amber:#9a5b00;--sand:#fff4dc;--red:#a23c3c;--rose:#fff0f0;--shadow:0 14px 38px rgba(30,55,90,.10)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif}button{font:inherit}a{color:var(--blue)}.page{max-width:1440px;margin:auto;padding:24px}.hero{background:linear-gradient(135deg,#0d3558,#176b8a 58%,#16846c);color:white;border-radius:28px;padding:32px;box-shadow:var(--shadow)}.hero p{max-width:90ch;color:#eaf6ff}.eyebrow{font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800}.meta,.grid,.facts,.flow,.feature-grid{display:grid;gap:14px}.meta{grid-template-columns:repeat(auto-fit,minmax(210px,1fr));margin-top:22px}.meta>div{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.25);padding:14px;border-radius:16px}.meta strong{display:block}.notice{margin-top:18px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.12);border-left:5px solid #8de6cd}.tabs{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;padding:14px 0;background:rgba(246,248,251,.96);backdrop-filter:blur(10px)}.tab{border:1px solid var(--line);background:white;color:var(--ink);border-radius:999px;padding:10px 16px;cursor:pointer}.tab[aria-selected="true"]{background:var(--blue);color:white;border-color:var(--blue)}section[role="tabpanel"]{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:var(--shadow)}section[role="tabpanel"][hidden]{display:none}h1{font-size:clamp(2rem,5vw,4rem);line-height:1.08;margin:.2em 0}h2{font-size:clamp(1.45rem,3vw,2.25rem);margin:0 0 12px}h3{margin:0 0 8px}p{max-width:90ch;color:var(--muted)}.grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.card{border:1px solid var(--line);border-radius:17px;padding:17px;background:#fff}.card.blue{background:var(--sky)}.card.green{background:var(--mint)}.card.amber{background:var(--sand)}.card.red{background:var(--rose)}.pill{display:inline-flex;border-radius:999px;padding:4px 10px;font-size:.78rem;font-weight:800;background:#e9eef5;color:#36475a}.pill.ok{background:#dff6ed;color:#08644f}.pill.check{background:#fff0cc;color:#815000}.pill.unknown{background:#ffe2e2;color:#8d3030}.flow{grid-template-columns:repeat(5,minmax(150px,1fr));align-items:stretch}.step{position:relative;border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff}.step:not(:last-child)::after{content:"→";position:absolute;right:-16px;top:42%;font-weight:900;color:var(--blue);z-index:2}.step b{display:block;color:var(--blue)}.arch{display:grid;grid-template-columns:1fr 52px 1fr 52px 1fr;align-items:center;gap:8px;margin:22px 0}.arch .box{min-height:140px;border-radius:18px;padding:18px;border:2px solid #b9cce0;background:#f7fbff}.arch .arrow{text-align:center;font-size:2rem;color:var(--blue)}.mock{border:12px solid #253247;border-radius:26px;padding:15px;background:#f8fbff;max-width:900px;margin:20px auto}.mock-head{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px}.mock-body{display:grid;grid-template-columns:1.05fr .95fr;gap:12px;margin-top:12px}.mock-panel{border:1px solid var(--line);border-radius:14px;padding:14px;background:white}.mock-list{display:grid;gap:8px}.mock-item{background:var(--sky);border-radius:10px;padding:10px}.caption{text-align:center;font-size:.9rem;color:var(--muted)}table{width:100%;border-collapse:collapse;margin:12px 0 22px;font-size:.94rem}th,td{border:1px solid var(--line);padding:10px;vertical-align:top;text-align:left}th{background:#edf3f9}code{background:#eef2f7;border-radius:6px;padding:.1em .35em;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{background:#111b2b;color:#eaf2ff;border-radius:14px;padding:14px;overflow:auto}.feature-grid{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}.feature{border:1px solid var(--line);border-radius:18px;padding:18px;background:white}.feature summary{cursor:pointer;font-weight:800;color:var(--blue)}.feature dl{display:grid;grid-template-columns:105px 1fr;gap:8px 12px}.feature dt{font-weight:800}.feature dd{margin:0;color:var(--muted)}.facts{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.fact{border-left:5px solid var(--blue);background:#f8fbff;padding:14px;border-radius:12px}.fact strong{display:block;font-size:1.45rem}.erd{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.entity{border:2px solid #9db5cc;border-radius:14px;padding:12px;min-width:160px;background:white}.rel{font-weight:900;color:var(--green)}ul{padding-left:1.2rem}.sources li{margin:.35em 0}.footer{margin:20px 0 4px;color:var(--muted);font-size:.9rem}@media(max-width:900px){.flow{grid-template-columns:1fr}.step:not(:last-child)::after{content:"↓";right:50%;top:auto;bottom:-20px}.arch{grid-template-columns:1fr}.arch .arrow{transform:rotate(90deg)}.mock-body{grid-template-columns:1fr}.page{padding:12px}section[role="tabpanel"]{padding:17px}.feature dl{grid-template-columns:1fr}.feature dd{margin-bottom:8px}}@media print{.tabs{display:none}.page{max-width:none;padding:0}.hero,section[role="tabpanel"]{box-shadow:none;break-inside:avoid}section[role="tabpanel"]{display:block!important;margin-top:14px}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="hero">
+    <div class="eyebrow">Screen · Code · API · DB · Operations</div>
+    <h1>KMovement 전체 로직 인수인계</h1>
+    <p>사용자가 여행 조건을 고르는 순간부터 SDUI 화면 조립, 업무 API, AI 추천·채팅, 데이터 저장, 비동기 미디어 작업과 배포까지 한 번에 추적하는 유지보수 지도입니다.</p>
+    <div class="meta">
+      <div><strong>기준 저장소</strong>feed-mina/KMovement · main</div>
+      <div><strong>기준 커밋</strong>0c6e278f1 · 2026-10-02</div>
+      <div><strong>독자</strong>신규 개발자 · 운영 담당자 · 장애 대응자</div>
+      <div><strong>읽는 순서</strong>전체 구조 → 대표 흐름 → 기능별 계약 → 운영</div>
+    </div>
+    <div class="notice"><strong>시각 자료 구분:</strong> 아래 화면은 실제 운영 캡처가 아니라 현재 코드와 메타데이터 연결을 바탕으로 만든 <strong>코드 기반 재구성</strong>입니다. 운영 URL, 외부 서비스, 실제 DB 데이터와 배포 상태는 이 문서 작성 과정에서 실측하지 않았습니다.</div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="인수인계 보고서 탭">
+    <button class="tab" role="tab" aria-selected="true" aria-controls="overview" id="tab-overview">1. 전체 구조</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="journey" id="tab-journey" tabindex="-1">2. 대표 사용자 흐름</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="domains" id="tab-domains" tabindex="-1">3. 기능별 로직</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="data" id="tab-data" tabindex="-1">4. 데이터·비동기</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="ops" id="tab-ops" tabindex="-1">5. 실행·테스트·복구</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="evidence" id="tab-evidence" tabindex="-1">6. 근거·한계</button>
+  </nav>
+
+  <section id="overview" role="tabpanel" aria-labelledby="tab-overview">
+    <h2>한 줄 구조: 화면 정의와 업무 처리는 Spring, 추천·추론은 FastAPI, 표현은 웹·모바일이 맡습니다</h2>
+    <div class="facts">
+      <div class="fact"><strong>5개</strong>핵심 실행 경계: 웹, 모바일, Spring, FastAPI, 작업 큐</div>
+      <div class="fact"><strong>109개</strong>Flyway 마이그레이션 파일</div>
+      <div class="fact"><strong>90 / 15 / 47</strong>웹 / 모바일 / Spring 테스트 파일</div>
+      <div class="fact"><strong>10개</strong>CI·배포·감사·그래프 작업 워크플로</div>
+    </div>
+    <div class="arch" aria-label="전체 아키텍처">
+      <div class="box"><h3>사용자 화면</h3><p>Next.js SDUI 웹, 지역별 공개 여행 페이지, Expo 모바일이 화면 번호와 사용자 조작을 전달합니다.</p><span class="pill ok">표현 계층</span></div>
+      <div class="arrow">⇄</div>
+      <div class="box"><h3>업무·화면 서버</h3><p>Spring Boot가 로그인·권한, 화면 트리, 동적 조회, K-POP·관광·커뮤니티·관리자 업무를 처리합니다.</p><span class="pill ok">업무 계층</span></div>
+      <div class="arrow">⇄</div>
+      <div class="box"><h3>추천·작업 서버</h3><p>FastAPI가 GraphRAG·벡터 검색·일정·채팅·경로와 Celery/RunPod 작업 요청을 담당합니다.</p><span class="pill ok">AI 계층</span></div>
+    </div>
+    <div class="grid">
+      <article class="card blue"><h3>SDUI 조립 축</h3><p><code>screenId</code>로 화면 정의를 받고, 데이터 소스를 실행한 뒤 컴포넌트 등록표로 실제 React 요소를 고릅니다. 웹과 모바일은 같은 화면 계약을 서로 다른 표현 컴포넌트로 해석합니다.</p></article>
+      <article class="card green"><h3>업무 API 축</h3><p><code>/api/ui</code>는 역할별 화면 트리를, <code>/api/execute</code>는 등록된 쿼리를, 도메인 API는 관광·K-POP·커뮤니티·인증·관리 업무를 제공합니다.</p></article>
+      <article class="card amber"><h3>AI 축</h3><p><code>/kride-api</code>는 FastAPI의 <code>/api</code>로 중계됩니다. 일정 생성은 장소 검색·그래프 확장·LLM 생성·좌표 해석·이력 저장을 조합합니다.</p></article>
+      <article class="card red"><h3>운영 축</h3><p>Redis는 캐시와 큐, PostgreSQL은 서비스 데이터, ChromaDB는 벡터 검색, Supabase는 그래프·이력, S3/Cloudinary는 미디어를 맡습니다. 각 저장소는 선택적 설정과 실패 정책이 다릅니다.</p></article>
+    </div>
+  </section>
+
+  <section id="journey" role="tabpanel" aria-labelledby="tab-journey" hidden>
+    <h2>대표 흐름: 여행 조건 입력 → 일정 생성 → 지도·채팅으로 보완</h2>
+    <div class="flow">
+      <div class="step"><b>1. 조건 선택</b>기간, 아티스트, 지역, 목적, 예산을 폼 상태에 모읍니다.</div>
+      <div class="step"><b>2. 화면 계약</b>화면 번호로 메타데이터와 선택지 데이터를 읽고 등록된 컴포넌트를 그립니다.</div>
+      <div class="step"><b>3. 추천 요청</b>Next.js 중계가 FastAPI 일정 생성 요청으로 전달합니다.</div>
+      <div class="step"><b>4. AI 조합</b>벡터·그래프 후보, 일정 생성, 좌표·맛집 보완, 이력 저장을 수행합니다.</div>
+      <div class="step"><b>5. 결과 사용</b>일정 패널과 지도 마커를 공유하고 채팅으로 질문·추천·재계획을 이어갑니다.</div>
+    </div>
+    <div class="mock" aria-label="코드 기반 재구성 화면">
+      <div class="mock-head"><strong>K-RIDE 여행 결과</strong><span class="pill check">코드 기반 재구성</span></div>
+      <div class="mock-body">
+        <div class="mock-panel"><h3>지도와 마커</h3><p>일정에 포함된 장소 좌표를 마커로 표시합니다. 직접 좌표 → 원본 후보 매칭 → 주소 지오코딩 순으로 보완합니다.</p><div style="height:180px;border-radius:12px;background:radial-gradient(circle at 30% 40%,#3d9 0 7px,transparent 8px),radial-gradient(circle at 65% 60%,#1684d8 0 7px,transparent 8px),linear-gradient(135deg,#d9efe4,#dcecff)"></div></div>
+        <div class="mock-panel"><h3>일정과 상담</h3><div class="mock-list"><div class="mock-item"><strong>Day 1</strong><br>성지 · 전시 · 식사</div><div class="mock-item"><strong>Day 2</strong><br>아티스트 관련 장소 · 카페</div><div class="mock-item"><strong>AI 상담</strong><br>질문은 답변, 추천은 후보, 일정 요청은 변경 결과로 분기</div></div></div>
+      </div>
+    </div>
+    <p class="caption">실제 운영 화면 캡처가 아닙니다. 현재 컴포넌트·API·좌표 보완 코드를 설명하기 위한 재구성입니다.</p>
+    <table>
+      <thead><tr><th>단계</th><th>입력</th><th>핵심 처리</th><th>반환·화면 결과</th><th>부수효과</th></tr></thead>
+      <tbody>
+        <tr><td>화면 열기</td><td>화면 번호, 로그인 역할</td><td>역할 필터 → 부모·자식 트리 → 데이터 소스 실행</td><td>화면 노드와 목록 데이터</td><td>없음</td></tr>
+        <tr><td>조건 입력</td><td>기간·아티스트·지역·목적·예산</td><td>선택/해제, 최대 개수, 예산 범위 보정</td><td>다음 화면과 폼 상태</td><td>브라우저 저장</td></tr>
+        <tr><td>일정 생성</td><td>여행 조건, 선택적 사용자 ID</td><td>RAG/GraphRAG 후보 → LLM 일정 → 좌표 해석 → 맛집 보완</td><td>일별 일정, POI, 마커, 추천 설명</td><td>설정 시 추천 이력 저장</td></tr>
+        <tr><td>대화</td><td>메시지와 현재 일정</td><td>질문·추천·일정 의도 분기, 그래프 문맥과 벡터 문맥 결합</td><td>스트림 답변 또는 일정 변경</td><td>대화 상태 갱신</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="domains" role="tabpanel" aria-labelledby="tab-domains" hidden>
+    <h2>기능별 입력·분기·출력 계약</h2>
+    <div class="feature-grid">
+      <details class="feature" open><summary>① SDUI 화면 조립</summary><dl><dt>입력</dt><dd>화면 번호, 역할, 상세 식별자, 페이지 조건</dd><dt>처리</dt><dd>Spring이 역할별 노드를 트리로 만들고 웹이 선언된 데이터 소스만 호출합니다. 등록표에 있는 컴포넌트만 렌더링합니다.</dd><dt>출력</dt><dd>화면 트리, 참조 데이터, 폼·액션 함수</dd><dt>실패 분기</dt><dd>부모가 권한 필터로 사라진 노드는 루트로 승격됩니다. 미등록 컴포넌트는 표시되지 않습니다.</dd><dt>핵심 파일</dt><dd><code>UiService.java</code>, <code>usePageMetadata.tsx</code>, <code>renderNodes.tsx</code>, <code>componentMap.tsx</code></dd></dl></details>
+      <details class="feature"><summary>② 인증·권한·사용자 상태</summary><dl><dt>입력</dt><dd>일반 로그인, 카카오 로그인, 토큰 갱신, 역할</dd><dt>처리</dt><dd>Spring Security와 JWT 필터가 인증을 구성하고 UI 노드·동적 쿼리·관리 API에서 역할을 다시 확인합니다.</dd><dt>출력</dt><dd>접근 가능한 화면, 서버가 주입한 사용자 식별자</dd><dt>주의</dt><dd>동적 쿼리 요청에서 사용자가 사용자 ID를 직접 덮어쓸 수 없도록 차단합니다.</dd><dt>핵심 파일</dt><dd><code>SecurityConfig.java</code>, <code>JwtAuthenticationFilter.java</code>, <code>AuthController.java</code></dd></dl></details>
+      <details class="feature"><summary>③ 관광·성지·맛집 탐색</summary><dl><dt>입력</dt><dd>지역 코드, 시군구, 콘텐츠 종류, 작품·검색 조건</dd><dt>처리</dt><dd>내부 <code>tour_poi</code>와 외부 TourAPI 결과를 정규화하고 성지·일반 관광·음식 경로를 나눕니다.</dd><dt>출력</dt><dd>장소 카드, 상세, 지역 목록</dd><dt>부수효과</dt><dd>사용자 제보는 검수 대기 상태로 저장되고 관리자가 승인·반려합니다.</dd><dt>핵심 파일</dt><dd><code>TourController.java</code>, <code>TourService.java</code>, <code>tourApi.ts</code></dd></dl></details>
+      <details class="feature"><summary>④ K-POP 허브·이벤트·상품</summary><dl><dt>입력</dt><dd>아티스트, 이벤트 날짜/지역, 분석 이미지, 상품 필터</dd><dt>처리</dt><dd>승인된 카탈로그만 노출하고 팔로우·북마크·저장 항목을 사용자 범위로 결합합니다. 이미지 분석 결과는 서버 카탈로그로 재수화합니다.</dd><dt>출력</dt><dd>아티스트·이벤트·상품 카드, 분석 작업 상태</dd><dt>실패 분기</dt><dd>근거·승인 카탈로그가 부족하면 <code>INSUFFICIENT_EVIDENCE</code>와 신뢰도 0으로 닫힙니다.</dd><dt>핵심 파일</dt><dd><code>KpopController.java</code>, <code>KpopProductService.java</code>, <code>KpopAnalysisService.java</code></dd></dl></details>
+      <details class="feature"><summary>⑤ AI 추천·GraphRAG·채팅</summary><dl><dt>입력</dt><dd>선호 아티스트, 지역, 목적, 기간, 예산, 질문</dd><dt>처리</dt><dd>Chroma 목적 검색과 로컬 그래프의 아티스트-장소 관계를 합치고 Groq 기반 생성 결과를 일정·답변 형태로 정리합니다.</dd><dt>출력</dt><dd>추천 장소, 일정, 좌표, 스트림 답변</dd><dt>대체 경로</dt><dd>직접 좌표와 원본 POI를 먼저 사용하고, 필요할 때만 주소 지오코딩합니다. 추천 이력 저장 실패는 응답 실패로 승격하지 않는 best-effort 정책입니다.</dd><dt>핵심 파일</dt><dd><code>fastapi_server.py</code>, <code>rag_client.py</code>, <code>graphrag_client.py</code>, <code>route_history.py</code></dd></dl></details>
+      <details class="feature"><summary>⑥ 커뮤니티·검수·미디어 변환</summary><dl><dt>입력</dt><dd>게시글, 이미지, 댓글, 좋아요, 신고, 애니메이션 요청</dd><dt>처리</dt><dd>게시물 관계를 저장하고 검수 상태를 전이합니다. 변환 요청은 작업 레코드와 원격 작업 ID를 연결하고 스케줄러가 상태를 갱신합니다.</dd><dt>출력</dt><dd>목록·상세·댓글·반응·변환 상태</dd><dt>부수효과</dt><dd>파일 저장, 알림, 감사 이력, RunPod/비동기 작업</dd><dt>핵심 파일</dt><dd><code>CommunityPostService.java</code>, <code>CommunityModerationService.java</code>, <code>AnimationService.java</code></dd></dl></details>
+      <details class="feature"><summary>⑦ 웹·모바일 공통 화면 계약</summary><dl><dt>입력</dt><dd>같은 화면 번호와 메타데이터 계약</dd><dt>처리</dt><dd>웹은 DOM 컴포넌트, 모바일은 React Native 컴포넌트 등록표로 해석합니다. 핵심 스토어·액션·SQL 데이터 훅은 <code>@kride/core</code>로 공유합니다.</dd><dt>출력</dt><dd>브라우저 화면 또는 Expo 네이티브 화면</dd><dt>주의</dt><dd>플랫폼별 지도·저장소·딥링크·권한 구현은 별도입니다.</dd><dt>핵심 파일</dt><dd><code>packages/core</code>, <code>apps/mobile/src/componentMap.tsx</code>, <code>apps/mobile/app/[screenId].tsx</code></dd></dl></details>
+      <details class="feature"><summary>⑧ 관리자·파트너·학습·AI 도구</summary><dl><dt>입력</dt><dd>관리자 역할, 목표/사용자/검수/파트너 데이터, 음성·이력서·학습 자료</dd><dt>처리</dt><dd>SDUI 관리 조회, 역할 변경, B2B 슬롯, 목표 대시보드, 학습 스케줄, STT·발음·면접을 도메인별 서비스로 처리합니다.</dd><dt>출력</dt><dd>관리 화면, 일정/학습 자료, AI 응답</dd><dt>핵심 파일</dt><dd><code>domain/admin</code>, <code>domain/study</code>, <code>domain/ai</code>, <code>domain/google</code></dd></dl></details>
+    </div>
+  </section>
+
+  <section id="data" role="tabpanel" aria-labelledby="tab-data" hidden>
+    <h2>데이터와 비동기 작업은 “원본·검색·캐시·파일”로 나뉩니다</h2>
+    <div class="grid">
+      <article class="card"><h3>PostgreSQL + Flyway</h3><p><code>ui_metadata</code>, <code>query_master</code>, 사용자·관광·K-POP·커뮤니티·작업 상태의 시스템 원본입니다. 109개 마이그레이션이 화면/쿼리/업무 스키마를 누적합니다.</p></article>
+      <article class="card"><h3>Redis</h3><p>K-POP 공개 조회 캐시, Celery 브로커·결과, 사용량 카운터에 쓰입니다. 사용자 범위 데이터와 명령형 쿼리는 공개 캐시에서 제외됩니다.</p></article>
+      <article class="card"><h3>ChromaDB + 로컬 그래프</h3><p>목적별 장소 임베딩 컬렉션과 <code>models/kride_graph.json</code>의 아티스트-장소 관계를 추천·채팅 문맥으로 사용합니다.</p></article>
+      <article class="card"><h3>Supabase + 파일 저장소</h3><p>그래프 미러·추천 이력과 커뮤니티/분석 미디어를 담당합니다. 설정이 없을 때 일부 이력은 로컬 JSONL 또는 비저장으로 내려갑니다.</p></article>
+    </div>
+    <h3>핵심 관계</h3>
+    <div class="erd" aria-label="핵심 ERD 요약">
+      <div class="entity"><b>ui_metadata</b><br>화면 노드·역할·액션</div><span class="rel">→</span><div class="entity"><b>query_master</b><br>등록 SQL·파라미터 계약</div><span class="rel">→</span><div class="entity"><b>업무 테이블</b><br>관광·K-POP·커뮤니티</div>
+      <div class="entity"><b>users</b><br>인증 주체</div><span class="rel">1:N</span><div class="entity"><b>saved_item</b><br>팔로우·북마크·상품 저장</div><span class="rel">N:1</span><div class="entity"><b>artist/event/product</b><br>승인 카탈로그</div>
+      <div class="entity"><b>community_post</b></div><span class="rel">1:N</span><div class="entity"><b>post_image/comment/like/report</b></div><span class="rel">→</span><div class="entity"><b>moderation_audit</b></div>
+      <div class="entity"><b>celery_jobs</b><br>작업·진행률·결과</div><span class="rel">1:N</span><div class="entity"><b>analysis_candidate</b><br>근거가 붙은 상품 후보</div>
+    </div>
+    <h3>비동기 작업 흐름</h3>
+    <div class="flow">
+      <div class="step"><b>접수</b>Spring 또는 FastAPI가 작업 종류와 소유자를 검증</div>
+      <div class="step"><b>큐</b>Celery가 Redis 브로커에 태스크 전달</div>
+      <div class="step"><b>실행</b>로컬/GPU 워커 또는 RunPod가 모델 작업 수행</div>
+      <div class="step"><b>상태</b>폴링·SSE로 진행률과 결과 확인</div>
+      <div class="step"><b>정리</b>결과 저장, 원본 삭제·만료·취소 상태 처리</div>
+    </div>
+  </section>
+
+  <section id="ops" role="tabpanel" aria-labelledby="tab-ops" hidden>
+    <h2>실행·테스트·배포·복구 체크</h2>
+    <div class="grid">
+      <article class="card blue"><h3>로컬 시작 순서</h3><ol><li>환경 변수 예시를 기준으로 DB·Redis·외부 키를 준비합니다.</li><li>Spring의 PostgreSQL/Flyway를 먼저 올립니다.</li><li>FastAPI와 필요 시 Chroma·Celery 워커를 올립니다.</li><li>Next.js 또는 Expo를 마지막에 연결합니다.</li></ol></article>
+      <article class="card green"><h3>표준 검증</h3><pre><code># Spring
+cd subproject/SDUI/SDUI-server
+./gradlew test
+
+# Web
+cd ../metadata-project
+npm ci
+npm test
+npm run build
+
+# AI API
+cd ../../..
+python -m pytest src/api tests -v
+
+# Mobile
+cd subproject/SDUI/kride
+pnpm install --frozen-lockfile
+pnpm test</code></pre></article>
+      <article class="card amber"><h3>현재 CI 경계</h3><p>루트 CI는 Next.js 테스트·빌드와 FastAPI 지정 테스트를 실행합니다. Spring은 전체 빌드를 테스트 제외로 수행한 뒤 Celery 관련 2개 테스트 클래스만 별도 실행합니다. 모바일 테스트는 이 CI 정의에 포함되지 않습니다.</p></article>
+      <article class="card red"><h3>배포·복구</h3><p>EC2 배포, 프런트 전용 배포, RunPod 이미지 빌드, Supabase 그래프 적재·갱신이 분리되어 있습니다. 장애 시 최근 이미지/커밋, Flyway 적용 버전, 환경 변수, 외부 서비스 상태를 같은 시점으로 맞춘 뒤 한 계층씩 되돌립니다.</p></article>
+    </div>
+    <table>
+      <thead><tr><th>증상</th><th>첫 확인</th><th>다음 경계</th><th>정상 기준</th></tr></thead>
+      <tbody>
+        <tr><td>화면이 비거나 일부만 보임</td><td>화면 번호·사용자 역할·UI 트리 응답</td><td>컴포넌트 등록표, 데이터 소스 선언</td><td>노드·데이터·등록 타입이 모두 일치</td></tr>
+        <tr><td>목록만 실패</td><td>등록 쿼리의 파라미터 선언·반환 타입</td><td>권한, 사용자 ID 서버 주입, Redis 캐시</td><td>허용 파라미터만 전달되고 결과 형식 일치</td></tr>
+        <tr><td>추천은 나오나 지도 비어 있음</td><td>일정 장소의 좌표</td><td>원본 POI 매칭, 지오코딩 응답</td><td>마커 수와 유효 좌표 수 일치</td></tr>
+        <tr><td>AI 작업이 계속 대기</td><td>Redis·워커·작업 소유권</td><td>RunPod 엔드포인트, 토큰, 폴링/SSE</td><td>QUEUED → RUNNING → terminal 상태 전이</td></tr>
+        <tr><td>배포 뒤 화면/DB 불일치</td><td>배포 커밋과 Flyway 버전</td><td>프런트 환경 변수와 백엔드 URL</td><td>동일 릴리스 기준으로 스키마·API·클라이언트 정렬</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+    <h2>확인한 것과 아직 확인하지 않은 것</h2>
+    <div class="grid">
+      <article class="card green"><span class="pill ok">확인</span><h3>정적 코드·구성</h3><ul><li>현재 main과 origin/main이 같은 커밋을 가리킴</li><li>웹·모바일·Spring·FastAPI·작업 큐의 진입점과 연결 경로</li><li>패키지 스크립트, CI 단계, Docker Compose 서비스</li><li>테스트 파일 수와 Flyway 마이그레이션 수</li></ul></article>
+      <article class="card amber"><span class="pill check">문서 작성 시 미실행</span><h3>런타임 검증</h3><ul><li>전체 Spring/Web/FastAPI/Mobile 테스트</li><li>로컬 통합 실행과 실제 브라우저 사용자 흐름</li><li>실제 PostgreSQL·Redis·Chroma·Supabase 데이터 조회</li><li>외부 TourAPI·Groq·Kakao·Google·RunPod 호출</li></ul></article>
+      <article class="card red"><span class="pill unknown">운영 미확인</span><h3>배포·서비스 상태</h3><ul><li>README에 적힌 운영 URL의 현재 응답</li><li>EC2/GCP/RunPod의 실제 배포 버전</li><li>운영 비밀값과 권한, 비용, 데이터 최신성</li><li>실제 사용자·고객의 수용 여부</li></ul></article>
+    </div>
+    <h3>핵심 근거 파일</h3>
+    <ul class="sources">
+      <li><code>subproject/SDUI/metadata-project/app/view/[...slug]/page.tsx</code> — 범용 화면 라우터</li>
+      <li><code>subproject/SDUI/metadata-project/components/DynamicEngine/</code> — 데이터 결합과 렌더링</li>
+      <li><code>subproject/SDUI/kride/packages/core/</code>, <code>apps/mobile/</code> — 모바일 공통 계약과 네이티브 표현</li>
+      <li><code>subproject/SDUI/SDUI-server/src/main/java/.../domain/</code> — 화면·업무 도메인</li>
+      <li><code>subproject/SDUI/SDUI-server/src/main/resources/db/migration/</code> — 누적 스키마와 화면 설정</li>
+      <li><code>src/api/fastapi_server.py</code>, <code>rag_client.py</code>, <code>graphrag_client.py</code>, <code>route_history.py</code> — 추천·채팅·이력</li>
+      <li><code>docker-compose.local.yml</code>, <code>docker-compose.gpu.yml</code>, <code>.github/workflows/</code> — 실행·배포</li>
+      <li><code>handover/KMovement-maintenance.md</code> — 기존 39개 화면/로직 인수인계 근거</li>
+    </ul>
+  </section>
+  <p class="footer">생성 시각: 2026-10-02 16:08 KST · 기준 SHA: 0c6e278f1 · 문서 생성은 애플리케이션 코드 변경, 배포 또는 운영 검증을 의미하지 않습니다.</p>
+</main>
+<script>
+  const tabs=[...document.querySelectorAll('[role="tab"]')];
+  const activate=(tab,focus=false)=>{tabs.forEach(t=>{const on=t===tab;t.setAttribute('aria-selected',String(on));t.tabIndex=on?0:-1;document.getElementById(t.getAttribute('aria-controls')).hidden=!on});if(focus)tab.focus()};
+  tabs.forEach((tab,i)=>{tab.addEventListener('click',()=>activate(tab));tab.addEventListener('keydown',e=>{let n=i;if(e.key==='ArrowRight')n=(i+1)%tabs.length;else if(e.key==='ArrowLeft')n=(i-1+tabs.length)%tabs.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=tabs.length-1;else return;e.preventDefault();activate(tabs[n],true)})});
+</script>
+</body>
+</html>
