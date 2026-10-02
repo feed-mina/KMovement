@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>근거 있는 검색과 답변 보류 — 쉬운 조사 안내서</title>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f4f7fb;color:#17233a;font:17px/1.65 system-ui,"Malgun Gothic",sans-serif}.goal{position:sticky;top:0;z-index:20;padding:12px 20px;background:#15395d;color:#fff}main{max-width:1120px;margin:auto;padding:22px}header,section{background:#fff;border:1px solid #d8e2ee;border-radius:20px;padding:24px;margin-bottom:20px}h1{font-size:30px;line-height:1.3;margin:.2em 0}h2{font-size:23px}h3{font-size:19px}.tag{display:inline-block;padding:4px 10px;border-radius:999px;background:#e8f1ff;color:#174e86;font-size:14px}.now{border-left:6px solid #2e73b8;background:#eef6ff;padding:14px}.unknown{border-left:6px solid #d18800;background:#fff7dd;padding:14px}.flow{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}.step{flex:1 1 150px;padding:15px;border-radius:14px;background:#edf4fb;border:1px solid #b9cee4}.arrow{align-self:center;font-weight:bold;color:#50708e}.map{display:grid;grid-template-columns:1.05fr 1fr;gap:20px}.panels{position:sticky;top:70px;align-self:start}.panel{display:none;padding:18px;border:2px solid #94b8dc;background:#edf6ff;border-radius:14px}.panel.active{display:block}.diagram{display:grid;gap:10px}.node{width:100%;text-align:left;border:2px solid #aac0d8;background:#fff;border-radius:14px;padding:16px;font:inherit;cursor:pointer}.node:hover,.node:focus-visible,.node[aria-pressed="true"]{border-color:#1d64aa;background:#e9f3ff;outline:none}.compare{display:grid;grid-template-columns:1fr 1fr;gap:18px}.mock{border:2px solid #d6dfeb;border-radius:15px;padding:17px;background:#f9fbfd}.bad{border-color:#e0a4a4}.good{border-color:#85bc96}.status{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.status div{padding:13px;border-radius:12px;background:#f1f5fa}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;vertical-align:top;border-bottom:1px solid #dae3ed}a{color:#075aaa}a:focus-visible,button:focus-visible{outline:3px solid #f2a900;outline-offset:3px}.small{font-size:14px;color:#53657a}.check li{margin:8px 0}@media(max-width:720px){main{padding:12px}.goal{position:static}.map,.compare,.status{grid-template-columns:1fr}.visual{order:0}.panels{order:1;position:static}h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="goal"><strong>최종 목표:</strong> 같은 질문을 다시 했을 때 알맞은 근거를 찾고, 근거가 없으면 모른다고 멈추는지 증명할 자료를 준비한다.</div>
+<main>
+<header>
+  <span class="tag">easy-guide · 조사 결과</span>
+  <h1>검색한 자료와 AI의 답변을 따로 확인하기</h1>
+  <p><strong>핵심 한 줄:</strong> 먼저 “찾은 자료가 맞는가”를 보고, 그다음 “AI가 그 자료 안에서만 답했는가”를 봅니다.</p>
+  <p><strong>다음 행동 하나:</strong> 실제로 틀렸던 질문부터 질문·기대 자료·답변 보류 여부를 한 줄씩 적습니다.</p>
+</header>
+
+<section>
+  <h2>3줄 줄거리</h2>
+  <ol>
+    <li>비슷한 말이라고 해서 사실까지 맞는 것은 아니므로, 정확한 번호·날짜·상태는 먼저 조건으로 좁힙니다.</li>
+    <li>같은 질문으로 여러 찾기 방법을 비교하고, 찾은 자료가 약하면 AI에게 답변하지 않게 합니다.</li>
+    <li>실패하면 “자료를 못 찾음”과 “자료는 맞지만 답을 잘못 만듦”을 나눠 고칩니다.</li>
+  </ol>
+  <p class="now"><strong>현재 위치:</strong> 전체 목표 중 <strong>실패 질문과 기대 자료를 만드는 단계</strong>입니다. 아직 검색 방법을 바꾸거나 서비스를 고치는 단계가 아닙니다.</p>
+</section>
+
+<section>
+  <h2>무엇을 먼저 알아내야 하나</h2>
+  <div class="flow" aria-label="조사 순서">
+    <div class="step"><strong>F1</strong><br>틀린 질문 모으기</div><div class="arrow">→</div>
+    <div class="step"><strong>F2</strong><br>기대 자료 정하기</div><div class="arrow">→</div>
+    <div class="step"><strong>F3</strong><br>찾은 자료 확인</div><div class="arrow">→</div>
+    <div class="step"><strong>F4</strong><br>답변과 출처 확인</div><div class="arrow">→</div>
+    <div class="step"><strong>F5</strong><br>실패한 곳으로 돌아가기</div>
+  </div>
+  <table>
+    <thead><tr><th>알아낼 것</th><th>남겨야 할 증거</th><th>끝났는지 확인</th></tr></thead>
+    <tbody>
+      <tr><td>어떤 질문에서 틀렸나</td><td>실제 질문과 잘못 나온 답</td><td>다시 똑같이 시험할 수 있다</td></tr>
+      <tr><td>무엇을 찾아야 맞나</td><td>기대 장소·문서·문단의 정확한 이름</td><td>사람이 정답 자료를 확인했다</td></tr>
+      <tr><td>검색은 무엇을 찾았나</td><td>찾은 자료의 이름·순서·점수</td><td>기대 자료가 몇 번째인지 보인다</td></tr>
+      <tr><td>근거가 없을 때 멈추나</td><td>“확인할 수 없음”으로 끝난 결과</td><td>그럴듯한 가짜 장소가 나오지 않는다</td></tr>
+      <tr><td>답변의 출처가 맞나</td><td>답변 옆의 자료 이름과 확인 위치</td><td>출처를 열어 같은 내용을 찾을 수 있다</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>클릭해서 조사 항목 보기</h2>
+  <div class="map">
+    <div class="panels" aria-live="polite">
+      <article class="panel active" id="p1"><h3>1. 실패 질문 표</h3><p><strong>현재 상황:</strong> “검색이 이상했다”는 기억만으로는 같은 문제를 다시 만들기 어렵습니다.</p><p><strong>내가 할 일:</strong> 질문, 기대 자료, 잘못 나온 자료, 답변 보류가 정답인지 적습니다.</p><p><strong>도우미에게 부탁할 말:</strong> “이 질문을 그대로 다시 실행하고, 답변을 만들기 전에 찾은 자료 목록을 보여줘.”</p><p><strong>완료 확인:</strong> 질문을 바꾸지 않고 다시 시험할 수 있습니다.</p></article>
+      <article class="panel" id="p2"><h3>2. 정확 조건 먼저</h3><p><strong>현재 상황:</strong> 장소 이름이 비슷해도 지역·번호·운영 상태가 다를 수 있습니다.</p><p><strong>내가 할 일:</strong> 정확한 번호, 날짜, 지역, 상태가 필요한 질문에 표시합니다.</p><p><strong>도우미에게 부탁할 말:</strong> “비슷한 뜻 찾기 전에 정확 조건으로 후보를 먼저 줄여줘.”</p><p><strong>완료 확인:</strong> 다른 지역이나 오래된 상태의 자료가 후보에서 빠집니다.</p></article>
+      <article class="panel" id="p3"><h3>3. 찾기 방법 비교</h3><p><strong>현재 상황:</strong> 비슷한 뜻 찾기 하나만으로는 고유 이름이나 번호를 놓칠 수 있습니다.</p><p><strong>내가 할 일:</strong> 같은 질문으로 단어 찾기, 뜻 찾기, 두 방법 섞기를 비교합니다.</p><p><strong>도우미에게 부탁할 말:</strong> “같은 정답표로 세 방법을 비교하고 기대 자료가 몇 번째인지 기록해줘.”</p><p><strong>완료 확인:</strong> 어느 방법이 어떤 질문에서 더 나은지 표로 보입니다.</p></article>
+      <article class="panel" id="p4"><h3>4. 답변 보류와 출처</h3><p><strong>현재 상황:</strong> 약한 자료를 받아도 AI가 그럴듯하게 답할 수 있습니다.</p><p><strong>내가 할 일:</strong> 근거 없음 질문과 잘못된 전제 질문을 따로 넣습니다.</p><p><strong>도우미에게 부탁할 말:</strong> “근거가 약하면 답변을 만들지 말고, 충분하면 사용한 자료를 답변 옆에 표시해줘.”</p><p><strong>완료 확인:</strong> 근거가 없는 질문에서는 답변이 멈추고, 답한 문장은 출처로 되짚을 수 있습니다.</p></article>
+      <article class="panel" id="p5"><h3>5. 실패한 단계 찾기</h3><p><strong>현재 상황:</strong> 검색과 답변을 한 덩어리로 보면 무엇을 고쳐야 할지 모릅니다.</p><p><strong>내가 할 일:</strong> “자료를 못 찾음 / 엉뚱한 자료를 찾음 / 자료는 맞지만 답이 틀림 / 출처가 다름”으로 나눕니다.</p><p><strong>완료 확인:</strong> 실패마다 돌아갈 단계가 하나로 정해집니다.</p></article>
+    </div>
+    <div class="visual diagram" aria-label="조사 항목 선택">
+      <button class="node" data-target="p1" aria-pressed="true"><strong>1. 실패 질문</strong><br><span class="small">무엇이 틀렸는지 고정</span></button>
+      <button class="node" data-target="p2" aria-pressed="false"><strong>2. 정확 조건</strong><br><span class="small">번호·날짜·지역·상태</span></button>
+      <button class="node" data-target="p3" aria-pressed="false"><strong>3. 찾기 비교</strong><br><span class="small">단어·뜻·섞기</span></button>
+      <button class="node" data-target="p4" aria-pressed="false"><strong>4. 답변 보류·출처</strong><br><span class="small">근거가 약하면 멈춤</span></button>
+      <button class="node" data-target="p5" aria-pressed="false"><strong>5. 실패 분리</strong><br><span class="small">고칠 단계 찾기</span></button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Before / After</h2>
+  <div class="compare">
+    <div class="mock bad"><h3>Before · 현재 흔한 모습</h3><p>질문 → 가장 비슷한 자료 → 바로 답변</p><p>왜 그 자료를 골랐는지, 근거가 충분했는지, 어디서 틀렸는지 알기 어렵습니다.</p></div>
+    <div class="mock good"><h3>After · 검증할 목표 모형</h3><p>질문 → 정확 조건 → 찾은 자료와 점수 확인 → 충분하면 답변과 출처 → 약하면 답변 보류</p><p><strong>개선 예상 모형</strong>이며 아직 실제 서비스에서 통과했다고 확인된 화면은 아닙니다.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>통과 기준</h2>
+  <ul class="check">
+    <li>고정된 질문 묶음에서 사람이 정한 기대 자료가 검색됩니다.</li>
+    <li>근거 없음 질문에서는 장소·날짜·상태를 지어내지 않습니다.</li>
+    <li>답변한 내용마다 사용한 자료를 열어 확인할 수 있습니다.</li>
+    <li>실패를 “찾기 실패”와 “답 만들기 실패”로 나눌 수 있습니다.</li>
+  </ul>
+  <div class="unknown"><strong>아직 모르는 것:</strong> 실제 서비스가 어느 검색 경로를 사용하고 있는지, 현재 점수 기준이 실제 실패 질문으로 정해졌는지, 운영 로그에 찾은 자료가 남는지는 확인되지 않았습니다.</div>
+  <p class="small">근거: <a href="https://developers.openai.com/api/docs/guides/embeddings">OpenAI Vector embeddings</a> · <a href="https://developers.openai.com/api/docs/guides/retrieval">OpenAI Retrieval</a> · <a href="https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy">OpenAI Optimizing LLM Accuracy</a> · 디밀리언 면접 47:23~51:32 질문. 공식 문서는 일반 원칙이며 KMovement의 통과를 증명하는 자료는 아닙니다.</p>
+</section>
+</main>
+<script>
+const nodes=[...document.querySelectorAll('.node')],panels=[...document.querySelectorAll('.panel')];
+function show(id){panels.forEach(p=>p.classList.toggle('active',p.id===id));nodes.forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.target===id)));if(innerWidth<=720)document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});}
+nodes.forEach(n=>n.addEventListener('click',()=>show(n.dataset.target)));
+</script>
+</body></html>

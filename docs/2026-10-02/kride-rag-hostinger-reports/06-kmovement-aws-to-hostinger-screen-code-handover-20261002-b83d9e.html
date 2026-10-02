@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KMovement AWS→Hostinger 화면·코드·배포 인수인계</title>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f3f6fa;color:#17263b;font:17px/1.65 system-ui,"Malgun Gothic",sans-serif;overflow-wrap:anywhere}.goal{position:sticky;top:0;z-index:20;background:#102b46;color:#fff;padding:12px 22px;box-shadow:0 2px 10px #0003}.goal strong{color:#8ed8ff}main{max-width:1180px;margin:auto;padding:24px}header,section{background:#fff;border:1px solid #d8e1ec;border-radius:18px;padding:24px;margin-bottom:22px}h1{font-size:31px;line-height:1.25;margin:.2em 0}h2{font-size:24px;margin-top:0}h3{font-size:20px}.eyebrow{color:#28679f;font-weight:700}.status,.note,.warn{padding:14px 16px;border-radius:12px;margin:12px 0}.status{background:#e9f6ee;border-left:5px solid #298651}.note{background:#edf5ff;border-left:5px solid #347abd}.warn{background:#fff2d9;border-left:5px solid #bd7600}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.three>div,.card{border:1px solid #d8e1ec;border-radius:14px;padding:16px;background:#f9fbfd}.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px}.step{flex:1 1 145px;border:2px solid #8db5dd;border-radius:13px;padding:13px;background:#eff7ff;min-width:0}.arrow{align-self:center;font-size:25px;color:#46749d}.map{display:grid;grid-template-columns:1.06fr 1fr;gap:20px;align-items:start}.panels{position:sticky;top:72px;min-width:0}.panel{display:none;border:2px solid #8bb6df;background:#eef7ff;border-radius:14px;padding:18px;min-width:0}.panel.active{display:block}.diagram{display:grid;gap:10px;min-width:0}.node{display:block;width:100%;border:2px solid #9bbbd9;background:#fff;border-radius:13px;padding:14px;text-align:left;font:inherit;cursor:pointer}.node:hover,.node:focus-visible,.node[aria-pressed="true"]{border-color:#0b6db7;background:#e8f5ff;outline:none}.node small{display:block;color:#45647e}.lanes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.lane{border:1px solid #cfdbe8;border-radius:14px;padding:12px;background:#f8fbff;min-width:0}.lane strong{display:block;color:#185c91}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:15px}th,td{text-align:left;vertical-align:top;padding:10px;border-bottom:1px solid #d8e1ec;overflow-wrap:anywhere}th{background:#edf4fb}.compare{display:grid;grid-template-columns:1fr 1fr;gap:18px}.mock{border:2px solid #d4deea;border-radius:15px;padding:17px;background:#f8fafc}.mock.after{border-color:#58a47c;background:#f0fbf5}.tag{display:inline-block;padding:3px 9px;border-radius:999px;background:#ddeaf6;font-size:14px}.bad{background:#ffe2df}.good{background:#dcf4e6}.unknown{background:#fff0c8}.refs a{display:block;margin:6px 0;color:#0a5fa8}.check li{margin:8px 0}code{background:#edf1f5;border-radius:5px;padding:2px 5px;font-size:.93em}pre{background:#132538;color:#e7f4ff;border-radius:12px;padding:15px;overflow:auto;font-size:14px}a{color:#0a5fa8}a:focus-visible{outline:3px solid #d78100;outline-offset:3px}@media(max-width:850px){.three,.lanes{grid-template-columns:1fr 1fr}.map,.compare{grid-template-columns:1fr}.diagram{order:0}.panels{order:1;position:static}.visual{order:0}}@media(max-width:520px){main{padding:10px}header,section{padding:17px}.three,.lanes{grid-template-columns:1fr}h1{font-size:27px}.arrow{display:none}table{font-size:14px}.goal{position:static}}
+</style>
+</head>
+<body>
+<div class="goal"><strong>최종 목표:</strong> KMovement의 EC2 호스트 역할을 Hostinger VPS로 옮기되 데이터·로그인·AI 작업을 잃지 않고, 검증 실패 시 DNS를 되돌릴 수 있는 이전 계획을 확정한다.</div>
+<main>
+<header>
+  <p class="eyebrow">screen-code-handover · 기준 커밋 4cfedf6 · 정적 소스 분석</p>
+  <h1>KMovement AWS→Hostinger 화면·코드·배포 인수인계</h1>
+  <p>현재 요청이 화면에서 어떤 컨테이너와 저장소를 지나가는지 추적하고, EC2에 묶인 항목만 Hostinger로 옮기는 순서를 정리했다. 이 문서는 <strong>이전 설계</strong>이며 실제 Hostinger 생성·배포·DNS 변경은 수행하지 않았다.</p>
+  <div class="status">현재 판정: <strong>조건부 이전 가능</strong>. Docker 기반 앱 계층은 그대로 옮길 수 있지만 PostgreSQL·ChromaDB·인증서·호스트 파일의 실제 백업 크기와 Hostinger VPS 사양이 아직 확인되지 않았다.</div>
+</header>
+
+<section>
+  <h2>3줄 줄거리</h2>
+  <div class="three">
+    <div><strong>1.</strong> 브라우저 요청은 Nginx가 Next.js, Spring Boot, FastAPI로 나누고 Redis·PostgreSQL·ChromaDB가 상태를 맡는다.</div>
+    <div><strong>2.</strong> EC2를 Hostinger VPS로 바꿔도 외부의 RunPod·Supabase·Cloudinary·GCP·Firebase·지도/LLM 서비스는 그대로 남는다.</div>
+    <div><strong>3.</strong> 새 서버를 병렬로 세운 뒤 데이터 복원, 내부 헬스체크, 임시 도메인 검증을 통과해야 DNS를 전환한다.</div>
+  </div>
+  <p class="note">지금 나는 [AWS 호스트를 안전하게 대체] 중 [상태 있는 데이터 이전]의 [백업·복원 기준 확정]에 있다.</p>
+</section>
+
+<section>
+  <h2>현재 실행 흐름</h2>
+  <div class="flow" aria-label="현재 요청 흐름">
+    <div class="step"><strong>F1 사용자 화면</strong><br>Next.js가 화면을 렌더링하고 API 요청을 만든다.</div><div class="arrow">→</div>
+    <div class="step"><strong>F2 호스트 Nginx</strong><br>경로별로 3000·8080·8000 포트에 전달한다.</div><div class="arrow">→</div>
+    <div class="step"><strong>F3 앱 서비스</strong><br>Spring Boot가 회원·SDUI·커뮤니티를, FastAPI가 추천·RAG를 처리한다.</div><div class="arrow">→</div>
+    <div class="step"><strong>F4 상태·작업</strong><br>PostgreSQL, Redis, ChromaDB, Celery가 저장·큐·검색을 맡는다.</div><div class="arrow">→</div>
+    <div class="step"><strong>F5 외부 서비스</strong><br>RunPod, Supabase, Cloudinary, GCP, Firebase 등으로 호출한다.</div>
+  </div>
+  <p class="warn">EC2만 바꾼다고 AWS 의존성이 0이 되지는 않는다. <code>S3Service</code>와 S3 자격증명은 별도 교체 대상이다.</p>
+</section>
+
+<section>
+  <h2>화면에서 저장값까지 따라가는 구조</h2>
+  <div class="map">
+    <div class="panels" id="detail-panels">
+      <article class="panel active" id="p-edge"><h3>M1. 진입·TLS</h3><p><strong>받는 값:</strong> HTTPS 경로와 쿠키·SSE 연결.</p><p><strong>처리:</strong> <code>deploy/ec2/nginx.conf</code>가 <code>/api/</code>, <code>/kride-api/</code>, <code>/jobs/celery/</code>, 나머지 화면을 서로 다른 프로세스로 전달한다.</p><p><strong>Hostinger 영향:</strong> 도메인 DNS, 인증서, 80/443 방화벽, Nginx 설정을 새 VPS에서 먼저 준비한다. 외부 공개 포트는 80/443과 제한된 SSH만 허용하고 앱 포트는 호스트 내부로 제한한다.</p><p><strong>검증:</strong> 임시 호스트명에서 화면 3개와 FastAPI health, SSE 응답을 확인한다.</p></article>
+      <article class="panel" id="p-web"><h3>M2. Next.js 화면</h3><p><strong>파일:</strong> <code>subproject/SDUI/metadata-project/Dockerfile</code>, <code>next.config.ts</code>.</p><p><strong>처리:</strong> 빌드 시 공개 지도·Firebase 설정과 백엔드 주소를 넣고, 런타임에는 Spring/FastAPI 프록시를 사용한다.</p><p><strong>Hostinger 영향:</strong> 이미지 자체는 재사용 가능하지만 새 도메인이 바뀌면 사이트 URL, OAuth 허용 도메인, CSP 연결 대상과 공유 링크를 함께 확인한다.</p></article>
+      <article class="panel" id="p-spring"><h3>M3. Spring Boot 업무 API</h3><p><strong>파일:</strong> <code>subproject/SDUI/SDUI-server</code>, <code>application.yml</code>.</p><p><strong>처리:</strong> 회원·로그인·SDUI 화면 정의·커뮤니티·여행 데이터·AI 중계·S3 presign을 처리한다.</p><p><strong>저장:</strong> PostgreSQL이 영속 데이터, Redis DB 0이 토큰·캐시를 담당한다.</p><p><strong>주의:</strong> 현재 운영 배포 스크립트는 <code>sdui-db</code>가 이미 존재한다고 가정한다. DB 생성·볼륨·백업 절차가 스크립트에 없으므로 실제 볼륨을 먼저 식별해야 한다.</p></article>
+      <article class="panel" id="p-ai"><h3>M4. FastAPI·Celery AI 경로</h3><p><strong>파일:</strong> <code>src/api/fastapi_server.py</code>, <code>rag_client.py</code>, <code>Dockerfile.worker</code>.</p><p><strong>처리:</strong> 추천·경로·RAG·RunPod 작업을 제공하고 Celery가 media·maintenance·beat 큐를 나눠 처리한다.</p><p><strong>저장:</strong> Redis DB 1은 broker/result, ChromaDB는 호스트의 <code>~/kride-data/chroma_db</code>, 임시 미디어와 beat 일정은 Docker 볼륨에 있다.</p><p><strong>주의:</strong> Chroma 디렉터리와 Celery 볼륨은 애플리케이션 이미지에 포함되지 않는다.</p></article>
+      <article class="panel" id="p-storage"><h3>M5. 데이터·파일 이전</h3><p><strong>반드시 백업:</strong> PostgreSQL dump, ChromaDB 디렉터리, study-materials, GCP/Firebase 자격 파일, 필요한 Celery 볼륨, Nginx/인증서 설정.</p><p><strong>재생성 가능:</strong> Docker 이미지·빌드 캐시·Hugging Face 캐시는 백업보다 새 서버 pull/rebuild가 안전하다.</p><p><strong>S3 분기:</strong> 1차 이전에서는 S3를 유지하면 앱 호스트 이동 위험을 줄일 수 있다. AWS 완전 종료는 S3 호환 저장소 추상화, 기존 객체 복사, presigned URL·암호화·삭제 수명 검증을 별도 단계로 수행한다.</p></article>
+      <article class="panel" id="p-cicd"><h3>M6. CI/CD와 복구</h3><p><strong>현재:</strong> GitHub Actions가 Docker Hub에 네 이미지를 올리고 AWS SSH 자격으로 원격 스크립트를 실행한다.</p><p><strong>제안:</strong> Hostinger 공식 deploy action 또는 Hostinger 전용 SSH 비밀 이름으로 워크플로를 분리한다. 기존 AWS 워크플로는 첫 성공 직후 삭제하지 말고 수동 복구용으로 잠시 보존한다.</p><p><strong>완료 증거:</strong> 새 서버 컨테이너·페이지·API·SSE·DB 건수·Chroma 컬렉션·업로드/다운로드 검증, DNS 전환 후 외부 검증, 롤백 리허설.</p></article>
+    </div>
+    <div class="visual diagram" role="group" aria-label="구조 노드를 선택하면 왼쪽 설명이 바뀝니다">
+      <button class="node" data-target="p-edge" aria-pressed="true"><strong>M1 도메인·Nginx</strong><small>HTTPS → 경로별 프록시</small></button>
+      <button class="node" data-target="p-web" aria-pressed="false"><strong>M2 Next.js</strong><small>화면·API route·SSE 프록시</small></button>
+      <button class="node" data-target="p-spring" aria-pressed="false"><strong>M3 Spring Boot</strong><small>회원·SDUI·커뮤니티·S3</small></button>
+      <button class="node" data-target="p-ai" aria-pressed="false"><strong>M4 FastAPI·Celery</strong><small>추천·RAG·비동기 작업</small></button>
+      <button class="node" data-target="p-storage" aria-pressed="false"><strong>M5 영속 데이터</strong><small>PostgreSQL·Chroma·호스트 파일·볼륨</small></button>
+      <button class="node" data-target="p-cicd" aria-pressed="false"><strong>M6 GitHub Actions</strong><small>이미지 배포·스모크·롤백</small></button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>현재 EC2와 제안 Hostinger의 역할 매핑</h2>
+  <div class="lanes">
+    <div class="lane"><strong>브라우저</strong>화면·쿠키·SSE<br>변경 최소화</div>
+    <div class="lane"><strong>Hostinger VPS</strong>Nginx, Next.js, Spring, FastAPI, Redis, Celery, PostgreSQL/볼륨</div>
+    <div class="lane"><strong>외부 관리형</strong>Supabase, Cloudinary, Firebase, GCP, 지도·TourAPI·LLM</div>
+    <div class="lane"><strong>GPU</strong>RunPod 유지<br>Hostinger CPU 호스트와 분리</div>
+  </div>
+  <table>
+    <thead><tr><th>현재 항목</th><th>코드 근거</th><th>Hostinger 이전안</th><th>완료 기준</th></tr></thead>
+    <tbody>
+      <tr><td>Nginx·TLS</td><td><code>deploy/ec2/nginx.conf</code></td><td>같은 경로 규칙을 새 VPS에 적용하거나 Traefik으로 동등하게 표현</td><td>HTTPS, 리다이렉트, SSE 무버퍼링</td></tr>
+      <tr><td>4개 앱 이미지</td><td><code>deploy-ec2.yml</code></td><td>Docker Hub 이미지를 Hostinger가 pull; 태그는 커밋 SHA 병행</td><td>Next/Spring/FastAPI/Celery 모두 실행</td></tr>
+      <tr><td>PostgreSQL</td><td>Spring datasource가 <code>sdui-db</code> 참조</td><td>새 영속 볼륨에 복원 후 쓰기 정지 창의 증분 반영</td><td>핵심 테이블 건수·로그인·쓰기 일치</td></tr>
+      <tr><td>Redis</td><td>DB 0 앱, DB 1 Celery 규약</td><td>새 Redis로 전환. 토큰 만료·큐 drain 시점을 명시</td><td>로그인·job status·SSE 성공</td></tr>
+      <tr><td>ChromaDB</td><td>호스트 bind mount</td><td>파일 정합성을 유지해 복사하고 collection/doc 수 비교</td><td>검색 프로브와 문서 수 일치</td></tr>
+      <tr><td>S3</td><td><code>S3Config</code>, <code>S3Service</code>, 분석 업로드</td><td>1차 유지 또는 2차 S3 호환 저장소 전환</td><td>presign PUT/GET, 암호화, 삭제 수명 검증</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>권장 전환 순서와 실패 분기</h2>
+  <div class="flow">
+    <div class="step"><strong>C0 측정</strong><br>EC2 CPU/RAM/디스크, DB·Chroma·볼륨 크기 기록</div><div class="arrow">→</div>
+    <div class="step"><strong>C1 새 VPS</strong><br>Ubuntu Docker, SSH 키, 방화벽, 백업 설정</div><div class="arrow">→</div>
+    <div class="step"><strong>C2 병렬 배포</strong><br>운영 DNS를 건드리지 않고 앱 기동</div><div class="arrow">→</div>
+    <div class="step"><strong>C3 데이터 복원</strong><br>DB·Chroma·호스트 파일·볼륨 검증</div><div class="arrow">→</div>
+    <div class="step"><strong>C4 리허설</strong><br>페이지/API/SSE/업로드/로그인 통과?</div>
+  </div>
+  <p class="warn"><strong>아니오:</strong> DNS를 바꾸지 않고 Hostinger만 수정한다. <strong>예:</strong> 쓰기 정지 → 최종 동기화 → DNS 전환 → 외부 모니터링. 실패하면 TTL 범위 안에서 AWS 주소로 되돌린다.</p>
+</section>
+
+<section>
+  <h2>Before / After</h2>
+  <div class="compare">
+    <div class="mock"><span class="tag bad">현재 · 코드 기반 재구성</span><h3>AWS EC2 단일 호스트</h3><p>GitHub Actions → AWS SSH → Docker 컨테이너와 호스트 Nginx</p><p>PostgreSQL 컨테이너·Chroma 호스트 폴더·자격 파일 위치가 서버에 묶여 있다.</p><p>배포 전 최소 4GiB 여유 공간을 요구하며 이미지 정리 후 재기동한다.</p></div>
+    <div class="mock after"><span class="tag good">개선 예상 모형 · 미배포</span><h3>Hostinger 병렬 호스트</h3><p>GitHub Actions → Hostinger deploy/SSH → 동일 Docker 서비스</p><p>명시적 영속 볼륨, 백업·복원 문서, 내부 전용 포트, 커밋 SHA 이미지 태그를 사용한다.</p><p>임시 도메인 검증 뒤 DNS만 전환하고 AWS는 롤백 창 동안 유지한다.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>아직 알아내야 하는 값</h2>
+  <ul class="check">
+    <li><span class="tag unknown">미확인</span> Hostinger VPS의 실제 vCPU·RAM·디스크·리전과 현재 사용 가능한 여유 공간</li>
+    <li><span class="tag unknown">미확인</span> EC2의 24시간·7일 CPU/RAM/디스크·트래픽 최고치와 Docker 이미지/볼륨 크기</li>
+    <li><span class="tag unknown">미확인</span> <code>sdui-db</code>의 실제 볼륨, DB별 크기, 마지막 백업·복원 성공 시각</li>
+    <li><span class="tag unknown">미확인</span> ChromaDB 컬렉션·문서 수와 파일 복사 중 쓰기 정지 방법</li>
+    <li><span class="tag unknown">미확인</span> AWS S3를 유지할지, 별도 S3 호환 저장소로 옮겨 AWS를 완전히 종료할지</li>
+    <li><span class="tag unknown">미확인</span> DuckDNS TTL, OAuth·Kakao·Google·Firebase의 허용 도메인/리다이렉트 등록 상태</li>
+  </ul>
+</section>
+
+<section class="refs">
+  <h2>근거</h2>
+  <a href="https://github.com/feed-mina/KMovement/blob/4cfedf6a191b61c6b8d966563631b03c42e1124c/.github/workflows/deploy-ec2.yml">KMovement deploy-ec2.yml · 현재 CI/CD</a>
+  <a href="https://github.com/feed-mina/KMovement/blob/4cfedf6a191b61c6b8d966563631b03c42e1124c/deploy/ec2/deploy.sh">KMovement deploy.sh · 컨테이너·볼륨·검증 흐름</a>
+  <a href="https://github.com/feed-mina/KMovement/blob/4cfedf6a191b61c6b8d966563631b03c42e1124c/deploy/ec2/nginx.conf">KMovement nginx.conf · 요청 라우팅</a>
+  <a href="https://www.hostinger.com/support/8306612-how-to-use-the-docker-vps-template-at-hostinger/">Hostinger 공식 · Docker VPS 템플릿</a>
+  <a href="https://www.hostinger.com/support/deploy-to-hostinger-vps-using-github-actions/">Hostinger 공식 · GitHub Actions 배포</a>
+  <a href="https://support.hostinger.com/en/articles/8172641-how-to-use-a-managed-vps-firewall">Hostinger 공식 · VPS 방화벽</a>
+  <a href="https://www.hostinger.com/support/6360129-how-to-install-ssl-on-vps-at-hostinger/">Hostinger 공식 · VPS SSL</a>
+  <a href="https://support.hostinger.com/en/articles/1583232-how-to-back-up-or-restore-a-vps">Hostinger 공식 · VPS 백업과 스냅샷</a>
+  <p class="note">Hostinger는 Docker Compose와 공식 배포 Action을 제공하지만, 이것만으로 KMovement의 데이터 이전이나 무중단 전환이 자동 보장되지는 않는다. 실제 서버 사양과 데이터 백업 검증이 선행 조건이다.</p>
+</section>
+</main>
+<script>
+const nodes=[...document.querySelectorAll('.node')],panels=[...document.querySelectorAll('.panel')];
+function activate(node){nodes.forEach(n=>n.setAttribute('aria-pressed',String(n===node)));panels.forEach(p=>p.classList.toggle('active',p.id===node.dataset.target));if(innerWidth<=850){document.getElementById(node.dataset.target).scrollIntoView({behavior:'smooth',block:'start'});}}
+nodes.forEach((node,i)=>{node.addEventListener('click',()=>activate(node));node.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();nodes[(i+1)%nodes.length].focus()}if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();nodes[(i-1+nodes.length)%nodes.length].focus()}})});
+</script>
+</body>
+</html>

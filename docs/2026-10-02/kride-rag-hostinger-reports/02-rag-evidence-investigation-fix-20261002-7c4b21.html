@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RAG 근거 검증 계획 — fix-guide</title>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f4f6fa;color:#17233a;font:16px/1.65 system-ui,"Malgun Gothic",sans-serif}.goal{position:sticky;top:0;z-index:10;background:#172f4d;color:#fff;padding:11px 18px}main{max-width:1180px;margin:auto;padding:22px}header,section{background:#fff;border:1px solid #d7e0eb;border-radius:18px;padding:24px;margin-bottom:20px}h1{font-size:30px;line-height:1.3}h2{font-size:23px}h3{font-size:19px}.tag{display:inline-block;background:#eaf1fb;color:#174d81;border-radius:999px;padding:4px 10px}.state{display:flex;gap:10px;flex-wrap:wrap}.state span{padding:7px 11px;border-radius:9px;background:#eef2f7}.ok{border-left:5px solid #3d9460}.unknown{border-left:5px solid #d08a16}.proposed{border-left:5px solid #3878bb}.box{padding:15px;background:#f6f9fc;border-radius:12px;margin:12px 0}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.flow div{padding:14px;border:1px solid #b6c9df;border-radius:12px;background:#edf5ff}.map{display:grid;grid-template-columns:1.08fr 1fr;gap:20px}.panels{position:sticky;top:68px;align-self:start}.panel{display:none;padding:18px;border:2px solid #8db1d7;background:#edf6ff;border-radius:14px}.panel.active{display:block}.nodes{display:grid;gap:10px}.node{font:inherit;text-align:left;padding:15px;border-radius:13px;border:2px solid #b2c5d9;background:#fff;cursor:pointer}.node[aria-pressed=true],.node:hover,.node:focus-visible{background:#e8f3ff;border-color:#2368ad;outline:none}.compare{display:grid;grid-template-columns:1fr 1fr;gap:18px}.mock{padding:17px;border:2px solid #d5deea;border-radius:14px}.before{border-color:#dfa4a4}.after{border-color:#82b995}table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #d9e2ed;padding:11px;text-align:left;vertical-align:top}code{background:#eef2f6;padding:2px 5px;border-radius:5px;overflow-wrap:anywhere}pre{white-space:pre-wrap;background:#17233a;color:#edf5ff;padding:16px;border-radius:12px;overflow:auto}a{color:#075ba8}.small{color:#586a7e;font-size:14px}@media(max-width:760px){main{padding:12px}.goal{position:static}.flow,.map,.compare{grid-template-columns:1fr}.nodes{order:0}.panels{order:1;position:static}h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="goal"><strong>최종 목표:</strong> 검색 품질과 생성 근거성을 별도로 재현·판정할 수 있는 고정 평가 계약을 정의한다.</div>
+<main>
+<header>
+  <span class="tag">fix-guide · 분석/설계안 · 코드 변경 없음</span>
+  <h1>RAG 검색 실패와 생성 실패를 분리하는 조사·검증 계획</h1>
+  <p><strong>핵심:</strong> 디밀리언 47:23~51:32의 질문에 답하려면 기술 이름이 아니라 실패 사례의 <code>query → retrieved evidence → context → answer</code> 전 과정을 보여줘야 합니다.</p>
+  <p><strong>다음 행동 하나:</strong> 면접에서 언급한 실제 오답 질문을 평가셋 첫 행으로 복원합니다.</p>
+</header>
+
+<section>
+  <h2>3줄 줄거리와 현재 위치</h2>
+  <ol><li>정답 문서가 무엇인지 먼저 고정하지 않으면 검색 품질을 측정할 수 없습니다.</li><li>필터·벡터·혼합·재정렬은 같은 평가셋으로 비교해야 합니다.</li><li>검색이 맞은 뒤에도 생성 근거성과 인용 일치성을 별도로 판정해야 합니다.</li></ol>
+  <p><strong>현재 위치:</strong> [근거 없는 답변 차단] 중 [평가 계약]의 [실패 질문·기대 근거 정의] 단계입니다.</p>
+  <div class="state"><span>확인: 공식 문서는 필터·점수 기준·혼합 검색을 제공</span><span>일부 확인: KMovement 코드에는 임계값과 보류 프롬프트가 존재</span><span>미확인: 운영 경로·임계값 보정·고정 평가 통과</span></div>
+</section>
+
+<section>
+  <h2>조사 전 가설과 판정</h2>
+  <table><thead><tr><th>가설</th><th>검증</th><th>현재 판정</th></tr></thead><tbody>
+    <tr><td>오답은 비동기 순서 문제였다.</td><td>동일 요청의 시간순 로그와 검색 결과를 재현해 순서 경합과 관련성 오류를 분리</td><td><strong>미확인.</strong> 면접 답변만으로는 검색 오류와 비동기 오류를 구분할 수 없음</td></tr>
+    <tr><td>거리 임계값만 넣으면 환각이 사라진다.</td><td>정답·오답·근거 없음 질문의 점수 분포와 오탐/누락 비교</td><td><strong>반증 가능성이 큼.</strong> 임계값은 검색 결과를 거를 뿐 생성 준수를 보증하지 않음</td></tr>
+    <tr><td>재정렬을 넣으면 항상 좋아진다.</td><td>동일 평가셋에서 검색 방식별 Recall@k, 잡음률, 보류 정확도 비교</td><td><strong>미확인.</strong> 운영 경로와 평가 결과가 필요</td></tr>
+    <tr><td>출처 이름을 붙이면 근거 답변이다.</td><td>답변 주장과 인용 청크의 내용 일치 검사</td><td><strong>반증.</strong> 안정적 출처 ID와 인용 검증이 필요</td></tr>
+  </tbody></table>
+</section>
+
+<section>
+  <h2>검증 흐름</h2>
+  <div class="flow"><div><strong>F1 정답표</strong><br>질문·기대 문서</div><div><strong>F2 검색 실행</strong><br>필터·top-k·점수</div><div><strong>F3 검색 판정</strong><br>기대 근거 포함?</div><div><strong>F4 생성 판정</strong><br>근거 밖 주장?</div><div><strong>F5 회귀</strong><br>실패 단계로 복귀</div></div>
+  <p class="box unknown"><strong>중요 분기:</strong> 기대 근거가 없으면 생성 모델을 고치지 않습니다. 기대 근거는 있는데 답변이 틀리면 검색 설정을 먼저 바꾸지 않습니다.</p>
+</section>
+
+<section>
+  <h2>클릭형 조사 지도</h2>
+  <div class="map">
+    <div class="panels" aria-live="polite">
+      <article class="panel active" id="a1"><h3>A1. 평가셋</h3><p><strong>현재 문제:</strong> 예제 4개나 임의 질문은 실제 실패를 대표하지 못합니다.</p><p><strong>사용자 직접 할 일:</strong> 틀렸던 질문과 기대 장소를 확인합니다.</p><p><strong>에이전트 역할:</strong> 최소 초기 20개 이상을 정상·정확필터·유사이름·잘못된전제·근거없음·오래된정보로 나눕니다.</p><p><strong>완료 증거:</strong> 각 행에 <code>expected_source_ids</code>와 <code>should_abstain</code>이 있습니다.</p></article>
+      <article class="panel" id="a2"><h3>A2. 검색 비교</h3><p><strong>현재 문제:</strong> “가장 가까운 결과”가 정답인지는 별도입니다.</p><p><strong>사용자 직접 할 일:</strong> 없음.</p><p><strong>에이전트 역할:</strong> 필터+벡터, 벡터만, 키워드+벡터, 재정렬을 같은 입력으로 비교합니다.</p><p><strong>완료 증거:</strong> 질문별 문서 ID·원시 거리·정규화 점수·순위·필터가 남습니다.</p></article>
+      <article class="panel" id="a3"><h3>A3. 임계값 보정</h3><p><strong>현재 문제:</strong> 숫자 하나를 주석으로 정한 것은 운영 기준의 근거가 아닙니다.</p><p><strong>에이전트 역할:</strong> 정답과 오답 점수 분포를 비교하고, 임계값별 false accept/false reject를 계산합니다.</p><p><strong>완료 증거:</strong> 선택 임계값과 포기한 정답/차단한 오답 수가 함께 제시됩니다.</p></article>
+      <article class="panel" id="a4"><h3>A4. 생성·인용</h3><p><strong>현재 문제:</strong> 프롬프트 지시는 실행 보장이 아닙니다.</p><p><strong>에이전트 역할:</strong> 올바른 컨텍스트·틀린 컨텍스트·빈 컨텍스트를 각각 넣어 답변 준수와 보류를 검사합니다.</p><p><strong>완료 증거:</strong> 모든 사실 주장에 안정적 source/chunk ID가 연결되고, 불일치 인용은 실패 처리됩니다.</p></article>
+      <article class="panel" id="a5"><h3>A5. 실패 원인 로그</h3><p><strong>현재 문제:</strong> 한 줄 오류만으로는 고칠 축을 고를 수 없습니다.</p><p><strong>에이전트 역할:</strong> <code>retrieval_miss</code>, <code>retrieval_noise</code>, <code>generation_unsupported</code>, <code>citation_mismatch</code>를 기록합니다.</p><p><strong>완료 증거:</strong> 각 실패에 돌아갈 담당 단계가 하나로 정해집니다.</p></article>
+    </div>
+    <div class="nodes">
+      <button class="node" data-target="a1" aria-pressed="true"><strong>A1 평가셋</strong><br>질문과 정답 근거 고정</button>
+      <button class="node" data-target="a2" aria-pressed="false"><strong>A2 검색 비교</strong><br>필터·벡터·혼합·재정렬</button>
+      <button class="node" data-target="a3" aria-pressed="false"><strong>A3 점수 기준</strong><br>오탐과 누락의 균형</button>
+      <button class="node" data-target="a4" aria-pressed="false"><strong>A4 답변·출처</strong><br>근거 밖 주장 차단</button>
+      <button class="node" data-target="a5" aria-pressed="false"><strong>A5 실패 분류</strong><br>원인 단계로 되돌림</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>평가 데이터 계약</h2>
+  <table><thead><tr><th>필드</th><th>뜻</th><th>판정에 쓰는 방법</th></tr></thead><tbody>
+    <tr><td><code>case_id</code></td><td>질문을 바꿔도 유지하는 식별자</td><td>회귀 결과 연결</td></tr>
+    <tr><td><code>query</code></td><td>실제 사용자 질문</td><td>입력 고정</td></tr>
+    <tr><td><code>filters</code></td><td>ID·지역·날짜·상태 등 정확 조건</td><td>의미 검색 전 후보 제한</td></tr>
+    <tr><td><code>expected_source_ids</code></td><td>사람이 확인한 기대 근거</td><td>Recall@k 판정</td></tr>
+    <tr><td><code>should_abstain</code></td><td>답변 보류가 정답인지</td><td>근거 없음 생성 차단 평가</td></tr>
+    <tr><td><code>required_claims</code></td><td>답변에 반드시 포함할 사실</td><td>생성 완전성 판정</td></tr>
+    <tr><td><code>forbidden_claims</code></td><td>근거 없이 말하면 안 되는 사실</td><td>환각 판정</td></tr>
+  </tbody></table>
+</section>
+
+<section>
+  <h2>에이전트에게 그대로 전달할 요청문</h2>
+  <pre>목표: 검색 결과와 생성 답변을 분리 평가하고, 근거가 약하면 생성하지 않는지 증명한다.
+대상: 실제 운영 RAG 진입점과 고정 평가셋.
+확인된 사실: 정확 ID·날짜·상태는 의미 검색보다 필터가 우선이며, 검색과 생성은 서로 다른 실패 축이다.
+미확정 가설: 현재 점수 기준과 재정렬이 실제 실패 질문에서도 유효하며 운영 경로에 연결돼 있다.
+맡길 범위: 읽기 전용 경로 추적, 평가셋 초안, 검색 방식·점수 기준 비교 계획, 로그 스키마와 출처 계약 제안. 코드 변경·배포·운영 데이터 쓰기 금지.
+완료 기준: 질문별 기대 근거, 검색 결과 ID/점수/순위, 생성에 전달한 컨텍스트, 답변과 인용, 보류 여부, 실패 단계가 한 행으로 연결된 보고서.</pre>
+  <p><strong>사용자가 지금 직접 할 일:</strong> 면접에서 틀렸던 실제 질문과 기대했던 장소·문서를 확인하는 일뿐입니다. 나머지는 아직 실행 요청이 아닙니다.</p>
+</section>
+
+<section>
+  <h2>Before / After</h2><div class="compare"><div class="mock before"><h3>Before</h3><p>검색 결과와 답변만 보고 “틀렸다”고 기록합니다. 원인이 검색인지 생성인지 알 수 없습니다.</p></div><div class="mock after"><h3>After · 제안 계약</h3><p>필터 → 후보 → 점수·순위 → 임계 판정 → 전달 컨텍스트 → 답변 → 인용 → 실패 단계가 연결됩니다.</p><p class="small">설계안이며 구현·테스트 완료 상태가 아닙니다.</p></div></div>
+</section>
+
+<section>
+  <h2>공식 근거와 적용 한계</h2>
+  <ul><li><a href="https://developers.openai.com/api/docs/guides/embeddings">Vector embeddings</a>: 벡터 거리는 텍스트 관련성을 나타내며 사실성 판정은 별도입니다.</li><li><a href="https://developers.openai.com/api/docs/guides/retrieval">Retrieval</a>: 속성 필터, 점수 임계값, 하이브리드 가중치를 비교할 수 있습니다.</li><li><a href="https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy">Optimizing LLM Accuracy</a>: 검색 실패와 모델 실패를 별도 축으로 평가하며, 초기 20개 이상의 정답 포함 질문을 기준선으로 제시합니다.</li><li><a href="https://developers.openai.com/api/docs/guides/citation-formatting">Citation Formatting</a>: 안정적 출처 단위·표현·형식·파싱 검증이 필요합니다.</li></ul>
+  <p class="box proposed"><strong>완료 상태:</strong> 조사 계획과 판정 계약만 작성했습니다. 평가 실행, 임계값 변경, 코드 수정, 배포는 하지 않았습니다.</p>
+</section>
+</main>
+<script>const ns=[...document.querySelectorAll('.node')],ps=[...document.querySelectorAll('.panel')];function show(id){ps.forEach(p=>p.classList.toggle('active',p.id===id));ns.forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.target===id)));if(innerWidth<=760)document.getElementById(id).scrollIntoView({behavior:'smooth'})}ns.forEach(n=>n.addEventListener('click',()=>show(n.dataset.target)));</script>
+</body></html>
