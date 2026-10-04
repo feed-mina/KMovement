@@ -62,7 +62,10 @@ jobs:
             (.services.spring.labels["traefik.http.routers.kmovement-f2-address.priority"] == "300") and
             (.services.spring.labels["traefik.http.services.kmovement-f2-address.loadbalancer.server.port"]
               == "8080") and
-            (.secrets.kakao_rest_api_key.file | endswith("/kakao_rest_api_key"))
+            (.secrets.spring_db_password.file | endswith("/spring_db_password")) and
+            (.secrets.spring_redis_password.file | endswith("/spring_redis_password")) and
+            (.secrets.spring_jwt_secret.file | endswith("/spring_jwt_secret")) and
+            (.secrets.spring_kakao_rest_api_key.file | endswith("/spring_kakao_rest_api_key"))
           ' /tmp/g1-compose.json > /dev/null
 
   mobile-address:

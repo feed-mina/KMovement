@@ -84,13 +84,13 @@ services:
         -XX:+ExitOnOutOfMemoryError
         -Djava.security.egd=file:/dev/urandom
     secrets:
-      - source: db_password
+      - source: spring_db_password
         target: spring.datasource.password
-      - source: redis_password
+      - source: spring_redis_password
         target: spring.data.redis.password
-      - source: jwt_secret
+      - source: spring_jwt_secret
         target: jwt.secret-key
-      - source: kakao_rest_api_key
+      - source: spring_kakao_rest_api_key
         target: kakao.client-id
     depends_on:
       postgres:
@@ -146,10 +146,14 @@ secrets:
     file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/db_password
   redis_password:
     file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/redis_password
-  jwt_secret:
-    file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/jwt_secret
-  kakao_rest_api_key:
-    file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/kakao_rest_api_key
+  spring_db_password:
+    file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/spring_db_password
+  spring_redis_password:
+    file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/spring_redis_password
+  spring_jwt_secret:
+    file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/spring_jwt_secret
+  spring_kakao_rest_api_key:
+    file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/spring_kakao_rest_api_key
 
 volumes:
   postgres_data:
