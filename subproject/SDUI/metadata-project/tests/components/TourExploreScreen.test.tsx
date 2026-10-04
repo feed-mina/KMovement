@@ -2,12 +2,13 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TourExploreScreen from '@/components/plugins/travel/TourExploreScreen';
-import { fetchHolyContents, fetchHolyPois, fetchTourAreas, fetchTourDistricts, fetchTourPois } from '@/services/tourApi';
+import { fetchHolyContents, fetchHolyPois, fetchRestaurants, fetchTourAreas, fetchTourDistricts, fetchTourPois } from '@/services/tourApi';
 import { HOLY_SITES } from '@/lib/data/holySites';
 
 jest.mock('@/services/tourApi', () => ({
     __esModule: true,
     fetchTourPois: jest.fn(),
+    fetchRestaurants: jest.fn(),
     fetchHolyPois: jest.fn(),
     fetchHolyContents: jest.fn(),
     fetchTourAreas: jest.fn(),
@@ -23,6 +24,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 const mockedFetch = fetchTourPois as jest.Mock;
+const mockedRestaurants = fetchRestaurants as jest.Mock;
 const mockedHolyFetch = fetchHolyPois as jest.Mock;
 const mockedContentFetch = fetchHolyContents as jest.Mock;
 const mockedAreaFetch = fetchTourAreas as jest.Mock;
@@ -38,6 +40,8 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         mockSearchParams = new URLSearchParams();
         mockedFetch.mockReset();
         mockedFetch.mockResolvedValue(sample);
+        mockedRestaurants.mockReset();
+        mockedRestaurants.mockResolvedValue(sample);
         mockedHolyFetch.mockReset();
         mockedHolyFetch.mockResolvedValue(HOLY_SITES);
         mockedContentFetch.mockReset();
@@ -68,8 +72,10 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
 
     it('기본 카테고리는 맛집(39)으로 조회해야 함', async () => {
         renderScreen();
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalled());
-        expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1', contentTypeId: '39' }));
+        await waitFor(() => expect(mockedRestaurants).toHaveBeenCalled());
+        expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({
+            areaCode: '1', numOfRows: 24, pageNo: 1,
+        }));
     });
 
     it('카테고리 전환 시 해당 contentTypeId로 재조회해야 함', async () => {
@@ -110,7 +116,7 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
     });
 
     it('썸네일이 오면 카드는 썸네일을, 모달은 원본을 쓴다', async () => {
-        mockedFetch.mockResolvedValue([{
+        mockedRestaurants.mockResolvedValue([{
             contentId: '9', title: '남산타워', addr: '서울 용산구',
             firstImage: 'https://img/original.jpg', thumbnail: 'https://img/thumb.jpg',
         }]);
@@ -125,13 +131,12 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
     });
 
     it('목록이 길면 끊어서 그리고 더 보기로 이어 붙인다', async () => {
-        // 성지는 서버가 최대 300건을 한 번에 내려준다. 전부 펼치면 카드 300장과
-        // 사진 300장이 한꺼번에 붙는다.
-        mockedFetch.mockResolvedValue(
-            Array.from({ length: 30 }, (_, i) => ({
-                contentId: String(100 + i), title: `장소${i}`, addr: '서울 강남구',
-            })),
-        );
+        const restaurants = Array.from({ length: 30 }, (_, i) => ({
+            contentId: String(100 + i), title: `장소${i}`, addr: '서울 강남구',
+        }));
+        mockedRestaurants.mockImplementation(({ pageNo }: { pageNo: number }) => Promise.resolve(
+            pageNo === 1 ? restaurants.slice(0, 24) : restaurants.slice(24),
+        ));
         renderScreen();
 
         await waitFor(() => expect(screen.getByText('장소0')).toBeInTheDocument());
@@ -142,14 +147,17 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
 
         expect(await screen.findByText('장소29')).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: /더 보기/ })).not.toBeInTheDocument();
+        expect(mockedRestaurants).toHaveBeenLastCalledWith(expect.objectContaining({ pageNo: 2 }));
     });
 
     it('카테고리를 바꾸면 목록이 첫 페이지로 돌아간다', async () => {
-        mockedFetch.mockResolvedValue(
-            Array.from({ length: 30 }, (_, i) => ({
-                contentId: String(200 + i), title: `장소${i}`, addr: '서울 강남구',
-            })),
-        );
+        const restaurants = Array.from({ length: 30 }, (_, i) => ({
+            contentId: String(200 + i), title: `장소${i}`, addr: '서울 강남구',
+        }));
+        mockedRestaurants.mockImplementation(({ pageNo }: { pageNo: number }) => Promise.resolve(
+            pageNo === 1 ? restaurants.slice(0, 24) : restaurants.slice(24),
+        ));
+        mockedFetch.mockResolvedValue(restaurants);
         renderScreen();
 
         await waitFor(() => expect(screen.getByText('장소0')).toBeInTheDocument());
@@ -163,7 +171,7 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
     });
 
     it('조회 실패 시 안내 문구를 표시해야 함', async () => {
-        mockedFetch.mockRejectedValueOnce(new Error('network'));
+        mockedRestaurants.mockRejectedValueOnce(new Error('network'));
         renderScreen();
         await waitFor(() => expect(screen.getByText(/불러오지 못했어요/)).toBeInTheDocument());
     });
@@ -173,21 +181,21 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         await waitFor(() => expect(screen.getByText('가담')).toBeInTheDocument());
         fireEvent.click(screen.getByText('종로구'));
         await waitFor(() =>
-            expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ sigunguCode: '23' })),
+            expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({ sigunguCode: '23' })),
         );
     });
 
     it('시·도 변경 시 하위 목록을 바꾸고 이전 시·군·구 선택을 초기화한다', async () => {
         renderScreen();
         fireEvent.click(await screen.findByRole('button', { name: '종로구' }));
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1', sigunguCode: '23' })));
+        await waitFor(() => expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1', sigunguCode: '23' })));
 
         fireEvent.click(screen.getByRole('button', { name: '경기도' }));
 
         expect(await screen.findByRole('button', { name: '경기도 전체' })).toHaveAttribute('aria-pressed', 'true');
         expect(await screen.findByRole('button', { name: '수원시' })).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: '종로구' })).not.toBeInTheDocument();
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '31', sigunguCode: '' })));
+        await waitFor(() => expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '31', sigunguCode: '' })));
     });
 
     it('지역 필터 이동 버튼으로 칩 레일을 부드럽게 스크롤하고 끝 지점을 표시한다', async () => {
@@ -218,7 +226,7 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         fireEvent.click(await screen.findByRole('button', { name: '경기도' }));
         fireEvent.click(await screen.findByRole('button', { name: '수원시' }));
 
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '31', sigunguCode: '13' })));
+        await waitFor(() => expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '31', sigunguCode: '13' })));
         fireEvent.click(screen.getByRole('button', { name: '성지' }));
         // 전국 시드(V90)는 시·군·구 코드가 없어 주소 매칭용 이름도 함께 보낸다.
         await waitFor(() => expect(mockedHolyFetch).toHaveBeenCalledWith(
@@ -230,32 +238,32 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         mockSearchParams = new URLSearchParams('area=6');
         renderScreen();
 
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '6' })));
+        await waitFor(() => expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '6' })));
         // 시·군·구 목록도 같은 지역으로 따라간다.
         await waitFor(() => expect(mockedDistrictFetch).toHaveBeenCalledWith('6'));
-        expect(mockedFetch).not.toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1' }));
+        expect(mockedRestaurants).not.toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1' }));
     });
 
     it('?area= 가 없거나 모르는 코드면 기본 지역으로 연다', async () => {
         mockSearchParams = new URLSearchParams('area=9999');
         const { unmount } = renderScreen();
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1' })));
+        await waitFor(() => expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1' })));
         unmount();
 
         mockedFetch.mockClear();
         mockSearchParams = new URLSearchParams();
         renderScreen();
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1' })));
+        await waitFor(() => expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1' })));
     });
 
     it('?area= 로 열어도 이후 칩 선택이 URL에 묶이지 않는다', async () => {
         mockSearchParams = new URLSearchParams('area=6');
         renderScreen();
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '6' })));
+        await waitFor(() => expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '6' })));
 
         fireEvent.click(await screen.findByRole('button', { name: '경기도' }));
 
-        await waitFor(() => expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '31' })));
+        await waitFor(() => expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '31' })));
     });
 
     it('성지 맛집 칩은 kind=FOOD로 조회하고 작품 필터를 함께 쓸 수 있다', async () => {
@@ -307,7 +315,7 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         await waitFor(() => expect(screen.getByText('가담')).toBeInTheDocument());
         fireEvent.click(screen.getByText('최신순'));
         await waitFor(() =>
-            expect(mockedFetch).toHaveBeenCalledWith(expect.objectContaining({ arrange: 'C' })),
+            expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({ arrange: 'C' })),
         );
     });
 

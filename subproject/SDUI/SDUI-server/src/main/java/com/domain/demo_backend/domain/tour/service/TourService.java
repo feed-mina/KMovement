@@ -80,8 +80,9 @@ public class TourService {
         return tourApiClient.areaBasedList(areaCode, sigunguCode, contentTypeId, arrange, rows, page);
     }
 
-    public List<TourPoiDto> getRestaurants(String areaCode, int numOfRows, int pageNo) {
-        return getPois(areaCode, null, CONTENT_TYPE_RESTAURANT, null, numOfRows, pageNo);
+    public List<TourPoiDto> getRestaurants(String areaCode, String sigunguCode, String arrange,
+                                           int numOfRows, int pageNo) {
+        return getPois(areaCode, sigunguCode, CONTENT_TYPE_RESTAURANT, arrange, numOfRows, pageNo);
     }
 
     /**
