@@ -39,6 +39,10 @@ jobs:
             (.services.spring.expose == ["8080"]) and
             (.services.spring.read_only == true) and
             (.networks.g1.internal == true) and
+            ((.networks.egress.internal // false) == false) and
+            ((.services.spring.networks | keys | sort) == ["egress", "g1"]) and
+            ((.services.postgres.networks | keys) == ["g1"]) and
+            ((.services.redis.networks | keys) == ["g1"]) and
             (.services.postgres.image | test("^postgres:15-alpine@sha256:[0-9a-f]{64}$")) and
             (.services.redis.image | test("^redis:7-alpine@sha256:[0-9a-f]{64}$")) and
             (.services.spring.image | test("^ghcr\\.io/feed-mina/kmovement-spring@sha256:[0-9a-f]{64}$"))

@@ -7,6 +7,8 @@ G1은 Spring Boot, PostgreSQL, Redis, Flyway의 공통 기반입니다. F2 배�
 
 - 외부 공개: `GET /api/platform/health`, `GET /api/v1/address/search`
 - 외부 비공개: PostgreSQL, Redis, Spring의 나머지 모든 API와 주소검색 POST
+- 네트워크: DB·Redis는 `g1` 내부망만 사용하고, Spring만 Kakao Local API 호출용
+  `egress` bridge에 추가 연결합니다. 어느 서비스도 host port를 publish하지 않습니다.
 - 제외: 제출/DB 저장 기능 검증, FastAPI, Celery, RunPod, AWS 종료, DNS 변경
 - 금지: 운영 검증 중 `docker compose down --volumes`
 
