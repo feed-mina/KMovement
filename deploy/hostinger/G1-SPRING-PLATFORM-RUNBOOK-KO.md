@@ -40,8 +40,24 @@ openssl rand -hex 32 > /docker/kmovement-g1/secrets/redis_password
 openssl rand -hex 64 > /docker/kmovement-g1/secrets/jwt_secret
 install -m 0600 /secure/input/kakao_rest_api_key \
   /docker/kmovement-g1/secrets/kakao_rest_api_key
-chmod 0600 /docker/kmovement-g1/secrets/*
+install -m 0400 -o 10001 -g 10001 /docker/kmovement-g1/secrets/db_password \
+  /docker/kmovement-g1/secrets/spring_db_password
+install -m 0400 -o 10001 -g 10001 /docker/kmovement-g1/secrets/redis_password \
+  /docker/kmovement-g1/secrets/spring_redis_password
+install -m 0400 -o 10001 -g 10001 /docker/kmovement-g1/secrets/jwt_secret \
+  /docker/kmovement-g1/secrets/spring_jwt_secret
+install -m 0400 -o 10001 -g 10001 /docker/kmovement-g1/secrets/kakao_rest_api_key \
+  /docker/kmovement-g1/secrets/spring_kakao_rest_api_key
+chmod 0600 /docker/kmovement-g1/secrets/db_password \
+  /docker/kmovement-g1/secrets/redis_password \
+  /docker/kmovement-g1/secrets/jwt_secret \
+  /docker/kmovement-g1/secrets/kakao_rest_api_key
 ```
+
+Compose의 로컬 file secret은 host 파일의 소유권을 그대로 유지합니다. 그래서
+DB·Redis 원본은 root 전용으로 두고, non-root Spring 사용자(UID/GID 10001)가
+읽는 복제본만 `10001:10001`, `0400`으로 제한합니다. secret 값을 환경변수나
+이미지 레이어에 복사하지 않습니다.
 
 `kakao_rest_api_key`는 GitHub Actions의 `KAKAO_REST_API_KEY` 또는 사용자가
 관리하는 비밀 저장소에서 암호화된 경로로 전달합니다. 채팅·로그·Git에 값을
