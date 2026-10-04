@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KMovement F1 Hostinger 배포 작업 지도</title>
+  <style>
+    :root{--bg:#07111f;--panel:#0d1b2d;--line:#27415f;--text:#eef6ff;--muted:#9db0c7;--ok:#48d597;--warn:#ffc857;--bad:#ff6b75;--accent:#69a7ff}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top left,#132d4e 0,#07111f 42%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}.wrap{max-width:1180px;margin:auto;padding:32px 20px 56px}header,.panel{background:rgba(13,27,45,.92);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.25)}header{padding:28px}.eyebrow{color:var(--accent);font-weight:800;letter-spacing:.08em}h1{margin:.35rem 0 .6rem;font-size:clamp(1.9rem,4vw,3rem);line-height:1.15}h2{margin:0 0 16px;font-size:1.25rem}p{margin:.4rem 0}.muted{color:var(--muted)}.status{display:inline-flex;gap:8px;align-items:center;margin-top:14px;padding:8px 12px;border-radius:999px;background:rgba(255,200,87,.12);border:1px solid rgba(255,200,87,.45);color:#ffe2a1;font-weight:800}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0}.metric,.panel{padding:20px}.metric{background:rgba(13,27,45,.9);border:1px solid var(--line);border-radius:15px}.metric strong{display:block;font-size:1.35rem;margin-top:5px}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.65fr);gap:18px}.flow{display:grid;gap:10px}.node{width:100%;text-align:left;color:var(--text);background:#10243b;border:1px solid #315170;border-radius:13px;padding:15px;cursor:pointer;transition:.2s}.node:hover,.node.active{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 0 0 3px rgba(105,167,255,.12)}.node b{display:block;margin-bottom:3px}.node small{color:var(--muted)}.arrow{text-align:center;color:#6385a9}.detail{position:sticky;top:18px;min-height:420px}.detail code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}.detail ul{padding-left:20px}.kv{display:grid;grid-template-columns:135px 1fr;gap:8px;border-top:1px solid var(--line);padding:9px 0}.kv:first-of-type{border-top:0}.wide{grid-column:1/-1;margin-top:18px}.checklist{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.check{background:#0a1727;border:1px solid var(--line);border-radius:11px;padding:12px}.tag{display:inline-block;padding:3px 8px;border-radius:999px;font-size:.78rem;font-weight:800;background:#193451;color:#b9d8ff}.next{border-color:rgba(255,200,87,.5)}a{color:#8fc0ff}@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}main{grid-template-columns:1fr}.detail{position:static}.checklist{grid-template-columns:1fr}}@media(max-width:500px){.grid{grid-template-columns:1fr}.wrap{padding:16px 12px 36px}header,.panel{border-radius:14px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">KMovement · F1 실행 기록 · 2026-10-04 KST</div>
+    <h1>웹 주소검색 → 좌표 → 지도 표시</h1>
+    <p>Hostinger 웹 단독 배포와 실패 복구는 완료했습니다. 주소검색 팝업은 열리지만 Kakao JavaScript SDK 도메인 미등록 때문에 지도·좌표·마커 검증은 아직 완료되지 않았습니다.</p>
+    <div class="status">● 현재 단계: Kakao 도메인 등록 대기</div>
+  </header>
+
+  <section class="grid" aria-label="핵심 상태">
+    <div class="metric"><span class="muted">컨테이너</span><strong class="ok">healthy</strong></div>
+    <div class="metric"><span class="muted">HTTPS</span><strong class="ok">2 / 2 200</strong></div>
+    <div class="metric"><span class="muted">지도 SDK</span><strong class="bad">401</strong></div>
+    <div class="metric"><span class="muted">PR</span><strong>#248</strong></div>
+  </section>
+
+  <main>
+    <section class="panel">
+      <h2>클릭형 작업 흐름</h2>
+      <div class="flow" id="flow">
+        <button id="tab-baseline" class="node active" data-step="baseline" role="tab" aria-selected="true" aria-controls="detailPanel"><b>1. 기준 고정</b><small>main SHA와 이미지 digest를 날짜가 아닌 불변 식별자로 고정</small></button>
+        <div class="arrow">↓</div>
+        <button id="tab-first" class="node" data-step="first" role="tab" aria-selected="false" aria-controls="detailPanel"><b>2. 1차 배포와 자동 롤백</b><small>새 Compose의 바인딩 누락을 health가 차단</small></button>
+        <div class="arrow">↓</div>
+        <button id="tab-cause" class="node" data-step="cause" role="tab" aria-selected="false" aria-controls="detailPanel"><b>3. health 원인 수정</b><small>HOSTNAME=0.0.0.0 복원, CI 재발 방지 추가</small></button>
+        <div class="arrow">↓</div>
+        <button id="tab-deploy" class="node" data-step="deploy" role="tab" aria-selected="false" aria-controls="detailPanel"><b>4. 재배포 성공</b><small>web만 교체, Traefik과 다른 서비스 불변</small></button>
+        <div class="arrow">↓</div>
+        <button id="tab-kakao" class="node" data-step="kakao" role="tab" aria-selected="false" aria-controls="detailPanel"><b>5. 실제 브라우저 검증</b><small>도메인 불일치 401을 네트워크 증거로 확정</small></button>
+        <div class="arrow">↓</div>
+        <button id="tab-next" class="node next" data-step="next" role="tab" aria-selected="false" aria-controls="detailPanel"><b>6. 다음 최소 행동</b><small>Kakao JavaScript SDK 도메인 1개 등록 후 F1 재검증</small></button>
+      </div>
+    </section>
+
+    <aside id="detailPanel" class="panel detail" role="tabpanel" aria-labelledby="tab-baseline" aria-live="polite">
+      <span class="tag" id="detailTag">완료</span>
+      <h2 id="detailTitle">1. 기준 고정</h2>
+      <div id="detailBody"></div>
+    </aside>
+
+    <section class="panel wide">
+      <h2>배포 식별자</h2>
+      <div class="kv"><b>main SHA</b><span class="mono">6b4b253ad4c6e5e33525df525efaa23fdaf06895</span></div>
+      <div class="kv"><b>image digest</b><span class="mono">sha256:8e4f3a8b4469431bcbf8d28529ad6cbaf7419342b3dc79a72be1756491de5936</span></div>
+      <div class="kv"><b>config revision</b><span class="mono">ec22a6580ac01aab52c9c3ef8209280bc8bb2624</span></div>
+      <div class="kv"><b>rollback digest</b><span class="mono">sha256:5195aa97b87f480089faf2c95ea1232d63b65a3efa0fc345c2e687077bbb1007</span></div>
+      <div class="kv"><b>target</b><span class="mono">kmovement.srv1869569.hstgr.cloud</span></div>
+    </section>
+
+    <section class="panel wide">
+      <h2>검증표</h2>
+      <div class="checklist">
+        <div class="check"><b class="ok">✓ Compose config</b><br><span class="muted">web 1개, 앱 published port 없음</span></div>
+        <div class="check"><b class="ok">✓ non-root</b><br><span class="muted">runtime user: nextjs</span></div>
+        <div class="check"><b class="ok">✓ HTTPS</b><br><span class="muted">/ 및 /holy/submit = 200</span></div>
+        <div class="check"><b class="ok">✓ 모바일 폭</b><br><span class="muted">390 × 844에서 페이지·검색 버튼 확인</span></div>
+        <div class="check"><b class="warn">△ 주소검색</b><br><span class="muted">Kakao Postcode 팝업·search frame 열림</span></div>
+        <div class="check"><b class="bad">✕ 지도/좌표/마커</b><br><span class="muted">SDK 401 domain mismatched</span></div>
+      </div>
+    </section>
+
+    <section class="panel wide">
+      <h2>범위 경계</h2>
+      <p><b>실행:</b> Hostinger web 컨테이너, 기존 Traefik 경유 HTTPS, 주소검색 화면의 브라우저 검증.</p>
+      <p><b>미실행:</b> 제출 버튼, DB 저장, Spring/FastAPI/Postgres/Redis/Celery/RunPod 배포, DNS 변경, AWS 종료, PR의 main 병합.</p>
+      <p><b>관련 PR:</b> <a href="https://github.com/feed-mina/KMovement/pull/248">feed-mina/KMovement #248</a></p>
+    </section>
+  </main>
+</div>
+<script>
+const details={
+  baseline:{tag:'완료',title:'1. 기준 고정',html:'<ul><li>origin/main SHA: <code>6b4b253…</code></li><li>OCI digest: <code>8e4f3a8…</code></li><li>롤백 digest: <code>5195aa9…</code></li></ul><p>날짜나 mutable tag만으로 배포 대상을 식별하지 않았습니다.</p>'},
+  first:{tag:'보호 작동',title:'2. 1차 배포와 자동 롤백',html:'<p>새 컨테이너가 <code>health=starting</code>에서 벗어나지 않아 배포 스크립트가 기존 digest로 자동 롤백했습니다.</p><p>롤백 시 신규 Compose를 재사용한 결함도 확인해, 이후에는 기존 이미지와 기존 Compose를 함께 복원하도록 수정했습니다.</p>'},
+  cause:{tag:'수정 완료',title:'3. health 원인 수정',html:'<p>새 Compose에서 <code>HOSTNAME: "0.0.0.0"</code>이 빠져 Next.js가 health 대상인 <code>127.0.0.1:3000</code>에 응답하지 않았습니다.</p><p>설정을 복원하고 CI가 이 값을 필수 계약으로 검사하도록 PR #248에 추가했습니다.</p>'},
+  deploy:{tag:'배포 완료',title:'4. 재배포 성공',html:'<ul><li>health: <b>healthy</b></li><li><code>/</code>: 200</li><li><code>/holy/submit</code>: 200</li><li>Traefik container ID: 불변</li><li>web 외 서비스: 변경 없음</li></ul>'},
+  kakao:{tag:'차단 확인',title:'5. 실제 브라우저 검증',html:'<p>Kakao SDK 응답:</p><p><code>401 AccessDeniedError</code><br><code>domain mismatched</code><br>caller=<code>https://kmovement.srv1869569.hstgr.cloud</code></p><p>키는 존재하며 길이는 32자였습니다. 값은 보고서와 로그에 노출하지 않았습니다.</p>'},
+  next:{tag:'사용자 설정 필요',title:'6. 다음 최소 행동',html:'<ol><li>Kakao Developers에서 해당 앱 선택</li><li><b>앱 → 플랫폼 키 → JavaScript 키</b></li><li><b>JavaScript SDK 도메인</b>에 <code>https://kmovement.srv1869569.hstgr.cloud</code> 등록</li><li>저장 후 401이 200으로 바뀌는지 확인</li><li>주소 1건 선택 → 주소/좌표 변경 → 지도 마커 이동 확인</li></ol><p>키 재발급이나 이미지 재배포는 우선 필요하지 않습니다.</p>'}
+};
+const title=document.querySelector('#detailTitle'),body=document.querySelector('#detailBody'),tag=document.querySelector('#detailTag');
+function show(key){const d=details[key];title.textContent=d.title;body.innerHTML=d.html;tag.textContent=d.tag;document.querySelectorAll('.node').forEach(n=>{const active=n.dataset.step===key;n.classList.toggle('active',active);n.setAttribute('aria-selected',String(active));if(active)document.querySelector('#detailPanel').setAttribute('aria-labelledby',n.id);});}
+document.querySelectorAll('.node').forEach(n=>n.addEventListener('click',()=>show(n.dataset.step)));
+show('baseline');
+</script>
+</body>
+</html>
