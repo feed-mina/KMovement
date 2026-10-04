@@ -135,6 +135,7 @@ services:
       traefik.http.services.kmovement-f2-address.loadbalancer.server.port: "8080"
     networks:
       - g1
+      - egress
     logging:
       driver: json-file
       options:
@@ -163,3 +164,5 @@ networks:
   g1:
     driver: bridge
     internal: true
+  egress:
+    driver: bridge
