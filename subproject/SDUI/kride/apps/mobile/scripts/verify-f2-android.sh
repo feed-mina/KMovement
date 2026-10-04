@@ -56,11 +56,18 @@ import xml.etree.ElementTree as ET
 path, needle = sys.argv[1:]
 root = ET.parse(path).getroot()
 nodes = list(root.iter("node"))
-for exact in (True, False):
+passes = (
+    ("content-desc", True, True),
+    ("content-desc", True, False),
+    ("text", False, True),
+    ("text", False, False),
+)
+for attribute, require_clickable, exact in passes:
   for node in nodes:
-    values = (node.attrib.get("text", ""), node.attrib.get("content-desc", ""))
-    matched = any(value == needle for value in values) if exact else any(needle in value for value in values)
-    if matched:
+    value = node.attrib.get(attribute, "")
+    matched = value == needle if exact else needle in value
+    clickable = node.attrib.get("clickable") == "true"
+    if matched and (not require_clickable or clickable):
         match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", node.attrib.get("bounds", ""))
         if match:
             left, top, right, bottom = map(int, match.groups())
