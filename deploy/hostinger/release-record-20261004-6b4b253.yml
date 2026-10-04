@@ -1,0 +1,64 @@
+schemaVersion: 1
+state: deployed-f1-blocked-kakao-domain
+deployedAt: "2026-10-04T17:24:56+09:00"
+
+source:
+  repository: feed-mina/KMovement
+  mainSha: 6b4b253ad4c6e5e33525df525efaa23fdaf06895
+  configRevision: ec22a6580ac01aab52c9c3ef8209280bc8bb2624
+  pullRequest: "https://github.com/feed-mina/KMovement/pull/248"
+
+artifact:
+  image: "ghcr.io/feed-mina/kmovement-web@sha256:8e4f3a8b4469431bcbf8d28529ad6cbaf7419342b3dc79a72be1756491de5936"
+  imageRevision: 6b4b253ad4c6e5e33525df525efaa23fdaf06895
+  runtimeUser: nextjs
+
+target:
+  vmId: srv1869569
+  hostname: kmovement.srv1869569.hstgr.cloud
+  profile: existing-traefik-web-only
+  externalPorts: [80, 443]
+  applicationPublishedPorts: []
+  traefikChanged: false
+
+rollback:
+  image: "ghcr.io/feed-mina/kmovement-web@sha256:5195aa97b87f480089faf2c95ea1232d63b65a3efa0fc345c2e687077bbb1007"
+  configRevision: a51c52f4d4c34f4ffa36feed2363b7153a1c8fc1
+
+verification:
+  composeConfig: passed
+  pullRequestChecks: passed
+  containerHealth: healthy
+  rootHttps200: true
+  holySubmitHttps200: true
+  desktopViewportChecked: true
+  mobileViewportChecked: true
+  addressSearchPopupOpened: true
+  addressSelected: false
+  coordinatesChanged: false
+  kakaoMarkerMoved: false
+  consoleAndNetworkCaptured: true
+
+blocker:
+  component: Kakao Maps JavaScript SDK
+  request: "https://dapi.kakao.com/v2/maps/sdk.js"
+  httpStatus: 401
+  errorType: AccessDeniedError
+  reason: domain-mismatched
+  caller: "https://kmovement.srv1869569.hstgr.cloud"
+  requiredAction: >-
+    Register the caller origin under the matching Kakao JavaScript key at
+    App > Platform Key > JavaScript key > JavaScript SDK domains, then repeat
+    address selection, coordinate change, and marker verification.
+
+excluded:
+  - form submission
+  - database persistence
+  - Spring deployment
+  - FastAPI deployment
+  - Postgres
+  - Redis
+  - Celery
+  - RunPod
+  - AWS shutdown
+  - DNS changes
