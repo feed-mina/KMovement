@@ -100,6 +100,7 @@ services:
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=128m
+      - /app/logs:rw,noexec,nosuid,size=64m,uid=10001,gid=10001
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://127.0.0.1:8080/actuator/health"]
       interval: 15s

@@ -16,8 +16,8 @@ FROM eclipse-temurin:17-jre-jammy@sha256:8993f1aed8b25fcea7a7047a7949c1866fa558f
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/* \
-    && groupadd --system spring \
-    && useradd --system --gid spring --home-dir /app --shell /usr/sbin/nologin spring
+    && groupadd --system --gid 10001 spring \
+    && useradd --system --uid 10001 --gid spring --home-dir /app --shell /usr/sbin/nologin spring
 
 WORKDIR /app
 COPY --from=build --chown=spring:spring /app/build/libs/*.jar app.jar
