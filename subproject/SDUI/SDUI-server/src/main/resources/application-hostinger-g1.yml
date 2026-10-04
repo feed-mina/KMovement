@@ -1,0 +1,81 @@
+spring:
+  config:
+    activate:
+      on-profile: hostinger-g1
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    out-of-order: false
+    clean-disabled: true
+  mail:
+    username: disabled@localhost
+    password: disabled
+
+server:
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+  health:
+    mail:
+      enabled: false
+    redis:
+      enabled: true
+
+app:
+  url:
+    web: https://kmovement.srv1869569.hstgr.cloud
+    mobile: https://kmovement.srv1869569.hstgr.cloud
+
+kakao:
+  client-id: disabled-g1
+  token-admin: disabled-g1
+  redirect-uri: https://kmovement.srv1869569.hstgr.cloud/api/kakao/callback
+
+fastapi:
+  url: http://disabled-fastapi:8000
+  internal-api-key: disabled-g1
+
+kride:
+  fastapi:
+    url: http://disabled-fastapi:8000
+    chatbot-url: http://disabled-fastapi:8000
+
+cloud:
+  aws:
+    s3:
+      bucket: disabled-g1
+      region: ap-northeast-2
+    credentials:
+      access-key: disabled-g1
+      secret-key: disabled-g1
+  gcp:
+    document-ai:
+      project-id: disabled-g1
+      location: us
+      processor-id: disabled-g1
+      credentials-path: /run/secrets/disabled-gcp-credentials.json
+
+logging:
+  file:
+    name: /tmp/kmovement-spring.log
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.mybatis: INFO
+    org.apache.ibatis: INFO

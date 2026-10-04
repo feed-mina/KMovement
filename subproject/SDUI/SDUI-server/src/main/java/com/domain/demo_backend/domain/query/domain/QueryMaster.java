@@ -6,6 +6,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -39,10 +41,11 @@ public class QueryMaster {
     @Column(name = "required_params", columnDefinition = "TEXT")
     private String requiredParams;
 
-    @Column(name = "param_mapping", columnDefinition = "TEXT")
+    @Column(name = "param_mapping", columnDefinition = "jsonb")
     private String paramMapping;
 
-    @Column(name = "use_redis_yn", length = 1)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "use_redis_yn", columnDefinition = "char(1)")
     private String useRedisYn;
 
     @Column(name = "redis_ttl_sec")

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>KMovement G1 Spring 플랫폼 작업 지도 · 2026-10-04</title>
+  <style>
+    :root{--bg:#f4f6f9;--card:#fff;--ink:#172033;--muted:#526076;--line:#d9e0ea;--blue:#2457c5;--bluebg:#eaf0ff;--green:#176a47;--greenbg:#e9f7ef;--amber:#8a5a00;--amberbg:#fff6df;--red:#a33030;--redbg:#fff0f0;--code:#142033;--shadow:0 14px 35px rgba(35,49,72,.08);font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;color-scheme:light}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#eef2f8,#f8fafc 420px);color:var(--ink);font:15px/1.7 var(--font,inherit)}button{font:inherit;color:inherit}button:focus-visible,summary:focus-visible{outline:3px solid #84a6ef;outline-offset:3px}.wrap{max-width:1280px;margin:auto;padding:28px}.hero,.panel{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}.hero{padding:28px}.eyebrow{margin:0 0 6px;color:var(--blue);font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase}h1{font-size:34px;line-height:1.28;letter-spacing:-1.2px;margin:0}h2{font-size:23px;margin:0}h3{font-size:17px;margin:0}p{color:var(--muted);max-width:78ch}.lead{font-size:17px;color:#303d51}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}.card{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fbfcfe}.card strong{display:block;margin-bottom:6px}.badge{display:inline-flex;padding:4px 9px;border-radius:99px;font-size:12px;font-weight:700}.done{color:var(--green);background:var(--greenbg)}.wait{color:var(--amber);background:var(--amberbg)}.fail{color:var(--red);background:var(--redbg)}.nextbox{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:16px}.nextbox>div{border:1px solid var(--line);border-radius:14px;padding:16px}.toggle{border:1px solid #b8c6df;background:white;border-radius:9px;padding:8px 12px;cursor:pointer}.follow[hidden]{display:none}.panel{margin-top:20px;padding:22px}.flow{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:16px}.flow button{border:1px solid var(--line);background:white;border-radius:13px;padding:13px;text-align:left;min-height:116px;cursor:pointer}.flow button.current{border:2px solid var(--blue);background:var(--bluebg)}.flow button.selected{box-shadow:0 0 0 3px rgba(36,87,197,.15)}.flow small{display:block;color:var(--muted);margin-top:7px}.flow-detail{margin-top:14px;padding:16px;border-radius:13px;background:#f7f9fc;border:1px solid var(--line)}.tabs{display:flex;gap:9px;overflow:auto;border-bottom:1px solid var(--line);margin:14px 0 18px}.tab{border:0;border-bottom:3px solid transparent;background:none;padding:11px 10px;white-space:nowrap;cursor:pointer;font-weight:700;color:var(--muted)}.tab[aria-selected=true]{color:var(--blue);border-bottom-color:var(--blue)}[role=tabpanel][hidden]{display:none}.mapgrid{display:grid;grid-template-columns:minmax(330px,.9fr) minmax(0,1.4fr);gap:18px;align-items:start}.map{border:1px solid var(--line);border-radius:15px;padding:16px;background:#fbfcfe}.lane{margin-bottom:20px}.lane-title{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.8px}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px}.arrow{color:#75839a}.node{flex:1;min-width:132px;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:10px;background:white;padding:11px;text-align:left;cursor:pointer}.node.cause{border-left-color:#d59720}.node.test{border-style:dashed;border-left-color:var(--blue)}.node[aria-pressed=true]{background:var(--bluebg);box-shadow:0 0 0 2px #8ba8e5}.node small{display:block;color:var(--muted);margin-top:3px}.detail{position:sticky;top:16px;border:1px solid var(--line);border-radius:15px;background:white;overflow:hidden}.detail-head{padding:16px 18px;border-bottom:1px solid var(--line)}.detail-body{padding:18px}.detail-body ul{padding-left:20px}.code{margin-top:14px;background:var(--code);color:#e7edf7;border-radius:10px;overflow:auto;padding:14px;font:12px/1.65 Consolas,monospace;white-space:pre}.models,.verifygrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.model,.verify{border:1px solid var(--line);border-radius:14px;padding:17px;background:#fbfcfe}.model ul,.verify ul{padding-left:20px}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f2f5f9;color:var(--muted)}details{border:1px solid var(--line);border-radius:12px;margin-top:12px;background:#fbfcfe}summary{cursor:pointer;padding:12px 14px;font-weight:700}details>div{padding:0 14px 14px;color:var(--muted)}code{font-family:Consolas,monospace}.muted{color:var(--muted)}footer{margin:24px 0 10px;color:var(--muted);font-size:12px}@media(max-width:950px){.cards{grid-template-columns:repeat(2,1fr)}.flow{grid-template-columns:repeat(3,1fr)}.mapgrid{grid-template-columns:1fr}.detail{position:static}.nextbox{grid-template-columns:1fr}}@media(max-width:620px){.wrap{padding:14px}.cards,.models,.verifygrid{grid-template-columns:1fr}.flow{grid-template-columns:1fr}h1{font-size:27px}.hero,.panel{border-radius:15px;padding:18px}.row{align-items:stretch}.node{min-width:100%}.arrow{width:100%;text-align:center;transform:rotate(90deg)}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <p class="eyebrow">KMovement · G1 platform gate · prepared, not deployed</p>
+    <h1>Spring·PostgreSQL·Redis 기반을<br>운영 배포 전에 검증 가능한 묶음으로 만들었습니다</h1>
+    <p class="lead">PR #249의 전체 CI는 통과했습니다. 다만 main 병합, Spring 이미지 게시, Hostinger 볼륨·비밀값 생성, 실제 배포는 실행하지 않았습니다.</p>
+    <div class="cards">
+      <article class="card"><strong>기준</strong><span class="badge done">확인</span><p>origin/main 6b4b253에서 분기<br>구현 HEAD 815f1fc</p></article>
+      <article class="card"><strong>통합 검증</strong><span class="badge done">PASS</span><p>Flyway 109개·Redis 인증·Spring health·재기동</p></article>
+      <article class="card"><strong>외부 노출</strong><span class="badge done">제한됨</span><p>published port 0개<br>/api/platform/health만 계획</p></article>
+      <article class="card"><strong>운영 배포</strong><span class="badge wait">미실행</span><p>VPS 데이터·기존 컨테이너 변경 없음</p></article>
+    </div>
+    <div class="nextbox">
+      <div><strong>핵심 파일과 변경 방향</strong><p><code>g1.compose.yml</code>이 세 서비스를 내부망으로 묶고, <code>application-hostinger-g1.yml</code>이 Flyway 검증과 플랫폼 health 범위를 고정합니다.</p></div>
+      <div><strong>다음 행동 하나</strong><p>PR 검토 후 main 병합 여부를 결정합니다. 실제 VPS 배포는 그 다음 별도 승인입니다.</p><button id="follow-toggle" class="toggle" aria-expanded="false" aria-controls="follow-body">배포 전 승인 항목 보기</button><div id="follow-body" class="follow" hidden><ul><li>PR #249 main 병합</li><li>main SHA로 Spring 이미지 수동 게시</li><li>digest와 rollback digest 확인</li><li>Hostinger 비밀값·볼륨 생성 승인</li></ul></div></div>
+    </div>
+  </header>
+
+  <section class="panel" aria-labelledby="flow-title">
+    <p class="eyebrow">진행상황</p><h2 id="flow-title">G1 단계별 상태</h2>
+    <div id="flow" class="flow"></div>
+    <div id="flow-detail" class="flow-detail" aria-live="polite"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="work-title">
+    <p class="eyebrow">코드·작업 지도</p><h2 id="work-title">파일을 누르면 근거와 실제 줄 번호가 보입니다</h2>
+    <nav class="tabs" role="tablist" aria-label="G1 보고서 탭">
+      <button class="tab" id="tab-map" role="tab" aria-selected="true" aria-controls="map-panel" tabindex="0">코드·작업 지도</button>
+      <button class="tab" id="tab-before" role="tab" aria-selected="false" aria-controls="before-panel" tabindex="-1">Before / After</button>
+      <button class="tab" id="tab-verify" role="tab" aria-selected="false" aria-controls="verify-panel" tabindex="-1">검증·배포</button>
+      <button class="tab" id="tab-evidence" role="tab" aria-selected="false" aria-controls="evidence-panel" tabindex="-1">근거·이력</button>
+    </nav>
+
+    <section id="map-panel" role="tabpanel" aria-labelledby="tab-map">
+      <div class="mapgrid">
+        <div class="map">
+          <div class="lane"><div class="lane-title">런타임 흐름</div><div class="row"><button class="node" data-node="compose"><strong>g1.compose.yml</strong><small>3서비스·내부망·secret</small></button><span class="arrow">→</span><button class="node" data-node="profile"><strong>hostinger-g1 profile</strong><small>Flyway·health 범위</small></button><span class="arrow">→</span><button class="node" data-node="schema"><strong>QueryMaster.java</strong><small>DB 스키마 정합성</small></button></div></div>
+          <div class="lane"><div class="lane-title">이미지와 보안</div><div class="row"><button class="node" data-node="docker"><strong>Dockerfile</strong><small>digest·non-root</small></button><span class="arrow">→</span><button class="node" data-node="health"><strong>SecurityConfig</strong><small>health만 익명 허용</small></button></div></div>
+          <div class="lane"><div class="lane-title">검증과 운영</div><div class="row"><button class="node test" data-node="ci"><strong>G1 validate workflow</strong><small>실제 3서비스 통합 게이트</small></button><span class="arrow">→</span><button class="node" data-node="runbook"><strong>운영 런북</strong><small>백업·복원·롤백</small></button></div></div>
+        </div>
+        <article class="detail" aria-labelledby="detail-title"><div class="detail-head"><p class="eyebrow">선택 상세</p><h3 id="detail-title" tabindex="-1"></h3></div><div id="detail-body" class="detail-body"></div></article>
+      </div>
+    </section>
+
+    <section id="before-panel" role="tabpanel" aria-labelledby="tab-before" hidden>
+      <div class="models">
+        <article class="model"><span class="badge fail">Before · CI에서 발견</span><h3>기존 Spring 컨테이너 계약</h3><ul><li>읽기 전용 컨테이너에서 <code>/app/logs</code> 쓰기 실패</li><li>JPA TEXT/VARCHAR 선언과 DB jsonb/CHAR 스키마 불일치</li><li>설명 문장 형태의 JWT fixture가 Base64 초기화 실패</li><li>범위 밖 Gmail health가 플랫폼 health를 DOWN으로 만듦</li></ul><p class="muted">실제 사용자 화면 캡처가 아니라 GitHub Actions 로그에 근거한 실행 상태 비교입니다.</p></article>
+        <article class="model"><span class="badge done">After · CI 확인</span><h3>현재 PR의 G1 게이트</h3><ul><li><code>/app/logs</code>만 UID 10001 tmpfs로 허용</li><li>JPA 선언을 실제 jsonb·CHAR 스키마와 일치</li><li>CI용 Base64 JWT fixture와 운영용 랜덤 secret 분리</li><li>mail health 제외, DB·Redis·Spring health만 판정</li></ul><p class="muted">운영 VPS 배포 결과가 아니라 격리된 Ubuntu runner 통합 검증 결과입니다.</p></article>
+      </div>
+    </section>
+
+    <section id="verify-panel" role="tabpanel" aria-labelledby="tab-verify" hidden>
+      <div class="verifygrid">
+        <article class="verify"><span class="badge done">PASS</span><h3>구성 계약</h3><ul><li>서비스: postgres, redis, spring</li><li>published port: 0</li><li>Spring read-only·non-root</li><li>네트워크 internal</li></ul></article>
+        <article class="verify"><span class="badge done">PASS</span><h3>통합 런타임</h3><ul><li>Flyway 109개 성공</li><li>Redis 인증 PING=PONG</li><li>Spring /actuator/health 성공</li><li>재시작 후 healthy 복귀</li></ul></article>
+        <article class="verify"><span class="badge done">PASS</span><h3>전체 PR 체크</h3><ul><li>compose 2개</li><li>spring-platform</li><li>sdui-server·fastapi·nextjs</li><li>traefik-compose·web-image</li></ul></article>
+        <article class="verify"><span class="badge wait">미실행</span><h3>운영 검증</h3><ul><li>main 병합과 이미지 게시</li><li>VPS secret·volume 생성</li><li>외부 HTTPS health</li><li>backup/restore 실검사</li></ul></article>
+        <article class="verify"><span class="badge wait">환경 제한</span><h3>보고서 브라우저 검증</h3><ul><li>정적 validator PASS</li><li>내장 브라우저는 로컬 런타임 자산 경로 오류로 실행 불가</li><li>탭·노드 클릭과 모바일 폭은 미검증</li></ul></article>
+      </div>
+      <details open><summary>현재 사용 안내</summary><div>이 PR은 플랫폼 기반만 준비합니다. 장소 목록·제출·사용자 데이터 기능 API는 공개하지 않습니다. G1 health 통과를 기능 완료로 해석하지 않습니다.</div></details>
+      <details><summary>다음 배포 단계와 실패 대응</summary><div>main SHA와 이미지 digest, config revision, target, rollback digest를 한 기록에 고정합니다. Spring health 실패 시 DB volume을 삭제하지 않고 Spring 이미지나 config만 되돌립니다. 비호환 migration은 자동 롤백하지 않습니다.</div></details>
+    </section>
+
+    <section id="evidence-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+      <div class="tablewrap"><table><thead><tr><th>구분</th><th>결과</th><th>근거</th></tr></thead><tbody>
+        <tr><td>브랜치</td><td>feat/hostinger-g1-platform · 구현 815f1fc</td><td>origin/main 6b4b253 기준, 구현 14개 + 이 보고서</td></tr>
+        <tr><td>PR</td><td>#249 OPEN · 전체 체크 PASS</td><td>https://github.com/feed-mina/KMovement/pull/249</td></tr>
+        <tr><td>G1 CI</td><td>run 37193465395 PASS</td><td>compose 29초, spring-platform 2분30초</td></tr>
+        <tr><td>수정 중 발견</td><td>로그 경로, JSONB/CHAR, JWT fixture, mail health</td><td>실패 run 로그 37191577039, 37192033714, 37192551201, 37192722106, 37192890020, 37193086267</td></tr>
+        <tr><td>로컬 Gradle</td><td>판정 제외</td><td>C: 디스크 부족 IOException으로 결과 오염; CI sdui-server PASS를 별도 근거로 사용</td></tr>
+        <tr><td>Hostinger</td><td>변경 없음</td><td>볼륨·secret·Spring 컨테이너·DNS 미생성</td></tr>
+      </tbody></table></div>
+      <details><summary>변경 커밋 7개</summary><div><ol><li>f1ae746 G1 플랫폼 구성</li><li>7efb3a6 로그 tmpfs</li><li>6ef5106 JSONB 정합성</li><li>b07a8fc·46a3212 CHAR JDBC 정합성</li><li>23ebb0d JWT fixture</li><li>815f1fc health 범위</li></ol></div></details>
+      <details><summary>실행한 핵심 검증</summary><div><ul><li><code>docker compose ... config --quiet</code></li><li>YAML 파싱, <code>git diff --check</code></li><li>GitHub Actions에서 이미지 build·non-root metadata 검사</li><li>빈 DB migration·table count·Redis auth·Spring restart</li></ul></div></details>
+    </section>
+  </section>
+  <footer>독립 HTML · 외부 폰트/CDN/네트워크 요청 없음 · 생성 2026-10-04 18:56 KST · 운영 상태는 자동 갱신되지 않습니다.</footer>
+</main>
+<script>
+const stages=[
+ {id:'scope',title:'범위 고정',status:'완료',summary:'Spring·PostgreSQL·Redis·Flyway만 G1으로 묶고 기능 API는 제외했습니다.',detail:'외부에는 health 한 경로만 계획했고 AWS 종료, DNS, FastAPI, Celery, RunPod는 포함하지 않았습니다.'},
+ {id:'contract',title:'Compose 계약',status:'완료',summary:'세 서비스, 내부망, secret, digest 정책을 코드로 고정했습니다.',detail:'published port는 없고 Spring만 내부 8080을 expose합니다.'},
+ {id:'repair',title:'기동 정합성',status:'완료',summary:'CI가 기존 로그·스키마·JWT·mail health 문제를 찾아 수정했습니다.',detail:'DB migration을 바꾸지 않고 JPA 매핑과 G1 프로필을 실제 계약에 맞췄습니다.'},
+ {id:'gate',title:'통합 게이트',status:'완료',summary:'격리된 runner에서 Flyway·Redis·health·재시작을 통과했습니다.',detail:'G1 전용 run 37193465395의 compose와 spring-platform job이 모두 성공했습니다.'},
+ {id:'pr',title:'PR 검토',status:'현재',summary:'PR #249가 열려 있고 전체 저장소 체크가 통과했습니다.',detail:'main 병합은 아직 실행하지 않았습니다.'},
+ {id:'deploy',title:'Hostinger 배포',status:'예정',summary:'이미지 게시와 VPS 변경은 별도 승인 뒤 수행합니다.',detail:'실제 secret·volume·backup/restore·외부 HTTPS 검증은 미실행입니다.'}
+];
+const nodes={
+ compose:{title:'deploy/hostinger/g1.compose.yml',kind:'변경',summary:'PostgreSQL·Redis·Spring을 외부 포트 없이 내부망으로 묶습니다.',done:['digest 고정 PG/Redis','Spring digest 필수 입력','파일 secret 3종','read-only와 no-new-privileges','health 전용 Traefik rule'],next:['실배포 시 KMOVEMENT_SPRING_IMAGE를 실제 digest로 교체'],code:'69: spring:\n70:   image: ${KMOVEMENT_SPRING_IMAGE:?...}\n75:   SPRING_PROFILES_ACTIVE: hostinger-g1\n86: secrets:\n98: expose: ["8080"]\n100: read_only: true\n101: tmpfs:\n102:   - /tmp:...\n103:   - /app/logs:...uid=10001,gid=10001'},
+ profile:{title:'application-hostinger-g1.yml',kind:'변경',summary:'DB 스키마를 자동 수정하지 않고 Flyway와 Hibernate 검증으로 기동을 차단합니다.',done:['ddl-auto=validate','Flyway validate-on-migrate','clean-disabled','Actuator는 health만 노출','mail health 제외·Redis health 유지'],next:['기능별 외부 서비스는 후속 단계에서 별도 활성화'],code:'5: jpa:\n6:   hibernate:\n7:     ddl-auto: validate\n9: flyway:\n14:   validate-on-migrate: true\n16:   clean-disabled: true\n24: management:\n28:   include: health\n35:   mail.enabled: false\n37:   redis.enabled: true'},
+ schema:{title:'QueryMaster.java',kind:'원인→변경',summary:'기존 JPA 선언을 실제 PostgreSQL jsonb·CHAR 스키마에 맞췄습니다.',done:['param_mapping TEXT → jsonb','use_redis_yn에 SqlTypes.CHAR 지정','Flyway 109개 이후 Hibernate validate 통과'],next:['새 migration에서는 엔티티 타입과 schema validation을 함께 확인'],code:'41: @Column(name = "required_params", columnDefinition = "TEXT")\n44: @Column(name = "param_mapping", columnDefinition = "jsonb")\n47: @JdbcTypeCode(SqlTypes.CHAR)\n48: @Column(name = "use_redis_yn", columnDefinition = "char(1)")'},
+ docker:{title:'SDUI-server/Dockerfile',kind:'변경',summary:'빌드·런타임 이미지를 digest로 고정하고 전용 UID로 실행합니다.',done:['JDK/JRE digest 고정','bootJar 한 번만 생성','curl health client 포함','UID/GID 10001','USER spring:spring'],next:['main merge 후 publish workflow에서 linux/amd64 이미지 생성'],code:'3: FROM eclipse-temurin:17-jdk-jammy@sha256:... AS build\n12: RUN ./gradlew clean bootJar -x test --no-daemon\n14: FROM eclipse-temurin:17-jre-jammy@sha256:...\n19: groupadd --system --gid 10001 spring\n20: useradd --system --uid 10001 ...\n25: USER spring:spring'},
+ health:{title:'SecurityConfig.java',kind:'변경',summary:'인증 없이 접근 가능한 플랫폼 경로를 Actuator health로 한정했습니다.',done:['GET /actuator/health 허용','나머지 기존 보안 규칙 유지','Traefik은 /api/platform/health만 치환'],next:['기능 API 노출은 기능별 승인과 테스트 뒤 별도 route로 추가'],code:'73: .permitAll()\n74: .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()\n76: .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**").permitAll()'},
+ ci:{title:'hostinger-g1-validate.yml',kind:'테스트',summary:'정적 검사와 실제 세 서비스 통합 실행을 같은 PR 게이트로 묶었습니다.',done:['Compose 서비스·포트·내부망 검사','Spring non-root label 검사','Flyway 성공·table count','Redis 인증 PING','Spring 재시작 복구'],next:['운영 배포 전에도 같은 SHA의 PR 체크를 다시 확인'],code:'96: for attempt in $(seq 1 60); do\n97:   status=$(docker compose ... ps ...)\n100:  restarts=$(docker inspect ...RestartCount)\n102:  test "$status" = "healthy" && exit 0\n121: curl .../actuator/health\n123: select count(*), bool_and(success) from flyway_schema_history;\n127: redis-cli ping | grep -qx PONG\n128: docker compose restart spring'},
+ runbook:{title:'G1-SPRING-PLATFORM-RUNBOOK-KO.md',kind:'운영',summary:'비밀값 준비, 순차 기동, 백업·복원, rollback을 승인 경계와 함께 기록합니다.',done:['운영에서 down --volumes 금지','main SHA·digest·config revision 동시 기록','PG dump와 분리 DB restore 요구','DB volume 보존 rollback'],next:['실배포 승인 시 런북 순서대로만 수행'],code:'1: # G1 Spring 플랫폼 게이트 실행 런북\n9: - 외부 공개: GET /api/platform/health 한 경로만\n12: - 금지: 운영 검증 중 docker compose down --volumes\n31: 실제 배포 승인 후 VPS 안에서만 비밀값 생성\n102: 백업 파일 생성만으로 복구 가능 판정 금지'}
+};
+let selectedStage='pr',selectedNode='compose';
+function renderFlow(){const root=document.getElementById('flow');root.replaceChildren();stages.forEach(s=>{const b=document.createElement('button');b.type='button';b.className=(s.status==='현재'?'current ':'')+(s.id===selectedStage?'selected':'');b.dataset.stage=s.id;b.innerHTML='<strong></strong><span class="badge"></span><small></small>';b.querySelector('strong').textContent=s.title;const badge=b.querySelector('.badge');badge.textContent=s.status;badge.classList.add(s.status==='완료'?'done':s.status==='현재'?'done':'wait');b.querySelector('small').textContent=s.summary;b.onclick=()=>{selectedStage=s.id;renderFlow()};root.append(b)});const s=stages.find(x=>x.id===selectedStage);const d=document.getElementById('flow-detail');d.replaceChildren();const h=document.createElement('h3');h.textContent=s.title;const p=document.createElement('p');p.textContent=s.detail;d.append(h,p)}
+function renderNode(focus=false){document.querySelectorAll('[data-node]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.node===selectedNode)));const n=nodes[selectedNode];document.getElementById('detail-title').textContent=n.title;const body=document.getElementById('detail-body');body.replaceChildren();const tag=document.createElement('span');tag.className='badge '+(n.kind==='테스트'?'done':n.kind.includes('원인')?'wait':'done');tag.textContent=n.kind;const p=document.createElement('p');p.textContent=n.summary;const done=document.createElement('section');done.innerHTML='<strong>완료·확인</strong>';const ul=document.createElement('ul');n.done.forEach(v=>{const li=document.createElement('li');li.textContent=v;ul.append(li)});done.append(ul);const next=document.createElement('section');next.innerHTML='<strong>다음</strong>';const ul2=document.createElement('ul');n.next.forEach(v=>{const li=document.createElement('li');li.textContent=v;ul2.append(li)});next.append(ul2);const pre=document.createElement('pre');pre.className='code';pre.textContent=n.code;body.append(tag,p,done,next,pre);if(focus){document.querySelector('.detail').scrollIntoView({behavior:'smooth',block:'nearest'});document.getElementById('detail-title').focus()}}
+document.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>{selectedNode=b.dataset.node;renderNode(true)});
+const tabs=[...document.querySelectorAll('[role=tab]')];function activate(tab,focus=false){tabs.forEach(t=>{const on=t===tab;t.setAttribute('aria-selected',String(on));t.tabIndex=on?0:-1;document.getElementById(t.getAttribute('aria-controls')).hidden=!on});if(focus)tab.focus()};tabs.forEach((t,i)=>{t.onclick=()=>activate(t);t.onkeydown=e=>{let n;if(e.key==='ArrowRight')n=(i+1)%tabs.length;else if(e.key==='ArrowLeft')n=(i-1+tabs.length)%tabs.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=tabs.length-1;else return;e.preventDefault();activate(tabs[n],true)}});
+document.getElementById('follow-toggle').onclick=function(){const open=this.getAttribute('aria-expanded')!=='true';this.setAttribute('aria-expanded',String(open));document.getElementById('follow-body').hidden=!open;this.textContent=open?'승인 항목 접기':'배포 전 승인 항목 보기'};
+renderFlow();renderNode();
+</script>
+</body>
+</html>

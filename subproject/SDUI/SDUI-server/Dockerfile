@@ -1,25 +1,27 @@
-# 1단계: 빌드 스테이지 (도커 안에서 자바 빌드)
-FROM eclipse-temurin:17-jdk-jammy AS build
+# syntax=docker/dockerfile:1.7
+
+FROM eclipse-temurin:17-jdk-jammy@sha256:43f4431cc895d37ceb115e2e1f160545ec45caee9c1cb4246fc6bb879d58aeda AS build
 WORKDIR /app
-# Gradle 래퍼와 설정 파일들을 먼저 복사 (캐싱 활용)
+
 COPY gradlew .
 COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
-# 실행 권한 부여 및 의존성 다운로드
-RUN chmod +x gradlew
-RUN ./gradlew build -x test --stacktrace || return 0
-# 소스 코드 복사 및 빌드
+RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
 COPY src ./src
-RUN ./gradlew clean bootJar -x test
-# 소스 코드 복사 및 실제 빌드
-COPY src ./src
-RUN ./gradlew clean bootJar -x test
-# 2단계: 실행 스테이지 (안정적인 Temurin 이미지 사용)
-FROM eclipse-temurin:17-jdk-jammy
+RUN ./gradlew clean bootJar -x test --no-daemon
+
+FROM eclipse-temurin:17-jre-jammy@sha256:8993f1aed8b25fcea7a7047a7949c1866fa558fc6830d938c22c4f13b26be9d7
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system --gid 10001 spring \
+    && useradd --system --uid 10001 --gid spring --home-dir /app --shell /usr/sbin/nologin spring
+
 WORKDIR /app
-# 빌드 스테이지에서 생성된 jar 파일만 복사
-# 일반 jar 파일이 아닌 실행 가능한 jar만 가져오기 위해 이름 패턴 지정
-COPY --from=build /app/build/libs/*-SNAPSHOT.jar app.jar
+COPY --from=build --chown=spring:spring /app/build/libs/*.jar app.jar
+
+USER spring:spring
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
