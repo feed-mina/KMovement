@@ -121,6 +121,7 @@ services:
       traefik.http.routers.kmovement-g1-health.tls: "true"
       traefik.http.routers.kmovement-g1-health.tls.certresolver: letsencrypt
       traefik.http.routers.kmovement-g1-health.middlewares: kmovement-g1-health-path
+      traefik.http.routers.kmovement-g1-health.service: kmovement-g1-health
       traefik.http.middlewares.kmovement-g1-health-path.replacepath.path: /actuator/health
       traefik.http.services.kmovement-g1-health.loadbalancer.server.port: "8080"
       traefik.http.routers.kmovement-f2-address.rule: >-
