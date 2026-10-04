@@ -57,6 +57,8 @@ jobs:
             (.services.spring.labels["traefik.http.routers.kmovement-g1-health.rule"]
               == "Host(`kmovement.srv1869569.hstgr.cloud`) && Path(`/api/platform/health`)") and
             (.services.spring.labels["traefik.http.routers.kmovement-g1-health.priority"] == "200") and
+            (.services.spring.labels["traefik.http.routers.kmovement-g1-health.service"]
+              == "kmovement-g1-health") and
             (.services.spring.labels["traefik.http.middlewares.kmovement-g1-health-path.replacepath.path"]
               == "/actuator/health") and
             (.services.spring.labels["traefik.http.services.kmovement-g1-health.loadbalancer.server.port"]
