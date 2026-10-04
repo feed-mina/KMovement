@@ -14,9 +14,11 @@ artifacts:
 target:
   vmId: srv1869569
   hostname: kmovement.srv1869569.hstgr.cloud
-  profile: spring-postgres-redis-health-only
+  profile: spring-postgres-redis-f2-address
   publishedApplicationPorts: []
-  publicPath: /api/platform/health
+  publicPaths:
+    - GET /api/platform/health
+    - GET /api/v1/address/search
 
 rollback:
   springImage: REPLACE_WITH_PREVIOUS_DIGEST
@@ -30,6 +32,8 @@ verification:
   redisAuthenticatedPing: false
   springHealthy: false
   externalHealthUp: false
+  addressSearch200: false
+  addressResultSelectedOnAndroid: false
   flywayAllSuccessful: false
   flywayChecksumsRecorded: false
   publicTableCount: null
@@ -39,7 +43,7 @@ verification:
   unrelatedContainersUnchanged: false
 
 excluded:
-  - user feature exposure
+  - Spring APIs other than health and F2 address search
   - form submission
   - FastAPI
   - Celery

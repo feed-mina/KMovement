@@ -90,6 +90,8 @@ services:
         target: spring.data.redis.password
       - source: jwt_secret
         target: jwt.secret-key
+      - source: kakao_rest_api_key
+        target: kakao.client-id
     depends_on:
       postgres:
         condition: service_healthy
@@ -121,6 +123,16 @@ services:
       traefik.http.routers.kmovement-g1-health.middlewares: kmovement-g1-health-path
       traefik.http.middlewares.kmovement-g1-health-path.replacepath.path: /actuator/health
       traefik.http.services.kmovement-g1-health.loadbalancer.server.port: "8080"
+      traefik.http.routers.kmovement-f2-address.rule: >-
+        Host(`${KMOVEMENT_SITE_HOST:?Set KMOVEMENT_SITE_HOST}`) &&
+        Path(`/api/v1/address/search`) &&
+        Method(`GET`)
+      traefik.http.routers.kmovement-f2-address.priority: "300"
+      traefik.http.routers.kmovement-f2-address.entrypoints: websecure
+      traefik.http.routers.kmovement-f2-address.tls: "true"
+      traefik.http.routers.kmovement-f2-address.tls.certresolver: letsencrypt
+      traefik.http.routers.kmovement-f2-address.service: kmovement-f2-address
+      traefik.http.services.kmovement-f2-address.loadbalancer.server.port: "8080"
     networks:
       - g1
     logging:
@@ -136,6 +148,8 @@ secrets:
     file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/redis_password
   jwt_secret:
     file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/jwt_secret
+  kakao_rest_api_key:
+    file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/kakao_rest_api_key
 
 volumes:
   postgres_data:

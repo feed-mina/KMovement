@@ -2,11 +2,11 @@
 
 ## 1. 목적과 경계
 
-G1은 사용자 기능 배포가 아니라 Spring Boot, PostgreSQL, Redis, Flyway의
-공통 기반을 복구 가능한 상태로 만드는 단계입니다.
+G1은 Spring Boot, PostgreSQL, Redis, Flyway의 공통 기반입니다. F2 배포부터는
+이 기반 위에 모바일 주소검색 한 경로를 추가 공개합니다.
 
-- 외부 공개: `GET /api/platform/health` 한 경로만
-- 외부 비공개: PostgreSQL, Redis, Spring의 나머지 모든 API
+- 외부 공개: `GET /api/platform/health`, `GET /api/v1/address/search`
+- 외부 비공개: PostgreSQL, Redis, Spring의 나머지 모든 API와 주소검색 POST
 - 제외: 제출/DB 저장 기능 검증, FastAPI, Celery, RunPod, AWS 종료, DNS 변경
 - 금지: 운영 검증 중 `docker compose down --volumes`
 
@@ -38,8 +38,21 @@ umask 077
 openssl rand -hex 32 > /docker/kmovement-g1/secrets/db_password
 openssl rand -hex 32 > /docker/kmovement-g1/secrets/redis_password
 openssl rand -hex 64 > /docker/kmovement-g1/secrets/jwt_secret
+install -m 0600 /secure/input/kakao_rest_api_key \
+  /docker/kmovement-g1/secrets/kakao_rest_api_key
 chmod 0600 /docker/kmovement-g1/secrets/*
 ```
+
+`kakao_rest_api_key`는 GitHub Actions의 `KAKAO_REST_API_KEY` 또는 사용자가
+관리하는 비밀 저장소에서 암호화된 경로로 전달합니다. 채팅·로그·Git에 값을
+붙여 넣지 않습니다.
+
+GitHub secret을 사용할 때는 VPS에서 일회용 RSA 키를 만들고 공개키만
+`deploy/hostinger/f2-recipient-public.pem`에 둡니다. `Seal Hostinger F2 Kakao
+secret` workflow가 만드는 암호문은 이 고정 공개키로만 암호화됩니다. 다운로드한
+암호문은 VPS에서만 복호화하며, 평문 키는 로컬 PC와 Actions artifact에 남기지 않습니다.
+복호화 후 일회용 개인키와 암호문을 삭제하고 최종 secret 파일을 `0600`으로
+고정합니다.
 
 배포 환경 파일에는 비밀값 대신 경로와 digest만 둡니다.
 
@@ -107,7 +120,12 @@ docker compose --env-file /docker/kmovement-g1/.env \
   'REDISCLI_AUTH="$(cat /run/secrets/redis_password)" redis-cli ping'
 
 curl -fsS https://kmovement.srv1869569.hstgr.cloud/api/platform/health
+curl -fsS --get --data-urlencode 'keyword=테헤란로 152' \
+  https://kmovement.srv1869569.hstgr.cloud/api/v1/address/search
 ```
+
+F2 완료 판정은 위 주소검색 응답이 200이고 `items`에 우편번호와 도로명 주소가
+있으며, Android 화면에서 검색 → 결과 선택 → 폼 반영까지 확인된 경우에만 합니다.
 
 ### 재기동
 

@@ -5,8 +5,12 @@ name: Validate Hostinger G1 platform
   pull_request:
     paths:
       - ".github/workflows/hostinger-g1-*.yml"
+      - ".github/workflows/hostinger-f2-*.yml"
       - "deploy/hostinger/g1*"
       - "subproject/SDUI/SDUI-server/**"
+      - "subproject/SDUI/kride/package.json"
+      - "subproject/SDUI/kride/pnpm-lock.yaml"
+      - "subproject/SDUI/kride/apps/mobile/**"
 
 permissions:
   contents: read
@@ -40,7 +44,7 @@ jobs:
             (.services.spring.image | test("^ghcr\\.io/feed-mina/kmovement-spring@sha256:[0-9a-f]{64}$"))
           ' /tmp/g1-compose.json > /dev/null
 
-      - name: Require health-only Traefik exposure
+      - name: Require health and GET-only F2 Traefik exposure
         shell: bash
         run: |
           set -euo pipefail
@@ -52,13 +56,58 @@ jobs:
             (.services.spring.labels["traefik.http.middlewares.kmovement-g1-health-path.replacepath.path"]
               == "/actuator/health") and
             (.services.spring.labels["traefik.http.services.kmovement-g1-health.loadbalancer.server.port"]
-              == "8080")
+              == "8080") and
+            (.services.spring.labels["traefik.http.routers.kmovement-f2-address.rule"]
+              == "Host(`kmovement.srv1869569.hstgr.cloud`) && Path(`/api/v1/address/search`) && Method(`GET`)") and
+            (.services.spring.labels["traefik.http.routers.kmovement-f2-address.priority"] == "300") and
+            (.services.spring.labels["traefik.http.services.kmovement-f2-address.loadbalancer.server.port"]
+              == "8080") and
+            (.secrets.kakao_rest_api_key.file | endswith("/kakao_rest_api_key"))
           ' /tmp/g1-compose.json > /dev/null
+
+  mobile-address:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: subproject/SDUI/kride/pnpm-lock.yaml
+
+      - name: Install the locked mobile workspace
+        working-directory: subproject/SDUI/kride
+        run: pnpm install --frozen-lockfile
+
+      - name: Test the F2 mobile address contract
+        working-directory: subproject/SDUI/kride
+        run: |
+          jq -e '
+            .build.preview.env.EXPO_PUBLIC_ADDRESS_API_BASE == "https://kmovement.srv1869569.hstgr.cloud" and
+            .build.production.env.EXPO_PUBLIC_ADDRESS_API_BASE == "https://kmovement.srv1869569.hstgr.cloud"
+          ' apps/mobile/eas.json > /dev/null
+          bash -n apps/mobile/scripts/verify-f2-android.sh
+          ./node_modules/.bin/tsc --noEmit -p apps/mobile/tsconfig.json
+          pnpm --filter @kride/mobile test -- AddressSearchModal.test.tsx --runInBand
 
   spring-platform:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Test the F2 Spring address contract
+        working-directory: subproject/SDUI/SDUI-server
+        run: ./gradlew test --tests 'com.domain.demo_backend.domain.address.*'
 
       - name: Build the Spring image
         run: |
@@ -125,6 +174,14 @@ jobs:
             "select count(*) from information_schema.tables where table_schema='public';"
           "${compose[@]}" exec -T redis sh -ec \
             'REDISCLI_AUTH="$(cat /run/secrets/redis_password)" redis-cli ping | grep -qx PONG'
+          short_query="$(${compose[@]} exec -T spring \
+            curl --fail --silent --get --data-urlencode 'keyword=강' \
+            http://127.0.0.1:8080/api/v1/address/search)"
+          test "$(jq -r '.items | length' <<< "$short_query")" = "0"
+          post_status="$(${compose[@]} exec -T spring \
+            curl --silent --output /dev/null --write-out '%{http_code}' \
+            --request POST 'http://127.0.0.1:8080/api/v1/address/search?keyword=test')"
+          test "$post_status" -ge 400
           "${compose[@]}" restart spring
           for attempt in $(seq 1 30); do
             status="$("${compose[@]}" ps --format json spring | jq -r 'if type == "array" then .[0].Health // .[0].State else .Health // .State end')"

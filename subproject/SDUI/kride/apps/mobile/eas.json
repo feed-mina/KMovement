@@ -8,7 +8,8 @@
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_BASE": "https://yerin.duckdns.org"
+        "EXPO_PUBLIC_API_BASE": "https://yerin.duckdns.org",
+        "EXPO_PUBLIC_ADDRESS_API_BASE": "https://kmovement.srv1869569.hstgr.cloud"
       },
       "android": {
         "buildType": "apk"
@@ -18,7 +19,8 @@
       "autoIncrement": true,
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_BASE": "https://yerin.duckdns.org"
+        "EXPO_PUBLIC_API_BASE": "https://yerin.duckdns.org",
+        "EXPO_PUBLIC_ADDRESS_API_BASE": "https://kmovement.srv1869569.hstgr.cloud"
       },
       "android": {
         "buildType": "app-bundle"

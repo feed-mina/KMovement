@@ -34,7 +34,8 @@ public class AddressSearchController {
             List<Map<String, String>> items = addressSearchService.search(keyword);
             return ResponseEntity.ok(Map.of("items", items));
         } catch (Exception e) {
-            log.error("주소 검색 실패 - keyword={}", keyword, e);
+            int keywordLength = keyword == null ? 0 : keyword.trim().length();
+            log.error("주소 검색 실패 - keywordLength={}", keywordLength, e);
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                     .body(Map.of("items", List.of(), "message", "주소 검색에 실패했습니다."));
         }

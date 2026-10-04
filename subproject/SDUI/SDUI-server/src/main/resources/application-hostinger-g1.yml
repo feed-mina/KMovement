@@ -43,9 +43,11 @@ app:
     mobile: https://kmovement.srv1869569.hstgr.cloud
 
 kakao:
-  client-id: disabled-g1
   token-admin: disabled-g1
   redirect-uri: https://kmovement.srv1869569.hstgr.cloud/api/kakao/callback
+  local:
+    address-url: https://dapi.kakao.com/v2/local/search/address.json
+    timeout: 3s
 
 fastapi:
   url: http://disabled-fastapi:8000

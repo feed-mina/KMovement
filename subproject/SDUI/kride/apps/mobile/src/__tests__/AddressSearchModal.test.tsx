@@ -2,6 +2,8 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import AddressSearchModal, { parseAddressSearchResponse } from '../components/AddressSearchModal';
 
+jest.setTimeout(30000);
+
 describe('parseAddressSearchResponse', () => {
   it('keeps only rows with both zipCode and roadAddress', () => {
     expect(
@@ -88,6 +90,39 @@ describe('AddressSearchModal', () => {
       zipCode: '06236',
       roadAddress: '서울 강남구 테헤란로 152',
     });
+  });
+
+  it('shows the empty state for a successful response with no usable rows', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ items: [] }),
+    }) as any;
+
+    render(<AddressSearchModal {...props} apiBase="https://api.test/" />);
+
+    fireEvent.changeText(screen.getByPlaceholderText('예: 테헤란로 152 또는 역삼동'), '없는주소');
+    fireEvent.press(screen.getByText('검색'));
+
+    await screen.findByText(
+      '검색 결과가 없습니다. 검색어를 바꾸거나 직접 입력해주세요.',
+      {},
+      { timeout: 15000 },
+    );
+    expect(global.fetch).toHaveBeenCalledWith(
+      `https://api.test/api/v1/address/search?keyword=${encodeURIComponent('없는주소')}`,
+    );
+  });
+
+  it('keeps manual entry available after a network error', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error('offline')) as any;
+
+    render(<AddressSearchModal {...props} />);
+
+    fireEvent.changeText(screen.getByPlaceholderText('예: 테헤란로 152 또는 역삼동'), '테헤란로');
+    fireEvent.press(screen.getByText('검색'));
+
+    await screen.findByText('네트워크 오류가 발생했습니다. 아래 직접 입력을 이용해주세요.', {}, { timeout: 15000 });
+    expect(screen.getByText('주소를 찾을 수 없나요? 직접 입력')).toBeTruthy();
   });
 
   it('requires at least two characters before searching', async () => {

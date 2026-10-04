@@ -58,6 +58,7 @@ export default function MobileScreen() {
   const [postcodeApply, setPostcodeApply] = useState<((result: PostcodeResult) => void) | null>(null);
   const sid = screenId ?? 'MAIN_PAGE';
   const apiBase = resolveRuntimeConfig({ apiBase: process.env.EXPO_PUBLIC_API_BASE }).apiBase;
+  const addressApiBase = process.env.EXPO_PUBLIC_ADDRESS_API_BASE ?? apiBase;
   const { data, isLoading, error } = useUiScreen(sid, apiBase);
   const { data: kpopPageData } = useKpopPageData(sid, apiBase, {
     artistId,
@@ -174,7 +175,7 @@ export default function MobileScreen() {
       </ScrollView>
       <AddressSearchModal
         visible={postcodeApply != null}
-        apiBase={apiBase}
+        apiBase={addressApiBase}
         onComplete={(result) => {
           postcodeApply?.(result);
           setPostcodeApply(null);
