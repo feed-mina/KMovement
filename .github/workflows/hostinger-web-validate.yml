@@ -103,7 +103,8 @@ jobs:
 
           jq -e '
             ((.services.web.ports // []) | length == 0) and
-            (.services.web.expose == ["3000"])
+            (.services.web.expose == ["3000"]) and
+            (.services.web.environment.HOSTNAME == "0.0.0.0")
           ' /tmp/kmovement-traefik-compose.json > /dev/null
 
       - name: Require digest pin and the existing Traefik contract
