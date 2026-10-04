@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>KMovement F4·F5 공개 조회 쉬운 안내서</title>
+  <style>
+    :root{--ink:#24324a;--muted:#66738b;--paper:#f5f7fb;--card:#fff;--line:#dbe2ec;--red:#e50914;--red-soft:#fff0f1;--blue:#2868c7;--blue-soft:#edf5ff;--green:#177456;--green-soft:#eaf8f2;--amber:#936000;--amber-soft:#fff5d9;--shadow:0 14px 34px rgba(36,50,74,.08)}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.68 system-ui,"Malgun Gothic",sans-serif}.goal{position:sticky;top:0;z-index:10;background:#213b64;color:white;padding:11px 18px;max-height:24vh;overflow:auto}main{max-width:1120px;margin:auto;padding:22px}header,section{background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;margin-bottom:22px;box-shadow:var(--shadow)}h1{font-size:clamp(28px,5vw,40px);line-height:1.28;margin:.3rem 0 1rem}h2{font-size:24px;margin-top:0}h3{font-size:20px}.eyebrow{color:var(--blue);font-weight:900}.status{display:inline-block;border-radius:999px;background:var(--amber-soft);color:var(--amber);padding:5px 11px;font-size:14px;font-weight:800}.next,.note,.stop{padding:14px;border-radius:12px}.next{background:var(--blue-soft);font-weight:800}.note{background:var(--green-soft)}.stop{background:var(--red-soft)}.flow{width:100%;height:auto}.map{display:grid;grid-template-columns:1.05fr 1fr;gap:20px;align-items:start}.panels{position:sticky;top:58px}.panel{display:none;background:var(--blue-soft);border:2px solid #94bcec;border-radius:15px;padding:20px;scroll-margin-top:100px}.panel.active{display:block}.where{font-size:14px;color:var(--muted);font-weight:800}.visual{border:1px solid var(--line);border-radius:16px;padding:16px}.diagram{width:100%;height:auto}.node{cursor:pointer}.node rect{fill:#fff;stroke:#94bcec;stroke-width:2}.node[aria-selected="true"] rect,.node:hover rect,.node:focus rect{fill:#dcecff;stroke:#2868c7;stroke-width:3}.node:focus{outline:none}.node:focus-visible rect{stroke:#d78200;stroke-width:4}.node text{pointer-events:none}svg text{font-family:system-ui,"Malgun Gothic",sans-serif;fill:var(--ink)}.compare,.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}.mock,.card{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fafbfd}.mock.before{background:#fff8f8;border-color:#ecb4b8}.mock.after{background:#f5fff9;border-color:#a5d7c4}.phone{border:8px solid #263247;border-radius:24px;background:#fff;padding:14px;min-height:280px}.chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.chip{border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:14px}.chip.on{background:var(--red);color:#fff}.line{height:42px;background:#edf0f5;border-radius:9px;margin:8px 0}.line.bad{height:auto;background:var(--red-soft);color:#b62a34;padding:12px}.line.good{height:auto;background:var(--green-soft);padding:12px}table{width:100%;border-collapse:collapse;font-size:16px}th,td{padding:11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}a{color:var(--blue)}footer{text-align:center;color:var(--muted);padding:0 16px 34px;font-size:13px}@media(max-width:720px){main{padding:12px}header,section{padding:18px}.map,.compare,.cards{grid-template-columns:1fr}.visual{order:0}.panels{order:1;position:static}.panel{scroll-margin-top:110px}.diagram{min-height:460px}.goal{font-size:15px}}
+  </style>
+</head>
+<body>
+  <div class="goal" role="note"><b>최종 목표:</b> 한 화면에서 전국 맛집과 K-컬처 성지를 지역별로 찾고, 한쪽이 고장 나도 다른 쪽은 계속 볼 수 있게 합니다.</div>
+  <main>
+    <header>
+      <p class="eyebrow">EASY GUIDE · 코드 없는 쉬운 설명</p>
+      <h1>맛집과 성지를<br>함께 준비하는 방법</h1>
+      <p>지금은 탐색 화면의 문은 열리지만 장소 목록을 가져오는 길이 막혀 있습니다. 공통 입구를 먼저 고친 뒤 맛집과 성지를 서로 다른 두 줄로 확인해야 합니다.</p>
+      <span class="status">계획만 완료 · 수정과 배포는 아직</span>
+      <p class="next">다음 행동: 개발 도우미에게 “공통 입구 → 맛집 → 성지 → 둘을 따로 확인” 순서로 부탁합니다.</p>
+    </header>
+
+    <section>
+      <h2>3줄 줄거리</h2>
+      <ol><li>맛집과 성지는 같은 지역 버튼과 장소 카드를 함께 씁니다.</li><li>맛집은 관광정보 제공처에서, 성지는 검수에 통과한 KMovement 자료에서 받습니다.</li><li>함께 만들되 맛집이 멈춰도 성지까지 멈추지 않게 따로 켜고 확인합니다.</li></ol>
+      <p class="note">지금 나는 [맛집과 성지를 함께 공개하기] 중 [막힌 데이터 길 찾기]의 [수정 전 계획]에 있습니다.</p>
+    </section>
+
+    <section>
+      <h2>지금 확인한 모습</h2>
+      <div class="cards"><div class="card"><h3>열리는 것</h3><p>탐색 화면 주소와 기본 화면 틀</p></div><div class="card"><h3>막힌 것</h3><p>지역, 맛집, 성지, 작품 목록 네 가지</p></div><div class="card"><h3>헷갈릴 수 있는 것</h3><p>성지 서버가 멈춰도 작은 예시가 대신 보일 수 있음</p></div><div class="card"><h3>잘못 이어지는 것</h3><p>성지 탐색 버튼을 눌러도 처음에는 맛집이 선택될 수 있음</p></div></div>
+    </section>
+
+    <section>
+      <h2>함께 만드는 순서</h2>
+      <svg class="flow" viewBox="0 0 1000 230" role="img" aria-label="공통 입구 뒤에 맛집과 성지가 나뉘고 따로 확인하는 순서">
+        <defs><marker id="ea" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2868c7"/></marker></defs>
+        <rect x="20" y="72" width="180" height="82" rx="16" fill="#edf5ff" stroke="#2868c7"/><text x="110" y="105" text-anchor="middle" font-weight="800">공통 입구</text><text x="110" y="132" text-anchor="middle" font-size="15">지역 선택</text>
+        <path d="M200 113 H290" stroke="#2868c7" stroke-width="3" marker-end="url(#ea)"/>
+        <rect x="305" y="18" width="205" height="82" rx="16" fill="#fff5d9" stroke="#936000"/><text x="407" y="52" text-anchor="middle" font-weight="800">전국 맛집</text><text x="407" y="78" text-anchor="middle" font-size="15">목록 · 다음 장소</text>
+        <rect x="305" y="130" width="205" height="82" rx="16" fill="#eaf8f2" stroke="#177456"/><text x="407" y="164" text-anchor="middle" font-weight="800">K-컬처 성지</text><text x="407" y="190" text-anchor="middle" font-size="15">승인 목록 · 작품</text>
+        <path d="M290 113 L305 59" stroke="#2868c7" stroke-width="3" marker-end="url(#ea)"/><path d="M290 113 L305 171" stroke="#2868c7" stroke-width="3" marker-end="url(#ea)"/>
+        <path d="M510 59 L625 113" stroke="#2868c7" stroke-width="3" marker-end="url(#ea)"/><path d="M510 171 L625 113" stroke="#2868c7" stroke-width="3" marker-end="url(#ea)"/>
+        <rect x="640" y="72" width="185" height="82" rx="16" fill="#fff" stroke="#2868c7"/><text x="732" y="105" text-anchor="middle" font-weight="800">따로 고장 내 보기</text><text x="732" y="132" text-anchor="middle" font-size="15">다른 쪽은 유지</text>
+        <path d="M825 113 H885" stroke="#2868c7" stroke-width="3" marker-end="url(#ea)"/><rect x="900" y="72" width="80" height="82" rx="16" fill="#edf5ff" stroke="#2868c7"/><text x="940" y="106" text-anchor="middle" font-weight="800">함께</text><text x="940" y="132" text-anchor="middle" font-size="14">공개</text>
+      </svg>
+    </section>
+
+    <section>
+      <h2>그림을 눌러 할 일 보기</h2>
+      <div class="map">
+        <div class="panels" aria-live="polite">
+          <article class="panel active" id="easy-door" role="tabpanel" tabindex="-1"><div class="where">전체 목표 › 공통 입구</div><h3>1. 읽기 전용 문만 연다</h3><p><b>현재:</b> 화면은 열리지만 목록이 지나가는 길이 막혀 있습니다.</p><p><b>내가 할 일:</b> 지금 없음.</p><p><b>도우미에게:</b> “맛집과 성지 목록을 읽는 문만 열고, 등록·관리 문은 열지 마세요.”</p><p><b>끝 확인:</b> 지역 버튼이 나오고, 등록이나 관리 화면은 여전히 보호됩니다.</p></article>
+          <article class="panel" id="easy-food" role="tabpanel" tabindex="-1" hidden><div class="where">전체 목표 › 전국 맛집</div><h3>2. 더 보기는 정말 다음 장소</h3><p><b>현재:</b> 처음 받은 장소 안에서만 펼치는 준비가 되어 있습니다.</p><p><b>내가 할 일:</b> 없음.</p><p><b>도우미에게:</b> “더 보기를 누르면 새 장소 묶음을 받아 오고 같은 장소가 겹치지 않게 해 주세요.”</p><p><b>끝 확인:</b> 서울→종로구가 바뀌고 더 보기 뒤 새 카드가 붙습니다.</p></article>
+          <article class="panel" id="easy-holy" role="tabpanel" tabindex="-1" hidden><div class="where">전체 목표 › K-컬처 성지</div><h3>3. 검수 통과 장소만</h3><p><b>현재:</b> 승인 규칙은 있지만 운영 목록은 오류이고 예시가 대신 보일 수 있습니다.</p><p><b>내가 할 일:</b> 종류를 이번에 “전체/성지 맛집”으로 할지 결정합니다.</p><p><b>도우미에게:</b> “승인된 성지만 보여 주고 오류를 예시로 숨기지 마세요.”</p><p><b>끝 확인:</b> 지역·작품·성지 맛집 선택과 주소·지도·출처가 맞습니다.</p></article>
+          <article class="panel" id="easy-check" role="tabpanel" tabindex="-1" hidden><div class="where">전체 목표 › 따로 확인</div><h3>4. 한쪽만 멈춰 보기</h3><p><b>현재:</b> 화면이 열리는 것만으로는 두 기능이 된 것이 아닙니다.</p><p><b>내가 할 일:</b> 완료 화면에서 맛집과 성지를 한 번씩 직접 눌러 봅니다.</p><p><b>도우미에게:</b> “맛집 연결을 끊었을 때 성지는 남고, 성지 연결을 끊었을 때 맛집은 남는지 보여 주세요.”</p><p><b>끝 확인:</b> 기다림·없음·오류·정상의 안내가 서로 다릅니다.</p></article>
+          <article class="panel" id="easy-finish" role="tabpanel" tabindex="-1" hidden><div class="where">전체 목표 › 완료 기록</div><h3>5. 무엇이 됐는지 두 줄로 기록</h3><p><b>현재:</b> 아직 구현과 배포를 하지 않았습니다.</p><p><b>내가 할 일:</b> 배포 직전 최종 확인만 승인합니다.</p><p><b>도우미에게:</b> “맛집과 성지의 성공·실패를 각각 적고, 되돌리는 방법도 남겨 주세요.”</p><p><b>끝 확인:</b> 맛집 완료와 성지 완료가 섞이지 않은 기록을 받습니다.</p></article>
+        </div>
+        <div class="visual">
+          <svg class="diagram" viewBox="0 0 480 570" role="group" aria-label="쉬운 행동 지도">
+            <path d="M240 88 V130 M240 230 V270 M240 370 V410" stroke="#94bcec" stroke-width="4"/>
+            <g class="node" data-panel="easy-door" role="tab" tabindex="0" aria-controls="easy-door" aria-selected="true"><rect x="60" y="18" width="360" height="70" rx="16"/><text x="240" y="48" text-anchor="middle" font-weight="800">1 · 공통 입구</text><text x="240" y="73" text-anchor="middle" font-size="14">목록만 읽는 문</text></g>
+            <g class="node" data-panel="easy-food" role="tab" tabindex="0" aria-controls="easy-food" aria-selected="false"><rect x="18" y="130" width="210" height="100" rx="16"/><text x="123" y="167" text-anchor="middle" font-weight="800">2 · 전국 맛집</text><text x="123" y="193" text-anchor="middle" font-size="14">지역 · 다음 장소</text></g>
+            <g class="node" data-panel="easy-holy" role="tab" tabindex="0" aria-controls="easy-holy" aria-selected="false"><rect x="252" y="130" width="210" height="100" rx="16"/><text x="357" y="167" text-anchor="middle" font-weight="800">3 · K-컬처 성지</text><text x="357" y="193" text-anchor="middle" font-size="14">승인 · 작품 · 종류</text></g>
+            <g class="node" data-panel="easy-check" role="tab" tabindex="0" aria-controls="easy-check" aria-selected="false"><rect x="60" y="270" width="360" height="100" rx="16"/><text x="240" y="308" text-anchor="middle" font-weight="800">4 · 따로 고장 내 보기</text><text x="240" y="334" text-anchor="middle" font-size="14">다른 기능은 계속 쓰기</text></g>
+            <g class="node" data-panel="easy-finish" role="tab" tabindex="0" aria-controls="easy-finish" aria-selected="false"><rect x="60" y="410" width="360" height="100" rx="16"/><text x="240" y="448" text-anchor="middle" font-weight="800">5 · 완료 기록</text><text x="240" y="474" text-anchor="middle" font-size="14">맛집 한 줄 · 성지 한 줄</text></g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Before / After</h2>
+      <div class="compare">
+        <div class="mock before"><h3>Before · 지금 확인</h3><div class="phone"><b>탐색</b><div class="chips"><span class="chip">서울</span><span class="chip on">맛집</span><span class="chip">성지</span></div><div class="line bad">장소를 불러오지 못했어요.</div><div class="line"></div><p>성지는 작은 예시가 대신 보일 수 있음</p></div></div>
+        <div class="mock after"><h3>After · 예상 모형</h3><div class="phone"><b>탐색</b><div class="chips"><span class="chip">서울</span><span class="chip">종로구</span><span class="chip on">맛집</span><span class="chip">성지</span></div><div class="line good">서울 종로구 맛집</div><div class="line"></div><div class="line"></div><button type="button">다음 장소 더 보기</button></div></div>
+      </div>
+      <p class="stop">After는 아직 만든 화면이나 실제 캡처가 아니라, 완료됐을 때 확인할 예상 그림입니다.</p>
+    </section>
+
+    <section>
+      <h2>끝났는지 확인하는 표</h2>
+      <table><thead><tr><th>장면</th><th>맛집</th><th>성지</th></tr></thead><tbody><tr><td>지역</td><td>시·도와 시·군·구에 맞음</td><td>선택 지역의 승인 장소</td></tr><tr><td>더 보기/필터</td><td>새 장소가 겹치지 않고 붙음</td><td>작품과 성지 맛집으로 좁혀짐</td></tr><tr><td>없음</td><td>이 지역에 맛집 없음</td><td>이 조건에 승인 성지 없음</td></tr><tr><td>오류</td><td>다시 시도 가능</td><td>예시로 숨기지 않고 다시 시도</td></tr><tr><td>한쪽 고장</td><td>성지는 계속 사용</td><td>맛집은 계속 사용</td></tr></tbody></table>
+      <p class="note"><b>지금 직접 할 일:</b> 없습니다. 구현을 시작할 때 성지 종류를 “전체/성지 맛집”으로 제한할지만 정하면 됩니다.</p>
+    </section>
+
+    <section>
+      <h2>이번에 한 일과 하지 않은 일</h2>
+      <div class="cards"><div class="card"><h3>한 일</h3><ul><li>현재 화면과 네 목록 연결 확인</li><li>맛집과 성지의 다른 출처 확인</li><li>함께 작업하고 따로 확인하는 순서 작성</li></ul></div><div class="card"><h3>하지 않은 일</h3><ul><li>기능 수정과 시험</li><li>비밀값 입력</li><li>PR·main 반영</li><li>운영 배포</li></ul></div></div>
+    </section>
+  </main>
+  <footer>독립 HTML · 외부 글꼴·사이트·데이터 호출 없음 · 쉬운 안내서</footer>
+  <script>
+    const nodes=[...document.querySelectorAll('.node')];
+    function show(node){const id=node.dataset.panel;nodes.forEach(n=>n.setAttribute('aria-selected',String(n===node)));document.querySelectorAll('.panel').forEach(p=>{const on=p.id===id;p.classList.toggle('active',on);p.hidden=!on});const panel=document.getElementById(id);panel.focus({preventScroll:true});if(innerWidth<720)panel.scrollIntoView({block:'start'})}
+    nodes.forEach((node,index)=>{node.addEventListener('click',()=>show(node));node.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();show(node)}else if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();nodes[(index+1)%nodes.length].focus()}else if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();nodes[(index-1+nodes.length)%nodes.length].focus()}})});
+  </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>KMovement F4·F5 공개 조회 통합 작업 fix-guide</title>
+  <style>
+    :root{--ink:#17263b;--muted:#627086;--line:#dbe2ec;--paper:#f3f5f9;--card:#fff;--navy:#132d49;--blue:#135cb0;--blue-soft:#edf5ff;--red:#c9333d;--red-soft:#fff0f1;--green:#187757;--green-soft:#eaf8f2;--amber:#946200;--amber-soft:#fff5d9;--shadow:0 14px 34px rgba(19,45,73,.09)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.65 system-ui,"Malgun Gothic",sans-serif}.goal-pin{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;padding:10px 18px;max-height:24vh;overflow:auto}.goal-pin strong{color:#9bd0ff}main{max-width:1180px;margin:auto;padding:24px}header,section{background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;margin:0 0 22px;box-shadow:var(--shadow)}h1{font-size:clamp(28px,5vw,42px);line-height:1.25;margin:.25rem 0 1rem}h2{font-size:24px;margin-top:0}h3{font-size:20px}.eyebrow{color:var(--blue);font-weight:800}.state{display:flex;gap:8px;flex-wrap:wrap}.badge{border-radius:999px;padding:5px 10px;font-size:13px;font-weight:800;background:var(--blue-soft);color:var(--blue)}.badge.bad{background:var(--red-soft);color:var(--red)}.badge.wait{background:var(--amber-soft);color:var(--amber)}.hint,.warn,.ok{padding:14px;border-radius:12px}.hint{background:var(--blue-soft)}.warn{background:var(--amber-soft);border-left:4px solid var(--amber)}.ok{background:var(--green-soft);border-left:4px solid var(--green)}a{color:var(--blue)}code,pre,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}code{font-size:.9em;background:#eef1f5;padding:2px 5px;border-radius:5px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#111827;color:#e8edf7;padding:16px;border-radius:12px;font-size:14px}.facts,.compare,.gates{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.fact,.mock,.gate{border:1px solid var(--line);border-radius:15px;padding:16px;background:#f9fafc}.fact strong{display:block}.flow{width:100%;height:auto}.map{display:grid;grid-template-columns:1.05fr 1fr;gap:20px;align-items:start}.panels{position:sticky;top:58px}.panel{display:none;padding:20px;background:var(--blue-soft);border:2px solid #8eb7e8;border-radius:14px;scroll-margin-top:100px}.panel.active{display:block}.path{font-size:13px;color:var(--muted);font-weight:700}.visual{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fafbfd}.diagram{width:100%;height:auto}.node{cursor:pointer}.node rect{fill:#fff;stroke:#8eb7e8;stroke-width:2}.node[aria-selected="true"] rect,.node:focus rect,.node:hover rect{fill:#dbeaff;stroke:#1b63af;stroke-width:3}.node text{pointer-events:none}.node:focus{outline:none}.node:focus-visible rect{stroke:#d78200;stroke-width:4}svg text{font-family:system-ui,"Malgun Gothic",sans-serif;fill:var(--ink)}table{border-collapse:collapse;width:100%;font-size:15px}th,td{border-bottom:1px solid var(--line);text-align:left;padding:11px;vertical-align:top;overflow-wrap:anywhere}th{background:#f0f4f8}.mock.current{border-color:#e6a2a7;background:#fff8f8}.mock.future{border-color:#9bd0b9;background:#f6fffb}.screen{border:8px solid #263247;border-radius:22px;padding:13px;background:#fff;min-height:260px}.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.chip{border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:13px}.chip.on{background:#e50914;color:#fff;border-color:#e50914}.row{height:42px;border-radius:9px;background:#edf0f5;margin:8px 0}.row.error{height:auto;padding:12px;background:var(--red-soft);color:var(--red)}.row.good{height:auto;padding:12px;background:var(--green-soft)}details{margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:12px}summary{cursor:pointer;font-weight:800}.next{font-size:19px;font-weight:800;color:var(--blue)}footer{text-align:center;color:var(--muted);padding:0 16px 36px;font-size:13px}@media(max-width:760px){main{padding:12px}header,section{padding:18px}.map,.compare,.facts,.gates{grid-template-columns:1fr}.visual{order:0}.panels{order:1;position:static}.panel{scroll-margin-top:110px}table{display:block;overflow-x:auto;white-space:nowrap}.goal-pin{font-size:15px}.diagram{min-height:470px}}
+  </style>
+</head>
+<body>
+  <div class="goal-pin" role="note"><strong>최종 목표:</strong> 한 탐색 화면에서 F4 맛집과 F5 성지를 함께 구현하되, TourAPI와 승인 DB의 장애·롤백을 서로 격리한다.</div>
+  <main>
+    <header>
+      <p class="eyebrow">FIX GUIDE · 2026-10-05 · 분석 전용</p>
+      <h1>F4 전국 맛집 + F5 K-컬처 성지<br>공개 조회 통합 작업지도</h1>
+      <p>화면과 서버 소스는 상당 부분 존재하지만 운영 조회 네 곳이 현재 모두 500입니다. 공통 공개 게이트를 먼저 열고, 맛집의 공급자·페이지와 성지의 승인 DB·필터를 별도 통과시켜야 합니다.</p>
+      <div class="state"><span class="badge">main ec54fad</span><span class="badge bad">운영 API 4곳 500</span><span class="badge wait">구현·테스트·배포 미실행</span></div>
+      <p class="next">다음 행동: 작업 브랜치 하나에서 공통 게이트 → F4 → F5 순서의 독립 커밋을 만든다.</p>
+    </header>
+
+    <section>
+      <h2>3줄 줄거리</h2>
+      <ol><li>탐색 화면은 열리지만 지역·맛집·성지·작품 조회는 운영에서 실패합니다.</li><li>지역 UI는 공유하고 맛집은 TourAPI, 성지는 승인 DB라는 출처 차이를 유지합니다.</li><li>한 PR에서 작업해도 공개 게이트와 완료 판정은 F4·F5로 나눕니다.</li></ol>
+      <p class="hint">지금 나는 [F4·F5 공개 조회 통합] 중 [운영 장애와 공통 계약]의 [구현 전 원인 분리]에 있습니다.</p>
+    </section>
+
+    <section>
+      <h2>현재 확인값</h2>
+      <div class="facts">
+        <div class="fact"><strong>탐색 화면</strong><span class="mono">/view/TOUR_EXPLORE → 200</span></div>
+        <div class="fact"><strong>공개 데이터</strong><span>areas · restaurants · holy · contents → 모두 500</span></div>
+        <div class="fact"><strong>Hostinger 공개 경로</strong><span>health와 F2 주소검색만 명시됨</span></div>
+        <div class="fact"><strong>F4 비밀값</strong><span>소스는 요구하지만 compose 연결 없음</span></div>
+        <div class="fact"><strong>F4 페이지</strong><span>24건 조회 후 서버 2페이지 요청 없음</span></div>
+        <div class="fact"><strong>F5 승인 조건</strong><span>비공공 + APPROVED를 repository에서 적용</span></div>
+      </div>
+      <p class="warn"><b>확인과 가설 구분:</b> 설정 누락은 확인했지만 F5 500의 단일 원인은 서버 로그·DB schema를 보기 전까지 확정하지 않습니다.</p>
+    </section>
+
+    <section>
+      <h2>실제 작업 순서와 분기</h2>
+      <svg class="flow" viewBox="0 0 1060 250" role="img" aria-label="공통 게이트 뒤에 F4와 F5가 나뉘고 독립 검증 후 통합 기록으로 합쳐지는 흐름">
+        <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#135cb0"/></marker></defs>
+        <rect x="20" y="85" width="170" height="78" rx="14" fill="#edf5ff" stroke="#135cb0"/><text x="105" y="116" text-anchor="middle" font-weight="700">공통 공개 게이트</text><text x="105" y="142" text-anchor="middle" font-size="14">GET allowlist · 지역</text>
+        <path d="M190 124 H285" stroke="#135cb0" stroke-width="3" marker-end="url(#arrow)"/>
+        <rect x="300" y="25" width="200" height="78" rx="14" fill="#fff5d9" stroke="#946200"/><text x="400" y="56" text-anchor="middle" font-weight="700">F4 전국 맛집</text><text x="400" y="82" text-anchor="middle" font-size="14">키 · 실제 다음 페이지</text>
+        <rect x="300" y="148" width="200" height="78" rx="14" fill="#eaf8f2" stroke="#187757"/><text x="400" y="179" text-anchor="middle" font-weight="700">F5 K-컬처 성지</text><text x="400" y="205" text-anchor="middle" font-size="14">APPROVED · 작품 · 종류</text>
+        <path d="M285 124 L300 64" stroke="#135cb0" stroke-width="3" marker-end="url(#arrow)"/><path d="M285 124 L300 187" stroke="#135cb0" stroke-width="3" marker-end="url(#arrow)"/>
+        <path d="M500 64 H610" stroke="#135cb0" stroke-width="3" marker-end="url(#arrow)"/><path d="M500 187 H610" stroke="#135cb0" stroke-width="3" marker-end="url(#arrow)"/>
+        <rect x="625" y="25" width="190" height="78" rx="14" fill="#fff" stroke="#946200"/><text x="720" y="56" text-anchor="middle" font-weight="700">F4 독립 판정</text><text x="720" y="82" text-anchor="middle" font-size="14">정상·빈값·오류·cache</text>
+        <rect x="625" y="148" width="190" height="78" rx="14" fill="#fff" stroke="#187757"/><text x="720" y="179" text-anchor="middle" font-weight="700">F5 독립 판정</text><text x="720" y="205" text-anchor="middle" font-size="14">승인·필터·오류 격리</text>
+        <path d="M815 64 L900 124" stroke="#135cb0" stroke-width="3" marker-end="url(#arrow)"/><path d="M815 187 L900 124" stroke="#135cb0" stroke-width="3" marker-end="url(#arrow)"/>
+        <rect x="915" y="85" width="125" height="78" rx="14" fill="#edf5ff" stroke="#135cb0"/><text x="977" y="116" text-anchor="middle" font-weight="700">한 배포 기록</text><text x="977" y="142" text-anchor="middle" font-size="13">판정은 두 줄</text>
+      </svg>
+    </section>
+
+    <section>
+      <h2>클릭형 수정 지도</h2>
+      <p>오른쪽 노드를 선택하면 왼쪽에 현재 문제, 수정 범위, 완료 증거와 실패 대응이 나타납니다.</p>
+      <div class="map">
+        <div class="panels" aria-live="polite">
+          <article class="panel active" id="panel-gateway" role="tabpanel" tabindex="-1"><div class="path">전체 목표 › 공통 게이트 › 공개 경로</div><h3>1. 읽기 전용 입구부터 고정</h3><p><b>현재 문제:</b> Spring Security는 공개 GET을 허용하지만 Hostinger proxy에는 tour 전용 라우터가 없습니다.</p><p><b>정확한 행동:</b> areas, poi, restaurants, holy, holy/contents의 GET만 allowlist하고 POST submission과 admin은 열지 않습니다. TourAPI secret 이름만 configtree로 연결합니다.</p><p><b>완료 증거:</b> compose config, GET 200/의도한 오류, POST·admin 차단, 80/443 외 공개 포트 없음.</p><p><b>실패하면:</b> 새 tour router만 제거하고 기존 health·주소검색·웹을 유지합니다.</p></article>
+          <article class="panel" id="panel-f4" role="tabpanel" tabindex="-1" hidden><div class="path">전체 목표 › F4 › 공급자와 페이지</div><h3>2. F4는 실제 서버 다음 페이지까지</h3><p><b>현재 문제:</b> 화면은 24건만 받고 “더 보기”는 새 pageNo를 요청하지 않습니다. poi와 restaurants 두 계약도 섞여 있습니다.</p><p><b>정확한 행동:</b> restaurants를 대표 계약으로 고정하고 areaCode, sigunguCode, arrange, numOfRows, pageNo를 통일합니다. 필터 변경 시 1페이지로 초기화하고 다음 결과를 ID 중복 없이 이어 붙입니다.</p><p><b>완료 증거:</b> 서울/종로/정렬, 서로 다른 1·2페이지, 빈 결과, 공급자 오류, 마지막 성공 cache 표시.</p><p><b>실패하면:</b> F4 탭만 비활성화하고 F5 DB 경로는 유지합니다.</p></article>
+          <article class="panel" id="panel-f5" role="tabpanel" tabindex="-1" hidden><div class="path">전체 목표 › F5 › 승인 데이터</div><h3>3. F5는 예시가 아닌 APPROVED DB만</h3><p><b>현재 문제:</b> 운영 API는 500이고 일반 성지는 정적 예시로 조용히 대체될 수 있습니다. K-POP 랜딩도 기본 맛집 탭으로 연결됩니다.</p><p><b>정확한 행동:</b> 성지 링크에 category를 전달하고 공개 결과는 비공공 APPROVED만 표시합니다. MVP 종류는 전체/성지 맛집으로 고정하며 작품·아티스트 선택을 함께 씁니다.</p><p><b>완료 증거:</b> PENDING/REJECTED 미노출, 지역·작품·FOOD 조합, 좌표·출처, 오류 시 재시도.</p><p><b>실패하면:</b> F5만 숨기고 F4와 공통 지역 기능을 유지합니다.</p></article>
+          <article class="panel" id="panel-test" role="tabpanel" tabindex="-1" hidden><div class="path">전체 목표 › 검증 › 독립 장애</div><h3>4. 같이 만들고 따로 깨뜨려 보기</h3><p><b>현재 문제:</b> 화면 200은 데이터 기능 성공이 아닙니다.</p><p><b>정확한 행동:</b> F4 공급자 실패, F5 DB 실패, 지역 실패를 각각 만들어 loading/empty/error/ready를 확인합니다. 데스크톱·모바일과 키보드 상세 모달도 확인합니다.</p><p><b>완료 증거:</b> 단위·화면 테스트, 네트워크 응답, 1·2페이지 ID, 승인 상태 대조, 두 기능 독립 결과.</p><p><b>실패하면:</b> 통합 배포를 멈추고 통과한 기능만 유지 가능한지 판정합니다.</p></article>
+          <article class="panel" id="panel-release" role="tabpanel" tabindex="-1" hidden><div class="path">전체 목표 › 배포 › 두 줄 판정</div><h3>5. 한 배포 기록 안에서 F4·F5 분리</h3><p><b>현재 문제:</b> 컨테이너가 healthy여도 공개 조회는 실패할 수 있습니다.</p><p><b>정확한 행동:</b> main SHA, image digest, config revision, target, rollback digest를 기록하고 F4·F5의 정상·빈값·오류 검증을 별도 행으로 남깁니다.</p><p><b>완료 증거:</b> 원격 PR, digest 고정, live 화면·API, rollback rehearsal.</p><p><b>실패하면:</b> feature gate나 router 단위로 한쪽만 되돌립니다.</p></article>
+        </div>
+        <div class="visual">
+          <svg class="diagram" viewBox="0 0 500 590" role="group" aria-label="F4 F5 수정 노드">
+            <path d="M250 92 V142 M250 232 V278 M250 368 V414 M250 504 V540" stroke="#8eb7e8" stroke-width="4"/>
+            <g class="node" data-panel="panel-gateway" role="tab" tabindex="0" aria-controls="panel-gateway" aria-selected="true"><rect x="65" y="20" width="370" height="72" rx="16"/><text x="250" y="51" text-anchor="middle" font-weight="800">1 · 공통 공개 게이트</text><text x="250" y="76" text-anchor="middle" font-size="14">명시적 GET · 비밀값 이름 · 쓰기 차단</text></g>
+            <g class="node" data-panel="panel-f4" role="tab" tabindex="0" aria-controls="panel-f4" aria-selected="false"><rect x="25" y="142" width="215" height="90" rx="16"/><text x="132" y="176" text-anchor="middle" font-weight="800">2 · F4 맛집</text><text x="132" y="201" text-anchor="middle" font-size="14">TourAPI · 실제 pageNo</text></g>
+            <g class="node" data-panel="panel-f5" role="tab" tabindex="0" aria-controls="panel-f5" aria-selected="false"><rect x="260" y="142" width="215" height="90" rx="16"/><text x="367" y="176" text-anchor="middle" font-weight="800">3 · F5 성지</text><text x="367" y="201" text-anchor="middle" font-size="14">APPROVED DB · 필터</text></g>
+            <g class="node" data-panel="panel-test" role="tab" tabindex="0" aria-controls="panel-test" aria-selected="false"><rect x="65" y="278" width="370" height="90" rx="16"/><text x="250" y="313" text-anchor="middle" font-weight="800">4 · 독립 장애 검증</text><text x="250" y="339" text-anchor="middle" font-size="14">한쪽 실패에도 다른 탭 유지</text></g>
+            <g class="node" data-panel="panel-release" role="tab" tabindex="0" aria-controls="panel-release" aria-selected="false"><rect x="65" y="414" width="370" height="90" rx="16"/><text x="250" y="449" text-anchor="middle" font-weight="800">5 · 배포 기록</text><text x="250" y="475" text-anchor="middle" font-size="14">한 묶음 · 판정 두 줄 · 롤백 분리</text></g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>핵심 파일과 역할</h2>
+      <table><thead><tr><th>대상</th><th>현재 역할</th><th>이번 작업 판단</th></tr></thead><tbody>
+        <tr><td class="mono">deploy/hostinger/g1.compose.yml</td><td>Spring secret·Traefik 라우터</td><td>tour GET allowlist와 TourAPI configtree 연결</td></tr>
+        <tr><td class="mono">services/tourApi.ts</td><td>프론트 공개 조회 계약</td><td>restaurants 페이지 계약 통일</td></tr>
+        <tr><td class="mono">TourExploreScreen.tsx</td><td>지역·카테고리·카드·모달</td><td>서버 페이지, category 진입, 탭별 오류 격리</td></tr>
+        <tr><td class="mono">TourController / TourService</td><td>공개 맛집·성지 조회</td><td>F4 파라미터와 오류/캐시 경계</td></tr>
+        <tr><td class="mono">TourPoiRepository</td><td>승인 성지 DB 조회</td><td>APPROVED·지역·작품·FOOD 유지</td></tr>
+        <tr><td class="mono">V90 / V91 / V92</td><td>전국 성지·작품 링크·성지 맛집</td><td>운영 적용·건수 확인, 데이터 수정 금지</td></tr>
+      </tbody></table>
+    </section>
+
+    <section>
+      <h2>Before / After GUI</h2>
+      <div class="compare">
+        <div class="mock current"><h3>Before · 현재 확인</h3><div class="screen"><b>탐색</b><div class="chips"><span class="chip">서울</span><span class="chip on">맛집</span><span class="chip">성지</span></div><div class="row error">장소를 불러오지 못했어요.</div><div class="row"></div><p>성지는 정적 예시로 장애가 가려질 수 있음</p></div></div>
+        <div class="mock future"><h3>After · 구현 후 예상 모형</h3><div class="screen"><b>탐색</b><div class="chips"><span class="chip">서울</span><span class="chip">종로구</span><span class="chip on">맛집</span><span class="chip">성지</span></div><div class="row good">실제 데이터 · 24건 · 최신 기준 표시</div><div class="row"></div><div class="row"></div><button type="button">다음 장소 더 보기</button></div></div>
+      </div>
+      <p class="warn">After는 실제 캡처나 구현 완료 화면이 아니라 검수 기준을 보여주는 예상 모형입니다.</p>
+    </section>
+
+    <section>
+      <h2>구현 게이트와 완료 증거</h2>
+      <div class="gates">
+        <div class="gate"><h3>F4 판정</h3><ul><li>지역·구·정렬 요청</li><li>서로 다른 1·2페이지 ID</li><li>빈값·오류·cache 구분</li><li>키·오류 본문 비노출</li></ul></div>
+        <div class="gate"><h3>F5 판정</h3><ul><li>APPROVED-only 대조</li><li>지역·작품·FOOD 조합</li><li>좌표·추천 이유·안전한 출처</li><li>정적 예시로 오류 은폐 금지</li></ul></div>
+      </div>
+      <details><summary>에이전트에게 전달할 범위 요약</summary><p>명시적 GET allowlist, TourAPI secret 이름, F4 실제 페이지, F5 승인 데이터와 필터, K-POP 랜딩의 성지 진입, 탭별 오류·롤백을 구현합니다. 기존 웹·F1·F2·데이터 볼륨·EC2·RunPod는 보존합니다. main 병합과 운영 배포는 사용자 확인에서 멈춥니다.</p></details>
+      <p class="ok"><b>사용자가 지금 직접 할 일:</b> 없음. 구현 승인 시 F5 종류를 “전체/성지 맛집”으로 제한할지와 F4 마지막 성공 cache 표시 여부만 선택하면 됩니다.</p>
+    </section>
+
+    <section>
+      <h2>이번 보고서의 실행 경계</h2>
+      <table><tbody><tr><th>분석</th><td>완료</td></tr><tr><th>코드 수정</th><td>미실행</td></tr><tr><th>테스트·빌드</th><td>미실행</td></tr><tr><th>PR·main</th><td>미실행</td></tr><tr><th>Hostinger 배포</th><td>미실행</td></tr></tbody></table>
+    </section>
+  </main>
+  <footer>독립 HTML · 외부 폰트·CDN·네트워크 호출 없음 · 기준 main ec54fad</footer>
+  <script>
+    const nodes=[...document.querySelectorAll('.node')];
+    function show(node){
+      const id=node.dataset.panel;
+      nodes.forEach(n=>n.setAttribute('aria-selected',String(n===node)));
+      document.querySelectorAll('.panel').forEach(p=>{const on=p.id===id;p.classList.toggle('active',on);p.hidden=!on});
+      const panel=document.getElementById(id); panel.focus({preventScroll:true});
+      if(innerWidth<760) panel.scrollIntoView({block:'start'});
+    }
+    nodes.forEach((node,index)=>{
+      node.addEventListener('click',()=>show(node));
+      node.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();show(node)}else if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();nodes[(index+1)%nodes.length].focus()}else if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();nodes[(index-1+nodes.length)%nodes.length].focus()}});
+    });
+  </script>
+</body>
+</html>
