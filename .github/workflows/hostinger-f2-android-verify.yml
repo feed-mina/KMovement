@@ -1,0 +1,93 @@
+name: Verify Hostinger F2 on Android
+
+"on":
+  workflow_dispatch:
+    inputs:
+      expected_main_sha:
+        description: Exact deployed 40-character origin/main SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hostinger-f2-android-verify
+  cancel-in-progress: false
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CI: "true"
+      EXPO_PUBLIC_API_BASE: https://kmovement.srv1869569.hstgr.cloud
+      EXPO_PUBLIC_ADDRESS_API_BASE: https://kmovement.srv1869569.hstgr.cloud
+      EXPO_PUBLIC_F2_CHECK: "true"
+      EXPO_PUBLIC_F2_TEST_QUERY: 테헤란로 152
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.expected_main_sha }}
+          fetch-depth: 1
+
+      - name: Require the exact deployed main SHA
+        shell: bash
+        env:
+          EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_MAIN_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --no-tags --depth=1 origin main
+          test "$(git rev-parse HEAD)" = "$EXPECTED_MAIN_SHA"
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: subproject/SDUI/kride/pnpm-lock.yaml
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install and generate the Android project
+        working-directory: subproject/SDUI/kride
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --dir apps/mobile exec expo prebuild --platform android --clean --no-install
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Search and select a real address on Android
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_5
+          emulator-options: >-
+            -no-snapshot-load -no-snapshot-save -no-window
+            -gpu swiftshader_indirect -noaudio -no-boot-anim
+            -camera-back none -camera-front none
+          disable-animations: true
+          script: bash subproject/SDUI/kride/apps/mobile/scripts/verify-f2-android.sh
+
+      - name: Upload Android evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f2-android-${{ inputs.expected_main_sha }}
+          path: artifacts/f2-android
+          if-no-files-found: warn

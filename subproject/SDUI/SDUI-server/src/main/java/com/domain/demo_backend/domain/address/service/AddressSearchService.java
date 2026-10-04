@@ -8,6 +8,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,16 +22,23 @@ import java.util.Map;
 @Service
 public class AddressSearchService {
 
-    private static final String KAKAO_LOCAL_ADDRESS_URL = "https://dapi.kakao.com/v2/local/search/address.json";
     private static final int MAX_RESULTS = 10;
 
     private final WebClient webClient;
+    private final String kakaoRestApiKey;
+    private final String kakaoLocalAddressUrl;
+    private final Duration requestTimeout;
 
-    @Value("${kakao.client-id}")
-    private String kakaoRestApiKey;
-
-    public AddressSearchService(WebClient.Builder webClientBuilder) {
+    public AddressSearchService(
+            WebClient.Builder webClientBuilder,
+            @Value("${kakao.client-id}") String kakaoRestApiKey,
+            @Value("${kakao.local.address-url:https://dapi.kakao.com/v2/local/search/address.json}")
+            String kakaoLocalAddressUrl,
+            @Value("${kakao.local.timeout:3s}") Duration requestTimeout) {
         this.webClient = webClientBuilder.build();
+        this.kakaoRestApiKey = kakaoRestApiKey;
+        this.kakaoLocalAddressUrl = kakaoLocalAddressUrl;
+        this.requestTimeout = requestTimeout;
     }
 
     public List<Map<String, String>> search(String keyword) {
@@ -39,7 +47,7 @@ public class AddressSearchService {
             return List.of();
         }
 
-        URI uri = UriComponentsBuilder.fromUriString(KAKAO_LOCAL_ADDRESS_URL)
+        URI uri = UriComponentsBuilder.fromUriString(kakaoLocalAddressUrl)
                 .queryParam("query", query)
                 .queryParam("size", MAX_RESULTS)
                 .queryParam("analyze_type", "similar")
@@ -54,6 +62,7 @@ public class AddressSearchService {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(Map.class)
+                .timeout(requestTimeout)
                 .block();
 
         return mapDocuments(body);
@@ -98,6 +107,9 @@ public class AddressSearchService {
                 item.put("buildingName", buildingName);
             }
             items.add(item);
+            if (items.size() == MAX_RESULTS) {
+                break;
+            }
         }
         return items;
     }

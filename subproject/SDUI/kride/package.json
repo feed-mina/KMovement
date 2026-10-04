@@ -27,12 +27,14 @@
   },
   "overrides": {
     "react-native": "0.74.5",
-    "@react-native/virtualized-lists": "0.74.87"
+    "@react-native/virtualized-lists": "0.74.87",
+    "@types/minimatch": "5.1.2"
   },
   "pnpm": {
     "overrides": {
       "react-native": "0.74.5",
-      "@react-native/virtualized-lists": "0.74.87"
+      "@react-native/virtualized-lists": "0.74.87",
+      "@types/minimatch": "5.1.2"
     }
   },
   "devDependencies": {

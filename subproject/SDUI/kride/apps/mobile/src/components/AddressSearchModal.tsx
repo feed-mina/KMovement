@@ -32,6 +32,7 @@ export const parseAddressSearchResponse = (body: unknown): AddressSearchRow[] =>
 type Props = {
   visible: boolean;
   apiBase: string;
+  initialKeyword?: string;
   onComplete: (result: PostcodeResult) => void;
   onClose: () => void;
 };
@@ -42,8 +43,14 @@ type Props = {
  * backend's Kakao Local proxy instead, and keeps a manual-entry escape hatch so
  * signup never dead-ends if the search API is unavailable.
  */
-export default function AddressSearchModal({ visible, apiBase, onComplete, onClose }: Props) {
-  const [keyword, setKeyword] = useState('');
+export default function AddressSearchModal({
+  visible,
+  apiBase,
+  initialKeyword = '',
+  onComplete,
+  onClose,
+}: Props) {
+  const [keyword, setKeyword] = useState(initialKeyword);
   const [rows, setRows] = useState<AddressSearchRow[]>([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -53,7 +60,7 @@ export default function AddressSearchModal({ visible, apiBase, onComplete, onClo
   const [manualRoad, setManualRoad] = useState('');
 
   const reset = () => {
-    setKeyword('');
+    setKeyword(initialKeyword);
     setRows([]);
     setSearched(false);
     setLoading(false);
@@ -81,8 +88,11 @@ export default function AddressSearchModal({ visible, apiBase, onComplete, onClo
     }
     setLoading(true);
     setError('');
+    setRows([]);
+    setSearched(false);
     try {
-      const res = await fetch(`${apiBase}/api/v1/address/search?keyword=${encodeURIComponent(query)}`);
+      const base = apiBase.replace(/\/$/, '');
+      const res = await fetch(`${base}/api/v1/address/search?keyword=${encodeURIComponent(query)}`);
       if (!res.ok) {
         setRows([]);
         setSearched(true);
