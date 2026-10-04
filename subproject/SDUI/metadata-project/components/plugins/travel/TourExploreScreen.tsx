@@ -14,7 +14,6 @@ import {
     TourPoi,
     TourRegion,
 } from '@/services/tourApi';
-import { HOLY_SITES } from '@/lib/data/holySites';
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
 import PoiImage from '@/components/plugins/travel/PoiImage';
 import TourPoiCard from '@/components/plugins/travel/TourPoiCard';
@@ -32,6 +31,14 @@ const CATEGORIES = [
     { id: '12', label: '관광지' },
     { id: '14', label: '문화시설' },
 ] as const;
+const DEFAULT_CATEGORY = '39';
+
+/** 외부 랜딩이 넘긴 카테고리를 공개 칩 범위로 제한한다. */
+export function resolveCategoryParam(value?: string | null): string {
+    const category = value?.trim();
+    if (!category) return DEFAULT_CATEGORY;
+    return CATEGORIES.some((item) => item.id === category) ? category : DEFAULT_CATEGORY;
+}
 
 /** 성지 계열(공용 tour_poi 데이터) 카테고리 여부 — 작품 필터를 공유한다. */
 const isHolyCategory = (category: string) => category === 'HOLY' || category === 'HOLY_FOOD';
@@ -188,7 +195,7 @@ function HorizontalFilterRail({
 
 export default function TourExploreScreen(_props: ScreenControllerProps) {
     const searchParams = useSearchParams();
-    const [category, setCategory] = useState('39');
+    const [category, setCategory] = useState(() => resolveCategoryParam(searchParams?.get('category')));
     // 진입 시점의 ?area= 만 반영한다. 이후 칩 선택은 URL과 무관하게 움직인다.
     const [areaCode, setAreaCode] = useState(() => resolveAreaParam(searchParams?.get('area')));
     const [sigungu, setSigungu] = useState('');
@@ -210,6 +217,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     // 작품/아티스트 성지 필터 (V91): 검색어 → 자동완성 → 선택 칩.
     const [contentQuery, setContentQuery] = useState('');
     const [contentOptions, setContentOptions] = useState<HolyContentOption[]>([]);
+    const [contentError, setContentError] = useState<string | null>(null);
     const [selectedContent, setSelectedContent] = useState<HolyContentOption | null>(null);
     const [selected, setSelected] = useState<TourPoi | null>(null);
     const [saved, setSaved] = useState<Set<string>>(new Set());
@@ -311,12 +319,10 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                     if (alive) setPois(list);
                 }
             } catch {
-                if (alive && category === 'HOLY') {
-                    setPois(HOLY_SITES.filter((site) =>
-                        site.areaCode === areaCode && (!sigungu || site.sigunguCode === sigungu)));
+                if (alive) {
+                    setPois([]);
+                    setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
                 }
-                if (alive && category !== 'HOLY') setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
-                if (alive && category === 'HOLY_FOOD') setPois([]);
             } finally {
                 if (alive) setLoading(false);
             }
@@ -353,15 +359,22 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     useEffect(() => {
         if (!isHolyCategory(category) || contentQuery.trim().length < 2) {
             setContentOptions([]);
+            setContentError(null);
             return;
         }
         let alive = true;
         const timer = setTimeout(async () => {
             try {
                 const options = await fetchHolyContents({ q: contentQuery.trim(), limit: 8 });
-                if (alive) setContentOptions(options);
+                if (alive) {
+                    setContentOptions(options);
+                    setContentError(null);
+                }
             } catch {
-                if (alive) setContentOptions([]);
+                if (alive) {
+                    setContentOptions([]);
+                    setContentError('작품·아티스트 검색을 불러오지 못했어요.');
+                }
             }
         }, 300);
         return () => { alive = false; clearTimeout(timer); };
@@ -576,6 +589,11 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                         </li>
                                     ))}
                                 </ul>
+                            )}
+                            {contentError && (
+                                <p role="alert" style={{ margin: '8px 0 0', color: '#A32D2D', fontSize: 12 }}>
+                                    {contentError}
+                                </p>
                             )}
                         </>
                     )}

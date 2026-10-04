@@ -150,6 +150,23 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         expect(mockedRestaurants).toHaveBeenLastCalledWith(expect.objectContaining({ pageNo: 2 }));
     });
 
+    it('?category=HOLY로 들어오면 승인 성지 조회로 바로 연다', async () => {
+        mockSearchParams = new URLSearchParams('area=1&category=HOLY');
+        renderScreen();
+
+        await waitFor(() => expect(mockedHolyFetch).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '1' })));
+        expect(mockedRestaurants).not.toHaveBeenCalled();
+        expect(screen.getByRole('button', { name: '성지' })).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('모르는 category는 맛집으로 안전하게 되돌린다', async () => {
+        mockSearchParams = new URLSearchParams('category=UNKNOWN');
+        renderScreen();
+
+        await waitFor(() => expect(mockedRestaurants).toHaveBeenCalled());
+        expect(screen.getByRole('button', { name: '맛집' })).toHaveAttribute('aria-pressed', 'true');
+    });
+
     it('카테고리를 바꾸면 목록이 첫 페이지로 돌아간다', async () => {
         const restaurants = Array.from({ length: 30 }, (_, i) => ({
             contentId: String(200 + i), title: `장소${i}`, addr: '서울 강남구',
@@ -371,11 +388,21 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         await waitFor(() => expect(screen.getByText('DB성지')).toBeInTheDocument());
     });
 
-    it('성지 API가 비었거나 실패하면 시드 큐레이션으로 폴백한다', async () => {
+    it('성지 API가 실패하면 정적 시드로 숨기지 않고 오류를 표시한다', async () => {
         mockedHolyFetch.mockRejectedValueOnce(new Error('network'));
         renderScreen();
         fireEvent.click(await screen.findByText('성지'));
-        await waitFor(() => expect(screen.getByText('서울숲')).toBeInTheDocument());
+        await waitFor(() => expect(screen.getByText(/장소를 불러오지 못했어요/)).toBeInTheDocument());
+        expect(screen.queryByText('서울숲')).not.toBeInTheDocument();
+    });
+
+    it('작품 검색 API 실패를 빈 결과로 숨기지 않는다', async () => {
+        mockedContentFetch.mockRejectedValueOnce(new Error('network'));
+        renderScreen();
+        fireEvent.click(await screen.findByText('성지'));
+        fireEvent.change(screen.getByLabelText('작품·아티스트로 성지 찾기'), { target: { value: '방탄' } });
+
+        await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('작품·아티스트 검색을 불러오지 못했어요.'));
     });
 
     it('성지 카드 모달에 팬덤 발자취·추천 이유를 표시', async () => {
