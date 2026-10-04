@@ -92,6 +92,8 @@ services:
         target: jwt.secret-key
       - source: spring_kakao_rest_api_key
         target: kakao.client-id
+      - source: spring_tour_api_key
+        target: tour.api-key
     depends_on:
       postgres:
         condition: service_healthy
@@ -134,6 +136,20 @@ services:
       traefik.http.routers.kmovement-f2-address.tls.certresolver: letsencrypt
       traefik.http.routers.kmovement-f2-address.service: kmovement-f2-address
       traefik.http.services.kmovement-f2-address.loadbalancer.server.port: "8080"
+      traefik.http.routers.kmovement-f4-f5-tour.rule: >-
+        Host(`${KMOVEMENT_SITE_HOST:?Set KMOVEMENT_SITE_HOST}`) &&
+        (Path(`/api/v1/tour/areas`) ||
+        Path(`/api/v1/tour/poi`) ||
+        Path(`/api/v1/tour/restaurants`) ||
+        Path(`/api/v1/tour/holy`) ||
+        Path(`/api/v1/tour/holy/contents`)) &&
+        Method(`GET`)
+      traefik.http.routers.kmovement-f4-f5-tour.priority: "300"
+      traefik.http.routers.kmovement-f4-f5-tour.entrypoints: websecure
+      traefik.http.routers.kmovement-f4-f5-tour.tls: "true"
+      traefik.http.routers.kmovement-f4-f5-tour.tls.certresolver: letsencrypt
+      traefik.http.routers.kmovement-f4-f5-tour.service: kmovement-f4-f5-tour
+      traefik.http.services.kmovement-f4-f5-tour.loadbalancer.server.port: "8080"
     networks:
       - g1
       - egress
@@ -156,6 +172,8 @@ secrets:
     file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/spring_jwt_secret
   spring_kakao_rest_api_key:
     file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/spring_kakao_rest_api_key
+  spring_tour_api_key:
+    file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/spring_tour_api_key
 
 volumes:
   postgres_data:

@@ -14,11 +14,16 @@ artifacts:
 target:
   vmId: srv1869569
   hostname: kmovement.srv1869569.hstgr.cloud
-  profile: spring-postgres-redis-f2-address
+  profile: spring-postgres-redis-f2-f4-f5-public-reads
   publishedApplicationPorts: []
   publicPaths:
     - GET /api/platform/health
     - GET /api/v1/address/search
+    - GET /api/v1/tour/areas
+    - GET /api/v1/tour/poi
+    - GET /api/v1/tour/restaurants
+    - GET /api/v1/tour/holy
+    - GET /api/v1/tour/holy/contents
 
 rollback:
   springImage: REPLACE_WITH_PREVIOUS_DIGEST
@@ -34,6 +39,10 @@ verification:
   externalHealthUp: false
   addressSearch200: false
   addressResultSelectedOnAndroid: false
+  tourAreas200: false
+  restaurants200: false
+  holyApprovedOnly200: false
+  holyContents200: false
   flywayAllSuccessful: false
   flywayChecksumsRecorded: false
   publicTableCount: null
@@ -43,7 +52,7 @@ verification:
   unrelatedContainersUnchanged: false
 
 excluded:
-  - Spring APIs other than health and F2 address search
+  - Spring APIs other than health, F2 address search, and the F4/F5 GET allowlist
   - form submission
   - FastAPI
   - Celery
