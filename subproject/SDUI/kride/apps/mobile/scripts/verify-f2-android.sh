@@ -44,6 +44,34 @@ wait_for_value() {
   return 1
 }
 
+wait_for_clickable_value() {
+  local needle="$1"
+  local attempts="${2:-45}"
+  for attempt in $(seq 1 "$attempts"); do
+    dump_ui
+    if python3 - "$artifact_dir/window.xml" "$needle" <<'PY'
+import sys
+import xml.etree.ElementTree as ET
+
+path, needle = sys.argv[1:]
+root = ET.parse(path).getroot()
+matched = any(
+    node.attrib.get("clickable") == "true"
+    and needle in node.attrib.get("content-desc", "")
+    for node in root.iter("node")
+)
+raise SystemExit(0 if matched else 1)
+PY
+    then
+      printf 'found clickable "%s" on attempt %s\n' "$needle" "$attempt"
+      return 0
+    fi
+    sleep 2
+  done
+  printf 'did not find clickable "%s"\n' "$needle" >&2
+  return 1
+}
+
 tap_value() {
   local needle="$1"
   dump_ui
@@ -79,7 +107,14 @@ PY
 
 wait_for_value '주소 검색'
 tap_value '검색'
-wait_for_value '테헤란로 152'
+if ! wait_for_clickable_value '테헤란로 152' 15; then
+  dump_ui
+  if grep -Fq '네트워크 오류' "$artifact_dir/window.xml"; then
+    printf 'retrying the address search after a transient network error\n'
+    tap_value '검색'
+  fi
+  wait_for_clickable_value '테헤란로 152'
+fi
 tap_value '테헤란로 152'
 wait_for_value '선택 완료: 06236 서울 강남구 테헤란로 152'
 
