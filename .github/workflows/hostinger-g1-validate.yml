@@ -39,7 +39,7 @@ jobs:
             (.services.spring.expose == ["8080"]) and
             (.services.spring.read_only == true) and
             (.networks.g1.internal == true) and
-            (.networks.egress.internal == false) and
+            ((.networks.egress.internal // false) == false) and
             ((.services.spring.networks | keys | sort) == ["egress", "g1"]) and
             ((.services.postgres.networks | keys) == ["g1"]) and
             ((.services.redis.networks | keys) == ["g1"]) and
