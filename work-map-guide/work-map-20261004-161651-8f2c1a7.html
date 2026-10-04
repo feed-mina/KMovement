@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KMovement 전체 작업지도 · 최소 행동 단위판</title>
+  <style>
+    :root{--bg:#f3f6fa;--paper:#fff;--ink:#172033;--muted:#5e6a7d;--line:#d8e0ea;--navy:#132d49;--blue:#215cc8;--green:#13795b;--amber:#9a6700;--red:#b42318;--soft:#edf4ff;--shadow:0 18px 45px rgba(25,45,75,.09)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(180deg,#eef3f9,#f8fafc);color:var(--ink);font:16px/1.65 system-ui,"Malgun Gothic",sans-serif}button{font:inherit}a{color:var(--blue)}
+    .goal{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;padding:11px 20px;border-bottom:1px solid #ffffff26}.goal strong{margin-right:8px}.wrap{max-width:1380px;margin:auto;padding:26px}.hero,.panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}.hero{padding:28px}.eyebrow{color:var(--blue);font-size:.78rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;margin:0 0 6px}h1,h2,h3{line-height:1.25;margin:0}h1{font-size:clamp(1.8rem,4vw,2.7rem)}h2{font-size:1.45rem}p,li{max-width:82ch}.lead{font-size:1.08rem;color:#334155}.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:20px}.card{border:1px solid var(--line);border-radius:14px;padding:15px;background:#fbfcfe}.card strong{display:block;margin-bottom:6px}.ok{color:var(--green)}.warn{color:var(--amber)}.stop{color:var(--red)}.panel{padding:22px;margin-top:20px}.story{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.story article{border-left:4px solid var(--blue);background:var(--soft);padding:14px;border-radius:10px}.flow{display:grid;grid-template-columns:repeat(7,minmax(135px,1fr));gap:10px;margin-top:15px}.flow button{border:1px solid var(--line);border-radius:13px;padding:13px;text-align:left;background:#fff;cursor:pointer;min-height:115px}.flow button[aria-current="step"]{border-color:var(--amber);box-shadow:0 0 0 2px #f7cc6b55}.flow button[aria-pressed="true"]{border-color:var(--blue);background:var(--soft)}.flow small{display:block;color:var(--muted);margin-top:6px}.flow-detail{margin-top:12px;padding:14px;border-radius:12px;background:#f8fafc;border:1px solid var(--line)}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.tab{border:1px solid var(--line);border-radius:999px;padding:9px 14px;background:#fff;cursor:pointer}.tab[aria-selected="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}[role="tabpanel"][hidden]{display:none}.map-layout{display:grid;grid-template-columns:minmax(340px,.9fr) minmax(420px,1.1fr);gap:18px}.map{border:1px solid var(--line);border-radius:16px;padding:15px;background:#f8fafc;max-height:780px;overflow:auto}.lane{margin-bottom:16px}.lane-title{font-weight:800;color:#43516a;margin:4px 0}.nodes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.node{border:1px solid var(--line);border-radius:12px;padding:11px;text-align:left;background:#fff;cursor:pointer}.node small{display:block;color:var(--muted)}.node[aria-pressed="true"]{border-color:var(--blue);background:var(--soft);box-shadow:0 0 0 2px #215cc833}.node.prepared{border-left:5px solid var(--amber)}.node.planned{border-left:5px solid #94a3b8}.node.done{border-left:5px solid var(--green)}.node.held{border-left:5px solid var(--red)}.detail{border:1px solid var(--line);border-radius:16px;padding:19px;min-height:560px}.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.chip{border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:.82rem;background:#fff}.step-list{counter-reset:step;padding:0;list-style:none}.step-list li{counter-increment:step;padding:9px 10px 9px 44px;position:relative;border-bottom:1px solid #e9edf2}.step-list li:before{content:counter(step,decimal-leading-zero);position:absolute;left:5px;top:8px;background:var(--navy);color:#fff;width:29px;height:29px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;font-weight:800}.four{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.before-after{display:grid;grid-template-columns:1fr 1fr;gap:14px}.before,.after{padding:18px;border-radius:14px;border:1px solid var(--line)}.before{background:#fff6f4;border-color:#ecc5bf}.after{background:#eefaf5;border-color:#b8dfd0}table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f6f8fb}.scroll{overflow:auto}details{border:1px solid var(--line);border-radius:12px;margin:10px 0;background:#fff}summary{cursor:pointer;font-weight:800;padding:12px}details>div{padding:0 14px 14px}.footer{color:var(--muted);font-size:.85rem;margin:25px 0}.focus:focus-visible,.node:focus-visible,.flow button:focus-visible,.tab:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+    @media(max-width:1000px){.summary,.four{grid-template-columns:repeat(2,1fr)}.flow{grid-template-columns:repeat(2,1fr)}.map-layout{grid-template-columns:1fr}.map{max-height:none}}@media(max-width:650px){.wrap{padding:12px}.hero,.panel{padding:17px}.summary,.story,.four,.before-after,.nodes{grid-template-columns:1fr}.goal{position:static}.flow{grid-template-columns:1fr}.detail{min-height:auto}}
+  </style>
+</head>
+<body>
+<div class="goal"><strong>최종 목표</strong>기능 하나·사용자 행동 하나·롤백 하나씩 Hostinger에 추가하고, 증거가 모일 때만 다음 단계로 이동한다.</div>
+<main class="wrap">
+  <header class="hero">
+    <p class="eyebrow">Work map guide · 2026-10-04 · KMovement only</p>
+    <h1>KMovement 전체 작업지도<br>가장 작은 행동 단위판</h1>
+    <p class="lead">현재 코드는 Hostinger 웹 전용 배포 준비까지 끝났지만 실배포는 아직입니다. 이 지도는 F1 주소검색부터 F16 운영자 기능까지를 각각 한 번의 관찰·변경·검증 행동으로 분리합니다.</p>
+    <div class="summary">
+      <article class="card"><strong>기준 main</strong><code>1f863f959277becfdeb2e8147027bf1a07c505ec</code></article>
+      <article class="card"><strong>현재 상태</strong><span class="warn">prepared-not-deployed</span></article>
+      <article class="card"><strong>이번 문서</strong><span class="ok">계획·검증 계약 완료</span></article>
+      <article class="card"><strong>다음 행동 하나</strong><span class="warn">F1-01 Kakao 임시 도메인 등록</span></article>
+    </div>
+  </header>
+
+  <section class="panel">
+    <p class="eyebrow">3줄 줄거리와 현재 위치</p>
+    <div class="story">
+      <article><b>1</b><br>웹 이미지·Traefik Compose·런북은 준비됐지만 VPS 실행과 실화면은 미확인입니다.</article>
+      <article><b>2</b><br>첫 기능은 주소 검색·선택·좌표·마커까지만 확인하며 제출·DB 저장은 제외합니다.</article>
+      <article><b>3</b><br>이후 기반 → 읽기 → 인증 → 쓰기 → AI → 비동기 → 운영 순서로 하나씩 엽니다.</article>
+    </div>
+    <p><b>현재 위치:</b> 전체 목표 → F1 웹 주소검색 → 실배포 승인 직전 → 임시 HTTPS·실화면 검증 미실행</p>
+    <p><b>가설:</b> 사용자 행동과 의존 서비스가 하나인 릴리스는 장애 원인과 롤백 범위를 한 기록 안에서 설명할 수 있다. <b>검증:</b> 정상·빈 값·오류·모바일·로그·롤백이 한 단계에 들어가지 않으면 더 나눈다.</p>
+  </section>
+
+  <section class="panel" aria-labelledby="flow-title">
+    <p class="eyebrow">진행상황</p><h2 id="flow-title">큰 흐름을 선택하면 상태 근거가 열립니다</h2>
+    <div class="flow" id="flow"></div><div class="flow-detail" id="flow-detail" aria-live="polite"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="map-title">
+    <p class="eyebrow">클릭형 작업 지도</p><h2 id="map-title">기능을 누르면 최소 행동·완료 증거·실패 대응이 바뀝니다</h2>
+    <div class="tabs" role="tablist" aria-label="보고서 보기">
+      <button class="tab" role="tab" id="tab-map" aria-controls="panel-map" aria-selected="true" tabindex="0">기능 지도</button>
+      <button class="tab" role="tab" id="tab-cycle" aria-controls="panel-cycle" aria-selected="false" tabindex="-1">공통 17단계</button>
+      <button class="tab" role="tab" id="tab-before" aria-controls="panel-before" aria-selected="false" tabindex="-1">Before / After</button>
+      <button class="tab" role="tab" id="tab-evidence" aria-controls="panel-evidence" aria-selected="false" tabindex="-1">근거·상태</button>
+    </div>
+    <div id="panel-map" role="tabpanel" aria-labelledby="tab-map">
+      <div class="map-layout"><div class="map" id="map"></div><article class="detail" id="detail" aria-live="polite"><h3 id="detail-title" tabindex="-1"></h3><div id="detail-body"></div></article></div>
+    </div>
+    <div id="panel-cycle" role="tabpanel" aria-labelledby="tab-cycle" hidden>
+      <h3>모든 기능에 반복하는 최소 배포 사이클</h3><ol class="step-list" id="cycle-list"></ol>
+    </div>
+    <div id="panel-before" role="tabpanel" aria-labelledby="tab-before" hidden>
+      <div class="before-after"><article class="before"><h3>BEFORE · 기능 이름 중심</h3><ul><li>맛집·커뮤니티·Celery처럼 큰 묶음이 중심</li><li>배포·화면·데이터 증거가 한 문단에 섞임</li><li>준비 완료와 실배포 완료의 경계가 약함</li><li>다음 사람이 첫 명령을 다시 해석해야 함</li></ul></article><article class="after"><h3>AFTER · 최소 행동 중심</h3><ul><li>조회·선택·빈 값·오류를 각각 다른 ID로 분리</li><li>SHA·digest·config·target·rollback을 먼저 고정</li><li>현재는 prepared-not-deployed라고 명시</li><li>다음 행동은 F1-01 하나로 고정</li></ul></article></div>
+    </div>
+    <div id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+      <div class="four"><article class="card"><strong>확인</strong>최신 main, Hostinger runbook, prepared release record, Traefik Compose, CI/endpoint 구조</article><article class="card"><strong>계획</strong>F1~F16 최소 행동, 통과 기준, 실패 대응, 다음 단계</article><article class="card"><strong>미실행</strong>VPS 변경, 임시 HTTPS, 주소 실화면, DB, 운영 DNS, AWS 종료, RunPod</article><article class="card"><strong>금지 경계</strong>증거 없는 완료, latest 태그, 비밀값 게시, 한 번에 여러 기능 배포</article></div>
+      <details open><summary>직접 확인한 핵심 파일</summary><div><ul><li>deploy/hostinger/VPS-DEPLOY-RUNBOOK-KO.md</li><li>deploy/hostinger/release-record-20261002-a51c52f.prepared.yml</li><li>deploy/hostinger/web.traefik.compose.yml</li><li>subproject/SDUI/metadata-project/app/holy/submit/page.tsx</li><li>subproject/SDUI/kride/apps/mobile/src/components/AddressSearchModal.tsx</li><li>subproject/SDUI/SDUI-server/.../SecurityConfig.java</li><li>src/api/fastapi_server.py</li></ul></div></details>
+      <details><summary>실행·게시 상태</summary><div><p>문서 분석·작성은 완료했습니다. 애플리케이션 코드와 인프라는 수정하지 않았습니다. 이 HTML 선택 상태는 탐색용이며 실제 배포 상태를 바꾸지 않습니다.</p></div></details>
+    </div>
+  </section>
+  <p class="footer">독립 HTML · 외부 스크립트/폰트/CDN 없음 · 기준 시점 2026-10-04 16:16 KST · 참고 보고서의 문제→수정→검증 구조만 적용하고 KMovement 근거만 사용</p>
+</main>
+<script>
+const commonCycle=[
+'origin/main fetch','깨끗한 작업트리 확인','40자 main SHA 기록','이미지를 digest로 고정','config revision 기록','rollback digest 또는 최초 제거 절차 기록','가장 작은 계약 테스트 1개','이미지 빌드와 non-root 확인','Compose 렌더링·공개 포트 확인','승인된 임시 대상에 한 서비스 적용','health와 대표 URL/API 확인','대표 사용자 행동 1회','빈 값 1회','실패 조건 1회','모바일·키보드·접근성 확인','Console·Network·서버 로그 확인','배포 기록 종료와 다음 기능 하나 결정'];
+const phases=[
+{id:'B0',lane:'기준과 첫 배포',title:'기준점·비용 경계',status:'완료',className:'done',evidence:'확인',summary:'main, prepared release record, 기존 Traefik, 비용 제외 경계를 고정한다.',steps:['최신 main SHA 읽기','SHA·digest·target·rollback 한 표에 기록','AWS·EC2·RunPod workflow 보존 목록 작성','Traefik과 80/443 소유자 읽기 전용 확인','KMovement Compose 프로젝트 이름 확정','운영 DNS와 임시 DNS 분리'],accept:'날짜가 아니라 SHA와 digest로 같은 배포를 식별한다.',failure:'식별값이 다르면 어떤 배포도 시작하지 않는다.',next:'F1-01 Kakao 임시 도메인 등록'},
+{id:'F1',lane:'기준과 첫 배포',title:'웹 주소검색·좌표·지도',status:'준비 완료·실배포 미실행',className:'prepared',evidence:'확인+계획',summary:'/holy/submit에서 제출 없이 주소·좌표·마커까지만 검증한다.',steps:['Kakao 임시 HTTPS 도메인 등록','이미지 digest pull','nextjs 사용자·revision 확인','Traefik Compose 서비스 web 1개 확인','host ports 없음 확인','라우터·네트워크 충돌 확인','승인 후 kmovement-web만 up','health 확인','/ 200','/holy/submit 200','주소검색 UI 열기','도로명 주소 1건 선택','좌표 전후 비교','마커 이동 확인','390px 모바일 반복','Console·Network 증거 저장','제출 버튼 미실행 기록','실패 시 새 Compose 프로젝트만 제거','release record 갱신'],accept:'주소·좌표·마커·모바일·로그 증거가 있고 제출/DB는 미검증으로 남는다.',failure:'KMovement 프로젝트만 내리고 기존 Traefik·서비스는 유지한다.',next:'G1 Spring 플랫폼 게이트'},
+{id:'G1',lane:'플랫폼 기반',title:'Spring·DB·Redis 기반',status:'계획',className:'planned',evidence:'계획',summary:'사용자 기능을 열기 전에 데이터·캐시·migration·복구 기반만 검증한다.',steps:['필수 env 이름 목록','Postgres 볼륨·백업 위치','Redis 역할 분리','내부 네트워크','최소 DB 권한','빈 DB Flyway 109개','기존 snapshot 재적용','Spring health','Postgres readiness','Redis PING','재기동','DB 복원','proxy allowlist','플랫폼 기록 종료'],accept:'health·migration·복원은 통과하지만 사용자 기능 완료로 오표기하지 않는다.',failure:'checksum 또는 복원 불일치면 F2로 진행하지 않는다.',next:'F2 모바일 주소검색'},
+{id:'F2',lane:'플랫폼 기반',title:'모바일 주소검색',status:'계획',className:'planned',evidence:'코드 확인',summary:'Spring Kakao Local 프록시와 Expo 주소 모달을 별도 검증한다.',steps:['REST 키를 Spring secret로 설정','2자 미만 빈 결과','정상 키워드 조회','최대 10건과 주소 필드 확인','모달 결과 1건 선택','0건 직접입력 안내','공급자 오류 502','AddressSearchModal 테스트'],accept:'정상·빈 값·공급자 실패·직접 입력 네 경로가 작동한다.',failure:'웹 F1은 유지하고 모바일 주소 모달만 닫는다.',next:'F3 공개 SDUI'},
+{id:'F3',lane:'공개 읽기',title:'SDUI 공개 화면 1개',status:'계획',className:'planned',evidence:'코드 확인',summary:'guest screenId 하나만 골라 metadata→data source→component registry를 잇는다.',steps:['guest screenId 선택','UI tree 응답 저장','data source 1개 실행','registry 누락 검사','loading','empty','error','재열기','역할 필터'],accept:'ready뿐 아니라 loading·empty·error와 역할 미노출이 확인된다.',failure:'/view 경로만 닫고 정적 웹은 유지한다.',next:'F4 맛집'},
+{id:'F4',lane:'공개 읽기',title:'맛집 공개 조회',status:'계획',className:'planned',evidence:'코드 확인',summary:'지역→목록→페이지 이동을 TourAPI 오류와 분리한다.',steps:['지역 목록','시군구 선택','첫 페이지','다음 페이지','빈 지역','공급자 오류','cache fallback 구분','이미지·출처·주소'],accept:'페이지네이션과 빈 값, 공급자 실패가 서로 다른 화면으로 보인다.',failure:'맛집 탭만 숨기고 다른 공개 화면은 유지한다.',next:'F5 성지'},
+{id:'F5',lane:'공개 읽기',title:'성지 공개 조회',status:'계획',className:'planned',evidence:'코드 확인',summary:'승인된 성지만 필터와 지도에 노출한다.',steps:['승인 데이터만 조회','지역 필터','작품 필터','종류 필터','주소·좌표 비교','이미지 출처','0건 상태'],accept:'pending은 숨고 승인 데이터의 주소·좌표·출처가 일치한다.',failure:'성지 탭만 닫고 맛집 단계는 유지한다.',next:'F6-A 아티스트'},
+{id:'F6A',lane:'K-POP 읽기',title:'아티스트 목록·상세',status:'계획',className:'planned',evidence:'코드 확인',summary:'목록과 상세만 열고 follow는 제외한다.',steps:['목록 1페이지','검색어','숫자 ID 상세','slug 상세','없는 ID 404','미승인 데이터 미노출'],accept:'공개 승인 카탈로그만 검색·상세에 나타난다.',failure:'K-POP 진입 카드만 숨긴다.',next:'F6-B 이벤트'},
+{id:'F6B',lane:'K-POP 읽기',title:'이벤트 목록·상세',status:'계획',className:'planned',evidence:'코드 확인',summary:'기간·지역·상세를 독립적으로 확인한다.',steps:['시작일 필터','종료일 필터','지역 필터','상세','종료 이벤트 표기','빈 기간'],accept:'기간 경계와 지역 필터가 목록·상세에서 일치한다.',failure:'이벤트 route만 닫는다.',next:'F6-C 상품 후보'},
+{id:'F6C',lane:'K-POP 읽기',title:'상품 후보 읽기',status:'계획',className:'planned',evidence:'코드 확인',summary:'후보와 근거 부족을 정상 결과로 분리한다.',steps:['조건 1개','후보·근거','근거 부족 빈 후보','cache miss','cache hit','구매 보증 아님 문구'],accept:'후보는 승인 카탈로그 근거와 함께 표시되며 구매 적합성을 보증하지 않는다.',failure:'상품 후보만 닫고 아티스트·이벤트는 유지한다.',next:'F7 인증'},
+{id:'F7',lane:'인증·사용자 쓰기',title:'로그인·프로필·로그아웃',status:'계획',className:'planned',evidence:'코드 확인',summary:'callback과 token 경계를 먼저 안정시킨다.',steps:['callback allowlist','guest 진입','로그인 버튼','code 1회 사용','me 조회','새로고침','만료 token','프로필 1필드','로그아웃','로그 token 검색'],accept:'guest·valid·expired·logout이 분리되고 token이 로그에 없다.',failure:'인증 route를 닫고 공개 읽기는 유지한다.',next:'F8 저장 기능'},
+{id:'F8',lane:'인증·사용자 쓰기',title:'follow·bookmark·saved item',status:'계획',className:'planned',evidence:'계획',summary:'세 저장 기능을 각각 생성부터 사용자 격리까지 반복한다.',steps:['아티스트 follow: 생성→중복→목록→삭제→격리','이벤트 bookmark: 생성→중복→목록→삭제→격리','상품 saved item: 생성→중복→목록→삭제→격리'],accept:'멱등성·삭제·재조회·다른 사용자 격리를 기능마다 증명한다.',failure:'route만 닫고 저장 데이터는 삭제하지 않는다.',next:'F9 제보'},
+{id:'F9',lane:'인증·사용자 쓰기',title:'성지 제보·검수·공개',status:'계획',className:'planned',evidence:'코드 확인',summary:'제출, 관리자 판단, 공개를 서로 다른 배포로 나눈다.',steps:['비로그인 제출 거부','로그인 pending 저장','출처 중복','제출 직후 미공개','pending 목록','거절 사유','별도 건 승인','승인 공개','승인 지도'],accept:'승인 전 비공개, 승인 후 공개, 모든 판단에 감사 기록이 있다.',failure:'쓰기·검수 route를 닫고 기존 공개 데이터는 유지한다.',next:'F10 커뮤니티'},
+{id:'F10',lane:'커뮤니티',title:'읽기→게시글→상호작용→검수',status:'계획',className:'planned',evidence:'코드 확인',summary:'읽기, 쓰기, 댓글·좋아요, 신고·검수를 네 릴리스로 나눈다.',steps:['읽기: 목록→다음→상세→댓글→빈 값→404','게시글: 비로그인 거부→텍스트→이미지→형식 거부→본인 수정→타인 거부→삭제','상호작용: 댓글 CRUD→좋아요 멱등→팔로우→자기팔로우 거부','검수: 신고→중복→queue→상태→숨김→audit'],accept:'소유권·페이지·파일 제한·멱등성·감사 로그가 하위 기능별로 통과한다.',failure:'실패한 하위 route만 닫고 animation/RunPod는 계속 비활성이다.',next:'F11 CPU 경로'},
+{id:'F11',lane:'경로·AI',title:'CPU 경로·코스·POI·날씨',status:'계획',className:'planned',evidence:'코드 확인',summary:'FastAPI CPU 기능을 AI·Celery 없이 먼저 연다.',steps:['health','정상 출발·도착','polyline','같은 좌표','경계 밖 좌표','순환 코스','시설','POI','날씨 fallback','timeout'],accept:'정상·경계·경로 없음·timeout과 지도 순서가 설명 가능하다.',failure:'FastAPI route만 닫고 Spring 공개 읽기는 유지한다.',next:'F12 AI 일정'},
+{id:'F12',lane:'경로·AI',title:'AI 일정 추천',status:'계획',className:'planned',evidence:'코드 확인',summary:'고정 평가 입력으로 후보→LLM→좌표→지도 전체를 비교한다.',steps:['평가 입력','조건 1회','후보 근거','LLM 대조','좌표 우선순위','일정·마커 수','빈 응답','120초 timeout','토큰·비용','회귀 비교'],accept:'환각·좌표 누락·비용·timeout을 숨기지 않고 partial result를 표시한다.',failure:'AI route를 닫고 CPU 경로는 유지한다.',next:'F13 SSE 챗봇'},
+{id:'F13',lane:'경로·AI',title:'SSE 챗봇',status:'계획',className:'planned',evidence:'코드 확인',summary:'인증·quota·stream 종료를 한 이벤트씩 확인한다.',steps:['인증 없음 401','invalid key 401','quota 429','정상 연결','첫 토큰 시간','이벤트 순서','DONE','브라우저 종료','서버 정리','재시도 중복 없음'],accept:'첫 토큰부터 종료까지 순서가 맞고 disconnect 자원이 정리된다.',failure:'stream route만 닫고 일정 추천은 유지한다.',next:'F14 Celery'},
+{id:'F14',lane:'비동기·고비용',title:'Celery task type 하나씩',status:'계획',className:'planned',evidence:'코드 확인',summary:'embed→rerank→weather→event→TTS→cleanup 순서로 독립 배포한다.',steps:['task type 1개 활성','1건 생성','queued','running','success','고의 실패','retry','중복 key','revoke','worker 재기동','결과 만료'],accept:'상태 전이와 중복 방지가 type마다 별도 기록으로 남는다.',failure:'해당 queue/type만 중단한다.',next:'다음 task type 또는 F15 승인 게이트'},
+{id:'F15',lane:'비동기·고비용',title:'미디어·RunPod',status:'비용 승인 전 보류',className:'held',evidence:'보류',summary:'비용 상한과 자동 종료가 생기기 전에는 job을 만들지 않는다.',steps:['일·월 비용 상한','idle 자동 종료','입력 보존 기간','결과 보존 기간','동의·소유권','중복 방지 키','웹·worker 장애 격리','별도 사용자 승인'],accept:'승인 전 실제 GPU job은 0건이다.',failure:'비용 게이트가 없으면 계속 보류한다.',next:'승인 시 미디어 type 하나만 선택'},
+{id:'F16',lane:'운영자',title:'관리자·파트너',status:'계획',className:'planned',evidence:'코드 확인',summary:'사용자 기능이 안정된 뒤 role·audit·rollback을 마지막에 연다.',steps:['guest admin 403','user admin 403','admin 사용자 목록','역할 변경 확인','재조회','SDUI 화면 목록','화면·query 연결','검수 queue','partner 역할','B2B event/review 분리','destructive audit','운영 rollback'],accept:'역할별 접근과 모든 파괴적 행동의 감사·복구가 확인된다.',failure:'관리자 route를 닫고 사용자 기능은 유지한다.',next:'운영 인수인계와 회귀 점검'}];
+const flows=[
+{id:'base',title:'기준점',status:'완료',current:false,detail:'B0에서 main·digest·target·rollback과 AWS/RunPod 제외 경계를 확인했습니다.'},
+{id:'web',title:'웹 첫 기능',status:'준비 완료',current:true,detail:'F1 코드·이미지·Compose·런북은 준비됐지만 VPS와 실화면은 아직 미실행입니다.'},
+{id:'platform',title:'플랫폼 기반',status:'계획',current:false,detail:'G1과 F2에서 Spring·DB·Redis와 모바일 주소검색을 분리합니다.'},
+{id:'read',title:'공개 읽기',status:'계획',current:false,detail:'SDUI·맛집·성지·K-POP을 쓰기 없이 하나씩 엽니다.'},
+{id:'write',title:'인증·쓰기',status:'계획',current:false,detail:'로그인 안정화 뒤 저장·제보·커뮤니티 쓰기를 엽니다.'},
+{id:'ai',title:'경로·AI·비동기',status:'계획/보류',current:false,detail:'CPU 경로부터 AI·SSE·Celery로 가며 RunPod는 비용 승인 전 보류합니다.'},
+{id:'ops',title:'운영자',status:'계획',current:false,detail:'관리자·파트너 기능은 사용자 경로가 안정된 뒤 마지막에 엽니다.'}];
+const laneOrder=['기준과 첫 배포','플랫폼 기반','공개 읽기','K-POP 읽기','인증·사용자 쓰기','커뮤니티','경로·AI','비동기·고비용','운영자'];
+let selected='F1',selectedFlow='web';
+function renderFlow(){const root=document.getElementById('flow');root.replaceChildren();flows.forEach(f=>{const b=document.createElement('button');b.type='button';b.className='focus';b.setAttribute('aria-pressed',String(f.id===selectedFlow));if(f.current)b.setAttribute('aria-current','step');const s=document.createElement('strong');s.textContent=f.title;const small=document.createElement('small');small.textContent=f.status;b.append(s,small);b.onclick=()=>{selectedFlow=f.id;renderFlow()};root.append(b)});const f=flows.find(x=>x.id===selectedFlow);document.getElementById('flow-detail').textContent=f.detail}
+function renderMap(){const root=document.getElementById('map');root.replaceChildren();laneOrder.forEach(lane=>{const group=phases.filter(p=>p.lane===lane);if(!group.length)return;const section=document.createElement('section');section.className='lane';const h=document.createElement('div');h.className='lane-title';h.textContent=lane;const nodes=document.createElement('div');nodes.className='nodes';group.forEach(p=>{const b=document.createElement('button');b.type='button';b.className=`node ${p.className} focus`;b.setAttribute('aria-pressed',String(p.id===selected));const st=document.createElement('strong');st.textContent=`${p.id} · ${p.title}`;const sm=document.createElement('small');sm.textContent=`${p.status} · ${p.evidence}`;b.append(st,sm);b.onclick=()=>{selected=p.id;renderMap();renderDetail(true)};nodes.append(b)});section.append(h,nodes);root.append(section)})}
+function renderDetail(focus=false){const p=phases.find(x=>x.id===selected);const title=document.getElementById('detail-title');title.textContent=`${p.id} · ${p.title}`;const body=document.getElementById('detail-body');body.replaceChildren();const chips=document.createElement('div');chips.className='chips';[p.status,p.evidence,`${p.steps.length}개 최소 행동`].forEach(v=>{const c=document.createElement('span');c.className='chip';c.textContent=v;chips.append(c)});const summary=document.createElement('p');summary.textContent=p.summary;const h=document.createElement('h3');h.textContent='행동 순서';const ol=document.createElement('ol');ol.className='step-list';p.steps.forEach(x=>{const li=document.createElement('li');li.textContent=x;ol.append(li)});const table=document.createElement('table');[['통과 기준',p.accept],['실패 시',p.failure],['다음',p.next]].forEach(([a,b])=>{const tr=document.createElement('tr');const th=document.createElement('th');th.textContent=a;const td=document.createElement('td');td.textContent=b;tr.append(th,td);table.append(tr)});body.append(chips,summary,h,ol,table);if(focus){title.focus();document.getElementById('detail').scrollIntoView({block:'nearest'})}}
+function renderCycle(){const root=document.getElementById('cycle-list');commonCycle.forEach(x=>{const li=document.createElement('li');li.textContent=x;root.append(li)})}
+const tabs=[...document.querySelectorAll('[role="tab"]')];function activate(tab,focus=false){tabs.forEach(t=>{const yes=t===tab;t.setAttribute('aria-selected',String(yes));t.tabIndex=yes?0:-1;document.getElementById(t.getAttribute('aria-controls')).hidden=!yes});if(focus)tab.focus()}
+tabs.forEach((t,i)=>{t.onclick=()=>activate(t);t.onkeydown=e=>{let n;if(e.key==='ArrowRight')n=(i+1)%tabs.length;else if(e.key==='ArrowLeft')n=(i+tabs.length-1)%tabs.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=tabs.length-1;else return;e.preventDefault();activate(tabs[n],true)}});
+renderFlow();renderMap();renderDetail();renderCycle();
+</script>
+</body>
+</html>
