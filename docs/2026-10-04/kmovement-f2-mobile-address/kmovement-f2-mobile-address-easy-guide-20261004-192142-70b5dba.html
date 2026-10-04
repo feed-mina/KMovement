@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>KMovement F2 모바일 주소검색 쉬운 안내서</title>
+<style>
+:root{--ink:#17263b;--muted:#526174;--line:#d9e1ec;--blue:#2459b8;--bluebg:#edf4ff;--green:#176a47;--greenbg:#eaf7ef;--amber:#8b5a00;--amberbg:#fff5da;--red:#9a3030;--redbg:#fff0f0}*{box-sizing:border-box}body{margin:0;background:#f3f6fa;color:var(--ink);font:17px/1.7 system-ui,"Malgun Gothic",sans-serif}.goal{position:sticky;top:0;z-index:10;background:#17365d;color:#fff;padding:12px 20px;text-align:center}main{max-width:1120px;margin:auto;padding:24px}header,section{background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;margin-bottom:22px}h1{font-size:32px;line-height:1.3;margin:4px 0 12px}h2{font-size:23px;margin:0 0 12px}h3{font-size:19px;margin:0 0 8px}p{max-width:78ch}.eyebrow{color:var(--blue);font-size:13px;font-weight:800;letter-spacing:.8px}.status{display:inline-block;padding:4px 10px;border-radius:99px;font-size:13px;font-weight:800}.ok{background:var(--greenbg);color:var(--green)}.wait{background:var(--amberbg);color:var(--amber)}.no{background:var(--redbg);color:var(--red)}.cards,.compare{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.card,.mock{border:1px solid var(--line);border-radius:15px;padding:17px;background:#fbfcfe}.story{padding-left:24px}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.step{position:relative;border:1px solid var(--line);border-radius:13px;padding:13px;background:#fff;min-height:118px}.step:not(:last-child)::after{content:"→";position:absolute;right:-10px;top:44%;z-index:2;color:#8290a4}.step small{display:block;color:var(--muted);margin-top:6px}.map{display:grid;grid-template-columns:1.05fr 1fr;gap:20px;align-items:start}.answer{position:sticky;top:62px;border:2px solid #8fb3e8;border-radius:15px;background:var(--bluebg);padding:20px;min-height:400px}.diagram{display:grid;gap:10px}.node{width:100%;border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:12px;background:#fff;padding:14px;text-align:left;font:inherit;cursor:pointer}.node[aria-pressed=true]{background:var(--bluebg);outline:3px solid #8fb3e8}.node small{display:block;color:var(--muted)}button:focus-visible{outline:3px solid #d48200;outline-offset:3px}.arrow{text-align:center;color:#8190a5}.actionbox{background:var(--amberbg);border-radius:13px;padding:16px}.phone{max-width:310px;margin:12px auto;border:8px solid #26354a;border-radius:30px;padding:20px;background:white;min-height:340px}.input,.result{border:1px solid var(--line);border-radius:10px;padding:11px;margin:9px 0}.button{background:#e31b38;color:#fff;border-radius:10px;padding:11px;text-align:center;font-weight:800}.help{color:var(--blue);font-weight:700;margin-top:15px}.evidence{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid var(--line);padding:12px;text-align:left;vertical-align:top}th{background:#f1f5fa}.note{color:var(--muted);font-size:14px}@media(max-width:760px){main{padding:12px}.cards,.compare,.map{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.step:not(:last-child)::after{content:"↓";right:50%;top:auto;bottom:-18px}.answer{position:static;order:2}.diagram{order:1}h1{font-size:27px}.goal{position:static}}
+</style>
+</head>
+<body>
+<div class="goal" role="note">최종 목표: 휴대폰에서 주소를 찾고 고른 뒤, 회원가입 칸에 우편번호와 도로명 주소가 정확히 들어가게 한다.</div>
+<div role="tablist" hidden><button id="tab-report" role="tab" aria-selected="true" aria-controls="report-main">보고서</button></div>
+<main id="report-main" role="tabpanel" aria-labelledby="tab-report">
+<header>
+<p class="eyebrow">F2 · 쉬운 안내서 · 2026-10-04</p>
+<h1>모바일 주소검색은 만들어져 있지만<br>Hostinger에서 실제로 쓰기 전 마지막 연결이 필요합니다</h1>
+<p>휴대폰 화면과 실패할 때의 직접 입력 길은 이미 준비되어 있습니다. 다음 행동은 개발자가 주소 찾기만 안전하게 열고 실제 휴대폰에서 다섯 가지 경우를 확인하는 것입니다.</p>
+<div class="cards">
+<article class="card"><span class="status ok">코드에서 확인</span><h3>화면과 선택</h3><p>두 글자 이상 검색하고 결과를 누르면 우편번호와 도로명 주소가 입력칸으로 전달됩니다.</p></article>
+<article class="card"><span class="status wait">아직 미확인</span><h3>실제 서비스</h3><p>Hostinger 주소로 실제 검색되는지, 빈 결과와 인터넷 오류가 휴대폰에서 잘 안내되는지는 확인하지 않았습니다.</p></article>
+</div>
+</header>
+
+<section>
+<h2>3줄 줄거리</h2>
+<ol class="story"><li>사용자가 휴대폰에서 주소를 두 글자 이상 입력하고 검색합니다.</li><li>KMovement가 카카오 주소 찾기에 대신 물어보고, 쓸 수 있는 도로명 주소를 최대 열 개 보여줍니다.</li><li>검색이 안 되더라도 직접 입력을 열어 회원가입을 계속할 수 있어야 합니다.</li></ol>
+<p><strong>지금 나는</strong> [기능을 하나씩 Hostinger에 여는 전체 목표] 중 [F2 모바일 주소검색]의 [코드는 확인했고 실제 연결은 아직 하지 않은 지점]에 있습니다.</p>
+<div class="actionbox"><strong>아직 모르는 것:</strong> 실제 Hostinger와 휴대폰에서 검색·빈 결과·외부 오류·인터넷 오류·직접 입력이 모두 같은 흐름으로 작동하는지.<br><strong>확인하는 방법:</strong> 주소 찾기만 따로 연 시험판에서 위 다섯 경우를 한 번씩 실행하고 화면과 응답을 함께 남깁니다.</div>
+</section>
+
+<section>
+<h2>사용자가 지나가는 길</h2>
+<div class="flow" aria-label="모바일 주소검색 흐름">
+<article class="step"><span class="status ok">준비됨</span><strong>1. 주소 찾기 열기</strong><small>회원가입 화면에서 시작</small></article>
+<article class="step"><span class="status ok">준비됨</span><strong>2. 두 글자 이상 입력</strong><small>도로명·건물명·동 이름</small></article>
+<article class="step"><span class="status wait">실사용 미확인</span><strong>3. 주소 결과 받기</strong><small>우편번호와 도로명</small></article>
+<article class="step"><span class="status ok">준비됨</span><strong>4. 결과 선택</strong><small>회원가입 칸에 채우기</small></article>
+<article class="step"><span class="status wait">실사용 미확인</span><strong>5. 실패하면 직접 입력</strong><small>막히지 않고 계속</small></article>
+</div>
+</section>
+
+<section>
+<h2>행동 지도</h2>
+<p>오른쪽 항목을 누르면 왼쪽에 지금 할 일과 끝났는지 확인하는 법이 나옵니다.</p>
+<div class="map">
+<article class="answer" aria-live="polite">
+<p class="eyebrow" id="path">전체 목표 › F2 › 검색 시작</p><h3 id="detail-title" tabindex="-1">검색 시작</h3>
+<div id="detail-body"><p><strong>현재 상황:</strong> 두 글자보다 짧으면 검색하지 않고 안내합니다.</p><p><strong>내가 할 일:</strong> “테헤란로 152”처럼 두 글자 이상 입력합니다.</p><p><strong>도우미에게 부탁할 말:</strong> 짧은 검색어가 밖으로 전송되지 않는지 확인해 주세요.</p><p><strong>끝났는지 확인:</strong> 한 글자에서는 안내만 보이고, 두 글자부터 검색이 시작됩니다.</p></div>
+</article>
+<div class="diagram" aria-label="클릭형 행동 지도">
+<button class="node" data-key="start" aria-pressed="true"><strong>① 검색 시작</strong><small>두 글자 규칙</small></button><div class="arrow">↓</div>
+<button class="node" data-key="result" aria-pressed="false"><strong>② 결과 보기</strong><small>도로명·우편번호</small></button><div class="arrow">↓</div>
+<button class="node" data-key="pick" aria-pressed="false"><strong>③ 주소 고르기</strong><small>입력칸에 전달</small></button><div class="arrow">↘ 실패하면</div>
+<button class="node" data-key="manual" aria-pressed="false"><strong>④ 직접 입력</strong><small>검색이 막혀도 계속</small></button><div class="arrow">↓</div>
+<button class="node" data-key="check" aria-pressed="false"><strong>⑤ 실제 휴대폰 확인</strong><small>다섯 가지 증거</small></button>
+</div>
+</div>
+</section>
+
+<section>
+<h2>Before / After</h2>
+<div class="compare">
+<article class="mock"><span class="status wait">현재 모형 · 실화면 아님</span><h3>Hostinger 연결 전</h3><div class="phone"><strong>주소 검색</strong><div class="input">테헤란로 152</div><div class="button">검색</div><p class="note">화면은 준비됐지만 실제 주소 결과가 오는지는 아직 확인하지 않았습니다.</p><p class="help">주소를 찾을 수 없나요? 직접 입력</p></div></article>
+<article class="mock"><span class="status wait">기대 모형 · 구현 후 확인</span><h3>F2 검증 후</h3><div class="phone"><strong>주소 검색</strong><div class="input">테헤란로 152</div><div class="result"><strong>서울 강남구 테헤란로 152</strong><br><small>[06236] 역삼동 737</small></div><div class="result">결과가 없거나 오류면<br><strong>직접 입력 계속 사용</strong></div></div></article>
+</div>
+</section>
+
+<section>
+<h2>완료 확인표</h2>
+<table class="evidence"><thead><tr><th>확인할 일</th><th>지금 상태</th><th>끝났다고 말할 기준</th></tr></thead><tbody>
+<tr><td>정상 검색</td><td>화면 준비 · 실제 미확인</td><td>실제 주소와 우편번호가 보이고 선택됨</td></tr>
+<tr><td>빈 결과</td><td>안내 화면 준비 · 실제 미확인</td><td>검색어 변경 또는 직접 입력 안내가 보임</td></tr>
+<tr><td>카카오 쪽 오류</td><td>실패 안내 준비 · 실제 미확인</td><td>서비스가 멈추지 않고 직접 입력 가능</td></tr>
+<tr><td>휴대폰 인터넷 오류</td><td>실패 안내 준비 · 실제 미확인</td><td>인터넷 오류를 알려주고 직접 입력 가능</td></tr>
+<tr><td>직접 입력</td><td>화면 준비 · 실제 미확인</td><td>다섯 자리 우편번호와 주소가 회원가입 칸에 들어감</td></tr>
+</tbody></table>
+<p class="note">이 보고서는 코드를 읽어 만든 설명입니다. 정적 HTML 검사는 통과했지만 내장 브라우저의 로컬 런타임 자산 경로 오류로 클릭·키보드·좁은 화면은 확인하지 못했습니다. 앱 수정, 서버 설정, 배포, 실제 휴대폰 검증도 수행하지 않았습니다.</p>
+</section>
+</main>
+<script>
+const details={
+start:{title:'검색 시작',path:'전체 목표 › F2 › 검색 시작',body:[['현재 상황','두 글자보다 짧으면 검색하지 않고 안내합니다.'],['내가 할 일','“테헤란로 152”처럼 두 글자 이상 입력합니다.'],['도우미에게 부탁할 말','짧은 검색어가 밖으로 전송되지 않는지 확인해 주세요.'],['끝났는지 확인','한 글자에서는 안내만 보이고, 두 글자부터 검색이 시작됩니다.']]},
+result:{title:'결과 보기',path:'전체 목표 › F2 › 주소 결과',body:[['현재 상황','쓸 수 있는 도로명 주소만 목록에 남기도록 준비돼 있습니다.'],['내가 할 일','도로명과 우편번호가 맞는 결과를 찾습니다.'],['도우미에게 부탁할 말','정상 결과, 결과 없음, 잘못된 응답을 따로 확인해 주세요.'],['끝났는지 확인','최대 열 개 안에서 도로명과 우편번호가 함께 보입니다.']]},
+pick:{title:'주소 고르기',path:'전체 목표 › F2 › 결과 선택',body:[['현재 상황','결과를 누르면 회원가입의 두 칸으로 값이 전달되도록 연결돼 있습니다.'],['내가 할 일','원하는 주소 한 줄을 누릅니다.'],['도우미에게 부탁할 말','선택 뒤 우편번호와 도로명 주소가 모두 채워지는지 확인해 주세요.'],['끝났는지 확인','주소 찾기 창이 닫히고 회원가입 화면에 두 값이 남습니다.']]},
+manual:{title:'직접 입력',path:'전체 목표 › F2 › 실패 탈출구',body:[['현재 상황','검색 실패가 회원가입 중단으로 이어지지 않도록 직접 입력이 있습니다.'],['내가 할 일','우편번호 다섯 자리와 도로명 주소를 직접 적고 “이 주소 사용”을 누릅니다.'],['도우미에게 부탁할 말','검색 오류 뒤에도 직접 입력 버튼이 활성화되는지 확인해 주세요.'],['끝났는지 확인','직접 적은 두 값이 회원가입 화면으로 돌아갑니다.']]},
+check:{title:'실제 휴대폰 확인',path:'전체 목표 › F2 › 완료 판정',body:[['현재 상황','코드의 준비 상태만 확인했고 실제 서비스 증거는 없습니다.'],['내가 할 일','개발자가 주소 찾기 시험판을 준비한 뒤 실제 휴대폰에서 함께 확인합니다.'],['도우미에게 부탁할 말','정상·빈 결과·카카오 오류·인터넷 오류·직접 입력의 화면과 결과를 남겨 주세요.'],['끝났는지 확인','다섯 경우가 모두 통과하고 비밀 주소 찾기 열쇠가 휴대폰에 보이지 않습니다.']]}
+};
+document.querySelectorAll('.node').forEach(btn=>btn.addEventListener('click',()=>{const d=details[btn.dataset.key];document.querySelectorAll('.node').forEach(x=>x.setAttribute('aria-pressed',String(x===btn)));document.getElementById('path').textContent=d.path;const title=document.getElementById('detail-title');title.textContent=d.title;const box=document.getElementById('detail-body');box.replaceChildren();d.body.forEach(([k,v])=>{const p=document.createElement('p');const s=document.createElement('strong');s.textContent=k+': ';p.append(s,document.createTextNode(v));box.append(p)});title.focus({preventScroll:true});if(innerWidth<760)title.scrollIntoView({block:'start'})}));
+</script>
+</body></html>

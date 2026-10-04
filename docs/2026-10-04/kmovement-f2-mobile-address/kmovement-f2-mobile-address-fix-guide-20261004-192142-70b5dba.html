@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>KMovement F2 모바일 주소검색 Fix Guide</title>
+<style>
+:root{--ink:#172235;--muted:#506077;--line:#d8e0ec;--blue:#2458b8;--bluebg:#edf3ff;--green:#176b48;--greenbg:#e9f7ef;--amber:#8a5900;--amberbg:#fff5da;--red:#9b3030;--redbg:#fff0f0;--code:#152033}*{box-sizing:border-box}body{margin:0;background:#f3f6fa;color:var(--ink);font:16px/1.7 system-ui,"Malgun Gothic",sans-serif}.goal{position:sticky;top:0;z-index:20;background:#132f52;color:white;padding:11px 18px;text-align:center}main{max-width:1220px;margin:auto;padding:24px}header,section{background:white;border:1px solid var(--line);border-radius:20px;padding:24px;margin-bottom:22px}h1{font-size:34px;line-height:1.3;margin:3px 0 12px}h2{font-size:23px;margin:0 0 12px}h3{font-size:18px;margin:0 0 8px}.eyebrow{font-size:12px;color:var(--blue);font-weight:800;letter-spacing:.8px}.badge{display:inline-flex;padding:4px 9px;border-radius:99px;font-size:12px;font-weight:800}.ok{color:var(--green);background:var(--greenbg)}.wait{color:var(--amber);background:var(--amberbg)}.risk{color:var(--red);background:var(--redbg)}.cards,.compare,.checks{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.card,.model,.check{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fbfcfe}.flow{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.flow>div{border:1px solid var(--line);border-radius:12px;padding:12px;min-height:125px;position:relative}.flow>div:not(:last-child)::after{content:"→";position:absolute;right:-10px;top:43%;z-index:2;color:#8391a5}.flow small{display:block;color:var(--muted);margin-top:6px}.map{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.85fr);gap:20px;align-items:start}.detail{position:sticky;top:58px;border:1px solid var(--line);border-radius:15px;overflow:hidden;background:#fff;min-height:600px}.detail header{border:0;border-radius:0;margin:0;padding:17px;border-bottom:1px solid var(--line)}.detail-body{padding:18px}.nodes{display:grid;gap:10px}.lane{font-size:12px;color:var(--muted);font-weight:800;margin:10px 0 4px}.node{border:1px solid var(--line);border-left:5px solid var(--green);border-radius:11px;background:#fff;text-align:left;padding:13px;font:inherit;cursor:pointer}.node.cause{border-left-color:#d29a29}.node.test{border-style:dashed;border-left-color:var(--blue)}.node.front{border-left-color:#7b8798}.node[aria-pressed=true]{background:var(--bluebg);outline:3px solid #8aa9e4}.node small{display:block;color:var(--muted)}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #d48200;outline-offset:3px}.arrow{text-align:center;color:#8492a6}pre{background:var(--code);color:#e6edf7;border-radius:10px;padding:14px;overflow:auto;font:13px/1.6 Consolas,monospace;white-space:pre-wrap}code{font-family:Consolas,monospace}.bodylist{padding-left:20px}.where{color:var(--muted);font-size:13px}.hypo{width:100%;border-collapse:collapse}th,td{padding:12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f1f5fa}.screen{border:1px solid var(--line);border-radius:14px;padding:16px}.route{background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px;margin:8px 0}.callout{background:var(--amberbg);padding:15px;border-radius:12px}.copy{border:1px solid #91abd6;background:white;border-radius:9px;padding:8px 12px;cursor:pointer}.prompt{max-height:380px}.note{font-size:13px;color:var(--muted)}a{color:#145cb4}@media(max-width:820px){main{padding:12px}.cards,.compare,.checks,.map{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.flow>div:not(:last-child)::after{content:"↓";right:50%;top:auto;bottom:-19px}.detail{position:static;order:2}.nodes{order:1}.goal{position:static}h1{font-size:27px}}
+</style>
+</head>
+<body>
+<div class="goal" role="note">최종 목표: origin/main 963b8d4 기준으로 모바일 주소검색 한 경로만 안전하게 공개하고, 정상·빈 결과·공급자 오류·네트워크 오류·직접 입력을 증거로 검증한다.</div>
+<div role="tablist" hidden><button id="tab-report" role="tab" aria-selected="true" aria-controls="report-main">보고서</button></div>
+<main id="report-main" role="tabpanel" aria-labelledby="tab-report">
+<header>
+<p class="eyebrow">F2 · FIX GUIDE · 분석 보고서 · 2026-10-04</p>
+<h1>모바일 주소검색의 앱·Spring 계약은 존재하지만<br>Hostinger 배포 계약과 전용 검증 게이트가 비어 있습니다</h1>
+<p>다음 구현은 새 기능을 넓히는 일이 아니라 카카오 REST 키, 정확한 GET 경로, 기존 Traefik 공용 네트워크, 다섯 가지 테스트를 F2 경계 안에서 연결하는 작업입니다.</p>
+<div class="cards">
+<article class="card"><span class="badge ok">확인</span><h3>이미 있는 흐름</h3><p>React Native 모달 → Spring 프록시 → Kakao Local 주소 검색 → 우편번호·도로명 선택 → 폼 반영. 실패 시 직접 입력을 유지합니다.</p></article>
+<article class="card"><span class="badge risk">현재 차단점</span><h3>운영 연결 없음</h3><p>G1 profile의 Kakao 키는 <code>disabled-g1</code>이고 Compose secret에는 REST 키가 없습니다. Traefik은 health 한 경로만 선언하며 Spring은 내부 <code>g1</code> 네트워크에만 있습니다.</p></article>
+</div>
+</header>
+
+<section>
+<h2>3줄 줄거리</h2>
+<ol><li>모바일은 <code>OPEN_POSTCODE</code>를 받으면 <code>AddressSearchModal</code>을 열고 두 글자 이상을 Spring으로 보냅니다.</li><li>Spring은 REST 키를 서버에 숨긴 채 Kakao 주소 API를 호출하고 최대 10건을 앱 계약으로 바꿉니다.</li><li>F2 완료를 위해서는 Hostinger secret·정확한 route·공용 proxy network·다섯 경우의 자동/실기기 증거가 추가돼야 합니다.</li></ol>
+<p><strong>지금 나는</strong> [기능별 Hostinger 배포] 중 [F2 모바일 주소검색]의 [정적 코드 계약 확인 완료, 운영 연결 설계 전]에 있습니다.</p>
+<div class="callout"><strong>가설:</strong> 현재 모바일·Spring 코드만으로 Hostinger에서 주소검색이 동작할 것이다.<br><strong>검증 결과:</strong> <b>반증</b>. 운영 profile은 키를 비활성값으로 두고 F2 route와 proxy network 연결이 없습니다. 실제 VPS·실기기 호출은 이번 분석에서 실행하지 않았습니다.</div>
+</section>
+
+<section>
+<h2>현재 호출 흐름과 완료 경계</h2>
+<div class="flow">
+<div><span class="badge ok">확인</span><strong>1. OPEN_POSTCODE</strong><small>폼 동작이 모바일 모달 callback을 등록</small></div>
+<div><span class="badge ok">확인</span><strong>2. 검색 모달</strong><small>2자 규칙·loading·empty·error·manual</small></div>
+<div><span class="badge wait">운영 미확인</span><strong>3. Spring GET</strong><small>공개 보안 규칙은 있으나 외부 route 없음</small></div>
+<div><span class="badge wait">키 미주입</span><strong>4. Kakao Local</strong><small>서버 요청은 맞지만 G1 키가 disabled</small></div>
+<div><span class="badge ok">정적 확인</span><strong>5. 응답 변환</strong><small>우편번호·도로명 없는 행 제외</small></div>
+<div><span class="badge wait">실기기 미확인</span><strong>6. 폼 반영</strong><small>callback 코드는 있으나 배포 증거 없음</small></div>
+</div>
+</section>
+
+<section>
+<h2>클릭형 수정 지도</h2><p>노드를 누르면 오른쪽에서 현재 문제, 수정 범위, 완료 증거와 실패 대응을 확인할 수 있습니다.</p>
+<div class="map">
+<div class="nodes">
+<div class="lane">모바일 화면</div>
+<button class="node front" data-id="mobile" aria-pressed="true"><strong>AddressSearchModal.tsx</strong><small>검색·결과·직접 입력 · 현재 구현</small></button>
+<div class="arrow">↓ GET /api/v1/address/search</div>
+<div class="lane">Spring API</div>
+<button class="node cause" data-id="controller" aria-pressed="false"><strong>AddressSearchController.java</strong><small>200 또는 502 응답 경계</small></button>
+<div class="arrow">↓ 서버에서 Kakao 호출</div>
+<button class="node cause" data-id="service" aria-pressed="false"><strong>AddressSearchService.java</strong><small>REST key·주소 변환·timeout 보강 지점</small></button>
+<div class="lane">Hostinger 공개 경계</div>
+<button class="node" data-id="deploy" aria-pressed="false"><strong>g1.compose.yml + hostinger profile</strong><small>secret·정확한 route·proxy network</small></button>
+<div class="lane">검증</div>
+<button class="node test" data-id="tests" aria-pressed="false"><strong>F2 전용 자동·실기기 검증</strong><small>현재 CI 누락을 보완</small></button>
+<button class="node test" data-id="handoff" aria-pressed="false"><strong>에이전트 요청문</strong><small>바로 전달 가능한 구현 범위</small></button>
+</div>
+<article class="detail" aria-live="polite"><header><p class="eyebrow" id="detail-path">전체 목표 › F2 › 모바일 화면</p><h3 id="detail-title" tabindex="-1">AddressSearchModal.tsx</h3><p class="where" id="detail-sub">현재 구현 · 수정 전 재검증</p></header><div class="detail-body" id="detail-body"></div></article>
+</div>
+</section>
+
+<section>
+<h2>Before / After</h2>
+<div class="compare">
+<article class="model"><span class="badge wait">현재 구성 모형</span><h3>health만 외부 공개</h3><div class="screen"><div class="route">휴대폰 → KMovement HTTPS</div><div class="route">주소 경로 → 웹 catch-all 또는 404/502 가능</div><div class="route">Spring → 내부 g1 network만</div><div class="route">Kakao key → disabled-g1</div></div><p class="note">코드·Compose 기반 재구성입니다. 실제 VPS 응답 캡처가 아닙니다.</p></article>
+<article class="model"><span class="badge wait">수정 후 기대 모형</span><h3>주소 GET 하나만 공개</h3><div class="screen"><div class="route">휴대폰 → GET 주소검색</div><div class="route">Traefik exact path + GET → Spring:8080</div><div class="route">Spring → Kakao HTTPS, REST key는 secret file</div><div class="route">정상 200 / 공급자 실패 502 / 앱 manual fallback</div></div><p class="note">제안 모형입니다. 구현·CI·VPS·실기기 검증 후에만 완료로 바뀝니다.</p></article>
+</div>
+</section>
+
+<section>
+<h2>가설과 검증 판정</h2>
+<table class="hypo"><thead><tr><th>가설</th><th>판정</th><th>근거와 다음 검증</th></tr></thead><tbody>
+<tr><td>앱 UI 계약이 없다</td><td><span class="badge ok">반증</span></td><td>모달, 응답 파서, 결과 선택, 직접 입력과 3개 컴포넌트 테스트가 존재합니다.</td></tr>
+<tr><td>Spring API가 인증 때문에 막힌다</td><td><span class="badge ok">반증</span></td><td>SecurityConfig가 GET 주소검색 한 경로를 비로그인 공개합니다.</td></tr>
+<tr><td>현재 G1 배포 설정으로 즉시 동작한다</td><td><span class="badge risk">반증</span></td><td>Kakao key가 disabled이고 address router가 없습니다. Traefik과 공유할 정확한 network 이름도 VPS에서 다시 확인해야 합니다.</td></tr>
+<tr><td>기존 CI가 F2 회귀를 막는다</td><td><span class="badge risk">반증</span></td><td>기본 Spring CI는 build에서 test를 빼고 Celery 테스트만 실행합니다. G1 통합 CI도 주소 외부호출과 mobile Jest를 실행하지 않습니다.</td></tr>
+<tr><td>실기기에서 다섯 경우가 통과한다</td><td><span class="badge wait">미확인</span></td><td>구현 후 Android 시험판에서 정상·빈 결과·502·네트워크 오류·직접 입력을 각각 캡처해야 합니다.</td></tr>
+</tbody></table>
+</section>
+
+<section>
+<h2>검증·배포 체크</h2>
+<div class="checks">
+<article class="check"><span class="badge ok">정적 확인</span><h3>현재 코드</h3><ul><li>2자 미만은 외부 호출 안 함</li><li>Kakao 요청 size=10, similar 분석</li><li>도로명·우편번호 없는 결과 제외</li><li>공급자 예외는 502</li><li>REST key는 모바일 응답에 포함하지 않음</li></ul></article>
+<article class="check"><span class="badge wait">구현 필요</span><h3>배포 계약</h3><ul><li><code>kakao.client-id</code>를 file secret으로 주입</li><li>GET exact path router만 추가</li><li>실제 Traefik 공용 network 이름을 preflight로 확인</li><li>Spring만 내부 DB망과 proxy망에 이중 연결</li><li>key·query가 로그에 노출되지 않는지 확인</li></ul></article>
+<article class="check"><span class="badge wait">자동 검증 필요</span><h3>테스트</h3><ul><li>mobile: 정상·empty·502·network error·manual</li><li>Spring: short query·10건·malformed·upstream 4xx/5xx·timeout</li><li>Security: 무인증 GET 허용, 다른 method 차단</li><li>Compose: DB/Redis 비공개와 exact router 보존</li></ul></article>
+<article class="check"><span class="badge wait">운영 승인 후</span><h3>실제 확인</h3><ul><li>digest와 main SHA 기록</li><li>외부 curl 200/502 계약</li><li>Android 실제 주소 선택과 폼 반영</li><li>secret 비노출 확인</li><li>이전 Spring digest rollback</li></ul></article>
+</div>
+<details><summary>제안 검증 명령 · 이번 보고서에서는 미실행</summary><div><p><b>위치:</b> <code>subproject/SDUI/kride</code></p><pre>pnpm --filter @kride/mobile test -- --runInBand src/__tests__/AddressSearchModal.test.tsx</pre><p><b>예상:</b> 기존 테스트와 새 다섯 경우가 모두 PASS.</p><p><b>위치:</b> <code>subproject/SDUI/SDUI-server</code></p><pre>./gradlew test --tests "*AddressSearchServiceTest" --tests "*AddressSearchControllerTest"</pre><p><b>예상:</b> 입력·매핑·502·timeout·security 계약 PASS.</p></div></details>
+</section>
+
+<section>
+<h2>근거와 공식 계약</h2>
+<ul>
+<li><code>AddressSearchModal.tsx:76-101, 141-201</code> — 검색 상태와 직접 입력</li>
+<li><code>[screenId].tsx:56-60, 91-93, 175-183</code> — 모달 callback과 runtime API base</li>
+<li><code>AddressSearchController.java:30-40</code> — 200/502 계약</li>
+<li><code>AddressSearchService.java:24-59, 63-102</code> — Kakao 호출과 앱 응답 변환</li>
+<li><code>SecurityConfig.java:125-126</code> — GET 공개 경로</li>
+<li><code>application-hostinger-g1.yml:45-48</code>, <code>g1.compose.yml:69-125</code> — 비활성 키와 health-only 공개</li>
+<li><a href="https://developers.kakao.com/docs/ko/kakaomap/rest-api">카카오맵 REST API 공식 문서</a> — 주소 검색 URL, <code>KakaoAK</code> 헤더, query/analyze_type/size 계약</li>
+<li><a href="https://developers.kakao.com/docs/ko/getting-started/security-guideline">카카오 보안 권장 사항</a> — 플랫폼에 맞는 키 사용, 허용 IP와 비밀 보호</li>
+</ul>
+<p class="note">기준: 2026-10-04 원격 확인, origin/main <code>963b8d479daea0eb2ec5d1c7f3576a0a87c7c591</code>. 정적 HTML 검사는 통과했습니다. 내장 브라우저의 로컬 런타임 자산 경로 오류로 클릭·키보드·좁은 화면은 미검증입니다. 코드 수정·테스트 실행·이미지 게시·Hostinger 배포는 수행하지 않았습니다.</p>
+</section>
+</main>
+<script>
+const promptText=`목표: feed-mina/KMovement origin/main 963b8d4 기준으로 F2 모바일 주소검색만 Hostinger에 안전하게 공개하고 실제 Android에서 검증한다.
+
+확인된 사실:
+- 모바일 AddressSearchModal은 2자 검색, 결과 선택, empty/error 안내, 직접 입력을 구현한다.
+- Spring GET /api/v1/address/search는 Kakao Local REST API를 서버에서 호출하고 예외를 502로 반환한다.
+- G1 profile의 Kakao client-id는 disabled-g1이고 Compose secret에는 Kakao REST key가 없다.
+- G1 Traefik label은 health만 공개하며 Spring은 내부 g1 network에만 있다.
+- 현재 기본 CI는 mobile 주소 Jest와 Spring 주소 테스트를 실행하지 않는다.
+
+맡길 범위:
+1. 실제 Traefik 공용 network 이름을 읽기 전용 preflight로 확인하고 Spring만 g1+proxy network에 연결한다.
+2. Kakao REST API key를 Git/로그에 노출하지 않는 file secret으로 주입한다.
+3. Host+GET+정확한 /api/v1/address/search router만 추가한다. 전체 /api 공개는 금지한다.
+4. WebClient timeout과 공급자 오류의 502 계약을 테스트 가능하게 만든다.
+5. mobile과 Spring에서 정상, empty, 공급자 오류, network/timeout, manual fallback 테스트를 CI에 추가한다.
+
+완료 기준:
+- compose config 통과, DB/Redis 외부 포트 0개, secret 값 미노출
+- 무인증 GET만 통과하고 다른 method·경로는 기존 정책 유지
+- 실제 주소 최대 10건, zipCode/roadAddress, empty 200, 공급자 실패 502
+- Android에서 선택값이 폼에 반영되고 네트워크 실패 후 직접 입력 가능
+- main SHA, image digest, config revision, target, rollback digest 기록
+
+권한 경계:
+- PR까지 수행하고 main 병합, image publish, VPS secret 생성, 실제 배포는 별도 사용자 확인 전 실행하지 않는다.`;
+const data={
+mobile:{title:'AddressSearchModal.tsx',path:'전체 목표 › F2 › 모바일 화면',sub:'현재 구현 · 정상/오류/manual UI',html:`<p><b>현재 문제</b>: 구현은 있으나 현재 CI와 실기기 증거가 없습니다.</p><p><b>핵심 근거</b>: 76–101행이 검색과 오류를, 141–201행이 empty·결과·직접 입력을 담당합니다.</p><pre>76  const search = async () =&gt; {
+77    const query = keyword.trim();
+78    if (query.length &lt; 2) { ... }
+85    HTTP GET apiBase + addressPath
+89    setError('주소 검색에 실패했습니다...')
+98    setError('네트워크 오류가 발생했습니다...')</pre><p><b>수정 방향</b>: 기존 UX는 유지하고 empty, fetch reject, malformed JSON, modal reset 테스트를 보강합니다.</p><p><b>완료 증거</b>: 다섯 경우 Jest PASS + Android 화면 캡처.</p>`},
+controller:{title:'AddressSearchController.java',path:'전체 목표 › F2 › Spring 공개 API',sub:'현재 구현 · 200/502 경계',html:`<p><b>현재 문제</b>: 예외를 502로 바꾸는 코드는 있지만 controller/security 전용 테스트가 없습니다.</p><pre>30  @GetMapping("/search")
+31  public ResponseEntity&lt;Map&lt;String,Object&gt;&gt; search(...)
+34    items = addressSearchService.search(keyword)
+35    return 200 { items }
+38    return 502 { items: [], message: ... }</pre><p><b>수정 방향</b>: 2자 미만과 empty는 200 빈 목록, 공급자 4xx/5xx·timeout은 502로 고정합니다. 검색어 전체를 오류 로그에 남길지 개인정보 관점에서 재검토합니다.</p><p><b>완료 증거</b>: MockMvc 정상/empty/502와 무인증 GET security 테스트.</p>`},
+service:{title:'AddressSearchService.java',path:'전체 목표 › F2 › Kakao 프록시',sub:'현재 구현 · REST key 서버 보관',html:`<p><b>현재 문제</b>: 공식 URL과 헤더는 맞지만 endpoint가 상수이고 명시 timeout이 없어 외부 실패 테스트와 장애 상한을 고정하기 어렵습니다.</p><pre>24  KAKAO_LOCAL_ADDRESS_URL = "https://dapi.kakao.com/.../address.json"
+25  MAX_RESULTS = 10
+38  if (query.length() &lt; 2) return []
+43  size=10, analyze_type=similar
+53  Authorization: KakaoAK + REST_API_KEY
+57  block()</pre><p><b>수정 방향</b>: base URL과 timeout을 설정값으로 분리하고 테스트 서버를 주입할 수 있게 합니다. 응답 변환은 도로명·우편번호가 있는 행만 유지합니다.</p><p><b>완료 증거</b>: 실제 key 없이 mock upstream으로 정상·4xx·5xx·timeout 테스트 PASS.</p>`},
+deploy:{title:'Hostinger F2 배포 계약',path:'전체 목표 › F2 › secret·route·network',sub:'계획 · 아직 구현/배포 안 함',html:`<p><b>현재 문제</b>: <code>kakao.client-id=disabled-g1</code>, Kakao secret 없음, health router만 있음, Spring은 내부 g1 network 하나뿐입니다.</p><p><b>수정 순서</b></p><ol><li>VPS에서 기존 Traefik의 실제 network 이름을 읽기 전용으로 확인</li><li><code>kakao.client-id</code> file secret 추가</li><li>Spring을 내부 g1망과 확인된 proxy망에만 연결</li><li>Host + Method(GET) + Path exact router 추가</li><li>config 검증 뒤 PR, 병합/배포는 별도 승인</li></ol><p><b>실패 대응</b>: 404는 router, 502는 shared network/Spring/Kakao 순으로 확인. DB·Redis volume은 건드리지 않습니다.</p>`},
+tests:{title:'F2 전용 검증 게이트',path:'전체 목표 › F2 › 자동·실기기 증거',sub:'계획 · 현재 CI 누락',html:`<p><b>현재 문제</b>: mobile 테스트 파일과 Spring mapping 테스트는 존재하지만 기본 CI가 이 묶음을 실행하지 않습니다.</p><ul class="bodylist"><li>모바일: 정상 선택, empty, 502, fetch reject, manual</li><li>Spring: short query, max 10, malformed, 4xx/5xx, timeout</li><li>보안: GET 무인증 허용, 나머지 method 차단</li><li>배포: exact route, key 비노출, DB/Redis 포트 없음</li><li>실기기: 주소 선택 후 폼의 zipCode/roadAddress 확인</li></ul><p><b>통과 기준</b>: 자동 테스트와 실제 Android 증거를 같은 main SHA·image digest에 묶습니다.</p>`},
+handoff:{title:'구현 에이전트 요청문',path:'전체 목표 › F2 › 인계',sub:'복사 가능 · 실행 권한은 별도 경계 유지',prompt:true}
+};
+function render(id){const d=data[id];document.querySelectorAll('.node').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));document.getElementById('detail-path').textContent=d.path;const t=document.getElementById('detail-title');t.textContent=d.title;document.getElementById('detail-sub').textContent=d.sub;const body=document.getElementById('detail-body');body.replaceChildren();if(d.prompt){const b=document.createElement('button');b.className='copy';b.textContent='요청문 복사';const pre=document.createElement('pre');pre.className='prompt';pre.textContent=promptText;b.onclick=async()=>{try{await navigator.clipboard.writeText(promptText);b.textContent='복사됨'}catch{b.textContent='복사 실패 · 아래 원문 사용'}};body.append(b,pre)}else body.innerHTML=d.html;t.focus({preventScroll:true});if(innerWidth<820)t.scrollIntoView({block:'start'})}
+document.querySelectorAll('.node').forEach(b=>b.addEventListener('click',()=>render(b.dataset.id)));render('mobile');
+</script>
+</body></html>
