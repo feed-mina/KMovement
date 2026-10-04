@@ -95,9 +95,15 @@ jobs:
           set -euo pipefail
           for attempt in $(seq 1 60); do
             status="$(docker compose -f deploy/hostinger/g1.compose.yml ps --format json spring | jq -r 'if type == "array" then .[0].Health // .[0].State else .Health // .State end')"
-            echo "spring health attempt ${attempt}: ${status}"
+            container_id="$(docker compose -f deploy/hostinger/g1.compose.yml ps --all -q spring)"
+            state="$(docker inspect --format '{{.State.Status}}' "$container_id")"
+            restarts="$(docker inspect --format '{{.RestartCount}}' "$container_id")"
+            echo "spring health attempt ${attempt}: health=${status} state=${state} restarts=${restarts}"
             test "$status" = "healthy" && exit 0
             test "$status" = "unhealthy" && break
+            test "$state" = "exited" && break
+            test "$state" = "dead" && break
+            test "$restarts" -gt 0 && break
             sleep 5
           done
           docker compose -f deploy/hostinger/g1.compose.yml logs --no-color spring postgres redis
