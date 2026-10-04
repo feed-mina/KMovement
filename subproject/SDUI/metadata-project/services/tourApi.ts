@@ -58,9 +58,14 @@ export async function fetchTourPois(params: TourQuery = {}): Promise<TourPoi[]> 
     return res.data?.data ?? [];
 }
 
-/** 맛집(음식점, contentTypeId=39) 편의 조회. */
-export async function fetchRestaurants(areaCode?: string, numOfRows = 20): Promise<TourPoi[]> {
-    const res = await api.get('/api/v1/tour/restaurants', { params: { areaCode, numOfRows } });
+export type RestaurantQuery = Pick<
+    TourQuery,
+    'areaCode' | 'sigunguCode' | 'arrange' | 'numOfRows' | 'pageNo'
+>;
+
+/** 맛집(음식점, contentTypeId=39) 페이지 조회. */
+export async function fetchRestaurants(params: RestaurantQuery = {}): Promise<TourPoi[]> {
+    const res = await api.get('/api/v1/tour/restaurants', { params });
     return res.data?.data ?? [];
 }
 

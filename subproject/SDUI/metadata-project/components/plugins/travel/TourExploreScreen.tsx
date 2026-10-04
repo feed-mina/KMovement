@@ -6,6 +6,7 @@ import type { ScreenControllerProps } from '@/components/screens/types';
 import {
     fetchHolyContents,
     fetchHolyPois,
+    fetchRestaurants,
     fetchTourAreas,
     fetchTourDistricts,
     fetchTourPois,
@@ -13,7 +14,6 @@ import {
     TourPoi,
     TourRegion,
 } from '@/services/tourApi';
-import { HOLY_SITES } from '@/lib/data/holySites';
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
 import PoiImage from '@/components/plugins/travel/PoiImage';
 import TourPoiCard from '@/components/plugins/travel/TourPoiCard';
@@ -31,6 +31,14 @@ const CATEGORIES = [
     { id: '12', label: '관광지' },
     { id: '14', label: '문화시설' },
 ] as const;
+const DEFAULT_CATEGORY = '39';
+
+/** 외부 랜딩이 넘긴 카테고리를 공개 칩 범위로 제한한다. */
+export function resolveCategoryParam(value?: string | null): string {
+    const category = value?.trim();
+    if (!category) return DEFAULT_CATEGORY;
+    return CATEGORIES.some((item) => item.id === category) ? category : DEFAULT_CATEGORY;
+}
 
 /** 성지 계열(공용 tour_poi 데이터) 카테고리 여부 — 작품 필터를 공유한다. */
 const isHolyCategory = (category: string) => category === 'HOLY' || category === 'HOLY_FOOD';
@@ -187,7 +195,7 @@ function HorizontalFilterRail({
 
 export default function TourExploreScreen(_props: ScreenControllerProps) {
     const searchParams = useSearchParams();
-    const [category, setCategory] = useState('39');
+    const [category, setCategory] = useState(() => resolveCategoryParam(searchParams?.get('category')));
     // 진입 시점의 ?area= 만 반영한다. 이후 칩 선택은 URL과 무관하게 움직인다.
     const [areaCode, setAreaCode] = useState(() => resolveAreaParam(searchParams?.get('area')));
     const [sigungu, setSigungu] = useState('');
@@ -200,11 +208,16 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     // 성지는 서버가 최대 300건(TourService.HOLY_MAX_RESULTS)을 한 번에 내려준다.
     // 전부 펼치면 카드 300장과 사진 300장이 한꺼번에 붙는다. 화면에는 끊어서 그린다.
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+    const [restaurantPage, setRestaurantPage] = useState(1);
+    const [restaurantHasMore, setRestaurantHasMore] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     // 작품/아티스트 성지 필터 (V91): 검색어 → 자동완성 → 선택 칩.
     const [contentQuery, setContentQuery] = useState('');
     const [contentOptions, setContentOptions] = useState<HolyContentOption[]>([]);
+    const [contentError, setContentError] = useState<string | null>(null);
     const [selectedContent, setSelectedContent] = useState<HolyContentOption | null>(null);
     const [selected, setSelected] = useState<TourPoi | null>(null);
     const [saved, setSaved] = useState<Set<string>>(new Set());
@@ -279,8 +292,11 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             if (!alive) return;
             setLoading(true);
             setError(null);
+            setLoadMoreError(null);
             // 조건이 바뀌면 목록도 처음부터다. 이전 페이지 수를 물려받으면 안 된다.
             setVisibleCount(PAGE_SIZE);
+            setRestaurantPage(1);
+            setRestaurantHasMore(false);
             try {
                 if (isHolyCategory(category)) {
                     const list = await fetchHolyPois({
@@ -289,17 +305,24 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                         kind: category === 'HOLY_FOOD' ? 'FOOD' : undefined,
                     });
                     if (alive) setPois(list);
+                } else if (category === '39') {
+                    const list = await fetchRestaurants({
+                        areaCode, sigunguCode: sigungu, arrange,
+                        numOfRows: PAGE_SIZE, pageNo: 1,
+                    });
+                    if (alive) {
+                        setPois(list);
+                        setRestaurantHasMore(list.length === PAGE_SIZE);
+                    }
                 } else {
                     const list = await fetchTourPois({ areaCode, sigunguCode: sigungu, contentTypeId: category, arrange, numOfRows: 24 });
                     if (alive) setPois(list);
                 }
             } catch {
-                if (alive && category === 'HOLY') {
-                    setPois(HOLY_SITES.filter((site) =>
-                        site.areaCode === areaCode && (!sigungu || site.sigunguCode === sigungu)));
+                if (alive) {
+                    setPois([]);
+                    setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
                 }
-                if (alive && category !== 'HOLY') setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
-                if (alive && category === 'HOLY_FOOD') setPois([]);
             } finally {
                 if (alive) setLoading(false);
             }
@@ -308,19 +331,50 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         return () => { alive = false; };
     }, [areaCode, category, sigungu, arrange, selectedSigunguName, selectedContent?.contentSqno]);
 
+    const loadMoreRestaurants = async () => {
+        if (category !== '39' || loadingMore || !restaurantHasMore) return;
+        const nextPage = restaurantPage + 1;
+        setLoadingMore(true);
+        setLoadMoreError(null);
+        try {
+            const nextPois = await fetchRestaurants({
+                areaCode, sigunguCode: sigungu, arrange,
+                numOfRows: PAGE_SIZE, pageNo: nextPage,
+            });
+            setPois((current) => {
+                const seen = new Set(current.map((poi) => poi.contentId).filter(Boolean));
+                const unique = nextPois.filter((poi) => !poi.contentId || !seen.has(poi.contentId));
+                return [...current, ...unique];
+            });
+            setRestaurantPage(nextPage);
+            setRestaurantHasMore(nextPois.length === PAGE_SIZE);
+        } catch {
+            setLoadMoreError('다음 맛집을 불러오지 못했어요. 다시 시도해 주세요.');
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
     // 작품/아티스트 자동완성 — 성지 계열 카테고리에서 2자 이상 입력 시 300ms 디바운스 조회.
     useEffect(() => {
         if (!isHolyCategory(category) || contentQuery.trim().length < 2) {
             setContentOptions([]);
+            setContentError(null);
             return;
         }
         let alive = true;
         const timer = setTimeout(async () => {
             try {
                 const options = await fetchHolyContents({ q: contentQuery.trim(), limit: 8 });
-                if (alive) setContentOptions(options);
+                if (alive) {
+                    setContentOptions(options);
+                    setContentError(null);
+                }
             } catch {
-                if (alive) setContentOptions([]);
+                if (alive) {
+                    setContentOptions([]);
+                    setContentError('작품·아티스트 검색을 불러오지 못했어요.');
+                }
             }
         }, 300);
         return () => { alive = false; clearTimeout(timer); };
@@ -536,6 +590,11 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                     ))}
                                 </ul>
                             )}
+                            {contentError && (
+                                <p role="alert" style={{ margin: '8px 0 0', color: '#A32D2D', fontSize: 12 }}>
+                                    {contentError}
+                                </p>
+                            )}
                         </>
                     )}
                 </section>
@@ -578,7 +637,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             {!loading && !error && pois.length > 0 && (
                 <>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 }}>
-                        {pois.slice(0, visibleCount).map((poi, index) => (
+                        {(category === '39' ? pois : pois.slice(0, visibleCount)).map((poi, index) => (
                             <TourPoiCard
                                 key={poi.contentId ?? index}
                                 poi={poi}
@@ -589,19 +648,32 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             />
                         ))}
                     </div>
-                    {visibleCount < pois.length && (
+                    {((category === '39' && restaurantHasMore) || (category !== '39' && visibleCount < pois.length)) && (
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
                             <button
                                 type="button"
-                                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                                disabled={loadingMore}
+                                onClick={() => {
+                                    if (category === '39') void loadMoreRestaurants();
+                                    else setVisibleCount((count) => count + PAGE_SIZE);
+                                }}
                                 style={{
                                     padding: '10px 22px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
                                     border: '0.5px solid #ddd', borderRadius: 10, background: '#fff', color: '#333',
                                 }}
                             >
-                                {`더 보기 (${visibleCount}/${pois.length})`}
+                                {loadingMore
+                                    ? '불러오는 중…'
+                                    : category === '39'
+                                        ? `더 보기 (${pois.length}개 표시)`
+                                        : `더 보기 (${visibleCount}/${pois.length})`}
                             </button>
                         </div>
+                    )}
+                    {loadMoreError && (
+                        <p role="alert" style={{ margin: '10px 0 0', textAlign: 'center', color: '#A32D2D', fontSize: 12 }}>
+                            {loadMoreError}
+                        </p>
                     )}
                 </>
             )}

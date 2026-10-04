@@ -6,8 +6,10 @@ name: Validate Hostinger G1 platform
     paths:
       - ".github/workflows/hostinger-g1-*.yml"
       - ".github/workflows/hostinger-f2-*.yml"
+      - ".github/workflows/hostinger-f4-*.yml"
       - "deploy/hostinger/g1*"
       - "subproject/SDUI/SDUI-server/**"
+      - "subproject/SDUI/metadata-project/**"
       - "subproject/SDUI/kride/package.json"
       - "subproject/SDUI/kride/pnpm-lock.yaml"
       - "subproject/SDUI/kride/apps/mobile/**"
@@ -48,7 +50,7 @@ jobs:
             (.services.spring.image | test("^ghcr\\.io/feed-mina/kmovement-spring@sha256:[0-9a-f]{64}$"))
           ' /tmp/g1-compose.json > /dev/null
 
-      - name: Require health and GET-only F2 Traefik exposure
+      - name: Require health and GET-only F2, F4, and F5 Traefik exposure
         shell: bash
         run: |
           set -euo pipefail
@@ -68,10 +70,16 @@ jobs:
             (.services.spring.labels["traefik.http.routers.kmovement-f2-address.priority"] == "300") and
             (.services.spring.labels["traefik.http.services.kmovement-f2-address.loadbalancer.server.port"]
               == "8080") and
+            (.services.spring.labels["traefik.http.routers.kmovement-f4-f5-tour.rule"]
+              == "Host(`kmovement.srv1869569.hstgr.cloud`) && (Path(`/api/v1/tour/areas`) || Path(`/api/v1/tour/poi`) || Path(`/api/v1/tour/restaurants`) || Path(`/api/v1/tour/holy`) || Path(`/api/v1/tour/holy/contents`)) && Method(`GET`)") and
+            (.services.spring.labels["traefik.http.routers.kmovement-f4-f5-tour.priority"] == "300") and
+            (.services.spring.labels["traefik.http.services.kmovement-f4-f5-tour.loadbalancer.server.port"]
+              == "8080") and
             (.secrets.spring_db_password.file | endswith("/spring_db_password")) and
             (.secrets.spring_redis_password.file | endswith("/spring_redis_password")) and
             (.secrets.spring_jwt_secret.file | endswith("/spring_jwt_secret")) and
-            (.secrets.spring_kakao_rest_api_key.file | endswith("/spring_kakao_rest_api_key"))
+            (.secrets.spring_kakao_rest_api_key.file | endswith("/spring_kakao_rest_api_key")) and
+            (.secrets.spring_tour_api_key.file | endswith("/spring_tour_api_key"))
           ' /tmp/g1-compose.json > /dev/null
 
   mobile-address:
@@ -114,9 +122,12 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Test the F2 Spring address contract
+      - name: Test the F2, F4, and F5 Spring contracts
         working-directory: subproject/SDUI/SDUI-server
-        run: ./gradlew test --tests 'com.domain.demo_backend.domain.address.*'
+        run: >-
+          ./gradlew test
+          --tests 'com.domain.demo_backend.domain.address.*'
+          --tests 'com.domain.demo_backend.domain.tour.*'
 
       - name: Build the Spring image
         run: |

@@ -51,7 +51,7 @@ export default function KpopAreaLanding({ area, spots }: { area: KpopAreaGuide; 
                 <p>{area.description}</p>
                 <div className={styles.actions}>
                     <TrackedLink className={styles.primaryButton} href="/view/ROUTE_PLANNER" entryPoint={kpopAreaEntryPoint(area.slug)}>무료로 여행 동선 만들기</TrackedLink>
-                    <Link className={styles.secondaryButton} href={`/view/TOUR_EXPLORE?area=${area.areaCode}`}>{area.name} 성지 탐색하기</Link>
+                    <Link className={styles.secondaryButton} href={`/view/TOUR_EXPLORE?area=${area.areaCode}&category=HOLY`}>{area.name} 성지 탐색하기</Link>
                 </div>
             </header>
 
@@ -109,7 +109,7 @@ export default function KpopAreaLanding({ area, spots }: { area: KpopAreaGuide; 
                     <span className={styles.sectionNote}>{area.districts.length}개 지역</span>
                 </div>
                 <p className={styles.lead}>
-                    <Link href={`/view/TOUR_EXPLORE?area=${area.areaCode}`}>{area.name} 탐색 화면</Link>에서 아래 지역으로 좁혀 성지를 볼 수 있습니다.
+                    <Link href={`/view/TOUR_EXPLORE?area=${area.areaCode}&category=HOLY`}>{area.name} 탐색 화면</Link>에서 아래 지역으로 좁혀 성지를 볼 수 있습니다.
                 </p>
                 <ul className={styles.districtList} aria-label={`${area.name} 시·군·구 목록`}>
                     {area.districts.map((district) => <li key={district}>{district}</li>)}

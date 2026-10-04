@@ -34,9 +34,9 @@ describe('tourApi 서비스', () => {
 
     it('fetchRestaurants는 맛집 엔드포인트를 호출해야 함', async () => {
         mockedApi.get.mockResolvedValue({ data: { data: [] } });
-        await fetchRestaurants('1', 10);
+        await fetchRestaurants({ areaCode: '1', sigunguCode: '23', arrange: 'A', numOfRows: 10, pageNo: 2 });
         expect(mockedApi.get).toHaveBeenCalledWith('/api/v1/tour/restaurants', {
-            params: { areaCode: '1', numOfRows: 10 },
+            params: { areaCode: '1', sigunguCode: '23', arrange: 'A', numOfRows: 10, pageNo: 2 },
         });
     });
 

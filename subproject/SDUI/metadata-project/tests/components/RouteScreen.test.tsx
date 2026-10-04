@@ -41,7 +41,7 @@ describe('RouteScreen — [동선] 기본/AI 코스 토글', () => {
     it('기본은 tour 모드로 TourAPI POI를 불러와 지도를 그린다', async () => {
         render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
         await waitFor(() => expect(screen.getByTestId('route-map')).toBeInTheDocument());
-        expect(fetchRestaurants).toHaveBeenCalledWith('1', 12);
+        expect(fetchRestaurants).toHaveBeenCalledWith({ areaCode: '1', numOfRows: 12, pageNo: 1 });
         expect(mockedFetch).not.toHaveBeenCalled(); // AI는 아직 호출 안 함
     });
 

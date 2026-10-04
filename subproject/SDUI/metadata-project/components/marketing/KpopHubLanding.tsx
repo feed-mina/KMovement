@@ -22,7 +22,7 @@ export default function KpopHubLanding() {
                 <p>{kpopHub.description}</p>
                 <div className={styles.actions}>
                     <TrackedLink className={styles.primaryButton} href="/view/ROUTE_PLANNER" entryPoint={kpopHub.entryPoint}>무료로 여행 동선 만들기</TrackedLink>
-                    <Link className={styles.secondaryButton} href="/view/TOUR_EXPLORE">성지 탐색하기</Link>
+                    <Link className={styles.secondaryButton} href="/view/TOUR_EXPLORE?category=HOLY">성지 탐색하기</Link>
                 </div>
             </header>
             <section className={styles.section}>
@@ -41,7 +41,7 @@ export default function KpopHubLanding() {
                     ))}
                 </div>
                 <p className={styles.sourceNote}>
-                    아직 페이지가 없는 지역의 성지는 <Link href="/view/TOUR_EXPLORE">탐색 화면</Link>에서 시·도별로 볼 수 있습니다.
+                    아직 페이지가 없는 지역의 성지는 <Link href="/view/TOUR_EXPLORE?category=HOLY">탐색 화면</Link>에서 시·도별로 볼 수 있습니다.
                 </p>
             </section>
             <section className={`${styles.section} ${styles.checklist}`}>

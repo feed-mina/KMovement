@@ -79,12 +79,15 @@ public class TourController {
         return ApiResponse.success(tourService.getAreas(areaCode));
     }
 
-    /** GET /api/v1/tour/restaurants?areaCode=1 — 맛집(음식점) 조회 편의 엔드포인트. */
+    /** GET /api/v1/tour/restaurants?areaCode=1&pageNo=1 — 맛집(음식점) 페이지 조회. */
     @GetMapping("/restaurants")
     public ApiResponse<List<TourPoiDto>> getRestaurants(
             @RequestParam(required = false) String areaCode,
+            @RequestParam(required = false) String sigunguCode,
+            @RequestParam(required = false) String arrange,
             @RequestParam(defaultValue = "20") int numOfRows,
             @RequestParam(defaultValue = "1") int pageNo) {
-        return ApiResponse.success(tourService.getRestaurants(areaCode, numOfRows, pageNo));
+        return ApiResponse.success(tourService.getRestaurants(
+                areaCode, sigunguCode, arrange, numOfRows, pageNo));
     }
 }

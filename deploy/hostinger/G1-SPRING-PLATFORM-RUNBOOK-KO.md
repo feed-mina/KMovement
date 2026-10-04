@@ -2,11 +2,16 @@
 
 ## 1. 목적과 경계
 
-G1은 Spring Boot, PostgreSQL, Redis, Flyway의 공통 기반입니다. F2 배포부터는
-이 기반 위에 모바일 주소검색 한 경로를 추가 공개합니다.
+G1은 Spring Boot, PostgreSQL, Redis, Flyway의 공통 기반입니다. F2 주소검색에
+이어 F4 맛집 공개 조회와 F5 성지 공개 조회의 읽기 경로만 추가 공개합니다.
 
-- 외부 공개: `GET /api/platform/health`, `GET /api/v1/address/search`
-- 외부 비공개: PostgreSQL, Redis, Spring의 나머지 모든 API와 주소검색 POST
+- 외부 공개: `GET /api/platform/health`, `GET /api/v1/address/search`, 아래 F4/F5 allowlist
+  - `GET /api/v1/tour/areas`
+  - `GET /api/v1/tour/poi`
+  - `GET /api/v1/tour/restaurants`
+  - `GET /api/v1/tour/holy`
+  - `GET /api/v1/tour/holy/contents`
+- 외부 비공개: PostgreSQL, Redis, Spring의 나머지 모든 API와 모든 POST·관리자 경로
 - 네트워크: DB·Redis는 `g1` 내부망만 사용하고, Spring만 Kakao Local API 호출용
   `egress` bridge에 추가 연결합니다. 어느 서비스도 host port를 publish하지 않습니다.
 - 제외: 제출/DB 저장 기능 검증, FastAPI, Celery, RunPod, AWS 종료, DNS 변경
@@ -42,6 +47,8 @@ openssl rand -hex 32 > /docker/kmovement-g1/secrets/redis_password
 openssl rand -hex 64 > /docker/kmovement-g1/secrets/jwt_secret
 install -m 0600 /secure/input/kakao_rest_api_key \
   /docker/kmovement-g1/secrets/kakao_rest_api_key
+install -m 0600 /secure/input/tour_api_key \
+  /docker/kmovement-g1/secrets/tour_api_key
 install -m 0400 -o 10001 -g 10001 /docker/kmovement-g1/secrets/db_password \
   /docker/kmovement-g1/secrets/spring_db_password
 install -m 0400 -o 10001 -g 10001 /docker/kmovement-g1/secrets/redis_password \
@@ -50,10 +57,13 @@ install -m 0400 -o 10001 -g 10001 /docker/kmovement-g1/secrets/jwt_secret \
   /docker/kmovement-g1/secrets/spring_jwt_secret
 install -m 0400 -o 10001 -g 10001 /docker/kmovement-g1/secrets/kakao_rest_api_key \
   /docker/kmovement-g1/secrets/spring_kakao_rest_api_key
+install -m 0400 -o 10001 -g 10001 /docker/kmovement-g1/secrets/tour_api_key \
+  /docker/kmovement-g1/secrets/spring_tour_api_key
 chmod 0600 /docker/kmovement-g1/secrets/db_password \
   /docker/kmovement-g1/secrets/redis_password \
   /docker/kmovement-g1/secrets/jwt_secret \
-  /docker/kmovement-g1/secrets/kakao_rest_api_key
+  /docker/kmovement-g1/secrets/kakao_rest_api_key \
+  /docker/kmovement-g1/secrets/tour_api_key
 ```
 
 Compose의 로컬 file secret은 host 파일의 소유권을 그대로 유지합니다. 그래서
@@ -72,6 +82,10 @@ secret` workflow가 만드는 암호문은 이 고정 공개키로만 암호화�
 암호문은 VPS에서만 복호화하며, 평문 키는 로컬 PC와 Actions artifact에 남기지 않습니다.
 복호화 후 일회용 개인키와 암호문을 삭제하고 최종 secret 파일을 `0600`으로
 고정합니다.
+
+TourAPI 키는 `Seal Hostinger F4 TourAPI secret` workflow가 실제 `areaCode2`
+호출을 통과한 경우에만 `tour_api_key.enc`로 만듭니다. 동일한 VPS 공개키를
+사용하며, VPS에서 복호화한 평문은 `spring_tour_api_key`로만 복제합니다.
 
 배포 환경 파일에는 비밀값 대신 경로와 digest만 둡니다.
 
@@ -141,10 +155,18 @@ docker compose --env-file /docker/kmovement-g1/.env \
 curl -fsS https://kmovement.srv1869569.hstgr.cloud/api/platform/health
 curl -fsS --get --data-urlencode 'keyword=테헤란로 152' \
   https://kmovement.srv1869569.hstgr.cloud/api/v1/address/search
+curl -fsS --get --data-urlencode 'areaCode=1' --data-urlencode 'numOfRows=1' \
+  https://kmovement.srv1869569.hstgr.cloud/api/v1/tour/restaurants
+curl -fsS --get --data-urlencode 'areaCode=1' \
+  https://kmovement.srv1869569.hstgr.cloud/api/v1/tour/holy
+curl -fsS --get --data-urlencode 'q=방탄소년단' --data-urlencode 'limit=1' \
+  https://kmovement.srv1869569.hstgr.cloud/api/v1/tour/holy/contents
 ```
 
 F2 완료 판정은 위 주소검색 응답이 200이고 `items`에 우편번호와 도로명 주소가
 있으며, Android 화면에서 검색 → 결과 선택 → 폼 반영까지 확인된 경우에만 합니다.
+F4는 실제 맛집 카드와 다음 페이지가 중복 없이 추가되는지, F5는 승인된 DB 성지만
+표시되고 작품 필터 실패가 사용자에게 드러나는지 브라우저에서 별도로 확인합니다.
 
 ### 재기동
 

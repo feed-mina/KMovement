@@ -18,6 +18,9 @@ describe('K-POP 허브', () => {
     it('페이지가 없는 지역은 탐색 화면으로 안내한다', () => {
         render(<KpopHubLanding />);
         expect(screen.getByText(/아직 페이지가 없는 지역의 성지는/)).toBeInTheDocument();
+        screen.getAllByRole('link', { name: /탐색/ }).forEach((link) => {
+            expect(link).toHaveAttribute('href', '/view/TOUR_EXPLORE?category=HOLY');
+        });
     });
 });
 
@@ -35,7 +38,7 @@ describe('K-POP 시·도 페이지', () => {
             expect(screen.getByRole('heading', { name: spot.name })).toBeInTheDocument();
         });
         screen.getAllByRole('link', { name: /탐색/ }).forEach((link) => {
-            expect(link).toHaveAttribute('href', `/view/TOUR_EXPLORE?area=${seoul.areaCode}`);
+            expect(link).toHaveAttribute('href', `/view/TOUR_EXPLORE?area=${seoul.areaCode}&category=HOLY`);
         });
     });
 
