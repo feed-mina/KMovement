@@ -62,8 +62,9 @@ DB·Redis 원본은 root 전용으로 두고, non-root Spring 사용자(UID/GID 
 이미지 레이어에 복사하지 않습니다.
 
 `kakao_rest_api_key`는 GitHub Actions의 `KAKAO_REST_API_KEY` 또는 사용자가
-관리하는 비밀 저장소에서 암호화된 경로로 전달합니다. 채팅·로그·Git에 값을
-붙여 넣지 않습니다.
+관리하는 비밀 저장소에서 암호화된 경로로 전달합니다. 실제 값은 Kakao Maps가
+활성화된 앱의 REST API 키여야 하며, sealing workflow가 실제 Local API 호출을
+통과한 키만 암호화합니다. 채팅·로그·Git에 값을 붙여 넣지 않습니다.
 
 GitHub secret을 사용할 때는 VPS에서 일회용 RSA 키를 만들고 공개키만
 `deploy/hostinger/f2-recipient-public.pem`에 둡니다. `Seal Hostinger F2 Kakao
