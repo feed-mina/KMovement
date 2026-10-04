@@ -42,7 +42,7 @@ public class QueryMaster {
     @Column(name = "param_mapping", columnDefinition = "jsonb")
     private String paramMapping;
 
-    @Column(name = "use_redis_yn", length = 1)
+    @Column(name = "use_redis_yn", columnDefinition = "char(1)")
     private String useRedisYn;
 
     @Column(name = "redis_ttl_sec")
