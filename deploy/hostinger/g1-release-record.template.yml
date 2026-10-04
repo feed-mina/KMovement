@@ -1,0 +1,48 @@
+schemaVersion: 1
+state: prepared-not-deployed
+
+source:
+  repository: feed-mina/KMovement
+  mainSha: REPLACE_WITH_40_HEX
+  configRevision: REPLACE_WITH_40_HEX
+
+artifacts:
+  springImage: "ghcr.io/feed-mina/kmovement-spring@sha256:REPLACE_WITH_64_HEX"
+  postgresImage: "postgres:15-alpine@sha256:f7d23353e1b15400d22ebe31189f4d314b87a4c129cc400c8c2d8d4ca127bf81"
+  redisImage: "redis:7-alpine@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499"
+
+target:
+  vmId: srv1869569
+  hostname: kmovement.srv1869569.hstgr.cloud
+  profile: spring-postgres-redis-health-only
+  publishedApplicationPorts: []
+  publicPath: /api/platform/health
+
+rollback:
+  springImage: REPLACE_WITH_PREVIOUS_DIGEST
+  databaseVolumePreserved: true
+  redisVolumePreserved: true
+
+verification:
+  composeConfig: false
+  secretsPermissions: false
+  postgresHealthy: false
+  redisAuthenticatedPing: false
+  springHealthy: false
+  externalHealthUp: false
+  flywayAllSuccessful: false
+  flywayChecksumsRecorded: false
+  publicTableCount: null
+  springRestartPassed: false
+  backupCreated: false
+  restoreTestPassed: false
+  unrelatedContainersUnchanged: false
+
+excluded:
+  - user feature exposure
+  - form submission
+  - FastAPI
+  - Celery
+  - RunPod
+  - AWS shutdown
+  - DNS changes

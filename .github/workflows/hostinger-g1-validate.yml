@@ -1,0 +1,145 @@
+name: Validate Hostinger G1 platform
+
+"on":
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/hostinger-g1-*.yml"
+      - "deploy/hostinger/g1*"
+      - "subproject/SDUI/SDUI-server/**"
+
+permissions:
+  contents: read
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Render the G1 Compose contract
+        run: >-
+          docker compose
+          --env-file deploy/hostinger/g1.env.example
+          -f deploy/hostinger/g1.compose.yml
+          config --format json > /tmp/g1-compose.json
+
+      - name: Require a private three-service platform
+        shell: bash
+        run: |
+          set -euo pipefail
+          services="$(jq -r '.services | keys[]' /tmp/g1-compose.json | sort | paste -sd ' ' -)"
+          test "$services" = "postgres redis spring"
+          jq -e '
+            ([.services[].ports[]?] | length == 0) and
+            (.services.spring.expose == ["8080"]) and
+            (.services.spring.read_only == true) and
+            (.networks.g1.internal == true) and
+            (.services.postgres.image | test("^postgres:15-alpine@sha256:[0-9a-f]{64}$")) and
+            (.services.redis.image | test("^redis:7-alpine@sha256:[0-9a-f]{64}$")) and
+            (.services.spring.image | test("^ghcr\\.io/feed-mina/kmovement-spring@sha256:[0-9a-f]{64}$"))
+          ' /tmp/g1-compose.json > /dev/null
+
+      - name: Require health-only Traefik exposure
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -e '
+            (.services.spring.labels["traefik.enable"] == "true") and
+            (.services.spring.labels["traefik.http.routers.kmovement-g1-health.rule"]
+              == "Host(`kmovement.srv1869569.hstgr.cloud`) && Path(`/api/platform/health`)") and
+            (.services.spring.labels["traefik.http.routers.kmovement-g1-health.priority"] == "200") and
+            (.services.spring.labels["traefik.http.middlewares.kmovement-g1-health-path.replacepath.path"]
+              == "/actuator/health") and
+            (.services.spring.labels["traefik.http.services.kmovement-g1-health.loadbalancer.server.port"]
+              == "8080")
+          ' /tmp/g1-compose.json > /dev/null
+
+  spring-platform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build the Spring image
+        run: |
+          docker build \
+            --pull \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --tag kmovement-spring:g1-validate \
+            subproject/SDUI/SDUI-server
+
+      - name: Verify non-root image metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(docker image inspect kmovement-spring:g1-validate --format '{{.Config.User}}')" = "spring:spring"
+          test "$(docker image inspect kmovement-spring:g1-validate --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "${GITHUB_SHA}"
+
+      - name: Start isolated Postgres, Redis, and Spring
+        shell: bash
+        env:
+          KMOVEMENT_SITE_HOST: kmovement.srv1869569.hstgr.cloud
+          KMOVEMENT_SPRING_IMAGE: kmovement-spring:g1-validate
+          KMOVEMENT_G1_SECRETS_DIR: ./g1.secrets.example
+        run: |
+          set -euo pipefail
+          docker compose -f deploy/hostinger/g1.compose.yml up -d
+
+      - name: Wait for the platform gate
+        shell: bash
+        env:
+          KMOVEMENT_SITE_HOST: kmovement.srv1869569.hstgr.cloud
+          KMOVEMENT_SPRING_IMAGE: kmovement-spring:g1-validate
+          KMOVEMENT_G1_SECRETS_DIR: ./g1.secrets.example
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            status="$(docker compose -f deploy/hostinger/g1.compose.yml ps --format json spring | jq -r 'if type == "array" then .[0].Health // .[0].State else .Health // .State end')"
+            echo "spring health attempt ${attempt}: ${status}"
+            test "$status" = "healthy" && exit 0
+            test "$status" = "unhealthy" && break
+            sleep 5
+          done
+          docker compose -f deploy/hostinger/g1.compose.yml logs --no-color spring postgres redis
+          exit 1
+
+      - name: Record migration, table, Redis, and restart evidence
+        shell: bash
+        env:
+          KMOVEMENT_SITE_HOST: kmovement.srv1869569.hstgr.cloud
+          KMOVEMENT_SPRING_IMAGE: kmovement-spring:g1-validate
+          KMOVEMENT_G1_SECRETS_DIR: ./g1.secrets.example
+        run: |
+          set -euo pipefail
+          compose=(docker compose -f deploy/hostinger/g1.compose.yml)
+          "${compose[@]}" exec -T spring curl --fail --silent http://127.0.0.1:8080/actuator/health
+          "${compose[@]}" exec -T postgres psql -U kmovement -d kmovement -Atc \
+            "select count(*), bool_and(success) from flyway_schema_history;"
+          "${compose[@]}" exec -T postgres psql -U kmovement -d kmovement -Atc \
+            "select count(*) from information_schema.tables where table_schema='public';"
+          "${compose[@]}" exec -T redis sh -ec \
+            'REDISCLI_AUTH="$(cat /run/secrets/redis_password)" redis-cli ping | grep -qx PONG'
+          "${compose[@]}" restart spring
+          for attempt in $(seq 1 30); do
+            status="$("${compose[@]}" ps --format json spring | jq -r 'if type == "array" then .[0].Health // .[0].State else .Health // .State end')"
+            echo "restart health attempt ${attempt}: ${status}"
+            test "$status" = "healthy" && exit 0
+            sleep 5
+          done
+          exit 1
+
+      - name: Show logs on failure
+        if: failure()
+        env:
+          KMOVEMENT_SITE_HOST: kmovement.srv1869569.hstgr.cloud
+          KMOVEMENT_SPRING_IMAGE: kmovement-spring:g1-validate
+          KMOVEMENT_G1_SECRETS_DIR: ./g1.secrets.example
+        run: docker compose -f deploy/hostinger/g1.compose.yml logs --no-color
+
+      - name: Remove the ephemeral validation stack
+        if: always()
+        env:
+          KMOVEMENT_SITE_HOST: kmovement.srv1869569.hstgr.cloud
+          KMOVEMENT_SPRING_IMAGE: kmovement-spring:g1-validate
+          KMOVEMENT_G1_SECRETS_DIR: ./g1.secrets.example
+        run: docker compose -f deploy/hostinger/g1.compose.yml down --volumes

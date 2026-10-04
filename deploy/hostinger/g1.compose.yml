@@ -1,0 +1,146 @@
+name: kmovement-g1
+
+services:
+  postgres:
+    image: postgres:15-alpine@sha256:f7d23353e1b15400d22ebe31189f4d314b87a4c129cc400c8c2d8d4ca127bf81
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kmovement
+      POSTGRES_USER: kmovement
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kmovement -d kmovement"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - g1
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  redis:
+    image: redis:7-alpine@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+    restart: unless-stopped
+    command:
+      - sh
+      - -ec
+      - |
+        umask 077
+        {
+          printf 'appendonly yes\n'
+          printf 'appendfsync everysec\n'
+          printf 'requirepass '
+          cat /run/secrets/redis_password
+          printf '\n'
+        } > /tmp/redis.conf
+        exec redis-server /tmp/redis.conf
+    secrets:
+      - redis_password
+    volumes:
+      - redis_data:/data
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=$$(cat /run/secrets/redis_password) redis-cli ping | grep -qx PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - g1
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  spring:
+    image: ${KMOVEMENT_SPRING_IMAGE:?Set KMOVEMENT_SPRING_IMAGE to a digest-pinned image}
+    pull_policy: if_not_present
+    init: true
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: hostinger-g1
+      SPRING_CONFIG_IMPORT: configtree:/run/secrets/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/kmovement
+      SPRING_DATASOURCE_USERNAME: kmovement
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+      SPRING_DATA_REDIS_DATABASE: "0"
+      JAVA_TOOL_OPTIONS: >-
+        -XX:MaxRAMPercentage=70
+        -XX:+ExitOnOutOfMemoryError
+        -Djava.security.egd=file:/dev/urandom
+    secrets:
+      - source: db_password
+        target: spring.datasource.password
+      - source: redis_password
+        target: spring.data.redis.password
+      - source: jwt_secret
+        target: jwt.secret-key
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose:
+      - "8080"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128m
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://127.0.0.1:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.kmovement-g1-health.rule: >-
+        Host(`${KMOVEMENT_SITE_HOST:?Set KMOVEMENT_SITE_HOST}`) &&
+        Path(`/api/platform/health`)
+      traefik.http.routers.kmovement-g1-health.priority: "200"
+      traefik.http.routers.kmovement-g1-health.entrypoints: websecure
+      traefik.http.routers.kmovement-g1-health.tls: "true"
+      traefik.http.routers.kmovement-g1-health.tls.certresolver: letsencrypt
+      traefik.http.routers.kmovement-g1-health.middlewares: kmovement-g1-health-path
+      traefik.http.middlewares.kmovement-g1-health-path.replacepath.path: /actuator/health
+      traefik.http.services.kmovement-g1-health.loadbalancer.server.port: "8080"
+    networks:
+      - g1
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+secrets:
+  db_password:
+    file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/db_password
+  redis_password:
+    file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/redis_password
+  jwt_secret:
+    file: ${KMOVEMENT_G1_SECRETS_DIR:?Set KMOVEMENT_G1_SECRETS_DIR}/jwt_secret
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  g1:
+    driver: bridge
+    internal: true
