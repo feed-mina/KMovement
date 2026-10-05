@@ -72,7 +72,11 @@ api.interceptors.response.use(
                 await refreshSession();
                 return api(originalRequest);
             } catch (refreshError) {
-                if (!isTestEnv && currentPath !== '/view/LOGIN_PAGE') {
+                // Anonymous readers may remain on the F6-A/B/C public catalogs when
+                // the shell's optional session lookup cannot refresh a session.
+                const publicCatalogRead = /^(?:\/view\/(?:KPOP_EXPLORE|KPOP_EVENTS|KPOP_PRODUCTS)\/?|\/view\/(?:KPOP_ARTIST_DETAIL|KPOP_EVENT_DETAIL)\/[^/]+\/?|\/kpop\/?|\/KPOP\/?)$/.test(currentPath);
+                const optionalSessionLookup = originalRequest.url?.split('?')[0] === '/api/auth/me';
+                if (!isTestEnv && currentPath !== '/view/LOGIN_PAGE' && !(publicCatalogRead && optionalSessionLookup)) {
                     alert('로그인 세션이 만료되었습니다. 다시 로그인해 주세요.');
                     window.location.href = '/view/LOGIN_PAGE';
                 }

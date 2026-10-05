@@ -108,7 +108,7 @@ class KpopControllerTest {
 
         // event는 지난 활동까지 담은 타임라인이므로(V119), 기본값이 없으면 목록이 1년 전부터 열린다.
         verify(jdbcTemplate).queryForList(
-                contains("e.event_date >= COALESCE(CAST(:fromDate AS date), CURRENT_DATE)"),
+                contains("e.event_date >= CAST(:fromDate AS date)"),
                 any(MapSqlParameterSource.class));
     }
 

@@ -165,6 +165,38 @@ services:
       traefik.http.routers.kmovement-f7-auth.tls.certresolver: letsencrypt
       traefik.http.routers.kmovement-f7-auth.service: kmovement-f7-auth
       traefik.http.services.kmovement-f7-auth.loadbalancer.server.port: "8080"
+      # F6-A only. Exact list and one-segment profile reads; no follow/event/product paths.
+      traefik.http.routers.kmovement-f6a-artists.rule: >-
+        Host(`${KMOVEMENT_SITE_HOST:?Set KMOVEMENT_SITE_HOST}`) &&
+        ((Path(`/api/v1/kpop/artists`) && QueryRegexp(`page`, `^[0-9]+$`)) ||
+        (PathRegexp(`^/api/v1/kpop/artists/[^/]+$`) && Query(`view`, `profile`))) &&
+        Method(`GET`)
+      traefik.http.routers.kmovement-f6a-artists.priority: "300"
+      traefik.http.routers.kmovement-f6a-artists.entrypoints: websecure
+      traefik.http.routers.kmovement-f6a-artists.tls: "true"
+      traefik.http.routers.kmovement-f6a-artists.tls.certresolver: letsencrypt
+      traefik.http.routers.kmovement-f6a-artists.service: kmovement-f6a-artists
+      traefik.http.services.kmovement-f6a-artists.loadbalancer.server.port: "8080"
+      # F6-B read-only list and numeric detail; bookmark/product routes are excluded.
+      traefik.http.routers.kmovement-f6b-events.rule: >-
+        Host(`${KMOVEMENT_SITE_HOST:?Set KMOVEMENT_SITE_HOST}`) &&
+        (Path(`/api/v1/kpop/events`) || PathRegexp(`^/api/v1/kpop/events/[0-9]+$`)) && Method(`GET`)
+      traefik.http.routers.kmovement-f6b-events.priority: "300"
+      traefik.http.routers.kmovement-f6b-events.entrypoints: websecure
+      traefik.http.routers.kmovement-f6b-events.tls: "true"
+      traefik.http.routers.kmovement-f6b-events.tls.certresolver: letsencrypt
+      traefik.http.routers.kmovement-f6b-events.service: kmovement-f6b-events
+      traefik.http.services.kmovement-f6b-events.loadbalancer.server.port: "8080"
+      # F6-C public read projection only; no upload, analysis, saved-item or payment paths.
+      traefik.http.routers.kmovement-f6c-products.rule: >-
+        Host(`${KMOVEMENT_SITE_HOST:?Set KMOVEMENT_SITE_HOST}`) &&
+        Path(`/api/v1/kpop/product-candidates`) && Query(`view`, `public`) && Method(`GET`)
+      traefik.http.routers.kmovement-f6c-products.priority: "300"
+      traefik.http.routers.kmovement-f6c-products.entrypoints: websecure
+      traefik.http.routers.kmovement-f6c-products.tls: "true"
+      traefik.http.routers.kmovement-f6c-products.tls.certresolver: letsencrypt
+      traefik.http.routers.kmovement-f6c-products.service: kmovement-f6c-products
+      traefik.http.services.kmovement-f6c-products.loadbalancer.server.port: "8080"
     networks:
       - g1
       - egress

@@ -12,6 +12,8 @@ export type ProductCandidate = {
     officialUrl?: string;
     rightsChecked: boolean;
     savedItemId?: string | number;
+    catalogSource?: string;
+    lastVerifiedAt?: string;
 };
 
 type SavedItem = {
@@ -50,6 +52,8 @@ export function normalizeCandidate(value: unknown): ProductCandidate {
         officialUrl: valueText(raw.officialUrl ?? raw.official_url ?? raw.officialLink ?? raw.official_link),
         rightsChecked: raw.rightsChecked === true || raw.rights_checked === true,
         savedItemId: raw.savedItemId ?? raw.saved_item_id,
+        catalogSource: valueText(raw.catalogSource),
+        lastVerifiedAt: valueText(raw.lastVerifiedAt),
     };
 }
 
@@ -93,7 +97,7 @@ function gradeCopy(grade: ProductCandidate['evidenceGrade']) {
     return '근거 부족 · 상품을 단정할 수 없음';
 }
 
-export function ProductCard({ candidate, onRemoved }: { candidate: ProductCandidate; onRemoved?: () => void }) {
+export function ProductCard({ candidate, onRemoved, readOnly = false }: { candidate: ProductCandidate; onRemoved?: () => void; readOnly?: boolean }) {
     const titleId = useId();
     const [savedItemId, setSavedItemId] = useState(candidate.savedItemId);
     const [busy, setBusy] = useState(false);
@@ -129,12 +133,15 @@ export function ProductCard({ candidate, onRemoved }: { candidate: ProductCandid
             <small className={`kpop-evidence-badge is-${candidate.evidenceGrade.toLowerCase()}`}>{gradeCopy(candidate.evidenceGrade)}</small>
             <h3 id={titleId}>{candidate.name}</h3>
             {candidate.brand && <p>{candidate.brand}</p>}
-            {typeof candidate.confidence === 'number' && <p><strong>모델 참고 점수:</strong> {Math.round(candidate.confidence)} / 100</p>}
+            {!readOnly && typeof candidate.confidence === 'number' && <p><strong>모델 참고 점수:</strong> {Math.round(candidate.confidence)} / 100</p>}
             <p><strong>확인 근거:</strong> {candidate.evidenceText || '제공되지 않았습니다. 근거 부족은 정상적인 결과입니다.'}</p>
+            {readOnly && <><p><strong>출처:</strong> {candidate.catalogSource === 'MANUAL_CURATED' ? '운영 검수 카탈로그' : candidate.catalogSource}</p>
+                <p><strong>확인 시각:</strong> {candidate.lastVerifiedAt} <small>(원본 기록 · 시간대 미기록)</small></p>
+                {!candidate.rightsChecked && <p>링크 권리 미확인 · 출처 링크를 제공하지 않아요.</p>}</>}
             <div className="kpop-card-actions">
-                <button type="button" aria-pressed={Boolean(savedItemId)} aria-busy={busy} disabled={busy || !candidate.id} onClick={toggleSaved}>
+                {!readOnly && <button type="button" aria-pressed={Boolean(savedItemId)} aria-busy={busy} disabled={busy || !candidate.id} onClick={toggleSaved}>
                     {busy ? '처리 중...' : savedItemId ? '저장 해제' : '후보 저장'}
-                </button>
+                </button>}
                 {canOpenOfficialUrl(candidate) && (
                     <a href={candidate.officialUrl} target="_blank" rel="noreferrer">권리 확인된 공식 출처 <span>(새 창)</span></a>
                 )}

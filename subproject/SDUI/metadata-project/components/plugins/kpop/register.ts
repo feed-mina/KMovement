@@ -4,12 +4,19 @@ import { registerScreenAccess } from '@/components/screens/screenAccess';
 import { KpopArtistCard, KpopEventCard } from './KpopCards';
 import { KpopAiResultCard, KpopUploadConsent } from './KpopAnalysis';
 import { KpopProductSearch, KpopSavedItemList } from './KpopProducts';
+import { registerScreen } from '@/components/screens/registry';
+import ArtistCatalogScreen from './ArtistCatalogScreen';
+import EventCatalogScreen from './EventCatalogScreen';
+import PublicProductCatalogScreen from './PublicProductCatalogScreen';
 
 let registered = false;
 
 export function registerKpopPlugin(): void {
     if (registered) return;
     registered = true;
+    registerScreen({match: id => id === 'KPOP_EXPLORE' || id === 'KPOP_ARTIST_DETAIL', controller: ArtistCatalogScreen});
+    registerScreen({match: id => id === 'KPOP_EVENTS' || id === 'KPOP_EVENT_DETAIL', controller: EventCatalogScreen});
+    registerScreen({match: id => id === 'KPOP_PRODUCTS', controller: PublicProductCatalogScreen});
 
     registerComponent('ARTIST_CARD', KpopArtistCard);
     registerComponent('EVENT_CARD', KpopEventCard);
@@ -29,7 +36,7 @@ export function registerKpopPlugin(): void {
     });
 
     registerScreenAccess(
-        (id) => ['KPOP_AI_FIND', 'KPOP_AI_RESULT', 'KPOP_PRODUCTS', 'KPOP_SAVED_ITEMS'].includes(id),
+        (id) => ['KPOP_AI_FIND', 'KPOP_AI_RESULT', 'KPOP_SAVED_ITEMS'].includes(id),
         { requireAuth: true, loginAlert: true }
     );
 }
