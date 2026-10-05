@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-05T14:52:25+09:00",
+  "origin": "https://kmovement.srv1869569.hstgr.cloud",
+  "method": "GET only, unauthenticated public endpoints",
+  "results": [
+    {"path":"/api/v1/tour/restaurants?areaCode=1&numOfRows=3","firstAttempt":"25-second timeout","retryStatus":200,"count":3,"coordinateCount":3},
+    {"path":"/api/v1/tour/holy?areaCode=1","status":200,"count":300,"coordinateCount":300},
+    {"path":"/api/v1/tour/areas","status":200,"count":17},
+    {"path":"/api/v1/tour/poi?areaCode=1&contentTypeId=12&numOfRows=3","status":200,"count":3,"coordinateCount":3}
+  ],
+  "limits":"Public responses confirm API availability at the stated time; no database inspection, writes or deployment performed."
+}

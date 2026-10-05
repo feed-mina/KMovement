@@ -10,15 +10,18 @@ interface TourPoiCardProps {
     priority?: boolean;
     onOpen: (poi: TourPoi, trigger: HTMLElement) => void;
     onToggleSave: (contentId?: string) => void;
+    selected?: boolean;
+    onMapSelect?: () => void;
+    cardId?: string;
 }
 
 const RED = '#E50914';
 
-export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onToggleSave}: TourPoiCardProps) {
+export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onToggleSave, selected, onMapSelect, cardId}: TourPoiCardProps) {
     const recommendReason = poi.recommendReason?.trim();
 
     return (
-        <article style={{border: '0.5px solid #eee', borderRadius: 14, overflow: 'hidden', background: '#fff', position: 'relative'}}>
+        <article id={cardId} tabIndex={-1} data-selected={Boolean(selected)} className="tour-poi-card" style={{border: '0.5px solid #eee', borderRadius: 14, overflow: 'hidden', background: '#fff', position: 'relative'}}>
             <button
                 type="button"
                 aria-haspopup="dialog"
@@ -60,6 +63,7 @@ export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onT
                     )}
                 </span>
             </button>
+            {onMapSelect ? <button className="tour-card-map-action" type="button" aria-pressed={Boolean(selected)} aria-label={`${poi.title} 지도에서 선택`} onClick={onMapSelect}>지도에서 선택</button> : cardId ? <span className="tour-card-coordinate-note">지도 좌표 없음 · 주소로 확인</span> : null}
             <button
                 type="button"
                 aria-label={isSaved ? `${poi.title} 저장 취소` : `${poi.title} 저장`}

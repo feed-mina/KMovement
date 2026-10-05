@@ -38,6 +38,7 @@ export function loadKakaoMaps(appKey: string): Promise<any> {
 
     const fail = (message: string) => {
       clearLoadTimeout();
+      document.getElementById(KAKAO_SDK_SCRIPT_ID)?.remove();
       kakaoMapsPromise = null;
       reject(new Error(message));
     };
@@ -57,6 +58,7 @@ export function loadKakaoMaps(appKey: string): Promise<any> {
     };
 
     if (existingScript) {
+      timeoutId = setTimeout(() => fail('Kakao Maps SDK load timed out.'), KAKAO_SDK_LOAD_TIMEOUT_MS);
       if (existingScript.dataset.loaded === 'true') {
         handleLoaded();
         return;
@@ -90,6 +92,10 @@ export function loadKakaoMaps(appKey: string): Promise<any> {
     };
 
     document.head.appendChild(script);
+  }).catch((error) => {
+    // Also clear synchronous initialization failures before the next retry.
+    kakaoMapsPromise = null;
+    throw error;
   });
 
   return kakaoMapsPromise;

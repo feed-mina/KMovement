@@ -1,0 +1,157 @@
+[
+  {
+    "width": 360,
+    "source": "http://localhost:3100 / fixture public API responses",
+    "errors": [],
+    "layout": {
+      "documentWidth": 360,
+      "viewport": 360,
+      "timeCard": {
+        "x": 42,
+        "y": 104,
+        "width": 276,
+        "height": 44,
+        "top": 104,
+        "right": 318,
+        "bottom": 148,
+        "left": 42
+      },
+      "timeCopy": {
+        "x": 42,
+        "y": 105.609375,
+        "width": 178.65625,
+        "height": 40.78125,
+        "top": 105.609375,
+        "right": 220.65625,
+        "bottom": 146.390625,
+        "left": 42
+      }
+    },
+    "searchAndFilter": "passed",
+    "mapFailure": "independent SDK recovery displayed"
+  },
+  {
+    "width": 390,
+    "source": "http://localhost:3100 / fixture public API responses",
+    "errors": [],
+    "layout": {
+      "documentWidth": 390,
+      "viewport": 390,
+      "timeCard": {
+        "x": 42,
+        "y": 104,
+        "width": 306,
+        "height": 44,
+        "top": 104,
+        "right": 348,
+        "bottom": 148,
+        "left": 42
+      },
+      "timeCopy": {
+        "x": 42,
+        "y": 105.609375,
+        "width": 208.65625,
+        "height": 40.78125,
+        "top": 105.609375,
+        "right": 250.65625,
+        "bottom": 146.390625,
+        "left": 42
+      }
+    },
+    "searchAndFilter": "passed",
+    "mapFailure": "independent SDK recovery displayed"
+  },
+  {
+    "width": 768,
+    "source": "http://localhost:3100 / fixture public API responses",
+    "errors": [],
+    "layout": {
+      "documentWidth": 768,
+      "viewport": 768,
+      "timeCard": {
+        "x": 110,
+        "y": 104,
+        "width": 548,
+        "height": 44,
+        "top": 104,
+        "right": 658,
+        "bottom": 148,
+        "left": 110
+      },
+      "timeCopy": {
+        "x": 110,
+        "y": 105.609375,
+        "width": 450.65625,
+        "height": 40.78125,
+        "top": 105.609375,
+        "right": 560.65625,
+        "bottom": 146.390625,
+        "left": 110
+      }
+    },
+    "searchAndFilter": "passed",
+    "mapFailure": "independent SDK recovery displayed"
+  },
+  {
+    "width": 960,
+    "source": "http://localhost:3100 / fixture public API responses",
+    "errors": [],
+    "layout": {
+      "documentWidth": 960,
+      "viewport": 960,
+      "timeCard": {
+        "x": 206,
+        "y": 104,
+        "width": 548,
+        "height": 44,
+        "top": 104,
+        "right": 754,
+        "bottom": 148,
+        "left": 206
+      },
+      "timeCopy": {
+        "x": 206,
+        "y": 105.609375,
+        "width": 450.65625,
+        "height": 40.78125,
+        "top": 105.609375,
+        "right": 656.65625,
+        "bottom": 146.390625,
+        "left": 206
+      }
+    },
+    "searchAndFilter": "passed",
+    "mapFailure": "independent SDK recovery displayed"
+  },
+  {
+    "width": 1440,
+    "source": "http://localhost:3100 / fixture public API responses",
+    "errors": [],
+    "layout": {
+      "documentWidth": 1440,
+      "viewport": 1440,
+      "timeCard": {
+        "x": 341,
+        "y": 41,
+        "width": 1038,
+        "height": 44,
+        "top": 41,
+        "right": 1379,
+        "bottom": 85,
+        "left": 341
+      },
+      "timeCopy": {
+        "x": 341,
+        "y": 42.609375,
+        "width": 220.515625,
+        "height": 40.78125,
+        "top": 42.609375,
+        "right": 561.515625,
+        "bottom": 83.390625,
+        "left": 341
+      }
+    },
+    "searchAndFilter": "passed",
+    "mapFailure": "independent SDK recovery displayed"
+  }
+]
