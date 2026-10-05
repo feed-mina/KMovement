@@ -1,0 +1,147 @@
+[
+  {
+    "width": 360,
+    "source": "https://kmovement.srv1869569.hstgr.cloud / fixture public API responses",
+    "errors": [],
+    "layout": {
+      "documentWidth": 360,
+      "viewport": 360,
+      "timeCard": {
+        "x": 122.421875,
+        "y": 114,
+        "width": 115.15625,
+        "height": 92.578125,
+        "top": 114,
+        "right": 237.578125,
+        "bottom": 206.578125,
+        "left": 122.421875
+      },
+      "timeCopy": {
+        "x": 122.421875,
+        "y": 114,
+        "width": 17.8125,
+        "height": 92.578125,
+        "top": 114,
+        "right": 140.234375,
+        "bottom": 206.578125,
+        "left": 122.421875
+      }
+    }
+  },
+  {
+    "width": 390,
+    "source": "https://kmovement.srv1869569.hstgr.cloud / fixture public API responses",
+    "errors": [],
+    "layout": {
+      "documentWidth": 390,
+      "viewport": 390,
+      "timeCard": {
+        "x": 137.421875,
+        "y": 114,
+        "width": 115.15625,
+        "height": 92.578125,
+        "top": 114,
+        "right": 252.578125,
+        "bottom": 206.578125,
+        "left": 137.421875
+      },
+      "timeCopy": {
+        "x": 137.421875,
+        "y": 114,
+        "width": 17.8125,
+        "height": 92.578125,
+        "top": 114,
+        "right": 155.234375,
+        "bottom": 206.578125,
+        "left": 137.421875
+      }
+    }
+  },
+  {
+    "width": 768,
+    "source": "https://kmovement.srv1869569.hstgr.cloud / fixture public API responses",
+    "errors": [],
+    "layout": {
+      "documentWidth": 768,
+      "viewport": 768,
+      "timeCard": {
+        "x": 326.359375,
+        "y": 114,
+        "width": 115.28125,
+        "height": 92.578125,
+        "top": 114,
+        "right": 441.640625,
+        "bottom": 206.578125,
+        "left": 326.359375
+      },
+      "timeCopy": {
+        "x": 326.359375,
+        "y": 114,
+        "width": 19.28125,
+        "height": 92.578125,
+        "top": 114,
+        "right": 345.640625,
+        "bottom": 206.578125,
+        "left": 326.359375
+      }
+    }
+  },
+  {
+    "width": 960,
+    "source": "https://kmovement.srv1869569.hstgr.cloud / fixture public API responses",
+    "errors": [],
+    "layout": {
+      "documentWidth": 960,
+      "viewport": 960,
+      "timeCard": {
+        "x": 422.359375,
+        "y": 114,
+        "width": 115.28125,
+        "height": 92.578125,
+        "top": 114,
+        "right": 537.640625,
+        "bottom": 206.578125,
+        "left": 422.359375
+      },
+      "timeCopy": {
+        "x": 422.359375,
+        "y": 114,
+        "width": 19.28125,
+        "height": 92.578125,
+        "top": 114,
+        "right": 441.640625,
+        "bottom": 206.578125,
+        "left": 422.359375
+      }
+    }
+  },
+  {
+    "width": 1440,
+    "source": "https://kmovement.srv1869569.hstgr.cloud / fixture public API responses",
+    "errors": [],
+    "layout": {
+      "documentWidth": 1440,
+      "viewport": 1440,
+      "timeCard": {
+        "x": 341,
+        "y": 41,
+        "width": 1038,
+        "height": 44,
+        "top": 41,
+        "right": 1379,
+        "bottom": 85,
+        "left": 341
+      },
+      "timeCopy": {
+        "x": 341,
+        "y": 42.609375,
+        "width": 220.515625,
+        "height": 40.78125,
+        "top": 42.609375,
+        "right": 561.515625,
+        "bottom": 83.390625,
+        "left": 341
+      }
+    }
+  }
+]
