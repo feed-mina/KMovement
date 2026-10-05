@@ -3,6 +3,7 @@
 import { useId, useState } from 'react';
 
 type CardProps = {
+    readOnly?: boolean;
     data?: Record<string, any>;
     meta?: Record<string, any>;
     onAction?: (meta: Record<string, any>, data?: Record<string, any>) => void;
@@ -71,7 +72,7 @@ function socialLinks(data?: Record<string, any>): SocialLink[] {
     return links;
 }
 
-export function KpopArtistCard({ data, meta, onAction }: CardProps) {
+export function KpopArtistCard({ data, meta, onAction, readOnly = false }: CardProps) {
     const titleId = useId();
     const [followed, setFollowed] = useState(Boolean(data?.followed));
     const [busy, setBusy] = useState(false);
@@ -146,9 +147,9 @@ export function KpopArtistCard({ data, meta, onAction }: CardProps) {
                             상세 보기
                         </button>
                     )}
-                    <button type="button" aria-pressed={followed} aria-busy={busy} disabled={busy} onClick={toggleFollow}>
+                    {!readOnly && <button type="button" aria-pressed={followed} aria-busy={busy} disabled={busy} onClick={toggleFollow}>
                         {busy ? '처리 중...' : followed ? '팔로우 취소' : '팔로우'}
-                    </button>
+                    </button>}
                 </div>
                 {status && <small role="status">{status}</small>}
             </div>
@@ -156,7 +157,7 @@ export function KpopArtistCard({ data, meta, onAction }: CardProps) {
     );
 }
 
-export function KpopEventCard({ data, meta, onAction }: CardProps) {
+export function KpopEventCard({ data, meta, onAction, readOnly = false }: CardProps) {
     if (meta?.componentId === 'kpop_event_card' && !data) {
         return (
             <article className="kpop-card kpop-event-card kpop-empty-state" aria-live="polite">
@@ -198,7 +199,10 @@ export function KpopEventCard({ data, meta, onAction }: CardProps) {
                     {data?.followed && <span className="kpop-followed-badge">팔로우 중</span>}
                 </span>
                 <h3 id={titleId}>{title}</h3>
+                {data?.ended === true && <p className="event-ended">종료된 일정 · 행사 날짜 지남</p>}
                 <p>{[data?.region, data?.venue, data?.date].filter(Boolean).join(' · ') || '장소와 일정 확인 중'}</p>
+                {isDetail && data?.description && <p>{String(data.description)}</p>}
+                {isValidHttpsUrl(data?.officialUrl) && <a href={String(data?.officialUrl)} target="_blank" rel="noopener noreferrer">공식 일정 안내 (새 창)</a>}
                 <p className="kpop-evidence">공식 또는 운영 검수 완료 링크를 기준으로 확인해 주세요.</p>
                 <div className="kpop-card-actions">
                     {!isDetail && (
@@ -213,9 +217,9 @@ export function KpopEventCard({ data, meta, onAction }: CardProps) {
                             상세 보기
                         </button>
                     )}
-                    <button type="button" aria-pressed={bookmarked} aria-busy={busy} disabled={busy} onClick={toggleBookmark}>
+                    {!readOnly && <button type="button" aria-pressed={bookmarked} aria-busy={busy} disabled={busy} onClick={toggleBookmark}>
                         {busy ? '저장 중...' : bookmarked ? '저장 취소' : '일정 저장'}
-                    </button>
+                    </button>}
                 </div>
                 {status && <small role="status">{status}</small>}
             </div>

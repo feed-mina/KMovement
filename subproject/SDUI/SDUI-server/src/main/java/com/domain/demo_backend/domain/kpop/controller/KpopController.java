@@ -21,6 +21,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDate;
+import org.springframework.http.CacheControl;
+import com.domain.demo_backend.domain.kpop.service.EventCatalogService;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +38,7 @@ public class KpopController {
     private final KpopProductService productService;
     private final KpopCacheService cacheService;
     private final Executor sseExecutor;
+    private final EventCatalogService eventCatalog;
 
     @Autowired
     public KpopController(
@@ -42,13 +46,20 @@ public class KpopController {
             KpopAnalysisService analysisService,
             KpopProductService productService,
             @Qualifier("sseExecutor") Executor sseExecutor,
-            KpopCacheService cacheService
+            KpopCacheService cacheService,
+            EventCatalogService eventCatalog
     ) {
         this.jdbcTemplate = jdbcTemplate;
         this.analysisService = analysisService;
         this.productService = productService;
         this.sseExecutor = sseExecutor;
         this.cacheService = cacheService;
+        this.eventCatalog = eventCatalog;
+    }
+
+    public KpopController(NamedParameterJdbcTemplate jdbcTemplate, KpopAnalysisService analysisService,
+                          KpopProductService productService, Executor sseExecutor, KpopCacheService cacheService) {
+        this(jdbcTemplate, analysisService, productService, sseExecutor, cacheService, new EventCatalogService(jdbcTemplate));
     }
 
     public KpopController(
@@ -57,11 +68,7 @@ public class KpopController {
             KpopProductService productService,
             Executor sseExecutor
     ) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.analysisService = analysisService;
-        this.productService = productService;
-        this.sseExecutor = sseExecutor;
-        this.cacheService = null;
+        this(jdbcTemplate, analysisService, productService, sseExecutor, null);
     }
 
     @GetMapping("/artists")
@@ -132,59 +139,21 @@ public class KpopController {
             @RequestParam(name = "to", required = false) String to,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        Long userSqno = user == null ? null : user.getUserSqno();
-
-        // 각 named parameter는 NamedParameterJdbcTemplate에서 등장 위치마다 별도의 placeholder로
-        // 전개된다. `:param IS NULL` 형태는 PostgreSQL이 해당 placeholder의 타입을 추론할 수 없어
-        // "could not determine data type of parameter"로 실패하므로 항상 명시적으로 캐스팅한다.
-        //
-        // from을 주지 않으면 오늘부터 본다. event 테이블은 지난 활동까지 담은 타임라인이라(V119)
-        // 기본값이 없으면 목록이 1년 전 일정부터 열린다. 과거를 보려면 from을 명시하면 된다.
-        String sql = """
-                SELECT e.event_id AS id, e.artist_id AS "artistId", a.name_ko AS "artistNameKo",
-                       e.title_ko AS "titleKo", e.title_en AS "titleEn", e.region, e.venue,
-                       e.event_date AS date, e.official_url AS "officialUrl",
-                       (af.artist_id IS NOT NULL) AS followed
-                FROM event e
-                JOIN artist a ON a.artist_id = e.artist_id
-                LEFT JOIN artist_follow af
-                       ON af.artist_id = e.artist_id
-                      AND af.user_sqno = CAST(:userSqno AS bigint)
-                WHERE e.approved_yn = 'Y'
-                  AND (CAST(:region AS text) IS NULL OR e.region = :region)
-                  AND e.event_date >= COALESCE(CAST(:fromDate AS date), CURRENT_DATE)
-                  AND (CAST(:toDate AS date) IS NULL OR e.event_date <= CAST(:toDate AS date))
-                ORDER BY (af.artist_id IS NOT NULL) DESC, e.event_date ASC, e.event_id ASC
-                """;
-        MapSqlParameterSource p = new MapSqlParameterSource()
-                .addValue("region", blankToNull(region))
-                .addValue("fromDate", blankToNull(from))
-                .addValue("toDate", blankToNull(to))
-                .addValue("userSqno", userSqno);
-        Map<String, Object> keyParts = new LinkedHashMap<>();
-        keyParts.put("region", blankToNull(region));
-        keyParts.put("from", blankToNull(from));
-        keyParts.put("to", blankToNull(to));
-        keyParts.put("userSqno", userSqno);
-        return ResponseEntity.ok(ApiResponse.success(cachedCatalog(
-                "events", keyParts, Duration.ofMinutes(3),
-                new TypeReference<List<Map<String, Object>>>() {},
-                () -> jdbcTemplate.queryForList(sql, p))));
+        LocalDate today = eventCatalog.today();
+        return eventResponse(today, eventCatalog.events(region, from, to, user == null ? null : user.getUserSqno(), today));
     }
 
     @GetMapping("/events/{eventId}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> event(@PathVariable Long eventId) {
-        return ResponseEntity.ok(ApiResponse.success(cachedCatalog(
-                "event_detail", Map.of("eventId", eventId), Duration.ofMinutes(5),
-                new TypeReference<Map<String, Object>>() {},
-                () -> one("""
-                        SELECT e.event_id AS id, e.artist_id AS "artistId", a.name_ko AS "artistNameKo",
-                               e.title_ko AS "titleKo", e.title_en AS "titleEn", e.region, e.venue,
-                               e.event_date AS date, e.official_url AS "officialUrl", e.description
-                        FROM event e
-                        JOIN artist a ON a.artist_id = e.artist_id
-                        WHERE e.event_id = :eventId AND e.approved_yn = 'Y'
-                        """, params("eventId", eventId)))));
+        LocalDate today = eventCatalog.today();
+        return eventResponse(today, eventCatalog.event(eventId, today));
+    }
+
+    private <T> ResponseEntity<ApiResponse<T>> eventResponse(LocalDate today, T data) {
+        // V103 keeps its array response. One server-derived day is used for filters and badges.
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                .header("X-Kpop-Today", today.toString()).header("X-Kpop-Time-Zone", EventCatalogService.ZONE.getId())
+                .body(ApiResponse.success(data));
     }
 
     @PostMapping("/artists/{artistId}/follow")

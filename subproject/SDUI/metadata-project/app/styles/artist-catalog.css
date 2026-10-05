@@ -1,0 +1,17 @@
+/* Scoped to F6-A; existing cards and pagination are reused. */
+.artist-catalog { width: 100%; max-width: 1120px; min-width: 0; margin-inline: auto; padding: 24px; }
+.artist-catalog h1, .artist-catalog h2, .artist-catalog .kpop-card { overflow-wrap: anywhere; }
+.artist-catalog-search { margin-block: 24px; }
+.artist-catalog-search label { display: block; margin-bottom: 8px; font-weight: 700; }
+.artist-catalog-inputs { display: flex; flex-wrap: wrap; gap: 10px; }
+.artist-catalog-inputs input { flex: 1 1 180px; min-width: 0; max-width: 100%; padding: 12px; border: 1px solid #8b94a3; border-radius: 8px; font-size: 16px; }
+.artist-catalog button, .artist-catalog .kpop-social-link { min-height: 44px; }
+.artist-catalog-inputs button, .artist-catalog-state button { padding: 10px 16px; border: 1px solid #9ba6b8; border-radius: 8px; }
+.artist-catalog .artist-catalog-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.artist-catalog .kpop-card { min-width: 0; }
+.artist-catalog .kpop-card-body { min-width: 0; }
+.artist-catalog .kpop-social-links, .artist-catalog .kpop-card-actions { flex-wrap: wrap; }
+.artist-catalog-results { scroll-margin-top: 100px; margin-block: 20px; }
+.artist-catalog-state { padding: 20px; border: 1px solid #c87941; border-radius: 12px; }
+.artist-catalog :is(a, button, input):focus-visible, .artist-catalog-results:focus { outline: 3px solid #285cb2; outline-offset: 3px; }
+@media (max-width: 600px) { .artist-catalog { padding: 16px; } .artist-catalog .artist-catalog-grid { grid-template-columns: minmax(0, 1fr); } }

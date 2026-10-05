@@ -127,12 +127,15 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Test the F2, F4, and F5 Spring contracts
+      - name: Test the F2, F4, F5, F6-A, F6-B, and F6-C Spring contracts
         working-directory: subproject/SDUI/SDUI-server
         run: >-
           ./gradlew test
           --tests 'com.domain.demo_backend.domain.address.*'
           --tests 'com.domain.demo_backend.domain.tour.*'
+          --tests 'com.domain.demo_backend.domain.kpop.controller.ArtistCatalogControllerTest'
+          --tests 'com.domain.demo_backend.domain.kpop.controller.EventCatalogControllerTest'
+          --tests 'com.domain.demo_backend.domain.kpop.controller.PublicProductCatalogControllerTest'
 
       - name: Build the Spring image
         run: |
