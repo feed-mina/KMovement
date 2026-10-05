@@ -24,6 +24,13 @@ jest.mock('next/navigation', () => ({
 }));
 
 const mockedFetch = fetchTourPois as jest.Mock;
+jest.mock('@/components/plugins/travel/TourExploreMap', () => ({
+    __esModule: true,
+    ...jest.requireActual('@/components/plugins/travel/TourExploreMap'),
+    default: ({pois, onSelect, selectedId}: any) => <div data-testid="explore-map" data-selected={selectedId}>
+        {pois.map((poi: any) => <button key={poi.contentId} onClick={() => onSelect(poi.contentId)} aria-label={`${poi.title} 지도 핀`}>핀</button>)}
+    </div>,
+}));
 const mockedRestaurants = fetchRestaurants as jest.Mock;
 const mockedHolyFetch = fetchHolyPois as jest.Mock;
 const mockedContentFetch = fetchHolyContents as jest.Mock;
@@ -83,6 +90,17 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         renderScreen();
         await waitFor(() => expect(screen.getByText('가나돈까스의집')).toBeInTheDocument());
         expect(screen.getByText('가담')).toBeInTheDocument();
+    });
+
+    it('카드 선택은 지도에 전달하고 핀 선택은 카드로 초점을 돌린다', async () => {
+        renderScreen();
+        await screen.findByText('가담');
+        fireEvent.click(screen.getByRole('button', {name: '가담 지도에서 선택'}));
+        expect(screen.getByTestId('explore-map')).toHaveAttribute('data-selected', '2');
+        fireEvent.click(screen.getByRole('button', {name: '가나돈까스의집 지도 핀'}));
+        await waitFor(() => expect(document.getElementById('tour-card-1')).toHaveFocus());
+        expect(document.getElementById('tour-card-1')).toHaveAttribute('data-selected', 'true');
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
     it('기본 카테고리는 맛집(39)으로 조회해야 함', async () => {

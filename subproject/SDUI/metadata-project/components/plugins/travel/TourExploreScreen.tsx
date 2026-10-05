@@ -17,6 +17,7 @@ import {
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
 import PoiImage from '@/components/plugins/travel/PoiImage';
 import TourPoiCard from '@/components/plugins/travel/TourPoiCard';
+import TourExploreMap, {hasTourCoordinates, tourPoiKey} from '@/components/plugins/travel/TourExploreMap';
 import { trackEvent } from '@/lib/analytics/dataLayer';
 
 // [탐색] 화면 컨트롤러 (여행 플러그인). TourAPI POI를 지역·카테고리·정렬로 탐색.
@@ -206,6 +207,17 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const [arrange, setArrange] = useState('A');
     const [placeQuery, setPlaceQuery] = useState('');
     const [filtersOpen, setFiltersOpen] = useState(false);
+    const [selectedMapId, setSelectedMapId] = useState<string | null>(null);
+    const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
+    const selectFromMap = useCallback((id: string) => {
+        setSelectedMapId(id);
+        setMobileView('list');
+        requestAnimationFrame(() => {
+            const card = document.getElementById(`tour-card-${encodeURIComponent(id)}`);
+            card?.scrollIntoView?.({block: 'nearest', behavior: 'smooth'});
+            card?.focus({preventScroll: true});
+        });
+    }, []);
     const filtersId = useId();
     const [pois, setPois] = useState<TourPoi[]>([]);
     // 성지는 서버가 최대 300건(TourService.HOLY_MAX_RESULTS)을 한 번에 내려준다.
@@ -457,7 +469,8 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         const query = placeQuery.trim().toLocaleLowerCase();
         return query ? pois.filter((poi) => `${poi.title} ${poi.addr ?? ''}`.toLocaleLowerCase().includes(query)) : pois;
     }, [pois, placeQuery]);
-    const displayedPois = category === '39' ? filteredPois : filteredPois.slice(0, visibleCount);
+    const displayedPois = useMemo(() => category === '39' ? filteredPois : filteredPois.slice(0, visibleCount), [category, filteredPois, visibleCount]);
+    const activeMapId = displayedPois.some((poi) => tourPoiKey(poi) === selectedMapId) ? selectedMapId : null;
     const resetFilters = () => {
         setPlaceQuery(''); setSigungu(''); setAreaCode(DEFAULT_AREA_CODE);
         setCategory(DEFAULT_CATEGORY); setArrange('A'); setSelectedContent(null); setContentQuery('');
@@ -660,10 +673,19 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
 
             {!loading && !error && pois.length > 0 && (
                 <>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 }}>
+                    <div className="tour-view-toggle" role="group" aria-label="탐색 보기">
+                        <button type="button" aria-pressed={mobileView === 'list'} onClick={() => setMobileView('list')}>목록 보기</button>
+                        <button type="button" aria-pressed={mobileView === 'map'} onClick={() => setMobileView('map')}>지도 보기</button>
+                    </div>
+                    <div className={`tour-results-layout tour-results-layout--${mobileView}`}>
+                    <div className="tour-results-list">
+                    <div className="tour-card-grid">
                         {displayedPois.map((poi, index) => (
                             <TourPoiCard
-                                key={poi.contentId ?? index}
+                                key={tourPoiKey(poi)}
+                                cardId={`tour-card-${encodeURIComponent(tourPoiKey(poi))}`}
+                                selected={activeMapId === tourPoiKey(poi)}
+                                onMapSelect={hasTourCoordinates(poi) ? () => {setSelectedMapId(tourPoiKey(poi)); setMobileView('map');} : undefined}
                                 poi={poi}
                                 isSaved={Boolean(poi.contentId && saved.has(poi.contentId))}
                                 priority={index < EAGER_CARD_COUNT}
@@ -699,6 +721,9 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             {loadMoreError}
                         </p>
                     )}
+                    </div>
+                    <div className="tour-results-map"><TourExploreMap pois={displayedPois} selectedId={activeMapId} onSelect={selectFromMap}/></div>
+                    </div>
                 </>
             )}
 
