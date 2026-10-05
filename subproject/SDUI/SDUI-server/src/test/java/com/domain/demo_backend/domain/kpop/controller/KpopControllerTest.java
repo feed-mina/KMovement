@@ -185,30 +185,30 @@ class KpopControllerTest {
     void followArtistUsesAuthenticatedPrincipalIdentity() {
         CustomUserDetails user = mock(CustomUserDetails.class);
         when(user.getUserSqno()).thenReturn(42L);
-        when(jdbcTemplate.update(contains("INSERT INTO artist_follow"), any(MapSqlParameterSource.class)))
-                .thenReturn(1);
+        when(jdbcTemplate.queryForList(contains("INSERT INTO artist_follow"), any(MapSqlParameterSource.class), eq(Long.class)))
+                .thenReturn(List.of(1L));
 
         ResponseEntity<ApiResponse<Map<String, Object>>> response = controller.followArtist(7L, user);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getData()).containsEntry("artistId", 7L).containsEntry("followed", true);
-        verify(jdbcTemplate).update(contains("INSERT INTO artist_follow"), any(MapSqlParameterSource.class));
+        verify(jdbcTemplate).queryForList(contains("INSERT INTO artist_follow"), any(MapSqlParameterSource.class), eq(Long.class));
     }
 
     @Test
     void bookmarkEventUsesAuthenticatedPrincipalIdentity() {
         CustomUserDetails user = mock(CustomUserDetails.class);
         when(user.getUserSqno()).thenReturn(42L);
-        when(jdbcTemplate.update(contains("INSERT INTO event_bookmark"), any(MapSqlParameterSource.class)))
-                .thenReturn(1);
+        when(jdbcTemplate.queryForList(contains("INSERT INTO event_bookmark"), any(MapSqlParameterSource.class), eq(Long.class)))
+                .thenReturn(List.of(1L));
 
         ResponseEntity<ApiResponse<Map<String, Object>>> response = controller.bookmarkEvent(9L, user);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getData()).containsEntry("eventId", 9L).containsEntry("bookmarked", true);
-        verify(jdbcTemplate).update(contains("INSERT INTO event_bookmark"), any(MapSqlParameterSource.class));
+        verify(jdbcTemplate).queryForList(contains("INSERT INTO event_bookmark"), any(MapSqlParameterSource.class), eq(Long.class));
     }
 
     @Test

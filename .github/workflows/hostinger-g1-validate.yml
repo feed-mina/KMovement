@@ -151,6 +151,14 @@ jobs:
           --tests 'com.domain.demo_backend.domain.kpop.controller.EventCatalogControllerTest'
           --tests 'com.domain.demo_backend.domain.kpop.controller.PublicProductCatalogControllerTest'
           --tests 'com.domain.demo_backend.domain.kpop.service.PublicProductPostgresTest'
+          --tests 'com.domain.demo_backend.domain.kpop.service.PersonalSavedPostgresTest'
+
+      - name: Upload PostgreSQL request and response test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f8-postgres-test-results
+          path: subproject/SDUI/SDUI-server/build/test-results/test/
 
       - name: Build the Spring image
         run: |

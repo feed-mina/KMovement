@@ -1,4 +1,5 @@
 'use client';
+import { SavedToggle } from './PersonalSaved';
 
 import { FormEvent, useEffect, useId, useState } from 'react';
 
@@ -97,7 +98,7 @@ function gradeCopy(grade: ProductCandidate['evidenceGrade']) {
     return '근거 부족 · 상품을 단정할 수 없음';
 }
 
-export function ProductCard({ candidate, onRemoved, readOnly = false }: { candidate: ProductCandidate; onRemoved?: () => void; readOnly?: boolean }) {
+export function ProductCard({ candidate, onRemoved, readOnly = false, personalSave = false }: { candidate: ProductCandidate; onRemoved?: () => void; readOnly?: boolean; personalSave?: boolean }) {
     const titleId = useId();
     const [savedItemId, setSavedItemId] = useState(candidate.savedItemId);
     const [busy, setBusy] = useState(false);
@@ -139,6 +140,7 @@ export function ProductCard({ candidate, onRemoved, readOnly = false }: { candid
                 <p><strong>확인 시각:</strong> {candidate.lastVerifiedAt} <small>(원본 기록 · 시간대 미기록)</small></p>
                 {!candidate.rightsChecked && <p>링크 권리 미확인 · 출처 링크를 제공하지 않아요.</p>}</>}
             <div className="kpop-card-actions">
+                {personalSave && candidate.id && <SavedToggle kind="products" itemRef={candidate.id} />}
                 {!readOnly && <button type="button" aria-pressed={Boolean(savedItemId)} aria-busy={busy} disabled={busy || !candidate.id} onClick={toggleSaved}>
                     {busy ? '처리 중...' : savedItemId ? '저장 해제' : '후보 저장'}
                 </button>}

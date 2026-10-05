@@ -8,12 +8,14 @@ import { registerScreen } from '@/components/screens/registry';
 import ArtistCatalogScreen from './ArtistCatalogScreen';
 import EventCatalogScreen from './EventCatalogScreen';
 import PublicProductCatalogScreen from './PublicProductCatalogScreen';
+import PersonalSavedScreen from './PersonalSaved';
 
 let registered = false;
 
 export function registerKpopPlugin(): void {
     if (registered) return;
     registered = true;
+    registerScreen({match: id => id === 'KPOP_SAVED_ITEMS', controller: PersonalSavedScreen});
     registerScreen({match: id => id === 'KPOP_EXPLORE' || id === 'KPOP_ARTIST_DETAIL', controller: ArtistCatalogScreen});
     registerScreen({match: id => id === 'KPOP_EVENTS' || id === 'KPOP_EVENT_DETAIL', controller: EventCatalogScreen});
     registerScreen({match: id => id === 'KPOP_PRODUCTS', controller: PublicProductCatalogScreen});

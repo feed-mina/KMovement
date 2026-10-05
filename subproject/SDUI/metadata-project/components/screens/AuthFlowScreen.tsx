@@ -145,6 +145,9 @@ function ProfileScreen() {
                 </dl>
 
                 <div className="auth-flow-actions">
+                    <button className="auth-flow-button secondary" type="button" onClick={() => router.push('/view/KPOP_SAVED_ITEMS')}>
+                        내 목록 보기
+                    </button>
                     <button className="auth-flow-button secondary" type="button" onClick={() => router.push('/view/MAIN_PAGE')}>
                         홈으로
                     </button>

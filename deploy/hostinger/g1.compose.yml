@@ -165,6 +165,17 @@ services:
       traefik.http.routers.kmovement-f7-auth.tls.certresolver: letsencrypt
       traefik.http.routers.kmovement-f7-auth.service: kmovement-f7-auth
       traefik.http.services.kmovement-f7-auth.loadbalancer.server.port: "8080"
+      # F8 personal endpoints. Spring requires an authenticated principal for every request.
+      traefik.http.routers.kmovement-f8-saved.rule: >-
+        Host(`${KMOVEMENT_SITE_HOST:?Set KMOVEMENT_SITE_HOST}`) &&
+        PathRegexp(`^/api/v1/kpop/me/saved/(artists|events|products)(/[0-9]+)?$`) &&
+        (Method(`GET`) || Method(`POST`) || Method(`DELETE`))
+      traefik.http.routers.kmovement-f8-saved.priority: "320"
+      traefik.http.routers.kmovement-f8-saved.entrypoints: websecure
+      traefik.http.routers.kmovement-f8-saved.tls: "true"
+      traefik.http.routers.kmovement-f8-saved.tls.certresolver: letsencrypt
+      traefik.http.routers.kmovement-f8-saved.service: kmovement-f8-saved
+      traefik.http.services.kmovement-f8-saved.loadbalancer.server.port: "8080"
       # F6-A only. Exact list and one-segment profile reads; no follow/event/product paths.
       traefik.http.routers.kmovement-f6a-artists.rule: >-
         Host(`${KMOVEMENT_SITE_HOST:?Set KMOVEMENT_SITE_HOST}`) &&
