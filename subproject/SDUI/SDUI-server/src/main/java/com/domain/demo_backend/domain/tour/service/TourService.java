@@ -33,6 +33,7 @@ public class TourService {
     private final TourApiClient tourApiClient;
     private final TourPoiRepository tourPoiRepository;
     private final HolyContentRepository holyContentRepository;
+    private final com.domain.demo_backend.domain.tour.domain.HolyReviewAuditRepository holyReviewAuditRepository;
 
     /** 맛집(음식점, contentTypeId=39) 조회 편의 메서드. */
     public static final String CONTENT_TYPE_RESTAURANT = "39";
@@ -183,8 +184,9 @@ public class TourService {
      * @throws IllegalArgumentException poiSqno 없음 / 잘못된 action / TOURAPI 행
      */
     @Transactional
-    public HolyReviewItemDto reviewHolyPoi(Long poiSqno, String action, String reviewer) {
-        TourPoi poi = tourPoiRepository.findById(poiSqno)
+    public HolyReviewItemDto reviewHolyPoi(Long poiSqno, String action, String reviewer, String reason) {
+        String cleanReviewer = required(reviewer, "reviewer", 60);
+        TourPoi poi = tourPoiRepository.findForReview(poiSqno)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 POI: " + poiSqno));
         if (SOURCE_TOURAPI.equals(poi.getSource())) {
             throw new IllegalArgumentException("공공(TOURAPI) POI는 검수 대상이 아닙니다: " + poiSqno);
@@ -197,10 +199,14 @@ public class TourService {
             case "REJECT" -> "REJECTED";
             default -> throw new IllegalArgumentException("action은 APPROVE 또는 REJECT여야 합니다: " + action);
         };
+        String cleanReason = "REJECTED".equals(status) ? required(reason, "reason", 500) : optional(reason, 500);
         poi.setReviewStatus(status);
-        poi.setReviewedBy(reviewer);
+        poi.setReviewReason(cleanReason);
+        poi.setReviewedBy(cleanReviewer);
         poi.setReviewedAt(LocalDateTime.now());
         TourPoi saved = tourPoiRepository.save(poi);
+        holyReviewAuditRepository.save(new com.domain.demo_backend.domain.tour.domain.HolyReviewAudit(
+                poiSqno,status,cleanReviewer,cleanReason,poi.getReviewedAt()));
         log.info("[TourService] 성지 검수 - poiSqno={}, status={}, reviewer={}", poiSqno, status, reviewer);
         return HolyReviewItemDto.from(saved);
     }
@@ -210,18 +216,22 @@ public class TourService {
                                             String artist, String recommendReason, String sourceUrl,
                                             Long submitterSqno) {
         String cleanTitle = required(title, "title", 255);
+        if (submitterSqno == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED);
         String cleanSourceUrl = requiredHttpUrl(sourceUrl);
         if (mapX == null || mapY == null || !Double.isFinite(mapX) || !Double.isFinite(mapY)
                 || mapX < 124 || mapX > 132 || mapY < 33 || mapY > 39) {
             throw new IllegalArgumentException("Coordinates must be within South Korea");
         }
-        tourPoiRepository.findFirstBySourceUrlAndReviewStatus(cleanSourceUrl, "PENDING")
-                .ifPresent(p -> { throw new IllegalArgumentException("This source URL is already pending review"); });
+        if (tourPoiRepository.findFirstBySourceUrlAndReviewStatus(cleanSourceUrl, "PENDING").isPresent()
+                || tourPoiRepository.existsBySourceAndSourceUrlAndReviewStatusIn("UGC", cleanSourceUrl, List.of("PENDING", "APPROVED")))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "This source URL is already pending or approved");
         TourPoi poi = new TourPoi();
         poi.setSource("UGC");
+        poi.setContentId("ugc-" + java.util.UUID.randomUUID());
         poi.setContentTypeId("HOLY");
         poi.setTitle(cleanTitle);
-        poi.setAddr(optional(addr, 500));
+        poi.setAddr(required(addr, "addr", 500));
+        poi.setAreaCode(submissionAreaCode(poi.getAddr()));
         poi.setMapX(mapX);
         poi.setMapY(mapY);
         poi.setArtist(optional(artist, 120));
@@ -229,7 +239,22 @@ public class TourService {
         poi.setSourceUrl(cleanSourceUrl);
         poi.setReviewStatus("PENDING");
         poi.setSubmittedBy(submitterSqno);
-        return HolyReviewItemDto.from(tourPoiRepository.save(poi));
+        return HolyReviewItemDto.from(tourPoiRepository.saveAndFlush(poi));
+    }
+
+    @Transactional(readOnly = true)
+    public List<com.domain.demo_backend.domain.tour.domain.HolyReviewAudit> getHolyReviewAudit(Long poiSqno) {
+        return holyReviewAuditRepository.findByPoiSqnoOrderByAuditIdAsc(poiSqno);
+    }
+
+    private String submissionAreaCode(String address) {
+        Map<String,String> fullNames = Map.ofEntries(
+                Map.entry("충청북", "33"), Map.entry("충청남", "34"),
+                Map.entry("전라북", "37"), Map.entry("전북", "37"), Map.entry("전라남", "38"),
+                Map.entry("경상북", "35"), Map.entry("경상남", "36"));
+        for (var entry : fullNames.entrySet()) if (address.startsWith(entry.getKey())) return entry.getValue();
+        for (var area : NATIONWIDE_AREAS) if (address.startsWith(area.name())) return area.code();
+        throw new IllegalArgumentException("addr must start with a Korean province or metropolitan city name");
     }
 
     /** 사진 보강 1회 실행 결과. */

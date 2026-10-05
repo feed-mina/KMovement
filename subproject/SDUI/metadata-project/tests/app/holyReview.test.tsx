@@ -34,6 +34,20 @@ describe('HolyReviewPage access and data states', () => {
     mockAuthState = { user: { role: 'ROLE_USER' }, isLoading: false };
   });
 
+  it('requires a rejection reason and preserves it in the request', async () => {
+    mockAuthState = { user: {role:'ROLE_ADMIN'}, isLoading:false };
+    (api.get as jest.Mock).mockResolvedValue({data:[pendingItem]});
+    (api.post as jest.Mock).mockResolvedValue({data:{}});
+    render(<HolyReviewPage/>);
+    fireEvent.click(await screen.findByRole('button',{name:'반려'}));
+    expect(api.post).not.toHaveBeenCalled();
+    expect(screen.getByRole('status')).toHaveTextContent('반려 사유를 입력');
+    fireEvent.change(screen.getByLabelText('반려 사유 (실제 검수 대기 성지)'),{target:{value:'출처 확인 불가'}});
+    fireEvent.click(screen.getByRole('button',{name:'반려'}));
+    await waitFor(()=>expect(api.post).toHaveBeenCalledWith('/api/admin/tour/holy/42/review',{action:'REJECT',reason:'출처 확인 불가'}));
+    expect(await screen.findByText('검수 대기 제보가 없습니다.')).toBeInTheDocument();
+  });
+
   it('does not request or expose the admin review UI to an ordinary user', () => {
     render(<HolyReviewPage />);
 
@@ -98,7 +112,9 @@ describe('HolyReviewPage access and data states', () => {
     (api.post as jest.Mock).mockRejectedValue(new Error('save error'));
     render(<HolyReviewPage />);
 
-    fireEvent.click(await screen.findByRole('button', { name: '반려' }));
+    await screen.findByRole('button', { name: '반려' });
+    fireEvent.change(screen.getByLabelText('반려 사유 (실제 검수 대기 성지)'), {target:{value:'출처를 확인할 수 없습니다.'}});
+    fireEvent.click(screen.getByRole('button', { name: '반려' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('검수 결과를 저장하지 못했습니다.');
     expect(screen.getByText('실제 검수 대기 성지')).toBeInTheDocument();
   });

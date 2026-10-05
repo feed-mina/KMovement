@@ -70,6 +70,7 @@ export default function HolyMapPicker({ provider, lat, lng, onChange }: Props) {
   }, [provider]);
 
   useEffect(() => {
+    if (!lat || !lng) return;
     const position = { lat: Number(lat), lng: Number(lng) };
     if (!Number.isFinite(position.lat) || !Number.isFinite(position.lng)) return;
     if (provider === 'google' && markerRef.current?.setPosition) markerRef.current.setPosition(position);
