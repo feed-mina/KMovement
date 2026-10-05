@@ -24,7 +24,7 @@ class TourServiceRestaurantTest {
         tourService = new TourService(
                 tourApiClient,
                 mock(TourPoiRepository.class),
-                mock(HolyContentRepository.class));
+                mock(HolyContentRepository.class), mock(com.domain.demo_backend.domain.tour.domain.HolyReviewAuditRepository.class));
     }
 
     @Test

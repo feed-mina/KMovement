@@ -16,6 +16,12 @@ import java.util.Optional;
 @Repository
 public interface TourPoiRepository extends JpaRepository<TourPoi, Long> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM TourPoi p WHERE p.poiSqno=:id")
+    Optional<TourPoi> findForReview(@Param("id") Long id);
+
+    boolean existsBySourceAndSourceUrlAndReviewStatusIn(String source,String sourceUrl,List<String> statuses);
+
     /** 성지 목록: 공공(TOURAPI) 제외 + 승인분만. idx_tour_poi_holy 부분 인덱스 사용. */
     List<TourPoi> findBySourceNotAndReviewStatusOrderByPoiSqnoAsc(String excludedSource, String reviewStatus);
 
@@ -41,7 +47,9 @@ public interface TourPoiRepository extends JpaRepository<TourPoi, Long> {
                     WHERE l.poiSqno = p.poiSqno AND l.contentSqno = :contentSqno))
               AND (:kind IS NULL OR :kind = ''
                    OR (:kind = 'FOOD' AND p.contentTypeId = 'HOLY_FOOD'))
-            ORDER BY p.poiSqno ASC
+            ORDER BY CASE WHEN p.source = 'UGC' THEN 0 ELSE 1 END,
+                     CASE WHEN p.source = 'UGC' THEN p.reviewedAt END DESC,
+                     p.poiSqno ASC
             """)
     List<TourPoi> findHolyPoisByRegion(
             @Param("excludedSource") String excludedSource,

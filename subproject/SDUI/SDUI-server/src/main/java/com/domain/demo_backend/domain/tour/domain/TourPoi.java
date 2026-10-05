@@ -93,6 +93,9 @@ public class TourPoi {
     @Column(name = "reviewed_by", length = 60)
     private String reviewedBy;
 
+    @Column(name = "review_reason", length = 500)
+    private String reviewReason;
+
     @Column(name = "reviewed_at")
     private LocalDateTime reviewedAt;
 

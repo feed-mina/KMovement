@@ -141,7 +141,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Test the F2, F4, F5, F6-A, F6-B, and F6-C Spring contracts
+      - name: Test public reads, personal saved lists, and F9 moderation with PostgreSQL
         working-directory: subproject/SDUI/SDUI-server
         run: >-
           ./gradlew test

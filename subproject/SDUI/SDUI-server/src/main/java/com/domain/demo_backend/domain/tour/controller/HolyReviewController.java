@@ -28,6 +28,16 @@ public class HolyReviewController {
 
     private final TourService tourService;
 
+    @ModelAttribute
+    void privateResponse(jakarta.servlet.http.HttpServletResponse response) {
+        response.setHeader("Cache-Control", "private, no-store");
+    }
+
+    @GetMapping("/{poiSqno}/audit")
+    public ApiResponse<?> audit(@PathVariable Long poiSqno) {
+        return ApiResponse.success(tourService.getHolyReviewAudit(poiSqno));
+    }
+
     /** GET /api/admin/tour/holy/pending — 검수 대기 큐 목록. */
     @GetMapping("/pending")
     public ApiResponse<List<HolyReviewItemDto>> getPending() {
@@ -49,16 +59,17 @@ public class HolyReviewController {
     }
 
     /** 검수 액션 요청 바디. action: APPROVE | REJECT */
-    public record ReviewActionRequest(String action) {}
+    public record ReviewActionRequest(String action, String reason) {}
 
     /** POST /api/admin/tour/holy/{poiSqno}/review — 승인/반려 처리. */
     @PostMapping("/{poiSqno}/review")
     public ResponseEntity<?> review(@PathVariable Long poiSqno,
                                     @RequestBody ReviewActionRequest request,
-                                    Principal principal) {
-        String reviewer = principal != null ? principal.getName() : "admin";
+                                    @org.springframework.security.core.annotation.AuthenticationPrincipal com.domain.demo_backend.global.security.CustomUserDetails principal) {
+        if (principal == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        String reviewer = "user:" + principal.getUserSqno();
         try {
-            HolyReviewItemDto result = tourService.reviewHolyPoi(poiSqno, request.action(), reviewer);
+            HolyReviewItemDto result = tourService.reviewHolyPoi(poiSqno, request.action(), reviewer, request.reason());
             return ResponseEntity.ok(ApiResponse.success(result));
         } catch (IllegalArgumentException e) {
             log.warn("[HolyReview] 검수 요청 거부 - poiSqno={}, reason={}", poiSqno, e.getMessage());

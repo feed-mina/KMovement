@@ -30,6 +30,8 @@ export default function HolyReviewPage() {
   const [loadState, setLoadState] = useState<LoadState>('idle');
   const [busy, setBusy] = useState<number | null>(null);
   const [reviewError, setReviewError] = useState(false);
+  const [reasons, setReasons] = useState<Record<number, string>>({});
+  const [notice, setNotice] = useState('');
   const isAdmin = user?.role === 'ROLE_ADMIN';
 
   const load = useCallback(async () => {
@@ -56,11 +58,16 @@ export default function HolyReviewPage() {
   }, [load]);
 
   const review = async (id: number, action: 'APPROVE' | 'REJECT') => {
+    if (busy !== null) return;
+    const reason = reasons[id]?.trim() || '';
+    if (action === 'REJECT' && !reason) { setNotice('반려 사유를 입력해 주세요.'); return; }
     setBusy(id);
     setReviewError(false);
+    setNotice('');
     try {
-      await api.post(`/api/admin/tour/holy/${id}/review`, { action });
+      await api.post(`/api/admin/tour/holy/${id}/review`, { action, ...(reason ? { reason } : {}) });
       setItems((current) => current.filter((item) => item.poiSqno !== id));
+      setNotice(action === 'APPROVE' ? '승인했습니다. 공개 목록에서 확인할 수 있습니다.' : '반려 사유와 검수 기록을 저장했습니다.');
     } catch {
       setReviewError(true);
     } finally {
@@ -121,6 +128,7 @@ export default function HolyReviewPage() {
           <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold shadow-sm">대기 {items.length}건</span>
         </div>
 
+        {notice && <p role="status" className="mt-5 rounded-xl bg-white p-3">{notice}</p>}
         {reviewError && (
           <p className="mt-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">
             검수 결과를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.
@@ -139,7 +147,10 @@ export default function HolyReviewPage() {
                   <h2 className="mt-3 text-xl font-bold">{item.title}</h2>
                   <p className="mt-1 text-sm text-gray-500">{item.addr} · {item.artist}</p>
                   <p className="mt-4 text-sm leading-6">{item.recommendReason}</p>
-                  <a className="mt-3 block text-sm font-semibold text-blue-700 underline" href={item.sourceUrl} target="_blank" rel="noreferrer">출처 확인</a>
+                  {/^(https?):\/\//i.test(item.sourceUrl) && <a className="mt-3 block text-sm font-semibold text-blue-700 underline" href={item.sourceUrl} target="_blank" rel="noreferrer">출처 확인</a>}
+                  <label className="mt-4 block text-sm font-semibold">반려 사유 ({item.title})
+                    <textarea className="mt-2 block w-full rounded-lg border p-3" maxLength={500} value={reasons[item.poiSqno] || ''} onChange={e => setReasons(current => ({...current, [item.poiSqno]: e.target.value}))} placeholder="반려할 때는 사유를 반드시 입력하세요." />
+                  </label>
                 </div>
                 <div className="flex items-end gap-2">
                   <button disabled={busy !== null} onClick={() => void review(item.poiSqno, 'REJECT')} className="rounded-xl border px-5 py-3 text-sm font-bold disabled:opacity-40">반려</button>

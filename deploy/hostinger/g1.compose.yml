@@ -165,6 +165,19 @@ services:
       traefik.http.routers.kmovement-f7-auth.tls.certresolver: letsencrypt
       traefik.http.routers.kmovement-f7-auth.service: kmovement-f7-auth
       traefik.http.services.kmovement-f7-auth.loadbalancer.server.port: "8080"
+      # F9 submission and moderation only; image backfill stays closed.
+      traefik.http.routers.kmovement-f9-holy.rule: >-
+        Host(`${KMOVEMENT_SITE_HOST:?Set KMOVEMENT_SITE_HOST}`) &&
+        ((Path(`/api/v1/tour/holy/submissions`) && Method(`POST`)) ||
+        (Path(`/api/admin/tour/holy/pending`) && Method(`GET`)) ||
+        (PathRegexp(`^/api/admin/tour/holy/[0-9]+/audit$`) && Method(`GET`)) ||
+        (PathRegexp(`^/api/admin/tour/holy/[0-9]+/review$`) && Method(`POST`)))
+      traefik.http.routers.kmovement-f9-holy.priority: "330"
+      traefik.http.routers.kmovement-f9-holy.entrypoints: websecure
+      traefik.http.routers.kmovement-f9-holy.tls: "true"
+      traefik.http.routers.kmovement-f9-holy.tls.certresolver: letsencrypt
+      traefik.http.routers.kmovement-f9-holy.service: kmovement-f9-holy
+      traefik.http.services.kmovement-f9-holy.loadbalancer.server.port: "8080"
       # F8 personal endpoints. Spring requires an authenticated principal for every request.
       traefik.http.routers.kmovement-f8-saved.rule: >-
         Host(`${KMOVEMENT_SITE_HOST:?Set KMOVEMENT_SITE_HOST}`) &&

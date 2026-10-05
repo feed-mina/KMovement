@@ -23,7 +23,8 @@ public record HolyReviewItemDto(
         String reviewStatus,
         String reviewedBy,
         LocalDateTime reviewedAt,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String reviewReason
 ) {
     public static HolyReviewItemDto from(TourPoi p) {
         return new HolyReviewItemDto(
@@ -41,7 +42,8 @@ public record HolyReviewItemDto(
                 p.getReviewStatus(),
                 p.getReviewedBy(),
                 p.getReviewedAt(),
-                p.getCreatedAt()
+                p.getCreatedAt(),
+                p.getReviewReason()
         );
     }
 }
