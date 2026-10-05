@@ -132,3 +132,6 @@ report/0608_runpod_media_deploy_fix.md
 report/3D inpainting.txt
 report/community_22_cogvideo_photo_final.mp4.codex-work/
 report/scratch/
+
+# Local F11/F12 verification environments and caches
+.codex-work/

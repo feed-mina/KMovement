@@ -61,8 +61,8 @@ jobs:
             org.opencontainers.image.revision=${{ inputs.expected_main_sha }}
           build-args: |
             NEXT_PUBLIC_SITE_URL=https://kmovement.srv1869569.hstgr.cloud
-            NEXT_PUBLIC_BACKEND_URL=http://disabled-spring:8080
-            FASTAPI_URL=http://disabled-fastapi:8000
+            NEXT_PUBLIC_BACKEND_URL=http://spring:8080
+            FASTAPI_URL=http://fastapi:8000
             NEXT_PUBLIC_KAKAO_MAP_APP_KEY=${{ secrets.NEXT_PUBLIC_KAKAO_MAP_APP_KEY }}
 
       - name: Verify and record the immutable image

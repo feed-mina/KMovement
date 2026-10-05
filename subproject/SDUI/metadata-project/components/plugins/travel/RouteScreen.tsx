@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ScreenControllerProps } from '@/components/screens/types';
+import RoadRoutePlanner from './RoadRoutePlanner';
 import RouteMap from '@/components/fields/kride/maps/RouteMap';
 import { tourPoisToRouteMapData } from '@/components/fields/kride/maps/tourToRouteMapData';
 import { normalizeRouteMapData } from '@/components/fields/kride/maps/normalizeRouteMapData';
@@ -24,10 +25,11 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const [mode, setMode] = useState<'tour' | 'ai'>('tour');
+    const [mode, setMode] = useState<'tour' | 'ai' | 'road'>('tour');
     const [region, setRegion] = useState('서울');
     const [purpose, setPurpose] = useState('성지순례');
     const [duration, setDuration] = useState('당일치기');
+    const [aiSources, setAiSources] = useState<{id:string;name:string;sourceUrl:string;verifiedAt:string}[]>([]);
     const [aiData, setAiData] = useState<unknown | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState<string | null>(null);
@@ -52,14 +54,17 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const fetchAi = async () => {
         const key = JSON.stringify({ region, purpose, duration });
         if (fetchedKeyRef.current === key) return; // 같은 조건이면 재요청 안 함
+        if (aiLoading) return;
         setAiLoading(true);
+        setAiData(null);
+        setAiSources([]);
         setAiError(null);
         trackEvent('preferences_complete', { region, purpose, duration });
         let timer: ReturnType<typeof setTimeout> | undefined;
         try {
             const controller = new AbortController();
             timer = setTimeout(() => controller.abort(), 120_000);
-            const res = await fetch('/kride-api/recommend/itinerary', {
+            const res = await fetch('/api/kride/recommend/itinerary', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -71,15 +76,18 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                 }),
                 signal: controller.signal,
             });
+            if (res.status === 401) throw new Error('login_required');
             if (!res.ok) throw new Error(`itinerary ${res.status}`);
             const result = await res.json();
+            if (result.status === 'empty_candidates') throw new Error('empty_candidates');
             fetchedKeyRef.current = key;
             const placeCount = countItineraryPlaces(result);
             if (placeCount === 0) throw new Error('empty_result');
             setAiData(result);
+            setAiSources(Array.isArray(result.source_pois) ? result.source_pois : []);
             trackEvent('itinerary_generated', { place_count: placeCount, duration, source: 'route_planner' });
         } catch (reason) {
-            setAiError('AI 코스를 불러오지 못했어요. 기본 코스로 볼 수 있어요.');
+            setAiError(reason instanceof Error && reason.message === 'login_required' ? '로그인 후 AI 코스를 이용해 주세요.' : reason instanceof Error && reason.message === 'empty_candidates' ? '출처가 확인된 추천 자료가 아직 없습니다.' : 'AI 코스를 불러오지 못했어요. 기본 코스로 볼 수 있어요.');
             const message = reason instanceof Error ? reason.message : 'unknown';
             trackEvent('itinerary_error', {
                 error_type: message === 'empty_result' ? 'empty_result' : message.includes('aborted') ? 'timeout' : message.startsWith('itinerary ') ? 'http_error' : 'request_error',
@@ -114,12 +122,14 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                     <span style={{ fontSize: 13, color: '#888' }}>내 취향대로 하루 코스</span>
                 </span>
                 <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <button type="button" onClick={() => setMode('road')} aria-pressed={mode === 'road'} style={pill(mode === 'road')}>길 찾기</button>
                     <KakaoShareButton text="Kride에서 추천받은 하루 코스를 확인해 보세요!" path="/view/ROUTE_PLANNER" />
                     <button type="button" onClick={() => setMode('tour')} aria-pressed={mode === 'tour'} style={pill(mode === 'tour')}>기본 코스</button>
                     <button type="button" onClick={requestAiCourse} aria-pressed={mode === 'ai'} style={pill(mode === 'ai')}>AI 코스</button>
                 </span>
             </header>
 
+            {mode === 'road' && <RoadRoutePlanner />}
             {mode === 'ai' && (
                 <div style={{ background: '#faf7f8', border: '0.5px solid #eee', borderRadius: 12, padding: '10px 12px' }}>
                     <div style={{ fontSize: 11, color: '#999', marginBottom: 8 }}>이 조건으로 코스를 짜요 · 바꾸면 다시 추천</div>
@@ -133,13 +143,14 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                 </div>
             )}
 
-            {loading && <div style={{ padding: 24, color: '#888' }}>불러오는 중…</div>}
-            {error && <div style={{ padding: 24, color: '#A32D2D' }}>{error}</div>}
+            {mode === 'tour' && loading && <div style={{ padding: 24, color: '#888' }}>불러오는 중…</div>}
+            {mode === 'tour' && error && <div style={{ padding: 24, color: '#A32D2D' }}>{error}</div>}
             {mode === 'ai' && aiLoading && <div style={{ padding: 24, color: '#888' }}>AI가 하루 코스를 짜는 중이에요…</div>}
             {mode === 'ai' && aiError && <div style={{ padding: 24, color: '#A32D2D' }}>{aiError}</div>}
 
-            {!loading && !error && !(mode === 'ai' && (aiLoading || aiError)) && (
+            {mode !== 'road' && (mode === 'ai' || (!loading && !error)) && !(mode === 'ai' && (aiLoading || aiError)) && (
                 <>
+                    {mode === 'ai' && aiSources.length > 0 && <details><summary>추천 자료 출처와 확인 시각</summary><p>공개 장소 근거 · 영업시간과 여행 지출은 별도 확인이 필요합니다.</p><ul>{aiSources.map(p => <li key={p.id}><a href={p.sourceUrl} target="_blank" rel="noopener noreferrer">{p.name}</a> · 확인 {p.verifiedAt}</li>)}</ul></details>}
                     {markers.length > 0 && (
                         <div style={{ display: 'flex', gap: 8 }}>
                             <SummaryCard value={String(markers.length)} label="방문지" accent />

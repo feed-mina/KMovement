@@ -1,0 +1,106 @@
+name: Validate and publish Hostinger CPU
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'scripts/index_public_pois.py'
+      - 'deploy/hostinger/f11*'
+      - '.github/workflows/hostinger-cpu.yml'
+      - '.dockerignore'
+  workflow_dispatch:
+    inputs:
+      expected_main_sha:
+        description: Exact current main SHA to test and publish
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: hostinger-cpu-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  cpu-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.expected_main_sha || github.ref }}
+      - name: Check publication target
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_main_sha }}
+        run: |
+          set -eu
+          [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --depth=1 origin main
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
+      - uses: docker/setup-buildx-action@v3
+      - name: Validate private service and web network configuration
+        env:
+          KRIDE_INTERNAL_TOKEN: ci-fixture-only
+          KMOVEMENT_CPU_IMAGE: kmovement-cpu:verify
+        run: |
+          docker compose -f deploy/hostinger/f11-cpu.compose.yml config --quiet
+          docker compose --env-file deploy/hostinger/traefik.env.example -f deploy/hostinger/web.traefik.compose.yml -f deploy/hostinger/f11-web.override.yml config --quiet
+      - name: Build the production dependency image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/api/Dockerfile
+          load: true
+          tags: kmovement-cpu:verify
+          labels: |
+            org.opencontainers.image.source=https://github.com/feed-mina/KMovement
+            org.opencontainers.image.revision=${{ inputs.expected_main_sha || github.sha }}
+          cache-from: type=gha,scope=hostinger-cpu
+          cache-to: type=gha,mode=max,scope=hostinger-cpu
+      - name: Run F11, Chroma, F12 and regression tests in the image
+        run: |
+          mkdir -p "$RUNNER_TEMP/cpu-results"
+          docker run --rm \
+            -e KRIDE_ROUTE_HISTORY_STORE=disabled \
+            -v "$PWD/tests:/app/tests:ro" \
+            -v "$RUNNER_TEMP/cpu-results:/results" \
+            kmovement-cpu:verify sh -ec '
+              pip install --no-cache-dir pytest==9.1.1
+              python -m pytest tests/test_f11_contract.py tests/test_f11_api.py tests/test_public_search.py tests/test_public_itinerary.py tests/test_fastapi.py -q --junitxml=/results/tests.xml
+              pip freeze > /results/runtime-versions.txt
+            '
+      - name: Verify restricted service readiness
+        run: |
+          docker run -d --name cpu-smoke -e KRIDE_ROUTE_HISTORY_STORE=disabled kmovement-cpu:verify uvicorn src.api.cpu_app:app --host 0.0.0.0 --port 8000
+          for n in $(seq 1 60); do
+            docker exec cpu-smoke curl -fsS http://127.0.0.1:8000/api/ready && break
+            sleep 2
+          done
+          docker exec cpu-smoke python -c "import httpx; b='http://127.0.0.1:8000'; assert httpx.get(b+'/api/ready').status_code==200; assert httpx.get(b+'/api/users/7/route-history').status_code==404; assert httpx.post(b+'/api/public/itinerary',json={}).status_code==401"
+      - uses: docker/login-action@v3
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish tested image
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_main_sha }}
+        run: |
+          set -eu
+          image="ghcr.io/feed-mina/kmovement-cpu:$EXPECTED_SHA"
+          docker tag kmovement-cpu:verify "$image"
+          docker push "$image"
+          docker image inspect "$image" --format '{{json .RepoDigests}}' > "$RUNNER_TEMP/cpu-results/image-digests.json"
+          cat "$RUNNER_TEMP/cpu-results/image-digests.json" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cpu-image-evidence
+          path: ${{ runner.temp }}/cpu-results/

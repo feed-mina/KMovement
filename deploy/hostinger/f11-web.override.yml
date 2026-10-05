@@ -1,0 +1,16 @@
+services:
+  web:
+    labels:
+      traefik.docker.network: kmovement-web_kmovement
+    environment:
+      FASTAPI_URL: http://fastapi:8000
+      AUTH_BACKEND_URL: http://spring:8080
+      BACKEND_URL: http://spring:8080
+      KRIDE_INTERNAL_TOKEN: ${KRIDE_INTERNAL_TOKEN:?Set the private CPU service token}
+    networks:
+      - kmovement
+      - spring
+networks:
+  spring:
+    external: true
+    name: kmovement-g1_egress

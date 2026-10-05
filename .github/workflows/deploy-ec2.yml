@@ -14,6 +14,7 @@ on:
       # 배포가 돌지 않는데, ensemble_client 가 src/ml/feature_engineering 을
       # 런타임에 import 한다.
       - "src/**"
+      - "scripts/index_public_pois.py"
       - "models/kride_graph.json"
       - "models/ensemble_ranker.pkl"
       - "Dockerfile.worker"
@@ -42,6 +43,8 @@ env:
 
 jobs:
   build-and-deploy:
+    # Hostinger is the current target; EC2 remains an explicit opt-in/manual action.
+    if: github.event_name == 'workflow_dispatch' || vars.KMOVEMENT_DEPLOY_TARGET == 'ec2'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

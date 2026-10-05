@@ -17,6 +17,7 @@ RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/wh
 # End of the shared K-Ride dependency layers.
 
 COPY src/ /app/src/
+COPY scripts/index_public_pois.py /app/scripts/index_public_pois.py
 
 COPY dataset/models/route_graph.pkl /app/dataset/models/route_graph.pkl
 COPY dataset/data/raw_ml/road_scored.csv /app/dataset/data/raw_ml/road_scored.csv
