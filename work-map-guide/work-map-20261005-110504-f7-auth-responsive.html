@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KMovement F7 로그인·프로필·로그아웃 작업 지도</title>
+  <style>
+    :root{--red:#e50914;--ink:#172033;--muted:#667085;--line:#dfe4ec;--bg:#f4f6f9;--card:#fff;--done:#087443;--doing:#9a6700;--hold:#8a2c0d;--soft:#fff0f1;--blue:#155eef}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif}button{font:inherit}.hero{padding:42px 24px;background:linear-gradient(135deg,#1d2330,#371116);color:#fff}.wrap{max-width:1180px;margin:auto}.eyebrow{margin:0 0 8px;color:#ffb9bd;font-weight:800;letter-spacing:.08em}.hero h1{margin:0;font-size:clamp(28px,5vw,48px);line-height:1.15}.hero .lead{max-width:900px;margin:14px 0 0;color:#f3e9ea;font-size:17px}.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}.summary article{padding:16px;border:1px solid #ffffff2d;border-radius:16px;background:#ffffff12}.summary b{display:block;color:#ffccd0}.tabs{display:flex;gap:8px;max-width:1180px;margin:18px auto 0;padding:0 24px;overflow:auto}.tabs button{padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:#fff;white-space:nowrap;cursor:pointer}.tabs button[aria-selected="true"]{border-color:var(--red);background:var(--soft);color:var(--red);font-weight:800}.main{padding:28px 24px 56px}.panel{margin-bottom:20px;padding:24px;border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:0 8px 24px #1720330b}.panel h2{margin:0 0 14px;font-size:22px}.legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}.pill{padding:6px 10px;border-radius:999px;font-size:13px;font-weight:800}.done{background:#e7f8ef;color:var(--done)}.doing{background:#fff4cc;color:var(--doing)}.hold{background:#fff0e8;color:var(--hold)}.flow{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:10px;align-items:stretch}.node{min-height:108px;padding:14px;border:1px solid var(--line);border-radius:15px;background:#fff;color:var(--ink);text-align:left;cursor:pointer}.node:hover,.node:focus-visible,.node[aria-pressed="true"]{border-color:var(--red);outline:none;box-shadow:0 0 0 3px #e5091420}.node strong{display:block;color:var(--red);font-size:16px}.node small{display:block;margin-top:6px;color:var(--muted)}.detail{margin-top:14px;padding:18px;border-left:5px solid var(--red);border-radius:12px;background:var(--soft)}.detail h3{margin:0 0 6px}.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}.sequence{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.step{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:750}.arrow{color:var(--red);font-weight:900}.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.fact{padding:14px;border:1px solid var(--line);border-radius:14px;background:#fafbfc}.fact b{display:block}.fact span{color:var(--muted)}table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f7f8fa}code{padding:2px 6px;border-radius:6px;background:#eef1f5;font-family:ui-monospace,Consolas,monospace}.warning{padding:16px;border:1px solid #f0c6a9;border-radius:14px;background:#fff7ef;color:#7a3314}.evidence{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.shot{padding:16px;border:1px dashed #aeb7c5;border-radius:16px;background:#fbfcfe}.shot .mock{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-top:10px;padding:14px;border:1px solid #e7e9ee;border-radius:13px}.shot .toggle{padding:9px 12px;border-radius:999px;background:#f4f6f8;font-weight:800}.next-list{display:grid;gap:8px;padding:0;list-style:none}.next-list li{padding:12px 14px;border:1px solid var(--line);border-radius:12px}.footer{padding:18px 24px 42px;color:var(--muted);text-align:center}@media(max-width:840px){.summary,.flow,.facts,.evidence{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}@media(max-width:560px){.hero,.main{padding-left:16px;padding-right:16px}.tabs{padding:0 16px}.summary,.flow,.facts,.evidence{grid-template-columns:1fr}.panel{padding:18px}.sequence{align-items:stretch}.arrow{display:none}}
+  </style>
+</head>
+<body>
+  <header class="hero"><div class="wrap">
+    <p class="eyebrow">KMovement · F7 · 2026-10-05 11:05 KST</p>
+    <h1>로그인 → 프로필 → 로그아웃과<br>모바일 시간 설정 레이아웃 정비</h1>
+    <p class="lead"><strong>결론:</strong> F7 코드는 구현했고 자동 테스트·프로덕션 빌드·로컬 태블릿/모바일 렌더링까지 통과했다. 실제 Hostinger 배포와 실계정·카카오 OAuth 검증은 아직 실행하지 않았으므로 완료로 합치지 않는다.</p>
+    <div class="summary">
+      <article><b>구현</b>일반 로그인·카카오 진입·내 프로필·로그아웃</article>
+      <article><b>보안</b>웹 토큰 본문 제거·HttpOnly/Secure 쿠키</article>
+      <article><b>반응형</b>390px·960px 가로 넘침 없음</article>
+      <article><b>다음</b>F8-A 아티스트 follow 한 기능만</article>
+    </div>
+  </div></header>
+
+  <nav class="tabs" role="tablist" aria-label="보고서 보기">
+    <button id="tab-map" role="tab" aria-controls="panel-map" aria-selected="true" tabindex="0">작업 지도</button>
+    <button id="tab-verify" role="tab" aria-controls="panel-verify" aria-selected="false" tabindex="-1">검증 요약</button>
+    <button id="tab-next" role="tab" aria-controls="panel-next" aria-selected="false" tabindex="-1">다음 단계</button>
+  </nav>
+  <main class="main wrap">
+    <div id="panel-map" role="tabpanel" aria-labelledby="tab-map" tabindex="0">
+    <section class="panel">
+      <h2>현재 작업 진행 단계</h2>
+      <div class="legend"><span class="pill done">코드 완료</span><span class="pill done">자동 테스트 완료</span><span class="pill done">로컬 화면 검증 완료</span><span class="pill doing">PR 작성 단계</span><span class="pill hold">운영 배포 미실행</span></div>
+      <div class="flow" role="group" aria-label="F7 작업 지도">
+        <button class="node" data-key="entry" aria-pressed="true"><strong>1. 진입</strong><small>헤더 로그인 버튼과 독립 로그인 화면</small></button>
+        <button class="node" data-key="login" aria-pressed="false"><strong>2. 로그인</strong><small>일반 로그인 또는 카카오 authorize</small></button>
+        <button class="node" data-key="profile" aria-pressed="false"><strong>3. 프로필</strong><small>/api/auth/me 사용자 상태 확인</small></button>
+        <button class="node" data-key="logout" aria-pressed="false"><strong>4. 로그아웃</strong><small>서버 refresh 삭제와 쿠키 전체 만료</small></button>
+        <button class="node" data-key="responsive" aria-pressed="false"><strong>5. 반응형</strong><small>시간 카드 기본 접힘·1024px 기준 통일</small></button>
+      </div>
+      <div class="detail" id="node-detail" aria-live="polite"><h3>1. 진입</h3><p>SDUI 메타데이터 API가 실패해도 로그인과 로그아웃 기본 버튼이 사라지지 않게 fallback을 둔다. 로그인·프로필 화면은 메타데이터와 분리된 정적 F7 화면으로 등록한다.</p></div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>사용자 흐름</h2>
+        <div class="sequence"><span class="step">게스트</span><span class="arrow">→</span><span class="step">이메일/비밀번호 또는 카카오</span><span class="arrow">→</span><span class="step">HttpOnly 쿠키</span><span class="arrow">→</span><span class="step">/api/auth/me</span><span class="arrow">→</span><span class="step">프로필</span><span class="arrow">→</span><span class="step">로그아웃</span></div>
+        <p>웹 응답 본문에는 access/refresh token을 넣지 않는다. 모바일 클라이언트가 <code>X-Platform: mobile</code>을 명시한 경우만 기존 토큰 본문 계약을 유지한다.</p>
+      </article>
+      <article class="panel">
+        <h2>시간 설정 수정</h2>
+        <div class="facts">
+          <div class="fact"><b>기준 통일</b><span>Header와 같은 1024px 미만을 compact로 판정</span></div>
+          <div class="fact"><b>기본 상태</b><span>모바일 우선 SSR에서 접힘으로 시작</span></div>
+          <div class="fact"><b>텍스트</b><span>‘시간 설정’은 세로 한 글자씩 깨지지 않음</span></div>
+          <div class="fact"><b>사용자 선택</b><span>펼침/접힘은 localStorage에 저장</span></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>화면 검증 결과</h2>
+      <div class="evidence">
+        <article class="shot"><b>모바일 390 × 844</b><p>헤더 390px, 시간 요약 290px, 가로 overflow 없음. 기본 버튼은 ‘펼치기’.</p><div class="mock"><div><small>시간 설정</small><br><strong>오늘의 약속 시간은 언제인가요?</strong></div><span class="toggle">펼치기⌄</span></div></article>
+        <article class="shot"><b>태블릿 960 × 900</b><p>헤더 960px, 시간 요약 532px, 가로 overflow 없음. 로그인 버튼과 카드가 중앙 정렬.</p><div class="mock"><div><small>시간 설정</small><br><strong>오늘의 약속 시간은 언제인가요?</strong></div><span class="toggle">펼치기⌄</span></div></article>
+      </div>
+      <p class="warning"><strong>경계:</strong> 로컬 Chromium 렌더링은 통과했지만 실제 Android 기기, 운영 도메인, 실제 사용자 계정, 카카오 OAuth callback은 아직 검증하지 않았다.</p>
+    </section>
+
+    <section class="panel">
+      <h2>검증표</h2>
+      <table><thead><tr><th>검증</th><th>결과</th><th>증거</th></tr></thead><tbody>
+        <tr><td>프런트 전체 테스트</td><td><span class="pill done">PASS</span></td><td>78 suites, 434 tests</td></tr>
+        <tr><td>Spring 인증 테스트</td><td><span class="pill done">PASS</span></td><td>AuthControllerIntegrationTest + RefreshTest, BUILD SUCCESSFUL</td></tr>
+        <tr><td>Next production build</td><td><span class="pill done">PASS</span></td><td>TypeScript, 42 routes, standalone trace</td></tr>
+        <tr><td>Hostinger compose config</td><td><span class="pill done">PASS</span></td><td>F7 exact paths → Spring:8080, TLS router</td></tr>
+        <tr><td>웹 쿠키 보안</td><td><span class="pill done">PASS</span></td><td>HttpOnly + Secure, JSON token 미반환</td></tr>
+        <tr><td>실계정·카카오 로그인</td><td><span class="pill hold">미실행</span></td><td>운영 비밀값·callback 등록·사용자 계정 필요</td></tr>
+        <tr><td>main 병합·Hostinger 배포</td><td><span class="pill hold">미실행</span></td><td>PR 검토 뒤 별도 실행</td></tr>
+      </tbody></table>
+    </section>
+
+    <section class="panel">
+      <h2>핵심 변경 파일</h2>
+      <table><thead><tr><th>영역</th><th>파일</th><th>역할</th></tr></thead><tbody>
+        <tr><td>화면</td><td><code>components/screens/AuthFlowScreen.tsx</code></td><td>로그인·프로필·로그아웃 독립 F7 화면</td></tr>
+        <tr><td>헤더</td><td><code>components/layout/Header.tsx</code></td><td>메타데이터 실패 fallback, 중복 기기 판정 제거</td></tr>
+        <tr><td>시간</td><td><code>components/fields/RecordTimeComponent.tsx</code></td><td>1024px compact, 모바일 기본 접힘, 선호 저장</td></tr>
+        <tr><td>인증 API</td><td><code>AuthController.java</code></td><td>웹 쿠키 인증, refresh 회전, 전체 쿠키 만료</td></tr>
+        <tr><td>카카오</td><td><code>KakaoController.java</code></td><td>server-side authorize, 안전 state, callback 프로필 이동</td></tr>
+        <tr><td>배포</td><td><code>deploy/hostinger/g1.compose.yml</code></td><td>F7 인증 경로를 Spring에 정확히 라우팅</td></tr>
+      </tbody></table>
+    </section>
+
+    <section class="panel">
+      <h2>다음 단계: F8 사용자 저장</h2>
+      <p><strong>한꺼번에 세 기능을 열지 않는다.</strong> 먼저 F8-A 아티스트 follow 하나만 아래 순서로 검증하고, 통과 뒤 F8-B event bookmark, 마지막으로 F8-C saved item을 반복한다.</p>
+      <ol class="next-list">
+        <li><b>F8-A-1</b> 비로그인 POST가 401/403인지 확인</li>
+        <li><b>F8-A-2</b> 로그인 사용자 follow 1건 생성</li>
+        <li><b>F8-A-3</b> 같은 요청을 다시 보내 중복 생성이 없는지 확인</li>
+        <li><b>F8-A-4</b> 내 follow 목록에서 방금 항목 조회</li>
+        <li><b>F8-A-5</b> 다른 사용자에게 보이지 않는지 격리 확인</li>
+        <li><b>F8-A-6</b> 삭제 후 목록 재조회, DB 기존 데이터 보존 확인</li>
+        <li><b>F8-A-7</b> 기능별 PR·이미지 digest·rollback 기록 후 한 기능만 배포</li>
+      </ol>
+    </section>
+    </div>
+    <section id="panel-verify" role="tabpanel" aria-labelledby="tab-verify" tabindex="0" hidden class="panel"><h2>검증 요약</h2><p>프런트 78 suites·434 tests, Spring 인증 대상 테스트, Next production build, Hostinger compose config가 통과했다. 실제 운영 로그인과 배포는 미실행이다.</p></section>
+    <section id="panel-next" role="tabpanel" aria-labelledby="tab-next" tabindex="0" hidden class="panel"><h2>다음 단계</h2><p>F8-A 아티스트 follow만 먼저 연다. 비로그인 거부 → 생성 → 중복 멱등 → 내 목록 → 사용자 격리 → 삭제·재조회 순서로 검증한다.</p></section>
+  </main>
+  <footer class="footer">이 문서는 코드·테스트·로컬 화면 증거를 기준으로 작성했다. 운영 배포 성공을 주장하지 않는다.</footer>
+  <script>
+    const details={
+      entry:['1. 진입','SDUI 메타데이터 API가 실패해도 로그인과 로그아웃 기본 버튼이 사라지지 않게 fallback을 둔다. 로그인·프로필 화면은 메타데이터와 분리된 정적 F7 화면으로 등록한다.'],
+      login:['2. 로그인','일반 로그인은 X-Platform:web으로 요청하고, 성공 뒤 /api/auth/me를 조회한다. 카카오 버튼은 서버의 /api/kakao/authorize로 이동해 client id를 브라우저 코드에 노출하지 않는다.'],
+      profile:['3. 프로필','내 프로필은 이메일, 사용자 ID, 로그인 방식, 권한을 보여 준다. 미로그인 상태가 확인되면 로그인 화면으로 되돌린다.'],
+      logout:['4. 로그아웃','서버 refresh token을 삭제하고 accessToken, refreshToken, loginType, role, isLoggedIn 쿠키를 모두 만료시킨 뒤 클라이언트 인증 상태를 초기화한다.'],
+      responsive:['5. 반응형','모바일 shell 기준을 1024px 미만으로 통일한다. 기본 접힘으로 큰 sticky header를 피하고, 펼침 선택은 저장한다. 390px와 960px 모두 overflow=false를 확인했다.']
+    };
+    document.querySelectorAll('.node').forEach(button=>button.addEventListener('click',()=>{
+      document.querySelectorAll('.node').forEach(item=>item.setAttribute('aria-pressed','false'));
+      button.setAttribute('aria-pressed','true');
+      const [title,text]=details[button.dataset.key];
+      document.getElementById('node-detail').innerHTML=`<h3>${title}</h3><p>${text}</p>`;
+    }));
+    const tabs=[...document.querySelectorAll('[role="tab"]')];
+    const activate=(tab,focus=false)=>{tabs.forEach(item=>{const active=item===tab;item.setAttribute('aria-selected',String(active));item.tabIndex=active?0:-1;document.getElementById(item.getAttribute('aria-controls')).hidden=!active});if(focus)tab.focus()};
+    tabs.forEach((tab,index)=>{tab.addEventListener('click',()=>activate(tab));tab.addEventListener('keydown',event=>{let target;if(event.key==='ArrowRight')target=(index+1)%tabs.length;if(event.key==='ArrowLeft')target=(index+tabs.length-1)%tabs.length;if(event.key==='Home')target=0;if(event.key==='End')target=tabs.length-1;if(target!==undefined){event.preventDefault();activate(tabs[target],true)}})});
+  </script>
+</body>
+</html>

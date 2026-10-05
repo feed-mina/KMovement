@@ -82,13 +82,13 @@ class AuthControllerRefreshTest {
         when(refreshTokenRepository.findById(user.getUserSqno())).thenReturn(Optional.of(savedToken));
         when(jwtUtil.generateTokens(user)).thenReturn(rotatedTokens);
 
-        ResponseEntity<?> response = controller.refresh("old-refresh-token", null);
+        ResponseEntity<?> response = controller.refresh("old-refresh-token", null, "web");
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getHeaders().get(HttpHeaders.SET_COOKIE))
                 .anyMatch(cookie -> cookie.startsWith("accessToken=new-access-token"))
                 .anyMatch(cookie -> cookie.startsWith("refreshToken=new-refresh-token"));
-        assertThat(response.getBody()).isEqualTo(Map.of("accessToken", "new-access-token"));
+        assertThat(response.getBody()).isEqualTo(Map.of("message", "세션 갱신 성공"));
         verify(jwtUtil).generateTokens(user);
     }
 }

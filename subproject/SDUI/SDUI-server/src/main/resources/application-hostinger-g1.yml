@@ -38,6 +38,8 @@ management:
       enabled: true
 
 app:
+  auth:
+    cookie-secure: true
   url:
     web: https://kmovement.srv1869569.hstgr.cloud
     mobile: https://kmovement.srv1869569.hstgr.cloud

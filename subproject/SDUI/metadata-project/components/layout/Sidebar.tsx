@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { usePageMetadata } from "@/components/DynamicEngine/hook/usePageMetadata";
 import { usePathname } from 'next/navigation';
-import { useDeviceType } from "@/hooks/useDeviceType";
 import { flattenMetadata } from "../utils/metadataUtils";
 import { usePageHook } from "@/components/DynamicEngine/hook/usePageHook";
 
@@ -63,12 +62,10 @@ function SidebarLogoToggle({ collapsed, onToggle, onHome }: SidebarProps & { onH
 }
 
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
-    const { isMobile } = useDeviceType();
-    const isPc = !isMobile;
     const pathname = usePathname();
     const { user, isLoggedIn } = useAuth();
 
-    const { metadata, pageData, loading: metaLoading } = usePageMetadata("GLOBAL_HEADER", 1, false, null);
+    const { metadata, pageData } = usePageMetadata("GLOBAL_HEADER", 1, false, null);
     const { handleAction } = usePageHook("GLOBAL_HEADER", metadata, pageData);
 
     const flatMeta = useMemo(() => flattenMetadata(metadata), [metadata]);
@@ -77,21 +74,16 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     const isAdmin = user?.role === 'ROLE_ADMIN';
     const goHome = () => handleAction({ actionType: 'ROUTE', actionUrl: '/view/MAIN_PAGE' });
 
-    if (!isPc) return null;
-    if (metaLoading) {
-        return (
-            <aside className={`pc-sidebar pc-sidebar-loading flex flex-col h-screen bg-gray-50${collapsed ? ' is-collapsed' : ''}${isAdmin ? ' is-admin' : ''}`}>
-                <SidebarLogoToggle collapsed={collapsed} onToggle={onToggle} onHome={goHome} />
-            </aside>
-        );
-    }
-
     const getVal = (obj: any, snake: string, camel: string) => obj?.[snake] || obj?.[camel] || "";
 
     // 조건 단순화: Context에서 제공하는 isLoggedIn 불리언 값만 신뢰하도록 수정
     // 메타데이터 매핑 (디버깅을 위해 콘솔 대신 대체 UI 렌더링 활용)
     const logoutId = user?.socialType === 'K' ? 'header_kakao_logout' : 'header_general_logout';
-    const logoutMeta = flatMeta.find(m => getVal(m, 'component_id', 'componentId') === logoutId);
+    const logoutMeta = flatMeta.find(m => getVal(m, 'component_id', 'componentId') === logoutId) || {
+        componentId: 'header_logout_fallback',
+        labelText: '로그아웃',
+        actionType: user?.socialType === 'K' ? 'KAKAO_LOGOUT' : 'LOGOUT',
+    };
     const loginBtnMeta = flatMeta.find(m => getVal(m, 'component_id', 'componentId') === 'header_login_btn') || {
         componentId: 'header_login_btn_fallback',
         labelText: '로그인',

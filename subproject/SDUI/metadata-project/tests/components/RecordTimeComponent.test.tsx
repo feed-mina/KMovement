@@ -1,7 +1,7 @@
 import React from 'react';
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import RecordTimeComponent from '@/components/fields/RecordTimeComponent';
+import RecordTimeComponent, {RECORD_TIME_COMPACT_QUERY} from '@/components/fields/RecordTimeComponent';
 
 const mockHandleLinkToSetup = jest.fn();
 const mockHandleArrival = jest.fn();
@@ -30,7 +30,7 @@ const setViewport = (isMobile: boolean) => {
         writable: true,
         value: jest.fn().mockImplementation(() => ({
             matches: isMobile,
-            media: '(max-width: 767px)',
+            media: RECORD_TIME_COMPACT_QUERY,
             onchange: null,
             addListener: jest.fn(),
             removeListener: jest.fn(),
@@ -58,6 +58,10 @@ describe('RecordTimeComponent accordion', () => {
         setViewport(false);
     });
 
+    it('uses the same 1024px boundary as the mobile application shell', () => {
+        expect(RECORD_TIME_COMPACT_QUERY).toBe('(max-width: 1023px)');
+    });
+
     it('starts collapsed on mobile and can expand to the setup action', async () => {
         setViewport(true);
         render(<RecordTimeComponent/>);
@@ -75,10 +79,12 @@ describe('RecordTimeComponent accordion', () => {
         expect(window.localStorage.getItem('kride:record-time-collapsed:v1')).toBe('expanded');
     });
 
-    it('starts expanded on desktop when no preference was saved', () => {
+    it('starts expanded on desktop when no preference was saved', async () => {
         render(<RecordTimeComponent/>);
 
-        expect(screen.getByRole('button', {name: /접기/})).toHaveAttribute('aria-expanded', 'true');
+        await waitFor(() => {
+            expect(screen.getByRole('button', {name: /접기/})).toHaveAttribute('aria-expanded', 'true');
+        });
         expect(screen.getByRole('button', {name: '시간 설정하기'})).toBeVisible();
     });
 
@@ -104,6 +110,9 @@ describe('RecordTimeComponent accordion', () => {
         });
 
         render(<RecordTimeComponent/>);
+        await waitFor(() => {
+            expect(screen.getByRole('button', {name: /접기/})).toHaveAttribute('aria-expanded', 'true');
+        });
         expect(screen.getByText(/목표 시간 날짜 2026-07-22T18:30:00/, {selector: 'strong'})).toBeVisible();
         expect(screen.getByRole('button', {name: '도착 완료'})).toBeVisible();
 

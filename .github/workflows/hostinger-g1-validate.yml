@@ -75,6 +75,11 @@ jobs:
             (.services.spring.labels["traefik.http.routers.kmovement-f4-f5-tour.priority"] == "300") and
             (.services.spring.labels["traefik.http.services.kmovement-f4-f5-tour.loadbalancer.server.port"]
               == "8080") and
+            (.services.spring.labels["traefik.http.routers.kmovement-f7-auth.rule"]
+              == "Host(`kmovement.srv1869569.hstgr.cloud`) && (Path(`/api/auth/login`) || Path(`/api/auth/me`) || Path(`/api/auth/refresh`) || Path(`/api/auth/logout`) || Path(`/api/kakao/authorize`) || Path(`/api/kakao/callback`) || Path(`/api/kakao/logout`))") and
+            (.services.spring.labels["traefik.http.routers.kmovement-f7-auth.priority"] == "320") and
+            (.services.spring.labels["traefik.http.services.kmovement-f7-auth.loadbalancer.server.port"]
+              == "8080") and
             (.secrets.spring_db_password.file | endswith("/spring_db_password")) and
             (.secrets.spring_redis_password.file | endswith("/spring_redis_password")) and
             (.secrets.spring_jwt_secret.file | endswith("/spring_jwt_secret")) and

@@ -3,6 +3,7 @@ package com.domain.demo_backend.domain.user.controller;
 import com.domain.demo_backend.domain.user.domain.User;
 import com.domain.demo_backend.domain.user.domain.UserRepository;
 import com.domain.demo_backend.domain.user.service.AuthService;
+import com.domain.demo_backend.domain.token.domain.RefreshTokenRepository;
 import com.domain.demo_backend.global.security.CustomUserDetails;
 import com.domain.demo_backend.global.security.PasswordUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,9 +15,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,7 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties = {
         "jwt.secret=test_secret_key_must_be_at_least_32_bytes_long_for_security",
         "jwt.expiration=3600000",
-        "jwt.refresh-token.expiration=86400000"
+        "jwt.refresh-token.expiration=86400000",
+        "app.auth.cookie-secure=true"
 })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -41,6 +45,11 @@ class AuthControllerIntegrationTest {
 
     @Autowired
     private AuthService authService;
+
+    // Login writes the refresh token to Redis. This controller test verifies
+    // HTTP/auth behavior without requiring an external Redis process.
+    @MockBean
+    private RefreshTokenRepository refreshTokenRepository;
 
     private User testUser;
     private final String TEST_EMAIL = "authtest@example.com";
@@ -77,26 +86,41 @@ class AuthControllerIntegrationTest {
                             .content("{\"user_email\":\"" + TEST_EMAIL + "\",\"user_pw\":\"" + TEST_PASSWORD + "\"}"))
                     .andExpect(status().isOk())
                     .andExpect(header().exists("Set-Cookie"))
+                    .andExpect(header().string("Set-Cookie", containsString("HttpOnly")))
+                    .andExpect(header().string("Set-Cookie", containsString("Secure")))
+                    .andExpect(jsonPath("$.message").value("로그인 성공"))
+                    .andExpect(jsonPath("$.accessToken").doesNotExist())
+                    .andExpect(jsonPath("$.refreshToken").doesNotExist());
+        }
+
+        @Test
+        @DisplayName("모바일 로그인: 명시적 플랫폼 요청에는 토큰 반환")
+        void login_mobileReturnsTokens() throws Exception {
+            mockMvc.perform(post("/api/auth/login")
+                            .header("X-Platform", "mobile")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"user_email\":\"" + TEST_EMAIL + "\",\"user_pw\":\"" + TEST_PASSWORD + "\"}"))
+                    .andExpect(status().isOk())
                     .andExpect(jsonPath("$.accessToken").isNotEmpty())
                     .andExpect(jsonPath("$.refreshToken").isNotEmpty());
         }
 
         @Test
-        @DisplayName("실패: 잘못된 비밀번호 → 401")
+        @DisplayName("실패: 잘못된 비밀번호 → 400")
         void login_wrongPassword() throws Exception {
             mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"user_email\":\"" + TEST_EMAIL + "\",\"user_pw\":\"wrongpass\"}"))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().isBadRequest());
         }
 
         @Test
-        @DisplayName("실패: 존재하지 않는 이메일 → 401")
+        @DisplayName("실패: 존재하지 않는 이메일 → 400")
         void login_nonExistentEmail() throws Exception {
             mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"user_email\":\"nobody@example.com\",\"user_pw\":\"pass\"}"))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().isBadRequest());
         }
 
         @Test

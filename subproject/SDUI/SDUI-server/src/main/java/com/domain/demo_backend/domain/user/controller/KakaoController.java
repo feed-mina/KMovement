@@ -60,6 +60,9 @@ public class KakaoController {
     @Value("${kakao.redirect-uri}")
     private String redirectUri;
 
+    @Value("${app.auth.cookie-secure:false}")
+    private boolean secureCookie;
+
     private String accessToken;
 
     // 생성자 주입
@@ -79,8 +82,7 @@ public class KakaoController {
             // 로그로 디버그 정보 출력
             log.info("카카오 로그인 시도");
             log.info("KAKAOCONTROLLER-kakao login");
-            log.info("KAKAOCONTROLLER-client_id : " + clientId);
-            log.info("KAKAOCONTROLLER-redirectUri : " + redirectUri);
+            log.info("카카오 로그인 설정 확인 완료");
 
             // 1. 받은 AccessToken으로 카카오에서 사용자 정보를 가져와
             KakaoUserInfo kakaoUserInfo = kakaoService.getKakaoUserInfo(kakaoAuthRequest.getAccessToken());
@@ -93,7 +95,7 @@ public class KakaoController {
             // 5. Refresh Token 쿠키 생성
             ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", tokenResponse.getRefreshToken())
                     .httpOnly(true)
-                    .secure(false)
+                    .secure(secureCookie)
                     .path("/")
                     .maxAge(7 * 24 * 60 * 60)
                     .sameSite("Lax")
@@ -102,7 +104,7 @@ public class KakaoController {
             // 6. Role 쿠키 생성 (RBAC용)
             ResponseCookie roleCookie = ResponseCookie.from("role", tokenResponse.getRole())
                     .httpOnly(false)
-                    .secure(false)
+                    .secure(secureCookie)
                     .path("/")
                     .maxAge(3600)
                     .sameSite("Lax")
@@ -124,16 +126,23 @@ public class KakaoController {
         }
     }
 
+    @GetMapping("/authorize")
+    public ResponseEntity<Void> authorize(@RequestParam(defaultValue = "web") String state) {
+        String safeState = switch (state) {
+            case "app", "mobile" -> state;
+            default -> "web";
+        };
+        String loginUrl = "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id="
+                + URLEncoder.encode(clientId, StandardCharsets.UTF_8)
+                + "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
+                + "&state=" + URLEncoder.encode(safeState, StandardCharsets.UTF_8);
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(loginUrl)).build();
+    }
+
     @GetMapping("/callback")
     public ResponseEntity<?> getAccessToken(@RequestParam String code, @RequestParam(required = false) String state,
             HttpServletResponse response) {
-        log.info("KAKAOCONTROLLER-code: " + code);
-
-        log.info("KAKAOCONTROLLER-@@@@@@@@@@@@@@@@@@@@@@@@");
-        log.info("KAKAOCONTROLLER-kakao callback");
-        log.info("KAKAOCONTROLLER-client_id : " + clientId);
-        log.info("KAKAOCONTROLLER-redirectUri : " + redirectUri);
-        log.info("KAKAOCONTROLLER-code : " + code);
+        log.info("카카오 OAuth callback 수신");
 
         MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
         formParams.add("grant_type", "authorization_code");
@@ -165,7 +174,7 @@ public class KakaoController {
         // 4. Access Token 쿠키 생성
         ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", jwtToken.getAccessToken())
                 .httpOnly(true)
-                .secure(false) // 로컬 테스트 시 false로 설정해야 쿠키가 보임
+                .secure(secureCookie)
                 .path("/")
                 .maxAge(3600)
                 .sameSite("Lax") // 로컬 테스트용
@@ -174,7 +183,7 @@ public class KakaoController {
         // 5. Refresh Token 쿠키 생성
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", jwtToken.getRefreshToken())
                 .httpOnly(true)
-                .secure(false)
+                .secure(secureCookie)
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60)
                 .sameSite("Lax")
@@ -183,7 +192,7 @@ public class KakaoController {
         // 6. Role 쿠키 생성 (RBAC용)
         ResponseCookie roleCookie = ResponseCookie.from("role", jwtToken.getRole())
                 .httpOnly(false)
-                .secure(false)
+                .secure(secureCookie)
                 .path("/")
                 .maxAge(3600)
                 .sameSite("Lax")
@@ -192,8 +201,10 @@ public class KakaoController {
         // 일반 로그인/카카오 로그인 성공 로직에 추가
         ResponseCookie loginTypeCookie = ResponseCookie.from("loginType", "K")
                 .httpOnly(false) // 프론트엔드 자바스크립트가 읽을 수 있어야 하므로 false
+                .secure(secureCookie)
                 .path("/")
                 .maxAge(3600)
+                .sameSite("Lax")
                 .build();
 
         // state 값이 없으면 기본적으로 'web'으로 간주
@@ -228,7 +239,7 @@ public class KakaoController {
             return ResponseEntity.ok(responseBody);
         }
         HttpHeaders redirectHeaders = new HttpHeaders();
-        redirectHeaders.setLocation(URI.create(webUrl));
+        redirectHeaders.setLocation(URI.create(webUrl + "/view/MY_PAGE"));
         redirectHeaders.add(HttpHeaders.SET_COOKIE, loginTypeCookie.toString());
         redirectHeaders.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
         redirectHeaders.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
@@ -241,21 +252,15 @@ public class KakaoController {
             @RequestHeader(value = "Authorization", required = false) String authorization,
             @RequestBody Map<String, Object> data) throws JsonProcessingException {
 
-        log.info("KAKAOCONTROLLER- Received Authorization header: {}", authorization);
-
         // Authorization 헤더 검증
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-            log.error(" Authorization 헤더가 없거나 잘못됨: {}", authorization);
+            log.warn("Authorization 헤더가 없거나 잘못됨");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("카카오 토큰이 필요합니다.");
         }
 
         String kakaoAccessToken = (String) data.get("kakaoAccessToken");
-        log.info("KAKAOCONTROLLER-📩 Kakao AccessToken from body: {}", kakaoAccessToken);
         // JWT 검증
         String jwtToken = authorization.substring(7);
-        log.info("KAKAOCONTROLLER- Extracted Access Token: {}", jwtToken);
-
-        log.error("@@@@@jwtToken", jwtToken);
         if (jwtToken.isEmpty()) {
             log.error(" 추출한 Access Token이 비어 있음");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰");
@@ -357,13 +362,14 @@ public class KakaoController {
         }
 
         // 모든 인증 관련 쿠키 일괄 삭제
-        String[] cookiesToClear = { "accessToken", "refreshToken", "loginType" };
+        String[] cookiesToClear = { "accessToken", "refreshToken", "loginType", "role", "isLoggedIn" };
         for (String cookieName : cookiesToClear) {
             ResponseCookie cookie = ResponseCookie.from(cookieName, "")
                     .path("/")
                     .maxAge(0)
-                    .httpOnly(!cookieName.equals("loginType"))
-                    .secure(false)
+                    .httpOnly(cookieName.equals("accessToken") || cookieName.equals("refreshToken"))
+                    .secure(secureCookie)
+                    .sameSite("Lax")
                     .build();
             response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         }
@@ -375,15 +381,15 @@ public class KakaoController {
     private void addAuthCookies(HttpServletResponse response, TokenResponse tokens, String type) {
         // 1. Access Token (HttpOnly)
         ResponseCookie access = ResponseCookie.from("accessToken", tokens.getAccessToken())
-                .path("/").maxAge(3600).httpOnly(true).secure(false).sameSite("Lax").build();
+                .path("/").maxAge(3600).httpOnly(true).secure(secureCookie).sameSite("Lax").build();
 
         // 2. Refresh Token (HttpOnly)
         ResponseCookie refresh = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
-                .path("/").maxAge(7 * 24 * 60 * 60).httpOnly(true).secure(false).sameSite("Lax").build();
+                .path("/").maxAge(7 * 24 * 60 * 60).httpOnly(true).secure(secureCookie).sameSite("Lax").build();
 
         // 3. Login Type Flag (일반 쿠키 - 프론트엔드 노출용)
         ResponseCookie loginType = ResponseCookie.from("loginType", type)
-                .path("/").maxAge(3600).httpOnly(false).build();
+                .path("/").maxAge(3600).httpOnly(false).secure(secureCookie).sameSite("Lax").build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, access.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refresh.toString());

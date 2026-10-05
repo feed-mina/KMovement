@@ -24,6 +24,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -49,6 +50,8 @@ public class AuthController {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
     private UserRepository userRepository;
+    @Value("${app.auth.cookie-secure:false}")
+    private boolean secureCookie;
     // 생성자 주입
     @Autowired
     public AuthController(
@@ -96,12 +99,14 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "서버오류"),
     })
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody com.domain.demo_backend.domain.user.dto.LoginRequest loginRequest) {
+    public ResponseEntity<?> login(
+            @RequestHeader(value = "X-Platform", defaultValue = "web") String platform,
+            @RequestBody com.domain.demo_backend.domain.user.dto.LoginRequest loginRequest) {
         TokenResponse tokenResponse = authService.login(loginRequest);
 //  Access Token 쿠키 (수명 1시간)
         ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", tokenResponse.getAccessToken())
                 .httpOnly(true)
-                .secure(false)  // 로컬 HTTP 테스트 시 false HTTPS 적용 시  true
+                .secure(secureCookie)
                 .path("/")
                 .maxAge(60 * 60)
                 .sameSite("Lax")
@@ -110,7 +115,7 @@ public class AuthController {
         // 2. Refresh Token 쿠키 (수명 7일)
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", tokenResponse.getRefreshToken())
                 .httpOnly(true)
-                .secure(false) // 로컬 HTTP 테스트 시 false HTTPS 적용 시  true
+                .secure(secureCookie)
                 .path("/")
                 .maxAge(60 * 60 * 24 * 7)
                 .sameSite("Lax")
@@ -120,14 +125,16 @@ public class AuthController {
         // 일반 로그인/카카오 로그인 성공 로직에 추가
         ResponseCookie loginTypeCookie = ResponseCookie.from("loginType", "N")
                 .httpOnly(false) // 프론트엔드 자바스크립트가 읽을 수 있어야 하므로 false
+                .secure(secureCookie)
                 .path("/")
                 .maxAge(3600)
+                .sameSite("Lax")
                 .build();
 
         // Role 쿠키 (RBAC용, 프론트엔드 접근 가능)
         ResponseCookie roleCookie = ResponseCookie.from("role", tokenResponse.getRole())
                 .httpOnly(false)
-                .secure(false)
+                .secure(secureCookie)
                 .path("/")
                 .maxAge(60 * 60)
                 .sameSite("Lax")
@@ -135,14 +142,20 @@ public class AuthController {
 
 // 로그인 여부 확인용 (자바스크립트 접근 가능)
         ResponseCookie statusCookie = ResponseCookie.from("isLoggedIn", "true")
-                .httpOnly(false).path("/").maxAge(3600).build();
-        return ResponseEntity.ok()
+                .httpOnly(false).secure(secureCookie).path("/").maxAge(3600).sameSite("Lax").build();
+        ResponseEntity.BodyBuilder response = ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, roleCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, loginTypeCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, statusCookie.toString())
-                .body(tokenResponse);  //앱 개발 확장 토큰 정보를 포함한 객체 반환
+                .header(HttpHeaders.SET_COOKIE, statusCookie.toString());
+
+        // Browser sessions keep both JWTs in HttpOnly cookies. Native clients
+        // explicitly opt in to the token response through X-Platform.
+        if ("mobile".equalsIgnoreCase(platform) || "app".equalsIgnoreCase(platform)) {
+            return response.body(tokenResponse);
+        }
+        return response.body(Map.of("message", "로그인 성공", "role", tokenResponse.getRole()));
     }
 
     @Operation(summary = "회원 가입페이지에서 회원가입 로직", description = "users 테이블에 insert한다..")
@@ -335,7 +348,8 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@CookieValue(name = "refreshToken", required = false) String cookieRT ,
-                                     @RequestHeader(value = "Authorization-Refresh", required = false) String headerRT) {
+                                     @RequestHeader(value = "Authorization-Refresh", required = false) String headerRT,
+                                     @RequestHeader(value = "X-Platform", defaultValue = "web") String platform) {
         try {
             // 1. 쿠키에 없으면 헤더에서 가져온다 (앱 대응)
             String refreshToken = (cookieRT != null) ? cookieRT : headerRT;
@@ -362,23 +376,28 @@ public class AuthController {
             TokenResponse refreshedTokens = jwtUtil.generateTokens(user);
             ResponseCookie newAccessCookie = ResponseCookie.from("accessToken", refreshedTokens.getAccessToken())
                     .httpOnly(true)
-                    .secure(false)
+                    .secure(secureCookie)
                     .path("/")
                     .maxAge(60 * 60)
                     .sameSite("Lax")
                     .build();
             ResponseCookie newRefreshCookie = ResponseCookie.from("refreshToken", refreshedTokens.getRefreshToken())
                     .httpOnly(true)
-                    .secure(false)
+                    .secure(secureCookie)
                     .path("/")
                     .maxAge(60 * 60 * 24 * 7)
                     .sameSite("Lax")
                     .build();
 
-            return ResponseEntity.ok()
+            ResponseEntity.BodyBuilder response = ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
-                    .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
-                    .body(Map.of("accessToken", refreshedTokens.getAccessToken()));
+                    .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString());
+            if ("mobile".equalsIgnoreCase(platform) || "app".equalsIgnoreCase(platform)) {
+                return response.body(Map.of(
+                        "accessToken", refreshedTokens.getAccessToken(),
+                        "refreshToken", refreshedTokens.getRefreshToken()));
+            }
+            return response.body(Map.of("message", "세션 갱신 성공"));
 
         } catch (ExpiredJwtException e) {
             log.info("@@@@@ 리프레시 토큰이 만료");
@@ -390,13 +409,18 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
+    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                    HttpServletResponse response) {
+        if (userDetails != null) {
+            refreshTokenRepository.deleteById(userDetails.getUserSqno());
+        }
         // 1. Access Token 삭제 쿠키
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
                 .path("/")
                 .maxAge(0) // 수명을 0으로 설정하여 즉시 삭제 
                 .httpOnly(true)
-                .secure(false) // 개발 환경에 맞춰 설정
+                .secure(secureCookie)
+                .sameSite("Lax")
                 .build();
 
         // 2. Refresh Token 삭제 쿠키
@@ -404,7 +428,8 @@ public class AuthController {
                 .path("/")
                 .maxAge(0)
                 .httpOnly(true)
-                .secure(false)
+                .secure(secureCookie)
+                .sameSite("Lax")
                 .build();
 
         // 3. 로그인 타입 플래그 쿠키 삭제 (일반 쿠키)
@@ -412,11 +437,20 @@ public class AuthController {
                 .path("/")
                 .maxAge(0)
                 .httpOnly(false) // 프론트에서 접근 가능했던 쿠키 
+                .secure(secureCookie)
+                .sameSite("Lax")
                 .build();
+
+        ResponseCookie roleCookie = ResponseCookie.from("role", "")
+                .path("/").maxAge(0).httpOnly(false).secure(secureCookie).sameSite("Lax").build();
+        ResponseCookie statusCookie = ResponseCookie.from("isLoggedIn", "")
+                .path("/").maxAge(0).httpOnly(false).secure(secureCookie).sameSite("Lax").build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, loginTypeCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, roleCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, statusCookie.toString());
         return ResponseEntity.ok().body("로그아웃 성공");
     }
 

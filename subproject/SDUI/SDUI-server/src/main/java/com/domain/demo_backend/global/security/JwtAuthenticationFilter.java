@@ -109,7 +109,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             } catch (Exception e) {
                 // 유효하지 않은 토큰 예외 처리
-                log.warn("Invalid JWT token: {}", e.getMessage(), e);
+                log.warn("Invalid JWT token: {}", e.getClass().getSimpleName());
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 응답 반환
                 response.getWriter().write("Invalid JWT Token");
                 return;

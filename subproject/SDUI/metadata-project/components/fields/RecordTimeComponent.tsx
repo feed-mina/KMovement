@@ -15,7 +15,10 @@ interface RecordTimeProps {
 }
 
 const COLLAPSE_STORAGE_KEY = 'kride:record-time-collapsed:v1';
-const MOBILE_QUERY = '(max-width: 767px)';
+// Header/useDeviceType switches to the mobile shell below 1024px. Keep the
+// accordion default in sync so tablet widths do not render the expanded card
+// inside the compact header.
+export const RECORD_TIME_COMPACT_QUERY = '(max-width: 1023px)';
 
 const RecordTimeComponent = (_props: RecordTimeProps) => {
     const {formatGoalDate, formatTimePretty} = dateFormatter();
@@ -28,7 +31,9 @@ const RecordTimeComponent = (_props: RecordTimeProps) => {
         handleArrival,
     } = useRecordTime();
     const [isListOpen, setIsListOpen] = useState(false);
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    // Mobile-first SSR default: keep the sticky header compact until the
+    // saved preference or the current viewport is available in the browser.
+    const [isCollapsed, setIsCollapsed] = useState(true);
     const bodyId = useId();
 
     useEffect(() => {
@@ -43,7 +48,7 @@ const RecordTimeComponent = (_props: RecordTimeProps) => {
             // Storage can be unavailable in privacy-restricted browsers and WebViews.
         }
 
-        setIsCollapsed(window.matchMedia(MOBILE_QUERY).matches);
+        setIsCollapsed(window.matchMedia(RECORD_TIME_COMPACT_QUERY).matches);
     }, []);
 
     const handleToggle = () => {

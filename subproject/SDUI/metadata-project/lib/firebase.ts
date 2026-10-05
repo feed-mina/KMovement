@@ -96,7 +96,6 @@ export const requestForToken = async () => {
     });
 
     if (currentToken) {
-      console.log("Current FCM token: ", currentToken);
       return currentToken;
     }
 

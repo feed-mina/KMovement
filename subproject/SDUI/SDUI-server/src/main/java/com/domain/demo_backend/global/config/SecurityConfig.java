@@ -156,6 +156,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "https://yerin.duckdns.org",
+                "https://kmovement.srv1869569.hstgr.cloud",
                 "http://localhost:3000",
                 "http://localhost:8080",
                 "http://43.201.237.68",

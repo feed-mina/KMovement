@@ -47,7 +47,7 @@ public class UserController {
         user.setFcmToken(request.getToken());
         userRepository.save(user);
 
-        log.info("FCM 토큰 저장 완료: userId={}, token={}", user.getUserId(), request.getToken());
+        log.info("FCM 토큰 저장 완료: userId={}", user.getUserId());
 
         return ResponseEntity.ok(Map.of("message", "FCM 토큰이 저장되었습니다."));
     }
