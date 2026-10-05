@@ -150,6 +150,8 @@ jobs:
           --tests 'com.domain.demo_backend.domain.kpop.controller.ArtistCatalogControllerTest'
           --tests 'com.domain.demo_backend.domain.kpop.controller.EventCatalogControllerTest'
           --tests 'com.domain.demo_backend.domain.kpop.controller.PublicProductCatalogControllerTest'
+          --tests 'com.domain.demo_backend.domain.kpop.controller.PersonalSavedControllerTest'
+          --tests 'com.domain.demo_backend.domain.kpop.controller.KpopControllerTest'
           --tests 'com.domain.demo_backend.domain.kpop.service.PublicProductPostgresTest'
           --tests 'com.domain.demo_backend.domain.kpop.service.PersonalSavedPostgresTest'
 
