@@ -43,7 +43,7 @@ public class KakaoService {
     public KakaoUserInfo getKakaoUserInfo(String accessToken) {
         log.info("KAKAOSERVICE-@@@@@@@@@@@@@@@@@@@@@@@@");
         log.info("KAKAOSERVICE-getKakaoUserInfo");
-        log.info("KAKAOSERVICE-accessToken : " + accessToken);
+        log.info("카카오 사용자 정보 조회 시작");
 
         @SuppressWarnings("unchecked")
         Map<String, Object> body = webClient.get()

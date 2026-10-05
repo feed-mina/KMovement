@@ -55,7 +55,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(null);
             setIsLoggedIn(false);
             // 브라우저 저장소나 쿠키 수동 삭제
-            document.cookie = "loginType=; path=/; max-age=0;";
+            document.cookie = "loginType=; path=/; max-age=0; SameSite=Lax";
+            document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
+            document.cookie = "isLoggedIn=; path=/; max-age=0; SameSite=Lax";
             // 로그인 페이지로 강제 이동 (필요시)
             router.push('/view/LOGIN_PAGE');
         }
@@ -137,7 +139,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const token = await requestForToken();
             if (!token || cancelled) return;
 
-            console.log("FCM 토큰 백엔드 전송 (예정): ", token);
+            // Never print push/auth tokens. The future API call may send it over
+            // HTTPS, but browser and server logs must remain token-free.
             // TODO: 백엔드 API 연동 시 주석 해제
             // api.post('/api/users/fcm-token', { token }).catch(console.error);
 

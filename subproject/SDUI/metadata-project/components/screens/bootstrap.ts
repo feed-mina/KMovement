@@ -3,12 +3,14 @@ import { registerScreenAccess } from "./screenAccess";
 import CommunityScreen from "./CommunityScreen";
 import ContentListScreen from "./ContentListScreen";
 import GoogleCallbackScreen from "./GoogleCallbackScreen";
+import AuthFlowScreen from "./AuthFlowScreen";
 
 // 코어 화면 컨트롤러 등록.
 // import 시점에 1회 실행되어 레지스트리를 채운다(모듈 평가 = 렌더 이전).
 registerScreen({ match: (id) => id.startsWith("COMMUNITY_"), controller: CommunityScreen });
 registerScreen({ match: (id) => id === "CONTENT_LIST", controller: ContentListScreen });
 registerScreen({ match: (id) => id === "GOOGLE_CALLBACK", controller: GoogleCallbackScreen });
+registerScreen({ match: (id) => id === "LOGIN_PAGE" || id === "MY_PAGE", controller: AuthFlowScreen });
 
 // 코어 접근제어 규칙
 const AUTH_SCREENS = [

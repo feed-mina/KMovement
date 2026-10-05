@@ -46,6 +46,7 @@
 }
 
 .header-container {
+    width: 100%;
     max-width: 600px;
     /* 모바일 최대 너비 제한 */
     margin: 0 auto;
@@ -182,6 +183,7 @@
 
 /* 시간 설정 컴포넌트 영역 */
 .header-bottom-row {
+    width: 100%;
     margin-top: 16px;
 }
 
@@ -213,10 +215,18 @@
 
 .time-card .record-time-summary-copy {
     flex: 1 1 auto;
-    width: 0;
+    width: auto;
+    min-width: 0;
 }
 
 .time-card .record-time-summary-copy strong {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+}
+
+.time-card .record-time-eyebrow {
     white-space: nowrap;
 }
 
@@ -2738,7 +2748,7 @@ readonly 공통 레이아웃
 }
 
 /* 모바일: 카드 여백 축소 + 하단 safe-area 확보 */
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
     .REG_CONTAINER {
         margin: var(--kride-space-4);
         padding: var(--kride-space-6) var(--kride-space-5);
@@ -4364,8 +4374,168 @@ button:hover {
         padding: var(--kride-space-3) var(--kride-space-4);
     }
 
-    .record-time-summary-copy strong {
-        white-space: nowrap;
+    .time-card .record-time-summary-copy strong {
+        white-space: normal;
+    }
+}
+
+/* F7 authentication flow */
+.auth-flow-page {
+    width: min(100% - 32px, 560px);
+    margin: 28px auto 96px;
+}
+
+.auth-flow-card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: clamp(24px, 6vw, 40px);
+    border: 1px solid var(--kride-border);
+    border-radius: 24px;
+    background: var(--kride-bg-card);
+    box-shadow: 0 16px 44px rgba(15, 23, 42, 0.08);
+}
+
+.auth-flow-heading {
+    display: grid;
+    gap: 6px;
+}
+
+.auth-flow-heading h1 {
+    margin: 0;
+    color: var(--kride-text-strong);
+    font-size: clamp(1.65rem, 6vw, 2.1rem);
+}
+
+.auth-flow-heading p,
+.auth-flow-help {
+    margin: 0;
+    color: var(--kride-text-sub);
+    line-height: 1.6;
+}
+
+.auth-flow-form,
+.auth-flow-fields {
+    display: grid;
+    gap: 16px;
+}
+
+.auth-flow-field {
+    display: grid;
+    gap: 7px;
+    color: var(--kride-text-main);
+    font-weight: 700;
+}
+
+.auth-flow-field input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--kride-border);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--kride-text-strong);
+    font: inherit;
+}
+
+.auth-flow-field input:focus-visible,
+.auth-flow-button:focus-visible,
+.auth-flow-link:focus-visible {
+    outline: 3px solid var(--kride-focus-ring);
+    outline-offset: 2px;
+}
+
+.auth-flow-button,
+.auth-flow-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font: inherit;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.auth-flow-button.primary {
+    background: var(--kride-primary);
+    color: #fff;
+}
+
+.auth-flow-button.secondary {
+    border-color: var(--kride-border);
+    background: #fff;
+    color: var(--kride-text-main);
+}
+
+.auth-flow-button.kakao {
+    background: #fee500;
+    color: #191919;
+}
+
+.auth-flow-button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.auth-flow-error {
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fff1f0;
+    color: #b42318;
+    line-height: 1.45;
+}
+
+.auth-profile-list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    border-top: 1px solid var(--kride-border);
+}
+
+.auth-profile-row {
+    display: grid;
+    grid-template-columns: minmax(90px, 0.35fr) minmax(0, 1fr);
+    gap: 12px;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--kride-border);
+}
+
+.auth-profile-row dt {
+    color: var(--kride-text-sub);
+    font-weight: 700;
+}
+
+.auth-profile-row dd {
+    min-width: 0;
+    margin: 0;
+    color: var(--kride-text-strong);
+    overflow-wrap: anywhere;
+}
+
+.auth-flow-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+@media (max-width: 480px) {
+    .auth-flow-page {
+        width: min(100% - 24px, 560px);
+        margin-top: 16px;
+    }
+
+    .auth-flow-card {
+        padding: 22px 18px;
+        border-radius: 18px;
+    }
+
+    .auth-flow-actions {
+        grid-template-columns: 1fr;
     }
 }
 

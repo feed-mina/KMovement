@@ -150,6 +150,21 @@ services:
       traefik.http.routers.kmovement-f4-f5-tour.tls.certresolver: letsencrypt
       traefik.http.routers.kmovement-f4-f5-tour.service: kmovement-f4-f5-tour
       traefik.http.services.kmovement-f4-f5-tour.loadbalancer.server.port: "8080"
+      traefik.http.routers.kmovement-f7-auth.rule: >-
+        Host(`${KMOVEMENT_SITE_HOST:?Set KMOVEMENT_SITE_HOST}`) &&
+        (Path(`/api/auth/login`) ||
+        Path(`/api/auth/me`) ||
+        Path(`/api/auth/refresh`) ||
+        Path(`/api/auth/logout`) ||
+        Path(`/api/kakao/authorize`) ||
+        Path(`/api/kakao/callback`) ||
+        Path(`/api/kakao/logout`))
+      traefik.http.routers.kmovement-f7-auth.priority: "320"
+      traefik.http.routers.kmovement-f7-auth.entrypoints: websecure
+      traefik.http.routers.kmovement-f7-auth.tls: "true"
+      traefik.http.routers.kmovement-f7-auth.tls.certresolver: letsencrypt
+      traefik.http.routers.kmovement-f7-auth.service: kmovement-f7-auth
+      traefik.http.services.kmovement-f7-auth.loadbalancer.server.port: "8080"
     networks:
       - g1
       - egress

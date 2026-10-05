@@ -48,6 +48,10 @@ const connectSrc = [
 
 const nextConfig: NextConfig = {
     output: 'standalone',
+    // Multiple lockfiles can make Next.js walk up to the Windows user profile
+    // and fail on protected folders. The deployable application is this
+    // workspace, so keep standalone tracing inside the project root.
+    outputFileTracingRoot: process.cwd(),
     async rewrites() {
         return [
             {
