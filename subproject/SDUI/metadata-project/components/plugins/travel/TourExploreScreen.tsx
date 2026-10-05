@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type { ScreenControllerProps } from '@/components/screens/types';
 import {
@@ -204,6 +204,9 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const [regionsLoading, setRegionsLoading] = useState(true);
     const [regionError, setRegionError] = useState<string | null>(null);
     const [arrange, setArrange] = useState('A');
+    const [placeQuery, setPlaceQuery] = useState('');
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const filtersId = useId();
     const [pois, setPois] = useState<TourPoi[]>([]);
     // 성지는 서버가 최대 300건(TourService.HOLY_MAX_RESULTS)을 한 번에 내려준다.
     // 전부 펼치면 카드 300장과 사진 300장이 한꺼번에 붙는다. 화면에는 끊어서 그린다.
@@ -450,6 +453,15 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             ? `https://www.google.com/maps/search/?api=1&query=${p.mapY},${p.mapX}`
             : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.title)}`;
     const selectedSourceUrl = safeExternalUrl(selected?.sourceUrl);
+    const filteredPois = useMemo(() => {
+        const query = placeQuery.trim().toLocaleLowerCase();
+        return query ? pois.filter((poi) => `${poi.title} ${poi.addr ?? ''}`.toLocaleLowerCase().includes(query)) : pois;
+    }, [pois, placeQuery]);
+    const displayedPois = category === '39' ? filteredPois : filteredPois.slice(0, visibleCount);
+    const resetFilters = () => {
+        setPlaceQuery(''); setSigungu(''); setAreaCode(DEFAULT_AREA_CODE);
+        setCategory(DEFAULT_CATEGORY); setArrange('A'); setSelectedContent(null); setContentQuery('');
+    };
 
     return (
         <div className="page-wrap TOUR_EXPLORE tour-explore" style={{ padding: '14px 16px' }}>
@@ -461,6 +473,23 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                 <KakaoShareButton text="Kride에서 K-컬처 여행지·맛집을 찾아보세요!" path="/view/TOUR_EXPLORE" />
             </header>
 
+            <div className="tour-search">
+                <label htmlFor="tour-place-search">불러온 장소 검색</label>
+                <input id="tour-place-search" type="search" value={placeQuery}
+                    onChange={(event) => setPlaceQuery(event.target.value)} placeholder="장소 이름 또는 주소" />
+                <small>현재 불러온 목록에서 검색해요. 더 보기를 누르면 검색 범위도 늘어나요.</small>
+            </div>
+            <div className="tour-category-row" role="group" aria-label="장소 카테고리">
+                {CATEGORIES.map((c) => (
+                    <button key={c.id} type="button" onClick={() => setCategory(c.id)} aria-pressed={category === c.id} style={chipStyle(category === c.id)}>{c.label}</button>
+                ))}
+            </div>
+            <div className="tour-filter-summary">
+                <p aria-label="선택한 필터">{selectedAreaName} · {selectedSigunguName || '전체'} · {SORTS.find((sort) => sort.code === arrange)?.label}{selectedContent ? ` · ${selectedContent.name}` : ''}</p>
+                <button type="button" aria-expanded={filtersOpen} aria-controls={filtersId} onClick={() => setFiltersOpen((open) => !open)}>세부 필터</button>
+                <button type="button" onClick={resetFilters}>필터 초기화</button>
+            </div>
+            <div id={filtersId} hidden={!filtersOpen} className="tour-filter-details">
             <section aria-label="지역 필터" style={{ marginBottom: 10 }}>
                 <HorizontalFilterRail label="시·도 선택">
                     {areas.map((area) => (
@@ -513,13 +542,6 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
 
             {/* 카테고리 + 정렬 */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', gap: 6 }}>
-                    {CATEGORIES.map((c) => (
-                        <button key={c.id} type="button" onClick={() => setCategory(c.id)} aria-pressed={category === c.id} style={chipStyle(category === c.id)}>
-                            {c.label}
-                        </button>
-                    ))}
-                </div>
                 <div style={{ display: 'flex', gap: 4 }}>
                     {SORTS.map((s) => (
                         <button key={s.code} type="button" onClick={() => setArrange(s.code)} aria-pressed={arrange === s.code} style={sortStyle(arrange === s.code)}>
@@ -527,6 +549,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                         </button>
                     ))}
                 </div>
+            </div>
             </div>
 
             {isHolyCategory(category) && (
@@ -632,12 +655,13 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
 
             {loading && <div style={{ padding: 24, color: '#888' }}>불러오는 중…</div>}
             {error && <div style={{ padding: 24, color: '#A32D2D' }}>{error}</div>}
-            {!loading && !error && pois.length === 0 && <div style={{ padding: 24, color: '#888' }}>표시할 장소가 없어요.</div>}
+            {!loading && !error && <p className="tour-result-count" aria-live="polite">불러온 {pois.length}곳 중 {filteredPois.length}곳 · 화면에 {displayedPois.length}곳 표시</p>}
+            {!loading && !error && filteredPois.length === 0 && <div style={{ padding: 24, color: '#666' }}>{placeQuery ? '검색 조건에 맞는 장소가 없어요.' : '표시할 장소가 없어요.'}</div>}
 
             {!loading && !error && pois.length > 0 && (
                 <>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 }}>
-                        {(category === '39' ? pois : pois.slice(0, visibleCount)).map((poi, index) => (
+                        {displayedPois.map((poi, index) => (
                             <TourPoiCard
                                 key={poi.contentId ?? index}
                                 poi={poi}
@@ -648,7 +672,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             />
                         ))}
                     </div>
-                    {((category === '39' && restaurantHasMore) || (category !== '39' && visibleCount < pois.length)) && (
+                    {((category === '39' && restaurantHasMore) || (category !== '39' && visibleCount < filteredPois.length)) && (
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
                             <button
                                 type="button"

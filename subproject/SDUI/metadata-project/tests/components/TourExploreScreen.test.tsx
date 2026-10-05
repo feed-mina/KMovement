@@ -62,7 +62,22 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         ));
     });
 
-    const renderScreen = () => render(<TourExploreScreen screenId="TOUR_EXPLORE" refId={null} />);
+    const renderScreen = () => {
+        const result = render(<TourExploreScreen screenId="TOUR_EXPLORE" refId={null} />);
+        fireEvent.click(screen.getByRole('button', {name: '세부 필터'}));
+        return result;
+    };
+
+    it('검색 범위를 명시하고 검색과 초기화를 제공한다', async () => {
+        render(<TourExploreScreen screenId="TOUR_EXPLORE" refId={null} />);
+        expect(screen.getByRole('button', {name: '세부 필터'})).toHaveAttribute('aria-expanded', 'false');
+        await screen.findByText('가담');
+        fireEvent.change(screen.getByLabelText('불러온 장소 검색'), {target: {value: '돈까스'}});
+        expect(screen.queryByText('가담')).not.toBeInTheDocument();
+        expect(screen.getByText(/불러온 2곳 중 1곳/)).toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', {name: '필터 초기화'}));
+        expect(screen.getByText('가담')).toBeInTheDocument();
+    });
 
     it('맛집 POI 카드를 렌더링해야 함', async () => {
         renderScreen();
