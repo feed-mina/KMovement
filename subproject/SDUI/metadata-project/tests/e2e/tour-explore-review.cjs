@@ -17,6 +17,15 @@ const pois = [
   const page=await browser.newPage({viewport:{width,height:1000},deviceScaleFactor:1});
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
+  await page.route('https://dapi.kakao.com/**', route => route.abort());
+  if (process.env.REVIEW_MAP_FIXTURE === '1') await page.addInitScript(() => {
+   class Point { constructor(lat,lng){this.lat=lat;this.lng=lng;} }
+   class ReviewMap { constructor(element){this.element=element; element.style.background='#e7edf0';element.innerHTML='<p style="padding:16px">지도 이벤트 테스트 대역 · 실제 지도 타일 아님</p>';}
+    setBounds(){} relayout(){} panTo(point){this.element.dataset.pan=JSON.stringify(point);} }
+   class ReviewMarker { constructor({map,position,title}){this.position=position; this.button=document.createElement('button');this.button.textContent=title+' 핀';this.button.style.cssText='margin:14px;padding:12px;background:white;border:2px solid #b7192b;border-radius:24px';map.element.append(this.button);}
+    getPosition(){return this.position;} setMap(map){if(!map)this.button.remove();} setZIndex(){} setOpacity(value){this.button.style.opacity=String(value);} }
+   window.kakao={maps:{load:callback=>callback(),LatLng:Point,Map:ReviewMap,Marker:ReviewMarker,LatLngBounds:class {extend(){}},event:{addListener:(marker,event,handler)=>marker.button.addEventListener(event,handler),removeListener:(marker,event,handler)=>marker.button.removeEventListener(event,handler)}}};
+  });
   await page.route('**/api/**',route=>{
    const u=new URL(route.request().url()); let data=[];
    if(u.pathname.endsWith('/auth/me')) return route.fulfill({status:401,json:{success:false}});
@@ -26,9 +35,13 @@ const pois = [
   });
   await page.goto(`${process.env.REVIEW_ORIGIN || 'http://localhost:3100'}/view/TOUR_EXPLORE`,{waitUntil:'networkidle',timeout:120000});
   await page.getByRole('button',{name:'서울숲 카페 상세 보기',exact:true}).waitFor({timeout:30000});
+  const rejectAnalytics=page.getByRole('button',{name:'거부',exact:true});
+  if(await rejectAnalytics.isVisible()) await rejectAnalytics.click();
   await page.screenshot({path:path.join(out,`${width}.png`),fullPage:true});
   records.push({width,source:`${process.env.REVIEW_ORIGIN || 'http://localhost:3100'} / fixture public API responses`,errors,layout:await page.evaluate(()=>({documentWidth:document.documentElement.scrollWidth,viewport:innerWidth,timeCard:document.querySelector('.record-time-summary')?.getBoundingClientRect().toJSON(),timeCopy:document.querySelector('.record-time-summary-copy')?.getBoundingClientRect().toJSON()}))});
   if(phase!=='baseline') {
+   if(records.at(-1).layout.documentWidth > width) throw Error(`Horizontal overflow at ${width}`);
+   if(width < 1024 && records.at(-1).layout.timeCopy.width < 120) throw Error(`Collapsed time text at ${width}`);
    await page.getByLabel('불러온 장소 검색').fill('카페');
    if(await page.getByRole('button',{name:'경복궁 식당 상세 보기',exact:true}).count()) throw Error('Search did not filter cards');
    await page.getByLabel('불러온 장소 검색').fill('');
@@ -36,6 +49,16 @@ const pois = [
    await page.getByRole('button',{name:'종로구',exact:true}).click();
    await page.getByRole('button',{name:'필터 초기화',exact:true}).first().click();
    records.at(-1).searchAndFilter='passed';
+   await page.getByRole('button',{name:'서울숲 카페 지도에서 선택',exact:true}).click();
+   if(process.env.REVIEW_MAP_FIXTURE === '1') {
+    await page.getByRole('button',{name:'경복궁 식당 핀',exact:true}).click();
+    await page.locator('#tour-card-review-2[data-selected="true"]').waitFor();
+    records.at(-1).mapSelection='card to map and pin to card passed / SDK test double';
+   } else {
+    await page.getByRole('button',{name:'지도 다시 시도'}).waitFor();
+    records.at(-1).mapFailure='independent SDK recovery displayed';
+   }
+   await page.screenshot({path:path.join(out,`${width}-interaction.png`),fullPage:true});
   }
   await page.close();
  }

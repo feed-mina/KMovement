@@ -1,0 +1,23 @@
+const {chromium}=require('../../subproject/SDUI/metadata-project/node_modules/playwright');
+const {pathToFileURL}=require('node:url');
+const path=require('node:path');
+(async()=>{
+ const browser=await chromium.launch({headless:true});
+ const page=await browser.newPage({viewport:{width:1440,height:1000}});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(pathToFileURL(path.resolve(process.argv[2])).href);
+ await page.locator('[data-node="2"]').click();
+ if(await page.locator('#detail-title').textContent()!=='지도 연결')throw Error('Node selection failed');
+ await page.locator('#before').click();
+ await page.locator('#after').click();
+ await page.locator('#tab-map').focus();await page.keyboard.press('ArrowRight');
+ if(await page.locator('#tab-screen').getAttribute('aria-selected')!=='true')throw Error('Keyboard tab failed');
+ await page.locator('#width').selectOption('360');
+ if(!await page.locator('#after-image').evaluate(img=>img.complete&&img.naturalWidth>0))throw Error('Embedded image missing');
+ await page.setViewportSize({width:390,height:900});
+ if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Report overflow');
+ await page.locator('#tab-check').click();
+ if(errors.length)throw Error(errors.join('\n'));
+ console.log('PASS: node, code toggle, keyboard tabs, embedded images, 390px layout, no page errors');
+ await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});
