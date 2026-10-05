@@ -8,7 +8,6 @@ import com.domain.demo_backend.domain.kpop.service.KpopProductService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -347,11 +346,8 @@ public class KpopController {
     }
 
     private void upsert(String table, String column, Long refId, Long userSqno) {
-        try {
-            jdbcTemplate.update("INSERT INTO " + table + " (user_sqno, " + column + ") VALUES (:userSqno, :id)",
-                    params("userSqno", userSqno).addValue("id", refId));
-        } catch (DuplicateKeyException ignored) {
-        }
+        String kind = table.equals("artist_follow") ? "artists" : "events";
+        new com.domain.demo_backend.domain.kpop.service.PersonalSavedService(jdbcTemplate).save(kind, refId, userSqno);
     }
 
     private void requireUser(CustomUserDetails user) {

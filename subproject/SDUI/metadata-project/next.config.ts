@@ -4,6 +4,19 @@ const withPWA = require('next-pwa')({
     disable: process.env.NODE_ENV === 'development',
     register: true,
     skipWaiting: true,
+    runtimeCaching: [
+        {
+            // Personal responses must never fall back to another session's offline cache.
+            urlPattern: ({ url }: { url: URL }) =>
+                url.pathname.startsWith('/api/v1/kpop/me/saved/') ||
+                url.pathname === '/api/v1/kpop/saved-items' ||
+                url.pathname === '/view/KPOP_SAVED_ITEMS' ||
+                url.pathname === '/view/MY_PAGE',
+            handler: 'NetworkOnly',
+            method: 'GET',
+        },
+        ...require('next-pwa/cache'),
+    ],
 });
 import type { NextConfig } from "next";
 

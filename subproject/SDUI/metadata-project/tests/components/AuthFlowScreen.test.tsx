@@ -90,6 +90,8 @@ describe('F7 auth flow screen', () => {
         render(<AuthFlowScreen screenId="MY_PAGE" refId={null} />);
         expect(screen.getByText('mina@example.com')).toBeVisible();
         expect(screen.getByText('카카오')).toBeVisible();
+        fireEvent.click(screen.getByRole('button', { name: '내 목록 보기' }));
+        expect(push).toHaveBeenCalledWith('/view/KPOP_SAVED_ITEMS');
 
         fireEvent.click(screen.getByRole('button', { name: '로그아웃' }));
         await waitFor(() => expect(logout).toHaveBeenCalledTimes(1));

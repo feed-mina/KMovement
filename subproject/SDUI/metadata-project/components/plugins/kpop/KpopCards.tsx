@@ -1,9 +1,11 @@
 'use client';
 
 import { useId, useState } from 'react';
+import { SavedToggle } from './PersonalSaved';
 
 type CardProps = {
     readOnly?: boolean;
+    personalSave?: boolean;
     data?: Record<string, any>;
     meta?: Record<string, any>;
     onAction?: (meta: Record<string, any>, data?: Record<string, any>) => void;
@@ -72,7 +74,7 @@ function socialLinks(data?: Record<string, any>): SocialLink[] {
     return links;
 }
 
-export function KpopArtistCard({ data, meta, onAction, readOnly = false }: CardProps) {
+export function KpopArtistCard({ data, meta, onAction, readOnly = false, personalSave = false }: CardProps) {
     const titleId = useId();
     const [followed, setFollowed] = useState(Boolean(data?.followed));
     const [busy, setBusy] = useState(false);
@@ -147,6 +149,7 @@ export function KpopArtistCard({ data, meta, onAction, readOnly = false }: CardP
                             상세 보기
                         </button>
                     )}
+                    {personalSave && data?.id && <SavedToggle kind="artists" itemRef={data.id} />}
                     {!readOnly && <button type="button" aria-pressed={followed} aria-busy={busy} disabled={busy} onClick={toggleFollow}>
                         {busy ? '처리 중...' : followed ? '팔로우 취소' : '팔로우'}
                     </button>}
@@ -157,7 +160,7 @@ export function KpopArtistCard({ data, meta, onAction, readOnly = false }: CardP
     );
 }
 
-export function KpopEventCard({ data, meta, onAction, readOnly = false }: CardProps) {
+export function KpopEventCard({ data, meta, onAction, readOnly = false, personalSave = false }: CardProps) {
     if (meta?.componentId === 'kpop_event_card' && !data) {
         return (
             <article className="kpop-card kpop-event-card kpop-empty-state" aria-live="polite">
@@ -217,6 +220,7 @@ export function KpopEventCard({ data, meta, onAction, readOnly = false }: CardPr
                             상세 보기
                         </button>
                     )}
+                    {personalSave && data?.id && <SavedToggle kind="events" itemRef={data.id} />}
                     {!readOnly && <button type="button" aria-pressed={bookmarked} aria-busy={busy} disabled={busy} onClick={toggleBookmark}>
                         {busy ? '저장 중...' : bookmarked ? '저장 취소' : '일정 저장'}
                     </button>}
