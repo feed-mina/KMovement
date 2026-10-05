@@ -22,8 +22,8 @@ public class PublicProductCatalogService {
     private final BackendOperationalTelemetry telemetry;
     private static final String FILTER = """
             FROM product_candidate pc WHERE pc.approved_yn = 'Y'
-              AND (CAST(:q AS text) IS NULL OR pc.name ILIKE CONCAT('%', :q, '%')
-                   OR pc.brand ILIKE CONCAT('%', :q, '%'))
+              AND (CAST(:q AS text) IS NULL OR pc.name ILIKE CONCAT('%', CAST(:q AS text), '%')
+                   OR pc.brand ILIKE CONCAT('%', CAST(:q AS text), '%'))
               AND (CAST(:artistId AS bigint) IS NULL OR pc.artist_id = :artistId)
               AND (CAST(:eventId AS bigint) IS NULL OR pc.event_id = :eventId)
               AND pc.evidence_grade IN ('EXACT_CANDIDATE','SIMILAR')

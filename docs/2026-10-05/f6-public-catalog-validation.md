@@ -18,6 +18,10 @@
 
 로컬 원본 증거는 `work-map-guide/f6a-implementation-20261005-7ac9`, `f6b-implementation-20261005-8b21`, `f6c-implementation-20261005-c631`에 보존한다. HTML 보고서의 구조·연결·스크립트는 정적 검증 통과했고 보고서 자체 브라우저 동작 검증은 미실행이다.
 
+## 운영 PostgreSQL에서 확인된 보완
+
+첫 F6 배포 후 A/B 공개 조회는 통과했으나 C의 빈 검색어가 `could not determine data type of parameter $2`로500이었다. H2 모드와 PostgreSQL의 매개변수 추론 차이다. `CONCAT`에 전달하는 각 검색어를 `CAST(... AS text)`로 명시해 기존 검색 의미를 유지했다. 실제 PostgreSQL의 읽기 전용 PREPARE/EXECUTE에서 NULL 검색어가 정상 빈 결과를 반환하는 것을 확인했다. CI에는 격리된 PostgreSQL15 서비스와 실제 서비스 SQL을 실행하는 null/blank/brand 회귀3개를 추가했다. 운영 데이터 삽입·변경을 이용한 검증은 하지 않는다.
+
 ## 배포 시 확인
 
 정확한 main SHA의 Spring·web 이미지를 발행하고 digest와 OCI revision을 대조한다. 기존 컨테이너·Compose·이미지와 DB 백업을 확보한다. F6 GET 전용 라우팅을 적용하고 V120·health·공개 API·실제 화면을 확인한다. DB·Redis 데이터와 F8 쓰기 경로는 건드리지 않는다.
