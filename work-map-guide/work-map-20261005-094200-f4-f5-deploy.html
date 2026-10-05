@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KMovement F4·F5 구현·배포 작업지도</title>
+  <style>
+    :root{--ink:#18212b;--muted:#66717e;--line:#d9e0e7;--paper:#fff;--wash:#f4f7fa;--red:#e50914;--green:#137a46;--amber:#a75c00;--blue:#1557b0;--shadow:0 12px 32px rgba(24,33,43,.09)}
+    *{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}
+    a{color:var(--blue)}.wrap{max-width:1240px;margin:auto;padding:28px}.hero,.panel,.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+    .hero{padding:30px;margin-bottom:18px;background:linear-gradient(135deg,#fff 60%,#fff1f2)}h1{font-size:clamp(28px,4vw,48px);line-height:1.1;margin:8px 0 14px}.eyebrow{font-size:13px;font-weight:800;color:var(--red);letter-spacing:.08em}.lead{font-size:18px;max-width:850px}.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.pill{border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:12px;background:#fff}.pill.ok{color:var(--green);border-color:#9bd3b7;background:#effbf4}.pill.warn{color:var(--amber);border-color:#e9c698;background:#fff9ef}
+    .layout{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(340px,.96fr);gap:18px;align-items:start}.panel{padding:22px}.panel h2{margin:0 0 16px;font-size:20px}.flow{display:grid;gap:10px}.node{width:100%;text-align:left;border:1px solid var(--line);border-radius:14px;background:#fff;padding:15px;cursor:pointer;color:inherit}.node:hover,.node:focus-visible,.node[aria-selected="true"]{border-color:var(--red);outline:3px solid rgba(229,9,20,.12)}.node strong{display:block;font-size:16px}.node span{display:block;color:var(--muted);font-size:13px;margin-top:3px}.arrow{text-align:center;color:#8b96a3;font-weight:900}.detail{position:sticky;top:18px;min-height:410px}.detail h3{font-size:24px;margin:0 0 8px}.detail ul{padding-left:20px}.detail code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-all;font-size:.9em}.status{font-weight:800;color:var(--green)}.warning{border-left:4px solid #e6a23c;background:#fff8e8;padding:12px 14px;border-radius:9px;margin:14px 0}.evidence{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.evidence .card{padding:18px}.shot{display:grid;place-items:center;min-height:180px;padding:24px;text-align:center;text-decoration:none;color:var(--ink);font-weight:800;background:linear-gradient(145deg,#fdfefe,#edf3f8);border:1px solid var(--line);border-radius:12px}.shot:hover,.shot:focus-visible{border-color:var(--red);outline:3px solid rgba(229,9,20,.12)}.section{margin-top:18px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{padding:17px}.card h3{margin:0 0 8px;font-size:16px}.card p{margin:6px 0;color:var(--muted)}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top}th{color:#52606d}.foot{margin:24px 2px;color:var(--muted);font-size:12px}
+    @media(max-width:860px){.wrap{padding:14px}.layout,.evidence,.grid{grid-template-columns:1fr}.detail{position:static}.hero{padding:22px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <div class="eyebrow">KMOVEMENT · HOSTINGER · 2026-10-05</div>
+    <h1>공통 게이트 → F4 맛집 → F5 성지<br>구현·병합·실배포 완료</h1>
+    <p class="lead">한 작업 브랜치에서 요청한 순서대로 독립 커밋을 만들고, GitHub 검사 통과 후 <strong>origin/main과 동일한 SHA</strong>의 Web·Spring 이미지를 Hostinger에 배포했다. Postgres·Redis와 다른 서비스 컨테이너는 교체하지 않았다.</p>
+    <div class="meta">
+      <span class="pill ok">배포 상태: deployed-verified</span>
+      <span class="pill ok">main: 416fd402…</span>
+      <span class="pill ok">Web/Spring healthy</span>
+      <span class="pill ok">F4·F5 모바일 실화면 확인</span>
+      <span class="pill warn">기존 /api/ui·auth fallback 500 별도 남음</span>
+    </div>
+  </header>
+
+  <section class="layout" aria-label="작업 흐름과 상세">
+    <article class="panel">
+      <h2>클릭 작업지도</h2>
+      <div class="flow">
+        <button class="node" type="button" role="tab" aria-selected="true" aria-controls="detail-panel" data-key="gate"><strong>1. 공통 배포 게이트</strong><span>GET 경로 제한, TourAPI 비밀 주입, 릴리스·롤백 기록</span></button>
+        <div class="arrow" aria-hidden="true">↓</div>
+        <button class="node" type="button" role="tab" aria-selected="false" aria-controls="detail-panel" data-key="f4"><strong>2. F4 · 맛집 공개 조회</strong><span>실제 서버 페이지네이션, 중복 제거, 재시도 UI</span></button>
+        <div class="arrow" aria-hidden="true">↓</div>
+        <button class="node" type="button" role="tab" aria-selected="false" aria-controls="detail-panel" data-key="f5"><strong>3. F5 · 성지 공개 조회</strong><span>승인 데이터 전용, 작품·아티스트 검색, fallback 제거</span></button>
+        <div class="arrow" aria-hidden="true">↓</div>
+        <button class="node" type="button" role="tab" aria-selected="false" aria-controls="detail-panel" data-key="merge"><strong>4. PR·main 고정</strong><span>PR #259·#260 병합, 전체 GitHub 검사 통과</span></button>
+        <div class="arrow" aria-hidden="true">↓</div>
+        <button class="node" type="button" role="tab" aria-selected="false" aria-controls="detail-panel" data-key="deploy"><strong>5. Hostinger 교체 배포</strong><span>첫 시도 자동 롤백 → 도구 의존 제거 → 재배포 성공</span></button>
+        <div class="arrow" aria-hidden="true">↓</div>
+        <button class="node" type="button" role="tab" aria-selected="false" aria-controls="detail-panel" data-key="verify"><strong>6. 운영·모바일 검증</strong><span>F4 24→48, F5 승인 성지·검색, HTTP·컨테이너 확인</span></button>
+      </div>
+    </article>
+
+    <aside class="panel detail" id="detail-panel" role="tabpanel" aria-live="polite">
+      <div class="eyebrow" id="detail-status">CONFIRMED</div>
+      <h3 id="detail-title">공통 배포 게이트</h3>
+      <div id="detail-body">
+        <p>외부 공개 경로를 조회용 GET으로 제한하고 Spring에 TourAPI 키를 파일 secret으로 주입했다.</p>
+        <ul><li><code>deploy/hostinger/g1.compose.yml</code></li><li>RSA 봉인 아티팩트와 checksum 검증</li><li>80/443 외 신규 공개 포트 없음</li><li>비밀값은 Git·로그·보고서에 미노출</li></ul>
+      </div>
+    </aside>
+  </section>
+
+  <section class="evidence" aria-label="실제 모바일 화면 증거">
+    <article class="card"><h2>F4 실제 화면</h2><p class="status">확인됨 · 390×844 Chrome</p><a class="shot" href="evidence/f4-f5-20261005-093450/f4-mobile.png">실제 F4 모바일 캡처 열기<br>24개 → 48개</a><p>첫 24개 표시 후 ‘더 보기’를 눌러 48개로 증가했다. <code>pageNo=2</code> 응답은 200이었다.</p></article>
+    <article class="card"><h2>F5 실제 화면</h2><p class="status">확인됨 · 390×844 Chrome</p><a class="shot" href="evidence/f4-f5-20261005-093450/f5-mobile.png">실제 F5 모바일 캡처 열기<br>승인 성지 + 방탄 검색</a><p>승인 성지 24개가 표시됐고 ‘방탄’ 검색으로 작품·아티스트 선택지 1개를 확인했다.</p></article>
+  </section>
+
+  <section class="section grid" aria-label="배포 식별자">
+    <article class="card"><h3>소스</h3><p class="mono">main/config<br>416fd402419b746951a54f025f63c1618aeabeea</p></article>
+    <article class="card"><h3>현재 이미지</h3><p class="mono">web sha256:a9085db8…<br>spring sha256:b201c9d5…</p></article>
+    <article class="card"><h3>롤백 이미지</h3><p class="mono">web sha256:8e4f3a8b…<br>spring sha256:f56d8008…</p></article>
+  </section>
+
+  <section class="section panel">
+    <h2>독립 커밋과 병합</h2>
+    <table>
+      <thead><tr><th>순서</th><th>커밋</th><th>역할</th><th>원격 결과</th></tr></thead>
+      <tbody>
+        <tr><td>공통</td><td class="mono">317086b</td><td>F4·F5 공개 조회 배포 게이트</td><td rowspan="4"><a href="https://github.com/feed-mina/KMovement/pull/259">PR #259</a> 병합</td></tr>
+        <tr><td>F4</td><td class="mono">503ac45</td><td>맛집 서버 페이지네이션</td></tr>
+        <tr><td>F5</td><td class="mono">81df4d8</td><td>승인 성지 조회 강제</td></tr>
+        <tr><td>문서</td><td class="mono">821676d</td><td>easy/fix guide</td></tr>
+        <tr><td>키 회전</td><td class="mono">0432227<br>867b0e4</td><td>VPS 수신 키 회전·공개키 추적</td><td><a href="https://github.com/feed-mina/KMovement/pull/260">PR #260</a> 병합</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section panel">
+    <h2>검증 결과와 경계</h2>
+    <div class="grid">
+      <article class="card"><h3>자동 검사</h3><p>Frontend 52 tests, Spring tour tests, TypeScript, compose config, GitHub production build·image build가 통과했다.</p></article>
+      <article class="card"><h3>운영 상태</h3><p>홈·탐색 200, platform health UP, Web·Spring·Postgres·Redis healthy. DB·Redis 볼륨과 기존 컨테이너를 보존했다.</p></article>
+      <article class="card"><h3>비밀·포트</h3><p>원본 키는 root 0600, Spring용 파일은 UID 10001 소유 0400. 외부 공개 포트는 80/443만 기록됐다.</p></article>
+    </div>
+    <div class="warning"><strong>별도 후속:</strong> 실제 화면은 기능별 정적 fallback으로 정상 표시되지만, 기존 SDUI 설정과 비로그인 확인 요청인 <code>/api/ui/*</code>, <code>/api/auth/me</code>가 500을 반환한다. F4/F5 대상 API는 모두 200이었으며 이번 완료 범위와 구분해 다음 Spring·SDUI 계약 정비 후보로 남긴다.</div>
+    <p><strong>실행하지 않음:</strong> AWS·RunPod 변경/종료, 운영 DNS 변경, DB 데이터 삭제·재시드, Postgres·Redis 교체, 다른 서비스 재배포.</p>
+  </section>
+
+  <footer class="foot">생성: 2026-10-05 09:42 KST · 실제 운영·GitHub·브라우저 증거 기반 · 비밀값 제외 · 기존 보고서 덮어쓰기 없음</footer>
+</main>
+<script>
+  const details={
+    gate:{title:'공통 배포 게이트',body:'<p>외부 공개 경로를 조회용 GET으로 제한하고 Spring에 TourAPI 키를 파일 secret으로 주입했다.</p><ul><li><code>deploy/hostinger/g1.compose.yml</code></li><li>RSA 봉인 아티팩트와 checksum 검증</li><li>80/443 외 신규 공개 포트 없음</li><li>비밀값은 Git·로그·보고서에 미노출</li></ul>'},
+    f4:{title:'F4 · 맛집 공개 조회',body:'<p>클라이언트에서 목록을 잘라 보이는 방식이 아니라 Spring→TourAPI의 실제 다음 페이지를 호출한다.</p><ul><li><code>sigunguCode</code>, <code>arrange</code>, <code>pageNo</code> 전달</li><li>contentId 기준 중복 제거</li><li>추가 조회 실패 시 재시도 메시지</li><li>운영 화면 24개 → 48개 확인</li></ul>'},
+    f5:{title:'F5 · 성지 공개 조회',body:'<p>런타임 정적 성지 fallback을 제거하고 DB의 승인된 성지만 공개한다.</p><ul><li><code>category=HOLY</code> 허용</li><li>작품·아티스트 자동완성 API 연결</li><li>목록·검색 실패를 화면에 분리 표시</li><li>운영 승인 성지와 방탄 검색 확인</li></ul>'},
+    merge:{title:'PR·main 고정',body:'<p>PR #259와 키 회전 PR #260을 차례로 병합했다.</p><ul><li>모든 필수 GitHub 검사 통과</li><li>origin/main: <code>416fd402419b746951a54f025f63c1618aeabeea</code></li><li>날짜 태그가 아니라 SHA와 이미지 digest로 식별</li></ul>'},
+    deploy:{title:'Hostinger 교체 배포',body:'<p>첫 시도는 VPS에 <code>jq</code>가 없어 검증 단계에서 멈췄고 자동 롤백이 정상 동작했다. 패키지를 추가하지 않고 Python 3 검증으로 바꿔 재배포했다.</p><ul><li>Web·Spring만 새 digest로 교체</li><li>Postgres·Redis 컨테이너 ID 보존</li><li>릴리스 기록과 롤백 digest 저장</li><li>최종 두 컨테이너 healthy</li></ul>'},
+    verify:{title:'운영·모바일 검증',body:'<p>실제 Chrome 모바일 뷰포트와 서버 직접 점검을 함께 수행했다.</p><ul><li>F4 페이지 1·2 모두 200, 카드 24→48</li><li>F5 성지·콘텐츠 검색 모두 200</li><li>홈·탐색 200, platform health UP</li><li>기존 SDUI/auth fallback 500은 별도 후속으로 기록</li></ul>'}
+  };
+  const title=document.getElementById('detail-title');const body=document.getElementById('detail-body');
+  document.querySelectorAll('.node').forEach((button)=>button.addEventListener('click',()=>{document.querySelectorAll('.node').forEach((item)=>item.setAttribute('aria-selected','false'));button.setAttribute('aria-selected','true');const detail=details[button.dataset.key];title.textContent=detail.title;body.innerHTML=detail.body;}));
+</script>
+</body>
+</html>

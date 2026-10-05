@@ -1,0 +1,186 @@
+{
+  "checkedAt": "2026-10-05T00:35:44.166Z",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "f4": {
+    "cardsBefore": 24,
+    "cardsAfter": 48,
+    "page2Requested": true
+  },
+  "f5": {
+    "cards": 24,
+    "contentOptions": 1
+  },
+  "apiResponses": [
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/v1/tour/areas",
+      "status": 200
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/v1/tour/areas?areaCode=1",
+      "status": 200
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/v1/tour/restaurants?areaCode=1&sigunguCode=&arrange=A&numOfRows=24&pageNo=1",
+      "status": 200
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/v1/tour/restaurants?areaCode=1&sigunguCode=&arrange=A&numOfRows=24&pageNo=2",
+      "status": 200
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/v1/tour/areas",
+      "status": 200
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/v1/tour/areas?areaCode=1",
+      "status": 200
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/v1/tour/holy?areaCode=1&sigunguCode=&sigunguName=",
+      "status": 200
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/v1/tour/holy/contents?q=%EB%B0%A9%ED%83%84&limit=8",
+      "status": 200
+    }
+  ],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 500 ()"
+  ],
+  "failedRequests": [
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/TOUR_EXPLORE",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "httpErrors": [
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/GLOBAL_HEADER",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/TOUR_EXPLORE",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/auth/me",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/theme/KRIDE_DEFAULT",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/TOUR_EXPLORE",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/theme/KRIDE_DEFAULT",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/GLOBAL_HEADER",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/TOUR_EXPLORE",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/auth/me",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/theme/KRIDE_DEFAULT",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/TOUR_EXPLORE",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/theme/KRIDE_DEFAULT",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/TOUR_EXPLORE",
+      "status": 500
+    }
+  ],
+  "knownNonBlockingFallbackErrors": [
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/GLOBAL_HEADER",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/TOUR_EXPLORE",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/auth/me",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/theme/KRIDE_DEFAULT",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/TOUR_EXPLORE",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/theme/KRIDE_DEFAULT",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/GLOBAL_HEADER",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/TOUR_EXPLORE",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/auth/me",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/theme/KRIDE_DEFAULT",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/TOUR_EXPLORE",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/theme/KRIDE_DEFAULT",
+      "status": 500
+    },
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/TOUR_EXPLORE",
+      "status": 500
+    }
+  ],
+  "knownNonBlockingFallbackFailures": [
+    {
+      "url": "https://kmovement.srv1869569.hstgr.cloud/api/ui/TOUR_EXPLORE",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "targetedFeatureStatus": "passed"
+}
