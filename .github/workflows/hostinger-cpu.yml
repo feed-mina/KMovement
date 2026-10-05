@@ -43,6 +43,13 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
           test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
       - uses: docker/setup-buildx-action@v3
+      - name: Validate private service and web network configuration
+        env:
+          KRIDE_INTERNAL_TOKEN: ci-fixture-only
+          KMOVEMENT_CPU_IMAGE: kmovement-cpu:verify
+        run: |
+          docker compose -f deploy/hostinger/f11-cpu.compose.yml config --quiet
+          docker compose --env-file deploy/hostinger/traefik.env.example -f deploy/hostinger/web.traefik.compose.yml -f deploy/hostinger/f11-web.override.yml config --quiet
       - name: Build the production dependency image
         uses: docker/build-push-action@v6
         with:
