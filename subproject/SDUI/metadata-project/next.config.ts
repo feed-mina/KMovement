@@ -74,7 +74,8 @@ const nextConfig: NextConfig = {
                 destination: `${FASTAPI_URL}/api/:path*`,
             },
             {
-                source: '/api/:path*',
+                // Keep dynamic F11 route handlers in Next; other APIs still use Spring.
+                source: '/api/:path((?!kride/route/).*)',
                 destination: `${BACKEND_URL}/api/:path*`,
             },
         ];

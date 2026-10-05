@@ -39,6 +39,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
+from src.api.route_contract import checked_node, closed_course
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -538,7 +539,7 @@ def get_nearby_facilities(path_coords: list, radius_m: float = 500) -> list:
                     ))
             except (ValueError, TypeError):
                 continue
-    return [{"name": r[0], "type": r[1], "lat": r[2], "lon": r[3]} for r in results]
+    return [{"name": r[0], "type": r[1], "lat": r[2], "lon": r[3], "distance_km": round(min(haversine((r[2],r[3]), p) for p in path_coords),3)} for r in sorted(results)]
 
 
 def get_nearby_pois(path_coords: list, radius_m: float = 1000) -> list:
@@ -595,28 +596,34 @@ class RecommendRequest(BaseModel):
 class RouteRequest(BaseModel):
     user_id: Optional[str] = None
     user_sqno: Optional[int] = None
-    start_lat: float
-    start_lon: float
-    end_lat: float
-    end_lon: float
-    w_safety: float = 0.6
-    w_tourism: float = 0.4
+    start_lat: float = Field(..., ge=-90, le=90, allow_inf_nan=False)
+    start_lon: float = Field(..., ge=-180, le=180, allow_inf_nan=False)
+    end_lat: float = Field(..., ge=-90, le=90, allow_inf_nan=False)
+    end_lon: float = Field(..., ge=-180, le=180, allow_inf_nan=False)
+    w_safety: float = Field(0.6, ge=0, le=1, allow_inf_nan=False)
+    w_tourism: float = Field(0.4, ge=0, le=1, allow_inf_nan=False)
     travel_date: Optional[str] = None   # Phase 3-8에서 활용
 
 
 class CourseRequest(BaseModel):
     user_id: Optional[str] = None
     user_sqno: Optional[int] = None
-    start_lat: float
-    start_lon: float
-    distance_km: float = 20.0
-    w_safety: float = 0.6
-    w_tourism: float = 0.4
+    start_lat: float = Field(..., ge=-90, le=90, allow_inf_nan=False)
+    start_lon: float = Field(..., ge=-180, le=180, allow_inf_nan=False)
+    distance_km: float = Field(20.0, ge=0.2, le=50, allow_inf_nan=False)
+    w_safety: float = Field(0.6, ge=0, le=1, allow_inf_nan=False)
+    w_tourism: float = Field(0.4, ge=0, le=1, allow_inf_nan=False)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 엔드포인트
 # ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/ready")
+def route_ready():
+    ready = G_main is not None and len(G_main) > 1 and df_scored is not None and df_facility is not None and df_poi is not None
+    return JSONResponse(status_code=200 if ready else 503, content={"ready": ready, "graph_nodes": len(G_main) if G_main is not None else 0, "scope": "loaded-road-network", "maxSnapKm": 2, "courseType": "out-and-back"})
+
 
 @app.get("/api/health")
 def health():
@@ -693,8 +700,10 @@ def find_route(req: RouteRequest):
     G_copy = G_main.copy()
     reweight_graph(G_copy, req.w_safety, req.w_tourism)
 
-    start_node = nearest_node(G_copy, req.start_lat, req.start_lon)
-    end_node   = nearest_node(G_copy, req.end_lat,   req.end_lon)
+    start_node = checked_node(G_copy, req.start_lat, req.start_lon, nearest_node, haversine)
+    end_node = checked_node(G_copy, req.end_lat, req.end_lon, nearest_node, haversine)
+    if start_node == end_node:
+        raise HTTPException(422, "출발·도착이 같은 도로 지점입니다.")
 
     try:
         path_nodes = nx.shortest_path(G_copy, source=start_node, target=end_node, weight="weight")
@@ -758,52 +767,15 @@ def find_route(req: RouteRequest):
 # ─────────────────────────────────────────────
 @app.post("/api/course")
 def generate_course(req: CourseRequest):
-    """시작점 기반 거리 조건 순환 코스 생성 (DFS)"""
+    """시작점으로 돌아오는 거리 조건 왕복 코스"""
     if G_main is None:
         raise HTTPException(status_code=503, detail="route_graph.pkl 로드 실패")
 
     G_copy = G_main.copy()
     reweight_graph(G_copy, req.w_safety, req.w_tourism)
 
-    start_node = nearest_node(G_copy, req.start_lat, req.start_lon)
-    target_km  = req.distance_km
-
-    # DFS 기반 코스 탐색 (best-first: final_score 내림차순)
-    best_course: list = []
-    best_dist: float  = 0.0
-
-    stack = [(start_node, [start_node], 0.0)]
-    visited_global: set = set()
-    MAX_ITER = 50_000
-
-    iters = 0
-    while stack and iters < MAX_ITER:
-        iters += 1
-        node, path, dist = stack.pop()
-
-        if dist >= target_km * 0.9:
-            if dist > best_dist:
-                best_dist   = dist
-                best_course = path
-            if dist >= target_km:
-                break
-            continue
-
-        neighbors = sorted(
-            [n for n in G_copy.neighbors(node) if n not in visited_global],
-            key=lambda n: -G_copy[node][n].get("final_score", 0),
-        )
-        for neighbor in neighbors[:6]:   # 분기 제한 (성능)
-            edge = G_copy[node][neighbor]
-            new_dist = dist + edge.get("length_km", haversine(node, neighbor))
-            if new_dist <= target_km * 1.2:   # 목표 거리의 120%까지 허용
-                visited_global.add(neighbor)
-                stack.append((neighbor, path + [neighbor], new_dist))
-
-    if not best_course:
-        # fallback: 가장 긴 탐색 결과 반환
-        best_course = [start_node]
-        best_dist   = 0.0
+    start_node = checked_node(G_copy, req.start_lat, req.start_lon, nearest_node, haversine)
+    best_course, best_dist = closed_course(G_copy, start_node, req.distance_km)
 
     course_coords = [{"lat": n[0], "lon": n[1]} for n in best_course]
     facilities    = get_nearby_facilities([(c["lat"], c["lon"]) for c in course_coords])
@@ -811,6 +783,8 @@ def generate_course(req: CourseRequest):
 
     return {
         "course": course_coords,
+        "courseType": "out-and-back",
+        "closed": True,
         "total_distance_km": round(best_dist, 3),
         "facilities_on_course": facilities,
         "pois_on_course": pois,
@@ -822,9 +796,9 @@ def generate_course(req: CourseRequest):
 # ─────────────────────────────────────────────
 @app.get("/api/facilities")
 def get_facilities(
-    lat: float = Query(...),
-    lon: float = Query(...),
-    radius_km: float = Query(2.0),
+    lat: float = Query(..., ge=-90, le=90, allow_inf_nan=False),
+    lon: float = Query(..., ge=-180, le=180, allow_inf_nan=False),
+    radius_km: float = Query(2.0, gt=0, le=20),
 ):
     """반경 내 편의시설 반환"""
     if df_facility is None:
@@ -848,6 +822,7 @@ def get_facilities(
                     "type": row.get(type_col, "") if type_col else "",
                     "lat": fac[0],
                     "lon": fac[1],
+                    "distance_km": round(haversine(center, fac), 3),
                 })
         except (ValueError, TypeError):
             continue
@@ -860,9 +835,9 @@ def get_facilities(
 # ─────────────────────────────────────────────
 @app.get("/api/pois")
 def get_pois(
-    lat: float = Query(...),
-    lon: float = Query(...),
-    radius_km: float = Query(3.0),
+    lat: float = Query(..., ge=-90, le=90, allow_inf_nan=False),
+    lon: float = Query(..., ge=-180, le=180, allow_inf_nan=False),
+    radius_km: float = Query(3.0, gt=0, le=20),
 ):
     """반경 내 관광 POI 반환"""
     if df_poi is None:
@@ -897,8 +872,8 @@ def get_pois(
 # ─────────────────────────────────────────────
 @app.get("/api/weather")
 def get_weather(
-    lat: float = Query(...),
-    lon: float = Query(...),
+    lat: float = Query(..., ge=-90, le=90, allow_inf_nan=False),
+    lon: float = Query(..., ge=-180, le=180, allow_inf_nan=False),
     base_w_safety: float = Query(0.6),
 ):
     """
@@ -909,7 +884,7 @@ def get_weather(
     """
     if not HAS_WEATHER:
         return {
-            "weather_label": "모듈 없음",
+            "weather_label": "모듈 없음", "fallback": True,
             "pop": 0,
             "pty": "없음",
             "sky": "맑음",
@@ -923,7 +898,7 @@ def get_weather(
     api_key = os.environ.get("KMA_API_KEY", "")
     if not api_key:
         return {
-            "weather_label": "API 키 없음",
+            "weather_label": "API 키 없음", "fallback": True,
             "pop": 0,
             "pty": "없음",
             "sky": "맑음",
@@ -950,7 +925,7 @@ def get_weather(
             "safety_penalty": weather_to_safety_penalty(weather.get("weather_label", "맑음")),
         }
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"KMA API 호출 실패: {e}")
+        return {"weather_label": "날씨 확인 불가", "fallback": True, "reason": "provider_unavailable", "w_safety_adj": base_w_safety, "w_tourism_adj": round(1.0-base_w_safety, 2)}
 
 
 # ─────────────────────────────────────────────
@@ -998,9 +973,9 @@ def detect_events(items: list[EventItem]):
 
 @app.get("/api/events")
 def get_events_near(
-    lat: float = Query(...),
-    lon: float = Query(...),
-    radius_km: float = Query(3.0),
+    lat: float = Query(..., ge=-90, le=90, allow_inf_nan=False),
+    lon: float = Query(..., ge=-180, le=180, allow_inf_nan=False),
+    radius_km: float = Query(3.0, gt=0, le=20),
 ):
     """
     특정 좌표 반경 내 이미 geocoding된 이벤트 목록 반환
@@ -2317,3 +2292,8 @@ async def celery_status_stream(
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# Bounded public-catalog recommendation; legacy endpoints remain separate.
+from src.api.public_itinerary import router as public_itinerary_router
+app.include_router(public_itinerary_router)

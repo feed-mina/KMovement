@@ -1,0 +1,44 @@
+name: kmovement-cpu
+services:
+  fastapi:
+    image: ${KMOVEMENT_CPU_IMAGE:?Use a tested digest-pinned CPU image}
+    command: ["uvicorn", "src.api.cpu_app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+    restart: unless-stopped
+    init: true
+    expose: ["8000"]
+    environment:
+      KRIDE_ROUTE_HISTORY_STORE: disabled
+      CHROMA_MODE: persistent
+      CHROMA_PATH: /data/chroma
+      HF_HOME: /data/models
+      TRANSFORMERS_CACHE: /data/models/hub
+      EMBED_MODEL: intfloat/multilingual-e5-small
+      TORCHSERVE_ENABLED: "false"
+      KRIDE_PUBLIC_CATALOG_URL: http://spring:8080
+      ITINERARY_BUDGET_DB: /data/budget/ledger.sqlite
+      ITINERARY_DAILY_USD: ${ITINERARY_DAILY_USD:-0}
+      ITINERARY_INPUT_USD_PER_M: ${ITINERARY_INPUT_USD_PER_M:-0}
+      ITINERARY_OUTPUT_USD_PER_M: ${ITINERARY_OUTPUT_USD_PER_M:-0}
+      KRIDE_INTERNAL_TOKEN: ${KRIDE_INTERNAL_TOKEN:?Set a private service token}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+    volumes:
+      - cpu-data:/data
+    mem_limit: 4g
+    cpus: 2
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/api/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+    networks: [web, spring]
+networks:
+  web:
+    external: true
+    name: kmovement-web_kmovement
+  spring:
+    external: true
+    name: kmovement-g1_egress
+volumes:
+  cpu-data:

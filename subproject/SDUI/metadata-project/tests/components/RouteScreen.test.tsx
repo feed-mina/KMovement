@@ -52,7 +52,7 @@ describe('RouteScreen — [동선] 기본/AI 코스 토글', () => {
         fireEvent.click(screen.getByText('AI 코스'));
 
         await waitFor(() => expect(mockedFetch).toHaveBeenCalled());
-        expect(mockedFetch).toHaveBeenCalledWith('/kride-api/recommend/itinerary', expect.objectContaining({ method: 'POST' }));
+        expect(mockedFetch).toHaveBeenCalledWith('/api/kride/recommend/itinerary', expect.objectContaining({ method: 'POST' }));
     });
 
     it('AI 코스는 한 번만 요청한다', async () => {
