@@ -19,6 +19,9 @@ export default function TourExploreMap({pois, selectedId, onSelect}: Props) {
     const mapRef = useRef<any>(null);
     const markersRef = useRef<Map<string, any>>(new Map());
     const [error, setError] = useState(false);
+    const [attempt, setAttempt] = useState(0);
+    const selectedRef = useRef(selectedId);
+    selectedRef.current = selectedId;
     const [ready, setReady] = useState(0);
     const geoPois = pois.filter(hasTourCoordinates);
 
@@ -47,7 +50,12 @@ export default function TourExploreMap({pois, selectedId, onSelect}: Props) {
             });
             map.setBounds(bounds);
             if (typeof ResizeObserver !== 'undefined') {
-                observer = new ResizeObserver(() => { map.relayout(); });
+                observer = new ResizeObserver(() => {
+                    map.relayout();
+                    const selected = selectedRef.current && markersRef.current.get(selectedRef.current);
+                    if (selected) map.panTo(selected.getPosition());
+                    else map.setBounds(bounds);
+                });
                 observer.observe(container.current);
             }
             setReady((value) => value + 1);
@@ -61,7 +69,7 @@ export default function TourExploreMap({pois, selectedId, onSelect}: Props) {
             });
             markersRef.current.clear(); mapRef.current = null;
         };
-    }, [pois, onSelect]);
+    }, [pois, onSelect, attempt]);
 
     useEffect(() => {
         const map = mapRef.current;
@@ -75,9 +83,18 @@ export default function TourExploreMap({pois, selectedId, onSelect}: Props) {
     }, [selectedId, ready]);
 
     return <section className="tour-browse-map" aria-label="장소 지도">
+        {geoPois.length > 0 && <label className="tour-map-picker">지도 장소 선택
+            <select aria-label="지도 장소 선택" value={selectedId ?? ''} onChange={(event) => {if (event.target.value) onSelect(event.target.value);}}>
+                <option value="">장소를 선택하세요</option>
+                {geoPois.map((poi) => <option key={tourPoiKey(poi)} value={tourPoiKey(poi)}>{poi.title}</option>)}
+            </select>
+        </label>}
         <div ref={container} className="tour-browse-map__canvas" aria-label="카카오 장소 지도" />
         {geoPois.length === 0 && <p className="tour-map-state">현재 목록에 지도 좌표가 있는 장소가 없어요. 주소는 카드에서 확인해 주세요.</p>}
-        {error && <div className="tour-map-state" role="status">지도를 불러오지 못했어요. 장소 목록은 계속 볼 수 있어요.</div>}
+        {error && <div className="tour-map-state tour-recovery" role="status" data-error-source="map-sdk">
+            <p>지도를 불러오지 못했어요. 장소 목록은 계속 볼 수 있어요.</p>
+            <button type="button" onClick={() => setAttempt((value) => value + 1)}>지도 다시 시도</button>
+        </div>}
         {selectedId && <p className="tour-map-selection">선택: {pois.find((poi) => tourPoiKey(poi) === selectedId)?.title}</p>}
         <p className="tour-map-caption">좌표가 있는 {geoPois.length}곳 표시 · 지도 핀을 누르면 해당 카드로 이동해요.</p>
     </section>;

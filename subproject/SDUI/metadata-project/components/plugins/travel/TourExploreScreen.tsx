@@ -204,6 +204,11 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const [districts, setDistricts] = useState<TourRegion[]>(FALLBACK_SEOUL_DISTRICTS);
     const [regionsLoading, setRegionsLoading] = useState(true);
     const [regionError, setRegionError] = useState<string | null>(null);
+    const [areaError, setAreaError] = useState<string | null>(null);
+    const [regionAttempt, setRegionAttempt] = useState(0);
+    const [placesAttempt, setPlacesAttempt] = useState(0);
+    const [contentAttempt, setContentAttempt] = useState(0);
+    const resultEpoch = useRef(0);
     const [arrange, setArrange] = useState('A');
     const [placeQuery, setPlaceQuery] = useState('');
     const [filtersOpen, setFiltersOpen] = useState(false);
@@ -269,16 +274,17 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     useEffect(() => {
         let alive = true;
         const loadAreas = async () => {
+            setAreaError(null);
             try {
                 const list = await fetchTourAreas();
                 if (alive && list.length > 0) setAreas(list);
             } catch {
-                if (alive) setRegionError('지역 목록을 새로 불러오지 못해 기본 지역을 표시해요.');
+                if (alive) setAreaError('지역 목록을 새로 불러오지 못해 기본 지역을 표시해요.');
             }
         };
         void loadAreas();
         return () => { alive = false; };
-    }, []);
+    }, [regionAttempt]);
 
     useEffect(() => {
         let alive = true;
@@ -298,16 +304,19 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         };
         void loadDistricts();
         return () => { alive = false; };
-    }, [areaCode]);
+    }, [areaCode, regionAttempt]);
 
     useEffect(() => {
         let alive = true;
+        const epoch = ++resultEpoch.current;
         const loadPois = async () => {
             await Promise.resolve();
             if (!alive) return;
             setLoading(true);
             setError(null);
             setLoadMoreError(null);
+            setLoadingMore(false);
+            setSelectedMapId(null);
             // 조건이 바뀌면 목록도 처음부터다. 이전 페이지 수를 물려받으면 안 된다.
             setVisibleCount(PAGE_SIZE);
             setRestaurantPage(1);
@@ -336,19 +345,22 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             } catch {
                 if (alive) {
                     setPois([]);
-                    setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+                    setError(isHolyCategory(category)
+                        ? '성지 목록을 불러오지 못했어요. 다시 시도하거나 일반 장소를 탐색해 주세요.'
+                        : '일반 장소를 불러오지 못했어요. 다시 시도하거나 성지를 탐색해 주세요.');
                 }
             } finally {
                 if (alive) setLoading(false);
             }
         };
         void loadPois();
-        return () => { alive = false; };
-    }, [areaCode, category, sigungu, arrange, selectedSigunguName, selectedContent?.contentSqno]);
+        return () => { alive = false; if (resultEpoch.current === epoch) resultEpoch.current++; };
+    }, [areaCode, category, sigungu, arrange, selectedSigunguName, selectedContent?.contentSqno, placesAttempt]);
 
     const loadMoreRestaurants = async () => {
         if (category !== '39' || loadingMore || !restaurantHasMore) return;
         const nextPage = restaurantPage + 1;
+        const epoch = resultEpoch.current;
         setLoadingMore(true);
         setLoadMoreError(null);
         try {
@@ -356,6 +368,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                 areaCode, sigunguCode: sigungu, arrange,
                 numOfRows: PAGE_SIZE, pageNo: nextPage,
             });
+            if (epoch !== resultEpoch.current) return;
             setPois((current) => {
                 const seen = new Set(current.map((poi) => poi.contentId).filter(Boolean));
                 const unique = nextPois.filter((poi) => !poi.contentId || !seen.has(poi.contentId));
@@ -364,9 +377,9 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             setRestaurantPage(nextPage);
             setRestaurantHasMore(nextPois.length === PAGE_SIZE);
         } catch {
-            setLoadMoreError('다음 맛집을 불러오지 못했어요. 다시 시도해 주세요.');
+            if (epoch === resultEpoch.current) setLoadMoreError('다음 맛집을 불러오지 못했어요. 다시 시도해 주세요.');
         } finally {
-            setLoadingMore(false);
+            if (epoch === resultEpoch.current) setLoadingMore(false);
         }
     };
 
@@ -393,7 +406,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             }
         }, 300);
         return () => { alive = false; clearTimeout(timer); };
-    }, [category, contentQuery]);
+    }, [category, contentQuery, contentAttempt]);
 
     useEffect(() => {
         if (loading || error || pois.length === 0) return;
@@ -474,6 +487,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const resetFilters = () => {
         setPlaceQuery(''); setSigungu(''); setAreaCode(DEFAULT_AREA_CODE);
         setCategory(DEFAULT_CATEGORY); setArrange('A'); setSelectedContent(null); setContentQuery('');
+        setSelectedMapId(null); setMobileView('list');
     };
 
     return (
@@ -546,11 +560,6 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                         </button>
                     ))}
                 </HorizontalFilterRail>
-                {regionError && (
-                    <p role="status" style={{ margin: '0 2px 8px', color: '#8B4A4D', fontSize: 11 }}>
-                        {regionError}
-                    </p>
-                )}
             </section>
 
             {/* 카테고리 + 정렬 */}
@@ -564,6 +573,10 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                 </div>
             </div>
             </div>
+            {(areaError || regionError) && <div role="status" className="tour-recovery" data-error-source="tour-regions">
+                {areaError && <p>{areaError}</p>}{regionError && <p>{regionError}</p>}
+                <button type="button" onClick={() => setRegionAttempt((value) => value + 1)}>지역 다시 시도</button>
+            </div>}
 
             {isHolyCategory(category) && (
                 <section aria-label="작품·아티스트 필터" style={{ marginBottom: 14 }}>
@@ -627,9 +640,10 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 </ul>
                             )}
                             {contentError && (
-                                <p role="alert" style={{ margin: '8px 0 0', color: '#A32D2D', fontSize: 12 }}>
+                                <div role="alert" className="tour-recovery" data-error-source="holy-content">
                                     {contentError}
-                                </p>
+                                    <button type="button" onClick={() => setContentAttempt((value) => value + 1)}>작품 검색 다시 시도</button>
+                                </div>
                             )}
                         </>
                     )}
@@ -667,9 +681,13 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             )}
 
             {loading && <div style={{ padding: 24, color: '#888' }}>불러오는 중…</div>}
-            {error && <div style={{ padding: 24, color: '#A32D2D' }}>{error}</div>}
+            {error && <div role="alert" className="tour-recovery" data-error-source={isHolyCategory(category) ? 'holy-postgres-api' : 'tour-api'}>
+                <p>{error}</p>
+                <button type="button" onClick={() => setPlacesAttempt((value) => value + 1)}>장소 다시 시도</button>
+                <button type="button" onClick={resetFilters}>필터 초기화</button>
+            </div>}
             {!loading && !error && <p className="tour-result-count" aria-live="polite">불러온 {pois.length}곳 중 {filteredPois.length}곳 · 화면에 {displayedPois.length}곳 표시</p>}
-            {!loading && !error && filteredPois.length === 0 && <div style={{ padding: 24, color: '#666' }}>{placeQuery ? '검색 조건에 맞는 장소가 없어요.' : '표시할 장소가 없어요.'}</div>}
+            {!loading && !error && filteredPois.length === 0 && <div className="tour-recovery"><p>{placeQuery ? '검색 조건에 맞는 장소가 없어요.' : '표시할 장소가 없어요.'}</p><button type="button" onClick={resetFilters}>필터 초기화</button></div>}
 
             {!loading && !error && pois.length > 0 && (
                 <>
@@ -712,7 +730,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                     ? '불러오는 중…'
                                     : category === '39'
                                         ? `더 보기 (${pois.length}개 표시)`
-                                        : `더 보기 (${visibleCount}/${pois.length})`}
+                                        : `더 보기 (${Math.min(visibleCount, filteredPois.length)}/${filteredPois.length})`}
                             </button>
                         </div>
                     )}

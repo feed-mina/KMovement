@@ -14,6 +14,9 @@
 .tour-filter-details { background: #fff; border: 1px solid #e4e7eb; border-radius: 14px; padding: 12px; margin-bottom: 16px; }
 .tour-filter-details[hidden] { display: none; }
 .tour-result-count { margin: 8px 0 14px; font-size: 13px; color: #596575; }
+.tour-recovery { padding: 16px; margin: 8px 0 16px; border: 1px solid #ead0d1; border-radius: 12px; background: #fff8f8; line-height: 1.6; }
+.tour-recovery p { margin: 0 0 10px; }
+.tour-recovery button + button { margin-left: 8px; }
 .tour-results-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
 .tour-results-list, .tour-results-map { min-width: 0; }
 .tour-results-map { position: sticky; top: 18px; }
@@ -23,9 +26,11 @@
 .tour-card-coordinate-note { display: block; margin: 8px; font-size: 12px; color: #596575; }
 .tour-browse-map { border: 1px solid #d5dbe1; border-radius: 14px; overflow: hidden; background: #f0f3f6; position: relative; }
 .tour-browse-map__canvas { width: 100%; height: 440px; }
+.tour-map-picker { display: grid; gap: 6px; padding: 12px; background: white; font-size: 13px; }
+.tour-map-picker select { width: 100%; min-width: 0; padding: 10px; border: 1px solid #c9cdd3; border-radius: 8px; }
 .tour-map-caption, .tour-map-selection { padding: 10px 14px; margin: 0; font-size: 13px; background: white; }
 .tour-map-selection { font-weight: 700; color: #831325; }
-.tour-map-state { position: absolute; top: 16px; left: 16px; right: 16px; padding: 16px; border-radius: 10px; background: white; color: #4c5563; line-height: 1.6; }
+.tour-map-state { position: absolute; top: 110px; left: 16px; right: 16px; padding: 16px; border-radius: 10px; background: white; color: #4c5563; line-height: 1.6; }
 .tour-view-toggle { display: none; gap: 8px; margin-bottom: 12px; }
 .tour-view-toggle button[aria-pressed=true] { color: #fff; background: #b7192b; border-color: #b7192b; }
 @media (max-width: 767px) {

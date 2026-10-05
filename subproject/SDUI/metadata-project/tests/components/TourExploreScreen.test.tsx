@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TourExploreScreen from '@/components/plugins/travel/TourExploreScreen';
 import { fetchHolyContents, fetchHolyPois, fetchRestaurants, fetchTourAreas, fetchTourDistricts, fetchTourPois } from '@/services/tourApi';
@@ -226,6 +226,33 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         await waitFor(() => expect(screen.getByText(/불러오지 못했어요/)).toBeInTheDocument());
     });
 
+    it('일반 장소와 성지 오류를 구분하고 현재 조건으로 재시도한다', async () => {
+        mockedRestaurants.mockRejectedValueOnce(new Error('TourAPI unavailable'));
+        renderScreen();
+        expect(await screen.findByRole('alert')).toHaveAttribute('data-error-source', 'tour-api');
+        fireEvent.click(screen.getByRole('button', {name:'장소 다시 시도'}));
+        await screen.findByText('가담');
+        mockedHolyFetch.mockRejectedValueOnce(new Error('holy backend unavailable'));
+        fireEvent.click(screen.getByRole('button', {name:'성지'}));
+        expect(await screen.findByRole('alert')).toHaveAttribute('data-error-source', 'holy-postgres-api');
+        fireEvent.click(screen.getByRole('button', {name:'장소 다시 시도'}));
+        await screen.findByText('서울숲');
+        expect(mockedHolyFetch).toHaveBeenLastCalledWith(expect.objectContaining({areaCode:'1'}));
+    });
+
+    it('지역을 바꾼 후 도착한 이전 맛집 추가 페이지를 버린다', async () => {
+        mockedRestaurants.mockResolvedValueOnce(Array.from({length:24},(_,i)=>({...sample[0],contentId:`page-${i}`,title:`첫페이지${i}`})));
+        let resolveMore!: (data: any[]) => void;
+        mockedRestaurants.mockImplementationOnce(()=>new Promise(resolve=>{resolveMore=resolve;}));
+        renderScreen();
+        await screen.findByText('첫페이지0');
+        fireEvent.click(screen.getByRole('button',{name:/더 보기/}));
+        fireEvent.click(screen.getByRole('button',{name:'관광지'}));
+        await screen.findByText('가담');
+        await act(async () => { resolveMore([{contentId:'stale',title:'이전 지역의 늦은 응답'}]); });
+        await waitFor(()=>expect(screen.queryByText('이전 지역의 늦은 응답')).not.toBeInTheDocument());
+    });
+
     it('지역(구) 선택 시 sigunguCode로 재조회해야 함', async () => {
         renderScreen();
         await waitFor(() => expect(screen.getByText('가담')).toBeInTheDocument());
@@ -425,7 +452,7 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         mockedHolyFetch.mockRejectedValueOnce(new Error('network'));
         renderScreen();
         fireEvent.click(await screen.findByText('성지'));
-        await waitFor(() => expect(screen.getByText(/장소를 불러오지 못했어요/)).toBeInTheDocument());
+        await waitFor(() => expect(screen.getByText(/성지 목록을 불러오지 못했어요/)).toBeInTheDocument());
         expect(screen.queryByText('서울숲')).not.toBeInTheDocument();
     });
 

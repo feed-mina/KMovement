@@ -1,4 +1,4 @@
-import {render, screen, waitFor} from '@testing-library/react';
+import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import TourExploreMap, {hasTourCoordinates} from '@/components/plugins/travel/TourExploreMap';
 import {loadKakaoMaps} from '@/components/fields/kride/maps/loadKakaoMaps';
 jest.mock('@/components/fields/kride/maps/loadKakaoMaps', () => ({loadKakaoMaps: jest.fn()}));
@@ -34,7 +34,11 @@ it('mapY를 위도, mapX를 경도로 사용하고 핀 선택과 카드 선택�
 });
 
 it('지도 SDK 실패를 목록 오류와 구분한다', async () => {
+    load.mockReset();
     load.mockRejectedValue(new Error('SDK failed'));
     render(<TourExploreMap pois={pois} selectedId={null} onSelect={jest.fn()}/>);
     expect(await screen.findByRole('status')).toHaveTextContent('장소 목록은 계속 볼 수 있어요');
+    expect(screen.getByRole('status')).toHaveAttribute('data-error-source', 'map-sdk');
+    fireEvent.click(screen.getByRole('button', {name:'지도 다시 시도'}));
+    await waitFor(()=>expect(load).toHaveBeenCalledTimes(2));
 });
