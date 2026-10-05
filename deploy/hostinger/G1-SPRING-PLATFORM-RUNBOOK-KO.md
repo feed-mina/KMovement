@@ -84,8 +84,10 @@ secret` workflow가 만드는 암호문은 이 고정 공개키로만 암호화�
 고정합니다.
 
 TourAPI 키는 `Seal Hostinger F4 TourAPI secret` workflow가 실제 `areaCode2`
-호출을 통과한 경우에만 `tour_api_key.enc`로 만듭니다. 동일한 VPS 공개키를
-사용하며, VPS에서 복호화한 평문은 `spring_tour_api_key`로만 복제합니다.
+호출을 통과한 경우에만 `tour_api_key.enc`로 만듭니다. F4 전용 공개키
+`deploy/hostinger/f4-recipient-public.pem`과 VPS root 전용 개인키
+`/root/.kmovement-secrets/f4-recipient-private.pem`을 짝으로 사용하며, VPS에서
+복호화한 평문은 `spring_tour_api_key`로만 복제합니다.
 
 배포 환경 파일에는 비밀값 대신 경로와 digest만 둡니다.
 
