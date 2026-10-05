@@ -58,7 +58,9 @@ class PersonalSavedPostgresTest {
     void sixStepLifecycleAndOtherOwnerIsolation(String kind) throws Exception {
         var first=mvc.perform(post(url(kind)+"/1")).andExpect(status().isOk()).andExpect(jsonPath("$.data.saved").value(true)).andReturn().getResponse().getContentAsString();
         var duplicate=mvc.perform(post(url(kind)+"/1")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        assertThat(duplicate).isEqualTo(first);
+        // Response timestamps vary per request; idempotency concerns the saved record.
+        var json = new com.fasterxml.jackson.databind.ObjectMapper();
+        assertThat(json.readTree(duplicate).get("data")).isEqualTo(json.readTree(first).get("data"));
         mvc.perform(get(url(kind))).andExpect(status().isOk()).andExpect(header().string("Cache-Control","private, no-store")).andExpect(jsonPath("$.data.totalCount").value(1)).andExpect(jsonPath("$.data.items[0].visibility").value("PUBLIC"));
         mvc.perform(delete(url(kind)+"/1")).andExpect(status().isOk()).andExpect(jsonPath("$.data.saved").value(false));
         mvc.perform(get(url(kind))).andExpect(jsonPath("$.data.totalCount").value(0)).andExpect(jsonPath("$.data.items").isEmpty());
