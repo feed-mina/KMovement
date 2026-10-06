@@ -1,0 +1,20 @@
+{
+  "files": {
+    ".gitignore": "766a0346f18921e2efb218597e9eeb36170aea18c35282f88cdf31b916bf487d",
+    "boundary-probe-result.json": "30ca49ea346afd51953351e0a45d443caa71f9e081d9ded3bafd6356dee0233b",
+    "boundary-probe.py": "2be2dbec8c324d894d577c8937ceafdcb60c7b385986512db027efafdfd809ae",
+    "boundary-verdict.json": "263fde361a5ab69cf3bbae2336683041a60991e4a1eff86b73e92a93cfc69f11",
+    "candidates.json": "bcaa84d108258f2f27374fd03aa9cdd7e6e3dda0c57d7e4b8f264ca1c965a0d8",
+    "model-lock.json": "be87b781cadd5d014b4237ac1eda14e1eaa0dc141eb6f403f12bb2e687385636",
+    "pilot-spec.json": "f2e47aa5ba6025203eaa860769d06bac09d0461d224e20120c629f696715fadd",
+    "questions-draft.json": "b56418021ccae6af7ea0b72b49886e3396a2ee93de3baf1186f1c0385ca28a6c",
+    "questions-reviewed.json": "70f42c5be6a100a2abcecd0d5f8ee520fbe8833dfb74917cdb821dccfb7d8628",
+    "review-attestation.json": "fc34c50ac9e05537c8d173ce32cd3b74967bb2802218efdfad02db1de31c3420",
+    "runtime-file-lock.json": "b74a7592d3a490cef156d882be1584849f71f7fbe83b831f24dbb9ce0ea0fcb4",
+    "source-id-ledger.json": "fa7388f357e27d71696354f543386225b6274d27471774298e129d77adffccc8",
+    "dependency-consistency.json": "dc24e4a59c1f534c7a7cf3ca8360c15071c34a920d8cf749e304ceda1ddb6302",
+    "README.md": "7f45d837c340f4fbc95f23c57d6d1b578845e8e4a2897065b72b70b1c41a6a4c"
+  },
+  "runtimePayloadManifest": "runtime-file-lock.json",
+  "v1Preserved": true
+}

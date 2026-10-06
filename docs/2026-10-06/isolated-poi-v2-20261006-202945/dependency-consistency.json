@@ -1,0 +1,10 @@
+{
+  "command": "copied python -I -S -B -m pip check",
+  "exitCode": 0,
+  "stdout": "No broken requirements found.",
+  "stderr": "",
+  "passed": true,
+  "meaning": "installed dependency metadata consistency only; no model or search execution; no ABI verification",
+  "networkDisabledAtOSLevel": false,
+  "pipNoIndex": true
+}

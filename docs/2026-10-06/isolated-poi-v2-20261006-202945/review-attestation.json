@@ -1,0 +1,13 @@
+{
+  "statement": "검수 완료",
+  "source": "direct user message in this task",
+  "recordedAt": "2026-10-06T20:29:46.722613+09:00",
+  "scope": "User reports completion for the presented v1 multilingual question/answer draft; no corrections supplied",
+  "independentExternalReviewClaimed": false,
+  "perQuestionReviewEvidenceProvided": false,
+  "contentChanged": false,
+  "v1QuestionsSha256": "b56418021ccae6af7ea0b72b49886e3396a2ee93de3baf1186f1c0385ca28a6c",
+  "v2QuestionsSha256": "70f42c5be6a100a2abcecd0d5f8ee520fbe8833dfb74917cdb821dccfb7d8628",
+  "questions": 120,
+  "executionApprovalGranted": false
+}

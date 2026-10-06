@@ -1,0 +1,22 @@
+{
+  "payloadCopyAndHash": "passed",
+  "postProbeHashesVerified": 33164,
+  "v1Preservation": "passed",
+  "localOnlyPythonPaths": "passed",
+  "environmentCredentialInheritance": "blocked by explicit allowlist",
+  "siteInitialization": "disabled",
+  "modelOfflineFlags": "set; not OS network enforcement",
+  "OSNetworkDeny": "not established",
+  "OSFileReadWriteDenyOutsideWorkspace": "not established",
+  "localDockerEngines": "default and desktop-linux named pipes absent",
+  "WindowsSandboxExecutablePresent": false,
+  "pilotExecutionAllowed": false,
+  "originalDBOpened": false,
+  "productionConnected": false,
+  "modelInferenceExecuted": false,
+  "newIndexCreated": false,
+  "requires": [
+    "OS-enforced isolation with no original or operating volumes/credentials",
+    "separate explicit execution approval"
+  ]
+}

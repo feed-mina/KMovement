@@ -1,0 +1,114 @@
+{
+  "version": "pilot-spec-v2",
+  "stage": "review_attested_runtime_prepared_OS_isolation_pending",
+  "executionAllowed": false,
+  "blockers": [
+    "OS-enforced filesystem and network isolation not verified",
+    "separate pilot execution approval"
+  ],
+  "corpus": {
+    "count": 1000,
+    "categoryQuota": 250,
+    "seed": "kride-pilot-v1",
+    "selection": "30 explicit anchors then category/region round robin with sha256(seed|id) ordering",
+    "populationRepresentative": false,
+    "sourceCount": 40664,
+    "publicEligibleCount": 0
+  },
+  "document": {
+    "format": "name: {raw name}\naddress: {raw address}\ncategory: {raw category}\nsub_category: {raw sub_category}",
+    "null": "empty text only in derived document; source bytes unchanged",
+    "normalization": "none: no strip/case folding/Unicode normalization; UTF-8 LF",
+    "historicalTextReproduction": false,
+    "scope": "new logical baseline, not a reproduction of old stored document format; description and artist assertions excluded"
+  },
+  "variants": {
+    "A": {
+      "document": "documentA",
+      "query": "raw"
+    },
+    "B": {
+      "document": "documentA",
+      "query": "query: + raw",
+      "reuseVectorsFrom": "A"
+    },
+    "C": {
+      "document": "documentC",
+      "query": "query: + raw"
+    }
+  },
+  "model": {
+    "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+    "dimension": 384,
+    "dtype": "float32",
+    "finite": true,
+    "pooling": "mean",
+    "normalize": true,
+    "maxTokens": 512,
+    "truncation": "record truncated IDs; do not silently vary maxTokens"
+  },
+  "metrics": {
+    "positive": {
+      "Recall@5": 0.8,
+      "nDCG@10": 0.7,
+      "maxDropVsA": 0.02,
+      "unit": "each language on locked holdout; mean recall=hits/number of relevant IDs; binary DCG=sum(rel/log2(rank+1)); macro average",
+      "ties": "score desc then ID asc",
+      "missingResults": "zero contribution; do not omit failures"
+    },
+    "negative": {
+      "unsupportedClaimAccepts": 0,
+      "positiveOverRefusalRateMax": 0.1,
+      "distanceOnlyAbstention": false
+    },
+    "ann": {
+      "Recall@10VsExact": 0.99,
+      "separateFromSemanticQuality": true
+    },
+    "integrity": {
+      "expectedIds": 1000,
+      "duplicateIds": 0,
+      "finiteFloat32": true,
+      "normTolerance": 1e-05
+    },
+    "latency": "measure warm/cold p50/p95 and RSS/disk without absolute performance pass claim; agree product SLA before production candidate"
+  },
+  "safety": {
+    "network": "denied during future inference",
+    "operatingCredentials": "absent",
+    "originalAndProductionMounts": "forbidden",
+    "newDatabase": "absent; future empty path under separate execution workspace",
+    "existingPath": "refuse reuse",
+    "chromaMigrationOrReplayFailure": "stop and retain disposable-run evidence",
+    "fullIndex": "not authorized",
+    "productionSwitch": "not authorized"
+  },
+  "reviewPolicy": "User attested review completion without corrections; no independent external reviewer or per-item evidence asserted. v1 preserved; reviewed question content and relevance unchanged.",
+  "searchScope": {
+    "collection": "all 1000 fixed candidates",
+    "implicitPurposeFilter": false,
+    "implicitRegionFilter": false,
+    "queryTextConditions": "ranking clues only; not proof of constraint compliance"
+  },
+  "inputs": {
+    "candidates": "candidates.json",
+    "questions": "questions-reviewed.json",
+    "reviewEvidence": "review-attestation.json",
+    "modelDirectory": "model",
+    "runtimeDirectory": "runtime",
+    "runtimeHashManifest": "runtime-file-lock.json",
+    "pathsRelativeTo": "this specification directory"
+  },
+  "runtimeLaunchPolicy": {
+    "interpreter": "runtime/python.exe",
+    "flags": [
+      "-I",
+      "-S",
+      "-B"
+    ],
+    "consoleEntryPoints": "not used",
+    "hostEnvironmentInheritance": false,
+    "operatingSystem": "Windows x86_64",
+    "OSIsolationPassed": false
+  }
+}

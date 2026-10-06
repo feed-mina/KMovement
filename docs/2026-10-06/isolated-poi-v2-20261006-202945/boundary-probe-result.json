@@ -1,0 +1,39 @@
+{
+  "pythonVersion": "3.11.15 (main, Jul 23 2026, 14:42:43) [MSC v.1944 64 bit (AMD64)]",
+  "sysPath": [
+    "D:\\KMovement\\pilot-specs\\isolated-poi-v2-20261006-202945\\runtime",
+    "D:\\KMovement\\pilot-specs\\isolated-poi-v2-20261006-202945\\runtime\\Lib",
+    "D:\\KMovement\\pilot-specs\\isolated-poi-v2-20261006-202945\\runtime\\DLLs",
+    "D:\\KMovement\\pilot-specs\\isolated-poi-v2-20261006-202945\\runtime\\Lib\\site-packages"
+  ],
+  "prefix": "D:\\KMovement\\pilot-specs\\isolated-poi-v2-20261006-202945\\runtime",
+  "basePrefix": "D:\\KMovement\\pilot-specs\\isolated-poi-v2-20261006-202945\\runtime",
+  "isolatedFlag": 1,
+  "noSite": 1,
+  "bytecodeDisabled": 1,
+  "packageOrigins": {
+    "torch": "D:\\KMovement\\pilot-specs\\isolated-poi-v2-20261006-202945\\runtime\\Lib\\site-packages\\torch\\__init__.py",
+    "numpy": "D:\\KMovement\\pilot-specs\\isolated-poi-v2-20261006-202945\\runtime\\Lib\\site-packages\\numpy\\__init__.py",
+    "chromadb": "D:\\KMovement\\pilot-specs\\isolated-poi-v2-20261006-202945\\runtime\\Lib\\site-packages\\chromadb\\__init__.py",
+    "transformers": "D:\\KMovement\\pilot-specs\\isolated-poi-v2-20261006-202945\\runtime\\Lib\\site-packages\\transformers\\__init__.py",
+    "sentence_transformers": "D:\\KMovement\\pilot-specs\\isolated-poi-v2-20261006-202945\\runtime\\Lib\\site-packages\\sentence_transformers\\__init__.py",
+    "tokenizers": "D:\\KMovement\\pilot-specs\\isolated-poi-v2-20261006-202945\\runtime\\Lib\\site-packages\\tokenizers\\__init__.py"
+  },
+  "distributionCount": 123,
+  "sqliteVersion": "3.53.1",
+  "environmentKeys": [
+    "HF_HOME",
+    "HF_HUB_OFFLINE",
+    "PATH",
+    "SYSTEMROOT",
+    "TEMP",
+    "TMP",
+    "TRANSFORMERS_OFFLINE",
+    "WINDIR"
+  ],
+  "networkProbeExecuted": false,
+  "modelImported": false,
+  "chromaImported": false,
+  "OSIsolationVerified": false,
+  "scope": "stdlib and import resolution smoke test only; no model/Chroma imports, index or paid calls"
+}
