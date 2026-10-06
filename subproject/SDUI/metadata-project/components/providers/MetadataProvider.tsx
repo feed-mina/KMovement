@@ -1,8 +1,8 @@
 'use client';
 
-import React, {createContext, useContext, useMemo, ReactNode, useState, useEffect} from "react";
+import React, {createContext, useContext, useMemo, ReactNode, useState, useEffect, useSyncExternalStore} from "react";
 import { usePathname, useParams } from 'next/navigation'; // @@@@ useParams 추가됨
-import { DEFAULT_SCREEN_ID, SCREEN_MAP } from '@/components/constants/screenMap';
+import { DEFAULT_SCREEN_ID, SCREEN_MAP, subscribeScreenPaths, getScreenPathsVersion } from '@/components/constants/screenMap';
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 
@@ -24,6 +24,9 @@ export function MetadataProvider({ children, screenId: propScreenId }: MetadataP
 
     const { user } = useAuth();
     const pathname = usePathname();
+    // A parent layout may mount before the route chunk registers domain aliases.
+    // Recompute when registration completes, even if the URL did not change.
+    const pathsVersion=useSyncExternalStore(subscribeScreenPaths,getScreenPathsVersion,getScreenPathsVersion);
 
     // 1. 최종 screenId 결정 로직 통합
     const finalScreenId = useMemo(() => {
@@ -43,7 +46,7 @@ export function MetadataProvider({ children, screenId: propScreenId }: MetadataP
         }
         // * 경로가 meta.screen_id로 URL 또는 MAIN_PAGE
         return SCREEN_MAP[pathname] || DEFAULT_SCREEN_ID;
-    }, [propScreenId, pathname]);
+    }, [propScreenId, pathname, pathsVersion]);
 
     // 2. 권한 정보 조합
     //  * RBAC 유저 권한에 따라 볼수 있는 페이지가 다르다

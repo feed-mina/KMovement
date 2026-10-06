@@ -26,9 +26,16 @@ export const SCREEN_MAP: Record<string, string> = {
 };
 
 // 도메인 플러그인이 URL→screenId 매핑을 런타임 주입한다(코어 하드코딩 제거).
-// 라우트 청크 평가 시점(렌더 이전)에 호출되어 SCREEN_MAP에 병합된다.
+// 지연 로드된 라우트가 등록되면 부모의 화면 해석도 다시 계산한다.
+let pathsVersion=0;
+const pathListeners=new Set<()=>void>();
+export const getScreenPathsVersion=()=>pathsVersion;
+export function subscribeScreenPaths(listener:()=>void){pathListeners.add(listener);return()=>{pathListeners.delete(listener)}}
 export function registerScreenPaths(paths: Record<string, string>): void {
+    if(!Object.entries(paths).some(([path,id])=>SCREEN_MAP[path]!==id))return;
     Object.assign(SCREEN_MAP, paths);
+    pathsVersion++;
+    pathListeners.forEach(listener=>listener());
 }
 
 export const DEFAULT_SCREEN_ID = "MAIN_PAGE";
