@@ -4,6 +4,9 @@ import KrideFocusScreen from '@/components/plugins/travel/KrideFocusScreen';
 
 const mockSetFormData = jest.fn();
 const mockHandleAction = jest.fn();
+const mockPush = jest.fn();
+let mockItinerary = { data: null, isLoading: false, error: null as string | null, requiresLogin: false };
+jest.mock('next/navigation', () => ({useRouter: () => ({push: mockPush})}));
 
 jest.mock('@/components/screens/useScreenGuard', () => ({
     useScreenGuard: () => ({ isLoading: false, blocked: false }),
@@ -25,7 +28,7 @@ jest.mock('@/components/screens/useSduiScreen', () => ({
 }));
 
 jest.mock('@/components/DynamicEngine/hook/useKrideItinerary', () => ({
-    useKrideItinerary: () => ({ data: null, isLoading: false, error: null }),
+    useKrideItinerary: () => mockItinerary,
 }));
 
 jest.mock('@/components/screens/SduiRenderer', () => ({
@@ -51,6 +54,8 @@ describe('KrideFocusScreen chat dialog accessibility', () => {
     beforeEach(() => {
         mockSetFormData.mockClear();
         mockHandleAction.mockClear();
+        mockPush.mockClear();
+        mockItinerary = {data: null, isLoading: false, error: null, requiresLogin: false};
     });
 
     it('exposes an accessible modal and closes it with Escape', () => {
@@ -61,6 +66,21 @@ describe('KrideFocusScreen chat dialog accessibility', () => {
 
         fireEvent.keyDown(document, { key: 'Escape' });
         expect(screen.queryByRole('dialog', { name: 'K-RIDE 여행봇' })).not.toBeInTheDocument();
+    });
+
+    it('takes an authentication failure to the login page instead of retrying generation', () => {
+        mockItinerary = {...mockItinerary, error: '로그인 후 AI 코스를 이용해 주세요.', requiresLogin: true};
+        render(<KrideFocusScreen screenId="KRIDE_FOCUS" refId={null} />);
+        fireEvent.click(screen.getByRole('button', {name: '로그인하기'}));
+        expect(mockPush).toHaveBeenCalledWith('/view/LOGIN_PAGE');
+        expect(screen.queryByRole('button', {name: '다시 시도'})).not.toBeInTheDocument();
+    });
+
+    it('keeps retry available for non-authentication failures', () => {
+        mockItinerary = {...mockItinerary, error: '추천 서버에 문제가 있어요.'};
+        render(<KrideFocusScreen screenId="KRIDE_FOCUS" refId={null} />);
+        expect(screen.getByRole('button', {name: '다시 시도'})).toBeInTheDocument();
+        expect(screen.queryByRole('button', {name: '로그인하기'})).not.toBeInTheDocument();
     });
 
     it('returns focus to the control that reopened the dialog', () => {
