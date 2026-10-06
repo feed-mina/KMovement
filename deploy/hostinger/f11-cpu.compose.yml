@@ -21,6 +21,8 @@ services:
       ITINERARY_OUTPUT_USD_PER_M: ${ITINERARY_OUTPUT_USD_PER_M:-0}
       KRIDE_INTERNAL_TOKEN: ${KRIDE_INTERNAL_TOKEN:?Set a private service token}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
+      KRIDE_AI_MODEL: ${KRIDE_AI_MODEL:-}
+      KRIDE_AI_TEST_USERS: ${KRIDE_AI_TEST_USERS:-}
     volumes:
       - cpu-data:/data
     mem_limit: 4g

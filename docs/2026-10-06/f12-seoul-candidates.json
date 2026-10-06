@@ -1,0 +1,77 @@
+{
+  "checkedAt": "2026-10-06T03:01:07.668453+00:00",
+  "status": "PREPARATION_ONLY",
+  "promotionRequires": [
+    "Map pin visual comparison",
+    "Public catalog approval with stable ID",
+    "Explicit indexing after approved catalog readback"
+  ],
+  "candidates": [
+    {
+      "candidateId": "tour:126508",
+      "name": "경복궁",
+      "address": "서울특별시 종로구 사직로 161 (세종로)",
+      "lat": 37.5760836609,
+      "lon": 126.9767375783,
+      "sourceUrl": "https://royal.khs.go.kr/ROYAL/contents/menuInfo-gbg.do?grpCode=gbg&lt=",
+      "addressEvidence": "Official operator/government page checked 2026-10-06",
+      "coordinateEvidence": "Existing repository TourAPI CSV; live map comparison pending",
+      "coordinateStatus": "PENDING_LIVE_MAP_REVIEW",
+      "artist": "",
+      "productionApplied": false
+    },
+    {
+      "candidateId": "tour:126509",
+      "name": "덕수궁",
+      "address": "서울특별시 중구 세종대로 99 (정동)",
+      "lat": 37.565054919430565,
+      "lon": 126.97657463444833,
+      "sourceUrl": "https://royal.khs.go.kr/ROYAL/contents/menuInfo-gbg.do?grpCode=gbg&lt=",
+      "addressEvidence": "Official operator/government page checked 2026-10-06",
+      "coordinateEvidence": "Official Korea Tourism Organization page embedded map data; approximately 6m from existing CSV",
+      "coordinateStatus": "OFFICIAL_MAP_DATA_CHECKED",
+      "artist": "",
+      "productionApplied": false,
+      "coordinateSourceUrl": "https://access.visitkorea.or.kr/ms/detail.do?cotId=e8681664-af6f-44d9-976f-bb94ab0025ae"
+    },
+    {
+      "candidateId": "tour:126511",
+      "name": "창경궁",
+      "address": "서울특별시 종로구 창경궁로 185 (와룡동)",
+      "lat": 37.5789336838,
+      "lon": 126.9964634775,
+      "sourceUrl": "https://royal.khs.go.kr/ROYAL/contents/menuInfo-gbg.do?grpCode=gbg&lt=",
+      "addressEvidence": "Official operator/government page checked 2026-10-06",
+      "coordinateEvidence": "Existing repository TourAPI CSV; live map comparison pending",
+      "coordinateStatus": "PENDING_LIVE_MAP_REVIEW",
+      "artist": "",
+      "productionApplied": false
+    },
+    {
+      "candidateId": "tour:128611",
+      "name": "서울숲",
+      "address": "서울특별시 성동구 뚝섬로 273",
+      "lat": 37.5431247707,
+      "lon": 127.0418131384,
+      "sourceUrl": "https://parks.seoul.go.kr/park/detailView.do?pIdx=5",
+      "addressEvidence": "Official operator/government page checked 2026-10-06",
+      "coordinateEvidence": "Existing repository TourAPI CSV; live map comparison pending",
+      "coordinateStatus": "PENDING_LIVE_MAP_REVIEW",
+      "artist": "",
+      "productionApplied": false
+    },
+    {
+      "candidateId": "candidate:n-seoul-tower",
+      "name": "N서울타워",
+      "address": "서울특별시 용산구 남산공원길 105",
+      "lat": 37.5511225714939,
+      "lon": 126.987867837993,
+      "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100291&menuNo=200025",
+      "addressEvidence": "Seoul Culture Portal checked 2026-10-06",
+      "coordinateEvidence": "Same official HTML markerLocations / lat / lng fields",
+      "coordinateStatus": "OFFICIAL_MAP_DATA_CHECKED",
+      "artist": "",
+      "productionApplied": false
+    }
+  ]
+}

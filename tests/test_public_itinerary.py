@@ -7,6 +7,37 @@ from fastapi.testclient import TestClient
 from src.api.public_itinerary import router,ground_plan
 from src.api.itinerary_budget import reserve_budget,record_usage
 
+
+@pytest.mark.parametrize('raw', [None, [], {'itinerary':None}, {'itinerary':{}},
+    {'itinerary':[None, {'morning':{'places':None}}]},
+    {'itinerary':[{'morning':{'places':[{'poiId':[]},{'poiId':{}},None]}}]}])
+def test_malformed_generated_values_never_escape_grounding(raw):
+    result=ground_plan(raw, {})
+    assert result['itinerary']==[]
+    assert result['resolvedMarkerCount']==0
+
+
+@pytest.mark.parametrize('field', ['artists','regions','purposes'])
+def test_oversized_conditions_rejected_before_catalog_lookup(field):
+    from src.api.public_itinerary import PublicItineraryRequest
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError):PublicItineraryRequest(**{field:['x'*101]})
+
+
+def test_fixed_evaluation_preserves_days_sources_and_marker_count():
+    # Synthetic fixed catalog: regression evidence, not live recommendation quality.
+    source={key:{'id':key,'name':key,'address':'서울','lat':37.5,'lon':127}
+            for key in ('a','b','c')}
+    raw={'itinerary':[
+        {'morning':{'places':[{'poiId':'a'},{'poiId':'invented'}]},'evening':{'places':[{'poiId':'b'}]}},
+        {'afternoon':{'places':[{'poiId':'a'},{'poiId':'c'}]}},
+        {'morning':{'places':[{'poiId':'extra'}]}}]}
+    result=ground_plan(raw,source,max_days=2)
+    assert [d['day'] for d in result['itinerary']]==[1,2]
+    assert [m['id'] for m in result['mapData']['markers']]==['a','b','c']
+    assert result['resolvedMarkerCount']==3
+    assert result['rejectedPlaceCount']==2
+
 def test_grounding_discards_invented_and_duplicate_places_and_coordinates():
     source={'a':{'id':'a','name':'공개 장소','address':'서울','lat':37.5,'lon':127}}
     raw={'itinerary':[{'morning':{'places':[{'poiId':'a','name':'거짓 이름','lat':0},{'poiId':'fake'},{'poiId':'a'}]}}]}
@@ -31,9 +62,10 @@ def test_internal_auth_and_empty_result(monkeypatch):
     from src.api import public_itinerary as module
     app=FastAPI();app.include_router(router);client=TestClient(app)
     monkeypatch.setenv('KRIDE_INTERNAL_TOKEN','fixture-only')
+    monkeypatch.setenv('KRIDE_AI_TEST_USERS','7')
     assert client.post('/api/public/itinerary',json={}).status_code==401
     monkeypatch.setattr(module,'generate_public',lambda *_:{'itinerary':[],'status':'empty_candidates'})
-    r=client.post('/api/public/itinerary',json={},headers={'X-Kride-Token':'fixture-only','X-Kride-User':'7'})
+    r=client.post('/api/public/itinerary',json={'regions':['서울']},headers={'X-Kride-Token':'fixture-only','X-Kride-User':'7'})
     assert r.status_code==200 and r.json()['status']=='empty_candidates'
 
 def test_empty_candidates_never_load_paid_client(monkeypatch):
@@ -46,6 +78,7 @@ def test_empty_candidates_never_load_paid_client(monkeypatch):
     assert module.generate_public(module.PublicItineraryRequest(),'7')['usage'] is None
 
 def test_full_generation_rechecks_approval_and_records_usage(tmp_path,monkeypatch):
+    monkeypatch.setenv('KRIDE_AI_MODEL','fixture-model')
     import groq
     from src.api import public_itinerary as module,rag_client
     source={'a':{'id':'a','name':'공개 장소','address':'서울','lat':37.5,'lon':127},'b':{'id':'b','name':'취소 예정','address':'서울','lat':37.6,'lon':127}}

@@ -34,11 +34,11 @@ if (typeof global.BroadcastChannel === 'undefined') {
 // 3. fetch 폴리필
 import 'whatwg-fetch';
 
-if (!Element.prototype.scrollTo) {
+if (typeof Element !== 'undefined' && !Element.prototype.scrollTo) {
     Element.prototype.scrollTo = jest.fn();
 }
 
-if (!Element.prototype.scrollIntoView) {
+if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
     Element.prototype.scrollIntoView = jest.fn();
 }
 
@@ -46,6 +46,7 @@ if (!Element.prototype.scrollIntoView) {
 global.alert = jest.fn();
 
 // window.location 완전 모킹 (MSW URL 파싱 및 리다이렉트 테스트에 필요)
+if (typeof window !== 'undefined') {
 delete window.location;
 const locationData = {
     href: 'http://localhost/',
@@ -70,6 +71,8 @@ Object.defineProperty(window.location, 'href', {
     writable: true,
     value: locationData.href,
 });
+
+}
 
 // 4. Next.js useRouter 모킹 (AuthProvider, MetadataProvider에서 사용)
 jest.mock('next/navigation', () => ({

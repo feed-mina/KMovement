@@ -13,7 +13,7 @@
 
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
   ChatMessage,
   KrideChatRequest,
@@ -24,6 +24,8 @@ import type {
 import { normalizeRouteMapData } from '@/components/fields/kride/maps/normalizeRouteMapData';
 import { trackEvent } from '@/lib/analytics/dataLayer';
 import { countItineraryPlaces } from '@/lib/analytics/itinerary';
+
+import { consumeChatStream } from '@/lib/kride/consumeChatStream';
 
 const STORAGE_KEY = 'kride_form';
 const MESSAGE_REGION_KEYWORDS = [
@@ -132,44 +134,7 @@ async function streamSseChunks(
     signal,
   });
 
-  if (!res.ok) throw new Error(`SSE failed: ${res.status}`);
-  if (!res.body) throw new Error('SSE: response body is null');
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder('utf-8');
-  let buffer = '';
-
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-
-    // SSE 이벤트는 "\n\n" 으로 구분
-    const events = buffer.split('\n\n');
-    buffer = events.pop() ?? '';
-
-    for (const ev of events) {
-      // 한 이벤트 내 여러 "data:" 라인 가능 — 합쳐서 처리
-      const dataLines = ev
-        .split('\n')
-        .filter((l) => l.startsWith('data:'))
-        .map((l) => l.slice(5).trim());
-      
-      if (dataLines.length === 0) continue;
-
-      for (const raw of dataLines) {
-        if (raw === '[DONE]' || raw === '"[DONE]"') return;
-
-        try {
-          const parsed = JSON.parse(raw) as { content?: string };
-          if (parsed.content) onChunk(parsed.content);
-        } catch {
-          // JSON 파싱 실패 시 raw 자체를 텍스트로 취급 (보수적)
-          if (raw && raw !== '[DONE]') onChunk(raw);
-        }
-      }
-    }
-  }
+  await consumeChatStream(res, signal, onChunk);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -204,22 +169,19 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const updateLast = useCallback(
-    (patch: Partial<ChatMessage> | ((m: ChatMessage) => Partial<ChatMessage>)) => {
-      setMessages((prev) => {
-        if (prev.length === 0) return prev;
-        const last = prev[prev.length - 1];
-        const next = typeof patch === 'function' ? patch(last) : patch;
-        return [...prev.slice(0, -1), { ...last, ...next }];
-      });
-    },
-    [],
-  );
+  useEffect(() => () => { abortRef.current?.abort(); abortRef.current = null; }, []);
+
+  const updateMessage = useCallback(
+    (id: string, patch: Partial<ChatMessage> | ((m: ChatMessage) => Partial<ChatMessage>)) => {
+      setMessages(prev => prev.map(message => message.id === id
+        ? { ...message, ...(typeof patch === 'function' ? patch(message) : patch) }
+        : message));
+    }, []);
 
   const send = useCallback(
     async (text: string) => {
       const trimmed = text.trim();
-      if (!trimmed || isLoading) return;
+      if (!trimmed || abortRef.current) return;
 
       const userMsg: ChatMessage = { id: genId(), role: 'user', text: trimmed };
       const assistantMsg: ChatMessage = {
@@ -243,8 +205,11 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
       const controller = new AbortController();
       abortRef.current = controller;
 
-      // 30초 타임아웃
-      const timeoutId = setTimeout(() => controller.abort(), 30_000);
+      const updateLast = (patch: Partial<ChatMessage> | ((m: ChatMessage) => Partial<ChatMessage>)) => {
+        if (abortRef.current === controller) updateMessage(assistantMsg.id, patch);
+      };
+      let timedOut = false;
+      const timeoutId = setTimeout(() => { timedOut = true; controller.abort(); }, 120_000);
 
       try {
         const useStream = opts.forceStream || req.intent === 'qa';
@@ -252,7 +217,7 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
         if (useStream) {
           // SSE 텍스트 스트리밍
           await streamSseChunks(
-            `${base}/api/v1/kride/chat/stream`,
+            `${base}/api/kride/chat/stream`,
             req,
             controller.signal,
             (chunk) => {
@@ -273,6 +238,7 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
 
           // SDUI 공통 응답 래퍼 ApiResponse<T> = { success, data, message } 가능성 고려
           const json = await res.json();
+          if (abortRef.current !== controller || controller.signal.aborted) return;
           const payload: KrideChatResponse =
             json && typeof json === 'object' && 'data' in json
               ? (json as { data: KrideChatResponse }).data
@@ -359,9 +325,12 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
           }
         }
       } catch (e: unknown) {
+        if (abortRef.current !== controller) return;
         if ((e as Error)?.name === 'AbortError') {
           if (req.intent === 'itinerary') trackEvent('itinerary_error', { error_type: 'timeout_or_cancelled', source: 'chat' });
-          updateLast({ streaming: false });
+          const error = timedOut ? '답변 시간이 초과됐습니다. 다시 시도해 주세요.' : undefined;
+          if (error) setError(error);
+          updateLast({ streaming: false, error });
           return;
         }
         const msg = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
@@ -374,17 +343,20 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
         });
       } finally {
         clearTimeout(timeoutId);
-        setIsLoading(false);
-        abortRef.current = null;
+        if (abortRef.current === controller) {
+          setIsLoading(false);
+          abortRef.current = null;
+        }
       }
     },
-    [base, isLoading, opts.contextOverride, opts.forceStream, updateLast],
+    [base, opts.contextOverride, opts.forceStream, updateMessage],
   );
 
   const abort = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
     setIsLoading(false);
+    setMessages(prev => prev.map(m => m.streaming ? { ...m, streaming: false } : m));
   }, []);
 
   const reset = useCallback(() => {

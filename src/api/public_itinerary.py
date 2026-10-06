@@ -1,35 +1,37 @@
 """Public-catalog-grounded itinerary endpoint for the bounded CPU deployment."""
 import asyncio
-import hmac
 import json
 import os
-from typing import Literal
+from typing import Annotated, Literal
 from fastapi import APIRouter,Header,HTTPException
 from pydantic import BaseModel,Field
 from src.api.public_search import public_catalog,search_public
 from src.api.itinerary_budget import reserve_budget,record_usage
+from src.api import ai_runtime
 
 router=APIRouter()
-_slots=asyncio.Semaphore(2)
 class PublicItineraryRequest(BaseModel):
     duration:Literal['당일치기','1박2일','2박3일']='당일치기'
-    artists:list[str]=Field(default_factory=list,max_length=5)
-    regions:list[str]=Field(default_factory=list,max_length=3)
-    purposes:list[str]=Field(default_factory=list,max_length=5)
+    artists:list[Annotated[str,Field(min_length=1,max_length=100)]]=Field(default_factory=list,max_length=5)
+    regions:list[Annotated[str,Field(min_length=1,max_length=100)]]=Field(default_factory=list,max_length=3)
+    purposes:list[Annotated[str,Field(min_length=1,max_length=100)]]=Field(default_factory=list,max_length=5)
     budget:dict=Field(default_factory=dict)
 
 def ground_plan(raw,catalog,max_days=3):
     days=[];markers=[];rejected=0;seen=set()
-    for day in (raw.get('itinerary') or [])[:max_days]:
+    itinerary=raw.get('itinerary') if isinstance(raw,dict) else None
+    if not isinstance(itinerary,list):itinerary=[]
+    for day in itinerary[:max_days]:
         if not isinstance(day,dict):continue
         clean={'day':len(days)+1}
         for slot in ('morning','afternoon','evening'):
             value=day.get(slot,{})
             places=value.get('places',[]) if isinstance(value,dict) else []
+            if not isinstance(places,list):places=[]
             kept=[]
             for place in places[:8]:
                 identity=place.get('poiId') if isinstance(place,dict) else None
-                source=catalog.get(identity)
+                source=catalog.get(identity) if isinstance(identity,str) else None
                 if not source or identity in seen:rejected+=1;continue
                 seen.add(identity)
                 # Generated names, coordinates and claims never override the public source.
@@ -52,9 +54,10 @@ def generate_public(req,identity):
     prompt=json.dumps({'duration':req.duration,'conditions':{'artists':req.artists,'regions':req.regions,'purposes':req.purposes},'candidates':[{'poiId':x['id'],'name':x['name'],'address':x['address']} for x in candidates]},ensure_ascii=False)
     if len(prompt.encode())>20000:raise HTTPException(422,'후보 정보가 너무 큽니다.')
     if not os.environ.get('GROQ_API_KEY'):raise HTTPException(503,'추천 공급자를 준비 중입니다.')
-    reservation=reserve_budget(identity,len((system+prompt).encode())+1024,2048)
+    model,max_output=ai_runtime.model_settings()
+    reservation=reserve_budget(identity,len((system+prompt).encode())+1024,max_output)
     from groq import Groq
-    response=Groq(api_key=os.environ['GROQ_API_KEY'],timeout=60,max_retries=0).chat.completions.create(model='llama-3.3-70b-versatile',messages=[{'role':'system','content':system},{'role':'user','content':prompt}],max_tokens=2048,temperature=0,response_format={'type':'json_object'})
+    response=Groq(api_key=os.environ['GROQ_API_KEY'],timeout=60,max_retries=0).chat.completions.create(model=model,messages=[{'role':'system','content':system},{'role':'user','content':prompt}],max_completion_tokens=max_output,temperature=0,response_format={'type':'json_object'})
     if response.usage is None:raise HTTPException(502,'사용량 확인에 실패했습니다.')
     usage=record_usage(reservation,response.usage)
     raw=json.loads(response.choices[0].message.content)
@@ -66,13 +69,12 @@ def generate_public(req,identity):
 
 @router.post('/api/public/itinerary')
 async def itinerary(req:PublicItineraryRequest,x_kride_token:str=Header(default=''),x_kride_user:str=Header(default='')):
-    expected=os.environ.get('KRIDE_INTERNAL_TOKEN','')
-    if not expected or not hmac.compare_digest(expected,x_kride_token):raise HTTPException(401,'인증이 필요합니다.')
-    if not x_kride_user.isdigit():raise HTTPException(401,'인증이 필요합니다.')
-    try:await asyncio.wait_for(_slots.acquire(),timeout=.1)
-    except asyncio.TimeoutError:raise HTTPException(429,'추천 요청이 많습니다. 잠시 후 다시 시도해 주세요.')
+    ai_runtime.authenticate(x_kride_token,x_kride_user)
+    if req.duration != '당일치기' or req.regions != ['서울']:
+        raise HTTPException(422,'현재 서울 당일치기만 검증 중입니다.')
+    await ai_runtime.acquire_slot()
     task=asyncio.create_task(asyncio.to_thread(generate_public,req,x_kride_user))
-    task.add_done_callback(lambda finished: (_slots.release(), finished.exception() if not finished.cancelled() else None))
+    task.add_done_callback(lambda finished: (ai_runtime.slots.release(), finished.exception() if not finished.cancelled() else None))
     try:
         # A disconnected client must not free an admission slot while its thread runs.
         return await asyncio.wait_for(asyncio.shield(task),timeout=105)
