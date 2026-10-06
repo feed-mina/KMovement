@@ -1,4 +1,5 @@
 'use client';
+import KpopNav from './KpopNav';
 
 import {FormEvent, useEffect, useRef, useState} from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
@@ -94,7 +95,7 @@ export default function ArtistCatalogScreen({screenId, refId}: ScreenControllerP
     };
 
     return <section className="page-wrap kpop-screen artist-catalog" aria-label="아티스트 공개 카탈로그">
-        <p className="kpop-eyebrow">K-POP · 아티스트</p>
+        <KpopNav/><p className="kpop-eyebrow">K-POP · 아티스트</p>
         <h1>{detail ? '아티스트 상세' : '아티스트 찾기'}</h1>
         <p>로그인 없이 공개된 아티스트 소개와 공식 채널을 볼 수 있어요.</p>
         {detail ? <a href={listUrl(query, page)}>아티스트 목록으로</a> : <form onSubmit={search} role="search" className="artist-catalog-search">

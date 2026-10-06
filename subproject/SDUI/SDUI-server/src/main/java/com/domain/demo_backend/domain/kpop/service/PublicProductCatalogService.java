@@ -65,6 +65,22 @@ public class PublicProductCatalogService {
             return safe;
         }).toList();
     }
+    public Map<String,Object> detail(Long id) {
+        if (id == null || id <= 0) throw bad("상품 번호를 확인해 주세요.");
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("q",null).addValue("artistId",null).addValue("eventId",null).addValue("id",id);
+        List<Map<String,Object>> rows = jdbc.queryForList("""
+                SELECT pc.product_candidate_id AS id, pc.name, pc.brand,
+                       pc.catalog_source AS "catalogSource", pc.evidence_grade AS "evidenceGrade",
+                       pc.evidence_text AS "evidenceText", pc.rights_checked AS "rightsChecked",
+                       CAST(pc.last_verified_at AS text) AS "lastVerifiedAt",
+                       CASE WHEN pc.rights_checked IS TRUE THEN pc.official_url ELSE NULL END AS "officialUrl"
+                """ + FILTER + " AND pc.product_candidate_id = :id",parameters);
+        if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"공개된 상품 후보가 없습니다.");
+        Map<String,Object> safe = new LinkedHashMap<>(rows.get(0));
+        if (!Boolean.TRUE.equals(safe.get("rightsChecked")) || !allowedSource(safe.get("officialUrl"))) safe.put("officialUrl",null);
+        return safe;
+    }
     private boolean allowedSource(Object raw) {
         if (!(raw instanceof String value)) return false;
         try {

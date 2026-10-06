@@ -1,0 +1,9 @@
+import React from 'react';
+import {render,screen,fireEvent,waitFor} from '@testing-library/react';
+import LanguageChatScreen from '@/components/screens/LanguageChatScreen';
+let mockAuth:any={isLoading:false,isLoggedIn:false,user:null};const mockConsume=jest.fn();
+jest.mock('@/context/AuthContext',()=>({useAuth:()=>mockAuth}));
+jest.mock('@/lib/kride/consumeChatStream',()=>({consumeChatStream:(...args:any[])=>mockConsume(...args)}));
+beforeEach(()=>{mockAuth={isLoading:false,isLoggedIn:false,user:null};global.fetch=jest.fn().mockResolvedValue({});mockConsume.mockReset()});
+test.each([['AI_ENGLISH_CHAT_PAGE','영어'],['AI_JAPANESE_CHAT_PAGE','일본어']])('opens %s for guests without paid requests',(screenId,name)=>{render(<LanguageChatScreen screenId={screenId} refId={null}/>);expect(screen.getByRole('heading',{name:name+' 채팅'})).toBeInTheDocument();expect(screen.getByRole('link',{name:'로그인하고 시작하기'})).toHaveAttribute('href',expect.stringContaining('returnTo='));expect(fetch).not.toHaveBeenCalled()});
+test('language request, error, explicit retry and stop',async()=>{mockAuth={isLoading:false,isLoggedIn:true,user:{userSqno:7}};mockConsume.mockRejectedValueOnce(new Error('사용 한도')).mockImplementationOnce((_r:any,signal:AbortSignal)=>new Promise(resolve=>signal.addEventListener('abort',()=>resolve(undefined))));render(<LanguageChatScreen screenId="AI_JAPANESE_CHAT_PAGE" refId={null}/>);fireEvent.change(screen.getByRole('textbox'),{target:{value:'こんにちは'}});fireEvent.click(screen.getByRole('button',{name:'전송'}));await screen.findByRole('alert');expect(JSON.parse((fetch as jest.Mock).mock.calls[0][1].body).language).toBe('ja');fireEvent.click(screen.getByRole('button',{name:'다시 시도'}));const signal=(fetch as jest.Mock).mock.calls[1][1].signal;fireEvent.click(screen.getByRole('button',{name:'응답 중단'}));expect(signal.aborted).toBe(true);await waitFor(()=>expect(screen.queryByRole('button',{name:'응답 중단'})).toBeNull())});

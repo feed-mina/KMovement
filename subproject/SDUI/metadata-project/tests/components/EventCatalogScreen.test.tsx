@@ -2,7 +2,7 @@ import React from 'react';
 import {act,fireEvent,render,screen} from '@testing-library/react';
 import EventCatalogScreen,{eventFilterError} from '@/components/plugins/kpop/EventCatalogScreen';
 let query='';const push=jest.fn();
-jest.mock('next/navigation',()=>({useRouter:()=>({push}),useSearchParams:()=>new URLSearchParams(query)}));
+jest.mock('next/navigation',()=>({usePathname:()=>'/view/KPOP_EXPLORE',useRouter:()=>({push}),useSearchParams:()=>new URLSearchParams(query)}));
 const item={id:2,titleKo:'오늘 서울 일정',date:'2026-10-05',region:'서울',ended:false};
 const response=(data:any,status=200)=>Promise.resolve({ok:status===200,status,headers:{get:(name:string)=>name==='X-Kpop-Today'?'2026-10-05':'Asia/Seoul'},json:async()=>({data})} as Response);
 beforeEach(()=>{query='';push.mockReset();global.fetch=jest.fn();});

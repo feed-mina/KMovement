@@ -20,6 +20,7 @@ let authState: any = {
 
 jest.mock('next/navigation', () => ({
     useRouter: () => ({ replace, push }),
+    useSearchParams: () => new URLSearchParams(),
 }));
 
 jest.mock('@/context/AuthContext', () => ({

@@ -3,6 +3,7 @@ import { registerScreenAccess } from "./screenAccess";
 import CommunityScreen from "./CommunityScreen";
 import ContentListScreen from "./ContentListScreen";
 import GoogleCallbackScreen from "./GoogleCallbackScreen";
+import LanguageChatScreen from './LanguageChatScreen';
 import AuthFlowScreen from "./AuthFlowScreen";
 
 // 코어 화면 컨트롤러 등록.
@@ -11,6 +12,8 @@ registerScreen({ match: (id) => id.startsWith("COMMUNITY_"), controller: Communi
 registerScreen({ match: (id) => id === "CONTENT_LIST", controller: ContentListScreen });
 registerScreen({ match: (id) => id === "GOOGLE_CALLBACK", controller: GoogleCallbackScreen });
 registerScreen({ match: (id) => id === "LOGIN_PAGE" || id === "MY_PAGE", controller: AuthFlowScreen });
+
+registerScreen({match:id=>['AI_ENGLISH_CHAT_PAGE','AI_JAPANESE_CHAT_PAGE','AI_KOREAN_CHAT_PAGE'].includes(id),controller:LanguageChatScreen});
 
 // 코어 접근제어 규칙
 const AUTH_SCREENS = [

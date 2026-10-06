@@ -25,4 +25,9 @@ public class PublicProductCatalogController {
                 .header("X-Candidate-Policy","public-evidence-v1")
                 .body(ApiResponse.success(products.search(q,artistId,eventId,limit)));
     }
+    @GetMapping("/product-candidates/{id}")
+    public ResponseEntity<ApiResponse<java.util.Map<String,Object>>> detail(@PathVariable("id") Long id) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                .header("X-Candidate-Policy","public-evidence-v1").body(ApiResponse.success(products.detail(id)));
+    }
 }

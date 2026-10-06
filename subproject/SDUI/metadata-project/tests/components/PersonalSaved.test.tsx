@@ -3,12 +3,14 @@ import {act,fireEvent,render,screen,waitFor} from '@testing-library/react';
 import {AuthContext} from '@/context/AuthContext';
 import PersonalSavedScreen,{SavedToggle} from '@/components/plugins/kpop/PersonalSaved';
 jest.mock('@/context/AuthContext',()=>({AuthContext:require('react').createContext(undefined)}));
+let mockQuery='';const mockListeners=new Set<(s:string)=>void>();
+jest.mock('next/navigation',()=>({useRouter:()=>({push:(url:string)=>{mockQuery=url.split('?')[1]||'';mockListeners.forEach(set=>set(mockQuery));}}),useSearchParams:()=>{const React=require('react');const [q,set]=React.useState(mockQuery);React.useEffect(()=>{mockListeners.add(set);return()=>{mockListeners.delete(set)}},[]);return new URLSearchParams(q)}}));
 const auth=(id=101)=>({user:{userSqno:id,isLoggedIn:true},isLoggedIn:true,isLoading:false} as any);
 const response=(data:any,status=200)=>Promise.resolve({ok:status===200,status,json:async()=>({data})} as Response);
 const page=(items:any[]=[],totalCount=items.length,n=1)=>({items,totalCount,page:n,pageSize:5});
 const row=(id=1,visibility='PUBLIC')=>({id,itemRef:id,title:'테스트 '+id,visibility});
 const wrap=(child:React.ReactNode,id=101)=><AuthContext.Provider value={auth(id)}>{child}</AuthContext.Provider>;
-beforeEach(()=>{global.fetch=jest.fn();});
+beforeEach(()=>{mockQuery='';mockListeners.clear();global.fetch=jest.fn();});
 test('anonymous public save button makes no personal request',()=>{
  render(<SavedToggle kind="artists" itemRef={1}/>);expect(screen.queryByRole('button')).toBeNull();expect(fetch).not.toHaveBeenCalled();
 });

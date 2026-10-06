@@ -3,7 +3,7 @@ import {act, fireEvent, render, screen} from '@testing-library/react';
 import ArtistCatalogScreen from '@/components/plugins/kpop/ArtistCatalogScreen';
 let query = '';
 const push = jest.fn();
-jest.mock('next/navigation', () => ({useRouter: () => ({push}), useSearchParams: () => new URLSearchParams(query)}));
+jest.mock('next/navigation', () => ({usePathname: () => '/view/kpop',useRouter: () => ({push}), useSearchParams: () => new URLSearchParams(query)}));
 const artist = {id: 9, slug: 'artist-9', nameKo: '검증 아티스트', nameEn: 'Test Artist'};
 const pageData = (items = [artist], totalCount = items.length) => ({items, totalCount, page: 1, pageSize: 8, query: ''});
 const response = (data: any, status = 200) => Promise.resolve({ok: status === 200, status, json: async () => ({data})} as Response);

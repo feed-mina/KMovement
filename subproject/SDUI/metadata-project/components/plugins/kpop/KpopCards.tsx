@@ -205,8 +205,8 @@ export function KpopEventCard({ data, meta, onAction, readOnly = false, personal
                 {data?.ended === true && <p className="event-ended">종료된 일정 · 행사 날짜 지남</p>}
                 <p>{[data?.region, data?.venue, data?.date].filter(Boolean).join(' · ') || '장소와 일정 확인 중'}</p>
                 {isDetail && data?.description && <p>{String(data.description)}</p>}
-                {isValidHttpsUrl(data?.officialUrl) && <a href={String(data?.officialUrl)} target="_blank" rel="noopener noreferrer">공식 일정 안내 (새 창)</a>}
-                <p className="kpop-evidence">공식 또는 운영 검수 완료 링크를 기준으로 확인해 주세요.</p>
+                {isValidHttpsUrl(data?.officialUrl) && <a href={String(data?.officialUrl)} target="_blank" rel="noopener noreferrer">일정 출처 확인 (새 창)</a>}
+                <p className="kpop-evidence">출처에는 언론·참고 자료가 포함될 수 있어요. 최신 일정은 주최 측 안내와 대조해 주세요.</p>
                 <div className="kpop-card-actions">
                     {!isDetail && (
                         <button

@@ -13,6 +13,14 @@ class PublicProductCatalogControllerTest {
     PublicProductFixture f;
     @BeforeEach void setup() throws Exception {f=new PublicProductFixture();}
     @AfterEach void cleanup(){if(f!=null)f.close();}
+    @Test void detailRetainsStableIdAndRechecksPublicApproval() throws Exception {
+        f.mvc.perform(get("/api/v1/kpop/product-candidates/1"))
+                .andExpect(status().isOk()).andExpect(header().string("Cache-Control","no-store"))
+                .andExpect(jsonPath("$.data.id").value(1));
+        f.jdbc.update("UPDATE product_candidate SET approved_yn='N' WHERE product_candidate_id=1",Map.of());
+        f.mvc.perform(get("/api/v1/kpop/product-candidates/1")).andExpect(status().isNotFound());
+        f.mvc.perform(get("/api/v1/kpop/product-candidates/0")).andExpect(status().isBadRequest());
+    }
     @Test void c01PostgresNameBrandSearchTrimsAndRejects121CharactersBeforeCache() throws Exception {
         for(String q:List.of(" 응원봉 "," light "))f.mvc.perform(get("/api/v1/kpop/product-candidates").param("view","public").param("q",q))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1));

@@ -95,3 +95,12 @@ def test_shared_slots_and_f12_scope(setup):
             await public_itinerary.itinerary(public_itinerary.PublicItineraryRequest(regions=['부산']),'fixture','7')
         assert error.value.status_code==422
     asyncio.run(run())
+
+@pytest.mark.parametrize('language,expected',[('en','English conversation tutor'),('ja','Japanese conversation tutor')])
+def test_language_is_server_owned_and_keeps_budget(setup,monkeypatch,language,expected):
+    client,headers,_=setup
+    provider,_=fake_provider(monkeypatch)
+    response=client.post('/api/public/chat/stream',json={'message':'hello','language':language},headers=headers)
+    assert response.status_code==200
+    assert expected in provider.chat.completions.create.call_args.kwargs['messages'][0]['content']
+    assert client.post('/api/public/chat/stream',json={'message':'hi','language':'invalid'},headers=headers).status_code==422

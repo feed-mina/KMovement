@@ -1,4 +1,4 @@
-.page { min-height: 100vh; background: #fffafa; color: #1f1f24; font-family: Arial, "Apple SD Gothic Neo", sans-serif; }
+.page { min-height: 100vh; background: #fffafa; color: #1f1f24; font-family: system-ui, "Malgun Gothic", sans-serif; }
 .nav { max-width: 1120px; margin: 0 auto; padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .brand { color: #e50914; font-size: 22px; font-weight: 800; text-decoration: none; letter-spacing: -.04em; }
 .navLinks { display: flex; gap: 18px; }
