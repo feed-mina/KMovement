@@ -1,0 +1,126 @@
+{
+  "checkedAt": "2026-10-06T19:57:24+09:00",
+  "scope": "read-only JSON and schema analysis; no embedding/model/Chroma client/index/production operations",
+  "originalFileCount": 54,
+  "originalAndArchiveUnchanged": true,
+  "graph": {
+    "path": "D:\\KMovement\\models\\kride_graph.json",
+    "sha256": "49110f8c6074a1028f687c448d1dda745ed313f5ec94e99d9cfd6af59547903c",
+    "pois": 40664,
+    "uniqueIds": 40664,
+    "missingNames": 0,
+    "missingAddresses": 1382,
+    "validKoreaCoordinateRange": 40462,
+    "invalidCoordinates": 202,
+    "directSourceUrlCount": 0,
+    "directCostFieldCount": 0,
+    "artistLinkedPoiCount": 1840,
+    "artistNodes": 137,
+    "danglingGraphEdges": 0,
+    "categories": {
+      "kculture": 23548,
+      "kpop": 495,
+      "tourism": 15905,
+      "food": 716
+    }
+  },
+  "copiedSchema": [
+    {
+      "name": "collections",
+      "sql": "CREATE TABLE \"collections\" (\n    id TEXT PRIMARY KEY, -- unique globally\n    name TEXT NOT NULL, -- unique per database\n    dimension INTEGER,\n    database_id TEXT NOT NULL REFERENCES databases(id) ON DELETE CASCADE, config_json_str TEXT, schema_str TEXT,\n    UNIQUE (name, database_id)\n)"
+    },
+    {
+      "name": "segments",
+      "sql": "CREATE TABLE \"segments\" (\n    id TEXT PRIMARY KEY,\n    type TEXT NOT NULL,\n    scope TEXT NOT NULL,\n    collection TEXT REFERENCES collection(id) NOT NULL\n)"
+    },
+    {
+      "name": "embedding_fulltext_search",
+      "sql": "CREATE VIRTUAL TABLE embedding_fulltext_search USING fts5(string_value, tokenize='trigram')"
+    }
+  ],
+  "segmentForeignKeys": [
+    [
+      0,
+      0,
+      "collection",
+      "collection",
+      "id",
+      "NO ACTION",
+      "NO ACTION",
+      "NONE"
+    ]
+  ],
+  "segmentRows": 10,
+  "segmentMissingPluralCollectionJoin": 0,
+  "previousPoiComparison": {
+    "at": "2026-10-06T18:28:34+09:00",
+    "idsMatched": 40664,
+    "fields": {
+      "nameMatches": 40664,
+      "addressMatches": 40664,
+      "categoryMatches": 40664,
+      "coordinateMatches": 40664,
+      "coordinateUnverifiable": 0
+    }
+  },
+  "preservation": {
+    "originalHashes": {
+      "0dfd6b0d-9099-465a-a6db-62ba7094df78/data_level0.bin": "1a1cf114f4ba854321b9ee49c8e767843ddca413d1f0331d68c7c4cb3ac01666",
+      "0dfd6b0d-9099-465a-a6db-62ba7094df78/header.bin": "6f1d4592dc9a7982263fbfa80c44f1bfdfb1e40678bd22b1a0e9dd0a490fa9eb",
+      "0dfd6b0d-9099-465a-a6db-62ba7094df78/index_metadata.pickle": "ed30c4b3bf51d5aa527edc8ff8566013d11990a2077ec88b6358e59dbbcf749e",
+      "0dfd6b0d-9099-465a-a6db-62ba7094df78/length.bin": "0db77ad6d3c13e311fba5ea38f5ed792025a55dffa5e367ee3df77ebc68a532c",
+      "0dfd6b0d-9099-465a-a6db-62ba7094df78/link_lists.bin": "5222cfdf1b3b2e8d6791d388116d41e447482ef185984f2a9a8c0785a85635d0",
+      "2cf53fa1-0285-4961-8645-50a52563fddd/data_level0.bin": "fa7efb3ab3bedfea918b49af2d97e5b663194c75415487d7ce84653142e56719",
+      "2cf53fa1-0285-4961-8645-50a52563fddd/header.bin": "dec19dcac5a401a6a7b38f6c9b94b01c46e2fe7ee739e56671afb728eabd472d",
+      "2cf53fa1-0285-4961-8645-50a52563fddd/index_metadata.pickle": "e430f889763694c306c796feb0c44cb357e342a5976ad0141422c69b7cda4903",
+      "2cf53fa1-0285-4961-8645-50a52563fddd/length.bin": "a566f4b47ed677126b3251b6e9f2509010bd335e76c42fb8f0a5aa6eba1439b4",
+      "2cf53fa1-0285-4961-8645-50a52563fddd/link_lists.bin": "3c67d6c15309038e50cc63acca3a4fb3d0f9a811dd3235f7333d56f7e98cf4a1",
+      "60652a66-194f-49aa-b5d6-66dbfc3d2053/data_level0.bin": "4e24d157e7caa3f65a19530312634f40a612e17a3326c3e8b8c639dd02ef4664",
+      "60652a66-194f-49aa-b5d6-66dbfc3d2053/header.bin": "dec19dcac5a401a6a7b38f6c9b94b01c46e2fe7ee739e56671afb728eabd472d",
+      "60652a66-194f-49aa-b5d6-66dbfc3d2053/index_metadata.pickle": "7516436aa18a3d97191af6cf3c7d0c715c0dd28898483fb40fce8501c3eace25",
+      "60652a66-194f-49aa-b5d6-66dbfc3d2053/length.bin": "8fd88b182fa64809966f83478bdda54023aeadf76c04801a1a39e3acadfa3878",
+      "60652a66-194f-49aa-b5d6-66dbfc3d2053/link_lists.bin": "27ad7ec98e35af8552fd971b1abd95c3059910102ff68a74ec08843c86d09a9f",
+      "6b0e133a-95e1-4e9c-8f43-468b95f5f87e/data_level0.bin": "9d889d0d22617f4b2309bfee21d30012245d76210ed3f2240ccd3323d1254142",
+      "6b0e133a-95e1-4e9c-8f43-468b95f5f87e/header.bin": "663b4edb26bef53ae3b4c876c4ad72f6362b63753bf539a943e89ca5e0d565ec",
+      "6b0e133a-95e1-4e9c-8f43-468b95f5f87e/index_metadata.pickle": "aeab4e80e126b104057888985cf76ef9a6e0d6d25be563f1063373684fa41712",
+      "6b0e133a-95e1-4e9c-8f43-468b95f5f87e/length.bin": "43a4ff2033e860d5f61b87259bc158860d66ec8feef81704b8af82de741db33e",
+      "6b0e133a-95e1-4e9c-8f43-468b95f5f87e/link_lists.bin": "4d7b4b99ab774f9ad121d9c43ea887b1bd0c98b1da4b7d20a991a2ec49001fc4",
+      "6fe4bbe6-7f5b-49b3-adb0-d80821a3a24a/data_level0.bin": "d43b3ceddfff34a6bb632159d9659ca40a30b9f26e195bcc23bdaefef28c1734",
+      "6fe4bbe6-7f5b-49b3-adb0-d80821a3a24a/header.bin": "a0e81c3b22454233bc12d0762f06dcca48261a75231cf87c79b75e69a6c00150",
+      "6fe4bbe6-7f5b-49b3-adb0-d80821a3a24a/length.bin": "822fa18c233685c590f04533195cf97e15ffde9a34da4a66b3c5124559972a07",
+      "6fe4bbe6-7f5b-49b3-adb0-d80821a3a24a/link_lists.bin": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "810fd388-b4b2-4b00-9f7b-3169730ffdea/data_level0.bin": "f61b330f37444b59122e11af0d8b08ca9c781bb11dfcdad87e101de5db9e3615",
+      "810fd388-b4b2-4b00-9f7b-3169730ffdea/header.bin": "a0e81c3b22454233bc12d0762f06dcca48261a75231cf87c79b75e69a6c00150",
+      "810fd388-b4b2-4b00-9f7b-3169730ffdea/length.bin": "f3c9ac54744b91d5d54a6c3ba2921d1cb81550d0549529c9ea075ccbc66b0e77",
+      "810fd388-b4b2-4b00-9f7b-3169730ffdea/link_lists.bin": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "92827a67-09d4-4078-ac0d-59aa9c609f8f/data_level0.bin": "94f2bab60be9a4c6a5f567dc7fcc4a2e91ffa3e5eecdc7581d2f5d24a98826b2",
+      "92827a67-09d4-4078-ac0d-59aa9c609f8f/header.bin": "a006e71d1cdf99cfc533677cf46a6f5162709fe77f5fef3c03765ad87b8de131",
+      "92827a67-09d4-4078-ac0d-59aa9c609f8f/index_metadata.pickle": "35a8d99d9425d0c8e657a72e4b44e05507940d0058e76caf5e6fad15ba87ca21",
+      "92827a67-09d4-4078-ac0d-59aa9c609f8f/length.bin": "d0654388e6f959072353efb65b0aee013ae26a1fb3bd4f9a4c9b272afd2979d1",
+      "92827a67-09d4-4078-ac0d-59aa9c609f8f/link_lists.bin": "37819c482f658f2b0da08c017f53d63cfec1264e2a14027a4f3f1c3f1eeccd6d",
+      "a4dbd972-33c8-48c0-92cb-9ae11286a177/data_level0.bin": "c29c7afaee9e2debd6b5e5ecbcf405c2f7c0bebe47874d6ac8ffd1c986b0ce5a",
+      "a4dbd972-33c8-48c0-92cb-9ae11286a177/header.bin": "3ce5e38ce331e2d77c94e093f22bfab93b64daf893ec51df590060ebf221cd25",
+      "a4dbd972-33c8-48c0-92cb-9ae11286a177/index_metadata.pickle": "1d8cce941c53775e61938781dc803dfa76faa584baf8af03ce528fd5c9245ab3",
+      "a4dbd972-33c8-48c0-92cb-9ae11286a177/length.bin": "cabe4fe363867aaaeabb82d300c8532f1149b523ad94c332a91409c17e55f85a",
+      "a4dbd972-33c8-48c0-92cb-9ae11286a177/link_lists.bin": "8c6215eeb2c9d65717c30348b67af3fb648fb20a4643090d827cd787d6fca687",
+      "a8763782-6190-4da9-945a-e182d1b91ed5/data_level0.bin": "1666abee001d6c0dcff45a393647b95f6fc0b307a5a82765c7d3139d01990f57",
+      "a8763782-6190-4da9-945a-e182d1b91ed5/header.bin": "380297411b645f38da0989db84aa5058a217d1a5b7b09e85865716a2e9c8aaf9",
+      "a8763782-6190-4da9-945a-e182d1b91ed5/index_metadata.pickle": "89f566b9c159bdbeb891ea857b1afcdf4d923a289db23a108a27feb9f1b29da3",
+      "a8763782-6190-4da9-945a-e182d1b91ed5/length.bin": "07a5000494509e7262932bb2de2b158f16c2667948662b5a613224cabd3e6c67",
+      "a8763782-6190-4da9-945a-e182d1b91ed5/link_lists.bin": "1b1590edaa341ca2ee102e3c15ae1a884f26086dd1cfd0bec41d0ef2d6b8d44f",
+      "a9a1d8d2-20d0-4ac9-88aa-86419c43a0d8/data_level0.bin": "f6c37cda501eff8640b5e9d4969c9427caa2461f685a6ea17b419543a3243223",
+      "a9a1d8d2-20d0-4ac9-88aa-86419c43a0d8/header.bin": "6f1d4592dc9a7982263fbfa80c44f1bfdfb1e40678bd22b1a0e9dd0a490fa9eb",
+      "a9a1d8d2-20d0-4ac9-88aa-86419c43a0d8/index_metadata.pickle": "d8e8b809c2b49bee849010b0aa79b401e362c72908f6606411e6737dfa8b4d9b",
+      "a9a1d8d2-20d0-4ac9-88aa-86419c43a0d8/length.bin": "9ba4fd2cb336f472476adba0705dfacf9fdab332f31ee8a8839f2e56ff8fa2ea",
+      "a9a1d8d2-20d0-4ac9-88aa-86419c43a0d8/link_lists.bin": "54ca6bc7766cdd254153d0283c4e48b27bf007a9b8e6d9c73c42af83e8cfbbc4",
+      "chroma.sqlite3": "28dd02d989e0b4e5429de5f125327539cce4e492b0c08e8ffef8499550a1e2ba",
+      "fe40f726-1eba-4dc5-b7b6-5d75d9ae8e1a/data_level0.bin": "0c0f6fdce80914a7f32c29b429829dcf65ab7200bb854020145599cc69f6fc5b",
+      "fe40f726-1eba-4dc5-b7b6-5d75d9ae8e1a/header.bin": "74442ad5b205880a7541b2111bd3dcfa57adb4d068f99418868b02e5074c6751",
+      "fe40f726-1eba-4dc5-b7b6-5d75d9ae8e1a/index_metadata.pickle": "747dc0c13bc73c05092fe39e356ac4ea50ff3ca79fa1504661a1b2338c03a514",
+      "fe40f726-1eba-4dc5-b7b6-5d75d9ae8e1a/length.bin": "73d7f8a76e6bcad1d526a6ef01ee8dbfa60072c6620d2ea2a742742018dbd4ba",
+      "fe40f726-1eba-4dc5-b7b6-5d75d9ae8e1a/link_lists.bin": "8360dcccb23734596180e52ee06f24e55662288173cf3027885d7044ca7c3d43"
+    },
+    "archiveSha256": "2253e3c965b13eb3ee80d915432ffebdc28e28cc80be395f3b4c72d1eff3be18",
+    "copiedDbSha256": "28dd02d989e0b4e5429de5f125327539cce4e492b0c08e8ffef8499550a1e2ba"
+  }
+}
