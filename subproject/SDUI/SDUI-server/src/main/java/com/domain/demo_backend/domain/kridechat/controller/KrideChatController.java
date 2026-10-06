@@ -45,9 +45,9 @@ public class KrideChatController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestHeader(value = "X-KRIDE-API-KEY", required = false) String apiKey) {
 
-        enforceAiGate(apiKey);
-        log.info("KRIDE 챗봇 요청 - message={}", request.getMessage());
         attachUserContext(request, userDetails);
+        enforceAiGate(apiKey);
+
         ChatQueryResponse response = chatService.chat(request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -59,9 +59,9 @@ public class KrideChatController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestHeader(value = "X-KRIDE-API-KEY", required = false) String apiKey) {
 
-        enforceAiGate(apiKey);
-        log.info("KRIDE 챗봇 스트리밍 요청 - message={}", request.getMessage());
         attachUserContext(request, userDetails);
+        enforceAiGate(apiKey);
+
         SseEmitter emitter = new SseEmitter(180_000L);
         chatService.streamChat(request, emitter, sseExecutor);
         return emitter;
@@ -79,13 +79,10 @@ public class KrideChatController {
 
     private void attachUserContext(ChatQueryRequest request, CustomUserDetails userDetails) {
         if (userDetails == null) {
-            return;
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
-        if (request.getUserSqno() == null) {
-            request.setUserSqno(userDetails.getUserSqno());
-        }
-        if (request.getUserId() == null || request.getUserId().isBlank()) {
-            request.setUserId(userDetails.getUserId());
-        }
+        // Caller-supplied identities must never override the authenticated account.
+        request.setUserSqno(userDetails.getUserSqno());
+        request.setUserId(userDetails.getUserId());
     }
 }

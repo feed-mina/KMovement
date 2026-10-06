@@ -62,7 +62,7 @@ jobs:
             org.opencontainers.image.revision=${{ inputs.expected_main_sha || github.sha }}
           cache-from: type=gha,scope=hostinger-cpu
           cache-to: type=gha,mode=max,scope=hostinger-cpu
-      - name: Run F11, Chroma, F12 and regression tests in the image
+      - name: Run F11, Chroma, F12 and F13 lifecycle regression tests in the image
         run: |
           mkdir -p "$RUNNER_TEMP/cpu-results"
           docker run --rm \
@@ -71,7 +71,7 @@ jobs:
             -v "$RUNNER_TEMP/cpu-results:/results" \
             kmovement-cpu:verify sh -ec '
               pip install --no-cache-dir pytest==9.1.1
-              python -m pytest tests/test_f11_contract.py tests/test_f11_api.py tests/test_public_search.py tests/test_public_itinerary.py tests/test_fastapi.py -q --junitxml=/results/tests.xml
+              python -m pytest tests/test_f11_contract.py tests/test_f11_api.py tests/test_public_search.py tests/test_public_itinerary.py tests/test_public_chat.py tests/test_chat_stream_lifecycle.py tests/test_fastapi.py -q --junitxml=/results/tests.xml
               pip freeze > /results/runtime-versions.txt
             '
       - name: Verify restricted service readiness

@@ -259,10 +259,13 @@ GraphRAG context contains artist-related filming locations — incorporate these
             max_tokens=700,
             stream=True,
         )
-        for chunk in stream:
-            delta = chunk.choices[0].delta
-            if delta.content:
-                yield delta.content
+        try:
+            for chunk in stream:
+                delta = chunk.choices[0].delta
+                if delta.content:
+                    yield delta.content
+        finally:
+            stream.close()
         _groq_breaker.record_success()
     except Exception as e:
         _groq_breaker.record_failure()

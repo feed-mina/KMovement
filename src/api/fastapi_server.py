@@ -1697,15 +1697,22 @@ def chat_stream(req: ChatStreamRequest):
     graphrag_ctx = _build_graphrag_chat_context(message)
 
     def _sse():
+        tokens = generate_chat_answer_stream(message, graphrag_context=graphrag_ctx)
         try:
-            for token in generate_chat_answer_stream(message, graphrag_context=graphrag_ctx):
+            for token in tokens:
                 yield f"data: {_json.dumps({'content': token})}\n\n"
         except Exception as exc:
-            print(f"[K-Ride] chat stream fallback: {exc}")
-            yield f"data: {_json.dumps({'content': 'K-Ride assistant is ready. Please try again with a travel question.'})}\n\n"
+            logger.warning('Chat stream failed: %s', type(exc).__name__)
+            yield f"data: {_json.dumps({'error': 'generation_failed'})}\n\n"
+        finally:
+            close = getattr(tokens, 'close', None)
+            if close:
+                close()
         yield "data: [DONE]\n\n"
 
-    return StreamingResponse(_sse(), media_type="text/event-stream; charset=utf-8")
+    return StreamingResponse(_sse(), media_type="text/event-stream; charset=utf-8", headers={
+        'Cache-Control': 'no-cache, no-transform', 'X-Accel-Buffering': 'no',
+    })
 
 
 @app.post("/api/chat/qa")

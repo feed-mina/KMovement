@@ -7,7 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
+import reactor.core.Disposable;
+import reactor.core.Disposables;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -32,31 +34,57 @@ public class KrideChatService {
     }
 
     public void streamChat(ChatQueryRequest request, SseEmitter emitter, Executor executor) {
-        executor.execute(() -> {
-            try {
-                fastApiClient.streamChat(request.getMessage())
-                        .doOnNext(chunk -> {
-                            try {
-                                emitter.send(SseEmitter.event().data(chunk));
-                            } catch (IOException e) {
-                                emitter.completeWithError(e);
-                            }
-                        })
-                        .doOnComplete(() -> {
-                            try {
-                                emitter.send(SseEmitter.event().data("[DONE]"));
-                                emitter.complete();
-                            } catch (IOException e) {
-                                emitter.completeWithError(e);
-                            }
-                        })
-                        .doOnError(emitter::completeWithError)
-                        .subscribe();
-            } catch (Exception e) {
-                log.error("스트리밍 챗봇 오류: {}", e.getMessage());
-                emitter.completeWithError(e);
-            }
-        });
+        // swap() also cancels subscriptions installed after an early disconnect.
+        Disposable.Swap subscription = Disposables.swap();
+        AtomicBoolean ended = new AtomicBoolean();
+        AtomicBoolean firstChunk = new AtomicBoolean();
+        long started = System.nanoTime();
+        Runnable cancel = () -> { ended.set(true); subscription.dispose(); };
+        emitter.onCompletion(cancel);
+        emitter.onTimeout(cancel);
+        emitter.onError(error -> cancel.run());
+        try {
+            executor.execute(() -> {
+                if (ended.get()) return;
+                try {
+                    subscription.update(fastApiClient.streamChat(request.getMessage())
+                            .takeUntil(chunk -> "[DONE]".equals(chunk) || "\"[DONE]\"".equals(chunk))
+                            .filter(chunk -> !"[DONE]".equals(chunk) && !"\"[DONE]\"".equals(chunk))
+                            .subscribe(chunk -> {
+                                if (ended.get()) return;
+                                if (firstChunk.compareAndSet(false, true)) {
+                                    log.info("KRIDE first stream event ms={}", (System.nanoTime() - started) / 1_000_000);
+                                }
+                                try {
+                                    emitter.send(SseEmitter.event().data(chunk));
+                                } catch (Exception error) {
+                                    cancel.run();
+                                    emitter.completeWithError(error);
+                                }
+                            }, error -> {
+                                if (!ended.getAndSet(true)) {
+                                    subscription.dispose();
+                                    emitter.completeWithError(error);
+                                }
+                            }, () -> {
+                                if (ended.getAndSet(true)) return;
+                                subscription.dispose();
+                                try {
+                                    emitter.send(SseEmitter.event().data("[DONE]"));
+                                    emitter.complete();
+                                } catch (Exception error) {
+                                    emitter.completeWithError(error);
+                                }
+                            }));
+                } catch (Exception error) {
+                    cancel.run();
+                    emitter.completeWithError(error);
+                }
+            });
+        } catch (RuntimeException error) {
+            cancel.run();
+            emitter.completeWithError(error);
+        }
     }
 
     private String resolveIntent(ChatQueryRequest request) {
