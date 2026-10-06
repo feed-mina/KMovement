@@ -127,6 +127,8 @@ export function useKrideItinerary(
                 const itinerary = json.itinerary ?? [];
                 const markers = json.mapData?.markers ?? [];
                 setData({
+                    source_pois:json.source_pois,
+                    scopeNotice:json.scopeNotice,
                     itinerary,
                     mapData: { ...json.mapData, markers, itinerary },
                     markers, // MapView가 data.markers로 직접 접근할 수 있도록

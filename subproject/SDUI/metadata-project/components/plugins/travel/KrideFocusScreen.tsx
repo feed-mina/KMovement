@@ -186,6 +186,7 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
 
     return (
         <div className={`page-wrap ${screenId}`}>
+            {combineData.scopeNotice&&<p className="kride-chat-scope">{combineData.scopeNotice}</p>}
             <SduiRenderer
                 screenId={screenId}
                 metadata={s.metadata}

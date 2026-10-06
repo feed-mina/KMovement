@@ -58,6 +58,7 @@ export default function RouteNode({ data, index = 0, onSelect }: Props) {
           {reason && <p className="text-yellow-400/80 text-[11px] mt-0.5 truncate">{reason}</p>}
         </div>
       </button>
+      {typeof data?.sourceUrl==='string'&&/^https?:\/\//.test(data.sourceUrl)&&<a href={data.sourceUrl} target="_blank" rel="noopener noreferrer" className="route-node__link" aria-label={`${name} 출처 확인`}>출처</a>}
       {urls && (
         <div className="flex-shrink-0 flex gap-1 items-center pt-0.5">
           <a

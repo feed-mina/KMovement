@@ -3,6 +3,7 @@ export async function consumeChatStream(
   response: Response,
   signal: AbortSignal,
   onChunk: (text: string) => void,
+  onSources?: (sources: import('@/lib/types/krideChat').KridePoi[]) => void,
 ): Promise<void> {
   if (!response.ok) {
     throw new Error(response.status === 401 ? '로그인이 필요합니다.'
@@ -31,12 +32,13 @@ export async function consumeChatStream(
           .map(line => line.slice(5).replace(/^ /, '')).join('\n');
         if (!raw) continue;
         if (raw === '[DONE]' || raw === '"[DONE]"') return;
-        let data: { content?: unknown; error?: unknown };
+        let data: { content?: unknown; error?: unknown; sources?: unknown };
         try { data = JSON.parse(raw); }
         catch { throw new Error('답변 형식이 올바르지 않습니다.'); }
         if (!data || typeof data !== 'object') throw new Error('답변 형식이 올바르지 않습니다.');
         if (data.error) throw new Error('답변 생성 중 오류가 발생했습니다. 다시 시도해 주세요.');
         if (typeof data.content === 'string') onChunk(data.content);
+        if (Array.isArray(data.sources)) onSources?.(data.sources.filter(p=>p&&typeof p.name==='string'&&typeof p.sourceUrl==='string'&&/^https?:\/\//.test(p.sourceUrl)));
       }
       if (done) throw new Error('답변 연결이 중간에 끊겼습니다. 다시 시도해 주세요.');
     }

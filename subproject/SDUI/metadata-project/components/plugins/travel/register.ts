@@ -4,6 +4,7 @@ import { registerFormPersistence } from "@/components/screens/persistence";
 import { registerComponent } from "@/components/constants/componentMap";
 import { registerScreenPaths } from "@/components/constants/screenMap";
 import KrideFocusScreen from "./KrideFocusScreen";
+import KrideChatScreen from './KrideChatScreen';
 import DurationButton from "@/components/fields/kride/DurationButton";
 import SelectionCard from "@/components/fields/kride/SelectionCard";
 import PurposeCard from "@/components/fields/kride/PurposeCard";
@@ -54,6 +55,7 @@ export function registerTravelPlugin(): void {
 
     // FOCUS 화면 컨트롤러
     registerScreen({ match: (id) => id === "KRIDE_FOCUS", controller: KrideFocusScreen });
+    registerScreen({match:id=>id==='KRIDE_CHAT',controller:KrideChatScreen});
     // [동선] 화면 컨트롤러 (TourAPI POI → 지도)
     registerScreen({ match: (id) => id === "ROUTE_PLANNER", controller: RouteScreen });
     // [탐색] 화면 컨트롤러 (TourAPI POI 카드)

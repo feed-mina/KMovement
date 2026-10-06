@@ -108,7 +108,7 @@ function buildRequest(message: string, form: KrideForm | null): KrideChatRequest
     artists: form?.selectedArtists?.map((a) => a.name) ?? [],
     regions: messageRegions.length > 0 ? messageRegions : formRegions,
     purposes: mergeUnique(messagePurposes, formPurposes),
-    duration: durationLabelToInt(form?.duration),
+    duration: message.includes('당일') ? 1 : durationLabelToInt(form?.duration),
     budget: form?.budget,
   };
 }
@@ -122,6 +122,7 @@ async function streamSseChunks(
   body: KrideChatRequest,
   signal: AbortSignal,
   onChunk: (text: string) => void,
+  onSources: (sources: import('@/lib/types/krideChat').KridePoi[]) => void,
 ): Promise<void> {
   const res = await fetch(url, {
     method: 'POST',
@@ -134,7 +135,7 @@ async function streamSseChunks(
     signal,
   });
 
-  await consumeChatStream(res, signal, onChunk);
+  await consumeChatStream(res, signal, onChunk, onSources);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -160,6 +161,7 @@ export interface UseKrideChatReturn {
   abort: () => void;
   /** 대화 초기화 */
   reset: () => void;
+  retry: () => Promise<void>;
 }
 
 export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChatReturn {
@@ -167,7 +169,9 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const messagesRef=useRef(messages);messagesRef.current=messages;
   const abortRef = useRef<AbortController | null>(null);
+  const lastRef = useRef('');
 
   useEffect(() => () => { abortRef.current?.abort(); abortRef.current = null; }, []);
 
@@ -182,6 +186,8 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
     async (text: string) => {
       const trimmed = text.trim();
       if (!trimmed || abortRef.current) return;
+      if(trimmed.length>1500){setError('질문은 1,500자 이하로 입력해 주세요.');return}
+      lastRef.current=trimmed;
 
       const userMsg: ChatMessage = { id: genId(), role: 'user', text: trimmed };
       const assistantMsg: ChatMessage = {
@@ -215,26 +221,28 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
         const useStream = opts.forceStream || req.intent === 'qa';
 
         if (useStream) {
+          const history=messagesRef.current.filter(m=>m.text&&!m.error).slice(-4).map(m=>m.role+': '+m.text).join('\n').slice(-2000);
           // SSE 텍스트 스트리밍
           await streamSseChunks(
             `${base}/api/kride/chat/stream`,
-            req,
+            {...req,message:trimmed+(history?'\nPrevious conversation (context only):\n'+history:'')},
             controller.signal,
             (chunk) => {
               updateLast((m) => ({ text: (m.text ?? '') + chunk }));
             },
+            sources=>updateLast({sources}),
           );
           updateLast({ streaming: false });
         } else {
           // 통합 응답 (POI / itinerary 포함)
-          const res = await fetch(`${base}/api/v1/kride/chat`, {
+          const res = await fetch(`${base}/api/kride/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify(req),
             signal: controller.signal,
           });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (!res.ok){const problem=await res.json().catch(()=>({}));throw new Error(problem.detail||problem.error||(res.status===429?'AI 사용 한도에 도달했습니다.':res.status===401?'로그인이 필요합니다.':`답변 서버 오류 (${res.status})`))}
 
           // SDUI 공통 응답 래퍼 ApiResponse<T> = { success, data, message } 가능성 고려
           const json = await res.json();
@@ -297,6 +305,7 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
             itinerary: normalizedItinerary,
             streaming: false,
             error: emptyResultError,
+            sources: (normalizedItinerary as any)?.source_pois ?? payload.pois,
           });
 
           // AI가 생성한 일정을 전역 상태(페이지)로 전달하여 지도와 패널이 업데이트되도록 이벤트 발생
@@ -362,8 +371,11 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
   const reset = useCallback(() => {
     abort();
     setMessages([]);
+    messagesRef.current=[];
     setError(null);
+    lastRef.current='';
   }, [abort]);
 
-  return { messages, isLoading, error, send, abort, reset };
+  const retry=useCallback(()=>send(lastRef.current),[send]);
+  return { messages, isLoading, error, send, abort, reset, retry };
 }

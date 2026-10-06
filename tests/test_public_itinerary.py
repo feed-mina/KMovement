@@ -87,7 +87,7 @@ def test_full_generation_rechecks_approval_and_records_usage(tmp_path,monkeypatc
     monkeypatch.setattr(module,'search_public',lambda *_:list(source.values()))
     monkeypatch.setattr(rag_client,'get_chroma',lambda:object())
     response=SimpleNamespace(usage=SimpleNamespace(prompt_tokens=100,completion_tokens=50),choices=[SimpleNamespace(message=SimpleNamespace(content='{"itinerary":[{"morning":{"places":[{"poiId":"a"},{"poiId":"b"},{"poiId":"invented"}]}}]}'))])
-    monkeypatch.setattr(groq,'Groq',lambda **_:SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=lambda **_:response))))
+    monkeypatch.setattr(groq,'Groq',lambda **_:SimpleNamespace(close=lambda:None,chat=SimpleNamespace(completions=SimpleNamespace(create=lambda **_:response))))
     for key,value in {'GROQ_API_KEY':'fixture','ITINERARY_BUDGET_DB':str(tmp_path/'usage.sqlite'),'ITINERARY_INPUT_USD_PER_M':'1','ITINERARY_OUTPUT_USD_PER_M':'1','ITINERARY_DAILY_USD':'1'}.items():monkeypatch.setenv(key,value)
     result=module.generate_public(module.PublicItineraryRequest(regions=['서울']),'7')
     assert result['resolvedMarkerCount']==1 and result['rejectedPlaceCount']==2

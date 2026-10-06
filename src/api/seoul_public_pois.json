@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "scope": "서울 당일치기 / 일반 공개 장소 / 영업시간·가격·아티스트 연관 미보증",
+  "items": [
+    {
+      "id": "curated:seoul:100867",
+      "name": "서울역사박물관",
+      "address": "서울특별시 종로구 새문안로 55",
+      "lat": 37.570507525011855,
+      "lon": 126.97052372473162,
+      "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100867&menuNo=200025",
+      "coordinateSourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100867&menuNo=200025",
+      "evidence": "서울문화포털 상세 페이지의 명칭·주소와 markerLocations 좌표 대조",
+      "sourceSha256": "7c3730ce396445e2479231c1265e904cd085f6c84f0b4cf5e12893101bd81a92",
+      "approved": true,
+      "verifiedAt": "2026-10-06T05:31:40.152250+00:00",
+      "reviewBy": "2026-11-05T05:31:40.152250+00:00",
+      "artist": ""
+    },
+    {
+      "id": "curated:seoul:100548",
+      "name": "남산골한옥마을",
+      "address": "서울특별시 중구 퇴계로34길 28",
+      "lat": 37.559304933707146,
+      "lon": 126.994440072131,
+      "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100548&menuNo=200025",
+      "coordinateSourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100548&menuNo=200025",
+      "evidence": "서울문화포털 상세 페이지의 명칭·주소와 markerLocations 좌표 대조",
+      "sourceSha256": "b702789f777471cd56232816e45e857808535141fd615f368bb9a5dd31a595fb",
+      "approved": true,
+      "verifiedAt": "2026-10-06T05:31:40.152250+00:00",
+      "reviewBy": "2026-11-05T05:31:40.152250+00:00",
+      "artist": ""
+    },
+    {
+      "id": "curated:seoul:100291",
+      "name": "N서울타워",
+      "address": "서울특별시 용산구 남산공원길 105",
+      "lat": 37.5511225714939,
+      "lon": 126.987867837993,
+      "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100291&menuNo=200025",
+      "coordinateSourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100291&menuNo=200025",
+      "evidence": "서울문화포털 상세 페이지의 명칭·주소와 markerLocations 좌표 대조",
+      "sourceSha256": "f7710883beb918fa012e127504bd7c4f0638ed793345b9998aca14c4ab916325",
+      "approved": true,
+      "verifiedAt": "2026-10-06T05:31:40.152250+00:00",
+      "reviewBy": "2026-11-05T05:31:40.152250+00:00",
+      "artist": ""
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import KrideChatComponent from '@/components/fields/kride/chat/KrideChatComponent';
 
 let mockHookState: any;
+jest.mock('@/context/AuthContext',()=>({useAuth:()=>({isLoading:false,isLoggedIn:true,user:{userSqno:3}})}));
 
 jest.mock('@/lib/hooks/useKrideChatStream', () => ({
   useKrideChatStream: () => mockHookState ?? ({

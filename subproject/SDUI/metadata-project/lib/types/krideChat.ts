@@ -49,6 +49,7 @@ export interface KrideDayPlan {
   day: number;
   morning: { places: KridePlaceStop[]; restaurants?: { name: string; rating: number; tag: string }[] };
   afternoon: { places: KridePlaceStop[]; restaurants?: { name: string; rating: number; tag: string }[] };
+  evening?: { places: KridePlaceStop[] };
 }
 
 export interface KridePlaceStop {
@@ -69,6 +70,7 @@ export interface ChatMessage {
   id: string;
   role: ChatMessageRole;
   text: string;
+  sources?: KridePoi[];
   pois?: KridePoi[];
   itinerary?: KrideItinerary;
   /** 스트리밍 중인 마지막 어시스턴트 메시지 표시용 */

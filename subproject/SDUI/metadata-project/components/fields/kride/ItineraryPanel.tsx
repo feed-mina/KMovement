@@ -16,6 +16,7 @@ interface DayPlan {
   day?: number;
   morning: TimeSlot;
   afternoon: TimeSlot;
+  evening?: TimeSlot;
 }
 
 const DURATION_TO_DAYS: Record<string, number> = {
@@ -163,8 +164,9 @@ function normalizeRawItinerary(rawDays: AnyRecord[], markerLookup: Map<string, A
   return rawDays.map((dayPlan, dayIndex) => {
     const morning = readSlotPlaces(dayPlan, ["morning", "am", "오전"]);
     const afternoon = readSlotPlaces(dayPlan, ["afternoon", "pm", "오후"]);
+    const evening = readSlotPlaces(dayPlan, ['evening','저녁']);
 
-    if (morning.length === 0 && afternoon.length === 0 && Array.isArray(dayPlan?.places)) {
+    if (morning.length === 0 && afternoon.length === 0 && evening.length===0 && Array.isArray(dayPlan?.places)) {
       const split = splitPlaces(dayPlan.places, markerLookup);
       return { day: toNumber(dayPlan?.day) ?? dayIndex + 1, ...split };
     }
@@ -181,6 +183,7 @@ function normalizeRawItinerary(rawDays: AnyRecord[], markerLookup: Map<string, A
           .map((place: AnyRecord, index: number) => normalizePlace(place, morning.length + index, markerLookup))
           .filter(Boolean) as AnyRecord[],
       },
+      evening:{places:evening.map((place:AnyRecord,index:number)=>normalizePlace(place,morning.length+afternoon.length+index,markerLookup)).filter(Boolean) as AnyRecord[]},
     };
   });
 }
@@ -205,7 +208,7 @@ function distributeMarkersIntoDays(markerPlaces: AnyRecord[], dayCount: number, 
 
 function countPlaces(days: DayPlan[]) {
   return days.reduce(
-    (total, day) => total + day.morning.places.length + day.afternoon.places.length,
+    (total, day) => total + day.morning.places.length + day.afternoon.places.length + (day.evening?.places.length??0),
     0
   );
 }
@@ -274,6 +277,7 @@ export default function ItineraryPanel({ id, data }: any) {
           const plan = itinerary[dayIdx];
           const morningKey = `day${dayIdx}-morning`;
           const afternoonKey = `day${dayIdx}-afternoon`;
+          const eveningKey=`day${dayIdx}-evening`;
 
           return (
             <div key={dayIdx} className="border border-gray-800 rounded-xl overflow-hidden">
@@ -318,6 +322,7 @@ export default function ItineraryPanel({ id, data }: any) {
                   ))
                 )}
               </CollapseBody>
+              {!!plan.evening?.places.length&&<><CollapseHeader id={eveningKey} meta={{}} data={{}} label="저녁" isOpen={openSlots[eveningKey]} onToggle={()=>toggle(eveningKey)}/><CollapseBody id={eveningKey} meta={{}} data={{}} isOpen={openSlots[eveningKey]}>{plan.evening.places.map((place,index)=><RouteNode key={place.id??index} id={`${eveningKey}-${index}`} meta={{}} data={place} index={plan.morning.places.length+plan.afternoon.places.length+index} onSelect={()=>selectPlace(place,dayIdx+1,'evening',index)}/>)}</CollapseBody></>}
             </div>
           );
         })}

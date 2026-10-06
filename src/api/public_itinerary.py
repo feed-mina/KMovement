@@ -10,6 +10,7 @@ from src.api.itinerary_budget import reserve_budget,record_usage
 from src.api import ai_runtime
 
 router=APIRouter()
+SCOPE_NOTICE='서울 당일치기 일반 장소입니다. 아티스트 연관·영업시간·가격·예약 가능 여부는 검증하지 않았습니다. 방문 전 출처를 확인하세요.'
 class PublicItineraryRequest(BaseModel):
     duration:Literal['당일치기','1박2일','2박3일']='당일치기'
     artists:list[Annotated[str,Field(min_length=1,max_length=100)]]=Field(default_factory=list,max_length=5)
@@ -36,7 +37,7 @@ def ground_plan(raw,catalog,max_days=3):
                 seen.add(identity)
                 # Generated names, coordinates and claims never override the public source.
                 item={**source,'poiId':identity,'reason':'확인된 공개 장소 · 선택한 조건으로 추천'}
-                kept.append(item);markers.append({'id':identity,'name':source['name'],'lat':source['lat'],'lng':source['lon'],'address':source['address'],'day':clean['day'],'slot':slot,'index':len(markers)})
+                kept.append(item);markers.append({'id':identity,'name':source['name'],'lat':source['lat'],'lng':source['lon'],'address':source['address'],'sourceUrl':source.get('sourceUrl'),'verifiedAt':source.get('verifiedAt'),'day':clean['day'],'slot':slot,'index':len(markers)})
             clean[slot]={'places':kept}
         if any(clean[s]['places'] for s in ('morning','afternoon','evening')):days.append(clean)
     return {'itinerary':days,'mapData':{'markers':markers},'resolvedMarkerCount':len(markers),'rejectedPlaceCount':rejected,'poiGrounded':bool(markers),'markerResolutionStatus':'resolved' if markers else 'empty','unresolvedPlaces':[]}
@@ -57,7 +58,11 @@ def generate_public(req,identity):
     model,max_output=ai_runtime.model_settings()
     reservation=reserve_budget(identity,len((system+prompt).encode())+1024,max_output)
     from groq import Groq
-    response=Groq(api_key=os.environ['GROQ_API_KEY'],timeout=60,max_retries=0).chat.completions.create(model=model,messages=[{'role':'system','content':system},{'role':'user','content':prompt}],max_completion_tokens=max_output,temperature=0,response_format={'type':'json_object'})
+    client=Groq(api_key=os.environ['GROQ_API_KEY'],timeout=60,max_retries=0)
+    try:
+        response=client.chat.completions.create(model=model,messages=[{'role':'system','content':system},{'role':'user','content':prompt}],max_completion_tokens=max_output,temperature=0,response_format={'type':'json_object'})
+    finally:
+        client.close()
     if response.usage is None:raise HTTPException(502,'사용량 확인에 실패했습니다.')
     usage=record_usage(reservation,response.usage)
     raw=json.loads(response.choices[0].message.content)
@@ -65,7 +70,7 @@ def generate_public(req,identity):
     # A second read excludes revocations that happened while the LLM was running.
     current=public_catalog();allowed={x['id']:current[x['id']] for x in candidates if x['id'] in current}
     result=ground_plan(raw,allowed,{'당일치기':1,'1박2일':2,'2박3일':3}[req.duration])
-    return {**result,'source_pois':list(allowed.values()),'sourcePoiCount':len(allowed),'status':'ok' if result['itinerary'] else 'empty_result','usage':usage}
+    return {**result,'source_pois':list(allowed.values()),'sourcePoiCount':len(allowed),'status':'ok' if result['itinerary'] else 'empty_result','usage':usage,'scopeNotice':SCOPE_NOTICE}
 
 @router.post('/api/public/itinerary')
 async def itinerary(req:PublicItineraryRequest,x_kride_token:str=Header(default=''),x_kride_user:str=Header(default='')):
