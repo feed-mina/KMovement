@@ -6,6 +6,7 @@ import api, { refreshSession } from '@/services/axios';
 import { useRouter } from "next/navigation";
 import { requestForToken, onMessageListener } from '@/lib/firebase';
 import { trackEvent } from '@/lib/analytics/dataLayer';
+import { clearLoginReturn, consumeLoginReturn } from '@/lib/kride/loginReturn';
 
 interface User {
     userId?: string;
@@ -51,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // console.error("Logout API error:", err);
             // 서버 에러가 나더라도 클라이언트 상태는 지우는 게 사용자 입장에서 안전해
         } finally {
+            clearLoginReturn();
             //  클라이언트 상태 초기화
             setUser(null);
             setIsLoggedIn(false);
@@ -104,6 +106,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         checkLoginStatus();
     }, []);
+
+    // OAuth returns to My or Main. Resume the selected screen after /me proves
+    // the session is ready; incomplete registration keeps its existing flow.
+    useEffect(() => {
+        if (isLoading || !isLoggedIn || !user?.role || user.role === 'ROLE_GUEST') return;
+        if (!['/', '/view/MY_PAGE', '/view/MAIN_PAGE'].includes(window.location.pathname)) return;
+        const destination = consumeLoginReturn();
+        if (destination && destination !== window.location.pathname) router.replace(destination);
+    }, [isLoading, isLoggedIn, user?.role, router]);
 
     useEffect(() => {
         if (!isLoggedIn) return;
