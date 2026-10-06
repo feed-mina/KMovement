@@ -1,0 +1,3 @@
+import React from 'react';import {render,screen} from '@testing-library/react';import KrideNav from '@/components/layout/KrideNav';
+let mockPath='/';jest.mock('next/navigation',()=>({usePathname:()=>mockPath}));
+test.each([['/','홈'],['/view/kpop','K-pop'],['/view/KPOP_PRODUCTS','K-pop'],['/view/KPOP_SAVED_ITEMS','마이'],['/view/AI_JAPANESE_CHAT_PAGE','언어 채팅'],['/view/INTRO1','코스 만들기']])('one active top-level destination at %s',(path,label)=>{mockPath=path;const {container}=render(<KrideNav/>);expect(container.querySelectorAll('[aria-current=page]')).toHaveLength(1);expect(screen.getByRole('link',{name:label,exact:true})).toHaveAttribute('aria-current','page')});
