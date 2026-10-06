@@ -1,0 +1,113 @@
+{
+  "version": "hostinger-preparation-plan-v1",
+  "stage": "plan ready; choice between separate VPS and revised same-host isolation pending",
+  "executionAllowed": false,
+  "preparationCompleted": false,
+  "remoteActionsPerformed": false,
+  "target": {
+    "provider": "Hostinger",
+    "planCandidate": "KVM 2",
+    "osCandidate": "Ubuntu 24.04 Plain",
+    "vpsId": null,
+    "sshHostFingerprint": null,
+    "productionDistinctVerified": false,
+    "existsUserAttested": true,
+    "purchaseAuthorized": false
+  },
+  "rejectedTargetEvidence": {
+    "checkedDateKST": "2026-10-06",
+    "providedSSH": "root@187.127.214.171",
+    "productionDomain": "kmovement.srv1869569.hstgr.cloud",
+    "observedARecord": "187.127.214.171",
+    "dnsCommand": "Resolve-DnsName kmovement.srv1869569.hstgr.cloud -Type A",
+    "repositoryEvidence": "deploy/hostinger/VPS-DEPLOY-RUNBOOK-KO.md:13",
+    "repositoryEvidenceValue": "root@187.127.214.171",
+    "classification": "provided target matches production; not accepted as separate pilot VPS",
+    "remoteSSHConnectedThisTurn": false,
+    "remoteMutationsPerformed": false,
+    "executionAllowed": false
+  },
+  "preservedSpecificationSha256": "f2e47aa5ba6025203eaa860769d06bac09d0461d224e20120c629f696715fadd",
+  "corpusCount": 1000,
+  "questionCount": 120,
+  "modelRevision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+  "priorWindowsVersionsForComparisonOnly": {
+    "chromadb": "1.5.9",
+    "numpy": "2.4.6",
+    "sentence-transformers": "6.1.0",
+    "tokenizers": "0.23.2",
+    "torch": "2.14.1+cpu",
+    "transformers": "5.18.0"
+  },
+  "linuxRuntime": {
+    "locked": false,
+    "pythonPreference": "3.11; exact supported Linux build and artifact hash pending",
+    "allWheelsAndTransitives": null,
+    "installedFileLock": null,
+    "resolvedNativeLibraries": null
+  },
+  "transfer": {
+    "performed": false,
+    "allowlist": "transfer-manifest.json",
+    "exclude": [
+      "old Chroma database",
+      "production credentials",
+      "source-id-ledger.json",
+      "Windows runtime",
+      "entire repository",
+      "SSH private keys",
+      "provider API tokens"
+    ]
+  },
+  "snapshots": {
+    "created": false,
+    "id": null,
+    "expiresAt": null,
+    "contentHashClaimed": false,
+    "durableRuntimeArchiveRequired": true,
+    "preLockdownRestoreRequiresBoundaryRecheck": true
+  },
+  "boundary": {
+    "verifiedOnVPS": false,
+    "WSLResultReusableAsVPSProof": false,
+    "taskNetwork": "deny IPv4/IPv6 TCP/UDP/DNS in task namespace",
+    "management": "separate source-restricted SSH; no agent forwarding",
+    "files": "read-only model/runtime/input; dedicated writable output; no original/production volumes"
+  },
+  "approval": {
+    "separatePilotExecutionRequired": true,
+    "record": null,
+    "noAutomaticTransition": true
+  },
+  "prohibited": [
+    "purchase without confirmed term/price",
+    "reinstall existing server",
+    "production connections",
+    "model embedding",
+    "Chroma client/database creation",
+    "pilot search",
+    "full indexing",
+    "deployment"
+  ],
+  "requiredEvidence": [
+    "target identity",
+    "Linux artifact and installed-file hashes",
+    "native and OS dependency inventory",
+    "durable archive hashes",
+    "snapshot ID/state/expiry",
+    "firewall config and counters",
+    "unprivileged negative boundary probes",
+    "load-only smoke test",
+    "executionAllowed=false and no automatic runners"
+  ],
+  "existingHost": {
+    "plan": "KVM 4 (user reported; not remotely checked)",
+    "productionHost": true,
+    "capacityMeasured": false,
+    "sameHostPreparationAuthorized": false
+  },
+  "decisionOptions": {
+    "separateVPS": "preserves requested separate-server condition",
+    "sameHostContainer": "requires user selection of revised boundary plus read-only capacity/engine assessment before preparation"
+  }
+}

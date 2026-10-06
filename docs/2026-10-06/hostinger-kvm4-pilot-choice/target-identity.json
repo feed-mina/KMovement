@@ -1,0 +1,13 @@
+{
+  "checkedDateKST": "2026-10-06",
+  "providedSSH": "root@187.127.214.171",
+  "productionDomain": "kmovement.srv1869569.hstgr.cloud",
+  "observedARecord": "187.127.214.171",
+  "dnsCommand": "Resolve-DnsName kmovement.srv1869569.hstgr.cloud -Type A",
+  "repositoryEvidence": "deploy/hostinger/VPS-DEPLOY-RUNBOOK-KO.md:13",
+  "repositoryEvidenceValue": "root@187.127.214.171",
+  "classification": "provided target matches production; not accepted as separate pilot VPS",
+  "remoteSSHConnectedThisTurn": false,
+  "remoteMutationsPerformed": false,
+  "executionAllowed": false
+}
