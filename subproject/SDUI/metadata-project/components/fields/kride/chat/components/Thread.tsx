@@ -30,6 +30,7 @@ export default function Thread({ messages, onPoiView, onPoiAdd, onApplyItinerary
           error={Boolean(message.error)}
         >
           {message.text && <div>{message.text}</div>}
+          {!!message.sources?.length&&<aside className="kride-chat-sources" aria-label="답변 참고 장소 출처"><strong>참고 장소 · 출처</strong><ul>{message.sources.map((p,i)=><li key={String(p.id??i)}><a href={String(p.sourceUrl)} target="_blank" rel="noopener noreferrer">{p.name} 출처 확인</a></li>)}</ul></aside>}
 
           {message.pois && message.pois.length > 0 && (
             <div className="kride-chat-bubble__stack">

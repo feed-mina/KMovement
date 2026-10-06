@@ -32,15 +32,10 @@ export default function Composer({ onSend, disabled, onAbort }: Props) {
             }
           }}
           placeholder="어디로 떠나볼까요?"
+          aria-label="여행봇 메시지"
+          maxLength={1500}
           disabled={disabled && !onAbort}
         />
-        <button
-          type="button"
-          aria-label="음성 입력"
-          className="kride-chat-composer__voice"
-        >
-          음성
-        </button>
       </div>
       {disabled && onAbort ? (
         <button
@@ -56,7 +51,7 @@ export default function Composer({ onSend, disabled, onAbort }: Props) {
           type="button"
           className="kride-chat-composer__send"
           onClick={submit}
-          disabled={!val.trim()}
+          disabled={disabled||!val.trim()}
           aria-label="전송"
         >
           전송

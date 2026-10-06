@@ -66,3 +66,25 @@ it('admits only one send in the same render and aborts on unmount', async () => 
   unmount();
   expect(signal.aborted).toBe(true);
 });
+
+it('routes recommendations to the authenticated CPU proxy and publishes source-bearing markers',async()=>{
+ const poi={id:'a',name:'서울 장소',lat:37.5,lng:127,sourceUrl:'https://example.test/a'};
+ global.fetch=jest.fn().mockResolvedValue({ok:true,json:async()=>({intent:'recommend',reply:'참고 장소',pois:[poi]})});
+ const listener=jest.fn();window.addEventListener('kride-chat-update',listener);
+ const {result}=renderHook(()=>useKrideChatStream());
+ await act(async()=>{await result.current.send('서울 장소 추천')});
+ expect(global.fetch).toHaveBeenCalledWith('/api/kride/chat',expect.anything());
+ expect(result.current.messages[1].sources).toEqual([poi]);
+ expect(listener).toHaveBeenCalled();window.removeEventListener('kride-chat-update',listener);
+});
+
+it('accepts structured source frames and retries only after an explicit request',async()=>{
+ const source={id:'a',name:'공개 장소',sourceUrl:'https://example.test/a'};
+ global.fetch=jest.fn().mockResolvedValueOnce({ok:false,status:503}).mockResolvedValueOnce(response(['data: '+JSON.stringify({sources:[source]})+'\n\ndata: {"content":"답변"}\n\ndata: [DONE]\n\n']).value);
+ const {result}=renderHook(()=>useKrideChatStream());
+ await act(async()=>{await result.current.send('어디인가요?')});
+ expect(global.fetch).toHaveBeenCalledTimes(1);
+ await act(async()=>{await result.current.retry()});
+ expect(global.fetch).toHaveBeenCalledTimes(2);
+ expect(result.current.messages[3].sources).toEqual([source]);
+});

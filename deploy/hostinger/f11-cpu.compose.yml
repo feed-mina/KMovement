@@ -14,6 +14,7 @@ services:
       TRANSFORMERS_CACHE: /data/models/hub
       EMBED_MODEL: intfloat/multilingual-e5-small
       TORCHSERVE_ENABLED: "false"
+      KRIDE_PRELOAD_EMBEDDER: "true"
       KRIDE_PUBLIC_CATALOG_URL: http://spring:8080
       ITINERARY_BUDGET_DB: /data/budget/ledger.sqlite
       ITINERARY_DAILY_USD: ${ITINERARY_DAILY_USD:-0}

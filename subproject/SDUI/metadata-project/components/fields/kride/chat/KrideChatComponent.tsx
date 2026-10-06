@@ -14,6 +14,8 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
+import {useAuth} from '@/context/AuthContext';
 import { useKrideChatStream } from '@/lib/hooks/useKrideChatStream';
 import type { KrideForm } from '@/lib/types/krideChat';
 import Header, { type Status as HeaderStatus } from './components/Header';
@@ -41,12 +43,9 @@ interface KrideChatComponentProps {
 }
 
 const DEFAULT_SUGGESTIONS = [
-  '1박2일 서울 코스 추천',
-  '강남 데이트 코스 짜줘',
-  '제주 자연 힐링 코스',
-  '촬영지 위주로 코스 짜줘',
-  '서울 야경 명소',
-  '내 일정에 저장',
+  '서울 당일치기 코스 짜줘',
+  '서울 문화 장소 추천',
+  '서울역사박물관은 어디에 있나요?',
 ];
 
 export default function KrideChatComponent({ meta, data, onCloseModal }: KrideChatComponentProps) {
@@ -54,9 +53,11 @@ export default function KrideChatComponent({ meta, data, onCloseModal }: KrideCh
   const title = meta?.labelText || meta?.label_text || 'K-RIDE 여행봇';
   const suggestions = data?.suggestions ?? DEFAULT_SUGGESTIONS;
 
-  const { messages, isLoading, error, send, abort, reset } = useKrideChatStream({
+  const auth=useAuth();
+  const { messages, isLoading, error, send, abort, reset, retry } = useKrideChatStream({
     contextOverride: data?.contextOverride,
   });
+  React.useEffect(()=>{reset();return()=>abort()},[auth.user?.userSqno]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // EmptyState 용 컨텍스트 읽기 — contextOverride 우선, 없으면 localStorage
   const context = React.useMemo(() => {
@@ -80,6 +81,9 @@ export default function KrideChatComponent({ meta, data, onCloseModal }: KrideCh
     : 'idle';
   const status: HeaderStatus = hasChatError ? 'error' : activeStatus;
 
+  if(auth.isLoading)return <p role="status">로그인 확인 중…</p>;
+  if(!auth.isLoggedIn)return <div className="kride-empty"><p>로그인 후 여행봇을 이용할 수 있어요.</p><Link className="kride-primary-button" href="/view/LOGIN_PAGE?returnTo=%2Fview%2FCHAT">로그인하고 시작하기</Link></div>;
+
   return (
     <div className={`kride-chat-container ${containerClass}`}>
       <Header
@@ -91,6 +95,7 @@ export default function KrideChatComponent({ meta, data, onCloseModal }: KrideCh
         }}
         variant={onCloseModal ? 'sheet' : 'full'}
       />
+      <p className="kride-chat-scope">서울 당일치기 일반 장소를 시험 중입니다. 아티스트 연관·영업시간·가격은 확인되지 않았습니다.</p>
 
       {isEmpty ? (
         <div className="kride-chat-empty">
@@ -106,6 +111,9 @@ export default function KrideChatComponent({ meta, data, onCloseModal }: KrideCh
       ) : (
         <Thread messages={messages} />
       )}
+
+      {error&&<div role="alert" className="kride-chat-retry"><p>{error}</p><button disabled={isLoading} onClick={()=>void retry()}>다시 시도</button></div>}
+      <button className="kride-chat-end" onClick={()=>{reset();onCloseModal?.()}}>대화 종료</button>
 
       <Composer
         onSend={(text) => void send(text)}

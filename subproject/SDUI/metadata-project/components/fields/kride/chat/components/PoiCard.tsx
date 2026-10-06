@@ -23,12 +23,13 @@ export default function PoiCard({ poi, onView, onAdd }: Props) {
         <div className="kride-chat-poi__name">{poi.name}</div>
         {poi.address && <div className="kride-chat-poi__address">{poi.address}</div>}
         <div className="kride-chat-poi__actions">
-          <KrideButton variant="ghost" size="sm" className="kride-chat-poi__btn" onClick={() => onView?.(poi)}>
+          {onView&&<KrideButton variant="ghost" size="sm" className="kride-chat-poi__btn" onClick={() => onView(poi)}>
             지도에서 보기
-          </KrideButton>
-          <KrideButton variant="primary" size="sm" className="kride-chat-poi__btn" onClick={() => onAdd?.(poi)}>
+          </KrideButton>}
+          {Number.isFinite(poi.lat)&&Number.isFinite(poi.lng??poi.lon)&&<a href={`https://map.kakao.com/link/map/${encodeURIComponent(poi.name)},${poi.lat},${poi.lng??poi.lon}`} target="_blank" rel="noopener noreferrer">지도 열기</a>}
+          {onAdd&&<KrideButton variant="primary" size="sm" className="kride-chat-poi__btn" onClick={() => onAdd(poi)}>
             일정에 담기
-          </KrideButton>
+          </KrideButton>}
         </div>
       </div>
     </div>

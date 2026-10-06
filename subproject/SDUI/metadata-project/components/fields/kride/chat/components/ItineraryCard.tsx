@@ -14,7 +14,7 @@ export default function ItineraryCard({ itinerary, onApply }: Props) {
   const days = itinerary.days ?? [];
 
   const totalStops = days.reduce(
-    (acc, day) => acc + (day.morning?.places?.length ?? 0) + (day.afternoon?.places?.length ?? 0),
+    (acc, day) => acc + (day.morning?.places?.length ?? 0) + (day.afternoon?.places?.length ?? 0) + (day.evening?.places?.length??0),
     0,
   );
 
@@ -36,7 +36,7 @@ export default function ItineraryCard({ itinerary, onApply }: Props) {
       <div className="kride-chat-itinerary__days">
         {days.map((day, index) => {
           const isOpen = openDay === index;
-          const stops = (day.morning?.places?.length ?? 0) + (day.afternoon?.places?.length ?? 0);
+          const stops = (day.morning?.places?.length ?? 0) + (day.afternoon?.places?.length ?? 0) + (day.evening?.places?.length??0);
 
           return (
             <div key={index} className="kride-chat-itinerary__day">
@@ -55,6 +55,7 @@ export default function ItineraryCard({ itinerary, onApply }: Props) {
                   {([
                     ['오전', day.morning] as const,
                     ['오후', day.afternoon] as const,
+                    ['저녁', day.evening] as const,
                   ]).map(([label, slot]) => (
                     <div key={label} className="kride-chat-itinerary__slot">
                       <div className="kride-chat-itinerary__slot-label">{label}</div>
@@ -63,6 +64,7 @@ export default function ItineraryCard({ itinerary, onApply }: Props) {
                           <span className="kride-chat-itinerary__place-dot" />
                           <div>
                             <div className="kride-chat-itinerary__place-name">{place.name}</div>
+                            {Number.isFinite(place.lat)&&Number.isFinite(place.lng??(place as any).lon)&&<a href={`https://map.kakao.com/link/map/${encodeURIComponent(place.name)},${place.lat},${place.lng??(place as any).lon}`} target="_blank" rel="noopener noreferrer">지도 열기</a>}
                             {(place.desc || place.description) && (
                               <div className="kride-chat-itinerary__place-desc">
                                 {place.desc ?? place.description}
@@ -72,13 +74,13 @@ export default function ItineraryCard({ itinerary, onApply }: Props) {
                         </div>
                       ))}
 
-                      {(slot?.restaurants && slot.restaurants.length > 0) && (
+                      {('restaurants' in (slot??{}) && (slot as any)?.restaurants?.length > 0) && (
                         <div className="kride-chat-itinerary__restaurants">
                           <div className="kride-chat-itinerary__restaurants-label">
                             {label} 주변 맛집
                           </div>
                           <div className="kride-chat-itinerary__restaurants-body">
-                            {slot.restaurants.map((restaurant) => (
+                            {(slot as any).restaurants.map((restaurant: {tag:string;name:string;rating:number}) => (
                               `[${restaurant.tag}] ${restaurant.name}(${restaurant.rating})`
                             )).join(', ')}
                           </div>
@@ -93,9 +95,9 @@ export default function ItineraryCard({ itinerary, onApply }: Props) {
         })}
       </div>
 
-      <KrideButton variant="primary" size="lg" className="kride-chat-itinerary__apply" onClick={() => onApply?.(itinerary)}>
+      {onApply&&<KrideButton variant="primary" size="lg" className="kride-chat-itinerary__apply" onClick={() => onApply(itinerary)}>
         FOCUS 화면에 적용
-      </KrideButton>
+      </KrideButton>}
     </div>
   );
 }

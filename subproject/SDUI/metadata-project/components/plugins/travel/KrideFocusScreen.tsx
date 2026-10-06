@@ -129,6 +129,8 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
                 return {
                     ...prev,
                     itinerary: krideItinerary.data?.itinerary,
+                    source_pois:krideItinerary.data?.source_pois,
+                    scopeNotice:krideItinerary.data?.scopeNotice,
                     markers,
                     mapData: {
                         ...prev?.mapData,
@@ -186,6 +188,7 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
 
     return (
         <div className={`page-wrap ${screenId}`}>
+            {combineData.scopeNotice&&<p className="kride-chat-scope">{combineData.scopeNotice}</p>}
             <SduiRenderer
                 screenId={screenId}
                 metadata={s.metadata}
