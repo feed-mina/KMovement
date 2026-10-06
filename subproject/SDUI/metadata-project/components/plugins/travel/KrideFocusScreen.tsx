@@ -129,6 +129,8 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
                 return {
                     ...prev,
                     itinerary: krideItinerary.data?.itinerary,
+                    source_pois:krideItinerary.data?.source_pois,
+                    scopeNotice:krideItinerary.data?.scopeNotice,
                     markers,
                     mapData: {
                         ...prev?.mapData,

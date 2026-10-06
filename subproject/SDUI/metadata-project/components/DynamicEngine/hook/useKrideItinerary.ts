@@ -111,7 +111,7 @@ export function useKrideItinerary(
                     purposes: Array.isArray(formData?.purposes)
                         ? formData.purposes
                         : [],
-                    budget: formData?.budget ?? { min: 30000, max: 2000000 },
+                    budget: Array.isArray(formData?.budget) ? {min:formData.budget[0],max:formData.budget[1]} : formData?.budget ?? { min: 30000, max: 2000000 },
                 };
 
                 trackEvent('preferences_complete', {
