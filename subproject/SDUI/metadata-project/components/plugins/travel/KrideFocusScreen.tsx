@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from 'next/navigation';
 import Skeleton from "@/components/utils/Skeleton";
 import { useScreenGuard } from "@/components/screens/useScreenGuard";
 import { useSduiScreen } from "@/components/screens/useSduiScreen";
@@ -16,6 +17,7 @@ import ItineraryLoadingPanel from "@/components/fields/kride/ItineraryLoadingPan
 // AI 일정 추천 훅, 챗봇 실시간 반영, 상태 패널, 플로팅 챗 모달을 담당한다.
 // 코어 라우터(page.tsx)에서 이 로직을 걷어내기 위한 격리 지점이다.
 export default function KrideFocusScreen({ screenId, refId }: ScreenControllerProps) {
+    const router = useRouter();
     const { isLoading, blocked } = useScreenGuard(screenId);
     const s = useSduiScreen(screenId, refId);
     const krideItinerary = useKrideItinerary(screenId, s.formData);
@@ -171,10 +173,12 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
                 <RaiStatePanel
                     state="sad"
                     eyebrow="K-RIDE AI"
-                    title="코스를 못 찾았어요"
+                    title={krideItinerary.requiresLogin ? '로그인이 필요해요' : '코스를 못 찾았어요'}
                     description={krideItinerary.error}
                 >
-                    <KrideButton onClick={() => window.location.reload()}>다시 시도</KrideButton>
+                    <KrideButton onClick={() => krideItinerary.requiresLogin ? router.push('/view/LOGIN_PAGE') : window.location.reload()}>
+                        {krideItinerary.requiresLogin ? '로그인하기' : '다시 시도'}
+                    </KrideButton>
                 </RaiStatePanel>
             </div>
         );

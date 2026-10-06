@@ -60,6 +60,7 @@ interface KrideItineraryResult {
     data: { itinerary: any[]; markers: any[]; mapData: Record<string, any>; [key: string]: any } | null;
     isLoading: boolean;
     error: string | null;
+    requiresLogin: boolean;
 }
 
 /**
@@ -73,6 +74,7 @@ export function useKrideItinerary(
     const [data, setData] = useState<KrideItineraryResult["data"]>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [requiresLogin, setRequiresLogin] = useState(false);
     const calledRef = useRef(false);
 
     const isFocus = screenId === "KRIDE_FOCUS";
@@ -135,6 +137,7 @@ export function useKrideItinerary(
                 });
             } catch (err: any) {
                 console.error("[useKrideItinerary]", err);
+                setRequiresLogin(err?.message === 'login_required');
                 setError(toUserMessage(err));
                 const message = String(err?.message || 'unknown');
                 trackEvent('itinerary_error', {
@@ -151,8 +154,8 @@ export function useKrideItinerary(
     }, [isFocus, hasFormData]); // eslint-disable-line react-hooks/exhaustive-deps
 
     if (!isFocus) {
-        return { data: null, isLoading: false, error: null };
+        return { data: null, isLoading: false, error: null, requiresLogin: false };
     }
 
-    return { data, isLoading, error };
+    return { data, isLoading, error, requiresLogin };
 }
