@@ -46,7 +46,9 @@ export default function SelectionCard({ id, meta, data, onChange, onAction, form
             : "bg-gray-800 text-gray-200 border-gray-600 hover:border-gray-300 hover:bg-gray-700"}
           ${disabled && !selected ? "opacity-40" : ""}
         `}
-        onClick={handleClick}
+        role="button" tabIndex={disabled ? -1 : 0} aria-pressed={selected} aria-disabled={disabled}
+      onKeyDown={(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();handleClick();}}}
+      onClick={handleClick}
       >
         {data?.name ?? ""}
       </div>
@@ -58,6 +60,8 @@ export default function SelectionCard({ id, meta, data, onChange, onAction, form
       className={`selection-card relative flex flex-col items-center gap-1 cursor-pointer transition-opacity ${
         disabled ? "opacity-40 cursor-not-allowed" : ""
       }`}
+      role="button" tabIndex={disabled ? -1 : 0} aria-pressed={selected} aria-disabled={disabled}
+      onKeyDown={(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();handleClick();}}}
       onClick={handleClick}
     >
       <div className={`relative w-24 h-24 ${mode === "circle" ? "rounded-full" : "rounded-lg"} overflow-hidden`}>

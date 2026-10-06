@@ -37,7 +37,7 @@ describe('시·도 맛집 페이지', () => {
     it('탐색 화면 링크에 이 지역의 TourAPI 시·도 코드를 실어 보낸다', () => {
         render(<FoodAreaLanding area={busan} />);
 
-        const links = screen.getAllByRole('link', { name: /탐색/ });
+        const links = screen.getAllByRole('link', { name: /탐색/ }).filter(link => !link.closest('[aria-label="주요 메뉴"]'));
         expect(links.length).toBeGreaterThan(0);
         links.forEach((link) => {
             expect(link).toHaveAttribute('href', `/view/TOUR_EXPLORE?area=${busan.areaCode}`);

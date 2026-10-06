@@ -26,6 +26,7 @@ export default function PurposeCard({ id, meta, data, onChange, onAction, formDa
     <button
       id={id}
       type="button"
+      aria-pressed={selected}
       onClick={handleClick}
       className={`purpose-card flex items-center gap-3 px-5 py-4 rounded-xl border-2 w-full transition-all
         ${selected
