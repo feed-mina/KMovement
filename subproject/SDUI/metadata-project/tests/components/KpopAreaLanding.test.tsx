@@ -18,7 +18,7 @@ describe('K-POP 허브', () => {
     it('페이지가 없는 지역은 탐색 화면으로 안내한다', () => {
         render(<KpopHubLanding />);
         expect(screen.getByText(/아직 페이지가 없는 지역의 성지는/)).toBeInTheDocument();
-        screen.getAllByRole('link', { name: /탐색/ }).forEach((link) => {
+        screen.getAllByRole('link', { name: /탐색/ }).filter(link => !link.closest('[aria-label="주요 메뉴"]')).forEach((link) => {
             expect(link).toHaveAttribute('href', '/view/TOUR_EXPLORE?category=HOLY');
         });
     });
@@ -37,7 +37,7 @@ describe('K-POP 시·도 페이지', () => {
         seoul.holySpots.forEach((spot) => {
             expect(screen.getByRole('heading', { name: spot.name })).toBeInTheDocument();
         });
-        screen.getAllByRole('link', { name: /탐색/ }).forEach((link) => {
+        screen.getAllByRole('link', { name: /탐색/ }).filter(link => !link.closest('[aria-label="주요 메뉴"]')).forEach((link) => {
             expect(link).toHaveAttribute('href', `/view/TOUR_EXPLORE?area=${seoul.areaCode}&category=HOLY`);
         });
     });
