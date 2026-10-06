@@ -37,7 +37,7 @@ export function registerTravelPlugin(): void {
     registerComponent("ITINERARY_PANEL", ItineraryPanel);
     registerComponent("KRIDE_NEXT_BTN", KrideNextButton, { needsFormData: true });
     registerComponent("KRIDE_WARNING", KrideWarningToast);
-    registerComponent("KRIDE_SELECTION_COUNTER", KrideSelectionCounter, { needsFormData: true });
+    registerComponent("KRIDE_SELECT_COUNT", KrideSelectionCounter, { needsFormData: true });
     registerComponent("TYPEWRITER_TEXT", TypewriterText);
     registerComponent("KRIDE_CHAT", KrideChatComponent);
 

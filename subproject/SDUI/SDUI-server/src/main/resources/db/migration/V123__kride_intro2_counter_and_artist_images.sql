@@ -1,7 +1,8 @@
 -- V123: KRIDE_INTRO2(아티스트 선택) 벤치마킹 G3 반영.
 --
 -- 근거: work-map-guide/ui-benchmark-20261006-165751-six-screens/kride-six-screens-ui-spec.md §3-2
---   1) 선택 수/상한 카운터가 없었다 → KRIDE_SELECTION_COUNTER 행 추가 ("2 / 5 선택")
+--   1) 선택 수/상한 카운터가 없었다 → KRIDE_SELECT_COUNT 행 추가 ("2 / 5 선택")
+--      (ui_metadata.component_type 은 varchar(20) → 20자 이하 이름만 가능)
 --   2) 다음 버튼에 하한 검사가 없었다 → component_props 로 checkKey/minCount 부여
 --      (프론트 KrideNextButton 은 하한 미만이면 숨기지 않고 비활성 + 이유 문구로 보여준다)
 --   3) 부제 문구에 하한을 함께 적는다
@@ -25,7 +26,7 @@ INSERT INTO ui_metadata
   (screen_id, component_id, component_type, label_text, sort_order, ref_data_id, parent_group_id,
    group_direction, css_class, action_type, action_url, data_api_url, data_sql_key, is_readonly, is_visible, component_props)
 VALUES
-  ('KRIDE_INTRO2', 'intro2_counter', 'KRIDE_SELECTION_COUNTER', '', 4, NULL, 'intro2_root',
+  ('KRIDE_INTRO2', 'intro2_counter', 'KRIDE_SELECT_COUNT', '', 4, NULL, 'intro2_root',
    NULL, '', NULL, NULL, NULL, NULL, true, 'true',
    '{"checkKey":"selectedArtists","min":1,"max":5,"unit":"명"}');
 
