@@ -12,3 +12,5 @@
 .kride-site-content :is(.group-intro1_root,.group-intro2_root,.group-intro3_root,.group-intro4_root,.group-intro5_root)>div:first-child,.kride-site-content .kride-intro1-title,.kride-site-content .card-label{color:var(--text-strong)}
 .kride-site-content [role=button][aria-pressed=false],.kride-site-content .purpose-card[aria-pressed=false]{background:var(--surface-subtle);border-color:var(--border-hair);color:var(--text-body)}
 .kride-site-content [role=button][aria-pressed=true]{border-color:var(--semantic-accent);background:var(--semantic-accent-soft);color:var(--text-strong)}
+
+.kride-site-header nav>a,.kride-more summary{min-height:48px;display:flex;align-items:center}.kride-more[open]>summary{background:var(--surface-subtle,#f5f1ea)}@media(max-width:750px){.kride-more div{right:auto;left:0}}
