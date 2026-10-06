@@ -25,6 +25,14 @@ describe('CPU chat proxy', () => {
       body: JSON.stringify({ message: 'hi' }),
     }));
   });
+  it('accepts the configured HTTPS origin behind an HTTP reverse proxy', async () => {
+    process.env.KRIDE_SITE_ORIGIN='https://site.test';
+    (global.fetch as jest.Mock).mockResolvedValueOnce(Response.json({isLoggedIn:false}));
+    const req=new Request('http://internal/api/kride/chat/stream',{method:'POST',headers:{origin:'https://site.test'},body:JSON.stringify({message:'hi'})}) as any;
+    expect((await POST(req)).status).toBe(401);
+    const foreign=new Request('http://internal/api/kride/chat/stream',{method:'POST',headers:{origin:'https://foreign.test'},body:JSON.stringify({message:'hi'})}) as any;
+    expect((await POST(foreign)).status).toBe(403);
+  });
   it('blocks guests before CPU requests', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(Response.json({ isLoggedIn: false }));
     expect((await POST(request())).status).toBe(401); expect(global.fetch).toHaveBeenCalledTimes(1);
