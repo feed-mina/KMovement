@@ -6,11 +6,12 @@ import api from '@/services/axios';
 import { useAuth } from '@/context/AuthContext';
 import Skeleton from '@/components/utils/Skeleton';
 import type { ScreenControllerProps } from './types';
+import { clearLoginReturn, rememberLoginReturn, safeLoginReturn } from '@/lib/kride/loginReturn';
 
 function LoginScreen() {
     const router = useRouter();
-    const search=useSearchParams();const rawReturn=search.get('returnTo');
-    const returnTo=rawReturn?.startsWith('/view/')&&!rawReturn.includes('://')&&!rawReturn.includes('\\')?rawReturn:'/view/MY_PAGE';
+    const search=useSearchParams();
+    const returnTo=safeLoginReturn(search.get('returnTo'));
     const { isLoggedIn, isLoading, login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -36,6 +37,7 @@ function LoginScreen() {
             });
             const me = await api.get('/api/auth/me');
             if (!me.data?.isLoggedIn) throw new Error('로그인 상태를 확인하지 못했습니다.');
+            clearLoginReturn();
             login(me.data);
             router.replace(returnTo);
         } catch (requestError: any) {
@@ -90,7 +92,10 @@ function LoginScreen() {
                 <button
                     className="auth-flow-button kakao"
                     type="button"
-                    onClick={() => window.location.assign('/api/kakao/authorize?state=web')}
+                    onClick={() => {
+                        rememberLoginReturn(returnTo);
+                        window.location.assign('/api/kakao/authorize?state=web');
+                    }}
                 >
                     카카오로 로그인
                 </button>
