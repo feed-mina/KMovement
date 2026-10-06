@@ -1,0 +1,14 @@
+{
+  "runtime-package.tar.gz": {
+    "sha256": "37986d2867907f7f4df6b3ef8135362146a6590edb339df25065f8bedaff4467",
+    "bytes": 1071576555
+  },
+  "base-image.tar.gz": {
+    "sha256": "2abab919752a70c8d1428d2e07f04ce11602897b48151f4ee23252cfb0852efa",
+    "bytes": 47925930
+  },
+  "review-bundle.tar.gz": {
+    "sha256": "84c30a8283937cd23b8352a434ef55f8a9087010b629543fbfc268520ef9be56",
+    "bytes": 1652830
+  }
+}

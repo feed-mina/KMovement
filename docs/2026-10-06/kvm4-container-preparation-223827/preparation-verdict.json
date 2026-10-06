@@ -1,0 +1,50 @@
+{
+  "stage": "same-host restricted container preparation and load-only boundary checks completed",
+  "executionAllowed": false,
+  "userSelectedSameHost": true,
+  "separateVPSClaimed": false,
+  "modelInferenceExecuted": false,
+  "chromaClientCreated": false,
+  "pilotSearchExecuted": false,
+  "sourceV2Sha256": "f2e47aa5ba6025203eaa860769d06bac09d0461d224e20120c629f696715fadd",
+  "baseImage": {
+    "Id": "sha256:d29f48a31a8b408ed19272ca1e7b10ebae13b240a27e862d3d4217c528e2e0c3",
+    "RepoDigests": [
+      "python@sha256:d29f48a31a8b408ed19272ca1e7b10ebae13b240a27e862d3d4217c528e2e0c3"
+    ],
+    "Architecture": "amd64",
+    "Os": "linux"
+  },
+  "artifactFiles": 27466,
+  "artifactBytes": 2152543057,
+  "boundaryChecks": {
+    "executionDisabled": true,
+    "nonroot": true,
+    "zeroCapsAndNoNewPrivileges": true,
+    "seccompActive": true,
+    "privilegeEscalationDenied": true,
+    "readOnlyInputsAndRoot": true,
+    "boundedOutputWritable": true,
+    "noDockerSocketOrHostCanary": true,
+    "noIPv4IPv6TCPUDP": true,
+    "dnsDenied": true,
+    "oneCPU": true,
+    "fourGiBNoSwap": true,
+    "pidsLimited": true
+  },
+  "dependencyCheck": {
+    "exitCode": 0,
+    "stdout": "No broken requirements found.",
+    "stderr": ""
+  },
+  "localArchivesVerified": true,
+  "productionContainerStatesUnchanged": true,
+  "separatePilotApprovalRequired": true,
+  "automaticSearchRunnerInstalled": false,
+  "providerSnapshotCreated": false,
+  "remaining": [
+    "review prepared evidence",
+    "separate explicit approval tied to manifests and 1000 candidates / 120 questions",
+    "implement and review search-only runner before its authorized launch"
+  ]
+}

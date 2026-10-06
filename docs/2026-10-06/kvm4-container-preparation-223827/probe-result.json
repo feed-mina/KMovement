@@ -1,0 +1,932 @@
+{
+  "checks": {
+    "executionDisabled": true,
+    "nonroot": true,
+    "zeroCapsAndNoNewPrivileges": true,
+    "seccompActive": true,
+    "privilegeEscalationDenied": true,
+    "readOnlyInputsAndRoot": true,
+    "boundedOutputWritable": true,
+    "noDockerSocketOrHostCanary": true,
+    "noIPv4IPv6TCPUDP": true,
+    "dnsDenied": true,
+    "oneCPU": true,
+    "fourGiBNoSwap": true,
+    "pidsLimited": true
+  },
+  "writes": {
+    "/runtime/.write-probe": 30,
+    "/model/.write-probe": 30,
+    "/inputs/.write-probe": 30,
+    "/etc/.write-probe": 30
+  },
+  "networkErrnos": {
+    "ipv4_tcp": 101,
+    "ipv4_udp": 101,
+    "ipv6_tcp": 101,
+    "ipv6_udp": 101
+  },
+  "cgroup": {
+    "cpu.max": "100000 100000",
+    "memory.max": "4294967296",
+    "memory.swap.max": "0",
+    "pids.max": "128"
+  },
+  "environmentKeys": [
+    "ANONYMIZED_TELEMETRY",
+    "GPG_KEY",
+    "HF_HOME",
+    "HF_HUB_DISABLE_TELEMETRY",
+    "HF_HUB_OFFLINE",
+    "HOME",
+    "HOSTNAME",
+    "LANG",
+    "MKL_NUM_THREADS",
+    "OMP_NUM_THREADS",
+    "OPENBLAS_NUM_THREADS",
+    "PATH",
+    "PYTHONDONTWRITEBYTECODE",
+    "PYTHON_SHA256",
+    "PYTHON_VERSION",
+    "TOKENIZERS_PARALLELISM",
+    "TRANSFORMERS_OFFLINE"
+  ],
+  "uid": 65532,
+  "capEff": "0000000000000000",
+  "noNewPrivs": "1",
+  "seccomp": "2",
+  "modelForwardExecuted": false,
+  "chromaClientCreated": false,
+  "searchExecuted": false,
+  "dependencyCheck": {
+    "exitCode": 0,
+    "stdout": "No broken requirements found.",
+    "stderr": ""
+  },
+  "loadedNativeFiles": {
+    "/usr/local/bin/python3.11": {
+      "sha256": "22e747b1e8a04719d4af2094133a0479b33728d2e4d03ab01539064dc6f45cfb",
+      "bytes": 14480
+    },
+    "/usr/local/lib/python3.11/lib-dynload/termios.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "43a4cfc9104738f5b2a8edca1bed6c38d5cb68f4a5f84d0e52d144f6466be8e7",
+      "bytes": 35336
+    },
+    "/runtime/safetensors/_safetensors_rust.abi3.so": {
+      "sha256": "e6f17a9e9846bc2bc4ad94cc5431746b59785de3d2681ef2666e8890ae192dfb",
+      "bytes": 1223000
+    },
+    "/runtime/sklearn/preprocessing/_target_encoder_fast.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ec0eba08cd1febd7dd0a602852e3329d6faf36cd6542939c5324edbfb9943053",
+      "bytes": 494064
+    },
+    "/runtime/sklearn/preprocessing/_csr_polynomial_expansion.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "fc6674db8ddf1424acb1b7442d74e0337de1f4d65412fa6cb3f24aa0da1f98eb",
+      "bytes": 292112
+    },
+    "/runtime/sklearn/metrics/_pairwise_fast.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e0c9e8025fa8750b5d2404bcb51e9196d5ef4ea63e4dfb5ae23427d87a760029",
+      "bytes": 142369
+    },
+    "/runtime/sklearn/metrics/_pairwise_distances_reduction/_radius_neighbors_classmode.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "8e99e093b418e9341d444794a7e1869ac90cce51f6cd844e4d3a9d083de2a5fd",
+      "bytes": 175505
+    },
+    "/runtime/sklearn/utils/_vector_sentinel.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ec6d08bf483bbb3b5113093262733485b9f9bd329d42327473b61cfe72586f8f",
+      "bytes": 157600
+    },
+    "/runtime/sklearn/metrics/_pairwise_distances_reduction/_radius_neighbors.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "0b0f04b27abd7e8fc63a6fec9971d001885697a13d352ef222b044d889bb468a",
+      "bytes": 267513
+    },
+    "/runtime/sklearn/metrics/_pairwise_distances_reduction/_argkmin_classmode.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "29a3025b0e7ffc40ca9e0edd45cbdc09e6f6883e808248185880942ff05b9b6e",
+      "bytes": 150801
+    },
+    "/runtime/sklearn/metrics/_pairwise_distances_reduction/_middle_term_computer.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "8e506890c101be273f94c65fda32114082a96bff6053cb689fb1edab81b71409",
+      "bytes": 349824
+    },
+    "/runtime/sklearn/utils/_cython_blas.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "97c574d7fb1ac2e604f311b41ec5f45fd51125c60f59b39acf0dcd73c2e48829",
+      "bytes": 208304
+    },
+    "/runtime/sklearn/metrics/_pairwise_distances_reduction/_datasets_pair.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "f3d16f8f83ce39c49da90f2b09ed647b734b7d8fd298cadb492447b1551d180f",
+      "bytes": 345120
+    },
+    "/runtime/sklearn/metrics/_pairwise_distances_reduction/_base.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "251d5d82912cebb954459e8053a632c753753eaee4239e3b70a88c722bde34d7",
+      "bytes": 208881
+    },
+    "/runtime/sklearn/metrics/_pairwise_distances_reduction/_argkmin.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "6c8741b2b514f1905c9ecc6e3edf4043d6a292695abb2a82c438327e96657159",
+      "bytes": 241177
+    },
+    "/runtime/scikit_learn.libs/libgomp-e985bcbb.so.1.0.0": {
+      "sha256": "a43904e4fa297301d4640dc1bb3c8a3480b406f99e498eba9b1914b68aab604a",
+      "bytes": 253289
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_lsprof.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "8d2158258b3e7efc6c983e988438c5d617ec61a034e0a60e48c71b23a44a4a91",
+      "bytes": 27656
+    },
+    "/runtime/sklearn/utils/_sorting.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "c85d6dbc71fa800e6b073677d6ee027d558a5edbd7c6b406293c8d645814aef3",
+      "bytes": 84808
+    },
+    "/runtime/sklearn/metrics/_dist_metrics.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "c47cd8dd97c3debf4b0a879619ec054fccc6cb7d32fc878db683207430a0b319",
+      "bytes": 591216
+    },
+    "/runtime/sklearn/metrics/cluster/_expected_mutual_info_fast.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "4c45cb17b9930e2ad595e3f851ea5818a55b682056f2fa68bb5332c44556d979",
+      "bytes": 96552
+    },
+    "/runtime/sklearn/utils/murmurhash.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e0f2a14ed53c947b4d959b701849a4fe842be9ff44635d686789a2fd070c60f5",
+      "bytes": 110736
+    },
+    "/runtime/sklearn/utils/sparsefuncs_fast.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "8a1669864716aa76f2e89346bb61391bab06bd8d60197a4b65f009066c1127e5",
+      "bytes": 673560
+    },
+    "/runtime/sklearn/_cyutility.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "2b5cc912d180506db44f7032ac310d0cc27ddc63c8c699153e82dffc397e6742",
+      "bytes": 214872
+    },
+    "/runtime/sklearn/utils/_isfinite.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "9187516b5eae541f52de76af0dcdd6e38ecc004aead54ddaff774ee8952db0e7",
+      "bytes": 85048
+    },
+    "/runtime/scipy/ndimage/_ni_label.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "457db95cf7886ad7f7a263bf8b79359ea14d146a76b4c93f56b75f791fe7cf2f",
+      "bytes": 212424
+    },
+    "/runtime/scipy/ndimage/_nd_image.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "27b7ec31e85e104e94ffca3ece9b9a4cdfc67dbf23be38df6c153b874646bcd1",
+      "bytes": 171408
+    },
+    "/runtime/scipy/stats/_qmvnt_cy.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e88d907993d8b451c1d81806c71e5a574db6a31e3120481cb315d442ed4264bd",
+      "bytes": 131576
+    },
+    "/runtime/scipy/stats/_rcont/rcont.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "51ee570c2b61a3799ca41dad929d98b068c806463382c8100704aedba6e45c9f",
+      "bytes": 104296
+    },
+    "/runtime/scipy/stats/_qmc_cy.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d6d6ff9da4b9f769a8ba9f52d9978ac2c340f02f2eeffe340f39fd2a78c020ac",
+      "bytes": 131032
+    },
+    "/runtime/scipy/stats/_sobol.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "226d282c3f59e9e92e8b15533a6d25009303652bcf3032e5fc6b50b892888a51",
+      "bytes": 182408
+    },
+    "/runtime/scipy/sparse/csgraph/_reordering.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "25ef76e53c00a631c141a4485dabc16ef6127441b3214a712a789f9115cb6b23",
+      "bytes": 155312
+    },
+    "/runtime/scipy/sparse/csgraph/_matching.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "9632ce8441240e14353d125c9b10cfad723672d30198894ea7bb84118f5ce579",
+      "bytes": 192984
+    },
+    "/runtime/scipy/sparse/csgraph/_flow.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "2d28f9ba4271d2390725593ac56496fe48a8c979cad4041724f0ac201ea10b52",
+      "bytes": 197256
+    },
+    "/runtime/scipy/sparse/csgraph/_min_spanning_tree.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "953f766cc408903ee727a410fbd5936b4ff81ba3a08254f5c6e4ab999ff9f778",
+      "bytes": 100800
+    },
+    "/runtime/scipy/sparse/csgraph/_traversal.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "27559486eba58664c9d15e099842c34a5dfed8ba783d6c542663aa2f10661d9f",
+      "bytes": 344336
+    },
+    "/runtime/scipy/sparse/csgraph/_shortest_path.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "a9df5e4d9ba6a4f30c5777624fdc6cd8c31b6f588e70cbfd06e3ff9f16718cad",
+      "bytes": 554416
+    },
+    "/runtime/scipy/special/cython_special.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d6fe7a54ef77b8d998aa346c55b44c7766ecbdf18d54de564fd31cf90b82fac0",
+      "bytes": 2401608
+    },
+    "/runtime/scipy/sparse/csgraph/_tools.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "531bc246dbbea7d24ab9e95704be015c9a66b3126902676cb48b2b31f82e6313",
+      "bytes": 185440
+    },
+    "/runtime/scipy/stats/_ansari_swilk_statistics.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "0515f5b070b3473d2ccde7924f7e41986054e6875fb09aa5e318c0e6e3029f5a",
+      "bytes": 104032
+    },
+    "/runtime/scipy/stats/_stats_pythran.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "3f08b80f614564c14191ab0cefdd4ef731e7844876bd1f738e8eb7ba7e3e90cd",
+      "bytes": 189856
+    },
+    "/runtime/sklearn/utils/_openmp_helpers.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "2d965a728c1e9d8753d3870c4bfb4e514a5e501d48a179b751d85df68b6b21ae",
+      "bytes": 72481
+    },
+    "/runtime/scipy/stats/_biasedurn.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "a3c0f488225df82520b9fd79efa8ac1543b7d92cd0321cfced5cbdfeceae908b",
+      "bytes": 241480
+    },
+    "/runtime/scipy/stats/_stats.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "4f412e72394cc3c5e21e9268362f8974a162cf5d1b702f660686c2d5500c74dc",
+      "bytes": 514440
+    },
+    "/runtime/scipy/interpolate/_rgi_cython.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d54e4c5e93bb7088ff03827df430cbe89933dc20697f31f3c8430e7bc60acb38",
+      "bytes": 119656
+    },
+    "/runtime/scipy/interpolate/_rbfinterp_pythran.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "5ae8e0e21ca49a559ce3ecd82e80a7d5d05cb88b254588c07b658348fd9e0196",
+      "bytes": 247384
+    },
+    "/runtime/scipy/interpolate/_interpnd.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "162ddcd5f345417c34d32fc8622ef20e14d7119375176ecfc764471f6db54a7d",
+      "bytes": 242896
+    },
+    "/runtime/scipy/interpolate/_ppoly.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "459e7d5db30166559491da7bb58b2a1bdf244eec80301bfddcc3e59f14dce3bf",
+      "bytes": 218392
+    },
+    "/runtime/scipy/interpolate/_dierckx.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "a8bf877280f7823dfe52f0ec036772d02973dc66e6d61dab1eaef86fa106cbd4",
+      "bytes": 129361
+    },
+    "/runtime/scipy/interpolate/_dfitpack.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "45cc7391161a72211f5472c29879a6777a814326c67e5c4782118bf9a53a5ee0",
+      "bytes": 366793
+    },
+    "/runtime/scipy/interpolate/_fitpack.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "524301137269652b7015fc9290f3e5c2bc1c5e2ab0b62d618574ac28a680e785",
+      "bytes": 95561
+    },
+    "/runtime/scipy/integrate/_vode.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "660e7382288b286f31733ec18d46765bb240d2c2fde6eeb57cabec1853b89ef4",
+      "bytes": 519809
+    },
+    "/runtime/scipy/integrate/_odepack.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "7247be9de803c8588d045f63407245e943f47eaa8b76d80e7e12948e906dfba4",
+      "bytes": 478889
+    },
+    "/runtime/scipy/fft/_pocketfft/pypocketfft.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "31d812b267667ac86e8479efe62b70353290105a0f5139b5233fd8ea38d65e32",
+      "bytes": 1223848
+    },
+    "/runtime/scipy/linalg/_decomp_interpolative.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "59a9ae26e5eda0e7e77c99a839341ab2bf6b074163b7bc4783c032588092caeb",
+      "bytes": 766224
+    },
+    "/runtime/scipy/optimize/_highspy/_core.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "b259e36fe574c0eb8ea225641bad9378b5b24ee637558d6a0c7c607375251bc2",
+      "bytes": 6720872
+    },
+    "/runtime/scipy/stats/_levy_stable/levyst.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "f3d2234c3e490ab9669193ac126ddc0483098c1fd0544c472ea4fb22cf2a351a",
+      "bytes": 57280
+    },
+    "/runtime/scipy/integrate/_dop.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "5d1de25b4fafa293a74ec425a1c7a8554f77432b32f0b928b1838f5a9d4af366",
+      "bytes": 59352
+    },
+    "/runtime/scipy/integrate/_quadpack.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "396e2f70df5f1c752b2523feb61d26f0484c07826fb667290dbc4ff41ecaf53e",
+      "bytes": 119920
+    },
+    "/runtime/scipy/optimize/_pava_pybind.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "12491a7ffdba02ed8aa90ff6f44a62758b0ed03d02b03e425b4104652c7d9edf",
+      "bytes": 201520
+    },
+    "/runtime/scipy/optimize/_bglu_dense.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "f046a5024de96f2a1ed555847bab22b22e9353b0f1280856b37fd31c28b55a2c",
+      "bytes": 188776
+    },
+    "/runtime/scipy/_lib/_uarray/_uarray.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "df29055dbb67bcbbf69e2eeb2c00a92912477a8b86706066a797a277fe75e146",
+      "bytes": 111000
+    },
+    "/runtime/scipy/optimize/_highspy/_highs_options.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "7ba9fd6e4a9cff3570337c44c11ab953a66b00229610e6f7c6f96918d1d09c3b",
+      "bytes": 395784
+    },
+    "/runtime/scipy/optimize/_minpack.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d3b6a5d24677bc4b621a6bce40cc490eb6e8a5b14d9c85c2bf2716227d99df87",
+      "bytes": 94024
+    },
+    "/runtime/scipy/optimize/_slsqplib.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ff528471f0459e629e08a95b9afe37ce9df47ff60894db0e52d632224cca11f8",
+      "bytes": 458321
+    },
+    "/runtime/scipy/optimize/_moduleTNC.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "627610f5fd6121653c4036129ba0b7ca8592ca6afa76cd72230fbd854fddf656",
+      "bytes": 144608
+    },
+    "/runtime/scipy/optimize/_lbfgsb.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "76b945447f82ff92b60d59b14cb60036fc2fbf943be257f7263db00cae356211",
+      "bytes": 454033
+    },
+    "/runtime/scipy/optimize/_trlib/_trlib.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ac8a481f656a505afe409c26562eb9edbcadb95782cbdfb023f0401014ab77bf",
+      "bytes": 212457
+    },
+    "/runtime/scipy/spatial/transform/_rotation_cy.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "be598d7799fcbd8c2247a2ec76ed95d6646850f5ac523496638fe900a4afbcc4",
+      "bytes": 609976
+    },
+    "/runtime/scipy/spatial/_distance_pybind.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "2a335fa97ecae68db1f2ba5076fc279868d59d4087aa25d1de7b277af6bb2060",
+      "bytes": 586608
+    },
+    "/runtime/scipy/spatial/_qhull.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "993093e6f6bb607c0fbe9dc5e1848592a5aeeb7d7a1c24d0e89103340687a801",
+      "bytes": 945832
+    },
+    "/runtime/scipy/spatial/_ckdtree.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "9f52ae4aa5c1d36e0b3666428e85897c308b602a6076e4f462ae9bd888249f38",
+      "bytes": 790544
+    },
+    "/runtime/scipy/sparse/linalg/_propack.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ebc5b8e185331c73cf4b0eeccaf65b79d93ee7f8c4ee1f8715576f4965b44226",
+      "bytes": 552529
+    },
+    "/runtime/scipy/sparse/linalg/_eigen/arpack/_arpacklib.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "87e89eb55052e37ccf6bc3072bfe8c6373c2e425281d6243b220d6824eabebda",
+      "bytes": 609793
+    },
+    "/runtime/scipy/linalg/_flapack.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "39fb8e55d62b49eed79e918d5846c8035999ea85466509ad3dc758da2aed8efd",
+      "bytes": 2560561
+    },
+    "/runtime/scipy/optimize/_direct.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "015fc50f4ec50afed170d8bcb250519cd831d3ea5ed08f432b966d16a1cb837f",
+      "bytes": 47368
+    },
+    "/runtime/scipy/optimize/_group_columns.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e391143e5f0c584dd346e5a00c3c8e8d23281a6a17c16c5252a5745e2cf25e8c",
+      "bytes": 92256
+    },
+    "/runtime/scipy/spatial/transform/_rigid_transform_cy.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "97e949b8178baf522e7dc499b599ce65303dc2697b45505237693774e32c4881",
+      "bytes": 258384
+    },
+    "/runtime/scipy/sparse/linalg/_dsolve/_superlu.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d190577110967f76305c7742b4d224016fba2b377de6268001930ab3279496e4",
+      "bytes": 835729
+    },
+    "/runtime/scipy/linalg/_decomp_update.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ba0240026b5edd0f19fc1498bdd1fbcd6cc904ad0fab66346eaf036c965f3c5c",
+      "bytes": 325792
+    },
+    "/runtime/scipy/linalg/_matfuncs_expm.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "332a52bdbee5dd96edc0051714d3ba37c74518e8565cd444ba2036b1cae40580",
+      "bytes": 511433
+    },
+    "/runtime/scipy.libs/libquadmath-828275a7.so.0.0.0": {
+      "sha256": "71bdc2ec57ab2fc939360597968f73230426b1c6764048e62a2cb6c8d8c3a1fd",
+      "bytes": 272193
+    },
+    "/runtime/sklearn/utils/_heap.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "1066d13746ffe111f150d9dd70325d5a011afa1d036742712a7ac6d26edb07a1",
+      "bytes": 27144
+    },
+    "/runtime/scipy/spatial/_distance_wrap.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "5e778b35cdda1cddc67d21a362cfae6745c7b0299dfaedd4ca5d78035ce87ca6",
+      "bytes": 120824
+    },
+    "/runtime/scipy/linalg/cython_blas.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "9d5838502cfd7fea2cbdf16400735f5039234f985510f82cc105f1c1414291b6",
+      "bytes": 168449
+    },
+    "/runtime/scipy/linalg/_linalg_pythran.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "97df8980ad36f16e6d623e4721a7f0f9f621daff221d9365b73e0cb5113be0c3",
+      "bytes": 122792
+    },
+    "/runtime/scipy/linalg/_matfuncs_schur_sqrtm.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "29ef0f77a6e1fe99956b92fd60acb30f6c3bfb52ea5a65480bc7947ae987dca6",
+      "bytes": 486881
+    },
+    "/runtime/scipy.libs/libgfortran-8f1e9814.so.5.0.0": {
+      "sha256": "a95cc4ac4afad889f2d83088f46b5e6fa6cd5efd729db887e1e639147ec55b73",
+      "bytes": 2714697
+    },
+    "/runtime/scipy/spatial/_hausdorff.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "afcf41f3387d1848ab381cafd9298d72777ef4fe502f0656f1805aa462c406f6",
+      "bytes": 87328
+    },
+    "/runtime/scipy/linalg/_fblas.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "deea2995d0cad9cb44c36bf73bd94218e505bdd00d24d6712eb1383c4cfc0213",
+      "bytes": 1032665
+    },
+    "/runtime/scipy/special/_special_ufuncs.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "13bedcf260f072cd3c4c2d4d1c71f9980057c05189da2ec616893969db14edc1",
+      "bytes": 1654984
+    },
+    "/runtime/scipy.libs/libscipy_openblas-6cdc3b4a.so": {
+      "sha256": "8fb864c29cac4b25f6e2c139491ea96f2724dde42d51394f84e9c4a622e34790",
+      "bytes": 24805561
+    },
+    "/runtime/scipy/linalg/_batched_linalg.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d72599c0cdf4b148d09bce6261a8ec79603642163f59bf7e30f96c4fd4741859",
+      "bytes": 179137
+    },
+    "/runtime/scipy/special/_ufuncs_cxx.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d44b99cd9119d1600c8324cb9390bd70dbaa669e2732de46ad0f5461547f637e",
+      "bytes": 1910152
+    },
+    "/runtime/scipy/special/_ufuncs.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d52a02c24e621a04f707ca6020c6f9c6f571d2255188514d80debd265dc59939",
+      "bytes": 1531945
+    },
+    "/runtime/scipy/linalg/_solve_toeplitz.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "0127ca632eeb6e362fe27a8acae419b0748b5af5d6c6f02ba89b659355da2cc3",
+      "bytes": 124640
+    },
+    "/runtime/scipy/linalg/cython_lapack.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "558c7c8094dc7764f40cb1626428f1b6f8cd66042d6cdaffcfa070d6996272c4",
+      "bytes": 580569
+    },
+    "/runtime/scipy/linalg/_cythonized_array_utils.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "18fc439056a75862cef1b78491a314d55ef185c7cc4280e65130d5ce913bf880",
+      "bytes": 321656
+    },
+    "/runtime/scipy/special/_specfun.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d4258f68549f9c6f75d2fbc57906e478cff9e423cbbb7e090d23ef491dfcbe75",
+      "bytes": 228128
+    },
+    "/runtime/scipy/sparse/_sparsetools.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "61d0e4c335ab469e3e2745dbdd4e724caac96ce6a4407da3d68aed0f2ec3c84c",
+      "bytes": 4524560
+    },
+    "/runtime/scipy/linalg/_decomp_lu_cython.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "492be7ae828729110f4fe607498899e81af3084da4f6997c61a606b0ccabf6ad",
+      "bytes": 116568
+    },
+    "/runtime/scipy/special/_gufuncs.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "199fa03e7a91dfcf48cc427aeba70f4936cb8c9450f5135be61813506be77920",
+      "bytes": 891592
+    },
+    "/runtime/scipy/special/_ellip_harm_2.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "5522fe2ace933da385df1c4fbbd10cedef5f81c5360b5ef8dc09473f5ced6118",
+      "bytes": 130145
+    },
+    "/runtime/charset_normalizer/cd.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "a668d894ed31c2151b418c276fdb643ea8392a64808e12bb6f6403e00c06ec8b",
+      "bytes": 185776
+    },
+    "/runtime/scipy/ndimage/_rank_filter_1d.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ecda0c8b793a182ed4f6cb710e8c322e7875cf1456a448d558981d2d3b4db2d0",
+      "bytes": 26944
+    },
+    "/runtime/scipy/sparse/_csparsetools.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ddedde20f03812e5ba04b7a30cb91f8dcc26e8393235bc0d686554522d8f9c32",
+      "bytes": 479320
+    },
+    "/runtime/numpy/fft/_pocketfft_umath.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "2e78619c9326b3a2e1a61369371ebf257c3c644d209c50f4b641fe055f37167e",
+      "bytes": 539280
+    },
+    "/runtime/numpy/random/mtrand.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "3badc42eeb19cb0837bb5fd89ed792e14be2df6bc4005cf2f9bca0490f610ad6",
+      "bytes": 647216
+    },
+    "/runtime/numpy/random/_generator.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "336eca5889ed937b66fddf1790095b35ec4c61e3a35375f0d29a94bb1299a3ef",
+      "bytes": 835416
+    },
+    "/runtime/tokenizers/tokenizers.abi3.so": {
+      "sha256": "7c4ddf7ad4251a646d324151b4d698da59531fdd892ea3abd24a6f323fcb1d6b",
+      "bytes": 11317624
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_codecs_jp.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "21159e6c3fd36617883900dbdb49bfc0b4fb2d3150bd07faf2f5dd34423a1d3d",
+      "bytes": 268608
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_codecs_tw.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e4889cd896e778509d4c4eacfeeb2eb12feffbe5796c86275e44441e637bc531",
+      "bytes": 112960
+    },
+    "/runtime/grpc/_cython/cygrpc.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "7c11e45f20a0c236fcdaf9bddd6491348df1d57f88efb92232e4d31c28f99e58",
+      "bytes": 16628096
+    },
+    "/runtime/scipy/optimize/_lsq/givens_elimination.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "9e31f7d48dbb1cb86e90d292a5c5cdf5110341a39f2c5ef97e77e8b7ac00d197",
+      "bytes": 64416
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_codecs_hk.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "01e64716805994b7b5273c2a76e8188d23c7acf12fe1af0b67e6eaae98e7d38c",
+      "bytes": 158048
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_codecs_cn.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e90f4f9f8ed38560782428d7c2385b4c29ed1b8d8ec1971a4fe6781b03421b13",
+      "bytes": 153920
+    },
+    "/runtime/pydantic_core/_pydantic_core.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "4ac2f56180cbde0758f23ab5772f85b3cdd28e93e875962f1e3475dc7a3c50d3",
+      "bytes": 4671424
+    },
+    "/runtime/scipy/optimize/_lsap.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e76a1fdd731689e2aaafc1d6d7fa5dc80e57ab64a68250116c4bd2c99b9f5b15",
+      "bytes": 26776
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_codecs_kr.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "4e58ac1d58546fe22215b7956918ec4a191006190466b9cbeadc0f42bade32ba",
+      "bytes": 141632
+    },
+    "/runtime/charset_normalizer/md.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "c8beee3f6bbd27f7952c2875bd177d1c2e392178e8ee0d7feecdbd904b315ab3",
+      "bytes": 354984
+    },
+    "/runtime/numpy/random/_philox.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "1a866751156413cd95c38e3b4bd4f981919cc4692a75dc8f965505c1ce48c4de",
+      "bytes": 114512
+    },
+    "/runtime/numpy/random/_mt19937.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "6edbd3acc543aa58610f0e3eacf71e7343010d5721b1df2a2a4fee7bea48407c",
+      "bytes": 131072
+    },
+    "/runtime/scipy/spatial/_voronoi.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "c4ad555fa529190d439f4e03fed01318e0414beb3b98cd8421b7c0d1a393e042",
+      "bytes": 82448
+    },
+    "/runtime/numpy/random/_pcg64.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "cd16eef58424a339bb93a9eff61c7482229e23554cbf4089526e3bacd018ec98",
+      "bytes": 138584
+    },
+    "/runtime/numpy/random/_common.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "71d7971ef760a9e45c5c804b98bc3155d42d38837d4f287ab3bb41865d9954b1",
+      "bytes": 266808
+    },
+    "/runtime/numpy/random/bit_generator.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e0d931cd4694de2ca87ed2731dffb51a0dacdeaa160b6fd627bda678f182e157",
+      "bytes": 222528
+    },
+    "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6": {
+      "sha256": "2e6eef9a727f081f0d453b4e5e6cbd8b9ef8b6f86cbf7681cbad444d3b0b55c8",
+      "bytes": 1437848
+    },
+    "/runtime/numpy/random/_bounded_integers.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "a3ed3619fb0bb7a8a68e605d8219aee971878710a9c7588f043e725f1d05254e",
+      "bytes": 342536
+    },
+    "/runtime/scipy/_cyutility.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "18a80ec93130f6bde42aa8cb2c098248979a656352f9a24d18880eb865816438",
+      "bytes": 214968
+    },
+    "/runtime/google/_upb/_message.abi3.so": {
+      "sha256": "4ac1622d643ff188f4f355cc89a439f6881c397d766911e1246f9f4a215d051d",
+      "bytes": 421992
+    },
+    "/usr/local/lib/python3.11/lib-dynload/unicodedata.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "cf7c77fb894c0512d3210af6e653a51d26582be9db1177fc1f57ba1cbea7a0e1",
+      "bytes": 1131672
+    },
+    "/runtime/scipy/_lib/messagestream.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "858f61c9a563ad6a78af3f53ea304e657690aa058d12ecbef71b59484b2a8f48",
+      "bytes": 79600
+    },
+    "/runtime/regex/_regex.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d75b44faa5c251963105b3cab17f4f91b3ec35749181d4df518bc08c8962bcc6",
+      "bytes": 2572544
+    },
+    "/runtime/numpy.libs/libquadmath-96973f99-934c22de.so.0.0.0": {
+      "sha256": "6ed5137f412781ad7863439fb543613f620b43c32b63292a0029246162f5bbc6",
+      "bytes": 250985
+    },
+    "/runtime/scipy/special/_comb.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "840fe0ca8e2d2bd3c2fd3cdc2e6d2bae94f5d8fa3de97f21d2e3a1f1c70db44c",
+      "bytes": 58384
+    },
+    "/runtime/rpds/rpds.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "be6a965c619fc93dd16b4094ee63a73ad24e9a1e1915e5120679ea574ea7b7c6",
+      "bytes": 1056736
+    },
+    "/runtime/numpy.libs/libgfortran-040039e1-0352e75f.so.5.0.0": {
+      "sha256": "c6090048eccc763522c12ef016f81da6b627cb3a044f55cf0479a839c41c0980",
+      "bytes": 2833617
+    },
+    "/runtime/scipy/optimize/_zeros.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "371debc370e522e1d01142591ae6430dd43b30eb3c5ee7ca4fbe78e05b3646e6",
+      "bytes": 21400
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_codecs_iso2022.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "04e8f60b6e1d11f6bc734ce96a057d3cace19eba26032e58a2ef42a2bd20999f",
+      "bytes": 26944
+    },
+    "/runtime/orjson/orjson.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "6670e814be603f49859e58f43526320c3fff8c58ca412ec1cafb88ed7844986c",
+      "bytes": 241600
+    },
+    "/runtime/numpy.libs/libscipy_openblas64_-32a4b2a6.so": {
+      "sha256": "05c9f9eb89ee68a4b9d673184fa91c99587e736392c0c2d49180a8aa5303d080",
+      "bytes": 25409073
+    },
+    "/usr/lib/x86_64-linux-gnu/libssl.so.3": {
+      "sha256": "9aec161fdbc82d3e4280f5084843118939f1f4acc53c98ec963de03cfe812fad",
+      "bytes": 688160
+    },
+    "/runtime/numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "1535fbed1e9ac6b717e72ad9bd5c20b9f0536a21084fcadc40c00255a8f35d1d",
+      "bytes": 10407681
+    },
+    "/runtime/numpy/random/_sfc64.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "91cca65548a69ed7851e0925e0ba3427a988b756027d0ce4cd4846c33f387a26",
+      "bytes": 87792
+    },
+    "/runtime/scipy/_lib/_ccallback_c.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "be952495f2e3563ca76cc176238e554b8c369abac0048dc2dfa0d437a52ba12a",
+      "bytes": 95176
+    },
+    "/runtime/pybase64/_pybase64.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "01ebc5d27a42acc5101cdeb37e41f86405bb87246c2f5db6f80be80878beb8eb",
+      "bytes": 234024
+    },
+    "/runtime/yaml/_yaml.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "aa9bb0d7b261b8266ababd9e19f5bf2f505d9a84ba360ce16502297e8a033765",
+      "bytes": 2650176
+    },
+    "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.30": {
+      "sha256": "e7848e32af4932840ba775169041759a2a8dd5a008af360e5c55bce506eebcf4",
+      "bytes": 2190440
+    },
+    "/runtime/torch/lib/libtorch_cpu.so": {
+      "sha256": "ba36052e5eb1e47a9bc99a190e5b89381a9ebc581f03209c6caa3fad155199da",
+      "bytes": 438232064
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_statistics.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "c3e2654a09c8c9de7795fb3abaed345fa7a36182dd15205442feb5705288b88d",
+      "bytes": 14480
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_multibytecodec.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ee5eb9eacddbcb7b9e7995c7cdc325493ae5868b3e08bf55d2577177860803d6",
+      "bytes": 46088
+    },
+    "/runtime/sklearn/__check_build/_check_build.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "11e4b19c6af7fd5578d63a8cc540bbbb94d4ba04c6771817ca3fdc36354ff9d6",
+      "bytes": 40304
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_zoneinfo.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d423593c7c5299133298839aef2489168f505e8e515a529bde1a0359a733b326",
+      "bytes": 32096
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_sqlite3.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "78af79da4b93a16f29de21f060920295347018f5082460e01ce80d7fa5789244",
+      "bytes": 119384
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_decimal.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "2effb9591f847049338da1fe49407e8f75f20278f9dba70864b3e7efe28b3841",
+      "bytes": 278168
+    },
+    "/runtime/markupsafe/_speedups.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ea585a4a49ddd4e967c1bb3b9809ea09e3833bee20bb790edc5b361b39198855",
+      "bytes": 43936
+    },
+    "/runtime/torch/lib/libtorch_python.so": {
+      "sha256": "923d6b300ec802031c3a0cbac9fb7e73c8dfd1a9277261f7a00f40820f9ed74e",
+      "bytes": 32544192
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_asyncio.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "3e5930c17c661f6cea3082f4893b3e185580619b1bb3b61b0382a63af2eb341b",
+      "bytes": 62000
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_posixshmem.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "af723dbd0860e91f6fe76ba8492050930e4cfacc2e64ce254a59cc000a1de753",
+      "bytes": 14840
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_multiprocessing.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "3948c1d0065cc78d3579a455e6a869dc535065997670ab6a78a21ca0ead90088",
+      "bytes": 20064
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_ssl.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "472e68b876420d76e7a57d5bc170f2766c2b1116738d3a779ac29ca135b00823",
+      "bytes": 212776
+    },
+    "/usr/lib/x86_64-linux-gnu/libuuid.so.1.3.0": {
+      "sha256": "94176513740e4b8d24a68e6c37a43986b488f2910c9eaa34f69bd7ba8c49307d",
+      "bytes": 34872
+    },
+    "/usr/local/lib/python3.11/lib-dynload/cmath.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "42d82d481d438a2b0031f9c818a30a3e15b1ae53a53792c10919a00c752c5a90",
+      "bytes": 40184
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_queue.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "670d8ac33587e5d8c9a02ff9cc8c4e431595f84ccb86f6b279d8ab865f311069",
+      "bytes": 19576
+    },
+    "/usr/local/lib/python3.11/lib-dynload/mmap.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "f6097b673d2dde805abb05222292f528bea7672fa63a1498d67b43072cceed9a",
+      "bytes": 28296
+    },
+    "/runtime/torch/lib/libc10.so": {
+      "sha256": "9c142dbe5f1c5291e57605586bf22eaa07cd27da720825b1cf02fc2f6eb8047e",
+      "bytes": 1553824
+    },
+    "/runtime/torch/lib/libgomp.so.1": {
+      "sha256": "dcb9bd5cc517b0a23cf5923864abeee11ee00ba11abe9b3089388f50f7ba4628",
+      "bytes": 2115417
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_uuid.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "6560893d36cd2f6969c9d4d7ef811f8118105ed6179ab6f888a97ce053fc7d84",
+      "bytes": 14512
+    },
+    "/usr/local/lib/python3.11/lib-dynload/grp.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e1677ab8a70a081a8b57b09c00a6c1c03990a3ba091b06fd8137433b2f85744f",
+      "bytes": 15128
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_heapq.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "02f59649b7cab4df634370898fa43f12ff359ba79a386e86bd2bf6de038633c4",
+      "bytes": 26904
+    },
+    "/runtime/numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ff1141bebaf0b681b329dfdab7153a78eb2b7c12e54e365ed70d385c495ec792",
+      "bytes": 231785
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_contextvars.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "55ba81c458e959b5b8bd1c04786b1b8f6bd729a74cb679e6bc77b672c4160642",
+      "bytes": 14328
+    },
+    "/usr/lib/x86_64-linux-gnu/librt.so.1": {
+      "sha256": "41c72def458b8cfb6aab96a7dbada7454dd216d89aac65fb085eb52bead51def",
+      "bytes": 14640
+    },
+    "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+      "sha256": "2bd1552c47799ef67e701e81d4383061fd76059868e446e63560f0dd0d5ec14e",
+      "bytes": 125312
+    },
+    "/runtime/torch/lib/libshm.so": {
+      "sha256": "7846821a00be2750f0c718c69396bd3c3e54924d52ecce347ab610ee9079149a",
+      "bytes": 41328
+    },
+    "/runtime/torch/lib/libtorch.so": {
+      "sha256": "28b3d3926e0674eda7dcdf26c27dfd05cb455d681d11cb84fdbf7e0df72f3f7b",
+      "bytes": 8032
+    },
+    "/usr/lib/x86_64-linux-gnu/libffi.so.8.1.2": {
+      "sha256": "983e72b7e964f3db43fe8a3dc8b338e731fade6ca38df6867aebb58186aaeb68",
+      "bytes": 43480
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_ctypes.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "b4556e7003d126ef1d7f1a320aa2043ae2def1ef894e4fa38ee07db5b907dccf",
+      "bytes": 119208
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_typing.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "be3ad3df8f9d2208b03571f702b0eb58ca1e7f9bf5a742210eea483213b75715",
+      "bytes": 14296
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_datetime.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "f575124dba01c1558c09294decada46b17fe21d86c4dac19a25ce1296644df8b",
+      "bytes": 104912
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_sha512.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "f57f49958e4512cabad82bce2f2a2ecfdbe71794260ef205087c49423556257e",
+      "bytes": 31928
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_random.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "416e5880725923a1a37c4d7789899662da8b766b9ece90d947c984e113742b15",
+      "bytes": 23208
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_bisect.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d40afc91244ba2ec72acaf3199a32bdb8c1717d4bf3e7d01de70318db760f703",
+      "bytes": 15064
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_struct.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "7aefcbf90eddedb5960519236de44be0d7e5604bbf2871d178fa1a2bb277c21f",
+      "bytes": 50776
+    },
+    "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.1": {
+      "sha256": "983464a4e0e840f85b519cb7b6153b60c75d6473f4d4c32a5a37b3f9894c52c3",
+      "bytes": 190456
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_lzma.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "7e3d94d4395d3fe2260437300bfa4489b1a4bbeed5e5c30543916cdad2624fc5",
+      "bytes": 44952
+    },
+    "/usr/lib/x86_64-linux-gnu/libbz2.so.1.0.4": {
+      "sha256": "e4f501c8bd22390e42422691093d8af4e744a3e854809b809948055e8b08bda5",
+      "bytes": 74688
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_bz2.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "fcd684c9299bb9944b4320c3cbf9913ffa649971de0bf0bc7774197f42aea767",
+      "bytes": 27832
+    },
+    "/usr/local/lib/python3.11/lib-dynload/zlib.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e1f1a8d4948eee386720bd17438c224f4b9b0b1519cde2e6ac8ba1373bd19fcb",
+      "bytes": 41112
+    },
+    "/usr/lib/x86_64-linux-gnu/libz.so.1.2.13": {
+      "sha256": "7e2a72b4c4b38c61e6962de6e3f4a5e9ae692e732c68deead10a7ce2135a7f68",
+      "bytes": 121280
+    },
+    "/usr/local/lib/python3.11/lib-dynload/binascii.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "b2f66458fe41f4180d3571ead29a8e3dbd6357c124ee5a101156d82d0dcf189f",
+      "bytes": 31992
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_csv.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d1e1725ba481a601186c8adf1dce098296382b9b43f16dbc5e4bd3e2808fb129",
+      "bytes": 37352
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_blake2.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "8ea96ebb00fe42346f4b5e83766e26e5222725943937c387eef138d805864a2e",
+      "bytes": 48568
+    },
+    "/usr/lib/x86_64-linux-gnu/libcrypto.so.3": {
+      "sha256": "72db1b3de8b7dfbaba4c056135f408da555f9d5e137c82129478e07e769f8070",
+      "bytes": 4734232
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_hashlib.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e3ae47f311302eba35aa615c6e03cc0d3b47b743e8a75649ce017626810449d2",
+      "bytes": 59448
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_posixsubprocess.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ee94da9608305089920ceee9fb3884b76abc82d5e07dbab70641f8de46aee696",
+      "bytes": 27216
+    },
+    "/usr/local/lib/python3.11/lib-dynload/fcntl.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "62d0a04919a7b0bd11d0352211eea63bed15e39bc82a4247421e5f6a53c47335",
+      "bytes": 22960
+    },
+    "/usr/local/lib/python3.11/lib-dynload/array.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "642d6a8efecdb318c00227a78a611b0cfe1de9642b5e0efce7ccc2f169e609cd",
+      "bytes": 70408
+    },
+    "/runtime/torch/_C.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ca256e748148444d8593ba9953c0bb4119d1602bdbdd3ab3ca04a04fd35813f6",
+      "bytes": 10721
+    },
+    "/usr/lib/x86_64-linux-gnu/libdl.so.2": {
+      "sha256": "95d521b2c39fd0333271b6fdcdddff878ae82001a304313a837b8e728ebe3cb1",
+      "bytes": 14480
+    },
+    "/usr/lib/x86_64-linux-gnu/libpthread.so.0": {
+      "sha256": "b93a680da8a05b939b235c1533572e7a2f6d3d8808bf70209997edc64ea5fedc",
+      "bytes": 14480
+    },
+    "/runtime/torch/lib/libtorch_global_deps.so": {
+      "sha256": "2e5d497259a62960d95f4a7719abaeb24745429b49ffdf58e67672140205eb99",
+      "bytes": 8264
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_pickle.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "00016432bb3db8e705edab9c7fdf451c70fb660075f637edaaf665018f3ca906",
+      "bytes": 117360
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_opcode.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "4994d8aef3efa1e6120091615cb0317c41dd242589320209e5ada3e594f6abbd",
+      "bytes": 14712
+    },
+    "/usr/local/lib/python3.11/lib-dynload/resource.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "22bcdf2c85f70d199bf728dd8fdd1bee94ae12aea5bc2eb2289c995cc7ca63e1",
+      "bytes": 19240
+    },
+    "/usr/local/lib/python3.11/lib-dynload/select.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "988a8311f80dc9076ad7ee998cc1b7f2ea93a4d8ac9fdeb1afb787b7e5e55e9a",
+      "bytes": 32584
+    },
+    "/usr/local/lib/python3.11/lib-dynload/math.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "c677d0763c5495307d9f4a7c383aea29a26ff78b933ce700d9378f933a204415",
+      "bytes": 62104
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_socket.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "aa10d28b792575defe27d1f6109fd94d61c5146036276f987bb90390ac0b8b72",
+      "bytes": 96048
+    },
+    "/usr/local/lib/python3.11/lib-dynload/_json.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "2bdc98d595a7f5c818f353ba7506b0aa03258cb0ff8e7ee1defac2b52fc92a2c",
+      "bytes": 45032
+    },
+    "/usr/lib/x86_64-linux-gnu/libm.so.6": {
+      "sha256": "7f2ca87f652f56b094462474b076749e90e689d0ecb9cb63c7679820b271b4e7",
+      "bytes": 911904
+    },
+    "/usr/lib/x86_64-linux-gnu/libc.so.6": {
+      "sha256": "6b4a45352fd0c540a9c7c718f35ce8c8e46a4e482f9d3885a910c32d1a0e1421",
+      "bytes": 1926232
+    },
+    "/usr/local/lib/libpython3.11.so.1.0": {
+      "sha256": "31cade60bce25347e90e6d358b4a52ac9be9941e076e61d75db7de8ad26996bb",
+      "bytes": 5354880
+    },
+    "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2": {
+      "sha256": "02bcda52c1a5dfc236f94d9e5255b4a0e26347d8a372a5223b650e31f291ce3c",
+      "bytes": 215000
+    }
+  },
+  "loadOnly": {
+    "python": "3.11.15",
+    "packages": {
+      "torch": "2.14.1+cpu",
+      "numpy": "2.4.6",
+      "chromadb": "1.5.9",
+      "transformers": "5.18.0",
+      "sentence-transformers": "6.1.0",
+      "tokenizers": "0.23.2"
+    },
+    "modelHiddenSize": 384,
+    "tokenizerClass": "XLMRobertaTokenizer",
+    "cpuOnly": true,
+    "peakRSSKiB": 889700,
+    "elapsedSeconds": 21.58
+  }
+}
