@@ -1,4 +1,4 @@
-.page { min-height: 100vh; background: #fffafa; color: #1f1f24; font-family: system-ui, "Malgun Gothic", sans-serif; }
+.page { min-height: 100vh; background: var(--surface-page, #FDFBF7); color: var(--text-strong, #111); font-family: system-ui, "Malgun Gothic", sans-serif; }
 .nav { max-width: 1120px; margin: 0 auto; padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .brand { color: #e50914; font-size: 22px; font-weight: 800; text-decoration: none; letter-spacing: -.04em; }
 .navLinks { display: flex; gap: 18px; }
@@ -9,13 +9,13 @@
 .hero p { max-width: 640px; margin: 24px auto 0; color: #65656d; font-size: 18px; line-height: 1.7; }
 .actions { margin-top: 34px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
 .primaryButton, .secondaryButton { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border-radius: 12px; font-weight: 700; text-decoration: none; }
-.primaryButton { background: #e50914; color: #fff; }
+.primaryButton { background: var(--semantic-accent, #e50914); color: var(--text-invert, #fff); }
 .secondaryButton { background: #fff; color: #333; border: 1px solid #ddd; }
 .section { max-width: 1120px; margin: 0 auto; padding: 68px 24px; }
 .section h2 { margin: 0; font-size: clamp(26px, 4vw, 40px); letter-spacing: -.035em; }
 .lead { max-width: 720px; color: #666; font-size: 17px; line-height: 1.75; }
 .cardGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 30px; }
-.card { padding: 26px; border-radius: 18px; border: 1px solid #eee2e3; background: #fff; box-shadow: 0 12px 34px rgba(80, 16, 22, .05); }
+.card { padding: 26px; border-radius: var(--kride-radius-lg, 16px); border: 1px solid var(--border-hair, #e5e7eb); background: var(--surface-card, #fff); box-shadow: 0 12px 34px rgba(80, 16, 22, .05); }
 .card h3 { margin: 0 0 12px; font-size: 20px; }
 .card p { min-height: 72px; color: #666; line-height: 1.65; }
 .card small { display: block; padding-top: 14px; border-top: 1px solid #eee; color: #9b3036; line-height: 1.55; }
