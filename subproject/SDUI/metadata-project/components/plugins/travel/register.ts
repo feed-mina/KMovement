@@ -13,6 +13,7 @@ import KrideMapView from "@/components/fields/kride/MapView";
 import ItineraryPanel from "@/components/fields/kride/ItineraryPanel";
 import KrideNextButton from "@/components/fields/kride/KrideNextButton";
 import KrideWarningToast from "@/components/fields/kride/KrideWarningToast";
+import KrideSelectionCounter from "@/components/fields/kride/KrideSelectionCounter";
 import TypewriterText from "@/components/fields/kride/TypewriterText";
 import KrideChatComponent from "@/components/fields/kride/chat/KrideChatComponent";
 import RouteScreen from "./RouteScreen";
@@ -36,6 +37,7 @@ export function registerTravelPlugin(): void {
     registerComponent("ITINERARY_PANEL", ItineraryPanel);
     registerComponent("KRIDE_NEXT_BTN", KrideNextButton, { needsFormData: true });
     registerComponent("KRIDE_WARNING", KrideWarningToast);
+    registerComponent("KRIDE_SELECTION_COUNTER", KrideSelectionCounter, { needsFormData: true });
     registerComponent("TYPEWRITER_TEXT", TypewriterText);
     registerComponent("KRIDE_CHAT", KrideChatComponent);
 

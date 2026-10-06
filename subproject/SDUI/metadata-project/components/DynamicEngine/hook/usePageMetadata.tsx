@@ -113,7 +113,7 @@ export const usePageMetadata = (
     const router = useRouter();
     const { user, isLoggedIn } = useAuth();
 
-    const { menuTree, isLoading: metaLoading, screenId: providerScreenId } = useMetadata();
+    const { menuTree, isLoading: metaLoading, screenId: providerScreenId, isError: metaError = false, refetch: refetchMetadata } = useMetadata() as ReturnType<typeof useMetadata> & { isError?: boolean; refetch?: () => void };
 
     const [metadata, setMetadata] = useState<any[]>([]); // 원본 메타데이터
     const [totalCount, setTotalCount] = useState(0);
@@ -408,6 +408,8 @@ export const usePageMetadata = (
         metadata: filteredMetadata,
         pageData,
         loading: loading || metaLoading,
+        metaError: screenId === providerScreenId ? metaError : false,
+        reloadMetadata: refetchMetadata ?? (() => {}),
         totalCount,
         isLoggedIn
     };

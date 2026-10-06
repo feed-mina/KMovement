@@ -2,13 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from 'next/navigation';
-import Skeleton from "@/components/utils/Skeleton";
+import Link from 'next/link';
+import ScreenSkeleton from "@/components/utils/ScreenSkeleton";
 import { useScreenGuard } from "@/components/screens/useScreenGuard";
 import { useSduiScreen } from "@/components/screens/useSduiScreen";
 import SduiRenderer from "@/components/screens/SduiRenderer";
 import type { ScreenControllerProps } from "@/components/screens/types";
 import { useKrideItinerary } from "@/components/DynamicEngine/hook/useKrideItinerary";
 import { KrideButton, RaiStatePanel } from "@/components/fields/kride/atoms/KridePrimitives";
+import { KrideStateChips } from "@/components/fields/kride/atoms/KrideStatePanel";
+import { RETRY_COOLDOWN_AFTER, RETRY_COOLDOWN_MS } from "@/components/DynamicEngine/hook/useKrideItinerary";
 import KrideChatComponent from "@/components/fields/kride/chat/KrideChatComponent";
 import { preferNonEmptyMarkers } from "@/components/fields/kride/maps/normalizeRouteMapData";
 import ItineraryLoadingPanel from "@/components/fields/kride/ItineraryLoadingPanel";
@@ -24,6 +27,19 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
 
     // FOCUS 진입 시 챗 모달 기본 오픈
     const [isChatModalOpen, setIsChatModalOpen] = useState(true);
+    // 연속 실패 시 재시도 버튼을 잠시 잠근다 (벤치마킹 G2 선택지).
+    // setState 는 타이머 콜백 안에서만 호출한다 (react-hooks/set-state-in-effect).
+    const failCountForLock = krideItinerary.failCount ?? 0;
+    const [retryLocked, setRetryLocked] = useState(false);
+    useEffect(() => {
+        if (failCountForLock < RETRY_COOLDOWN_AFTER) {
+            const unlock = setTimeout(() => setRetryLocked(false), 0);
+            return () => clearTimeout(unlock);
+        }
+        const lockT = setTimeout(() => setRetryLocked(true), 0);
+        const unlockT = setTimeout(() => setRetryLocked(false), RETRY_COOLDOWN_MS);
+        return () => { clearTimeout(lockT); clearTimeout(unlockT); };
+    }, [failCountForLock]);
     const chatDialogRef = useRef<HTMLDivElement>(null);
     const chatOpenerRef = useRef<HTMLElement | null>(null);
 
@@ -159,7 +175,7 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
         return s.handleAction(meta, data);
     };
 
-    if (isLoading || blocked) return <Skeleton />;
+    if (isLoading || blocked) return <ScreenSkeleton />;
 
     if (krideItinerary.isLoading) {
         return (
@@ -170,17 +186,57 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
     }
 
     if (krideItinerary.error) {
+        const kind = krideItinerary.errorKind ?? (krideItinerary.requiresLogin ? 'login' : krideItinerary.candidatesUnavailable ? 'candidates' : 'server');
+        const failCount = krideItinerary.failCount ?? 0;
+        const cooled = failCount >= RETRY_COOLDOWN_AFTER;
+        const title = kind === 'login' ? '로그인이 필요해요'
+            : kind === 'candidates' ? '추천 자료를 준비 중이에요'
+            : kind === 'no-route' ? '조건에 맞는 코스를 못 찾았어요'
+            : kind === 'offline' ? '인터넷 연결을 확인해 주세요'
+            : '코스를 아직 못 만들었어요';
+        const description = cooled && kind !== 'login' && kind !== 'candidates'
+            ? `${failCount}번 연속 실패했어요. 잠시 후 다시 시도하거나 조건을 바꿔 보세요. (재시도는 ${RETRY_COOLDOWN_MS / 1000}초 뒤 다시 열려요)`
+            : krideItinerary.error;
+        // 사용자가 넣은 조건을 그대로 보여준다 (레퍼런스 3/4). 새로고침이 아니라 retry() 라서 조건이 사라지지 않는다.
+        const form = s.formData ?? {};
+        const chips = [
+            ...((form.selectedArtists ?? []) as any[]).map((a) => ({ text: a?.name ?? String(a), accent: true })),
+            ...((form.selectedRegions ?? []) as any[]).map((r) => ({ text: r?.name ?? String(r) })),
+            ...(form.duration ? [{ text: ({ day: '당일치기', onenight: '1박 2일', twonight: '2박 3일' } as Record<string, string>)[form.duration] ?? String(form.duration) }] : []),
+        ];
+        const primary = kind === 'login'
+            ? { label: '로그인하기', onClick: () => router.push('/view/LOGIN_PAGE') }
+            : kind === 'candidates'
+                ? { label: '홈으로', onClick: () => router.push('/') }
+                : { label: '다시 시도', onClick: () => krideItinerary.retry?.(), disabled: retryLocked };
         return (
             <div className="page-wrap KRIDE_FOCUS kride-focus-state-page">
                 <RaiStatePanel
                     state="sad"
                     eyebrow="K-RIDE AI"
-                    title={krideItinerary.requiresLogin ? '로그인이 필요해요' : krideItinerary.candidatesUnavailable ? '추천 자료를 준비 중이에요' : '코스를 못 찾았어요'}
-                    description={krideItinerary.error}
+                    title={title}
+                    description={description}
+                    className="kride-focus-state-card"
                 >
-                    <KrideButton onClick={() => krideItinerary.requiresLogin ? router.push('/view/LOGIN_PAGE') : krideItinerary.candidatesUnavailable ? router.push('/') : window.location.reload()}>
-                        {krideItinerary.requiresLogin ? '로그인하기' : krideItinerary.candidatesUnavailable ? '홈으로' : '다시 시도'}
-                    </KrideButton>
+                    {chips.length > 0 && kind !== 'login' && kind !== 'candidates' && (
+                        <KrideStateChips label="내가 고른 조건" items={chips} />
+                    )}
+                    <div className="kride-focus-state-card__actions">
+                        <KrideButton onClick={primary.onClick} disabled={primary.disabled}>
+                            {primary.label}
+                        </KrideButton>
+                        {kind !== 'login' && kind !== 'candidates' && (
+                            <KrideButton variant="ghost" onClick={() => router.push('/view/INTRO1')}>
+                                조건 바꾸기
+                            </KrideButton>
+                        )}
+                    </div>
+                    {kind !== 'login' && (
+                        <div className="kride-focus-state-card__links">
+                            <Link href="/view/kpop">인기 아티스트·이벤트 둘러보기</Link>
+                            <Link href="/view/MAIN_PAGE">홈으로</Link>
+                        </div>
+                    )}
                 </RaiStatePanel>
             </div>
         );

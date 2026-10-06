@@ -19,9 +19,12 @@ interface ConsentContextValue {
     setConsent: (value: Exclude<AnalyticsConsent, 'unset'>) => void;
     settingsOpen: boolean;
     setSettingsOpen: (open: boolean) => void;
+    /** 메뉴 안에 "개인정보 설정" 항목이 마운트돼 있으면 > 0. 그때는 떠 있는 버튼을 숨긴다 (벤치마킹 G8). */
+    menuEntries: number;
+    registerMenuEntry: () => () => void;
 }
 
-const ConsentContext = createContext<ConsentContextValue | null>(null);
+export const ConsentContext = createContext<ConsentContextValue | null>(null);
 
 function subscribeToConsent(callback: () => void) {
     const onChange = () => callback();
@@ -47,6 +50,11 @@ export default function AnalyticsProvider({ children }: { children: React.ReactN
     const consent = useSyncExternalStore<AnalyticsConsent>(subscribeToConsent, readAnalyticsConsent, () => 'unset');
     const [ready, setReady] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [menuEntries, setMenuEntries] = useState(0);
+    const registerMenuEntry = useCallback(() => {
+        setMenuEntries((n) => n + 1);
+        return () => setMenuEntries((n) => Math.max(0, n - 1));
+    }, []);
     const gtmId = safePublicId(process.env.NEXT_PUBLIC_GTM_ID, /^GTM-[A-Z0-9]+$/i);
     const gaMeasurementId = safePublicId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, /^G-[A-Z0-9]+$/i);
     const clarityId = safePublicId(process.env.NEXT_PUBLIC_CLARITY_ID, /^[a-z0-9]+$/i);
@@ -64,7 +72,7 @@ export default function AnalyticsProvider({ children }: { children: React.ReactN
         setSettingsOpen(false);
     }, []);
 
-    const context = useMemo(() => ({ consent, ready, setConsent, settingsOpen, setSettingsOpen }), [consent, ready, setConsent, settingsOpen]);
+    const context = useMemo(() => ({ consent, ready, setConsent, settingsOpen, setSettingsOpen, menuEntries, registerMenuEntry }), [consent, ready, setConsent, settingsOpen, menuEntries, registerMenuEntry]);
     const enabled = ready && consent === 'granted';
 
     return (
@@ -74,7 +82,7 @@ export default function AnalyticsProvider({ children }: { children: React.ReactN
                 <RouteChangeTracker />
             </Suspense>
             <ConsentBanner />
-            <PrivacySettingsButton />
+            <PrivacySettingsButton variant="floating" />
             {enabled && gtmId && (
                 <Script id="google-tag-manager" strategy="afterInteractive">
                     {`(function(w,d,s,l,i,g){w[l]=w[l]||[];if(g){w[l].push({ga_measurement_id:g});}w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}','${gaMeasurementId}');`}

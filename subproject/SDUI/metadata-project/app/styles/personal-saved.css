@@ -1,1 +1,131 @@
-.personal-saved{max-width:960px;margin:auto;padding:24px}.personal-saved nav{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}.personal-saved button,.personal-save-action button{min-height:44px;padding:10px 18px;border:1px solid currentColor;border-radius:8px}.personal-saved button[aria-pressed=true]{font-weight:bold;border:3px solid currentColor}.personal-saved ul{list-style:none;padding:0}.personal-saved li{padding:20px;border:1px solid #888;border-radius:12px;margin:16px 0;overflow-wrap:anywhere}.personal-saved li a{margin-right:20px}.personal-save-action{margin-top:12px}.personal-saved button:focus-visible,.personal-save-action button:focus-visible{outline:3px solid #b87800;outline-offset:3px}.personal-saved button:disabled,.personal-save-action button:disabled{opacity:.6}@media(max-width:600px){.personal-saved{padding:16px}}
+/* ==========================================================
+   내 목록 (KPOP_SAVED_ITEMS) — 벤치마킹 G6 (2026-10-06)
+   마이페이지(auth-flow-card)와 같은 토큰·여백·버튼 변형을 쓴다.
+   ========================================================== */
+.personal-saved {
+    width: min(100% - 32px, 760px);
+    margin: 28px auto 96px;
+    padding: clamp(24px, 6vw, 36px);
+    border: 1px solid var(--kride-border);
+    border-radius: 24px;
+    background: var(--kride-bg-card);
+    box-shadow: 0 16px 44px rgba(15, 23, 42, 0.08);
+    display: grid;
+    gap: 18px;
+}
+.personal-saved-head { display: grid; gap: 6px; }
+.personal-saved-head h1 { margin: 0; font-size: clamp(1.5rem, 5vw, 2rem); color: var(--kride-text-strong); }
+.personal-saved-head p { margin: 0; color: var(--kride-text-sub); }
+.personal-saved-back {
+    justify-self: start;
+    color: var(--kride-text-sub);
+    text-decoration: none;
+    font-size: 0.92rem;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+}
+.personal-saved-back:hover { color: var(--kride-primary-dark); text-decoration: underline; }
+
+.personal-saved-tabs {
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid var(--kride-border);
+}
+.personal-saved-tabs button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 8px 14px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0 !important;
+    margin-bottom: -1px;
+    background: transparent;
+    color: var(--kride-text-sub);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+.personal-saved-tabs button[aria-pressed="true"] {
+    border: 0;
+    border-bottom: 2px solid var(--kride-primary);
+    background: transparent;
+    color: var(--kride-primary-dark);
+    font-weight: 800;
+}
+.personal-saved-tabs__count {
+    display: inline-block;
+    min-width: 22px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--kride-bg-cream-2);
+    color: var(--kride-text-main);
+    font-size: 0.78rem;
+    text-align: center;
+}
+.personal-saved-tabs button[aria-pressed="true"] .personal-saved-tabs__count {
+    background: var(--kride-primary-soft);
+    color: var(--kride-primary-dark);
+}
+.personal-saved-title { margin: 0 !important; font-size: 1.05rem !important; color: var(--kride-text-main); }
+.personal-saved-alert {
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fff1f0;
+    color: #b42318;
+}
+.personal-saved-skeleton { display: grid; gap: 10px; }
+.personal-saved-skeleton .skeleton-box { display: block; border-radius: 14px; }
+
+.personal-saved-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.personal-saved-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--kride-border);
+    border-radius: 14px;
+    background: #fff;
+}
+.personal-saved-item.is-private { background: var(--kride-bg-cream); }
+.personal-saved-item__body { min-width: 0; display: grid; gap: 2px; }
+.personal-saved-item__body h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--kride-text-strong);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.personal-saved-item__body p { margin: 0; font-size: 0.85rem; color: var(--kride-text-sub); line-height: 1.5; }
+.personal-saved-item__actions { display: flex; gap: 8px; flex: none; }
+.personal-saved-item__link,
+.personal-saved-item__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--kride-border);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--kride-text-main);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+.personal-saved-item__remove { color: #b42318; }
+.personal-saved-item__remove:disabled { opacity: .55; cursor: not-allowed; }
+.personal-saved-pageinfo { margin: 0; text-align: center; font-size: 0.85rem; color: var(--kride-text-sub); }
+
+@media (max-width: 480px) {
+    .personal-saved { width: min(100% - 24px, 760px); padding: 20px 16px; border-radius: 18px; }
+    .personal-saved-item { flex-direction: column; align-items: stretch; }
+    .personal-saved-item__actions { justify-content: flex-end; }
+}

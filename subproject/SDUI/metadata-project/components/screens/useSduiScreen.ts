@@ -16,7 +16,7 @@ export function useSduiScreen(
     const isOnlyMine = opts?.isOnlyMine ?? false;
     const pageSize = opts?.pageSize ?? 5;
 
-    const { metadata, pageData, totalCount, loading } = usePageMetadata(
+    const { metadata, pageData, totalCount, loading, metaError, reloadMetadata } = usePageMetadata(
         screenId,
         currentPage,
         isOnlyMine,
@@ -41,6 +41,8 @@ export function useSduiScreen(
         pageData,
         totalCount,
         loading,
+        metaError,
+        reloadMetadata,
         formData,
         setFormData,
         handleChange,

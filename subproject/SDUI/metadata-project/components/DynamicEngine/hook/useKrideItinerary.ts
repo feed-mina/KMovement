@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { trackEvent } from '@/lib/analytics/dataLayer';
 import { countItineraryPlaces } from '@/lib/analytics/itinerary';
 
@@ -8,8 +8,11 @@ const DURATION_TO_KOREAN: Record<string, string> = {
     twonight: "2박3일",
 };
 
-/** 중복 과금을 피하기 위해 자동 재시도 없이 한 번만 요청한다. */
+/** 중복 과금을 피하기 위해 자동 재시도 없이 한 번만 요청한다. 재시도는 사용자가 버튼으로만 한다. */
 const REQUEST_TIMEOUT_MS = 120_000;
+/** 연속 실패가 이 횟수에 닿으면 안내 문구를 바꾸고 재시도 버튼을 잠시 잠근다 (벤치마킹 G2). */
+export const RETRY_COOLDOWN_AFTER = 3;
+export const RETRY_COOLDOWN_MS = 30_000;
 
 function isTransientFailure(error: unknown): boolean {
     const name = (error as { name?: string })?.name ?? '';
@@ -18,6 +21,10 @@ function isTransientFailure(error: unknown): boolean {
     return name === 'AbortError'
         || /abort/i.test(message)
         || /failed to fetch|network|load failed/i.test(message);
+}
+
+function isOffline(): boolean {
+    return typeof navigator !== 'undefined' && navigator.onLine === false;
 }
 
 /** 한 번의 요청. 타임아웃 타이머를 호출 측에 넘겨 finally 에서 정리하게 한다. */
@@ -43,30 +50,65 @@ async function requestItinerary(body: unknown, keepTimer: (timer: ReturnType<typ
 }
 
 /**
+ * 오류 종류. 결과 없음(no-route) 과 서버 오류(server) 를 다른 문구·행동으로 보여주기 위해 분리한다.
+ * (업계 표준: Google Maps "경로 없음" vs 네트워크 오류, 4/4 레퍼런스 공통)
+ */
+export type ItineraryErrorKind =
+    | 'no-route'
+    | 'server'
+    | 'timeout'
+    | 'offline'
+    | 'login'
+    | 'candidates'
+    | 'unknown';
+
+export function classifyError(error: unknown): ItineraryErrorKind {
+    const message = String((error as { message?: string })?.message ?? '');
+    if (message === 'login_required') return 'login';
+    if (message === 'empty_candidates') return 'candidates';
+    if (message === 'empty_result') return 'no-route';
+    if (isTransientFailure(error)) return isOffline() ? 'offline' : 'timeout';
+    if (message.includes('응답 오류')) return 'server';
+    return 'unknown';
+}
+
+/**
  * 사용자에게 보일 문구. 원본 예외 문구("signal is aborted without reason")는
  * 무슨 일이 일어났는지 알려주지 못한다.
  */
 export function toUserMessage(error: unknown): string {
-    if (isTransientFailure(error)) return '추천 서버 응답이 늦어요. 잠시 후 다시 시도해 주세요.';
-    const message = String((error as { message?: string })?.message ?? '');
-    if (message === 'login_required') return '로그인 후 AI 코스를 이용해 주세요.';
-    if (message === 'empty_candidates') return '출처가 확인된 추천 자료가 아직 없습니다.';
-    if (message === 'empty_result') return '조건에 맞는 코스를 찾지 못했어요. 지역이나 기간을 바꿔 보세요.';
-    if (message.includes('응답 오류')) return '추천 서버에 문제가 있어요. 잠시 후 다시 시도해 주세요.';
-    return '코스를 만들지 못했어요. 잠시 후 다시 시도해 주세요.';
+    switch (classifyError(error)) {
+        case 'offline': return '인터넷 연결이 끊겼어요. 연결을 확인한 뒤 다시 시도해 주세요.';
+        case 'timeout': return '추천 서버 응답이 늦어요. 잠시 후 다시 시도해 주세요.';
+        case 'login': return '로그인 후 AI 코스를 이용해 주세요.';
+        case 'candidates': return '출처가 확인된 추천 자료가 아직 없습니다.';
+        case 'no-route': return '조건에 맞는 코스를 찾지 못했어요. 지역이나 기간을 바꿔 보세요.';
+        case 'server': return '추천 서버에 문제가 있어요. 잠시 후 다시 시도해 주세요.';
+        default: return '코스를 만들지 못했어요. 잠시 후 다시 시도해 주세요.';
+    }
 }
 
 interface KrideItineraryResult {
     data: { itinerary: any[]; markers: any[]; mapData: Record<string, any>; [key: string]: any } | null;
     isLoading: boolean;
     error: string | null;
+    errorKind: ItineraryErrorKind | null;
     requiresLogin: boolean;
     candidatesUnavailable: boolean;
+    /** 연속 실패 횟수. 성공하면 0 으로 돌아간다. */
+    failCount: number;
+    /** 입력값(formData)을 그대로 두고 같은 요청을 다시 보낸다. 새로고침 없음. */
+    retry: () => void;
 }
+
+const IDLE: KrideItineraryResult = {
+    data: null, isLoading: false, error: null, errorKind: null,
+    requiresLogin: false, candidatesUnavailable: false, failCount: 0, retry: () => {},
+};
 
 /**
  * KRIDE_FOCUS 화면일 때만 FastAPI에 일정 추천을 요청하는 훅.
- * formData에 온보딩 데이터(duration 등)가 준비된 뒤 1회만 호출한다.
+ * formData에 온보딩 데이터(duration 등)가 준비된 뒤 1회만 호출하고, 이후는 retry() 로만 다시 요청한다.
  */
 export function useKrideItinerary(
     screenId: string,
@@ -75,9 +117,14 @@ export function useKrideItinerary(
     const [data, setData] = useState<KrideItineraryResult["data"]>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [errorKind, setErrorKind] = useState<ItineraryErrorKind | null>(null);
     const [requiresLogin, setRequiresLogin] = useState(false);
     const [candidatesUnavailable, setCandidatesUnavailable] = useState(false);
+    const [failCount, setFailCount] = useState(0);
     const calledRef = useRef(false);
+    const inFlightRef = useRef(false);
+    const formRef = useRef(formData);
+    formRef.current = formData;
 
     const isFocus = screenId === "KRIDE_FOCUS";
 
@@ -88,80 +135,93 @@ export function useKrideItinerary(
         (Array.isArray(formData?.selectedRegions) && formData.selectedRegions.length > 0)
     );
 
-    useEffect(() => {
-        if (!isFocus || !hasFormData || calledRef.current) return;
-        calledRef.current = true;
+    const fetchItinerary = useCallback(async (entryPoint: 'focus_auto_generation' | 'focus_retry') => {
+        if (inFlightRef.current) return;
+        inFlightRef.current = true;
+        const form = formRef.current ?? {};
+        setIsLoading(true);
+        setError(null);
+        setErrorKind(null);
+        setCandidatesUnavailable(false);
+        trackEvent('itinerary_start', { entry_point: entryPoint });
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        try {
+            const rawDuration = form?.duration ?? "day";
+            const body = {
+                duration: DURATION_TO_KOREAN[rawDuration] ?? rawDuration,
+                artists: Array.isArray(form?.selectedArtists)
+                    ? form.selectedArtists.map((a: any) => a.name)
+                    : [],
+                regions: Array.isArray(form?.selectedRegions)
+                    ? form.selectedRegions.map((r: any) => r.name)
+                    : [],
+                purposes: Array.isArray(form?.purposes)
+                    ? form.purposes
+                    : [],
+                budget: Array.isArray(form?.budget) ? { min: form.budget[0], max: form.budget[1] } : form?.budget ?? { min: 30000, max: 2000000 },
+            };
 
-        const fetchItinerary = async () => {
-            setIsLoading(true);
-            setError(null);
-            setCandidatesUnavailable(false);
-            trackEvent('itinerary_start', { entry_point: 'focus_auto_generation' });
-            let timer: ReturnType<typeof setTimeout> | undefined;
-            try {
-                const rawDuration = formData?.duration ?? "day";
-                const body = {
-                    duration: DURATION_TO_KOREAN[rawDuration] ?? rawDuration,
-                    artists: Array.isArray(formData?.selectedArtists)
-                        ? formData.selectedArtists.map((a: any) => a.name)
-                        : [],
-                    regions: Array.isArray(formData?.selectedRegions)
-                        ? formData.selectedRegions.map((r: any) => r.name)
-                        : [],
-                    purposes: Array.isArray(formData?.purposes)
-                        ? formData.purposes
-                        : [],
-                    budget: Array.isArray(formData?.budget) ? {min:formData.budget[0],max:formData.budget[1]} : formData?.budget ?? { min: 30000, max: 2000000 },
-                };
-
+            if (entryPoint === 'focus_auto_generation') {
                 trackEvent('preferences_complete', {
                     region: body.regions[0] || 'unspecified',
                     purpose: body.purposes[0] || 'unspecified',
                     duration: String(body.duration),
                 });
-
-                const json = await requestItinerary(body, (t) => { timer = t; });
-                if (json.status === 'empty_candidates') throw new Error('empty_candidates');
-                const placeCount = countItineraryPlaces(json);
-                if (placeCount === 0) throw new Error('empty_result');
-                const itinerary = json.itinerary ?? [];
-                const markers = json.mapData?.markers ?? [];
-                setData({
-                    source_pois:json.source_pois,
-                    scopeNotice:json.scopeNotice,
-                    itinerary,
-                    mapData: { ...json.mapData, markers, itinerary },
-                    markers, // MapView가 data.markers로 직접 접근할 수 있도록
-                    markerResolutionStatus: json.markerResolutionStatus ?? json.mapData?.markerResolutionStatus,
-                    unresolvedPlaces: json.unresolvedPlaces ?? json.mapData?.unresolvedPlaces,
-                } as any);
-                trackEvent('itinerary_generated', {
-                    place_count: placeCount,
-                    duration: String(body.duration),
-                    source: 'focus_onboarding',
-                });
-            } catch (err: any) {
-                if (err?.message !== "empty_candidates") console.error("[useKrideItinerary]", err);
-                setCandidatesUnavailable(err?.message === "empty_candidates");
-                setRequiresLogin(err?.message === 'login_required');
-                setError(toUserMessage(err));
-                const message = String(err?.message || 'unknown');
-                trackEvent('itinerary_error', {
-                    error_type: message === 'empty_result' ? 'empty_result' : message.toLowerCase().includes('abort') ? 'timeout' : message.includes('응답 오류') ? 'http_error' : 'request_error',
-                    source: 'focus_onboarding',
-                });
-            } finally {
-                if (timer) clearTimeout(timer);
-                setIsLoading(false);
             }
-        };
 
-        fetchItinerary();
-    }, [isFocus, hasFormData]); // eslint-disable-line react-hooks/exhaustive-deps
+            const json = await requestItinerary(body, (t) => { timer = t; });
+            if (json.status === 'empty_candidates') throw new Error('empty_candidates');
+            const placeCount = countItineraryPlaces(json);
+            if (placeCount === 0) throw new Error('empty_result');
+            const itinerary = json.itinerary ?? [];
+            const markers = json.mapData?.markers ?? [];
+            setData({
+                source_pois: json.source_pois,
+                scopeNotice: json.scopeNotice,
+                itinerary,
+                mapData: { ...json.mapData, markers, itinerary },
+                markers, // MapView가 data.markers로 직접 접근할 수 있도록
+                markerResolutionStatus: json.markerResolutionStatus ?? json.mapData?.markerResolutionStatus,
+                unresolvedPlaces: json.unresolvedPlaces ?? json.mapData?.unresolvedPlaces,
+            } as any);
+            setFailCount(0);
+            trackEvent('itinerary_generated', {
+                place_count: placeCount,
+                duration: String(body.duration),
+                source: entryPoint === 'focus_retry' ? 'focus_retry' : 'focus_onboarding',
+            });
+        } catch (err: any) {
+            if (err?.message !== "empty_candidates") console.error("[useKrideItinerary]", err);
+            const kind = classifyError(err);
+            setCandidatesUnavailable(kind === 'candidates');
+            setRequiresLogin(kind === 'login');
+            setErrorKind(kind);
+            setError(toUserMessage(err));
+            setFailCount((n) => n + 1);
+            const message = String(err?.message || 'unknown');
+            trackEvent('itinerary_error', {
+                error_type: message === 'empty_result' ? 'empty_result' : message.toLowerCase().includes('abort') ? 'timeout' : message.includes('응답 오류') ? 'http_error' : 'request_error',
+                source: entryPoint === 'focus_retry' ? 'focus_retry' : 'focus_onboarding',
+            });
+        } finally {
+            if (timer) clearTimeout(timer);
+            inFlightRef.current = false;
+            setIsLoading(false);
+        }
+    }, []);
 
-    if (!isFocus) {
-        return { data: null, isLoading: false, error: null, requiresLogin: false, candidatesUnavailable: false };
-    }
+    useEffect(() => {
+        if (!isFocus || !hasFormData || calledRef.current) return;
+        calledRef.current = true;
+        fetchItinerary('focus_auto_generation');
+    }, [isFocus, hasFormData, fetchItinerary]);
 
-    return { data, isLoading, error, requiresLogin, candidatesUnavailable };
+    const retry = useCallback(() => {
+        if (!isFocus) return;
+        fetchItinerary('focus_retry');
+    }, [isFocus, fetchItinerary]);
+
+    if (!isFocus) return IDLE;
+
+    return { data, isLoading, error, errorKind, requiresLogin, candidatesUnavailable, failCount, retry };
 }

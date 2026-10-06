@@ -5063,3 +5063,213 @@ button:hover {
         min-height: 220px;
     }
 }
+
+/* ==========================================
+   MAIN_PAGE 위계 정리 (벤치마킹 G4, 2026-10-06, V124)
+   히어로 1개 → 로그인 한 줄 배너 → 기능 타일
+   ========================================== */
+.bento-card-tile {
+    background: var(--kride-bg-card);
+    color: var(--kride-text-strong);
+    border: 1px solid var(--kride-border);
+    border-radius: 16px;
+    padding: 22px;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.bento-card-tile:hover,
+.bento-card-tile:focus-within {
+    transform: translateY(-2px);
+    border-color: var(--kride-primary);
+    box-shadow: var(--kride-shadow-lift);
+}
+.group-main_bento_kpop_grp.bento-card-tile {
+    grid-column: 3 / 4;
+    background: var(--kride-bg-card);
+}
+.bento-card-tile__kicker {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--kride-primary);
+    font-weight: 800;
+}
+.bento-card-tile__title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.25;
+    margin: 2px 0 4px;
+}
+.bento-card-tile__desc {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--kride-text-sub);
+    word-break: keep-all;
+}
+.bento-card-tile__cta {
+    align-self: flex-start;
+    margin-top: auto;
+    padding: 9px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--kride-border);
+    background: var(--kride-bg-card);
+    color: var(--kride-text-main);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+}
+.bento-card-tile__cta:hover { border-color: var(--kride-primary); color: var(--kride-primary-dark); }
+
+.bento-card-login-banner {
+    min-height: 0;
+    padding: 14px 20px;
+    border-radius: 12px;
+    background: var(--kride-primary-soft);
+    border: 1px solid rgba(229, 9, 20, 0.18);
+    color: var(--kride-text-strong);
+    cursor: pointer;
+}
+.bento-card-login-banner__body {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.bento-card-login-banner__title { font-weight: 700; font-size: 0.95rem; }
+.bento-card-login-banner__link { font-weight: 800; color: var(--kride-primary-dark); white-space: nowrap; }
+.bento-card-login-banner .bento-card-arrow { display: none; }
+
+@media (max-width: 999px) {
+    .group-main_bento_kpop_grp.bento-card-tile { grid-column: 1; }
+}
+
+/* ==========================================
+   MY_PAGE 위계 (벤치마킹 G5, 2026-10-06)
+   아바타 헤더 → 숫자 타일 → 설정 목록 → 로그아웃/탈퇴 텍스트
+   ========================================== */
+.auth-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.auth-profile-avatar {
+    flex: none;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--kride-primary-soft);
+    color: var(--kride-primary);
+    font-size: 22px;
+    font-weight: 800;
+}
+.auth-profile-header__copy { min-width: 0; display: grid; gap: 4px; }
+.auth-profile-header__copy h1 {
+    margin: 0;
+    font-size: clamp(1.3rem, 5vw, 1.6rem);
+    color: var(--kride-text-strong);
+    overflow-wrap: anywhere;
+}
+.auth-profile-header__meta {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    color: var(--kride-text-sub);
+    font-size: 0.92rem;
+    overflow-wrap: anywhere;
+}
+.auth-profile-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--kride-border);
+    background: var(--kride-bg-cream);
+    color: var(--kride-text-main);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+.auth-profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.auth-profile-stat {
+    display: grid;
+    gap: 2px;
+    justify-items: center;
+    min-height: 72px;
+    padding: 12px 8px;
+    border: 1px solid var(--kride-border);
+    border-radius: 14px;
+    background: #fff;
+    color: var(--kride-text-sub);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+.auth-profile-stat strong { font-size: 1.35rem; color: var(--kride-text-strong); line-height: 1.1; }
+.auth-profile-stat:hover { border-color: var(--kride-primary); }
+.auth-profile-menu {
+    display: grid;
+    border-top: 1px solid var(--kride-border);
+}
+.auth-profile-menu__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 4px;
+    border: 0;
+    border-bottom: 1px solid var(--kride-border);
+    border-radius: 0 !important;
+    background: transparent;
+    color: var(--kride-text-main);
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+.auth-profile-menu__row span:last-child { color: var(--kride-text-sub); }
+.auth-profile-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.auth-flow-textlink {
+    padding: 8px 2px;
+    border: 0;
+    background: transparent;
+    color: var(--kride-text-sub);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+    min-height: 44px;
+}
+.auth-flow-textlink--danger { color: #b42318; }
+.auth-profile-confirm {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+.auth-profile-confirm > span { flex: 1 1 100%; font-weight: 700; color: var(--kride-text-strong); }
+.auth-flow-button.danger {
+    background: #fff1f0;
+    color: #b42318;
+    border-color: #f5c2c7;
+}
+@media (max-width: 480px) {
+    .auth-profile-stats { gap: 6px; }
+}
