@@ -1,0 +1,35 @@
+{
+  "stage": "OS-boundary synthetic probe passed; pilot not ready or approved",
+  "checkedAtUTC": "2026-10-06T13:01:18.742390+00:00",
+  "hostEdition": "Windows Core (Home), build 26200",
+  "distro": "Ubuntu-24.04 on WSL2",
+  "distroVhdPath": "D:\\KMovement\\.codex-work\\kride-pilot-isolation-ubuntu-20261006\\ext4.vhdx",
+  "distroVhdBytesAtReport": 1475346432,
+  "configSha256": "cccda268970d2f2c83d5b6ccb935c341b8e908d5096040e27fe16e5e3bf1285c",
+  "probeScriptSha256": "f92ba8907b4f1436fc1af4ba7666213a801ce3c96e89aed414615e7c74ebce1e",
+  "v2PilotSpecSha256": "f2e47aa5ba6025203eaa860769d06bac09d0461d224e20120c629f696715fadd",
+  "boundaryChecks": {
+    "distroConfigDisablesHostMountAndInterop": true,
+    "hostDrivesAbsentAfterRestart": true,
+    "freshNetworkNamespace": true,
+    "unprivilegedNoCapabilities": true,
+    "allowlistedEnvironmentOnly": true,
+    "noHostDriveMountsInProcess": true,
+    "WSLBridgesMaskedInProcess": true,
+    "noNetworkRouteOrEgress": true
+  },
+  "scope": "unprivileged dummy process only; no model/POI/Chroma/actual search",
+  "pilotExecutionAllowed": false,
+  "remainingBeforeExecutionApproval": [
+    "prepare and hash Linux-native Python packages plus model inputs independently",
+    "repeat this exact launcher boundary with the Linux runtime and permitted copied input only",
+    "obtain separate user authorization for actual pilot search"
+  ],
+  "notDone": [
+    "original DB access or repair",
+    "production DB access",
+    "POI indexing",
+    "pilot search",
+    "deployment"
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "checkedAtUTC": "2026-10-06T13:01:18.742390+00:00",
+  "distro": "Ubuntu-24.04",
+  "testType": "synthetic boundary probe only; no POI, model, Chroma, or pilot search",
+  "baseline": {
+    "uid": 0,
+    "netns": "net:[4026531840]",
+    "configText": "[automount]\nenabled=false\nmountFsTab=false\n[interop]\nenabled=false\nappendWindowsPath=false\n",
+    "configSha256": "cccda268970d2f2c83d5b6ccb935c341b8e908d5096040e27fe16e5e3bf1285c",
+    "drvfsMounts": [],
+    "windowsDriveMounts": [],
+    "wslInteropEnvPresent": false
+  },
+  "isolatedProcess": {
+    "uid": 999,
+    "gid": 989,
+    "netns": "net:[4026532223]",
+    "mntns": "mnt:[4026532222]",
+    "caps": {
+      "CapEff": "0000000000000000",
+      "CapBnd": "0000000000000000",
+      "NoNewPrivs": "1"
+    },
+    "environmentKeys": [
+      "HOME",
+      "LANG",
+      "PATH"
+    ],
+    "drvfsMounts": [],
+    "windowsDriveMounts": [],
+    "routeRows": 0,
+    "egressConnectErrno": 101,
+    "expectedNetworkUnreachable": 101,
+    "windowsCmdPathPresent": false,
+    "hostProjectPathPresent": false,
+    "wslBridgePathsPresent": {
+      "/mnt/wsl": false,
+      "/mnt/wslg": false,
+      "/usr/lib/wsl/drivers": false,
+      "/usr/lib/wsl/lib": false,
+      "/tmp/.X11-unix/.X11-unix": false
+    },
+    "wslInitMasked": true
+  },
+  "checks": {
+    "distroConfigDisablesHostMountAndInterop": true,
+    "hostDrivesAbsentAfterRestart": true,
+    "freshNetworkNamespace": true,
+    "unprivilegedNoCapabilities": true,
+    "allowlistedEnvironmentOnly": true,
+    "noHostDriveMountsInProcess": true,
+    "WSLBridgesMaskedInProcess": true,
+    "noNetworkRouteOrEgress": true
+  },
+  "boundaryProbePassed": true,
+  "actualPilotExecutionAuthorized": false,
+  "linuxRuntimePinned": false,
+  "originalOrProductionDatabaseConnected": false,
+  "distroTerminatedAfterProbe": true
+}
