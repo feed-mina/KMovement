@@ -1,0 +1,14 @@
+### UI 상태 처리 자가 점검
+| 파일 | 빈 상태 | 로딩 | 오류 | 말줄임 | 반응형 | 접근성 | 페이지네이션 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `components/plugins/travel/KrideFocusScreen.tsx` | ❓ | ✅ | ✅ | ✅ | ❓ | ✅ | – |
+| `components/screens/SduiScreen.tsx` | ❓ | ✅ | ❓ | ❓ | ❓ | ❓ | – |
+| `components/fields/kride/SelectionCard.tsx` | ❓ | ❓ | ❓ | ❓ | ❓ | ✅ | – |
+| `components/fields/kride/atoms/CardImage.tsx` | ❓ | ❓ | ❓ | ❓ | ❓ | ✅ | – |
+| `components/screens/AuthFlowScreen.tsx` | ❓ | ✅ | ✅ | ❓ | ❓ | ✅ | ❓ |
+| `components/plugins/kpop/PersonalSaved.tsx` | ✅ | ✅ | ✅ | ❓ | ❓ | ✅ | ✅ |
+| `components/screens/LanguageChatScreen.tsx` | ✅ | ✅ | ✅ | ❓ | ❓ | ✅ | ❓ |
+| `components/utils/Skeleton.tsx` | ❓ | ✅ | ❓ | ❓ | ❓ | ❓ | – |
+
+❓ = 코드에서 흔적을 못 찾음(누락 확정 아님, 상위에서 처리하는지 확인). – = 해당 없음. 점검 필요 파일 8/8개.
+기준 항목: ui-benchmarking-analyst 스킬 references/state-checklist.md

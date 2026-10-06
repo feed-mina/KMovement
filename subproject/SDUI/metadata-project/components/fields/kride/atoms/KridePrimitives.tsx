@@ -101,6 +101,9 @@ interface RaiStatePanelProps {
   title: React.ReactNode;
   description?: React.ReactNode;
   children?: React.ReactNode;
+  /** 기본 dark(챗봇 모달). 밝은 페이지 위에 놓을 때는 'light'. */
+  tone?: 'dark' | 'light';
+  className?: string;
 }
 
 export function RaiStatePanel({
@@ -109,9 +112,11 @@ export function RaiStatePanel({
   title,
   description,
   children,
+  tone = 'dark',
+  className = '',
 }: RaiStatePanelProps) {
   return (
-    <div className="kride-rai-panel">
+    <div className={`kride-rai-panel kride-rai-panel--${tone} ${className}`.trim()}>
       <div className="kride-rai-panel__mascot-wrap">
         <Rai state={state} size={76} className="kride-rai-panel__mascot" />
       </div>

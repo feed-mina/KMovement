@@ -9,6 +9,10 @@ import { useAuth } from "@/context/AuthContext";
 interface MetadataContextType {
     menuTree: any[];
     isLoading: boolean;
+    /** 메타데이터 요청 실패 (벤치마킹 G4: 홈이 빈 화면으로 남지 않도록 노출) */
+    isError: boolean;
+    errorMessage: string | null;
+    refetch: () => void;
     screenId: string;
     refId: string | number | null;
 }
@@ -61,7 +65,7 @@ export function MetadataProvider({ children, screenId: propScreenId }: MetadataP
 
     // 3. 데이터 페칭
     //  * QueryProvider에서 reactQuery를 사용하여 서버와 통신
-    const { data, isLoading } = useQuery({
+    const { data, isLoading, isError, error, refetch } = useQuery({
         // * queryKey는 메타데이터와 dynamicQueryKey : ${유저구분키}_${URL파라미터} 이다.
         queryKey: ['metadata', dynamicQueryKey],
         queryFn: async () => {
@@ -92,10 +96,13 @@ export function MetadataProvider({ children, screenId: propScreenId }: MetadataP
         return {
             menuTree: data || [],
             isLoading,
+            isError,
+            errorMessage: isError ? String((error as Error)?.message ?? '') : null,
+            refetch: () => { void refetch(); },
             screenId: finalScreenId,
             refId: refIdFromUrl
         };
-    }, [data, isLoading, slug, pathname, finalScreenId]);
+    }, [data, isLoading, isError, error, refetch, slug, pathname, finalScreenId]);
 
     return (
         <MetadataContext.Provider value={contextValue}>

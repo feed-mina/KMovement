@@ -1,0 +1,199 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KRIDE 기대 화면 목업 6종</title><style>body{margin:0;padding:16px;background:#e9e7e2;display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;align-items:start}/* ---- 기대 화면 목업 공통 스타일 (KRIDE 브랜드 톤: 레드 #e50914 · 크림 #faf8f3) ---- */
+.mk{--red:#e50914;--red-soft:#fff0f1;--ink:#1b1d22;--muted:#6b7280;--line:#e6e2dc;--cream:#faf8f3;--navy:#1f2a3a;
+ font:14px/1.5 system-ui,"Malgun Gothic",sans-serif;color:var(--ink);background:var(--cream);border:1px solid #d9d4cc;border-radius:16px;overflow:hidden;min-width:0}
+.mk *{box-sizing:border-box}
+.mk .top{display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--line);padding:10px 16px}
+.mk .logo{color:var(--red);font-weight:900;letter-spacing:.5px}
+.mk .nav{display:flex;gap:12px;font-size:12px;color:#444}
+.mk .nav b{background:var(--red-soft);color:var(--red);padding:3px 8px;border-radius:8px;font-weight:700}
+.mk .body{padding:16px}
+.mk .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.mk .dark{background:#0b0b0d;color:#fff;border-color:#222}
+.mk .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:10px;padding:10px 16px;font-weight:700;font-size:13px;border:1px solid transparent}
+.mk .primary{background:var(--red);color:#fff}
+.mk .ghost{background:transparent;border-color:#cfd3d9;color:#333}
+.mk .dark .ghost{border-color:#444;color:#ddd}
+.mk .link{color:#9aa3b2;font-size:12px;text-decoration:underline}
+.mk .btn.dis{background:#f0d2d5;color:#fff;cursor:not-allowed}
+.mk .muted{color:var(--muted);font-size:12px}
+.mk h4{margin:0 0 4px;font-size:16px}
+.mk .chip{display:inline-block;border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 10px;font-size:11px;margin:2px 2px 0 0}
+.mk .chip.on{background:var(--red);color:#fff;border-color:var(--red)}
+.mk .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.mk .between{justify-content:space-between}
+.mk .avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--red-soft);color:var(--red);font-weight:800}
+.mk .steps{display:flex;gap:4px;margin:8px 0}
+.mk .steps i{flex:1;height:4px;border-radius:2px;background:#e8e3dc}
+.mk .steps i.on{background:var(--red)}
+.mk .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.mk .art{text-align:center;font-size:11px;padding:6px 2px;border-radius:10px;position:relative;border:2px solid transparent}
+.mk .art.sel{background:var(--red-soft);border-color:var(--red)}
+.mk .art .ph{width:40px;height:40px;margin:0 auto 4px;border-radius:50%;background:#e5e1da;display:grid;place-items:center;font-weight:800;color:#555}
+.mk .art.sel .ph{outline:2px solid var(--red);outline-offset:1px}
+.mk .art .ph.init{background:var(--red-soft);color:var(--red)}
+.mk .art .ck{position:absolute;top:4px;right:10px;width:14px;height:14px;border-radius:50%;background:var(--red);color:#fff;font-size:9px;display:grid;place-items:center}
+.mk .sticky{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mk .hero{background:linear-gradient(120deg,#111,#2b0d10);color:#fff;border-radius:14px;padding:18px}
+.mk .hero small{letter-spacing:2px;color:#bbb;font-size:10px}
+.mk .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.mk .tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12px}
+.mk .tile b{display:block;font-size:13px;margin-bottom:2px}
+.mk .badge{font-size:9px;padding:1px 6px;border-radius:6px;background:#ffe9b3;color:#7a4a00;font-weight:800;vertical-align:middle}
+.mk .stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.mk .stat div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.mk .stat strong{display:block;font-size:18px}
+.mk .list{border-top:1px solid var(--line)}
+.mk .list div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}
+.mk .danger{color:#b91c1c;font-size:12px}
+.mk .tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.mk .tabs span{padding:8px 10px;font-size:12px;color:#555}
+.mk .tabs span.on{border-bottom:2px solid var(--red);color:var(--red);font-weight:700}
+.mk .empty{text-align:center;padding:24px 10px}
+.mk .empty .ic{width:48px;height:48px;border-radius:14px;background:var(--red-soft);margin:0 auto 10px;display:grid;place-items:center;font-size:22px}
+.mk .skel{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mk .skel i{display:block;height:72px;border-radius:10px;background:linear-gradient(90deg,#eee,#f7f5f1,#eee);background-size:200%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.mk .chat{display:flex;flex-direction:column;gap:8px;min-height:150px}
+.mk .bub{max-width:80%;padding:9px 12px;border-radius:14px;font-size:12px;line-height:1.45}
+.mk .ai{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.mk .me{background:var(--red);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.mk .ai details{margin-top:4px;font-size:11px;color:#555}
+.mk .ai summary{cursor:pointer;color:var(--red)}
+.mk .err{background:#fff4f4;border:1px solid #f5c2c7;color:#8a1c1c;align-self:flex-start}
+.mk .compose{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-top:10px}
+.mk .compose span{flex:1;color:#9aa;font-size:12px}
+.mk .send{width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-weight:900}
+.mk .send.off{background:#e9d4d6}
+.mk .info{font-size:11px;background:#fff8e6;border:1px solid #f1dfa6;color:#6b4e00;border-radius:8px;padding:6px 10px;margin-bottom:10px}
+.mk .typing{font-size:11px;color:#888;padding-left:4px}
+.mk .bar{display:flex;justify-content:space-around;background:#111;color:#ddd;font-size:10px;padding:8px}
+.mk .note{font-size:11px;color:#9aa3b2;margin-top:8px}
+.mk .dark .chip{background:#1f1f24;color:#ddd;border-color:#444}
+.mk .dark .chip.on{background:var(--red);color:#fff;border-color:var(--red)}
+.mk .nav{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mk .dark .muted{color:#aaa}
+.mk .send{flex:none}.mk .avatar{flex:none}
+</style></head><body><!-- ===== MOCK 1 : 코스 만들기 오류 ===== -->
+<div class="mk" id="mock1">
+  <div class="top"><span class="logo">KRIDE</span><span class="nav">홈 · K-pop · <b>코스 만들기</b> · 언어 채팅 · 마이</span></div>
+  <div class="body" style="padding-bottom:56px">
+    <div class="muted" style="margin-bottom:8px">코스 만들기 · 5/5단계 · 결과</div>
+    <div class="card dark" style="max-width:520px;margin:0 auto">
+      <div class="row"><span class="avatar" style="background:#2a1014;color:#ff6b74">AI</span><div><b style="font-size:12px;color:#ff6b74">K-RIDE AI</b><div class="muted" style="color:#aaa">방금 전 시도 · 추천 서버 응답 없음(5xx)</div></div></div>
+      <h4 style="margin-top:12px">코스를 아직 못 만들었어요</h4>
+      <div style="font-size:12px;color:#ccc">추천 서버에 일시적인 문제가 있어요. 고른 조건은 그대로 두었으니 바로 다시 시도할 수 있어요.</div>
+      <div style="margin:10px 0 2px;font-size:11px;color:#999">내가 고른 조건</div>
+      <div><span class="chip on">BLACKPINK</span><span class="chip on">TWICE</span><span class="chip">서울 · 성수</span><span class="chip">1박 2일</span><span class="chip">예산 20만원</span></div>
+      <div class="row" style="margin-top:14px"><span class="btn primary" style="flex:1">다시 시도</span><span class="btn ghost">조건 바꾸기</span></div>
+      <div class="row between" style="margin-top:10px"><span class="link">인기 코스 먼저 둘러보기</span><span class="link">문의하기</span></div>
+    </div>
+    <div class="note">· 3회 연속 실패 시 "잠시 후 알림으로 알려드릴게요" 로 바뀌고 재시도 버튼은 30초 비활성</div>
+  </div>
+  <div class="bar"><span>🏠 홈</span><span>💬 커뮤니티</span><span>⏰ 시간 설정</span></div>
+</div>
+
+<!-- ===== MOCK 2 : 아티스트 선택 단계 ===== -->
+<div class="mk" id="mock2">
+  <div class="top"><span class="logo">KRIDE</span><span class="nav">홈 · K-pop · <b>코스 만들기</b> · 언어 채팅 · 마이</span></div>
+  <div class="body" style="padding-bottom:0">
+    <div class="row between"><span class="muted">← 이전</span><span class="muted">2 / 5 단계 · 아티스트</span><span class="link">저장하고 나가기</span></div>
+    <div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+    <h4>좋아하는 아티스트를 골라주세요</h4>
+    <div class="row between"><span class="muted">1명 이상, 최대 5명</span><span style="font-size:12px;color:var(--red);font-weight:700">2 / 5 선택</span></div>
+    <div class="card" style="padding:8px 12px;margin-top:8px;color:#9aa;font-size:12px">🔍 아티스트 검색 (예: NewJeans)</div>
+    <div style="margin-top:8px"><span class="chip on">BLACKPINK ✕</span><span class="chip on">TWICE ✕</span></div>
+    <div class="grid">
+      <div class="art"><div class="ph">📷</div>BTS</div>
+      <div class="art sel"><span class="ck">✓</span><div class="ph">📷</div>BLACKPINK</div>
+      <div class="art"><div class="ph">📷</div>EXO</div>
+      <div class="art sel"><span class="ck">✓</span><div class="ph">📷</div>TWICE</div>
+      <div class="art"><div class="ph">📷</div>SEVENTEEN</div>
+      <div class="art"><div class="ph">📷</div>aespa</div>
+      <div class="art"><div class="ph init">TX</div>TXT</div>
+      <div class="art"><div class="ph init">EN</div>ENHYPEN</div>
+    </div>
+    <div class="note">· 이미지 없는 아티스트는 브랜드 톤 이니셜(2글자) 로 통일 · 5명 채우면 나머지 카드 흐리게 + "최대 5명이에요" 토스트</div>
+  </div>
+  <div class="sticky"><span class="btn ghost">이전</span><span class="btn primary" style="flex:1;max-width:240px">다음 · 2명 선택됨</span></div>
+</div>
+
+<!-- ===== MOCK 3 : 홈 ===== -->
+<div class="mk" id="mock3">
+  <div class="top"><span class="logo">KRIDE</span><span class="nav"><b>홈</b> · K-pop · 코스 만들기 · 언어 채팅 · <span class="avatar" style="width:22px;height:22px;font-size:10px">M</span></span></div>
+  <div class="body">
+    <div class="hero">
+      <small>NEW · KRIDE TRAVEL</small>
+      <h4 style="font-size:20px;margin-top:4px">K-RIDE 시작하기</h4>
+      <div style="font-size:12px;color:#ccc;max-width:36ch">좋아하는 아티스트와 지역을 고르면 AI가 동선과 일정을 한 번에 짜드려요.</div>
+      <div class="row" style="margin-top:12px"><span class="btn primary">▶ 여행 시작하기</span><span class="link" style="color:#ddd">지난 코스 이어하기 (1)</span></div>
+    </div>
+    <div class="card" style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;padding:10px 14px">
+      <div><div class="muted" style="color:var(--red);font-size:10px;letter-spacing:1px">오늘의 약속</div><b style="font-size:13px">오후 7:00 · 성수 팝업</b></div><span class="btn ghost" style="padding:6px 10px">변경</span>
+    </div>
+    <div class="tiles">
+      <div class="tile"><b>K-POP 팬 여행</b>아티스트 팔로우 · 이벤트 일정 · 굿즈</div>
+      <div class="tile"><b>커뮤니티</b>다른 팬들과 일상 공유</div>
+      <div class="tile"><b>AI 영어 채팅 <span class="badge">PREMIUM</span></b>여행 영어 연습</div>
+      <div class="tile"><b>AI 일본어 채팅 <span class="badge">PREMIUM</span></b>여행 일본어 연습</div>
+    </div>
+    <div class="note">· 로그인 전엔 히어로 아래에 "로그인하면 코스가 저장돼요" 한 줄 배너만 · 로그인 후엔 배너 대신 아바타(우상단)</div>
+  </div>
+</div>
+
+<!-- ===== MOCK 4 : 마이페이지 ===== -->
+<div class="mk" id="mock4">
+  <div class="top"><span class="logo">KRIDE</span><span class="nav">홈 · K-pop · 코스 만들기 · 언어 채팅 · <b>마이</b></span></div>
+  <div class="body">
+    <div class="row"><span class="avatar" style="width:48px;height:48px;font-size:18px">M</span><div><b style="font-size:15px">myeliln12</b><div class="muted">myeliln12@naver.com · <span class="chip" style="padding:0 7px">카카오 로그인</span></div></div></div>
+    <div class="stat"><div><strong>3</strong><span class="muted">저장한 아티스트</span></div><div><strong>0</strong><span class="muted">저장한 이벤트</span></div><div><strong>1</strong><span class="muted">저장한 상품</span></div></div>
+    <div class="card" style="padding:0 14px">
+      <div class="list">
+        <div><span>내 코스</span><span class="muted">2개 ›</span></div>
+        <div><span>오늘의 약속 시간</span><span class="muted">오후 7:00 ›</span></div>
+        <div><span>알림 설정</span><span class="muted">켜짐 ›</span></div>
+        <div><span>개인정보 설정</span><span class="muted">›</span></div>
+      </div>
+    </div>
+    <div class="row between" style="margin-top:14px"><span class="link">로그아웃</span><span class="danger">회원 탈퇴</span></div>
+    <div class="note">· 숫자 타일 = 내 목록 탭으로 바로 이동 · 로그아웃은 확인 1단계("로그아웃할까요?") · 탈퇴는 별도 화면 + 이메일 입력 확인</div>
+  </div>
+</div>
+
+<!-- ===== MOCK 5 : 내 목록 ===== -->
+<div class="mk" id="mock5">
+  <div class="top"><span class="logo">KRIDE</span><span class="nav">홈 · K-pop · 코스 만들기 · 언어 채팅 · <b>마이</b></span></div>
+  <div class="body">
+    <div class="row between"><span class="muted">← 마이페이지</span><h4 style="margin:0">내 목록</h4><span></span></div>
+    <div class="muted">나만 볼 수 있는 저장 목록이에요.</div>
+    <div class="tabs" style="margin-top:10px"><span>아티스트 <b>3</b></span><span class="on">이벤트 <b>0</b></span><span>상품 <b>1</b></span></div>
+    <div class="card empty">
+      <div class="ic">📅</div>
+      <b>아직 저장한 이벤트가 없어요</b>
+      <div class="muted" style="margin:4px 0 12px">K-pop 탭에서 관심 있는 이벤트의 ♥ 를 누르면 여기에 모여요.</div>
+      <span class="btn primary">이벤트 둘러보기</span>
+    </div>
+    <div class="muted" style="margin:14px 0 6px">로딩 중일 때 (같은 자리 Skeleton 3장)</div>
+    <div class="skel"><i></i><i></i><i></i></div>
+    <div class="note">· 페이지네이션은 6개 이상일 때만 노출 · 항목 카드엔 ♥ 해제 → 토스트 "저장 취소됨 · 되돌리기"</div>
+  </div>
+</div>
+
+<!-- ===== MOCK 6 : 언어 채팅 ===== -->
+<div class="mk" id="mock6">
+  <div class="top"><span class="logo">KRIDE</span><span class="nav">홈 · K-pop · 코스 만들기 · <b>언어 채팅</b> · 마이</span></div>
+  <div class="body" style="padding-bottom:0">
+    <div class="row between"><div class="tabs" style="margin:0;border:0"><span class="on">영어</span><span>일본어</span></div><span class="link">대화 종료</span></div>
+    <div class="info">시험 운영 중 · 텍스트만 지원, 음성은 준비 중이에요</div>
+    <div class="chat">
+      <div class="bub ai">Hi! I'm your travel English buddy. Where are you heading today?<details><summary>한국어 설명 보기</summary>"heading" 은 "~로 가다" 라는 뜻이에요.</details></div>
+      <div class="bub me">How can I order coffee?</div>
+      <div class="bub ai">You can say: "Can I get an iced americano, please?"<details><summary>한국어 설명 보기</summary>"Can I get ~" 이 가장 자연스러운 주문 표현이에요.</details></div>
+      <div class="bub err">답변을 못 받았어요 · <u>다시 보내기</u></div>
+      <div class="typing">● ● ●  AI가 답변 중…</div>
+    </div>
+    <div class="row" style="margin-top:8px"><span class="chip">길 묻기</span><span class="chip">콘서트 굿즈 줄 서기</span><span class="chip">카페 주문</span></div>
+    <div class="compose"><span>영어 또는 한국어로 입력…</span><span class="send off">↑</span></div>
+    <div class="note">· 전송은 글자 있을 때만 활성 · Enter 전송 / Shift+Enter 줄바꿈 · 대화 종료는 확인 모달("대화 기록이 사라져요")</div>
+  </div>
+</div>
+</body></html>

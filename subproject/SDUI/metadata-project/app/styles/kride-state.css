@@ -1,0 +1,174 @@
+/* ==========================================================
+   공용 상태 패널 + 화면 Skeleton (벤치마킹 G0·G1, 2026-10-06)
+   - 색은 tokens.css 의 semantic 토큰만 쓴다
+   - tone--light 기본, tone--dark 는 FOCUS 결과 카드 전용
+   ========================================================== */
+
+.screen-skeleton {
+    display: grid;
+    gap: 14px;
+    width: min(100%, 760px);
+    margin: 24px auto;
+    padding: 0 4px;
+}
+.screen-skeleton .skeleton-box { display: block; border-radius: var(--kride-radius-md, 12px); }
+.screen-skeleton__title { border-radius: 8px; }
+.screen-skeleton__block { border-radius: var(--kride-radius-lg, 16px); }
+
+.kride-state-panel {
+    display: grid;
+    gap: 14px;
+    justify-items: start;
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 28px 24px;
+    border: 1px solid var(--border-hair, #e5e7eb);
+    border-radius: var(--kride-radius-lg, 16px);
+    background: var(--surface-card, #fff);
+    color: var(--text-body, #374151);
+    text-align: left;
+}
+.kride-state-panel--empty-first,
+.kride-state-panel--empty-filtered,
+.kride-state-panel--loading {
+    justify-items: center;
+    text-align: center;
+}
+.kride-state-panel__icon {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    background: var(--semantic-accent-soft, rgba(229, 9, 20, .08));
+    font-size: 26px;
+    line-height: 1;
+}
+.kride-state-panel--error .kride-state-panel__icon { background: var(--danger-soft, rgba(229, 9, 20, .1)); }
+.kride-state-panel__copy { display: grid; gap: 6px; }
+.kride-state-panel__title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--text-strong, #111);
+    word-break: keep-all;
+}
+.kride-state-panel__description {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-muted, #6b7280);
+    word-break: keep-all;
+}
+.kride-state-panel__context { width: 100%; }
+.kride-state-panel__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+.kride-state-panel--empty-first .kride-state-panel__actions,
+.kride-state-panel--empty-filtered .kride-state-panel__actions { justify-content: center; }
+.kride-state-panel__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--kride-touch-target, 48px);
+    padding: 0 20px;
+    border-radius: var(--kride-radius-md, 12px);
+    border: 1px solid transparent;
+    font: inherit;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+}
+.kride-state-panel__btn--primary {
+    flex: 1 1 160px;
+    background: var(--semantic-accent, #e50914);
+    color: var(--text-invert, #fff);
+}
+.kride-state-panel__btn--ghost {
+    border-color: var(--border-hair, #e5e7eb);
+    background: transparent;
+    color: var(--text-body, #374151);
+}
+.kride-state-panel__btn:disabled,
+.kride-state-panel__btn[aria-disabled="true"] { opacity: .55; cursor: not-allowed; }
+.kride-state-panel__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    width: 100%;
+    font-size: 14px;
+}
+.kride-state-panel__links a { color: var(--text-muted, #6b7280); text-decoration: underline; }
+
+/* 조건 칩 */
+.kride-state-chips { display: grid; gap: 6px; }
+.kride-state-chips__label { font-size: 12px; color: var(--text-muted, #6b7280); }
+.kride-state-chips__list { display: flex; flex-wrap: wrap; gap: 6px; }
+.kride-state-chip {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border-hair, #e5e7eb);
+    background: var(--surface-subtle, #f5f1ea);
+    font-size: 13px;
+    color: var(--text-body, #374151);
+}
+.kride-state-chip--accent {
+    border-color: var(--semantic-accent, #e50914);
+    background: var(--semantic-accent, #e50914);
+    color: var(--text-invert, #fff);
+}
+
+/* 어두운 톤 (FOCUS 결과 카드) */
+.kride-state-panel--dark {
+    background: var(--kride-bg-dark, #0a0a0a);
+    border-color: #2a2a2a;
+    color: #e5e7eb;
+}
+.kride-state-panel--dark .kride-state-panel__title { color: #fff; }
+.kride-state-panel--dark .kride-state-panel__description { color: #a3a3a3; }
+.kride-state-panel--dark .kride-state-panel__btn--ghost { border-color: #444; color: #ddd; }
+.kride-state-panel--dark .kride-state-panel__links a { color: #9aa3b2; }
+.kride-state-panel--dark .kride-state-chip { background: #1f1f24; border-color: #444; color: #ddd; }
+.kride-state-panel--dark .kride-state-chips__label { color: #999; }
+
+/* 공용 토스트 (저장 취소 되돌리기 등) */
+.kride-undo-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(24px + var(--kride-safe-bottom, 0px));
+    z-index: 900;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: min(92vw, 420px);
+    padding: 12px 16px;
+    border-radius: 999px;
+    background: rgba(20, 20, 20, .94);
+    color: #fff;
+    font-size: 14px;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, .3);
+}
+.kride-undo-toast button {
+    min-height: 0;
+    padding: 4px 10px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #ffb4ba;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* RaiStatePanel 라이트 톤 (기존 다크 전용 패널 확장) */
+.kride-rai-panel--light { background: var(--surface-card, #fff); border: 1px solid var(--border-hair, #e5e7eb); border-radius: 16px; }
+.kride-rai-panel--light .kride-rai-panel__title { color: var(--text-strong, #111); }
+.kride-rai-panel--light .kride-rai-panel__description { color: var(--text-muted, #6b7280); }
+.kride-rai-panel--light .kride-rai-panel__eyebrow { color: var(--semantic-accent-strong, #8b0610); }

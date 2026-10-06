@@ -32,14 +32,14 @@ test('private item has no detail link and final deletion shows explicit empty st
  (fetch as jest.Mock).mockReturnValueOnce(response(page([row(1,'PRIVATE')]))).mockReturnValueOnce(response({saved:false})).mockReturnValueOnce(response(page()));
  render(wrap(<PersonalSavedScreen screenId="KPOP_SAVED_ITEMS" refId={null}/>));
  await screen.findByRole('heading',{name:'비공개 항목'});expect(screen.queryByText('테스트 1')).toBeNull();expect(screen.queryByRole('link',{name:'보기'})).toBeNull();
- fireEvent.click(screen.getByRole('button',{name:'삭제'}));expect(await screen.findByText(/빈 목록입니다/)).toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'삭제'}));expect(await screen.findByText(/아직 저장한 .*가 없어요/)).toBeInTheDocument();
 });
 test('106 records are five per page with independent category reset',async()=>{
  (fetch as jest.Mock).mockReturnValueOnce(response(page([1,2,3,4,5].map(i=>row(i)),106))).mockReturnValueOnce(response(page([6,7,8,9,10].map(i=>row(i)),106,2))).mockReturnValueOnce(response(page()));
  render(wrap(<PersonalSavedScreen screenId="KPOP_SAVED_ITEMS" refId={null}/>));
  expect(await screen.findAllByRole('listitem')).toHaveLength(5);fireEvent.click(screen.getByRole('button',{name:'다음'}));await screen.findByText('테스트 6');
  expect(fetch).toHaveBeenLastCalledWith(expect.stringContaining('artists?page=2'),expect.anything());
- fireEvent.click(screen.getByRole('button',{name:'이벤트'}));await screen.findByText(/빈 목록입니다/);
+ fireEvent.click(screen.getByRole('button',{name:'이벤트'}));await screen.findByText(/아직 저장한 .*가 없어요/);
  expect(fetch).toHaveBeenLastCalledWith(expect.stringContaining('events?page=1'),expect.anything());
 });
 test('switching account masks previous list and ignores stale response',async()=>{
@@ -51,11 +51,26 @@ test('switching account masks previous list and ignores stale response',async()=
 });
 test('read failure is distinct from empty and retry recovers',async()=>{
  (fetch as jest.Mock).mockReturnValueOnce(response({},500)).mockReturnValueOnce(response(page()));
- render(wrap(<PersonalSavedScreen screenId="KPOP_SAVED_ITEMS" refId={null}/>));await screen.findByRole('alert');expect(screen.queryByText(/빈 목록입니다/)).toBeNull();
- fireEvent.click(screen.getByRole('button',{name:'다시 시도'}));await screen.findByText(/빈 목록입니다/);
+ render(wrap(<PersonalSavedScreen screenId="KPOP_SAVED_ITEMS" refId={null}/>));await screen.findByRole('alert');expect(screen.queryByText(/아직 저장한 .*가 없어요/)).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'다시 시도'}));await screen.findByText(/아직 저장한 .*가 없어요/);
 });
 test('delete failure preserves the item',async()=>{
  (fetch as jest.Mock).mockReturnValueOnce(response(page([row()]))).mockReturnValueOnce(response({},500));
  render(wrap(<PersonalSavedScreen screenId="KPOP_SAVED_ITEMS" refId={null}/>));fireEvent.click(await screen.findByRole('button',{name:'삭제'}));
  await screen.findByRole('alert');expect(screen.getByText('테스트 1')).toBeInTheDocument();
+});
+// 벤치마킹 G6: 페이지네이션은 넘칠 때만, 탭 카운트는 방문한 탭만, 삭제 후 되돌리기
+test('pagination text is hidden for a short list and tab count follows the visited tab',async()=>{
+ (fetch as jest.Mock).mockReturnValueOnce(response(page([row(1),row(2)],2)));
+ render(wrap(<PersonalSavedScreen screenId="KPOP_SAVED_ITEMS" refId={null}/>));
+ await screen.findByText('테스트 1');expect(screen.queryByText(/페이지 · 5개씩/)).toBeNull();
+ expect(screen.getByRole('button',{name:/아티스트/})).toHaveTextContent('2');expect(screen.getByRole('button',{name:'이벤트'})).toHaveTextContent('이벤트');
+});
+test('deleting offers undo which re-saves the item',async()=>{
+ (fetch as jest.Mock).mockReturnValueOnce(response(page([row(1)]))).mockReturnValueOnce(response({saved:false})).mockReturnValueOnce(response(page())).mockReturnValueOnce(response({saved:true})).mockReturnValueOnce(response(page([row(1)])));
+ render(wrap(<PersonalSavedScreen screenId="KPOP_SAVED_ITEMS" refId={null}/>));
+ fireEvent.click(await screen.findByRole('button',{name:'삭제'}));
+ fireEvent.click(await screen.findByRole('button',{name:'되돌리기'}));
+ await screen.findByText('테스트 1');
+ expect((fetch as jest.Mock).mock.calls.map(c=>c[1].method)).toEqual(['GET','DELETE','GET','POST','GET']);
 });
