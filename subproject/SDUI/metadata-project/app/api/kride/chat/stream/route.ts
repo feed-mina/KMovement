@@ -9,7 +9,10 @@ export async function POST(request: NextRequest) {
   const reply = (status: number) => Response.json({ error: '답변 연결을 확인해 주세요.' },
     { status, headers: { 'Cache-Control': 'private, no-store' } });
   const origin = request.headers.get('origin');
-  if (origin && origin !== new URL(request.url).origin) return reply(403);
+  const configuredOrigin = process.env.KRIDE_SITE_ORIGIN ?? process.env.NEXT_PUBLIC_SITE_URL;
+  let expectedOrigin: string;
+  try { expectedOrigin = new URL(configuredOrigin ?? request.url).origin; } catch { return reply(503); }
+  if (origin && origin !== expectedOrigin) return reply(403);
   if (!base || !auth || !token) return reply(503);
   const controller = new AbortController();
   const abort = () => controller.abort();

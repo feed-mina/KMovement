@@ -3,6 +3,7 @@ services:
     labels:
       traefik.docker.network: kmovement-web_kmovement
     environment:
+      KRIDE_SITE_ORIGIN: https://${KMOVEMENT_SITE_HOST:?Set the public hostname}
       FASTAPI_URL: http://fastapi:8000
       AUTH_BACKEND_URL: http://spring:8080
       BACKEND_URL: http://spring:8080
