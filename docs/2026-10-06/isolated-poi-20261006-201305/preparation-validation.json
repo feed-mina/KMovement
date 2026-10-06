@@ -1,0 +1,20 @@
+{
+  "sourceGraphUnchanged": true,
+  "sourceSha256": "49110f8c6074a1028f687c448d1dda745ed313f5ec94e99d9cfd6af59547903c",
+  "candidateCount": 1000,
+  "uniqueCandidates": 1000,
+  "questions": 120,
+  "splitCountsPerLanguage": {
+    "development": 20,
+    "holdout": 20
+  },
+  "anchorLeakageAcrossSplits": false,
+  "reviewedQuestions": 0,
+  "modelHashesVerified": 10,
+  "corePayloadFilesHashed": 16759,
+  "missingCoreFiles": [],
+  "originalDatabaseOpened": false,
+  "chromaClientOpened": false,
+  "inferenceExecuted": false,
+  "operatingConnection": false
+}

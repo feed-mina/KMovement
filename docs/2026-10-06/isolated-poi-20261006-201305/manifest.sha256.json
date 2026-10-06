@@ -1,0 +1,15 @@
+{
+  "files": {
+    "candidates.json": "bcaa84d108258f2f27374fd03aa9cdd7e6e3dda0c57d7e4b8f264ca1c965a0d8",
+    "library-lock.json": "81297aba3bd027d2ee3db249a0d9935f7836faf8ff5bfe6ee75a081ef4c09daf",
+    "model-lock.json": "addc75599b89da8c73f9d4b87cb79c8e1190b94c8c8e556bb556f59c2cb38edf",
+    "pilot-spec.json": "e80a1bcea266fbe27408e03c991d7e40edac515a84643c8ddd548fe97701225a",
+    "preparation-validation.json": "8b6087f903ea66ee38901e69a46d5da8d381474deeb062b479be57fd0992c2a4",
+    "questions-draft.json": "b56418021ccae6af7ea0b72b49886e3396a2ee93de3baf1186f1c0385ca28a6c",
+    "review-sheet.csv": "0866431ba5ef29753214abca2920b18a2e9e0ac012e538d0ee544520319022aa",
+    "source-graph.json": "49110f8c6074a1028f687c448d1dda745ed313f5ec94e99d9cfd6af59547903c",
+    "source-id-ledger.json": "fa7388f357e27d71696354f543386225b6274d27471774298e129d77adffccc8",
+    "README.md": "67f9e551db148b1c9537c23f925149f270e7a281e1c32e8424fdc8a1ed25d680"
+  },
+  "meaning": "byte freeze of preparation artifacts; no results or human review implied"
+}

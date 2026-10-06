@@ -1,0 +1,1922 @@
+[
+  {
+    "id": "P01-ko",
+    "group": "poi_9636",
+    "split": "development",
+    "language": "ko",
+    "query": "경주 동궁과 월지의 위치를 찾고 싶어요.",
+    "expectedIdsDraft": [
+      "poi_9636"
+    ],
+    "relevanceDraft": {
+      "poi_9636": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P01-en",
+    "group": "poi_9636",
+    "split": "development",
+    "language": "en",
+    "query": "Find the location of Donggung Palace and Wolji Pond.",
+    "expectedIdsDraft": [
+      "poi_9636"
+    ],
+    "relevanceDraft": {
+      "poi_9636": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P01-ja",
+    "group": "poi_9636",
+    "split": "development",
+    "language": "ja",
+    "query": "東宮と月池の場所を探してください。",
+    "expectedIdsDraft": [
+      "poi_9636"
+    ],
+    "relevanceDraft": {
+      "poi_9636": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P02-ko",
+    "group": "poi_2356",
+    "split": "development",
+    "language": "ko",
+    "query": "부산광역시에서 광안리해수욕장에 해당하는 장소 자료를 찾아줘.",
+    "expectedIdsDraft": [
+      "poi_2356"
+    ],
+    "relevanceDraft": {
+      "poi_2356": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P02-en",
+    "group": "poi_2356",
+    "split": "development",
+    "language": "en",
+    "query": "Find the place record for Gwangalli Beach in 부산광역시.",
+    "expectedIdsDraft": [
+      "poi_2356"
+    ],
+    "relevanceDraft": {
+      "poi_2356": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P02-ja",
+    "group": "poi_2356",
+    "split": "development",
+    "language": "ja",
+    "query": "부산광역시にある広安里海水浴場の場所情報を探してください。",
+    "expectedIdsDraft": [
+      "poi_2356"
+    ],
+    "relevanceDraft": {
+      "poi_2356": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P03-ko",
+    "group": "poi_15398",
+    "split": "development",
+    "language": "ko",
+    "query": "성산일출봉 [유네스코 세계자연유산]과 이름이 비슷한 숙소 대신 이 장소의 주소 자료를 보여줘.",
+    "expectedIdsDraft": [
+      "poi_15398"
+    ],
+    "relevanceDraft": {
+      "poi_15398": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P03-en",
+    "group": "poi_15398",
+    "split": "development",
+    "language": "en",
+    "query": "Show the address record for Seongsan Ilchulbong, not accommodation with a similar name.",
+    "expectedIdsDraft": [
+      "poi_15398"
+    ],
+    "relevanceDraft": {
+      "poi_15398": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P03-ja",
+    "group": "poi_15398",
+    "split": "development",
+    "language": "ja",
+    "query": "似た名前の宿泊施設ではなく、城山日出峰の住所情報を見せてください。",
+    "expectedIdsDraft": [
+      "poi_15398"
+    ],
+    "relevanceDraft": {
+      "poi_15398": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P04-ko",
+    "group": "poi_2530",
+    "split": "development",
+    "language": "ko",
+    "query": "해운대해수욕장의 위치를 찾고 싶어요.",
+    "expectedIdsDraft": [
+      "poi_2530"
+    ],
+    "relevanceDraft": {
+      "poi_2530": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P04-en",
+    "group": "poi_2530",
+    "split": "development",
+    "language": "en",
+    "query": "Find the location of Haeundae Beach.",
+    "expectedIdsDraft": [
+      "poi_2530"
+    ],
+    "relevanceDraft": {
+      "poi_2530": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P04-ja",
+    "group": "poi_2530",
+    "split": "development",
+    "language": "ja",
+    "query": "海雲台海水浴場の場所を探してください。",
+    "expectedIdsDraft": [
+      "poi_2530"
+    ],
+    "relevanceDraft": {
+      "poi_2530": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P05-ko",
+    "group": "media_2023_1601",
+    "split": "development",
+    "language": "ko",
+    "query": "서울특별시에서 어니언 성수에 해당하는 장소 자료를 찾아줘.",
+    "expectedIdsDraft": [
+      "media_2023_1601"
+    ],
+    "relevanceDraft": {
+      "media_2023_1601": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P05-en",
+    "group": "media_2023_1601",
+    "split": "development",
+    "language": "en",
+    "query": "Find the place record for Onion Seongsu in 서울특별시.",
+    "expectedIdsDraft": [
+      "media_2023_1601"
+    ],
+    "relevanceDraft": {
+      "media_2023_1601": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P05-ja",
+    "group": "media_2023_1601",
+    "split": "development",
+    "language": "ja",
+    "query": "서울특별시にあるオニオン聖水の場所情報を探してください。",
+    "expectedIdsDraft": [
+      "media_2023_1601"
+    ],
+    "relevanceDraft": {
+      "media_2023_1601": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P06-ko",
+    "group": "media_2023_1625",
+    "split": "development",
+    "language": "ko",
+    "query": "곰솔마루과 이름이 비슷한 숙소 대신 이 장소의 주소 자료를 보여줘.",
+    "expectedIdsDraft": [
+      "media_2023_1625"
+    ],
+    "relevanceDraft": {
+      "media_2023_1625": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P06-en",
+    "group": "media_2023_1625",
+    "split": "development",
+    "language": "en",
+    "query": "Show the address record for Gomsolmaru, not accommodation with a similar name.",
+    "expectedIdsDraft": [
+      "media_2023_1625"
+    ],
+    "relevanceDraft": {
+      "media_2023_1625": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P06-ja",
+    "group": "media_2023_1625",
+    "split": "development",
+    "language": "ja",
+    "query": "似た名前の宿泊施設ではなく、コムソルマルの住所情報を見せてください。",
+    "expectedIdsDraft": [
+      "media_2023_1625"
+    ],
+    "relevanceDraft": {
+      "media_2023_1625": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P07-ko",
+    "group": "poi_874493",
+    "split": "development",
+    "language": "ko",
+    "query": "N서울타워의 위치를 찾고 싶어요.",
+    "expectedIdsDraft": [
+      "poi_874493"
+    ],
+    "relevanceDraft": {
+      "poi_874493": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P07-en",
+    "group": "poi_874493",
+    "split": "development",
+    "language": "en",
+    "query": "Find the location of N Seoul Tower.",
+    "expectedIdsDraft": [
+      "poi_874493"
+    ],
+    "relevanceDraft": {
+      "poi_874493": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P07-ja",
+    "group": "poi_874493",
+    "split": "development",
+    "language": "ja",
+    "query": "Nソウルタワーの場所を探してください。",
+    "expectedIdsDraft": [
+      "poi_874493"
+    ],
+    "relevanceDraft": {
+      "poi_874493": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P08-ko",
+    "group": "poi_433",
+    "split": "development",
+    "language": "ko",
+    "query": "서울특별시에서 창덕궁과 후원 [유네스코 세계유산]에 해당하는 장소 자료를 찾아줘.",
+    "expectedIdsDraft": [
+      "poi_433"
+    ],
+    "relevanceDraft": {
+      "poi_433": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P08-en",
+    "group": "poi_433",
+    "split": "development",
+    "language": "en",
+    "query": "Find the place record for Changdeokgung Palace and Secret Garden in 서울특별시.",
+    "expectedIdsDraft": [
+      "poi_433"
+    ],
+    "relevanceDraft": {
+      "poi_433": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P08-ja",
+    "group": "poi_433",
+    "split": "development",
+    "language": "ja",
+    "query": "서울특별시にある昌徳宮と後苑の場所情報を探してください。",
+    "expectedIdsDraft": [
+      "poi_433"
+    ],
+    "relevanceDraft": {
+      "poi_433": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P09-ko",
+    "group": "poi_1657",
+    "split": "development",
+    "language": "ko",
+    "query": "도산서원(대전)과 이름이 비슷한 숙소 대신 이 장소의 주소 자료를 보여줘.",
+    "expectedIdsDraft": [
+      "poi_1657"
+    ],
+    "relevanceDraft": {
+      "poi_1657": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P09-en",
+    "group": "poi_1657",
+    "split": "development",
+    "language": "en",
+    "query": "Show the address record for Dosan Seowon in Daejeon, not accommodation with a similar name.",
+    "expectedIdsDraft": [
+      "poi_1657"
+    ],
+    "relevanceDraft": {
+      "poi_1657": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P09-ja",
+    "group": "poi_1657",
+    "split": "development",
+    "language": "ja",
+    "query": "似た名前の宿泊施設ではなく、大田の道山書院の住所情報を見せてください。",
+    "expectedIdsDraft": [
+      "poi_1657"
+    ],
+    "relevanceDraft": {
+      "poi_1657": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P10-ko",
+    "group": "poi_9672",
+    "split": "development",
+    "language": "ko",
+    "query": "경주 첨성대의 위치를 찾고 싶어요.",
+    "expectedIdsDraft": [
+      "poi_9672"
+    ],
+    "relevanceDraft": {
+      "poi_9672": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P10-en",
+    "group": "poi_9672",
+    "split": "development",
+    "language": "en",
+    "query": "Find the location of Cheomseongdae in Gyeongju.",
+    "expectedIdsDraft": [
+      "poi_9672"
+    ],
+    "relevanceDraft": {
+      "poi_9672": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P10-ja",
+    "group": "poi_9672",
+    "split": "development",
+    "language": "ja",
+    "query": "慶州の瞻星台の場所を探してください。",
+    "expectedIdsDraft": [
+      "poi_9672"
+    ],
+    "relevanceDraft": {
+      "poi_9672": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P11-ko",
+    "group": "media_2023_1606",
+    "split": "development",
+    "language": "ko",
+    "query": "광주광역시에서 고수닭갈비 충장점에 해당하는 장소 자료를 찾아줘.",
+    "expectedIdsDraft": [
+      "media_2023_1606"
+    ],
+    "relevanceDraft": {
+      "media_2023_1606": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P11-en",
+    "group": "media_2023_1606",
+    "split": "development",
+    "language": "en",
+    "query": "Find the place record for Gosu Dakgalbi Chungjang in 광주광역시.",
+    "expectedIdsDraft": [
+      "media_2023_1606"
+    ],
+    "relevanceDraft": {
+      "media_2023_1606": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P11-ja",
+    "group": "media_2023_1606",
+    "split": "development",
+    "language": "ja",
+    "query": "광주광역시にあるコスダッカルビ忠壮店の場所情報を探してください。",
+    "expectedIdsDraft": [
+      "media_2023_1606"
+    ],
+    "relevanceDraft": {
+      "media_2023_1606": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P12-ko",
+    "group": "poi_5859",
+    "split": "development",
+    "language": "ko",
+    "query": "속초해수욕장과 이름이 비슷한 숙소 대신 이 장소의 주소 자료를 보여줘.",
+    "expectedIdsDraft": [
+      "poi_5859"
+    ],
+    "relevanceDraft": {
+      "poi_5859": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P12-en",
+    "group": "poi_5859",
+    "split": "development",
+    "language": "en",
+    "query": "Show the address record for Sokcho Beach, not accommodation with a similar name.",
+    "expectedIdsDraft": [
+      "poi_5859"
+    ],
+    "relevanceDraft": {
+      "poi_5859": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P12-ja",
+    "group": "poi_5859",
+    "split": "development",
+    "language": "ja",
+    "query": "似た名前の宿泊施設ではなく、束草海水浴場の住所情報を見せてください。",
+    "expectedIdsDraft": [
+      "poi_5859"
+    ],
+    "relevanceDraft": {
+      "poi_5859": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P13-ko",
+    "group": "poi_12802",
+    "split": "development",
+    "language": "ko",
+    "query": "도산서원(무주)의 위치를 찾고 싶어요.",
+    "expectedIdsDraft": [
+      "poi_12802"
+    ],
+    "relevanceDraft": {
+      "poi_12802": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P13-en",
+    "group": "poi_12802",
+    "split": "development",
+    "language": "en",
+    "query": "Find the location of Dosan Seowon in Muju.",
+    "expectedIdsDraft": [
+      "poi_12802"
+    ],
+    "relevanceDraft": {
+      "poi_12802": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P13-ja",
+    "group": "poi_12802",
+    "split": "development",
+    "language": "ja",
+    "query": "茂朱の道山書院の場所を探してください。",
+    "expectedIdsDraft": [
+      "poi_12802"
+    ],
+    "relevanceDraft": {
+      "poi_12802": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P14-ko",
+    "group": "poi_874452",
+    "split": "development",
+    "language": "ko",
+    "query": "경상북도에서 대릉원에 해당하는 장소 자료를 찾아줘.",
+    "expectedIdsDraft": [
+      "poi_874452"
+    ],
+    "relevanceDraft": {
+      "poi_874452": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P14-en",
+    "group": "poi_874452",
+    "split": "development",
+    "language": "en",
+    "query": "Find the place record for Daereungwon in Gyeongju in 경상북도.",
+    "expectedIdsDraft": [
+      "poi_874452"
+    ],
+    "relevanceDraft": {
+      "poi_874452": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P14-ja",
+    "group": "poi_874452",
+    "split": "development",
+    "language": "ja",
+    "query": "경상북도にある慶州の大陵苑の場所情報を探してください。",
+    "expectedIdsDraft": [
+      "poi_874452"
+    ],
+    "relevanceDraft": {
+      "poi_874452": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P15-ko",
+    "group": "media_2023_1622",
+    "split": "development",
+    "language": "ko",
+    "query": "일산칼국수과 이름이 비슷한 숙소 대신 이 장소의 주소 자료를 보여줘.",
+    "expectedIdsDraft": [
+      "media_2023_1622"
+    ],
+    "relevanceDraft": {
+      "media_2023_1622": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P15-en",
+    "group": "media_2023_1622",
+    "split": "development",
+    "language": "en",
+    "query": "Show the address record for Ilsan Kalguksu, not accommodation with a similar name.",
+    "expectedIdsDraft": [
+      "media_2023_1622"
+    ],
+    "relevanceDraft": {
+      "media_2023_1622": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P15-ja",
+    "group": "media_2023_1622",
+    "split": "development",
+    "language": "ja",
+    "query": "似た名前の宿泊施設ではなく、一山カルグクスの住所情報を見せてください。",
+    "expectedIdsDraft": [
+      "media_2023_1622"
+    ],
+    "relevanceDraft": {
+      "media_2023_1622": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P16-ko",
+    "group": "media_2023_1626",
+    "split": "holdout",
+    "language": "ko",
+    "query": "맛짱떡볶이의 위치를 찾고 싶어요.",
+    "expectedIdsDraft": [
+      "media_2023_1626"
+    ],
+    "relevanceDraft": {
+      "media_2023_1626": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P16-en",
+    "group": "media_2023_1626",
+    "split": "holdout",
+    "language": "en",
+    "query": "Find the location of Matjjang Tteokbokki.",
+    "expectedIdsDraft": [
+      "media_2023_1626"
+    ],
+    "relevanceDraft": {
+      "media_2023_1626": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P16-ja",
+    "group": "media_2023_1626",
+    "split": "holdout",
+    "language": "ja",
+    "query": "マッチャン トッポッキの場所を探してください。",
+    "expectedIdsDraft": [
+      "media_2023_1626"
+    ],
+    "relevanceDraft": {
+      "media_2023_1626": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P17-ko",
+    "group": "poi_15302",
+    "split": "holdout",
+    "language": "ko",
+    "query": "제주특별자치도에서 만장굴 (제주도 국가지질공원)에 해당하는 장소 자료를 찾아줘.",
+    "expectedIdsDraft": [
+      "poi_15302"
+    ],
+    "relevanceDraft": {
+      "poi_15302": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P17-en",
+    "group": "poi_15302",
+    "split": "holdout",
+    "language": "en",
+    "query": "Find the place record for Manjanggul Cave in 제주특별자치도.",
+    "expectedIdsDraft": [
+      "poi_15302"
+    ],
+    "relevanceDraft": {
+      "poi_15302": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P17-ja",
+    "group": "poi_15302",
+    "split": "holdout",
+    "language": "ja",
+    "query": "제주특별자치도にある万丈窟の場所情報を探してください。",
+    "expectedIdsDraft": [
+      "poi_15302"
+    ],
+    "relevanceDraft": {
+      "poi_15302": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P18-ko",
+    "group": "media_2023_1607",
+    "split": "holdout",
+    "language": "ko",
+    "query": "궁전제과 충장점과 이름이 비슷한 숙소 대신 이 장소의 주소 자료를 보여줘.",
+    "expectedIdsDraft": [
+      "media_2023_1607"
+    ],
+    "relevanceDraft": {
+      "media_2023_1607": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P18-en",
+    "group": "media_2023_1607",
+    "split": "holdout",
+    "language": "en",
+    "query": "Show the address record for Gungjeon Bakery Chungjang, not accommodation with a similar name.",
+    "expectedIdsDraft": [
+      "media_2023_1607"
+    ],
+    "relevanceDraft": {
+      "media_2023_1607": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P18-ja",
+    "group": "media_2023_1607",
+    "split": "holdout",
+    "language": "ja",
+    "query": "似た名前の宿泊施設ではなく、宮殿製菓忠壮店の住所情報を見せてください。",
+    "expectedIdsDraft": [
+      "media_2023_1607"
+    ],
+    "relevanceDraft": {
+      "media_2023_1607": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P19-ko",
+    "group": "media_2023_1596",
+    "split": "holdout",
+    "language": "ko",
+    "query": "마돈의 위치를 찾고 싶어요.",
+    "expectedIdsDraft": [
+      "media_2023_1596"
+    ],
+    "relevanceDraft": {
+      "media_2023_1596": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P19-en",
+    "group": "media_2023_1596",
+    "split": "holdout",
+    "language": "en",
+    "query": "Find the location of Madon.",
+    "expectedIdsDraft": [
+      "media_2023_1596"
+    ],
+    "relevanceDraft": {
+      "media_2023_1596": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P19-ja",
+    "group": "media_2023_1596",
+    "split": "holdout",
+    "language": "ja",
+    "query": "マドンの場所を探してください。",
+    "expectedIdsDraft": [
+      "media_2023_1596"
+    ],
+    "relevanceDraft": {
+      "media_2023_1596": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P20-ko",
+    "group": "poi_11993",
+    "split": "holdout",
+    "language": "ko",
+    "query": "경상남도에서 통영케이블카에 해당하는 장소 자료를 찾아줘.",
+    "expectedIdsDraft": [
+      "poi_11993"
+    ],
+    "relevanceDraft": {
+      "poi_11993": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P20-en",
+    "group": "poi_11993",
+    "split": "holdout",
+    "language": "en",
+    "query": "Find the place record for Tongyeong Cable Car in 경상남도.",
+    "expectedIdsDraft": [
+      "poi_11993"
+    ],
+    "relevanceDraft": {
+      "poi_11993": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P20-ja",
+    "group": "poi_11993",
+    "split": "holdout",
+    "language": "ja",
+    "query": "경상남도にある統営ケーブルカーの場所情報を探してください。",
+    "expectedIdsDraft": [
+      "poi_11993"
+    ],
+    "relevanceDraft": {
+      "poi_11993": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P21-ko",
+    "group": "media_2023_1608",
+    "split": "holdout",
+    "language": "ko",
+    "query": "감천문화마을과 이름이 비슷한 숙소 대신 이 장소의 주소 자료를 보여줘.",
+    "expectedIdsDraft": [
+      "media_2023_1608"
+    ],
+    "relevanceDraft": {
+      "media_2023_1608": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P21-en",
+    "group": "media_2023_1608",
+    "split": "holdout",
+    "language": "en",
+    "query": "Show the address record for Gamcheon Culture Village, not accommodation with a similar name.",
+    "expectedIdsDraft": [
+      "media_2023_1608"
+    ],
+    "relevanceDraft": {
+      "media_2023_1608": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P21-ja",
+    "group": "media_2023_1608",
+    "split": "holdout",
+    "language": "ja",
+    "query": "似た名前の宿泊施設ではなく、甘川文化村の住所情報を見せてください。",
+    "expectedIdsDraft": [
+      "media_2023_1608"
+    ],
+    "relevanceDraft": {
+      "media_2023_1608": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P22-ko",
+    "group": "media_2023_1627",
+    "split": "holdout",
+    "language": "ko",
+    "query": "마치래빗 샐러드 신사동가로수길본점의 위치를 찾고 싶어요.",
+    "expectedIdsDraft": [
+      "media_2023_1627"
+    ],
+    "relevanceDraft": {
+      "media_2023_1627": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P22-en",
+    "group": "media_2023_1627",
+    "split": "holdout",
+    "language": "en",
+    "query": "Find the location of March Rabbit Salad Sinsa Garosugil.",
+    "expectedIdsDraft": [
+      "media_2023_1627"
+    ],
+    "relevanceDraft": {
+      "media_2023_1627": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P22-ja",
+    "group": "media_2023_1627",
+    "split": "holdout",
+    "language": "ja",
+    "query": "マーチラビットサラダ新沙カロスキルの場所を探してください。",
+    "expectedIdsDraft": [
+      "media_2023_1627"
+    ],
+    "relevanceDraft": {
+      "media_2023_1627": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P23-ko",
+    "group": "poi_650",
+    "split": "holdout",
+    "language": "ko",
+    "query": "서울특별시에서 서울역사박물관에 해당하는 장소 자료를 찾아줘.",
+    "expectedIdsDraft": [
+      "poi_650"
+    ],
+    "relevanceDraft": {
+      "poi_650": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P23-en",
+    "group": "poi_650",
+    "split": "holdout",
+    "language": "en",
+    "query": "Find the place record for Seoul Museum of History in 서울특별시.",
+    "expectedIdsDraft": [
+      "poi_650"
+    ],
+    "relevanceDraft": {
+      "poi_650": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P23-ja",
+    "group": "poi_650",
+    "split": "holdout",
+    "language": "ja",
+    "query": "서울특별시にあるソウル歴史博物館の場所情報を探してください。",
+    "expectedIdsDraft": [
+      "poi_650"
+    ],
+    "relevanceDraft": {
+      "poi_650": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P24-ko",
+    "group": "poi_5568",
+    "split": "holdout",
+    "language": "ko",
+    "query": "낙산사과 이름이 비슷한 숙소 대신 이 장소의 주소 자료를 보여줘.",
+    "expectedIdsDraft": [
+      "poi_5568"
+    ],
+    "relevanceDraft": {
+      "poi_5568": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P24-en",
+    "group": "poi_5568",
+    "split": "holdout",
+    "language": "en",
+    "query": "Show the address record for Naksansa Temple, not accommodation with a similar name.",
+    "expectedIdsDraft": [
+      "poi_5568"
+    ],
+    "relevanceDraft": {
+      "poi_5568": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P24-ja",
+    "group": "poi_5568",
+    "split": "holdout",
+    "language": "ja",
+    "query": "似た名前の宿泊施設ではなく、洛山寺の住所情報を見せてください。",
+    "expectedIdsDraft": [
+      "poi_5568"
+    ],
+    "relevanceDraft": {
+      "poi_5568": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P25-ko",
+    "group": "poi_70",
+    "split": "holdout",
+    "language": "ko",
+    "query": "남산골한옥마을의 위치를 찾고 싶어요.",
+    "expectedIdsDraft": [
+      "poi_70"
+    ],
+    "relevanceDraft": {
+      "poi_70": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P25-en",
+    "group": "poi_70",
+    "split": "holdout",
+    "language": "en",
+    "query": "Find the location of Namsangol Hanok Village.",
+    "expectedIdsDraft": [
+      "poi_70"
+    ],
+    "relevanceDraft": {
+      "poi_70": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P25-ja",
+    "group": "poi_70",
+    "split": "holdout",
+    "language": "ja",
+    "query": "南山コル韓屋村の場所を探してください。",
+    "expectedIdsDraft": [
+      "poi_70"
+    ],
+    "relevanceDraft": {
+      "poi_70": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P26-ko",
+    "group": "media_2023_1612",
+    "split": "holdout",
+    "language": "ko",
+    "query": "부산광역시에서 국제통닭 부평본점에 해당하는 장소 자료를 찾아줘.",
+    "expectedIdsDraft": [
+      "media_2023_1612"
+    ],
+    "relevanceDraft": {
+      "media_2023_1612": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P26-en",
+    "group": "media_2023_1612",
+    "split": "holdout",
+    "language": "en",
+    "query": "Find the place record for Gukje Chicken Bupyeong in 부산광역시.",
+    "expectedIdsDraft": [
+      "media_2023_1612"
+    ],
+    "relevanceDraft": {
+      "media_2023_1612": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P26-ja",
+    "group": "media_2023_1612",
+    "split": "holdout",
+    "language": "ja",
+    "query": "부산광역시にある国際チキン富平本店の場所情報を探してください。",
+    "expectedIdsDraft": [
+      "media_2023_1612"
+    ],
+    "relevanceDraft": {
+      "media_2023_1612": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P27-ko",
+    "group": "media_2023_1610",
+    "split": "holdout",
+    "language": "ko",
+    "query": "삼송초밥과 이름이 비슷한 숙소 대신 이 장소의 주소 자료를 보여줘.",
+    "expectedIdsDraft": [
+      "media_2023_1610"
+    ],
+    "relevanceDraft": {
+      "media_2023_1610": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P27-en",
+    "group": "media_2023_1610",
+    "split": "holdout",
+    "language": "en",
+    "query": "Show the address record for Samsong Sushi, not accommodation with a similar name.",
+    "expectedIdsDraft": [
+      "media_2023_1610"
+    ],
+    "relevanceDraft": {
+      "media_2023_1610": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P27-ja",
+    "group": "media_2023_1610",
+    "split": "holdout",
+    "language": "ja",
+    "query": "似た名前の宿泊施設ではなく、サムソン寿司の住所情報を見せてください。",
+    "expectedIdsDraft": [
+      "media_2023_1610"
+    ],
+    "relevanceDraft": {
+      "media_2023_1610": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P28-ko",
+    "group": "poi_874496",
+    "split": "holdout",
+    "language": "ko",
+    "query": "국립중앙박물관의 위치를 찾고 싶어요.",
+    "expectedIdsDraft": [
+      "poi_874496"
+    ],
+    "relevanceDraft": {
+      "poi_874496": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P28-en",
+    "group": "poi_874496",
+    "split": "holdout",
+    "language": "en",
+    "query": "Find the location of National Museum of Korea.",
+    "expectedIdsDraft": [
+      "poi_874496"
+    ],
+    "relevanceDraft": {
+      "poi_874496": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P28-ja",
+    "group": "poi_874496",
+    "split": "holdout",
+    "language": "ja",
+    "query": "国立中央博物館の場所を探してください。",
+    "expectedIdsDraft": [
+      "poi_874496"
+    ],
+    "relevanceDraft": {
+      "poi_874496": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P29-ko",
+    "group": "poi_841681",
+    "split": "holdout",
+    "language": "ko",
+    "query": "강원특별자치도에서 오죽헌시립박물관에 해당하는 장소 자료를 찾아줘.",
+    "expectedIdsDraft": [
+      "poi_841681"
+    ],
+    "relevanceDraft": {
+      "poi_841681": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P29-en",
+    "group": "poi_841681",
+    "split": "holdout",
+    "language": "en",
+    "query": "Find the place record for Ojukheon Municipal Museum in 강원특별자치도.",
+    "expectedIdsDraft": [
+      "poi_841681"
+    ],
+    "relevanceDraft": {
+      "poi_841681": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P29-ja",
+    "group": "poi_841681",
+    "split": "holdout",
+    "language": "ja",
+    "query": "강원특별자치도にある烏竹軒市立博物館の場所情報を探してください。",
+    "expectedIdsDraft": [
+      "poi_841681"
+    ],
+    "relevanceDraft": {
+      "poi_841681": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P30-ko",
+    "group": "poi_840775",
+    "split": "holdout",
+    "language": "ko",
+    "query": "독립기념관과 이름이 비슷한 숙소 대신 이 장소의 주소 자료를 보여줘.",
+    "expectedIdsDraft": [
+      "poi_840775"
+    ],
+    "relevanceDraft": {
+      "poi_840775": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P30-en",
+    "group": "poi_840775",
+    "split": "holdout",
+    "language": "en",
+    "query": "Show the address record for Independence Hall in Cheonan, not accommodation with a similar name.",
+    "expectedIdsDraft": [
+      "poi_840775"
+    ],
+    "relevanceDraft": {
+      "poi_840775": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "P30-ja",
+    "group": "poi_840775",
+    "split": "holdout",
+    "language": "ja",
+    "query": "似た名前の宿泊施設ではなく、天安の独立記念館の住所情報を見せてください。",
+    "expectedIdsDraft": [
+      "poi_840775"
+    ],
+    "relevanceDraft": {
+      "poi_840775": 1
+    },
+    "answerMode": "retrieve_location_only",
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null,
+    "rationale": "Source name/address anchor; aliases and all other relevant IDs require review; not proof of current opening or prices."
+  },
+  {
+    "id": "N01-ko",
+    "group": "negative-1",
+    "split": "development",
+    "language": "ko",
+    "query": "달에 있는 KRIDE 달빛박물관 주소를 알려줘.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N01-en",
+    "group": "negative-1",
+    "split": "development",
+    "language": "en",
+    "query": "Find KRIDE Moonlight Museum on the Moon.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N01-ja",
+    "group": "negative-1",
+    "split": "development",
+    "language": "ja",
+    "query": "月にあるKRIDE月光博物館の住所を教えて。",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N02-ko",
+    "group": "negative-2",
+    "split": "holdout",
+    "language": "ko",
+    "query": "서울의 가상장소 PILOT-NO-PLACE-002를 찾아줘.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N02-en",
+    "group": "negative-2",
+    "split": "holdout",
+    "language": "en",
+    "query": "Find the fictional place PILOT-NO-PLACE-002 in Seoul.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N02-ja",
+    "group": "negative-2",
+    "split": "holdout",
+    "language": "ja",
+    "query": "ソウルの架空施設PILOT-NO-PLACE-002を探して。",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N03-ko",
+    "group": "negative-3",
+    "split": "development",
+    "language": "ko",
+    "query": "부산의 가상장소 PILOT-NO-PLACE-003을 찾아줘.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N03-en",
+    "group": "negative-3",
+    "split": "development",
+    "language": "en",
+    "query": "Find fictional PILOT-NO-PLACE-003 in Busan.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N03-ja",
+    "group": "negative-3",
+    "split": "development",
+    "language": "ja",
+    "query": "釜山の架空施設PILOT-NO-PLACE-003を探して。",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N04-ko",
+    "group": "negative-4",
+    "split": "holdout",
+    "language": "ko",
+    "query": "제주의 가상장소 PILOT-NO-PLACE-004를 찾아줘.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N04-en",
+    "group": "negative-4",
+    "split": "holdout",
+    "language": "en",
+    "query": "Find fictional PILOT-NO-PLACE-004 in Jeju.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N04-ja",
+    "group": "negative-4",
+    "split": "holdout",
+    "language": "ja",
+    "query": "済州の架空施設PILOT-NO-PLACE-004を探して。",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N05-ko",
+    "group": "negative-5",
+    "split": "development",
+    "language": "ko",
+    "query": "수성에 있는 한국민속촌 주소를 알려줘.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N05-en",
+    "group": "negative-5",
+    "split": "development",
+    "language": "en",
+    "query": "Find a Korean Folk Village located on Mercury.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N05-ja",
+    "group": "negative-5",
+    "split": "development",
+    "language": "ja",
+    "query": "水星にある韓国民俗村の住所を教えて。",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_no_place",
+    "retrievalMayReturnCandidates": false,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N06-ko",
+    "group": "negative-6",
+    "split": "holdout",
+    "language": "ko",
+    "query": "N서울타워의 지금 입장료가 정확히 얼마인지 확정해줘.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N06-en",
+    "group": "negative-6",
+    "split": "holdout",
+    "language": "en",
+    "query": "Confirm the exact current admission price of N Seoul Tower.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N06-ja",
+    "group": "negative-6",
+    "split": "holdout",
+    "language": "ja",
+    "query": "Nソウルタワーの現在の正確な入場料を確定して。",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N07-ko",
+    "group": "negative-7",
+    "split": "development",
+    "language": "ko",
+    "query": "어니언 성수의 오늘 영업 종료 시간을 확정해줘.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N07-en",
+    "group": "negative-7",
+    "split": "development",
+    "language": "en",
+    "query": "Confirm when Onion Seongsu closes today.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N07-ja",
+    "group": "negative-7",
+    "split": "development",
+    "language": "ja",
+    "query": "オニオン聖水の本日の閉店時間を確定して。",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N08-ko",
+    "group": "negative-8",
+    "split": "holdout",
+    "language": "ko",
+    "query": "내일 경복궁 입장권 예약이 가능한지 확정해줘.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N08-en",
+    "group": "negative-8",
+    "split": "holdout",
+    "language": "en",
+    "query": "Confirm ticket availability for Gyeongbokgung tomorrow.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N08-ja",
+    "group": "negative-8",
+    "split": "holdout",
+    "language": "ja",
+    "query": "明日の景福宮の予約可否を確定して。",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N09-ko",
+    "group": "negative-9",
+    "split": "development",
+    "language": "ko",
+    "query": "지금 BTS 멤버가 있는 카페 위치를 알려줘.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N09-en",
+    "group": "negative-9",
+    "split": "development",
+    "language": "en",
+    "query": "Tell me which cafe a BTS member is at right now.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N09-ja",
+    "group": "negative-9",
+    "split": "development",
+    "language": "ja",
+    "query": "今BTSのメンバーがいるカフェの場所を教えて。",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N10-ko",
+    "group": "negative-10",
+    "split": "holdout",
+    "language": "ko",
+    "query": "공식 근거 없이 무료라고 확정한 여행지를 추천해줘.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N10-en",
+    "group": "negative-10",
+    "split": "holdout",
+    "language": "en",
+    "query": "Recommend a place guaranteed free without an official price source.",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  },
+  {
+    "id": "N10-ja",
+    "group": "negative-10",
+    "split": "holdout",
+    "language": "ja",
+    "query": "公式料金の根拠なしで必ず無料の観光地を推薦して。",
+    "expectedIdsDraft": [],
+    "relevanceDraft": {},
+    "answerMode": "abstain_unsupported_claim",
+    "retrievalMayReturnCandidates": true,
+    "reviewStatus": "needs_independent_review",
+    "reviewer": null
+  }
+]

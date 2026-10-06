@@ -1,0 +1,9 @@
+{
+  "filesVerified": 10,
+  "candidateIds": 1000,
+  "questions": 120,
+  "allSplitAndDocumentAssertionsPassed": true,
+  "hashesMatch": true,
+  "chromaAbsent": true,
+  "inferenceExecuted": false
+}
