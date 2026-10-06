@@ -1,0 +1,12 @@
+{
+  "samples": 128,
+  "dimension": 384,
+  "dtype": "float32",
+  "finite": true,
+  "maxNormError": 1.1920928955078125e-07,
+  "medianCosine": 1.0,
+  "minimumCosine": 0.9999998807907104,
+  "maxAbsoluteComponentDelta": 1.3783574104309082e-07,
+  "elapsedSeconds": 42.21899999999732,
+  "passed": true
+}

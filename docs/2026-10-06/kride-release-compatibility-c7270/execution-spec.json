@@ -1,0 +1,25 @@
+{
+  "fixedBeforeInference": true,
+  "fingerprint": {
+    "dimension": 384,
+    "finiteFloat32": true,
+    "normErrorMax": 1e-05,
+    "medianCosineMin": 0.9999,
+    "minimumCosineMin": 0.999
+  },
+  "quality": {
+    "positiveCases": 36,
+    "noEvidenceCases": 4,
+    "perLanguage": 12,
+    "recallAt5Min": 0.8,
+    "ndcgAt10Min": 0.7,
+    "maximumDropVersusRaw": 0.02,
+    "negativeSafety": "Nearest vectors alone never prove evidence; flag all nonempty negative results for source-policy review"
+  },
+  "limitations": [
+    "12 exact-name anchors, translated by assistant",
+    "not independent human ground truth",
+    "queue sample biased; not full corpus quality",
+    "PDF fingerprint covered; PDF retrieval quality not labeled"
+  ]
+}

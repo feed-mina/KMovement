@@ -1,0 +1,132 @@
+{
+  "kind": "real public browser, anonymous; no provider calls, authenticated flow unverified",
+  "metadata": [
+    {
+      "screen": "KRIDE_INTRO2",
+      "status": 200,
+      "counterPresent": true,
+      "tilePresent": false
+    },
+    {
+      "screen": "MAIN_PAGE",
+      "status": 200,
+      "counterPresent": false,
+      "tilePresent": true
+    }
+  ],
+  "catalogCount": 3,
+  "pages": [
+    {
+      "route": "/",
+      "width": 390,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 636
+    },
+    {
+      "route": "/view/INTRO2",
+      "width": 390,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 605
+    },
+    {
+      "route": "/view/kpop",
+      "width": 390,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 840
+    },
+    {
+      "route": "/view/MY_PAGE",
+      "width": 390,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 310
+    },
+    {
+      "route": "/view/AI_ENGLISH_CHAT_PAGE",
+      "width": 390,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 348
+    },
+    {
+      "route": "/view/AI_JAPANESE_CHAT_PAGE",
+      "width": 390,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 350
+    },
+    {
+      "route": "/view/CHAT",
+      "width": 390,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 237
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 636
+    },
+    {
+      "route": "/view/INTRO2",
+      "width": 1440,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 605
+    },
+    {
+      "route": "/view/kpop",
+      "width": 1440,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 840
+    },
+    {
+      "route": "/view/MY_PAGE",
+      "width": 1440,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 310
+    },
+    {
+      "route": "/view/AI_ENGLISH_CHAT_PAGE",
+      "width": 1440,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 348
+    },
+    {
+      "route": "/view/AI_JAPANESE_CHAT_PAGE",
+      "width": 1440,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 350
+    },
+    {
+      "route": "/view/CHAT",
+      "width": 1440,
+      "status": 200,
+      "pageErrors": [],
+      "overflow": false,
+      "bodyTextLength": 237
+    }
+  ]
+}

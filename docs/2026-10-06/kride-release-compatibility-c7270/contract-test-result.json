@@ -1,0 +1,7 @@
+{
+  "tests": "tests/test_public_search.py",
+  "passed": 4,
+  "elapsedSeconds": 33.15,
+  "fixtureEmbeddings": true,
+  "operatingChange": false
+}
