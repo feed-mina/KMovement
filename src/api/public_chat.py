@@ -5,6 +5,7 @@ import logging
 import os
 import time
 import uuid
+from typing import Literal
 import anyio
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
@@ -20,6 +21,7 @@ SYSTEM = '한국어 여행 도우미입니다. 확인하지 않은 장소, 영�
 
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=4000)
+    language: Literal['en','ja','ko'] | None = None
 
 
 def frame(value):
@@ -55,15 +57,16 @@ async def stream_chat(req: ChatRequest, x_kride_token: str = Header(default=''),
             finally:
                 ai_runtime.slots.release()
 
+    system = SYSTEM if req.language is None else {'en':'You are an English conversation tutor. Reply in English followed by a short Korean explanation. Correct mistakes kindly and ask one follow-up question.','ja':'You are a Japanese conversation tutor. Reply in Japanese followed by a short Korean explanation. Correct mistakes kindly and ask one follow-up question.','ko':'You are a Korean conversation tutor. Reply in Korean and ask one follow-up question.'}[req.language]
     started = time.monotonic()
     request_id = uuid.uuid4().hex
     try:
         model, max_output = ai_runtime.model_settings()
-        reservation = reserve_budget(x_kride_user, len((SYSTEM + req.message).encode()) + 1024, max_output)
+        reservation = reserve_budget(x_kride_user, len((system + req.message).encode()) + 1024, max_output)
         from groq import AsyncGroq
         client = AsyncGroq(api_key=os.environ['GROQ_API_KEY'], timeout=60, max_retries=0)
         stream = await asyncio.wait_for(client.chat.completions.create(
-            model=model, messages=[{'role':'system','content':SYSTEM},{'role':'user','content':req.message}],
+            model=model, messages=[{'role':'system','content':system},{'role':'user','content':req.message}],
             max_completion_tokens=max_output, temperature=0, stream=True), timeout=65)
     except BaseException as error:
         await cleanup()

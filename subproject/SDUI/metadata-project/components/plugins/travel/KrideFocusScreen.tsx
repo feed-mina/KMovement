@@ -173,11 +173,11 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
                 <RaiStatePanel
                     state="sad"
                     eyebrow="K-RIDE AI"
-                    title={krideItinerary.requiresLogin ? '로그인이 필요해요' : '코스를 못 찾았어요'}
+                    title={krideItinerary.requiresLogin ? '로그인이 필요해요' : krideItinerary.candidatesUnavailable ? '추천 자료를 준비 중이에요' : '코스를 못 찾았어요'}
                     description={krideItinerary.error}
                 >
-                    <KrideButton onClick={() => krideItinerary.requiresLogin ? router.push('/view/LOGIN_PAGE') : window.location.reload()}>
-                        {krideItinerary.requiresLogin ? '로그인하기' : '다시 시도'}
+                    <KrideButton onClick={() => krideItinerary.requiresLogin ? router.push('/view/LOGIN_PAGE') : krideItinerary.candidatesUnavailable ? router.push('/') : window.location.reload()}>
+                        {krideItinerary.requiresLogin ? '로그인하기' : krideItinerary.candidatesUnavailable ? '홈으로' : '다시 시도'}
                     </KrideButton>
                 </RaiStatePanel>
             </div>

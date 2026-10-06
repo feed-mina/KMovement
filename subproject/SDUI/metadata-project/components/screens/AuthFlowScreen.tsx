@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/services/axios';
 import { useAuth } from '@/context/AuthContext';
 import Skeleton from '@/components/utils/Skeleton';
@@ -9,6 +9,8 @@ import type { ScreenControllerProps } from './types';
 
 function LoginScreen() {
     const router = useRouter();
+    const search=useSearchParams();const rawReturn=search.get('returnTo');
+    const returnTo=rawReturn?.startsWith('/view/')&&!rawReturn.includes('://')&&!rawReturn.includes('\\')?rawReturn:'/view/MY_PAGE';
     const { isLoggedIn, isLoading, login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -16,8 +18,8 @@ function LoginScreen() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        if (!isLoading && isLoggedIn) router.replace('/view/MY_PAGE');
-    }, [isLoading, isLoggedIn, router]);
+        if (!isLoading && isLoggedIn) router.replace(returnTo);
+    }, [isLoading, isLoggedIn, router, returnTo]);
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -35,7 +37,7 @@ function LoginScreen() {
             const me = await api.get('/api/auth/me');
             if (!me.data?.isLoggedIn) throw new Error('로그인 상태를 확인하지 못했습니다.');
             login(me.data);
-            router.replace('/view/MY_PAGE');
+            router.replace(returnTo);
         } catch (requestError: any) {
             const message = [400, 401].includes(requestError?.response?.status)
                 ? '이메일 또는 비밀번호를 다시 확인해 주세요.'
@@ -121,10 +123,11 @@ function ProfileScreen() {
         <main className="auth-flow-page" aria-labelledby="profile-title">
             <section className="auth-flow-card">
                 <header className="auth-flow-heading">
-                    <h1 id="profile-title">내 프로필</h1>
-                    <p>현재 로그인된 계정의 기본 정보입니다.</p>
+                    <h1 id="profile-title">마이페이지</h1>
+                    <p>저장한 항목과 계정 정보를 한곳에서 확인해요.</p>
                 </header>
 
+                <div className="my-saved-shortcuts" aria-label="저장 목록 바로가기">{[['아티스트','artists'],['이벤트','events'],['상품','products']].map(([label,kind])=><button key={kind} className="auth-flow-button secondary" onClick={()=>router.push('/view/KPOP_SAVED_ITEMS?kind='+kind+'&page=1')}>저장한 {label} →</button>)}</div>
                 <dl className="auth-profile-list">
                     <div className="auth-profile-row">
                         <dt>이메일</dt>
@@ -148,7 +151,7 @@ function ProfileScreen() {
                     <button className="auth-flow-button secondary" type="button" onClick={() => router.push('/view/KPOP_SAVED_ITEMS')}>
                         내 목록 보기
                     </button>
-                    <button className="auth-flow-button secondary" type="button" onClick={() => router.push('/view/MAIN_PAGE')}>
+                    <button className="auth-flow-button secondary" type="button" onClick={() => router.push('/')}>
                         홈으로
                     </button>
                     <button className="auth-flow-button primary" type="button" onClick={handleLogout} disabled={loggingOut}>

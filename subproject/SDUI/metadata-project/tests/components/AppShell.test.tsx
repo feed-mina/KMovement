@@ -2,8 +2,9 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import AppShell from '@/components/layout/AppShell';
 
+let mockPath='/view/admin/THEME_SETTINGS';
 jest.mock('next/navigation', () => ({
-    usePathname: () => '/view/MAIN_PAGE',
+    usePathname: () => mockPath,
 }));
 
 jest.mock('@/hooks/useDeviceType', () => ({
@@ -25,7 +26,7 @@ jest.mock('@/components/fields/RecordTimeComponent', () => () => null);
 jest.mock('@/components/layout/ServiceWorkerUpdater', () => () => null);
 jest.mock('@/components/layout/FocusFooterBar', () => () => null);
 
-describe('AppShell desktop sidebar', () => {
+describe('AppShell admin desktop sidebar', () => {
     it('toggles the sidebar when its logo control is clicked', () => {
         render(<AppShell><div>content</div></AppShell>);
 
@@ -39,3 +40,5 @@ describe('AppShell desktop sidebar', () => {
         expect(toggle).toHaveAttribute('aria-expanded', 'true');
     });
 });
+
+it('customer pages share navigation without the legacy sidebar',()=>{mockPath='/view/kpop';render(<AppShell><div>customer content</div></AppShell>);expect(screen.getByRole('navigation',{name:'주요 메뉴'})).toBeInTheDocument();expect(screen.queryByRole('button',{name:'sidebar'})).toBeNull();expect(screen.getByText('customer content')).toBeInTheDocument()});

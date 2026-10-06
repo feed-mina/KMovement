@@ -61,6 +61,7 @@ interface KrideItineraryResult {
     isLoading: boolean;
     error: string | null;
     requiresLogin: boolean;
+    candidatesUnavailable: boolean;
 }
 
 /**
@@ -75,6 +76,7 @@ export function useKrideItinerary(
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [requiresLogin, setRequiresLogin] = useState(false);
+    const [candidatesUnavailable, setCandidatesUnavailable] = useState(false);
     const calledRef = useRef(false);
 
     const isFocus = screenId === "KRIDE_FOCUS";
@@ -93,6 +95,7 @@ export function useKrideItinerary(
         const fetchItinerary = async () => {
             setIsLoading(true);
             setError(null);
+            setCandidatesUnavailable(false);
             trackEvent('itinerary_start', { entry_point: 'focus_auto_generation' });
             let timer: ReturnType<typeof setTimeout> | undefined;
             try {
@@ -136,7 +139,8 @@ export function useKrideItinerary(
                     source: 'focus_onboarding',
                 });
             } catch (err: any) {
-                console.error("[useKrideItinerary]", err);
+                if (err?.message !== "empty_candidates") console.error("[useKrideItinerary]", err);
+                setCandidatesUnavailable(err?.message === "empty_candidates");
                 setRequiresLogin(err?.message === 'login_required');
                 setError(toUserMessage(err));
                 const message = String(err?.message || 'unknown');
@@ -154,8 +158,8 @@ export function useKrideItinerary(
     }, [isFocus, hasFormData]); // eslint-disable-line react-hooks/exhaustive-deps
 
     if (!isFocus) {
-        return { data: null, isLoading: false, error: null, requiresLogin: false };
+        return { data: null, isLoading: false, error: null, requiresLogin: false, candidatesUnavailable: false };
     }
 
-    return { data, isLoading, error, requiresLogin };
+    return { data, isLoading, error, requiresLogin, candidatesUnavailable };
 }

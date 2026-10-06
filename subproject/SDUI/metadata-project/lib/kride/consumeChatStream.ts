@@ -6,6 +6,8 @@ export async function consumeChatStream(
 ): Promise<void> {
   if (!response.ok) {
     throw new Error(response.status === 401 ? '로그인이 필요합니다.'
+      : response.status === 403 ? '현재 테스트 계정에서만 이용할 수 있어요.'
+      : response.status === 503 ? '답변 서비스를 준비 중입니다. 잠시 후 이용해 주세요.'
       : response.status === 429 ? 'AI 사용 한도에 도달했습니다. 잠시 후 다시 시도해 주세요.'
       : `답변 서버에 연결하지 못했습니다. (${response.status})`);
   }

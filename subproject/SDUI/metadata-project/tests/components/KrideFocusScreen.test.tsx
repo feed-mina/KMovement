@@ -5,7 +5,7 @@ import KrideFocusScreen from '@/components/plugins/travel/KrideFocusScreen';
 const mockSetFormData = jest.fn();
 const mockHandleAction = jest.fn();
 const mockPush = jest.fn();
-let mockItinerary = { data: null, isLoading: false, error: null as string | null, requiresLogin: false };
+let mockItinerary = { data: null, isLoading: false, error: null as string | null, requiresLogin: false, candidatesUnavailable: false };
 jest.mock('next/navigation', () => ({useRouter: () => ({push: mockPush})}));
 
 jest.mock('@/components/screens/useScreenGuard', () => ({
@@ -55,7 +55,7 @@ describe('KrideFocusScreen chat dialog accessibility', () => {
         mockSetFormData.mockClear();
         mockHandleAction.mockClear();
         mockPush.mockClear();
-        mockItinerary = {data: null, isLoading: false, error: null, requiresLogin: false};
+        mockItinerary = {data: null, isLoading: false, error: null, requiresLogin: false, candidatesUnavailable: false};
     });
 
     it('exposes an accessible modal and closes it with Escape', () => {
@@ -106,4 +106,13 @@ describe('KrideFocusScreen chat dialog accessibility', () => {
         fireEvent.keyDown(document, { key: 'Tab' });
         expect(closeButton).toHaveFocus();
     });
+});
+
+it('does not ask users to retry an unavailable catalog', () => {
+  mockItinerary = {...mockItinerary, error: '출처가 확인된 추천 자료가 아직 없습니다.', requiresLogin: false, candidatesUnavailable: true};
+  render(<KrideFocusScreen screenId="KRIDE_FOCUS" refId={null} />);
+  expect(screen.getByText('추천 자료를 준비 중이에요')).toBeInTheDocument();
+  expect(screen.queryByRole('button', {name: '다시 시도'})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', {name: '홈으로'}));
+  expect(mockPush).toHaveBeenCalledWith('/');
 });

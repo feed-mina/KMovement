@@ -2,7 +2,7 @@ import React from 'react';
 import {act,fireEvent,render,screen} from '@testing-library/react';
 import PublicProductCatalogScreen from '@/components/plugins/kpop/PublicProductCatalogScreen';
 let query='';const push=jest.fn();
-jest.mock('next/navigation',()=>({useRouter:()=>({push}),useSearchParams:()=>new URLSearchParams(query)}));
+jest.mock('next/navigation',()=>({usePathname:()=>'/view/KPOP_EXPLORE',useRouter:()=>({push}),useSearchParams:()=>new URLSearchParams(query)}));
 const item={id:1,name:'응원봉 후보',brand:'LIGHT',evidenceGrade:'EXACT_CANDIDATE',evidenceText:'공식 기록 대조',catalogSource:'MANUAL_CURATED',lastVerifiedAt:'2026-10-01 10:15:00',rightsChecked:true,officialUrl:'https://example.com/products/1'};
 const response=(data:any,status=200,policy='public-evidence-v1')=>Promise.resolve({ok:status===200,status,headers:{get:()=>policy},json:async()=>({data})} as unknown as Response);
 const component=()=> <PublicProductCatalogScreen screenId="KPOP_PRODUCTS" refId={null}/>;
@@ -26,11 +26,11 @@ test('C02 source recorded time and non-guaranteed grade appear; no made-up model
  expect(screen.getByText(/동일 상품 확정 아님/)).toBeInTheDocument();expect(screen.queryByText(/모델 참고 점수/)).not.toBeInTheDocument();
 });
 test('C06 unreviewed link is absent even when URL exists',async()=>{
- (fetch as jest.Mock).mockReturnValue(response([{...item,rightsChecked:false}]));render(component());await screen.findByText(item.name);expect(screen.queryByRole('link')).not.toBeInTheDocument();
+ (fetch as jest.Mock).mockReturnValue(response([{...item,rightsChecked:false}]));render(component());await screen.findByText(item.name);expect(screen.queryByRole('link',{name:/공식 출처/})).not.toBeInTheDocument();
 });
 test('C06 reviewed HTTPS link opens a separate tab',async()=>{
  (fetch as jest.Mock).mockReturnValue(response([item]));render(component());await screen.findByText(item.name);
- expect(screen.getByRole('link')).toHaveAttribute('href',item.officialUrl);expect(screen.getByRole('link')).toHaveAttribute('target','_blank');
+ expect(screen.getByRole('link',{name:/공식 출처/})).toHaveAttribute('href',item.officialUrl);expect(screen.getByRole('link',{name:/공식 출처/})).toHaveAttribute('target','_blank');
 });
 test('C03 empty is normal and disclaimer stays visible',async()=>{
  (fetch as jest.Mock).mockReturnValue(response([]));render(component());expect(await screen.findByRole('status')).toHaveTextContent('상품이 없다는 뜻은 아니며');

@@ -1,6 +1,7 @@
 'use client';
 import Image from "next/image";
 import { useState } from "react";
+import { artistImageSource } from "@/lib/kride/artistImages";
 
 interface Props {
   id: string;
@@ -9,9 +10,9 @@ interface Props {
 }
 
 export default function CardImage({ id, meta, data }: Props) {
-  const [error, setError] = useState(false);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
   
-  let src = data?.imageUrl || meta?.imageUrl || "";
+  const candidate = data?.imageUrl || meta?.imageUrl || "";
   const alt = data?.name || meta?.labelText || "";
   const mode = meta?.cssClass?.includes("circle") ? "circle" : "square";
   const shapeClass = mode === "circle"
@@ -19,11 +20,9 @@ export default function CardImage({ id, meta, data }: Props) {
     : "rounded-lg overflow-hidden";
   const initial = alt ? alt.charAt(0).toUpperCase() : "?";
 
-  if (!src && mode === "circle" && alt) {
-    src = `/artists/${alt}.jpg`;
-  }
+  const src = artistImageSource(candidate, alt, mode === "circle");
 
-  if (!src || error) {
+  if (!src || failedSrc === src) {
     return (
       <div className={`card-image-wrapper ${shapeClass} relative w-full aspect-square bg-gray-800 border border-gray-700 flex items-center justify-center`}>
         <span className="text-white text-2xl font-bold">{initial}</span>
@@ -41,7 +40,7 @@ export default function CardImage({ id, meta, data }: Props) {
           src={encodeURI(src)} 
           alt={alt} 
           className="absolute inset-0 w-full h-full object-cover" 
-          onError={() => setError(true)}
+          onError={() => setFailedSrc(src)}
         />
       </div>
     );
@@ -55,7 +54,7 @@ export default function CardImage({ id, meta, data }: Props) {
         fill 
         className="object-cover" 
         sizes="150px" 
-        onError={() => setError(true)}
+        onError={() => setFailedSrc(src)}
       />
     </div>
   );

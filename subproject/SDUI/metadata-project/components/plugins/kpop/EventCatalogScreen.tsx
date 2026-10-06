@@ -1,4 +1,5 @@
 'use client';
+import KpopNav from './KpopNav';
 import {FormEvent, useEffect, useRef, useState} from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import type {ScreenControllerProps} from '@/components/screens/types';
@@ -57,7 +58,7 @@ export default function EventCatalogScreen({screenId,refId}:ScreenControllerProp
     const apply=(e:FormEvent)=>{e.preventDefault();const error=eventFilterError(draft,current.today);setInputError(error);if(!error)navigate(draft);};
     const open=(meta:Record<string,any>)=>router.push(meta.actionUrl+(filterKey?'?'+filterKey:''));
     return <section className="page-wrap kpop-screen event-catalog" aria-label="이벤트 공개 목록">
-        <p className="kpop-eyebrow">K-POP · 이벤트</p><h1>{detail?'이벤트 상세':'이벤트 일정 찾기'}</h1>
+        <KpopNav/><p className="kpop-eyebrow">K-POP · 이벤트</p><h1>{detail?'이벤트 상세':'이벤트 일정 찾기'}</h1>
         <p>로그인 없이 검수된 일정을 확인해요. 이벤트와 연결 아티스트가 모두 공개 승인된 일정만 보여요.</p>
         <p>날짜는 한국 시간(Asia/Seoul) 기준이에요. {current.today?`서버 기준 오늘: ${current.today}. `:''}시작일과 종료일을 모두 포함하며, 시작일을 비우면 오늘부터 찾아요.</p>
         <p>‘종료된 일정’은 행사 날짜가 지난 뜻이에요. 오늘 행사의 실제 종료 시각은 공식 안내를 확인해 주세요.</p>

@@ -130,7 +130,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/kpop/artists", "/api/v1/kpop/artists/*",
                                 "/api/v1/kpop/events", "/api/v1/kpop/events/*",
-                                "/api/v1/kpop/product-candidates").permitAll()
+                                "/api/v1/kpop/product-candidates", "/api/v1/kpop/product-candidates/*").permitAll()
                         .requestMatchers("/api/v1/kpop/**").authenticated()
                         // ── [추가] KRIDE ──
                         .requestMatchers("/api/v1/kride/chat/**").authenticated()
