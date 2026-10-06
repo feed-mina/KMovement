@@ -1,0 +1,21 @@
+{
+  "revision": "v1.1 clarification only; original v1 hashes preserved",
+  "corrects": "library-lock.json scope text says nine, but eight requested core distributions were installed and hashed",
+  "authoritativeCoreCount": 8,
+  "actualCoreDistributions": [
+    "chromadb",
+    "huggingface_hub",
+    "numpy",
+    "safetensors",
+    "sentence-transformers",
+    "tokenizers",
+    "torch",
+    "transformers"
+  ],
+  "requestedButNotInstalled": [
+    "sentencepiece"
+  ],
+  "noInstallOrImportPerformed": true,
+  "originalLibraryLockSha256": "81297aba3bd027d2ee3db249a0d9935f7836faf8ff5bfe6ee75a081ef4c09daf",
+  "runtimeStillIncomplete": true
+}
