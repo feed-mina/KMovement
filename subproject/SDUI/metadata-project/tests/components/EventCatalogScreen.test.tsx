@@ -1,6 +1,6 @@
 import React from 'react';
 import {act,fireEvent,render,screen} from '@testing-library/react';
-import EventCatalogScreen,{eventFilterError} from '@/components/plugins/kpop/EventCatalogScreen';
+import {LegacyEventCatalogScreen as EventCatalogScreen,eventFilterError} from '@/components/plugins/kpop/EventCatalogScreen';
 let query='';const push=jest.fn();
 jest.mock('next/navigation',()=>({usePathname:()=>'/view/KPOP_EXPLORE',useRouter:()=>({push}),useSearchParams:()=>new URLSearchParams(query)}));
 const item={id:2,titleKo:'오늘 서울 일정',date:'2026-10-05',region:'서울',ended:false};
@@ -60,4 +60,9 @@ test('old response cannot replace newer region response',async()=>{
     let old:(x:any)=>void=()=>{};(fetch as jest.Mock).mockReturnValueOnce(new Promise(r=>old=r)).mockReturnValue(response([{...item,titleKo:'부산 일정'}]));
     const view=render(<EventCatalogScreen screenId="KPOP_EVENTS" refId={null}/>);query='region=부산';view.rerender(<EventCatalogScreen screenId="KPOP_EVENTS" refId={null}/>);
     await screen.findByText('부산 일정');await act(async()=>old(await response([item])));expect(screen.queryByText('오늘 서울 일정')).not.toBeInTheDocument();
+});
+test('event detail return accepts the fan filter route and rejects external destinations',async()=>{
+ query='returnEvents='+encodeURIComponent('/view/KPOP_EVENTS?scope=all&geography=overseas&countryCode=JP&page=2');(fetch as jest.Mock).mockReturnValue(response(null,404));
+ const v=render(<EventCatalogScreen screenId="KPOP_EVENT_DETAIL" refId="999"/>);await screen.findByText(/공개된 이벤트를 찾을 수 없어요/);expect(screen.getByRole('link',{name:'이벤트 목록으로'})).toHaveAttribute('href','/view/KPOP_EVENTS?scope=all&geography=overseas&countryCode=JP&page=2');
+ v.unmount();query='returnEvents='+encodeURIComponent('https://evil.example');render(<EventCatalogScreen screenId="KPOP_EVENT_DETAIL" refId="999"/>);await screen.findByText(/공개된 이벤트를 찾을 수 없어요/);expect(screen.getByRole('link',{name:'이벤트 목록으로'})).toHaveAttribute('href','/view/KPOP_EVENTS');
 });
