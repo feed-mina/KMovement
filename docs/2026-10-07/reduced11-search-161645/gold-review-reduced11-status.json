@@ -1,0 +1,50 @@
+{
+  "version": "reduced11-v1",
+  "reviewer": "/root/gold_reviewer",
+  "reviewerType": "independent-AI-not-human",
+  "decision": "approved-for-question-gold-scope-freeze-only",
+  "approvedAt": "2026-10-07T07:05:55.1473952Z",
+  "approvalScope": "questions-gold-rubric-preregistration-source-scope",
+  "files": {
+    "questions.json": "2ba963b791b7db34a73f6fd4219ff6f50d00023511b2f461d11e63f3f7f2469c",
+    "gold.json": "b63c994e8f962f46f9560cfbee2424d2e16e5e34becd72ef0207f702c7dcc97c",
+    "preregistration.md": "b92c4ddbaf4437ee29d658442fa8ea5eab52c15c1640cbacb4623b68eaf0e734",
+    "gold-rubric.md": "e34d253c5b324f0b2d0cbd2b7b531932b11d21266c2c5026686dc86d58b8dbc4",
+    "release-gates-reference.json": "a1c5119a2282de3f42e7d32ba08a420e12951ec2cba2b2b3b955d7702853097a",
+    "source-catalog-reference.json": "3b4c2181d0b2abd40b997b6c75296fac58afa6dbe144d0b29f59fe4a970114e3"
+  },
+  "sourceCatalogueSha256": "1789273e4216461313320bfb24576e40303e0b3970e1256fa6a7e1ceab6c067d",
+  "sourceApprovalSha256": "2fe5d1eba5b0551f5fcd3439735d04b286ed057188cf9c4a15b2acc4abc988ae",
+  "finiteEntityReviewSha256": "9d6bf8f44db1b5ffd2aa5b796dce2647830a01275f8b66b9245acee641a3da41",
+  "originalReleaseGatesSha256": "efd5b45213fca555e92bac84817772e11d6a82cf99254e9d6413f534f0b2fc28",
+  "candidateCount": 11,
+  "questionCount": 51,
+  "perLanguage": {
+    "positive": 11,
+    "unsupported": 6
+  },
+  "translationFamilies": 17,
+  "allLanguageQuestionsReviewed": true,
+  "schemaAndSourceMappingErrors": 0,
+  "entityScopeDifferenceCount": 0,
+  "thresholdsChanged": false,
+  "previous120Preserved": true,
+  "reviewedSourceScopeApproved": true,
+  "questionGoldScopeFreezeApproved": true,
+  "executionBundleFrozen": false,
+  "executionAllowed": false,
+  "experimentExecuted": false,
+  "productCodeRead": false,
+  "priorScoresRead": false,
+  "humanReview": false,
+  "osEnforcedIsolation": false,
+  "releaseApproved": false,
+  "limits": [
+    "Finite supplied old120 entity-context separation only; no all-history semantic contamination-free claim",
+    "51 language variants form17 translation families; small11-candidate scope and selected6 attribute targets limit generalization",
+    "ANN top10 covers10 of11 candidates; no production1000-scale conclusion",
+    "Response/overrefusal and response/course latency require actual response pipeline; retrieval-only cannot pass them",
+    "Frozen question/gold files may retain pending inline review labels; this hash-bound external approval is authoritative for its narrow scope",
+    "Runner environment model artifact and document hashes remain pending execution freeze; no execution or operating approval"
+  ]
+}

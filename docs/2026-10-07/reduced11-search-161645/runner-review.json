@@ -1,0 +1,128 @@
+{
+  "reviewer": "/root/independent_places",
+  "reviewerType": "independent-AI-static-code-review-not-human",
+  "targetFile": "runner.py",
+  "targetSha256": "213d1dcb4a1572b502e37466d61a03801776e67bd627d3fe277fa08b1c85b674",
+  "decision": "static-code-accepted-subject-to-separate-launch-isolation-and-private-output-gates",
+  "executionPerformed": false,
+  "newQuestionsRead": false,
+  "newGoldRead": false,
+  "runtimeContainerInspected": false,
+  "blockingFindings": [],
+  "additionalFindings": [
+    {
+      "id": "R4",
+      "priority": "low",
+      "status": "duplicate-gold-fixed-late-semantic-validation-remains",
+      "finding": "Raw gold length51 is checked before dict conversion; unique dict51 and unique question51 prevent duplicate collapse. Full language/count/expected-ID checks still happen after collection creation; malformed input aborts without successful aggregate. Approved frozen gold and isolated disposable output remain prerequisites."
+    },
+    {
+      "id": "R5",
+      "priority": "launch-gate",
+      "status": "external-verification-required",
+      "finding": "Fresh empty output mount and no original/production database mounts must be verified separately. Runner fixed path alone cannot establish host isolation."
+    },
+    {
+      "id": "R6",
+      "priority": "launch-gate",
+      "status": "external-verification-required",
+      "finding": "Network denial, telemetry/offline settings and private capture of third-party stdout/stderr require launch verification. Runner-owned output is aggregate-only with exception type only; this review does not guarantee third-party log contents."
+    }
+  ],
+  "confirmedStaticProperties": [
+    {
+      "property": "A/B fixed document vectors",
+      "result": "Code builds one collection, uses same stored float32 vectors for both arms, changes only query prefix, and hashes vectors again after evaluation. Depends on guards remaining active."
+    },
+    {
+      "property": "P separate from prefix experiment",
+      "result": "search_reviewed results are accumulated separately as P and do not alter A/B orders or scores."
+    },
+    {
+      "property": "Language denominators",
+      "result": "Count check requires11 positive and6 unsupported per ko/en/ja. Recall/nDCG aggregate positive11; A/B ANN is appended for all17 language queries."
+    },
+    {
+      "property": "Acceptance thresholds",
+      "result": "Per language B and P require recall@5>=0.8 and nDCG@10>=0.7; B may regress from A by at most0.02 in each metric; A/B ANN recall@10>=0.99."
+    },
+    {
+      "property": "Small-corpus limit",
+      "result": "Output explicitly states11 candidates and k10 near-exhaustive behavior, as well as51 variants/17 translation families."
+    },
+    {
+      "property": "No generation claim",
+      "result": "Output explicitly says generation/refusal/login not evaluated and productionEligible=false."
+    },
+    {
+      "property": "Explicit data paths",
+      "result": "Visible runner reads /inputs and /model, imports /app code, writes /output/new-collection. It does not explicitly reference original or production databases; mounted paths/imported code still require external verification."
+    }
+  ],
+  "limits": [
+    "Static code review only; no execution, imports, model loading, index creation, queries, old scores or new question/gold access by this reviewer.",
+    "Container mounts, network isolation, model inventory, dependency versions, frozen run-lock and launcher were not inspected in this review.",
+    "No recommendation to change retrieval thresholds or reduce the predefined denominator based on results."
+  ],
+  "operatingCandidateEligible": false,
+  "productionPromoted": false,
+  "resolvedFindings": [
+    {
+      "id": "R1",
+      "priority": "high",
+      "lines": [
+        20,
+        26
+      ],
+      "title": "Required frozen inputs are not required by the hash loop",
+      "finding": "lock.files is iterated but its key set is not checked. An omitted questions.json or gold.json entry is never hashed before the file is read at lines41-42. Empty or partial modelFiles is also accepted. This allows successful evaluation of bytes outside the supposed frozen input manifest without an input-hash failure.",
+      "requestedChange": "Require the exact expected catalog/review/questions/gold entries and the declared complete model-file manifest before reading any protected input. Validate digest syntax and reject missing/extra input keys. Bind the model inventory to the frozen model manifest or verify full expected file coverage.",
+      "status": "resolved-in-final-reviewed-runner"
+    },
+    {
+      "id": "R2",
+      "priority": "high",
+      "lines": [
+        27,
+        29
+      ],
+      "title": "Product module is imported before its code hash is checked",
+      "finding": "The import executes module and package initialization before sha('/app/src/api/multilingual_catalog.py') is compared to catalogCodeSha256. A mismatched mounted module can already perform side effects before aborting, violating fail-closed code provenance.",
+      "requestedChange": "Verify the exact code bytes before import. Ensure package __init__ files are frozen or avoid importing unverified package initialization with a verified direct-file load. Verify the imported module resolves to the expected verified file.",
+      "status": "resolved-in-final-reviewed-runner"
+    },
+    {
+      "id": "R3",
+      "priority": "high",
+      "lines": [
+        21,
+        24,
+        26,
+        29,
+        40,
+        45,
+        63,
+        81,
+        83
+      ],
+      "title": "Safety and acceptance preconditions disappear under Python optimization",
+      "finding": "Every hash, executionAllowed, count and vector-integrity guard uses assert. Python -O or PYTHONOPTIMIZE removes these checks entirely, including the test for authorized execution and fixed input hashes.",
+      "requestedChange": "Use explicit checks that raise a sanitized exception for critical gates, or at minimum reject optimized execution with an explicit if sys.flags.optimize check before main; explicit checks are preferred. Freeze the launcher and environment as separate evidence.",
+      "status": "resolved-in-final-reviewed-runner"
+    }
+  ],
+  "finalRevisionVerified": [
+    "required input exact4 and model exact10 manifest sets",
+    "code SHA before import plus two package-init empty-SHA checks",
+    "explicit non-assert rejection of sys.flags.optimize",
+    "raw gold51 before deduplication",
+    "A/B/P formulas and denominators unchanged",
+    "document_text serialization SHA must equal documentSha256 before questions are read"
+  ],
+  "authorReportedNotIndependentlyVerified": [
+    "container preparation probe passed",
+    "image/dependency manifest pinned",
+    "final launch mounts/caps/network/read-only settings will be enforced"
+  ],
+  "executionAllowedByThisReview": false
+}

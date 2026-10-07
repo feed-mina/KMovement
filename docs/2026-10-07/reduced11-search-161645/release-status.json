@@ -1,0 +1,14 @@
+{
+  "sourceScope": "passed-11-location-facts-only",
+  "questionGoldScope": "frozen-51",
+  "retrieval": "passed-small-catalogue-only",
+  "refusal": "not-run",
+  "positiveOverrefusal": "not-run",
+  "generationPerformance": "not-run",
+  "loginStopRetry": "not-run-browser-tool-unavailable",
+  "productionPromotion": false,
+  "originalDatabaseChanged": false,
+  "productionCollectionChanged": false,
+  "costLimitsUnchanged": true,
+  "backgroundScheduleCreated": false
+}

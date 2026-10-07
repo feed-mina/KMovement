@@ -1,0 +1,45 @@
+{
+  "reviewer": "/root/independent_places",
+  "reviewerType": "independent-AI-static-review-not-human",
+  "targetFile": "remote-evaluate.py",
+  "targetSha256": "6bb32d7d7c51c44076f7e51cbedd7e93728a0bac07037fd7ca6ed754fea4950d",
+  "runnerSha256": "213d1dcb4a1572b502e37466d61a03801776e67bd627d3fe277fa08b1c85b674",
+  "preparationFileSha256": "31b63e4b3fe00ff51c1012de7da7aa824f5ba939af93d9a57b287d55ecfcf2a5",
+  "decision": "static-launcher-accepted-subject-to-final-authorization-manifest-and-boundary-verification",
+  "blockingFindings": [],
+  "resolvedFindings": [
+    {"id": "L1", "resolution": "Explicit non-assert sys.flags.optimize rejection precedes lock reads and Docker commands."},
+    {"id": "L2", "resolution": "Aggregate accepted only when CLI returncode0, container ExitCode0, notOOM and notRunning. Other paths set retrievalPassed=false."},
+    {"id": "L3", "resolution": "Runner-review hash, reviewed runner target SHA, exact accepted decision and empty blockingFindings checked before container creation. Separate explicit authorization manifest still requires final operator verification."},
+    {"id": "L4", "resolution": "Docker entrypoint explicitly python, command -I -B -u /checks/runner.py; image startup entrypoint not used."},
+    {"id": "L5", "resolution": "Private stderr created using os.open O_EXCL with0600 from first creation."}
+  ],
+  "confirmedStaticChecks": {
+    "image": "Digest-pinned reference compared with preparation image and actual inspected imageId.",
+    "inputs": "Required four file hashes, runner SHA, preparation SHA and runner-review SHA verified before start.",
+    "mounts": "Prepared three source-to-destination mappings checked exactly against inspect and required read-only; no original or production database host mount in inspected preparation metadata.",
+    "user": "65532:65532 created and inspected.",
+    "network": "none created and inspected; offline model and telemetry opt-out env supplied.",
+    "privileges": "ReadonlyRootfs, nonprivileged, CapDrop ALL, no-new-privileges, no host PID/IPC, private cgroup namespace inspected.",
+    "resources": "1CPU,4GiB memory,4GiB memory-swap total,128PIDs inspected; output256MiB and tmp128MiB fresh tmpfs requested.",
+    "freshCollection": "Runner writes its collection under fresh container /output tmpfs, not a persistent host database mount.",
+    "timeout": "600second docker attach timeout; finally invokes docker stop with5second grace.",
+    "publicOutput": "Only aggregate marker JSON or sanitized runner abort-type result is forwarded; full library stderr stays host-local0600.",
+    "runnerDocumentLock": "Latest runner checks actual serialized document_text SHA against frozen documentSha256 before reading question/gold files."
+  },
+  "remainingNonblockingLimitations": [
+    "TimeoutExpired stops container in finally but does not emit a structured timeout aggregate; no success is claimed on that path.",
+    "Preparation JSON reports all11 boundary checks true and inference/search false. Reviewer did not independently run Docker or reproduce preparation probes.",
+    "Final execution authorization manifest and final run-lock were still being assembled and were not inspected. Verify their exact input, code, runner-review, launcher-review, preparation and question/gold approval hashes before running.",
+    "Ensure private host parent directory permissions and bounded Docker local logs remain private; root/Docker administrators can access container logs.",
+    "Final Docker inspect checks are executed by launcher immediately before start; this static report does not replace the resulting execution-boundary evidence.",
+    "No evaluation threshold, denominator or new question content was changed by this review."
+  ],
+  "executionPerformed": false,
+  "newQuestionsOrGoldAccessed": false,
+  "modelInferenceExecuted": false,
+  "indexingExecuted": false,
+  "searchExecuted": false,
+  "executionAuthorizedByThisReview": false,
+  "productionEligible": false
+}

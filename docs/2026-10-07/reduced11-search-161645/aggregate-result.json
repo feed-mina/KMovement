@@ -1,0 +1,121 @@
+{
+  "runId": "r11_20261007_v1",
+  "retrievalPassed": true,
+  "summary": {
+    "ko": {
+      "A": {
+        "recallAt5": 1.0,
+        "ndcgAt10": 1.0,
+        "annRecallAt10": 1.0,
+        "querySecondsP95": 0.04204156696796417,
+        "positiveCount": 11,
+        "queryCount": 17
+      },
+      "B": {
+        "recallAt5": 1.0,
+        "ndcgAt10": 1.0,
+        "annRecallAt10": 1.0,
+        "querySecondsP95": 0.04115146193653345,
+        "positiveCount": 11,
+        "queryCount": 17
+      },
+      "P": {
+        "recallAt5": 1.0,
+        "ndcgAt10": 1.0,
+        "annRecallAt10": null,
+        "querySecondsP95": 0.04399545872583985,
+        "positiveCount": 11,
+        "queryCount": 17
+      }
+    },
+    "en": {
+      "A": {
+        "recallAt5": 1.0,
+        "ndcgAt10": 0.9545454545454546,
+        "annRecallAt10": 1.0,
+        "querySecondsP95": 0.04224803950637579,
+        "positiveCount": 11,
+        "queryCount": 17
+      },
+      "B": {
+        "recallAt5": 1.0,
+        "ndcgAt10": 0.9545454545454546,
+        "annRecallAt10": 1.0,
+        "querySecondsP95": 0.04296627463772893,
+        "positiveCount": 11,
+        "queryCount": 17
+      },
+      "P": {
+        "recallAt5": 1.0,
+        "ndcgAt10": 1.0,
+        "annRecallAt10": null,
+        "querySecondsP95": 0.04735073456540703,
+        "positiveCount": 11,
+        "queryCount": 17
+      }
+    },
+    "ja": {
+      "A": {
+        "recallAt5": 1.0,
+        "ndcgAt10": 1.0,
+        "annRecallAt10": 1.0,
+        "querySecondsP95": 0.06297205593436957,
+        "positiveCount": 11,
+        "queryCount": 17
+      },
+      "B": {
+        "recallAt5": 1.0,
+        "ndcgAt10": 1.0,
+        "annRecallAt10": 1.0,
+        "querySecondsP95": 0.0469630017876625,
+        "positiveCount": 11,
+        "queryCount": 17
+      },
+      "P": {
+        "recallAt5": 1.0,
+        "ndcgAt10": 1.0,
+        "annRecallAt10": null,
+        "querySecondsP95": 0.050160136539489024,
+        "positiveCount": 11,
+        "queryCount": 17
+      }
+    }
+  },
+  "counts": {
+    "ko": {
+      "positive": 11,
+      "unsupported": 6
+    },
+    "en": {
+      "positive": 11,
+      "unsupported": 6
+    },
+    "ja": {
+      "positive": 11,
+      "unsupported": 6
+    }
+  },
+  "collection": {
+    "collection": "kride_public_v2_review11_r11_20261007_v1",
+    "count": 11,
+    "catalogSha256": "1789273e4216461313320bfb24576e40303e0b3970e1256fa6a7e1ceab6c067d",
+    "documentSha256": "bc3de4a412ed70c3415cd20a761cd318e59616ccf2b4cf16eb903417eeaeeb65",
+    "modelRevision": "614241f622f53c4eeff9890bdc4f31cfecc418b3"
+  },
+  "documentVectorsSha256": "297a45d9e9229103a8be3c442ed04d8ffc99dbf50d1d2296af31d357922c9e4c",
+  "vectorsUnchanged": true,
+  "peakRSSKiB": 1007384,
+  "elapsedSeconds": 24.957815210334957,
+  "generationExecuted": false,
+  "refusalEvaluated": false,
+  "loginEvaluated": false,
+  "productionEligible": false,
+  "limits": [
+    "51 variants/17 translation families; no statistical independence claim",
+    "11 candidates only; ANN k10 is near-exhaustive",
+    "retrieval metrics do not assess generated refusal or live service performance"
+  ],
+  "containerExitCode": 0,
+  "oomKilled": false,
+  "runLockSha256": "938ed3f5ebf19415db6ad247a46162a6e009a6bee85e5852a5d7740f1213b49e"
+}

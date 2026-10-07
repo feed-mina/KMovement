@@ -1,0 +1,21 @@
+{
+  "image": "sha256:37359dcbce2fb3cfc1d73e504782c0d09af986dbc113662ba79763c233451d32",
+  "mounts": {
+    "/opt/kride-pilot-prep/20261006-223827/package/model": "/model",
+    "/opt/kride-review11-20261007/checks": "/checks",
+    "/opt/kride-review11-20261007/inputs": "/inputs"
+  },
+  "network": "none",
+  "user": "65532:65532",
+  "memory": 4294967296,
+  "cpus": 1,
+  "pids": 128,
+  "tmpfs": {
+    "/output": "rw,nosuid,nodev,noexec,size=256m,uid=65532,gid=65532,mode=0700",
+    "/tmp": "rw,nosuid,nodev,noexec,size=128m,uid=65532,gid=65532,mode=0700"
+  },
+  "hostAvailableMemoryKiB": 11320372,
+  "runLockSha256": "938ed3f5ebf19415db6ad247a46162a6e009a6bee85e5852a5d7740f1213b49e",
+  "timeoutSeconds": 600,
+  "at": "2026-10-07T07:12:33.684889+00:00"
+}

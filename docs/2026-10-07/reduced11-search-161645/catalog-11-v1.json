@@ -1,0 +1,1230 @@
+{
+  "contract": "kride-reviewed-multilingual-v2",
+  "author": "implementation-author",
+  "derivedBy": "/root/independent_places",
+  "derivationScope": "select11 previously independently source-approved records; no name/address/coordinate value edits",
+  "status": "source-approved-for-predeclared-isolated-evaluation-only",
+  "sourceReviewApproved": true,
+  "operatingCandidateEligible": false,
+  "productionPromoted": false,
+  "executionAllowed": false,
+  "parentCatalogSha256": "aca608a8cae40db351625a6084eafebbdcb55503eba235bcfcde1f7dec81e10a",
+  "selectionReviewSha256": "9d6bf8f44db1b5ffd2aa5b796dce2647830a01275f8b66b9245acee641a3da41",
+  "items": [
+    {
+      "id": "curated:seoul:102409",
+      "name": "대한민국역사박물관",
+      "address": "서울특별시 종로구 세종대로 198",
+      "region": "서울",
+      "lat": 37.5737136067193,
+      "lon": 126.978339442463,
+      "verifiedAt": "2026-10-07T03:17:43.091593+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "verified",
+          "value": "대한민국역사박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+          "sourceSha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "locator": "official detail facility title",
+          "originalSourceSha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "sourceFile": "fresh-source-evidence/c0d051056caa1267.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "en": {
+          "value": "National Museum of Korean Contemporary History",
+          "status": "verified",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            20
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 20; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "sourceFile": "fresh-source-evidence/40dcd75624b85c8e.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "ja": {
+          "value": "大韓民国歴史博物館",
+          "status": "verified",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            20
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 20; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "sourceFile": "fresh-source-evidence/64377bcfc7bb3783.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "verified",
+          "value": "대한민국역사박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+          "sourceSha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "locator": "facility title",
+          "originalSourceSha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "sourceFile": "fresh-source-evidence/c0d051056caa1267.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "coordinates": {
+          "status": "verified",
+          "value": {
+            "lat": 37.5737136067193,
+            "lon": 126.978339442463
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+          "sourceSha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "locator": "markerLocations coordinates",
+          "originalSourceSha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "sourceFile": "fresh-source-evidence/c0d051056caa1267.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "region": {
+          "status": "verified",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+          "sourceSha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "locator": "official address",
+          "originalSourceSha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "sourceFile": "fresh-source-evidence/c0d051056caa1267.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      },
+      "sourceReviewApproved": true,
+      "operatingCandidateEligible": false,
+      "productionPromoted": false,
+      "independentReview": {
+        "reviewerId": "/root/independent_places",
+        "reviewerType": "AI-not-human",
+        "reviewedAt": "2026-10-07T06:50:59.408282+00:00",
+        "decision": "approved-for-source-scope-only",
+        "scope": "whole-museum",
+        "note": "EN/JA 가이드 p20의 한국어명과 세종대로198 일치. 국립중앙박물관과 다른 시설.",
+        "coordinatesMeaning": "official published map marker only; no geodetic/entrance/onsite verification",
+        "price": "unknown",
+        "artist": "unknown"
+      }
+    },
+    {
+      "id": "curated:seoul:100892",
+      "name": "서울돈화문국악당",
+      "address": "서울  종로구 와룡동 12-2",
+      "region": "서울",
+      "lat": 37.5772502822,
+      "lon": 126.9907306641,
+      "verifiedAt": "2026-10-07T03:17:43.108005+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "verified",
+          "value": "서울돈화문국악당",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100892&menuNo=200025",
+          "sourceSha256": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+          "locator": "official detail facility title",
+          "originalSourceSha256": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+          "sourceFile": "fresh-source-evidence/9b3eb2de9428687d.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "en": {
+          "value": "Seoul Donhwamun Traditional Theater",
+          "sourceUrl": "https://english.seoul.go.kr/policy/culture/cultural-facilities/museums/",
+          "sourceSha256": "a8958ac8de9a1045d89b8073878b2012c756281c162215e88f5a1f4aec8ec9c6",
+          "locator": "named venue heading and distinct facility description",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "verified",
+          "historicalNameOnly": true,
+          "originalSourceSha256": "c1d5150ebe6fa8dfe31e8bb2dd63b3f6c147d93d1dfc18875874d2ff0adfe708",
+          "sourceFile": "fresh-source-evidence/supplement-a5c606915346.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "ja": {
+          "value": "ソウルトンファムン(敦化門)国楽堂",
+          "sourceUrl": "https://japanese.seoul.go.kr/政策紹介/文化/文化施設/博物館/",
+          "sourceSha256": "a81739dee8467ce30c62f889fb1f4dcdaee905ee971ff47851cfce8b3c705afd",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "verified",
+          "historicalNameOnly": true,
+          "originalSourceSha256": "3fd929c66781d0774a5d2ce8738826e1a667fd404b2f76564586e541f4aede05",
+          "sourceFile": "fresh-source-evidence/5258bd2f05c95490.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "verified",
+          "value": "서울돈화문국악당",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100892&menuNo=200025",
+          "sourceSha256": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+          "locator": "facility title",
+          "originalSourceSha256": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+          "sourceFile": "fresh-source-evidence/9b3eb2de9428687d.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "coordinates": {
+          "status": "verified",
+          "value": {
+            "lat": 37.5772502822,
+            "lon": 126.9907306641
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100892&menuNo=200025",
+          "sourceSha256": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+          "locator": "markerLocations coordinates",
+          "originalSourceSha256": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+          "sourceFile": "fresh-source-evidence/9b3eb2de9428687d.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "region": {
+          "status": "verified",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100892&menuNo=200025",
+          "sourceSha256": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+          "locator": "official address",
+          "originalSourceSha256": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+          "sourceFile": "fresh-source-evidence/9b3eb2de9428687d.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      },
+      "sourceReviewApproved": true,
+      "operatingCandidateEligible": false,
+      "productionPromoted": false,
+      "independentReview": {
+        "reviewerId": "/root/independent_places",
+        "reviewerType": "AI-not-human",
+        "reviewedAt": "2026-10-07T06:50:59.408282+00:00",
+        "decision": "approved-after-source-correction",
+        "scope": "whole-theater",
+        "note": "2020 재개관 기사는 단독 최신성 근거로 사용하지 않음. 현재 공식 EN 정책페이지 및 JA 시설설명은 창덕궁 맞은편 국악공연장으로 식별. 현행 서울의밤 페이지 율곡로102 확인. 상세의 와룡동12-2는 원문 주소로 보존하며 도로명으로 자동 교체하지 않음.",
+        "coordinatesMeaning": "official published map marker only; no geodetic/entrance/onsite verification",
+        "price": "unknown",
+        "artist": "unknown"
+      }
+    },
+    {
+      "id": "curated:seoul:102065",
+      "name": "창경궁",
+      "address": "서울 종로구 창경궁로 185 창경궁",
+      "region": "서울",
+      "lat": 37.5776239475981,
+      "lon": 126.993841430623,
+      "verifiedAt": "2026-10-07T03:17:43.114392+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "verified",
+          "value": "창경궁",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102065&menuNo=200025",
+          "sourceSha256": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+          "locator": "official detail facility title",
+          "originalSourceSha256": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+          "sourceFile": "fresh-source-evidence/f5ff367a4099338d.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "en": {
+          "value": "Changgyeonggung Palace",
+          "status": "verified",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            5
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 5; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "sourceFile": "fresh-source-evidence/40dcd75624b85c8e.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "ja": {
+          "value": "昌慶宮",
+          "status": "verified",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            5
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 5; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "sourceFile": "fresh-source-evidence/64377bcfc7bb3783.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "verified",
+          "value": "창경궁",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102065&menuNo=200025",
+          "sourceSha256": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+          "locator": "facility title",
+          "originalSourceSha256": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+          "sourceFile": "fresh-source-evidence/f5ff367a4099338d.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "coordinates": {
+          "status": "verified",
+          "value": {
+            "lat": 37.5776239475981,
+            "lon": 126.993841430623
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102065&menuNo=200025",
+          "sourceSha256": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+          "locator": "markerLocations coordinates",
+          "originalSourceSha256": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+          "sourceFile": "fresh-source-evidence/f5ff367a4099338d.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "region": {
+          "status": "verified",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102065&menuNo=200025",
+          "sourceSha256": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+          "locator": "official address",
+          "originalSourceSha256": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+          "sourceFile": "fresh-source-evidence/f5ff367a4099338d.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      },
+      "sourceReviewApproved": true,
+      "operatingCandidateEligible": false,
+      "productionPromoted": false,
+      "independentReview": {
+        "reviewerId": "/root/independent_places",
+        "reviewerType": "AI-not-human",
+        "reviewedAt": "2026-10-07T06:50:59.408282+00:00",
+        "decision": "approved-for-source-scope-only",
+        "scope": "whole-palace",
+        "note": "EN/JA 가이드 p5의 창경궁 한국어 병기, 창경궁로185, 궁역 설명 일치. 창덕궁·홍화문·온실과 동일 ID로 합치지 않음. PDF 다단 추출의 인접 종묘주소157을 오배정하지 않음.",
+        "coordinatesMeaning": "official published map marker only; no geodetic/entrance/onsite verification",
+        "price": "unknown",
+        "artist": "unknown"
+      }
+    },
+    {
+      "id": "curated:seoul:102354",
+      "name": "경희궁",
+      "address": "서울특별시 종로구 새문안로 45",
+      "region": "서울",
+      "lat": 37.57078184592975,
+      "lon": 126.96865021365493,
+      "verifiedAt": "2026-10-07T03:17:43.404800+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "verified",
+          "value": "경희궁",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102354&menuNo=200025",
+          "sourceSha256": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+          "locator": "official detail facility title",
+          "originalSourceSha256": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+          "sourceFile": "fresh-source-evidence/2e5abaa848c0f70a.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "en": {
+          "value": "Gyeonghuigung Palace",
+          "status": "verified",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            5
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 5; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "sourceFile": "fresh-source-evidence/40dcd75624b85c8e.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "ja": {
+          "value": "慶熙宮",
+          "status": "verified",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            5
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 5; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "sourceFile": "fresh-source-evidence/64377bcfc7bb3783.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "verified",
+          "value": "경희궁",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102354&menuNo=200025",
+          "sourceSha256": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+          "locator": "facility title",
+          "originalSourceSha256": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+          "sourceFile": "fresh-source-evidence/2e5abaa848c0f70a.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "coordinates": {
+          "status": "verified",
+          "value": {
+            "lat": 37.57078184592975,
+            "lon": 126.96865021365493
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102354&menuNo=200025",
+          "sourceSha256": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+          "locator": "markerLocations coordinates",
+          "originalSourceSha256": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+          "sourceFile": "fresh-source-evidence/2e5abaa848c0f70a.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "region": {
+          "status": "verified",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102354&menuNo=200025",
+          "sourceSha256": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+          "locator": "official address",
+          "originalSourceSha256": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+          "sourceFile": "fresh-source-evidence/2e5abaa848c0f70a.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      },
+      "sourceReviewApproved": true,
+      "operatingCandidateEligible": false,
+      "productionPromoted": false,
+      "independentReview": {
+        "reviewerId": "/root/independent_places",
+        "reviewerType": "AI-not-human",
+        "reviewedAt": "2026-10-07T06:50:59.408282+00:00",
+        "decision": "approved-for-source-scope-only",
+        "scope": "whole-palace",
+        "note": "EN/JA 가이드 p5와 p13의 경희궁·새문안로45 일치. 숭정전 단일 전각으로 축소하지 않고 전체 궁역.",
+        "coordinatesMeaning": "official published map marker only; no geodetic/entrance/onsite verification",
+        "price": "unknown",
+        "artist": "unknown"
+      }
+    },
+    {
+      "id": "curated:seoul:100885",
+      "name": "국립현대미술관 서울",
+      "address": "서울특별시 종로구 삼청로 30",
+      "region": "서울",
+      "lat": 37.5786280284849,
+      "lon": 126.980087994867,
+      "verifiedAt": "2026-10-07T03:17:43.913608+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "verified",
+          "value": "국립현대미술관 서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100885&menuNo=200025",
+          "sourceSha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "locator": "official detail facility title",
+          "originalSourceSha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "sourceFile": "fresh-source-evidence/5b4efdc0cc0b958c.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "en": {
+          "value": "MMCA Seoul",
+          "status": "verified",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            9
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 9; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "sourceFile": "fresh-source-evidence/40dcd75624b85c8e.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "ja": {
+          "value": "国立現代美術館ソウル館",
+          "status": "verified",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            9
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 9; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "sourceFile": "fresh-source-evidence/64377bcfc7bb3783.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "verified",
+          "value": "국립현대미술관 서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100885&menuNo=200025",
+          "sourceSha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "locator": "facility title",
+          "originalSourceSha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "sourceFile": "fresh-source-evidence/5b4efdc0cc0b958c.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "coordinates": {
+          "status": "verified",
+          "value": {
+            "lat": 37.5786280284849,
+            "lon": 126.980087994867
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100885&menuNo=200025",
+          "sourceSha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "locator": "markerLocations coordinates",
+          "originalSourceSha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "sourceFile": "fresh-source-evidence/5b4efdc0cc0b958c.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "region": {
+          "status": "verified",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100885&menuNo=200025",
+          "sourceSha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "locator": "official address",
+          "originalSourceSha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "sourceFile": "fresh-source-evidence/5b4efdc0cc0b958c.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      },
+      "sourceReviewApproved": true,
+      "operatingCandidateEligible": false,
+      "productionPromoted": false,
+      "independentReview": {
+        "reviewerId": "/root/independent_places",
+        "reviewerType": "AI-not-human",
+        "reviewedAt": "2026-10-07T06:50:59.408282+00:00",
+        "decision": "approved-for-source-scope-only",
+        "scope": "seoul-branch",
+        "note": "EN/JA 가이드 p9에서 서울관·삼청로30 확인. 덕수궁관이 별도 항목으로 인접 기재됨. 공백 제거는 표기 정규화일 뿐 분관 생략 금지.",
+        "coordinatesMeaning": "official published map marker only; no geodetic/entrance/onsite verification",
+        "price": "unknown",
+        "artist": "unknown"
+      }
+    },
+    {
+      "id": "curated:seoul:100511",
+      "name": "서울시립미술관 서소문본관",
+      "address": "서울특별시 중구 덕수궁길 61",
+      "region": "서울",
+      "lat": 37.5641060692766,
+      "lon": 126.973699316136,
+      "verifiedAt": "2026-10-07T03:17:43.956612+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "verified",
+          "value": "서울시립미술관 서소문본관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100511&menuNo=200025",
+          "sourceSha256": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+          "locator": "official detail facility title",
+          "originalSourceSha256": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+          "sourceFile": "fresh-source-evidence/ee96701b52e4cb8b.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "en": {
+          "value": "Seoul Museum of Art (Seosomun Main Building)",
+          "status": "verified",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            9
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 9; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "sourceFile": "fresh-source-evidence/40dcd75624b85c8e.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "ja": {
+          "value": "ソウル市立美術館 西小門本館",
+          "status": "verified",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            9
+          ],
+          "matchMethod": "independent PDF text and rendered-page visual review",
+          "locator": "PDF physical page9 printed015, heading and Deoksugung-gil61; furigana excluded",
+          "sourceFile": "fresh-source-evidence/64377bcfc7bb3783.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "verified",
+          "value": "서울시립미술관 서소문본관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100511&menuNo=200025",
+          "sourceSha256": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+          "locator": "facility title",
+          "originalSourceSha256": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+          "sourceFile": "fresh-source-evidence/ee96701b52e4cb8b.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "coordinates": {
+          "status": "verified",
+          "value": {
+            "lat": 37.5641060692766,
+            "lon": 126.973699316136
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100511&menuNo=200025",
+          "sourceSha256": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+          "locator": "markerLocations coordinates",
+          "originalSourceSha256": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+          "sourceFile": "fresh-source-evidence/ee96701b52e4cb8b.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "region": {
+          "status": "verified",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100511&menuNo=200025",
+          "sourceSha256": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+          "locator": "official address",
+          "originalSourceSha256": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+          "sourceFile": "fresh-source-evidence/ee96701b52e4cb8b.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      },
+      "sourceReviewApproved": true,
+      "operatingCandidateEligible": false,
+      "productionPromoted": false,
+      "independentReview": {
+        "reviewerId": "/root/independent_places",
+        "reviewerType": "AI-not-human",
+        "reviewedAt": "2026-10-07T06:50:59.408282+00:00",
+        "decision": "approved-after-source-correction",
+        "scope": "seosomun-main-building",
+        "note": "EN/JA 가이드 p9의 서소문본관·덕수궁길61 확인. JA 원문 PDF와 제공 p9 렌더를 직접 대조해 후리가나 소소문을 본문명에서 분리. 누락 URL/전체PDF SHA 보완. 북서울관 등과 합치지 않음.",
+        "coordinatesMeaning": "official published map marker only; no geodetic/entrance/onsite verification",
+        "price": "unknown",
+        "artist": "unknown"
+      }
+    },
+    {
+      "id": "curated:seoul:101632",
+      "name": "서울공예박물관",
+      "address": "서울특별시 종로구 율곡로3길 4",
+      "region": "서울",
+      "lat": 37.5766481740232,
+      "lon": 126.983533363501,
+      "verifiedAt": "2026-10-07T03:17:43.872525+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "verified",
+          "value": "서울공예박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101632&menuNo=200025",
+          "sourceSha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "locator": "official detail facility title",
+          "originalSourceSha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "sourceFile": "fresh-source-evidence/79ed8d9dbaa81372.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "en": {
+          "value": "Seoul Museum of Craft Art",
+          "status": "verified",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            8
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 8; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "sourceFile": "fresh-source-evidence/40dcd75624b85c8e.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "ja": {
+          "value": "ソウル工芸博物館",
+          "status": "verified",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            8
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 8; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "sourceFile": "fresh-source-evidence/64377bcfc7bb3783.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "verified",
+          "value": "서울공예박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101632&menuNo=200025",
+          "sourceSha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "locator": "facility title",
+          "originalSourceSha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "sourceFile": "fresh-source-evidence/79ed8d9dbaa81372.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "coordinates": {
+          "status": "verified",
+          "value": {
+            "lat": 37.5766481740232,
+            "lon": 126.983533363501
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101632&menuNo=200025",
+          "sourceSha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "locator": "markerLocations coordinates",
+          "originalSourceSha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "sourceFile": "fresh-source-evidence/79ed8d9dbaa81372.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "region": {
+          "status": "verified",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101632&menuNo=200025",
+          "sourceSha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "locator": "official address",
+          "originalSourceSha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "sourceFile": "fresh-source-evidence/79ed8d9dbaa81372.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      },
+      "sourceReviewApproved": true,
+      "operatingCandidateEligible": false,
+      "productionPromoted": false,
+      "independentReview": {
+        "reviewerId": "/root/independent_places",
+        "reviewerType": "AI-not-human",
+        "reviewedAt": "2026-10-07T06:50:59.408282+00:00",
+        "decision": "approved-for-source-scope-only",
+        "scope": "whole-museum",
+        "note": "EN/JA 가이드 p8의 한국어 병기와 율곡로3길4 일치. SeMoCa 및 어린이박물관과의 관계를 이유로 별도 장소 범위를 생성하지 않음.",
+        "coordinatesMeaning": "official published map marker only; no geodetic/entrance/onsite verification",
+        "price": "unknown",
+        "artist": "unknown"
+      }
+    },
+    {
+      "id": "curated:seoul:100462",
+      "name": "운현궁",
+      "address": "서울특별시 종로구 삼일대로 464",
+      "region": "서울",
+      "lat": 37.57607864675475,
+      "lon": 126.98708335796199,
+      "verifiedAt": "2026-10-07T03:17:44.182755+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "verified",
+          "value": "운현궁",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100462&menuNo=200025",
+          "sourceSha256": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+          "locator": "official detail facility title",
+          "originalSourceSha256": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+          "sourceFile": "fresh-source-evidence/4c37040c801537f8.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "en": {
+          "value": "Unhyeongung Palace",
+          "sourceUrl": "https://english.visitseoul.net/attractions/unhyeongungpalace/ENP000471",
+          "sourceSha256": "65b34ca2869fd577c6fefc10b83c48f7366d65451bc4391dc7384f88cfaaf149",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "verified",
+          "historicalNameOnly": false,
+          "originalSourceSha256": "3af50ff96f5b970631451c5c3f53ffade1b0431968e67b45948bdeeb2db0eb15",
+          "sourceFile": "fresh-source-evidence/ed522932ed94086b.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "ja": {
+          "value": "雲峴宮",
+          "sourceUrl": "https://japanese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=111116",
+          "sourceSha256": "6fb584235decad2e2ec5d87cd3ef870e10a0a16a1780667e1c67facf27dfe571",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "verified",
+          "historicalNameOnly": false,
+          "originalSourceSha256": "edd45f13c9a139453e507cc3706bc997970474798952a7ef56cac30365342123",
+          "sourceFile": "fresh-source-evidence/e3bc287364410e45.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "verified",
+          "value": "운현궁",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100462&menuNo=200025",
+          "sourceSha256": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+          "locator": "facility title",
+          "originalSourceSha256": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+          "sourceFile": "fresh-source-evidence/4c37040c801537f8.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "coordinates": {
+          "status": "verified",
+          "value": {
+            "lat": 37.57607864675475,
+            "lon": 126.98708335796199
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100462&menuNo=200025",
+          "sourceSha256": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+          "locator": "markerLocations coordinates",
+          "originalSourceSha256": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+          "sourceFile": "fresh-source-evidence/4c37040c801537f8.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "region": {
+          "status": "verified",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100462&menuNo=200025",
+          "sourceSha256": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+          "locator": "official address",
+          "originalSourceSha256": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+          "sourceFile": "fresh-source-evidence/4c37040c801537f8.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      },
+      "sourceReviewApproved": true,
+      "operatingCandidateEligible": false,
+      "productionPromoted": false,
+      "independentReview": {
+        "reviewerId": "/root/independent_places",
+        "reviewerType": "AI-not-human",
+        "reviewedAt": "2026-10-07T06:50:59.408282+00:00",
+        "decision": "approved-for-source-scope-only",
+        "scope": "whole-historic-residence",
+        "note": "EN VisitSeoul과 JA KTO 본문의 운현궁 명칭·삼일대로464 일치. 노안당·노락당·이로당은 내부 전각, 전체 운현궁과 합치지 않음.",
+        "coordinatesMeaning": "official published map marker only; no geodetic/entrance/onsite verification",
+        "price": "unknown",
+        "artist": "unknown"
+      }
+    },
+    {
+      "id": "curated:seoul:100186",
+      "name": "서대문형무소역사관",
+      "address": "서울특별시 서대문구 통일로 251",
+      "region": "서울",
+      "lat": 37.5746085138333,
+      "lon": 126.955611774864,
+      "verifiedAt": "2026-10-07T03:17:44.169200+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "verified",
+          "value": "서대문형무소역사관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100186&menuNo=200025",
+          "sourceSha256": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+          "locator": "official detail facility title",
+          "originalSourceSha256": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+          "sourceFile": "fresh-source-evidence/10b26238e082c958.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "en": {
+          "value": "Seodaemun Prison History Hall",
+          "status": "verified",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            8
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 8; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "sourceFile": "fresh-source-evidence/40dcd75624b85c8e.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "ja": {
+          "value": "西大門刑務所歴史館",
+          "sourceUrl": "https://japanese.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?menuSn=351&vcontsId=110714",
+          "sourceSha256": "3b481ab1c4c693f4ea22537d3858e336c45d7ad4c2a2c63e7cd47740af41d003",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "verified",
+          "historicalNameOnly": false,
+          "originalSourceSha256": "1c97b23204a07846ad303951fcab5f1c8491a8bc894073b6f295b5da3ec4c578",
+          "sourceFile": "fresh-source-evidence/a4ba059b9da5ddaa.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "verified",
+          "value": "서대문형무소역사관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100186&menuNo=200025",
+          "sourceSha256": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+          "locator": "facility title",
+          "originalSourceSha256": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+          "sourceFile": "fresh-source-evidence/10b26238e082c958.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "coordinates": {
+          "status": "verified",
+          "value": {
+            "lat": 37.5746085138333,
+            "lon": 126.955611774864
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100186&menuNo=200025",
+          "sourceSha256": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+          "locator": "markerLocations coordinates",
+          "originalSourceSha256": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+          "sourceFile": "fresh-source-evidence/10b26238e082c958.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "region": {
+          "status": "verified",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100186&menuNo=200025",
+          "sourceSha256": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+          "locator": "official address",
+          "originalSourceSha256": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+          "sourceFile": "fresh-source-evidence/10b26238e082c958.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      },
+      "sourceReviewApproved": true,
+      "operatingCandidateEligible": false,
+      "productionPromoted": false,
+      "independentReview": {
+        "reviewerId": "/root/independent_places",
+        "reviewerType": "AI-not-human",
+        "reviewedAt": "2026-10-07T06:50:59.408282+00:00",
+        "decision": "approved-for-source-scope-only",
+        "scope": "whole-history-museum",
+        "note": "EN 가이드 p8 및 JA KTO 시설명·통일로251 일치. 서대문자연사박물관과 구분, 형무소의 개별 옥사만 가리키지 않음.",
+        "coordinatesMeaning": "official published map marker only; no geodetic/entrance/onsite verification",
+        "price": "unknown",
+        "artist": "unknown"
+      }
+    },
+    {
+      "id": "curated:seoul:101016",
+      "name": "DDP(동대문디자인플라자)",
+      "address": "서울특별시 중구 을지로 281",
+      "region": "서울",
+      "lat": 37.56735731522952,
+      "lon": 127.00977973484339,
+      "verifiedAt": "2026-10-07T03:17:44.452089+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "verified",
+          "value": "DDP(동대문디자인플라자)",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101016&menuNo=200025",
+          "sourceSha256": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+          "locator": "official detail facility title",
+          "originalSourceSha256": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+          "sourceFile": "fresh-source-evidence/a4af802f02a0031e.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "en": {
+          "value": "Dongdaemun Design Plaza",
+          "status": "verified",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            17
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 17; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "sourceFile": "fresh-source-evidence/40dcd75624b85c8e.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "ja": {
+          "value": "東大門デザインプラザ",
+          "status": "verified",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            17
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page17; DDP heading, Korean name, Eulji-ro without street number, and ddp.or.kr; exact281 from EN/KO only",
+          "originalSourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "sourceFile": "fresh-source-evidence/64377bcfc7bb3783.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "verified",
+          "value": "DDP(동대문디자인플라자)",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101016&menuNo=200025",
+          "sourceSha256": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+          "locator": "facility title",
+          "originalSourceSha256": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+          "sourceFile": "fresh-source-evidence/a4af802f02a0031e.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "coordinates": {
+          "status": "verified",
+          "value": {
+            "lat": 37.56735731522952,
+            "lon": 127.00977973484339
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101016&menuNo=200025",
+          "sourceSha256": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+          "locator": "markerLocations coordinates",
+          "originalSourceSha256": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+          "sourceFile": "fresh-source-evidence/a4af802f02a0031e.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "region": {
+          "status": "verified",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101016&menuNo=200025",
+          "sourceSha256": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+          "locator": "official address",
+          "originalSourceSha256": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+          "sourceFile": "fresh-source-evidence/a4af802f02a0031e.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      },
+      "sourceReviewApproved": true,
+      "operatingCandidateEligible": false,
+      "productionPromoted": false,
+      "independentReview": {
+        "reviewerId": "/root/independent_places",
+        "reviewerType": "AI-not-human",
+        "reviewedAt": "2026-10-07T06:50:59.408282+00:00",
+        "decision": "approved-after-source-correction",
+        "scope": "whole-complex",
+        "note": "EN 가이드 p17의 DDP·을지로281과 JA p17의 DDP 항목을 대조. 초안 JA p37은 명칭 주변문맥이 약해 p17을 주근거로 보완. 전체 DDP이며 내부 디자인뮤지엄이나 특정 홀로 축소하지 않음.",
+        "coordinatesMeaning": "official published map marker only; no geodetic/entrance/onsite verification",
+        "price": "unknown",
+        "artist": "unknown"
+      }
+    },
+    {
+      "id": "curated:seoul:100293",
+      "name": "전쟁기념관",
+      "address": "서울특별시 용산구 이태원로 29",
+      "region": "서울",
+      "lat": 37.5373140468913,
+      "lon": 126.978466063237,
+      "verifiedAt": "2026-10-07T03:17:44.475370+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "verified",
+          "value": "전쟁기념관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100293&menuNo=200025",
+          "sourceSha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "locator": "official detail facility title",
+          "originalSourceSha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "sourceFile": "fresh-source-evidence/fd9388ebd3c64a15.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "en": {
+          "value": "The War Memorial of Korea",
+          "status": "verified",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            8
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 8; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "sourceFile": "fresh-source-evidence/40dcd75624b85c8e.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "ja": {
+          "value": "戦争記念館",
+          "status": "verified",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            8
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical page 8; whole facility/branch heading and context independently inspected",
+          "originalSourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "sourceFile": "fresh-source-evidence/64377bcfc7bb3783.pdf",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "verified",
+          "value": "전쟁기념관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100293&menuNo=200025",
+          "sourceSha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "locator": "facility title",
+          "originalSourceSha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "sourceFile": "fresh-source-evidence/fd9388ebd3c64a15.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "coordinates": {
+          "status": "verified",
+          "value": {
+            "lat": 37.5373140468913,
+            "lon": 126.978466063237
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100293&menuNo=200025",
+          "sourceSha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "locator": "markerLocations coordinates",
+          "originalSourceSha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "sourceFile": "fresh-source-evidence/fd9388ebd3c64a15.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "region": {
+          "status": "verified",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100293&menuNo=200025",
+          "sourceSha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "locator": "official address",
+          "originalSourceSha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "sourceFile": "fresh-source-evidence/fd9388ebd3c64a15.html",
+          "hashScope": "full-response-body",
+          "verificationScope": "official-source identity/location claim only; not operating admission"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      },
+      "sourceReviewApproved": true,
+      "operatingCandidateEligible": false,
+      "productionPromoted": false,
+      "independentReview": {
+        "reviewerId": "/root/independent_places",
+        "reviewerType": "AI-not-human",
+        "reviewedAt": "2026-10-07T06:50:59.408282+00:00",
+        "decision": "approved-for-source-scope-only",
+        "scope": "whole-memorial-museum",
+        "note": "EN/JA 가이드 p8의 전쟁기념관·이태원로29 일치. 야외전시장 포함 시설이며 전쟁과여성인권박물관 등과 구분.",
+        "coordinatesMeaning": "official published map marker only; no geodetic/entrance/onsite verification",
+        "price": "unknown",
+        "artist": "unknown"
+      }
+    }
+  ]
+}

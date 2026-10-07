@@ -1,0 +1,29 @@
+{
+  "image": "ghcr.io/feed-mina/kmovement-cpu@sha256:37359dcbce2fb3cfc1d73e504782c0d09af986dbc113662ba79763c233451d32",
+  "imageId": "sha256:37359dcbce2fb3cfc1d73e504782c0d09af986dbc113662ba79763c233451d32",
+  "checks": {
+    "caps": true,
+    "cpu1": true,
+    "memory4GiB": true,
+    "networkDenied": true,
+    "noDockerSocket": true,
+    "noNewPrivileges": true,
+    "nonroot": true,
+    "outputBounded": true,
+    "pids128": true,
+    "readOnlyInputs": true,
+    "seccomp": true
+  },
+  "dependencyFiles": 52697,
+  "modelFiles": 10,
+  "fullManifestSha256": "31b63e4b3fe00ff51c1012de7da7aa824f5ba939af93d9a57b287d55ecfcf2a5",
+  "packages": {
+    "chromadb": "1.5.8",
+    "numpy": "2.2.6",
+    "sentence-transformers": "5.4.1",
+    "tokenizers": "0.22.2",
+    "torch": "2.14.1+cpu",
+    "transformers": "5.7.0"
+  },
+  "modelInferenceExecuted": false
+}
