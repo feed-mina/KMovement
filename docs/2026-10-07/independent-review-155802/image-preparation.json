@@ -1,0 +1,18 @@
+{
+  "sourceCommit": "92e3d271a3aa4199a03c5fb668249963a43ecb25",
+  "cpuImage": "ghcr.io/feed-mina/kmovement-cpu@sha256:37359dcbce2fb3cfc1d73e504782c0d09af986dbc113662ba79763c233451d32",
+  "webImage": "ghcr.io/feed-mina/kmovement-web@sha256:4cfeb846eba184147cedd3005953ffcf92165ce8e1b6f8ae3c7516b565efcaa9",
+  "cpuRun": 37570569992,
+  "cpuTests": {
+    "tests": 115,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "artifactHashes": {
+    "image-digests.json": "24248c1f74b111b6f9a9ed67156b1dba68c3a51593a3ac2a365ebcf212f23956",
+    "runtime-versions.txt": "ea9d3d02775fdafe28e204487b6ad4323fe58844ef637f03eb7e07e059ac1cfa",
+    "tests.xml": "5328715d14f8491d728c7360af6002414c4d4c6fcd23a024109531cafc8a4cee"
+  },
+  "productionPromoted": false
+}

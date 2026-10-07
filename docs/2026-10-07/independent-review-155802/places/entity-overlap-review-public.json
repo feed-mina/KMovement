@@ -1,0 +1,36 @@
+{
+  "reviewerId": "/root/independent_places",
+  "scope": "finite old120 context independent entity review; private details withheld",
+  "inputHashes": {
+    "oldTargets": "b5afe48e1d89bf8a3758e1b2364a8556281a921582ada03456069ecce30fd091",
+    "oldContextOnly": "67c0283e0617ed6a853289f9ce38c96db9b15a500ed2665ee4f35fa2b0f8cdb8",
+    "sourceReviewedCurrentCatalog": "aca608a8cae40db351625a6084eafebbdcb55503eba235bcfcde1f7dec81e10a"
+  },
+  "summary": {
+    "oldQuestions": 120,
+    "manuallyContextReviewed": 120,
+    "initialExtractedTargetRows": 92,
+    "initialUnresolvedRows": 28,
+    "remainingUnreadOldContexts": 0,
+    "currentCandidates": 20,
+    "sourceApproved": 17,
+    "exactEntityOverlap": 4,
+    "sourceApprovedExactOverlap": 3,
+    "additionalConservativeGroupExclusions": 3,
+    "sourceApprovedWithoutExactOverlap": 14,
+    "sourceApprovedConservativeRemaining": 11,
+    "operatingCandidateEligible": 0
+  },
+  "limitations": [
+    "Results cover only supplied finite old120 corpus and target metadata, not every prior thread, model training, external exposure, or unrecorded evaluation.",
+    "Related-complex exclusions are conservative policy proposals, not assertions that museums and enclosing palaces are the same place.",
+    "11 remaining places are a proposed new evaluation scope, not a new frozen holdout, promotion, or execution authorization.",
+    "Current20 catalog and source decisions remain unchanged; no denominator silently altered.",
+    "This reviewer did not inspect new120 questions; custodian and gold reviewer must re-author/review any reduced-scope set before freeze."
+  ],
+  "privateResultSha256": "9d6bf8f44db1b5ffd2aa5b796dce2647830a01275f8b66b9245acee641a3da41",
+  "newHoldoutAccessed": false,
+  "oldScoresAccessed": false,
+  "currentCatalogMutated": false,
+  "executionAllowed": false
+}

@@ -1,0 +1,91 @@
+{
+  "reviewer": "/root/gold_reviewer",
+  "status": "internal-consistency-pass-full-gold-not-approved",
+  "totalReviewed": 120,
+  "languages": {
+    "ja": {
+      "unsupported": 10,
+      "positive": 30
+    },
+    "ko": {
+      "unsupported": 10,
+      "positive": 30
+    },
+    "en": {
+      "unsupported": 10,
+      "positive": 30
+    }
+  },
+  "internalConsistencyPassed": true,
+  "sourceGroundedGoldApproved": false,
+  "frozen": false,
+  "reviewRounds": 2,
+  "findingsResolved": 6,
+  "questionsSha256": "d190727f2126f8b0bbcf60f9190b95e3b71a79cdcb76581202bf84455d34c778",
+  "goldSha256": "6365fd12745280badc6ee1cb83c18b24d32fdc33e190c2c3b631ad1ba5226d95",
+  "rubricSha256": "c860c6ceee88abfe9aa3f1dcadaa71e6a49f90cff5b0dea0e2203ada0bca2854",
+  "crossSplitLeakageChecked": false,
+  "leakageAuditStatus": "mechanical-comparison-and-finite-old120-entity-review-completed-new-question-semantic-independence-not-cleared",
+  "retrievalEvaluationExecuted": false,
+  "humanReview": false,
+  "osEnforcedIsolation": false,
+  "implementationCodeRead": false,
+  "limits": [
+    "AI author and AI reviewer separation only; not human review or OS isolation",
+    "17 candidate source reviews approved, 3 pending; whole gold not approved",
+    "Original gold sourceRefs retained; final source evidence is bound through separately hashed overlay",
+    "Mechanical duplicate and place-intent checks do not prove semantic or translation-family independence",
+    "120 language variants comprise 40 cross-language families and shared places; not 120 independent samples",
+    "Independent AI reviewer examined all supplied old120 contexts: 14 source-approved candidates without exact entity overlap; conservative related-complex exclusions propose 11. This is finite-corpus scope only, not a new frozen evaluation or all-history semantic independence.",
+    "No runtime evaluation, threshold freeze, production or release approval"
+  ],
+  "leakageFree": false,
+  "reviewedCatalogueSha256": "aca608a8cae40db351625a6084eafebbdcb55503eba235bcfcde1f7dec81e10a",
+  "placeReviewSha256": "9d76f60702f0edce797d22d19913809bd852d612faa93c3642a98e7327ee0aa4",
+  "leakageAuditSha256": "f3e51fa1e0bf3e54d061e3a37fef55a511086315a00df7319054938c8004c103",
+  "mechanicalLeakageComparisonReviewed": true,
+  "translationFamilyCount": 40,
+  "sourceApprovedCandidates": 17,
+  "semanticLeakageAdjudicationCompleted": false,
+  "catalogueMeaningMismatchCount": 0,
+  "unapprovedTargetQuestions": 18,
+  "scopeAuditSha256": "ea7bfaa820d68f572c94d72375f9fe8c6f7b8b1222559c168255ccd2a9d116e2",
+  "whitespaceOnlyDifferences": 6,
+  "sourcePendingCandidates": 3,
+  "sourceOverlaySha256": "b6d2fc0ff5c251f2f8f1bf9ece6e465c28b682c5e9753e137b7c076e4d40d6d5",
+  "sourceOverlayMappingErrors": 0,
+  "independentFiniteEntityReview": {
+    "reviewer": "/root/independent_places",
+    "publicReportSha256": "ac9fef3d2fa2a4d5ebd616dc748b36f546c4f40d6974c69acb983882b0175659",
+    "privateReportSha256": "9d6bf8f44db1b5ffd2aa5b796dce2647830a01275f8b66b9245acee641a3da41",
+    "scope": "finite old120 context independent entity review; private details withheld",
+    "summary": {
+      "oldQuestions": 120,
+      "manuallyContextReviewed": 120,
+      "initialExtractedTargetRows": 92,
+      "initialUnresolvedRows": 28,
+      "remainingUnreadOldContexts": 0,
+      "currentCandidates": 20,
+      "sourceApproved": 17,
+      "exactEntityOverlap": 4,
+      "sourceApprovedExactOverlap": 3,
+      "additionalConservativeGroupExclusions": 3,
+      "sourceApprovedWithoutExactOverlap": 14,
+      "sourceApprovedConservativeRemaining": 11,
+      "operatingCandidateEligible": 0
+    },
+    "limitations": [
+      "Results cover only supplied finite old120 corpus and target metadata, not every prior thread, model training, external exposure, or unrecorded evaluation.",
+      "Related-complex exclusions are conservative policy proposals, not assertions that museums and enclosing palaces are the same place.",
+      "11 remaining places are a proposed new evaluation scope, not a new frozen holdout, promotion, or execution authorization.",
+      "Current20 catalog and source decisions remain unchanged; no denominator silently altered.",
+      "This reviewer did not inspect new120 questions; custodian and gold reviewer must re-author/review any reduced-scope set before freeze."
+    ],
+    "finiteOldCorpusEntityReviewCompleted": true,
+    "proposedConservativeSourceApprovedCount": 11,
+    "newReducedScopeAuthored": false,
+    "newHoldoutFrozen": false,
+    "allHistoricalSemanticNonOverlapEstablished": false,
+    "noQuestionOrGoldChanges": true
+  }
+}

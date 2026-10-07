@@ -1,0 +1,129 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>독립 검수 결과 · fix-guide</title><style>body{margin:0;background:#f3f5fa;color:#17233b;font:17px/1.65 system-ui}main{max-width:1180px;margin:auto;padding:30px}h1{font-size:32px}button{font:inherit;cursor:pointer;background:white;border:1px solid #aab7cc;border-radius:12px;padding:12px;color:#17233b}button[aria-selected=true]{background:#163e70;color:white}.flow,.tabs{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}.layout{display:grid;grid-template-columns:1fr 1.5fr;gap:20px}.nodes{display:grid;gap:12px}article,.card{background:white;border:1px solid #d3dbea;border-radius:18px;padding:25px}td,th{border:1px solid #cbd5e1;padding:12px;text-align:left}table{border-collapse:collapse;width:100%;font-size:15px}code{overflow-wrap:anywhere}p{max-width:80ch}[hidden]{display:none!important}a{color:#164e9f}@media(max-width:700px){main{padding:15px}.layout{grid-template-columns:1fr}article{padding:15px}table{display:block;overflow:auto}h1{font-size:26px}}</style><main><p>KRIDE · 20261007-155802 · 검수 단계</p><h1>별도 검수 완료 · 운영 공개는 보류</h1><p>출처 17곳 통과 / 3곳 보완 · 다음 평가 범위 11곳 제안 · 검색 미실행</p><div class="card"><strong>다음 행동: 축소 범위·새 정답·시험 분모 검수 및 고정</strong><p>사용자 터미널 작업 불필요. 원본과 기존 운영을 보존합니다.</p></div><nav class="flow" aria-label="진행 단계"><button data-node="places">① 장소 검수 · 17/20</button><button data-node="gold">② 새 시험 · 동결 보류</button><button data-node="overlap">③ 과거 시험 대조 · 완료</button><button data-node="runtime">④ 실행 준비 · 부분 완료</button><button data-node="release">⑤ 운영 전환 · 보류</button></nav><nav class="tabs" role="tablist"><button role="tab" id="t-map" aria-controls="map" aria-selected="true" data-tab="map">작업 지도</button><button role="tab" id="t-report" aria-controls="report" aria-selected="false" data-tab="report">검수 보고서</button><button role="tab" id="t-detail" aria-controls="detail" aria-selected="false" data-tab="detail">근거·공개 조건</button></nav><section id="map" role="tabpanel" aria-labelledby="t-map"><div class="layout"><div class="nodes"><button data-node="places">① 장소 검수 · 17/20</button><button data-node="gold">② 새 시험 · 동결 보류</button><button data-node="overlap">③ 과거 시험 대조 · 완료</button><button data-node="runtime">④ 실행 준비 · 부분 완료</button><button data-node="release">⑤ 운영 전환 · 보류</button></div><article><h2 id="title" tabindex="-1">① 장소 검수 · 17/20</h2><p id="desc">완료한 범위: 공식 ID·명칭·주소·게시 좌표·다국어 출처. 보완3곳은 가격/아티스트 미확인과 별도로 해결해야 합니다. 근거: places/place-review-results.json. 다음은 승인 범위 고정입니다.</p></article></div><p>장소 승인 → 새 시험 고정 → 격리 검사 → 서비스 수용 → 조건부 전환. 클릭은 설명 열람이며 실행이 아닙니다.</p></section><section hidden id="report" role="tabpanel" aria-labelledby="t-report"><article><h1>독립 검수 근거와 운영 전환 조건</h1>
+<h2>검수 경계</h2>
+<p>코드 작성자와 분리한 세 AI 에이전트가 역할별로 검토했다. 새 holdout 원문·정답·개별 사례는 비공개 보관하고 작성자에게 집계와 해시만 전달했다. 동일 머신의 폴더 분리는 절차적 분리이며 OS 강제 격리가 아니다. 비공개 질문과 상세 중첩표는 공개 저장소에 포함하지 않는다.</p>
+<h2>장소 출처 계약</h2>
+<p>공식 시설 ID·명칭·주소·게시 좌표를 확인했다. 출처 범위 승인 17/20, 보완 3/20. 게시 좌표 확인은 실제 출입구 측량이나 현장 확인이 아니다. 가격·아티스트 연결 근거는 미확인이므로 지원한다고 주장하지 않는다.</p>
+<ul>
+<li>N서울타워: 시설 전체와 운영 시설 범위, 일본어 할인 상품 출처의 범위 보완 필요.</li>
+<li>청계천박물관: 공식 이름·주소 관찰과 전체 HTML 스냅샷 확보를 구분. 발췌 해시는 전체 원문 해시가 아니다.</li>
+<li>북촌문화센터: 넓은 북촌 소개에서 이름이 나오는 것만으로 정확한 시설·주소 대응을 승인하지 않음.</li>
+</ul>
+<p>제안 카탈로그 SHA256: <code>aca608a8cae40db351625a6084eafebbdcb55503eba235bcfcde1f7dec81e10a</code>.
+장소 검수 결과 SHA256: <code>9d76f60702f0edce797d22d19913809bd852d612faa93c3642a98e7327ee0aa4</code>.</p>
+<h2>시험 검수 및 누출 한계</h2>
+<p>현재 초안은 언어별 양성30·미지원10, 총120문항이다. 40개 번역 묶음이므로 120개의 통계적으로 독립된 관측이라고 하지 않는다. 내부 일관성은 두 차례 검토 후 통과했다. 출처 보류 항목과 의미·장소 중첩 때문에 전체 gold 승인과 동결은 보류한다.</p>
+<p>별도 장소 검수자는 새 질문·정답·과거 성적을 읽지 않고 옛 120문항 전체 문맥과 대상 메타데이터를 대조했다. 현재20 중 동일 개체4, 출처 승인17 중 동일 개체3을 확인했다. 관련 시설군3을 추가 제외하는 보수적 제안은 11곳이다. 관련 시설과 동일 시설을 혼동하지 않는다. 기존20 및 17/3 판정과 시험 분모는 바꾸지 않았다. 결과는 제공된 유한120개에 한정하며 모든 역사적 노출이나 모델 학습 데이터의 비오염 증명이 아니다.</p>
+<p>질문 SHA256: <code>d190727f2126f8b0bbcf60f9190b95e3b71a79cdcb76581202bf84455d34c778</code>.
+정답 SHA256: <code>6365fd12745280badc6ee1cb83c18b24d32fdc33e190c2c3b631ad1ba5226d95</code>.
+이 해시는 보존된 초안 식별자이며 통과한 시험 인증이 아니다.</p>
+<h2>이미지·모델 준비</h2>
+<p>병합 commit <code>92e3d271a3aa4199a03c5fb668249963a43ecb25</code>의 웹·CPU 이미지 발행 완료. CPU 산출물의 검사115개는 실패·오류·건너뜀0이다. image-preparation.json에 정확한 digest를 기록했다. 이것은 실제 검색·LLM·로그인 검사와 별개다.</p>
+<p>multilingual-e5-small revision <code>614241f622f53c4eeff9890bdc4f31cfecc418b3</code>의 준비 모델 파일10개 실제 SHA256이 기존 고정 목록과 일치했다. 읽기 전용 확인이며 모델 추론은 실행하지 않았다. 새 실행 환경의 전체 의존성 해시·입출력 manifest·리소스 여유·컨테이너 제한은 실행 직전 다시 검증해야 한다.</p>
+<h2>남은 gate와 실패 대응</h2>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>통과 기준 / 실패 대응</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>축소 범위 재검수</td>
+<td>장소군·질문 목적·분모를 사전 고정. 신규 정답 이중 검토 후 해시 고정. 불명확하면 보완</td>
+</tr>
+<tr>
+<td>격리 경계</td>
+<td>원본·운영 DB 및 인증정보 미연결, 전용 출력·자원·시간 한도 확인. 실패하면 실행 중단</td>
+</tr>
+<tr>
+<td>검색</td>
+<td>언어별 Recall@5≥0.80, nDCG@10≥0.70, baseline 하락≤0.02 제안값을 실행 전 확정. 점수 후 수정하면 새 holdout 필요</td>
+</tr>
+<tr>
+<td>ANN</td>
+<td>exact 대비 Recall@10≥0.99 제안. 고정 문서벡터 A/B 질문 접두사 비교와 C 문서 형식 비교 분리</td>
+</tr>
+<tr>
+<td>출처·거절</td>
+<td>필수 근거 검수100%, 미지원 주장 수락0/분모, 양성 과거절≤5% 제안. 속성 미지원과 장소 전체 거절 구분</td>
+</tr>
+<tr>
+<td>실제 수용</td>
+<td>언어·장소ID·지도·출처 일치, 로그인·중단·재시도·429·공급자 오류 검사</td>
+</tr>
+<tr>
+<td>성능</td>
+<td>첫 유효 응답 p95≤10초, 코스 완료 p95≤30초 제안. cold10/warm30은 일10회 한도 안에서 날짜를 나눠야 함</td>
+</tr>
+<tr>
+<td>운영</td>
+<td>위 조건 모두 통과한 image digest·collection·catalog/review SHA·설정 revision만 전환. 이전 release/collection 유지</td>
+</tr>
+</tbody>
+</table>
+<p>합산 $1/일·사용자10회/일·동시2건 제한 유지. 실제 수용을 mock 검사로 대체하지 않는다. 이번 단계는 새 색인·검색·생성·운영 전환 미실행이다.</p></article></section><section hidden id="detail" role="tabpanel" aria-labelledby="t-detail"><article><h1>독립 검수 근거와 운영 전환 조건</h1>
+<h2>검수 경계</h2>
+<p>코드 작성자와 분리한 세 AI 에이전트가 역할별로 검토했다. 새 holdout 원문·정답·개별 사례는 비공개 보관하고 작성자에게 집계와 해시만 전달했다. 동일 머신의 폴더 분리는 절차적 분리이며 OS 강제 격리가 아니다. 비공개 질문과 상세 중첩표는 공개 저장소에 포함하지 않는다.</p>
+<h2>장소 출처 계약</h2>
+<p>공식 시설 ID·명칭·주소·게시 좌표를 확인했다. 출처 범위 승인 17/20, 보완 3/20. 게시 좌표 확인은 실제 출입구 측량이나 현장 확인이 아니다. 가격·아티스트 연결 근거는 미확인이므로 지원한다고 주장하지 않는다.</p>
+<ul>
+<li>N서울타워: 시설 전체와 운영 시설 범위, 일본어 할인 상품 출처의 범위 보완 필요.</li>
+<li>청계천박물관: 공식 이름·주소 관찰과 전체 HTML 스냅샷 확보를 구분. 발췌 해시는 전체 원문 해시가 아니다.</li>
+<li>북촌문화센터: 넓은 북촌 소개에서 이름이 나오는 것만으로 정확한 시설·주소 대응을 승인하지 않음.</li>
+</ul>
+<p>제안 카탈로그 SHA256: <code>aca608a8cae40db351625a6084eafebbdcb55503eba235bcfcde1f7dec81e10a</code>.
+장소 검수 결과 SHA256: <code>9d76f60702f0edce797d22d19913809bd852d612faa93c3642a98e7327ee0aa4</code>.</p>
+<h2>시험 검수 및 누출 한계</h2>
+<p>현재 초안은 언어별 양성30·미지원10, 총120문항이다. 40개 번역 묶음이므로 120개의 통계적으로 독립된 관측이라고 하지 않는다. 내부 일관성은 두 차례 검토 후 통과했다. 출처 보류 항목과 의미·장소 중첩 때문에 전체 gold 승인과 동결은 보류한다.</p>
+<p>별도 장소 검수자는 새 질문·정답·과거 성적을 읽지 않고 옛 120문항 전체 문맥과 대상 메타데이터를 대조했다. 현재20 중 동일 개체4, 출처 승인17 중 동일 개체3을 확인했다. 관련 시설군3을 추가 제외하는 보수적 제안은 11곳이다. 관련 시설과 동일 시설을 혼동하지 않는다. 기존20 및 17/3 판정과 시험 분모는 바꾸지 않았다. 결과는 제공된 유한120개에 한정하며 모든 역사적 노출이나 모델 학습 데이터의 비오염 증명이 아니다.</p>
+<p>질문 SHA256: <code>d190727f2126f8b0bbcf60f9190b95e3b71a79cdcb76581202bf84455d34c778</code>.
+정답 SHA256: <code>6365fd12745280badc6ee1cb83c18b24d32fdc33e190c2c3b631ad1ba5226d95</code>.
+이 해시는 보존된 초안 식별자이며 통과한 시험 인증이 아니다.</p>
+<h2>이미지·모델 준비</h2>
+<p>병합 commit <code>92e3d271a3aa4199a03c5fb668249963a43ecb25</code>의 웹·CPU 이미지 발행 완료. CPU 산출물의 검사115개는 실패·오류·건너뜀0이다. image-preparation.json에 정확한 digest를 기록했다. 이것은 실제 검색·LLM·로그인 검사와 별개다.</p>
+<p>multilingual-e5-small revision <code>614241f622f53c4eeff9890bdc4f31cfecc418b3</code>의 준비 모델 파일10개 실제 SHA256이 기존 고정 목록과 일치했다. 읽기 전용 확인이며 모델 추론은 실행하지 않았다. 새 실행 환경의 전체 의존성 해시·입출력 manifest·리소스 여유·컨테이너 제한은 실행 직전 다시 검증해야 한다.</p>
+<h2>남은 gate와 실패 대응</h2>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>통과 기준 / 실패 대응</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>축소 범위 재검수</td>
+<td>장소군·질문 목적·분모를 사전 고정. 신규 정답 이중 검토 후 해시 고정. 불명확하면 보완</td>
+</tr>
+<tr>
+<td>격리 경계</td>
+<td>원본·운영 DB 및 인증정보 미연결, 전용 출력·자원·시간 한도 확인. 실패하면 실행 중단</td>
+</tr>
+<tr>
+<td>검색</td>
+<td>언어별 Recall@5≥0.80, nDCG@10≥0.70, baseline 하락≤0.02 제안값을 실행 전 확정. 점수 후 수정하면 새 holdout 필요</td>
+</tr>
+<tr>
+<td>ANN</td>
+<td>exact 대비 Recall@10≥0.99 제안. 고정 문서벡터 A/B 질문 접두사 비교와 C 문서 형식 비교 분리</td>
+</tr>
+<tr>
+<td>출처·거절</td>
+<td>필수 근거 검수100%, 미지원 주장 수락0/분모, 양성 과거절≤5% 제안. 속성 미지원과 장소 전체 거절 구분</td>
+</tr>
+<tr>
+<td>실제 수용</td>
+<td>언어·장소ID·지도·출처 일치, 로그인·중단·재시도·429·공급자 오류 검사</td>
+</tr>
+<tr>
+<td>성능</td>
+<td>첫 유효 응답 p95≤10초, 코스 완료 p95≤30초 제안. cold10/warm30은 일10회 한도 안에서 날짜를 나눠야 함</td>
+</tr>
+<tr>
+<td>운영</td>
+<td>위 조건 모두 통과한 image digest·collection·catalog/review SHA·설정 revision만 전환. 이전 release/collection 유지</td>
+</tr>
+</tbody>
+</table>
+<p>합산 $1/일·사용자10회/일·동시2건 제한 유지. 실제 수용을 mock 검사로 대체하지 않는다. 이번 단계는 새 색인·검색·생성·운영 전환 미실행이다.</p></article></section></main><script>const data=[["places", "① 장소 검수 · 17/20", "완료한 범위: 공식 ID·명칭·주소·게시 좌표·다국어 출처. 보완3곳은 가격/아티스트 미확인과 별도로 해결해야 합니다. 근거: places/place-review-results.json. 다음은 승인 범위 고정입니다."], ["gold", "② 새 시험 · 동결 보류", "120문항 초안의 내부 일관성은 통과했습니다. 전체 정답 승인은 보류합니다. 질문·정답은 별도 담당이 보관하며 작성자에게 공개하지 않습니다. 실패 대응: 근거와 의미 범위를 보완한 새 버전을 검수합니다."], ["overlap", "③ 과거 시험 대조 · 완료", "유한120개 문맥을 독립 검수했습니다. 승인17에서 동일3·관련시설군3 제외 시11곳 제안. 모든 과거 노출의 비오염 증명은 아닙니다. 다음은 새 범위·분모 사전 고정입니다."], ["runtime", "④ 실행 준비 · 부분 완료", "정확한 웹/CPU 이미지 준비, CPU115검사 통과, 모델10파일 해시 일치. 추론 미실행. 실행 직전 의존성·manifest·자원·격리 제한 재검증이 필요합니다."], ["release", "⑤ 운영 전환 · 보류", "검색·출처 계약·거절·성능·실제 로그인 검사를 모두 통과해야 합니다. 실패하면 기존 release를 유지합니다. 새 컬렉션과 정확한 digest를 묶고 이전 release/collection을 rollback 대상으로 보존합니다."]];function tab(id){document.querySelectorAll('[role=tabpanel]').forEach(e=>e.hidden=e.id!==id);document.querySelectorAll('[role=tab]').forEach(e=>{e.setAttribute('aria-selected',e.dataset.tab===id);e.tabIndex=e.dataset.tab===id?0:-1})}document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>tab(b.dataset.tab));document.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>{tab('map');const n=data.find(x=>x[0]===b.dataset.node);document.getElementById('title').textContent=n[1];document.getElementById('desc').textContent=n[2];document.getElementById('title').focus();document.getElementById('title').scrollIntoView({block:'nearest'})});document.querySelectorAll('[role=tab]').forEach((b,i)=>b.onkeydown=e=>{const a=[...document.querySelectorAll('[role=tab]')];let j=e.key==='Home'?0:e.key==='End'?a.length-1:e.key==='ArrowRight'?(i+1)%a.length:e.key==='ArrowLeft'?(i+a.length-1)%a.length:null;if(j!==null){e.preventDefault();a[j].click();a[j].focus()}});</script></html>

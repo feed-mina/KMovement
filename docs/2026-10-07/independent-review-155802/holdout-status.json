@@ -1,0 +1,166 @@
+{
+  "version": "fresh-independent-holdout-draft-v2",
+  "createdAt": "2026-10-07T06:46:48.083890+00:00",
+  "osEnforcedAccessControl": false,
+  "sourceCatalogueSha256": "82aac2bcef8708af563466b97cbda05df1970653289aefcf9e75f22aa611b6d4",
+  "questionsSha256": "d190727f2126f8b0bbcf60f9190b95e3b71a79cdcb76581202bf84455d34c778",
+  "goldSha256": "6365fd12745280badc6ee1cb83c18b24d32fdc33e190c2c3b631ad1ba5226d95",
+  "frozen": false,
+  "crossSplitLeakageChecked": "exact-and-heuristic-only-semantic-pending",
+  "independentGoldSecondReview": false,
+  "retrievalEvaluationExecuted": false,
+  "total": 120,
+  "candidateCount": 20,
+  "languages": {
+    "ko": {
+      "positive": 30,
+      "unsupported": 10
+    },
+    "en": {
+      "positive": 30,
+      "unsupported": 10
+    },
+    "ja": {
+      "positive": 30,
+      "unsupported": 10
+    }
+  },
+  "limits": [
+    "Provisional gold depends on pending candidate identity/name/region review.",
+    "Co-located folder separation is a process convention, not OS-enforced isolation.",
+    "Paraphrase families and shared candidate catalogue limit effective independence; this tests in-catalogue identification, not unseen-place generalization.",
+    "Only name/region identity positives and unsupported price/artist claims are represented; alias/typo/broad-category coverage is limited.",
+    "No independent second gold review, evaluation, threshold freeze, or release approval.",
+    "Prior text was read only by an explicitly authorized post-authorship audit program; exact/heuristic comparison complete, semantic leakage not cleared.",
+    "120 questions form 40 translation families, so they are not 120 statistically independent observations; semantic leakage remains unresolved after independent proxy-audit review."
+  ],
+  "status": "draft-awaiting-place-review-and-independent-gold-review",
+  "questionsFile": "private-holdout/questions.draft-v2.json",
+  "goldFile": "private-holdout/gold.draft-v2.json",
+  "leakageAudit": {
+    "at": "2026-10-07T06:48:37.207958+00:00",
+    "auditStage": "after-v2-draft-hash-before-freeze",
+    "oldSourceFile": "D:\\KMovement\\pilot-specs\\kvm4-container-prep-20261006-223827\\evidence\\inputs\\questions-reviewed.json",
+    "oldSourceSha256": "70f42c5be6a100a2abcecd0d5f8ee520fbe8833dfb74917cdb821dccfb7d8628",
+    "oldSourceMatchesPriorRunManifest": true,
+    "newQuestionsSha256": "d190727f2126f8b0bbcf60f9190b95e3b71a79cdcb76581202bf84455d34c778",
+    "newGoldSha256": "6365fd12745280badc6ee1cb83c18b24d32fdc33e190c2c3b631ad1ba5226d95",
+    "oldQuestionTextReadByProgram": true,
+    "oldScoresRead": false,
+    "newQuestionsModifiedDuringAudit": false,
+    "splitSummary": {
+      "development": {
+        "oldCount": 60,
+        "newCount": 120,
+        "normalizedExactNewCount": 0,
+        "punctuationNormalizedExactNewCount": 0,
+        "templateExactNewCount": 4,
+        "samePlaceNewCount": 6,
+        "samePlaceAndHeuristicIntentNewCount": 6,
+        "sameLanguagePlaceAndHeuristicIntentNewCount": 4
+      },
+      "holdout": {
+        "oldCount": 60,
+        "newCount": 120,
+        "normalizedExactNewCount": 0,
+        "punctuationNormalizedExactNewCount": 0,
+        "templateExactNewCount": 4,
+        "samePlaceNewCount": 24,
+        "samePlaceAndHeuristicIntentNewCount": 18,
+        "sameLanguagePlaceAndHeuristicIntentNewCount": 14
+      }
+    },
+    "semanticLeakageReviewed": false,
+    "leakageFree": false,
+    "translationGroupAudit": "heuristic-place-intent-proxy-only-not-semantic-translation-proof",
+    "limits": [
+      "Only manifest-matching 120-item prior-run input was compared; no exhaustive historical corpus audit.",
+      "Template stripping uses current candidate ko/en/ja names only; unlisted aliases evade this heuristic.",
+      "Cross-language place-intent overlap is a coarse proxy, not a semantic equivalence decision.",
+      "Shared places are expected in catalogue testing and are not automatically leaked wording, but prevent unseen-place generalization.",
+      "Independent semantic adjudication remains required; no scores or prior failures were used."
+    ]
+  },
+  "authorshipBeforePriorQuestionAccess": true,
+  "priorScoresRead": false,
+  "translationFamilyCount": 40,
+  "statisticallyIndependentQuestionCountEstablished": false,
+  "independentSemanticLeakageAdjudicationCompleted": false,
+  "leakageFree": false,
+  "familySeparationFeasibility": {
+    "reviewers": [
+      "holdout_custodian",
+      "gold_reviewer"
+    ],
+    "completeSemanticSeparationEstablished": false,
+    "newVersionAuthoredAfterAudit": false,
+    "reason": "Fixed twenty-place coverage with name/region-only evidence cannot guarantee disjoint identity intent from prior questions; rewording would only reduce surface overlap.",
+    "currentValidScope": "freshly-authored in-catalogue draft with unresolved source and semantic-independence gates",
+    "alternatives": [
+      "Independently review additional nonoverlapping candidate places and authorize a place-group-disjoint test.",
+      "Explicitly authorize another evaluation objective with independently verified additional facts and regroup at intent/translation-family level."
+    ],
+    "questionDifficultyOrObservedFailuresUsedToSelectItems": false
+  },
+  "sourceReview": {
+    "catalogueSha256": "aca608a8cae40db351625a6084eafebbdcb55503eba235bcfcde1f7dec81e10a",
+    "approvedCount": 17,
+    "pendingCount": 3,
+    "all20Approved": false
+  },
+  "reducedScopeFeasibility": {
+    "candidateCount": 20,
+    "overlapDetectedCount": 4,
+    "provisionalNoOverlapCount": 16,
+    "fullAliasEntityResolutionCompleted": false,
+    "strictNonOverlapConfirmedCount": 0,
+    "questionEdits": false,
+    "scoresRead": false,
+    "limits": [
+      "Current multilingual names and old candidate-name containment only; unofficial aliases, abbreviated entity mentions, and translated descriptive references may remain unresolved.",
+      "Nonoverlap detection is provisional; exact old ID mapping and exhaustive source-backed alias resolution need independent adjudication.",
+      "Shared candidate corpus exposure is distinct from old-question place overlap and remains a limit."
+    ],
+    "sourceApprovedAndProvisionalNoOverlapCount": 14,
+    "supersededByIndependentFiniteContextReview": true,
+    "proposedConservativeSourceApprovedCount": 11,
+    "finiteOldCorpusEntityReviewCompleted": true,
+    "allHistoricalSemanticNonOverlapEstablished": false
+  },
+  "sourceReviewOverlay": {
+    "sha256": "b6d2fc0ff5c251f2f8f1bf9ece6e465c28b682c5e9753e137b7c076e4d40d6d5",
+    "questionCount": 120,
+    "targetSourceApproved": 102,
+    "targetSourcePending": 18,
+    "contrastMentionImpactStillSeparate": true,
+    "goldV2Unmodified": true
+  },
+  "independentEntityOverlapReview": {
+    "reviewSha256": "9d6bf8f44db1b5ffd2aa5b796dce2647830a01275f8b66b9245acee641a3da41",
+    "reviewer": "independent_places",
+    "summary": {
+      "oldQuestions": 120,
+      "manuallyContextReviewed": 120,
+      "initialExtractedTargetRows": 92,
+      "initialUnresolvedRows": 28,
+      "remainingUnreadOldContexts": 0,
+      "currentCandidates": 20,
+      "sourceApproved": 17,
+      "exactEntityOverlap": 4,
+      "sourceApprovedExactOverlap": 3,
+      "additionalConservativeGroupExclusions": 3,
+      "sourceApprovedWithoutExactOverlap": 14,
+      "sourceApprovedConservativeRemaining": 11,
+      "operatingCandidateEligible": 0
+    },
+    "limitations": [
+      "Results cover only supplied finite old120 corpus and target metadata, not every prior thread, model training, external exposure, or unrecorded evaluation.",
+      "Related-complex exclusions are conservative policy proposals, not assertions that museums and enclosing palaces are the same place.",
+      "11 remaining places are a proposed new evaluation scope, not a new frozen holdout, promotion, or execution authorization.",
+      "Current20 catalog and source decisions remain unchanged; no denominator silently altered.",
+      "This reviewer did not inspect new120 questions; custodian and gold reviewer must re-author/review any reduced-scope set before freeze."
+    ],
+    "newQuestionsReadByEntityReviewer": false,
+    "priorScoresRead": false
+  }
+}
