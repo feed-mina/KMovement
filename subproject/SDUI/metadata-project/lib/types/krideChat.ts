@@ -8,6 +8,8 @@
 /** 백엔드 ChatQueryRequest.java 와 1:1 대응 */
 export interface KrideChatRequest {
   message: string;
+  responseLocale?: 'ko' | 'en' | 'ja';
+  courseContext?: string;
   intent?: 'itinerary' | 'recommend' | 'qa';
   artists?: string[];
   regions?: string[];
