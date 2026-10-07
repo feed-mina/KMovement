@@ -71,7 +71,7 @@ jobs:
             -v "$RUNNER_TEMP/cpu-results:/results" \
             kmovement-cpu:verify sh -ec '
               pip install --no-cache-dir pytest==9.1.1
-              python -m pytest tests/test_f11_contract.py tests/test_f11_api.py tests/test_public_search.py tests/test_public_itinerary.py tests/test_public_chat.py tests/test_course_context.py tests/test_multilingual_catalog.py tests/test_chat_stream_lifecycle.py tests/test_fastapi.py -q --junitxml=/results/tests.xml
+              python -m pytest tests/test_f11_contract.py tests/test_f11_api.py tests/test_public_search.py tests/test_public_itinerary.py tests/test_test_account_budget.py tests/test_shared_admission.py tests/test_public_chat.py tests/test_course_context.py tests/test_multilingual_catalog.py tests/test_chat_stream_lifecycle.py tests/test_fastapi.py -q --junitxml=/results/tests.xml
               pip freeze > /results/runtime-versions.txt
             '
       - name: Verify restricted service readiness

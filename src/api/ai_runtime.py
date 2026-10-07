@@ -3,8 +3,9 @@ import asyncio
 import hmac
 import os
 from fastapi import HTTPException
+from src.api.shared_admission import SharedSlots
 
-slots = asyncio.Semaphore(2)
+slots = SharedSlots(2)
 
 
 def authenticate(token, identity):
