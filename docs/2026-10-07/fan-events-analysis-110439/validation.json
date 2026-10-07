@@ -1,0 +1,26 @@
+[
+  {
+    "kind": "fix-guide",
+    "static": true,
+    "nodeClick": true,
+    "zoomAndEscape": true,
+    "keyboard": true,
+    "mobileNoOverflow": true
+  },
+  {
+    "kind": "easy-guide",
+    "static": true,
+    "nodeClick": true,
+    "zoomAndEscape": true,
+    "keyboard": true,
+    "mobileNoOverflow": true
+  },
+  {
+    "kind": "work-map",
+    "static": true,
+    "nodeClick": true,
+    "zoomAndEscape": true,
+    "keyboard": true,
+    "mobileNoOverflow": true
+  }
+]

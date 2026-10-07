@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-07T01:59:24.322Z",
+  "route": "https://kmovement.srv1869569.hstgr.cloud/view/KPOP_EVENTS",
+  "httpStatus": 200,
+  "publicDefaultCount": 90,
+  "artistCount": 16,
+  "regionDistinctCount": 29,
+  "countryCodePresent": false,
+  "productionChanged": false,
+  "source": "public unauthenticated GET, not complete database audit"
+}
