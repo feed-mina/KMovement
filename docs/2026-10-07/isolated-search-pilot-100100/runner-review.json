@@ -1,0 +1,14 @@
+{
+  "reviewType": "self review plus executable metric fixture tests, not independent reviewer",
+  "passed": [
+    "metric tests: perfect, missing, rank discount, negative exclusion",
+    "A/B share same array and collection with byte hash equality",
+    "C uses separately encoded documentC",
+    "read-only allowlisted inputs; network none; no production client",
+    "locked holdout scored without tuning",
+    "negative answer evaluation explicitly unevaluated",
+    "new DB only; abort on any migration/index/query failure",
+    "one CPU,4GiB,1800sec; output streamed before stopping"
+  ],
+  "runnerSha256": "6498d7cd7b5a84dc3dfcc1e52bd7b90db34690bc04bc4cfb08ac8b7d7394b489"
+}

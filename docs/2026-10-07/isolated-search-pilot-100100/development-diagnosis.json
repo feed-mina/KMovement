@@ -1,0 +1,118 @@
+{
+  "developmentFailures": [
+    {
+      "questionId": "P01-en",
+      "language": "en",
+      "query": "Find the location of Donggung Palace and Wolji Pond.",
+      "expected": [
+        "경주 동궁과 월지"
+      ],
+      "top3": [
+        "육회별장",
+        "태종대온천찜질방",
+        "폴콘"
+      ],
+      "exactAlsoMissed": true
+    },
+    {
+      "questionId": "P01-ja",
+      "language": "ja",
+      "query": "東宮と月池の場所を探してください。",
+      "expected": [
+        "경주 동궁과 월지"
+      ],
+      "top3": [
+        "창덕궁과 후원 [유네스코 세계유산]",
+        "역사공부에 아름다운 자연풍광까지! 두마리 토끼를 잡는 울산여행",
+        "김녕미로공원"
+      ],
+      "exactAlsoMissed": true
+    },
+    {
+      "questionId": "P03-en",
+      "language": "en",
+      "query": "Show the address record for Seongsan Ilchulbong, not accommodation with a similar name.",
+      "expected": [
+        "성산일출봉 [유네스코 세계자연유산]"
+      ],
+      "top3": [
+        "은화당",
+        "이공제비 및 군수이후범선영세불망비",
+        "청학동다소랑정원"
+      ],
+      "exactAlsoMissed": true
+    },
+    {
+      "questionId": "P04-en",
+      "language": "en",
+      "query": "Find the location of Haeundae Beach.",
+      "expected": [
+        "해운대해수욕장"
+      ],
+      "top3": [
+        "다대포 해수욕장",
+        "송지호해수욕장",
+        "사촌해수욕장야영장"
+      ],
+      "exactAlsoMissed": true
+    },
+    {
+      "questionId": "P04-ja",
+      "language": "ja",
+      "query": "海雲台海水浴場の場所を探してください。",
+      "expected": [
+        "해운대해수욕장"
+      ],
+      "top3": [
+        "금능해수욕장",
+        "계양산 산림욕장",
+        "봉암몽돌해수욕장"
+      ],
+      "exactAlsoMissed": true
+    },
+    {
+      "questionId": "P05-ja",
+      "language": "ja",
+      "query": "서울특별시にあるオニオン聖水の場所情報を探してください。",
+      "expected": [
+        "어니언 성수"
+      ],
+      "top3": [
+        "오엔",
+        "오리올",
+        "송파파크하비오워터킹덤워터파크&찜질스파"
+      ],
+      "exactAlsoMissed": true
+    },
+    {
+      "questionId": "P06-en",
+      "language": "en",
+      "query": "Show the address record for Gomsolmaru, not accommodation with a similar name.",
+      "expected": [
+        "곰솔마루"
+      ],
+      "top3": [
+        "월계동장고분",
+        "5·18민주화운동 기록관",
+        "광주 북구문화원"
+      ],
+      "exactAlsoMissed": true
+    },
+    {
+      "questionId": "P08-en",
+      "language": "en",
+      "query": "Find the place record for Changdeokgung Palace and Secret Garden in 서울특별시.",
+      "expected": [
+        "창덕궁과 후원 [유네스코 세계유산]"
+      ],
+      "top3": [
+        "국립중앙박물관",
+        "원주에서 만나는 역사와 문학의 향기",
+        "동작대교 주차장"
+      ],
+      "exactAlsoMissed": true
+    }
+  ],
+  "positiveExactAndANNMetricsEqual": true,
+  "interpretation": "On this fixed sample, exact search has the same positive metrics, so HNSW tuning alone cannot resolve these semantic misses. Missing cross-language aliases/entity mapping is a hypothesis, not a proven sole cause. No new embeddings or query rewrites tested."
+}

@@ -1,0 +1,22 @@
+{
+  "count": 1000,
+  "publicEligibleCount": 0,
+  "rawFieldPresence": {
+    "type": 1000,
+    "name": 1000,
+    "category": 1000,
+    "sub_category": 1000,
+    "address": 1000,
+    "lat": 1000,
+    "lon": 1000,
+    "community": 1000,
+    "id": 1000,
+    "description": 274
+  },
+  "verifiedPublicUrls": 0,
+  "sourceContractStatus": "not eligible; source-node hashes preserve provenance but are not public source URLs",
+  "budgetEvidenceStatus": "absent",
+  "artistEvidenceStatus": "raw descriptions may contain associations but excluded from documents and not verified",
+  "coordinateStatus": "raw coordinate presence not independent validation",
+  "productionPromotion": "blocked"
+}

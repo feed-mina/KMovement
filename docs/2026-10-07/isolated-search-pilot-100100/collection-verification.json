@@ -1,0 +1,6 @@
+{
+  "archiveSha256": "af5b0f605f15a3263e76a8a1f6ce4cd98300368537ddc791331dbf1b3b43b386",
+  "localHashMatches": true,
+  "source": "streamed tmpfs after search child terminated, before container stopped",
+  "containerStopped": true
+}

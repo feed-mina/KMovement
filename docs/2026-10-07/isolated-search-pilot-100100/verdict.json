@@ -1,0 +1,97 @@
+{
+  "retrievalExecuted": true,
+  "candidateCount": 1000,
+  "questionCount": 120,
+  "ABFixedVectors": true,
+  "gates": {
+    "A": {
+      "language": {
+        "ko": {
+          "recall5": 1.0,
+          "ndcg10": 1.0,
+          "absolutePass": true,
+          "dropVsABounded": true
+        },
+        "en": {
+          "recall5": 0.4,
+          "ndcg10": 0.36666666666666664,
+          "absolutePass": false,
+          "dropVsABounded": true
+        },
+        "ja": {
+          "recall5": 0.4666666666666667,
+          "ndcg10": 0.4420619835714305,
+          "absolutePass": false,
+          "dropVsABounded": true
+        }
+      },
+      "semanticPass": false,
+      "annPass": true
+    },
+    "B": {
+      "language": {
+        "ko": {
+          "recall5": 1.0,
+          "ndcg10": 1.0,
+          "absolutePass": true,
+          "dropVsABounded": true
+        },
+        "en": {
+          "recall5": 0.4,
+          "ndcg10": 0.40682324146447624,
+          "absolutePass": false,
+          "dropVsABounded": true
+        },
+        "ja": {
+          "recall5": 0.4666666666666667,
+          "ndcg10": 0.4570804791405348,
+          "absolutePass": false,
+          "dropVsABounded": true
+        }
+      },
+      "semanticPass": false,
+      "annPass": true
+    },
+    "C": {
+      "language": {
+        "ko": {
+          "recall5": 1.0,
+          "ndcg10": 1.0,
+          "absolutePass": true,
+          "dropVsABounded": true
+        },
+        "en": {
+          "recall5": 0.4,
+          "ndcg10": 0.4,
+          "absolutePass": false,
+          "dropVsABounded": true
+        },
+        "ja": {
+          "recall5": 0.5333333333333333,
+          "ndcg10": 0.41864280452992764,
+          "absolutePass": false,
+          "dropVsABounded": false
+        }
+      },
+      "semanticPass": false,
+      "annPass": true
+    }
+  },
+  "publicContractPass": false,
+  "publicEligibleCount": 0,
+  "negativeAnswerGate": "not evaluated; no answer/refusal implementation in retrieval-only runner",
+  "latencyGate": "not evaluated against SLA; no locked product SLA or cold distribution",
+  "productionTransition": "blocked by evidence gates, not pending user authorization",
+  "deploymentExecuted": false,
+  "fullCorpusIndexed": false,
+  "originalModified": false,
+  "productionContainerStatesUnchanged": true,
+  "holdoutRetuningAllowed": false,
+  "remaining": [
+    "document failures as held-out evidence; use development set and newly reviewed holdout for subsequent changes",
+    "verify public source URLs, coordinates, region and requested price/artist claims before any eligibility",
+    "implement and independently evaluate grounded answer/refusal flow",
+    "bind exact production document/query schema and model/version; establish latency SLA and login/cancel/retry acceptance",
+    "only promote a passing release with immutable digest and rollback, retaining existing production collection"
+  ]
+}

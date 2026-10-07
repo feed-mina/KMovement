@@ -1,0 +1,273 @@
+{
+  "candidateCount": 1000,
+  "questionCount": 120,
+  "vectorHashes": {
+    "A": "1dd0fbfb4a1a90d8c2b30538cce24e7b9ae96691bb4bdd4e85ba715492f09fde",
+    "C": "8b481ddb5590e36a790b5d071371cdfa6b2f95ac8b44d8166d50193640f6b0f4",
+    "B": "1dd0fbfb4a1a90d8c2b30538cce24e7b9ae96691bb4bdd4e85ba715492f09fde"
+  },
+  "ABSameStoredVectors": true,
+  "CSeparate": true,
+  "metrics": {
+    "A": {
+      "development": {
+        "ko": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 1.0,
+            "ndcg10": 1.0
+          },
+          "annQuality": {
+            "recall5": 1.0,
+            "ndcg10": 1.0
+          }
+        },
+        "en": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 0.26666666666666666,
+            "ndcg10": 0.2534019997109321
+          },
+          "annQuality": {
+            "recall5": 0.26666666666666666,
+            "ndcg10": 0.2534019997109321
+          }
+        },
+        "ja": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 0.4,
+            "ndcg10": 0.3126303083133167
+          },
+          "annQuality": {
+            "recall5": 0.4,
+            "ndcg10": 0.3126303083133167
+          }
+        }
+      },
+      "holdout": {
+        "ko": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 1.0,
+            "ndcg10": 1.0
+          },
+          "annQuality": {
+            "recall5": 1.0,
+            "ndcg10": 1.0
+          }
+        },
+        "en": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 0.4,
+            "ndcg10": 0.36666666666666664
+          },
+          "annQuality": {
+            "recall5": 0.4,
+            "ndcg10": 0.36666666666666664
+          }
+        },
+        "ja": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 0.4666666666666667,
+            "ndcg10": 0.4420619835714305
+          },
+          "annQuality": {
+            "recall5": 0.4666666666666667,
+            "ndcg10": 0.4420619835714305
+          }
+        }
+      }
+    },
+    "B": {
+      "development": {
+        "ko": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 1.0,
+            "ndcg10": 1.0
+          },
+          "annQuality": {
+            "recall5": 1.0,
+            "ndcg10": 1.0
+          }
+        },
+        "en": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 0.26666666666666666,
+            "ndcg10": 0.2555555555555556
+          },
+          "annQuality": {
+            "recall5": 0.26666666666666666,
+            "ndcg10": 0.2555555555555556
+          }
+        },
+        "ja": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 0.4666666666666667,
+            "ndcg10": 0.4035325881322006
+          },
+          "annQuality": {
+            "recall5": 0.4666666666666667,
+            "ndcg10": 0.4035325881322006
+          }
+        }
+      },
+      "holdout": {
+        "ko": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 1.0,
+            "ndcg10": 1.0
+          },
+          "annQuality": {
+            "recall5": 1.0,
+            "ndcg10": 1.0
+          }
+        },
+        "en": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 0.4,
+            "ndcg10": 0.40682324146447624
+          },
+          "annQuality": {
+            "recall5": 0.4,
+            "ndcg10": 0.40682324146447624
+          }
+        },
+        "ja": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 0.4666666666666667,
+            "ndcg10": 0.4570804791405348
+          },
+          "annQuality": {
+            "recall5": 0.4666666666666667,
+            "ndcg10": 0.4570804791405348
+          }
+        }
+      }
+    },
+    "C": {
+      "development": {
+        "ko": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 1.0,
+            "ndcg10": 1.0
+          },
+          "annQuality": {
+            "recall5": 1.0,
+            "ndcg10": 1.0
+          }
+        },
+        "en": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 0.2,
+            "ndcg10": 0.19761753912698604
+          },
+          "annQuality": {
+            "recall5": 0.2,
+            "ndcg10": 0.19761753912698604
+          }
+        },
+        "ja": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 0.4,
+            "ndcg10": 0.34792289962779027
+          },
+          "annQuality": {
+            "recall5": 0.4,
+            "ndcg10": 0.34792289962779027
+          }
+        }
+      },
+      "holdout": {
+        "ko": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 1.0,
+            "ndcg10": 1.0
+          },
+          "annQuality": {
+            "recall5": 1.0,
+            "ndcg10": 1.0
+          }
+        },
+        "en": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 0.4,
+            "ndcg10": 0.4
+          },
+          "annQuality": {
+            "recall5": 0.4,
+            "ndcg10": 0.4
+          }
+        },
+        "ja": {
+          "n": 15,
+          "exactQuality": {
+            "recall5": 0.5333333333333333,
+            "ndcg10": 0.41864280452992764
+          },
+          "annQuality": {
+            "recall5": 0.5333333333333333,
+            "ndcg10": 0.41864280452992764
+          }
+        }
+      }
+    }
+  },
+  "annRecall10": {
+    "A": 0.9933333333333334,
+    "B": 0.9908333333333333,
+    "C": 0.9933333333333334
+  },
+  "latency": {
+    "A": {
+      "firstQueryMs": 29.990050476044416,
+      "warmP50Ms": 31.259202864021063,
+      "warmP95Ms": 41.659595072269425
+    },
+    "B": {
+      "firstQueryMs": 28.30559480935335,
+      "warmP50Ms": 31.429752707481384,
+      "warmP95Ms": 36.643107049167156
+    },
+    "C": {
+      "firstQueryMs": 30.224301852285862,
+      "warmP50Ms": 32.99023909494281,
+      "warmP95Ms": 47.128324676305056
+    }
+  },
+  "modelLoadSeconds": 6.548745510168374,
+  "documentEmbeddingSeconds": {
+    "A": 25.88021204294637,
+    "C": 28.466141832992435
+  },
+  "truncatedIds": [],
+  "peakRSSKiB": 1087616,
+  "elapsedSeconds": 91.74501364305615,
+  "diskBytes": 9385353,
+  "negativeEvaluation": {
+    "status": "not_evaluated",
+    "negativeQuestionsRetrieved": 30,
+    "reason": "search-only runner returns candidates, no application answer/abstention pipeline; retrieval is not unsupported-claim acceptance",
+    "unsupportedClaimAccepts": null,
+    "positiveOverRefusalRate": null
+  },
+  "publicEligibleCount": 0,
+  "publicContractPass": false,
+  "productionTransitionAllowed": false,
+  "latencySlaPass": null,
+  "coldLatencyDistribution": "not measured: model-load time and single first-query observation only",
+  "populationGeneralization": false
+}
