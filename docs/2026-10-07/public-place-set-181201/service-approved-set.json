@@ -1,0 +1,5 @@
+{
+  "scope": "new approvals from this task only; not existing service inventory",
+  "places": [],
+  "reason": "service acceptance gates pending"
+}

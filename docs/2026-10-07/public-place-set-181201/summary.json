@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-07T09:11:59.310423+00:00",
+  "storedRows": 40664,
+  "searchVerifiedCount": null,
+  "servicePublicApprovedFromThisTask": 0,
+  "existingServicePublicCount": "not rechecked",
+  "classificationRows": {
+    "human_review": 8677,
+    "auto_hold": 30335,
+    "data_pass": 1652
+  },
+  "candidateEntities": 1651,
+  "independentMultilingualEntities": 4,
+  "approvedAliasRowsCollapsedInDerivedSet": 1,
+  "sourceGraphSha256": "49110f8c6074a1028f687c448d1dda745ed313f5ec94e99d9cfd6af59547903c",
+  "sourceGraphUnchanged": true,
+  "classificationDisjointAndComplete": true,
+  "originalDeletedOrEdited": false,
+  "searchExecuted": false,
+  "deployed": false,
+  "inputHashes": {
+    "place-linkage-local.jsonl": "ed62e829dcab6de80eafa44e375bc4fabdf6c2447851616fa4a2d1ca13c40ee8",
+    "independent-review.json": "bf347969e19a6ecb205e1ecfb0d781c4c72e8f9d3d25c046403915435ce07213",
+    "linkage-result.json": "b789e4e4145158d77e4cbccd9d1077f0ff42f3ab77d58ecb8d0fbc8a9dfce52d"
+  }
+}

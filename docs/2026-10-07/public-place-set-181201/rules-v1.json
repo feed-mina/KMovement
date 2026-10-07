@@ -1,0 +1,16 @@
+{
+  "version": "public-place-candidate-v1",
+  "scope": "dated basic place metadata preparation, NOT service-publication approval",
+  "precedence": [
+    "existing independently approved identity + no location flags -> data_pass",
+    "unresolved duplicate or coordinate/address flag -> human_review",
+    "official exact name/address, all matched coordinates within100m, no duplicate/flags -> data_pass",
+    "otherwise -> auto_hold_missing_source"
+  ],
+  "sourceAge": "2022 source is historical; current existence/hours/price/artist not certified",
+  "multilingual": "only independently approved KO/EN/JA names",
+  "canonicalization": "only approved curated identity links; no other merges",
+  "searchVerifiedCount": null,
+  "servicePublicApprovedFromThisTask": 0,
+  "executionAllowed": false
+}

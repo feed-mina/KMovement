@@ -1,0 +1,235 @@
+[
+  {
+    "id": "curated:seoul:100885",
+    "legacyIds": [
+      "poi_556"
+    ],
+    "names": {
+      "ko": "국립현대미술관 서울",
+      "en": "MMCA Seoul",
+      "ja": "国立現代美術館ソウル館"
+    },
+    "address": "서울특별시 종로구 삼청로 30",
+    "lat": 37.5786280284849,
+    "lon": 126.980087994867,
+    "evidenceLevel": "independent_multilingual_identity",
+    "sourceDate": "2026-10-07T03:17:43.913608+00:00",
+    "sources": [
+      {
+        "url": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100885&menuNo=200025",
+        "sha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+        "locator": "official detail facility title",
+        "language": "ko"
+      },
+      {
+        "url": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+        "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+        "locator": "PDF physical page 9; whole facility/branch heading and context independently inspected",
+        "language": "en"
+      },
+      {
+        "url": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+        "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+        "locator": "PDF physical page 9; whole facility/branch heading and context independently inspected",
+        "language": "ja"
+      }
+    ],
+    "coordinateStatus": "reviewed official marker; entrance accuracy unverified",
+    "officialCoordinateEvidence": [],
+    "allowedClaims": [
+      "source-dated place name/address",
+      "coordinate only with provenance and uncertainty"
+    ],
+    "unsupported": [
+      "current opening/existence",
+      "price",
+      "artist visit/relation",
+      "budget guarantee"
+    ],
+    "multilingualReady": true,
+    "searchValidated": false,
+    "serviceEligible": false,
+    "remainingGates": [
+      "current source recheck",
+      "retrieval evaluation",
+      "answer refusal and over-refusal",
+      "performance",
+      "login stop retry acceptance"
+    ]
+  },
+  {
+    "id": "curated:seoul:102409",
+    "legacyIds": [
+      "poi_589",
+      "media_2023_1649"
+    ],
+    "names": {
+      "ko": "대한민국역사박물관",
+      "en": "National Museum of Korean Contemporary History",
+      "ja": "大韓民国歴史博物館"
+    },
+    "address": "서울특별시 종로구 세종대로 198",
+    "lat": 37.5737136067193,
+    "lon": 126.978339442463,
+    "evidenceLevel": "independent_multilingual_identity",
+    "sourceDate": "2026-10-07T03:17:43.091593+00:00",
+    "sources": [
+      {
+        "url": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+        "sha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+        "locator": "official detail facility title",
+        "language": "ko"
+      },
+      {
+        "url": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+        "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+        "locator": "PDF physical page 20; whole facility/branch heading and context independently inspected",
+        "language": "en"
+      },
+      {
+        "url": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+        "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+        "locator": "PDF physical page 20; whole facility/branch heading and context independently inspected",
+        "language": "ja"
+      }
+    ],
+    "coordinateStatus": "reviewed official marker; entrance accuracy unverified",
+    "officialCoordinateEvidence": [],
+    "allowedClaims": [
+      "source-dated place name/address",
+      "coordinate only with provenance and uncertainty"
+    ],
+    "unsupported": [
+      "current opening/existence",
+      "price",
+      "artist visit/relation",
+      "budget guarantee"
+    ],
+    "multilingualReady": true,
+    "searchValidated": false,
+    "serviceEligible": false,
+    "remainingGates": [
+      "current source recheck",
+      "retrieval evaluation",
+      "answer refusal and over-refusal",
+      "performance",
+      "login stop retry acceptance"
+    ]
+  },
+  {
+    "id": "curated:seoul:101632",
+    "legacyIds": [
+      "poi_638"
+    ],
+    "names": {
+      "ko": "서울공예박물관",
+      "en": "Seoul Museum of Craft Art",
+      "ja": "ソウル工芸博物館"
+    },
+    "address": "서울특별시 종로구 율곡로3길 4",
+    "lat": 37.5766481740232,
+    "lon": 126.983533363501,
+    "evidenceLevel": "independent_multilingual_identity",
+    "sourceDate": "2026-10-07T03:17:43.872525+00:00",
+    "sources": [
+      {
+        "url": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101632&menuNo=200025",
+        "sha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+        "locator": "official detail facility title",
+        "language": "ko"
+      },
+      {
+        "url": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+        "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+        "locator": "PDF physical page 8; whole facility/branch heading and context independently inspected",
+        "language": "en"
+      },
+      {
+        "url": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+        "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+        "locator": "PDF physical page 8; whole facility/branch heading and context independently inspected",
+        "language": "ja"
+      }
+    ],
+    "coordinateStatus": "reviewed official marker; entrance accuracy unverified",
+    "officialCoordinateEvidence": [],
+    "allowedClaims": [
+      "source-dated place name/address",
+      "coordinate only with provenance and uncertainty"
+    ],
+    "unsupported": [
+      "current opening/existence",
+      "price",
+      "artist visit/relation",
+      "budget guarantee"
+    ],
+    "multilingualReady": true,
+    "searchValidated": false,
+    "serviceEligible": false,
+    "remainingGates": [
+      "current source recheck",
+      "retrieval evaluation",
+      "answer refusal and over-refusal",
+      "performance",
+      "login stop retry acceptance"
+    ]
+  },
+  {
+    "id": "curated:seoul:100293",
+    "legacyIds": [
+      "poi_754"
+    ],
+    "names": {
+      "ko": "전쟁기념관",
+      "en": "The War Memorial of Korea",
+      "ja": "戦争記念館"
+    },
+    "address": "서울특별시 용산구 이태원로 29",
+    "lat": 37.5373140468913,
+    "lon": 126.978466063237,
+    "evidenceLevel": "independent_multilingual_identity",
+    "sourceDate": "2026-10-07T03:17:44.475370+00:00",
+    "sources": [
+      {
+        "url": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100293&menuNo=200025",
+        "sha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+        "locator": "official detail facility title",
+        "language": "ko"
+      },
+      {
+        "url": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+        "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+        "locator": "PDF physical page 8; whole facility/branch heading and context independently inspected",
+        "language": "en"
+      },
+      {
+        "url": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+        "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+        "locator": "PDF physical page 8; whole facility/branch heading and context independently inspected",
+        "language": "ja"
+      }
+    ],
+    "coordinateStatus": "reviewed official marker; entrance accuracy unverified",
+    "officialCoordinateEvidence": [],
+    "allowedClaims": [
+      "source-dated place name/address",
+      "coordinate only with provenance and uncertainty"
+    ],
+    "unsupported": [
+      "current opening/existence",
+      "price",
+      "artist visit/relation",
+      "budget guarantee"
+    ],
+    "multilingualReady": true,
+    "searchValidated": false,
+    "serviceEligible": false,
+    "remainingGates": [
+      "current source recheck",
+      "retrieval evaluation",
+      "answer refusal and over-refusal",
+      "performance",
+      "login stop retry acceptance"
+    ]
+  }
+]
