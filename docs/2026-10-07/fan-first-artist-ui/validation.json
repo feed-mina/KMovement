@@ -1,0 +1,83 @@
+[
+  {
+    "kind": "fix-guide",
+    "width": 390,
+    "nodes": 5,
+    "tabs": 3,
+    "externalRequests": [],
+    "pageErrors": [],
+    "status": "pass"
+  },
+  {
+    "kind": "fix-guide",
+    "width": 768,
+    "nodes": 5,
+    "tabs": 3,
+    "externalRequests": [],
+    "pageErrors": [],
+    "status": "pass"
+  },
+  {
+    "kind": "fix-guide",
+    "width": 1440,
+    "nodes": 5,
+    "tabs": 3,
+    "externalRequests": [],
+    "pageErrors": [],
+    "status": "pass"
+  },
+  {
+    "kind": "easy-guide",
+    "width": 390,
+    "nodes": 5,
+    "tabs": 3,
+    "externalRequests": [],
+    "pageErrors": [],
+    "status": "pass"
+  },
+  {
+    "kind": "easy-guide",
+    "width": 768,
+    "nodes": 5,
+    "tabs": 3,
+    "externalRequests": [],
+    "pageErrors": [],
+    "status": "pass"
+  },
+  {
+    "kind": "easy-guide",
+    "width": 1440,
+    "nodes": 5,
+    "tabs": 3,
+    "externalRequests": [],
+    "pageErrors": [],
+    "status": "pass"
+  },
+  {
+    "kind": "work-map",
+    "width": 390,
+    "nodes": 5,
+    "tabs": 3,
+    "externalRequests": [],
+    "pageErrors": [],
+    "status": "pass"
+  },
+  {
+    "kind": "work-map",
+    "width": 768,
+    "nodes": 5,
+    "tabs": 3,
+    "externalRequests": [],
+    "pageErrors": [],
+    "status": "pass"
+  },
+  {
+    "kind": "work-map",
+    "width": 1440,
+    "nodes": 5,
+    "tabs": 3,
+    "externalRequests": [],
+    "pageErrors": [],
+    "status": "pass"
+  }
+]
