@@ -10,7 +10,8 @@ const withPWA = require('next-pwa')({
             urlPattern: ({ url }: { url: URL }) =>
                 url.pathname.startsWith('/api/admin/tour/holy/') ||
                 url.pathname === '/admin/holy-review' ||
-                url.pathname.startsWith('/api/v1/kpop/me/saved/') ||
+                (url.pathname.startsWith('/api/v1/kpop/me/') || url.pathname === '/api/v1/kpop/event-feed') ||
+                url.pathname === '/view/KPOP_EVENTS' ||
                 url.pathname === '/api/v1/kpop/saved-items' ||
                 url.pathname === '/view/KPOP_SAVED_ITEMS' ||
                 url.pathname === '/view/MY_PAGE',

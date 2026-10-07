@@ -6,6 +6,7 @@ Embedding and reranking then run in-process with sentence-transformers.
 from __future__ import annotations
 
 import os
+import re
 
 import httpx
 
@@ -33,7 +34,11 @@ def _get_local_embedder():
     if _local_embedder is None:
         from sentence_transformers import SentenceTransformer
 
-        _local_embedder = SentenceTransformer(EMBED_MODEL)
+        revision = os.environ.get('KRIDE_EMBED_REVISION')
+        if revision and not re.fullmatch('[0-9a-f]{40}', revision):
+            raise RuntimeError('invalid_embedding_revision')
+        options = {'revision': revision, 'local_files_only': True} if revision else {}
+        _local_embedder = SentenceTransformer(EMBED_MODEL, **options)
     return _local_embedder
 
 
@@ -74,6 +79,12 @@ def _local_weather_default() -> dict:
 
 
 def embed_texts_sync(texts: list[str]) -> list[list[float]]:
+    # A reviewed release must use its pinned offline model, never an unversioned
+    # TorchServe endpoint. The deployment manifest separately pins file hashes.
+    if os.environ.get('KRIDE_REVIEWED_CATALOG_PATH'):
+        if not re.fullmatch('[0-9a-f]{40}', os.environ.get('KRIDE_EMBED_REVISION', '')):
+            raise RuntimeError('pinned_embedding_revision_required')
+        return _local_embed_texts(texts)
     if not TORCHSERVE_ENABLED:
         return _local_embed_texts(texts)
     try:

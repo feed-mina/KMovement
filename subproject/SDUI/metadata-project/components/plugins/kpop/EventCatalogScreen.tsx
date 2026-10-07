@@ -1,5 +1,7 @@
 'use client';
+import FanEventFeed from './FanEventFeed';
 import KpopNav from './KpopNav';
+import ArtistReturn from './ArtistReturn';
 import {FormEvent, useEffect, useRef, useState} from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import type {ScreenControllerProps} from '@/components/screens/types';
@@ -25,9 +27,11 @@ export function eventFilterError(filters:Filters,today?:string) {
     if(filters.region.trim().length>100) return '지역은 100자 이내로 입력해 주세요.';
     return '';
 }
-export default function EventCatalogScreen({screenId,refId}:ScreenControllerProps) {
+export function LegacyEventCatalogScreen({screenId,refId}:ScreenControllerProps) {
     const router=useRouter(),search=useSearchParams();
     const applied:Filters={from:search.get('from')?.trim()||'',to:search.get('to')?.trim()||'',region:search.get('region')?.trim()||''};
+    const returnEvents=search.get('returnEvents');
+    const feedBack=returnEvents&&/^\/view\/KPOP_EVENTS(?:\?[^#]*)?$/.test(returnEvents)?returnEvents:null;
     const filterKey=params(applied),detail=screenId==='KPOP_EVENT_DETAIL',key=JSON.stringify([detail,refId,filterKey]);
     const [draft,setDraft]=useState(applied),[inputError,setInputError]=useState(''),[retry,setRetry]=useState(0);
     const [result,setResult]=useState<Result>({key,status:'loading'});
@@ -58,11 +62,11 @@ export default function EventCatalogScreen({screenId,refId}:ScreenControllerProp
     const apply=(e:FormEvent)=>{e.preventDefault();const error=eventFilterError(draft,current.today);setInputError(error);if(!error)navigate(draft);};
     const open=(meta:Record<string,any>)=>router.push(meta.actionUrl+(filterKey?'?'+filterKey:''));
     return <section className="page-wrap kpop-screen event-catalog" aria-label="이벤트 공개 목록">
-        <KpopNav/><p className="kpop-eyebrow">K-POP · 이벤트</p><h1>{detail?'이벤트 상세':'이벤트 일정 찾기'}</h1>
+        <KpopNav/><ArtistReturn/><p className="kpop-eyebrow">K-POP · 이벤트</p><h1>{detail?'이벤트 상세':'이벤트 일정 찾기'}</h1>
         <p>로그인 없이 검수된 일정을 확인해요. 이벤트와 연결 아티스트가 모두 공개 승인된 일정만 보여요.</p>
         <p>날짜는 한국 시간(Asia/Seoul) 기준이에요. {current.today?`서버 기준 오늘: ${current.today}. `:''}시작일과 종료일을 모두 포함하며, 시작일을 비우면 오늘부터 찾아요.</p>
         <p>‘종료된 일정’은 행사 날짜가 지난 뜻이에요. 오늘 행사의 실제 종료 시각은 공식 안내를 확인해 주세요.</p>
-        {detail?<a href={LIST+(filterKey?'?'+filterKey:'')}>이벤트 목록으로</a>:<form onSubmit={apply} noValidate className="event-filters" aria-label="이벤트 조건">
+        {detail?<a href={feedBack||LIST+(filterKey?'?'+filterKey:'')}>이벤트 목록으로</a>:<form onSubmit={apply} noValidate className="event-filters" aria-label="이벤트 조건">
             {(['from','to','region'] as const).map(name=><label key={name} htmlFor={'event-'+name}>{name==='from'?'시작일':name==='to'?'종료일':'지역'}
                 <input id={'event-'+name} type={name==='region'?'text':'date'} value={draft[name]} maxLength={name==='region'?100:undefined} placeholder={name==='region'?'예: 서울 (지역명 일치)':undefined} onChange={e=>{setDraft(v=>({...v,[name]:e.target.value}));setInputError('');}} aria-describedby="event-input-help"/>
             </label>)}
@@ -80,3 +84,5 @@ export default function EventCatalogScreen({screenId,refId}:ScreenControllerProp
         </div>
     </section>;
 }
+
+export default function EventCatalogScreen(props:ScreenControllerProps){return props.screenId==='KPOP_EVENT_DETAIL'?<LegacyEventCatalogScreen {...props}/>:<FanEventFeed/>;}

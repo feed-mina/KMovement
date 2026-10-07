@@ -10,6 +10,7 @@ jest.mock('@/components/providers/MetadataProvider', () => ({
     useMetadata: () => ({ screenId: 'KPOP_EXPLORE', metadata: [], pageData: {} }),
 }));
 
+jest.mock('@/components/plugins/kpop/ArtistRelated',()=>({__esModule:true,default:()=>null}));
 registerKpopPlugin();
 
 describe('K-POP internal SDUI cards', () => {
@@ -138,7 +139,8 @@ describe('K-POP internal SDUI cards', () => {
         );
 
         expect(screen.getByRole('heading', { name: 'aespa' })).toBeInTheDocument();
-        expect(screen.getByText(artist.profile)).toBeInTheDocument();
+        expect(screen.queryByText(artist.profile)).not.toBeInTheDocument();
+        expect(screen.getByText('aespa의 공식 소식에서 다음에 함께하고 싶은 순간을 찾아보세요.')).toBeInTheDocument();
         expect(screen.getByRole('link', { name: 'aespa Instagram (새 창)' })).toBeInTheDocument();
     });
 
@@ -159,7 +161,7 @@ describe('K-POP internal SDUI cards', () => {
             />,
         );
 
-        expect(screen.getByText('가상 세계관 콘셉트로 전시·팝업 연계 일정이 많은 그룹입니다.')).toBeInTheDocument();
+        expect(screen.getByText('aespa의 공식 소식에서 다음에 함께하고 싶은 순간을 찾아보세요.')).toBeInTheDocument();
         expect(screen.getByRole('link', { name: 'aespa Instagram (새 창)' })).toBeInTheDocument();
         // 텍스트 대괄호 표기 대신 브랜드 로고 SVG를 렌더한다.
         expect(container.querySelectorAll('svg.kpop-social-icon')).toHaveLength(2);

@@ -4,8 +4,14 @@ name: Publish Hostinger G1 Spring image
   workflow_dispatch:
     inputs:
       expected_main_sha:
-        description: Exact 40-character origin/main SHA to publish
+        description: Exact 40-character release SHA to publish
         required: true
+        type: string
+
+      source_ref:
+        description: Source release branch
+        required: true
+        default: main
         type: string
 
 permissions:
@@ -25,16 +31,26 @@ jobs:
           ref: ${{ inputs.expected_main_sha }}
           fetch-depth: 1
 
-      - name: Require the current main SHA
+      - name: Require the selected release SHA
         shell: bash
         env:
           EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+          SOURCE_REF: ${{ inputs.source_ref }}
         run: |
           set -euo pipefail
           [[ "$EXPECTED_MAIN_SHA" =~ ^[0-9a-f]{40}$ ]]
-          git fetch --no-tags --depth=1 origin main
+          git check-ref-format --branch "$SOURCE_REF"
+          git fetch --no-tags --depth=1 origin "refs/heads/$SOURCE_REF"
           test "$(git rev-parse HEAD)" = "$EXPECTED_MAIN_SHA"
-          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          test "$(git rev-parse FETCH_HEAD)" = "$EXPECTED_MAIN_SHA"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Verify isolated event and saved-list contracts
+        working-directory: subproject/SDUI/SDUI-server
+        run: bash gradlew test --no-daemon --tests '*EventCatalogControllerTest' --tests '*FanEventFeedControllerTest' --tests '*PersonalSaved*'
 
       - uses: docker/setup-buildx-action@v3
 
@@ -45,7 +61,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and publish the exact main image
+      - name: Build and publish the exact release image
         id: build
         uses: docker/build-push-action@v6
         with:

@@ -1,5 +1,6 @@
 'use client';
 import KpopNav from './KpopNav';
+import ArtistReturn from './ArtistReturn';
 import {FormEvent,useEffect,useRef,useState} from 'react';
 import {useRouter,useSearchParams} from 'next/navigation';
 import {normalizeCandidate,ProductCard,ProductCandidate} from './KpopProducts';
@@ -44,7 +45,7 @@ export default function PublicProductCatalogScreen(_props:ScreenControllerProps)
     };
     const submit=(e:FormEvent)=>{e.preventDefault();navigate(draft);};
     return <section className="page-wrap kpop-screen public-products" aria-label="공개 상품 후보">
-        <KpopNav/>{itemId&&<a href="/view/KPOP_PRODUCTS">상품 목록으로</a>}<p className="kpop-eyebrow">K-POP · 공개 상품 후보</p><h1>상품명·브랜드로 후보 찾기</h1>
+        <KpopNav/><ArtistReturn/>{itemId&&<a href="/view/KPOP_PRODUCTS">상품 목록으로</a>}<p className="kpop-eyebrow">K-POP · 공개 상품 후보</p><h1>상품명·브랜드로 후보 찾기</h1>
         <p>검색 결과는 후보이며 동일 상품·정품·구매 적합성을 보증하지 않습니다. 현재 재고와 가격도 보증하지 않아요.</p>
         <p>승인된 후보 중 근거 설명·출처·확인 시각이 있고, 근거 등급이 ‘근거가 비교적 강한 후보’ 또는 ‘유사 후보’인 항목만 보여요. 근거 부족의 빈 결과도 정상입니다.</p>
         <p>확인 시각은 카탈로그에 기록된 값이에요. 원본에 시간대가 없어 한국 시간으로 바꾸지 않았어요.</p>

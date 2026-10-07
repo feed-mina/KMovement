@@ -38,6 +38,8 @@ interface KrideChatComponentProps {
     welcomeMessage?: string;
     suggestions?: string[];
     contextOverride?: KrideForm;
+    courseContext?: string;
+    responseLocale?: 'ko' | 'en' | 'ja';
   };
   onCloseModal?: () => void;
 }
@@ -51,13 +53,18 @@ const DEFAULT_SUGGESTIONS = [
 export default function KrideChatComponent({ meta, data, onCloseModal }: KrideChatComponentProps) {
   const containerClass = meta?.cssClass || meta?.css_class || '';
   const title = meta?.labelText || meta?.label_text || 'K-RIDE 여행봇';
-  const suggestions = data?.suggestions ?? DEFAULT_SUGGESTIONS;
+  const [locale,setLocale] = React.useState<'ko'|'en'|'ja'>(data?.responseLocale ?? 'ko');
+  const suggestions = data?.suggestions ?? (data?.courseContext ? ({ko:['첫 번째 장소를 설명해 줘','두 번째 장소의 공식 안내를 보여줘'],en:['Tell me about the first stop','Show the official guide for the second stop'],ja:['最初の場所について教えて','2番目の場所の公式案内を見せて']}[locale]) : DEFAULT_SUGGESTIONS);
 
   const auth=useAuth();
   const { messages, isLoading, error, send, abort, reset, retry } = useKrideChatStream({
     contextOverride: data?.contextOverride,
+    courseContext: data?.courseContext,
+    responseLocale: locale,
   });
   React.useEffect(()=>{reset();return()=>abort()},[auth.user?.userSqno]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  React.useEffect(()=>{reset()},[data?.courseContext]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // EmptyState 용 컨텍스트 읽기 — contextOverride 우선, 없으면 localStorage
   const context = React.useMemo(() => {
@@ -95,6 +102,9 @@ export default function KrideChatComponent({ meta, data, onCloseModal }: KrideCh
         }}
         variant={onCloseModal ? 'sheet' : 'full'}
       />
+      <div role="group" aria-label="답변 언어 / Response language" style={{display:'flex',gap:8,padding:12,flexWrap:'wrap'}}>
+        {(['ko','en','ja'] as const).map(l=><button key={l} type="button" disabled={isLoading} aria-pressed={locale===l} onClick={()=>{reset();setLocale(l)}} style={{padding:'10px 16px',border:locale===l?'2px solid #b40020':'1px solid #64748b',borderRadius:10,color:'#172033',background:'#fff'}}>{{ko:'한국어',en:'English',ja:'日本語'}[l]}</button>)}
+      </div>
       <p className="kride-chat-scope">서울 당일치기 일반 장소를 시험 중입니다. 아티스트 연관·영업시간·가격은 확인되지 않았습니다.</p>
 
       {isEmpty ? (

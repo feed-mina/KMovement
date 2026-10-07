@@ -8,6 +8,11 @@ from src.api.public_itinerary import router,ground_plan
 from src.api.itinerary_budget import reserve_budget,record_usage
 
 
+@pytest.fixture(autouse=True)
+def course_signing_fixture(monkeypatch):
+    monkeypatch.setenv('KRIDE_COURSE_SIGNING_KEY','unit-test-only-not-a-production-secret')
+
+
 @pytest.mark.parametrize('raw', [None, [], {'itinerary':None}, {'itinerary':{}},
     {'itinerary':[None, {'morning':{'places':None}}]},
     {'itinerary':[{'morning':{'places':[{'poiId':[]},{'poiId':{}},None]}}]}])

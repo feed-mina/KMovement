@@ -17,7 +17,8 @@ async function request(url:string,signal:AbortSignal,method='GET') {
  const r=await fetch(url,{method,credentials:'include',cache:'no-store',signal});
  if(!r.ok)throw new Error(String(r.status));return (await r.json()).data;
 }
-export function SavedToggle({kind,itemRef}:{kind:SavedKind;itemRef:string|number}) {
+export function SavedToggle({kind,itemRef,guestPrompt=false,saveLabel='저장',savedLabel='저장 해제'}:{kind:SavedKind;itemRef:string|number;guestPrompt?:boolean;saveLabel?:string;savedLabel?:string}) {
+ const [guestNotice,setGuestNotice]=useState(false);
  const auth=useContext(AuthContext);const identity=auth?.isLoggedIn&&!auth.isLoading?String(auth.user?.userSqno??auth.user?.userId??''):'';
  const key=identity+':'+kind+':'+itemRef;
  const [state,setState]=useState<{key:string;saved:boolean;status:'loading'|'ready'|'error'|'private';busy?:boolean}>({key:'',saved:false,status:'loading'});
@@ -27,14 +28,14 @@ export function SavedToggle({kind,itemRef}:{kind:SavedKind;itemRef:string|number
   request(base+kind+'/'+encodeURIComponent(itemRef),abort.signal).then(data=>{if(!abort.signal.aborted)setState({key,saved:data.saved,status:'ready'});}).catch(()=>{if(!abort.signal.aborted)setState({key,saved:false,status:'error'});});
   return ()=>{abort.abort();operation.current?.abort();};
  },[key,identity,kind,itemRef,retry]);
- if(!identity)return null;
+ if(!identity)return guestPrompt?<div className="personal-save-action"><button type="button" disabled={auth?.isLoading} onClick={()=>setGuestNotice(true)}>{auth?.isLoading?'저장 확인 중…':saveLabel}</button>{guestNotice&&<p role="status">내 목록에 담으려면 로그인해 주세요. <Link href={'/view/LOGIN_PAGE?returnTo='+encodeURIComponent(typeof window==='undefined'?'/view/KPOP_EXPLORE':window.location.pathname+window.location.search)}>로그인하고 돌아오기</Link></p>}</div>:null;
  const current=state.key===key?state:{key,saved:false,status:'loading' as const};
  const toggle=async()=>{if(current.busy||current.status==='loading')return;const abort=new AbortController();operation.current=abort;setState({...current,busy:true});
   try {const data=await request(base+kind+'/'+encodeURIComponent(itemRef),abort.signal,current.saved?'DELETE':'POST');if(live.current===key&&!abort.signal.aborted)setState({key,saved:data.saved,status:'ready'});}
   catch(e){if(live.current===key&&!abort.signal.aborted)setState({...current,busy:false,status:(e as Error).message==='404'?'private':'error'});}
  };
  return <div className="personal-save-action">
-  {current.status==='error'?<><p role="alert">저장 상태를 확인하지 못했어요.</p><button onClick={()=>setRetry(x=>x+1)}>저장 상태 다시 확인</button></>:current.status==='private'?<p role="status">비공개로 전환되어 새로 저장할 수 없어요. 내 목록에서 기존 저장을 관리해 주세요.</p>:<button disabled={current.busy||current.status==='loading'} aria-pressed={current.saved} onClick={toggle}>{current.status==='loading'?'저장 확인 중…':current.busy?'처리 중…':current.saved?'저장 해제':'저장'}</button>}
+  {current.status==='error'?<><p role="alert">저장 상태를 확인하지 못했어요.</p><button onClick={()=>setRetry(x=>x+1)}>저장 상태 다시 확인</button></>:current.status==='private'?<p role="status">비공개로 전환되어 새로 저장할 수 없어요. 내 목록에서 기존 저장을 관리해 주세요.</p>:<button disabled={current.busy||current.status==='loading'} aria-pressed={current.saved} onClick={toggle}>{current.status==='loading'?'저장 확인 중…':current.busy?'처리 중…':current.saved?savedLabel:saveLabel}</button>}
  </div>;
 }
 type SavedRow={id:number;itemRef:number;title:string;visibility:'PUBLIC'|'PRIVATE'};
@@ -48,10 +49,11 @@ type SavedPage={items:SavedRow[];page:number;pageSize:number;totalCount:number};
 export default function PersonalSavedScreen(_props:ScreenControllerProps) {
  const auth=useContext(AuthContext);const identity=auth?.isLoggedIn&&!auth.isLoading?String(auth.user?.userSqno??auth.user?.userId??''):'';
  const router=useRouter(),search=useSearchParams();
+ const eventReturn=search.get('returnEvents');const eventBack=eventReturn&&/^\/view\/KPOP_EVENTS(?:\?[^#]*)?$/.test(eventReturn)?eventReturn:null;
  const rawKind=search.get('kind');const kind:SavedKind=rawKind==='events'||rawKind==='products'?rawKind:'artists';
  const rawPage=Number(search.get('page')||1);const page=Number.isSafeInteger(rawPage)&&rawPage>0?rawPage:1;
  const [retry,setRetry]=useState(0);
- const navigate=(nextKind:SavedKind,nextPage:number)=>{focus.current=true;router.push('/view/KPOP_SAVED_ITEMS?kind='+nextKind+'&page='+nextPage,{scroll:false});};
+ const navigate=(nextKind:SavedKind,nextPage:number)=>{focus.current=true;router.push('/view/KPOP_SAVED_ITEMS?kind='+nextKind+'&page='+nextPage+(eventBack?'&returnEvents='+encodeURIComponent(eventBack):''),{scroll:false});};
  const key=identity+':'+kind+':'+page;
  const [result,setResult]=useState<{key:string;data?:SavedPage;error?:boolean}>({key:''});
  const [counts,setCounts]=useState<Partial<Record<SavedKind,number>>>({});
@@ -77,6 +79,7 @@ export default function PersonalSavedScreen(_props:ScreenControllerProps) {
  };
  const total=current.data?.totalCount??0;
  return <section className="page-wrap personal-saved" aria-label="내 저장 목록">
+  {eventBack&&<Link href={eventBack}>팬 일정으로 돌아가기</Link>}
   <div className="personal-saved-head"><Link className="personal-saved-back" href="/view/MY_PAGE">← 마이페이지</Link><h1>내 목록</h1><p>나만 볼 수 있는 저장 목록이에요.</p></div>
   <nav className="personal-saved-tabs" aria-label="저장 종류">{(Object.keys(labels) as SavedKind[]).map(k=><button key={k} aria-pressed={kind===k} onClick={()=>{navigate(k,1);}}>{labels[k]}{counts[k]!==undefined&&<b className="personal-saved-tabs__count">{counts[k]}</b>}</button>)}</nav>
   <h2 ref={heading} tabIndex={-1} className="personal-saved-title">{labels[kind]} 저장 목록{current.data?` · ${total}개`:''}</h2>

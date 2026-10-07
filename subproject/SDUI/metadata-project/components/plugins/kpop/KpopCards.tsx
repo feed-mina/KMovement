@@ -2,8 +2,11 @@
 
 import { useId, useState } from 'react';
 import { SavedToggle } from './PersonalSaved';
+import ArtistMedia from './ArtistMedia';
+import ArtistRelated from './ArtistRelated';
 
 type CardProps = {
+    variant?: 'list' | 'detail';
     readOnly?: boolean;
     personalSave?: boolean;
     data?: Record<string, any>;
@@ -74,18 +77,18 @@ function socialLinks(data?: Record<string, any>): SocialLink[] {
     return links;
 }
 
-export function KpopArtistCard({ data, meta, onAction, readOnly = false, personalSave = false }: CardProps) {
+export function KpopArtistCard({ data, meta, onAction, readOnly = false, personalSave = false, variant }: CardProps) {
     const titleId = useId();
     const [followed, setFollowed] = useState(Boolean(data?.followed));
     const [busy, setBusy] = useState(false);
     const [status, setStatus] = useState('');
     const name = artistName(data);
-    const imageUrl = data?.imageUrl || data?.image_url;
     const links = socialLinks(data);
-    const isDetail = String(meta?.componentId || '').includes('_detail');
+    const isDetail = variant ? variant === 'detail' : String(meta?.componentId || '').includes('_detail');
     const nameEn = data?.nameEn || data?.name_en;
     const subtitle = nameEn && nameEn !== name ? String(nameEn) : '';
-    const profile = data?.profile || '이벤트와 팬 여행 정보를 확인해 보세요.';
+    const profile = `${name}의 공식 소식에서 다음에 함께하고 싶은 순간을 찾아보세요.`;
+    const Heading = isDetail ? 'h1' : 'h3';
 
     const toggleFollow = async () => {
         if (busy || !data?.id) return;
@@ -102,19 +105,16 @@ export function KpopArtistCard({ data, meta, onAction, readOnly = false, persona
     };
 
     return (
-        <article className="kpop-card" aria-labelledby={titleId}>
-            <div className="kpop-card-image">
-                {imageUrl ? (
-                    <img src={imageUrl} alt={`${name} 아티스트 프로필`} loading="lazy" />
-                ) : (
-                    <span aria-hidden="true">{name.slice(0, 1)}</span>
-                )}
-            </div>
+        <article className={`kpop-card kpop-artist-card${isDetail ? ' artist-profile' : ''}`} aria-labelledby={titleId}>
+            <ArtistMedia id={data?.id} name={String(name)} eager={isDetail}/>
             <div className="kpop-card-body">
-                <span className="kpop-eyebrow">ARTIST</span>
-                <h3 id={titleId}>{name}</h3>
+                <span className="kpop-eyebrow">좋아하는 마음이, 다음 추억으로</span>
+                <Heading id={titleId}>{name}</Heading>
                 {subtitle && <p className="kpop-card-subtitle">{subtitle}</p>}
                 <p>{profile}</p>
+                {isDetail&&<p>마음에 드는 아티스트와 소식은 내 목록에 차곡차곡 담아요.</p>}
+                {personalSave && data?.id && <SavedToggle kind="artists" itemRef={data.id} guestPrompt savedLabel="내 아티스트로 저장됨" saveLabel="내 아티스트로 저장" />}
+                {isDetail && links.find(link=>link.key==='official') && <a className="artist-official-action" href={links.find(link=>link.key==='official')!.href} target="_blank" rel="noreferrer">공식 소식 보기 ↗</a>}
                 {links.length > 0 && (
                     <div className="kpop-social-links" aria-label={`${name} 공식 및 SNS 링크`}>
                         {links.map((link) => (
@@ -149,13 +149,13 @@ export function KpopArtistCard({ data, meta, onAction, readOnly = false, persona
                             상세 보기
                         </button>
                     )}
-                    {personalSave && data?.id && <SavedToggle kind="artists" itemRef={data.id} />}
                     {!readOnly && <button type="button" aria-pressed={followed} aria-busy={busy} disabled={busy} onClick={toggleFollow}>
                         {busy ? '처리 중...' : followed ? '팔로우 취소' : '팔로우'}
                     </button>}
                 </div>
                 {status && <small role="status">{status}</small>}
             </div>
+            {isDetail&&data?.id&&<ArtistRelated key={String(data.id)} id={Number(data.id)} name={String(name)}/>}
         </article>
     );
 }
