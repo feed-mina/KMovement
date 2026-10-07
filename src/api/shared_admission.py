@@ -15,6 +15,8 @@ class SharedSlots:
         try:
             directory=os.environ.get('KRIDE_ADMISSION_LOCK_DIR','')
             if not directory:
+                if os.environ.get('ITINERARY_TEST_LIMIT_USERS','').strip():
+                    raise RuntimeError('shared_admission_unconfigured')
                 self.held.append(None)
                 return True
             import fcntl
