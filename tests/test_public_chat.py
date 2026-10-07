@@ -37,6 +37,30 @@ def fake_provider(monkeypatch, fail=False, usage=True):
     return client,stream
 
 
+@pytest.mark.parametrize('locale,expected',[('ko','Korean'),('en','English'),('ja','Japanese')])
+def test_course_language_keeps_order_and_owner(setup,monkeypatch,locale,expected):
+    from src.api.course_context import issue_context
+    client,headers,_=setup
+    monkeypatch.setenv('KRIDE_COURSE_SIGNING_KEY','test-key-not-for-production'*2)
+    catalog={i:{'id':i,'name':i,'address':'서울','lat':37.5,'lon':127,'sourceUrl':'https://example.test/'+i} for i in ['a','b']}
+    monkeypatch.setattr(api,'public_catalog',lambda:catalog)
+    monkeypatch.setattr(api,'lookup_public',lambda *_:pytest.fail('Course questions must resolve the existing course'))
+    provider,_=fake_provider(monkeypatch)
+    token=issue_context('7',['b','a'],catalog)['courseContext']
+    response=client.post('/api/public/chat/stream',json={'message':'second stop','responseLocale':locale,'courseContext':token},headers=headers)
+    assert response.status_code==200
+    prompt=provider.chat.completions.create.call_args.kwargs['messages'][0]['content']
+    assert 'Reply only in '+expected in prompt
+    assert prompt.index('"id": "b"')<prompt.index('"id": "a"')
+    assert '"courseStop": 2' in prompt
+    provider.chat.completions.create.reset_mock()
+    other=issue_context('8',['b'],catalog)['courseContext']
+    rejected=client.post('/api/public/chat/stream',json={'message':'hello','courseContext':other},headers=headers)
+    assert rejected.status_code==409
+    provider.chat.completions.create.assert_not_awaited()
+    assert ai_runtime.slots._value==2
+
+
 def test_auth_allowlist_and_missing_key_fail_before_provider(setup,monkeypatch):
     client,headers,_=setup
     assert client.post('/api/public/chat/stream',json={'message':'hi'}).status_code==401

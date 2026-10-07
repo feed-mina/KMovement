@@ -37,6 +37,19 @@ describe('CPU chat proxy', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(Response.json({ isLoggedIn: false }));
     expect((await POST(request())).status).toBe(401); expect(global.fetch).toHaveBeenCalledTimes(1);
   });
+  it('forwards travel locale and signed course without accepting caller identity', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce(user()).mockResolvedValueOnce(new Response('data: [DONE]\n\n',{headers:{'content-type':'text/event-stream'}}));
+    const req=new Request('http://web/api/kride/chat/stream',{method:'POST',body:JSON.stringify({message:'2番目の場所',responseLocale:'ja',courseContext:'signed-course',userSqno:99})}) as any;
+    await (await POST(req)).text();
+    const init=(global.fetch as jest.Mock).mock.calls[1][1];
+    expect(JSON.parse(init.body)).toEqual({message:'2番目の場所',responseLocale:'ja',courseContext:'signed-course'});
+    expect(init.headers['X-Kride-User']).toBe('7');
+  });
+  it.each([{responseLocale:'invalid'},{courseContext:{poiIds:['invented']}}])('rejects malformed travel context before CPU work: %j',async extra=>{
+    (global.fetch as jest.Mock).mockResolvedValueOnce(user());
+    const req=new Request('http://web/api/kride/chat/stream',{method:'POST',body:JSON.stringify({message:'hi',...extra})}) as any;
+    expect((await POST(req)).status).toBe(422);expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
   it('keeps the upstream quota status and conceals private error text', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(user()).mockResolvedValueOnce(new Response('private details', { status: 429 }));
     const result = await POST(request()); expect(result.status).toBe(429);

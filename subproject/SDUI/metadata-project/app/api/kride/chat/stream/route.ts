@@ -35,10 +35,12 @@ export async function POST(request: NextRequest) {
     try { body = JSON.parse(text); } catch { return reply(400); }
     if (typeof body?.message !== 'string' || !body.message.trim() || body.message.length > 4000) return reply(422);
     if (body.language !== undefined && !['en','ja','ko'].includes(body.language)) return reply(422);
+    if (body.responseLocale !== undefined && !['en','ja','ko'].includes(body.responseLocale)) return reply(422);
+    if (body.courseContext !== undefined && (typeof body.courseContext !== 'string' || body.courseContext.length > 8000)) return reply(422);
     const upstream = await fetch(`${base}/api/public/chat/stream`, {
       method: 'POST', headers: { 'Content-Type': 'application/json',
         'X-Kride-Token': token, 'X-Kride-User': String(user.userSqno) },
-      body: JSON.stringify({ message: body.message, ...(body.language ? {language:body.language} : {}) }), signal: controller.signal, cache: 'no-store',
+      body: JSON.stringify({ message: body.message, ...(body.language ? {language:body.language} : {}), ...(body.responseLocale ? {responseLocale:body.responseLocale} : {}), ...(body.courseContext ? {courseContext:body.courseContext} : {}) }), signal: controller.signal, cache: 'no-store',
     });
     if (!upstream.ok) { await upstream.body?.cancel(); return reply(upstream.status); }
     if (!upstream.body || !upstream.headers.get('content-type')?.includes('text/event-stream')) {

@@ -23,10 +23,13 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
     const router = useRouter();
     const { isLoading, blocked } = useScreenGuard(screenId);
     const s = useSduiScreen(screenId, refId);
-    const krideItinerary = useKrideItinerary(screenId, s.formData);
+    const [courseConfirmed,setCourseConfirmed] = useState(false);
+    const [acknowledged,setAcknowledged] = useState(false);
+    const [responseLocale,setResponseLocale] = useState<'ko'|'en'|'ja'>('ko');
+    const krideItinerary = useKrideItinerary(screenId, {...s.formData,responseLocale,acknowledgeUnverifiedConditions:acknowledged},courseConfirmed);
 
     // FOCUS 진입 시 챗 모달 기본 오픈
-    const [isChatModalOpen, setIsChatModalOpen] = useState(true);
+    const [isChatModalOpen, setIsChatModalOpen] = useState(false);
     // 연속 실패 시 재시도 버튼을 잠시 잠근다 (벤치마킹 G2 선택지).
     // setState 는 타이머 콜백 안에서만 호출한다 (react-hooks/set-state-in-effect).
     const failCountForLock = krideItinerary.failCount ?? 0;
@@ -177,6 +180,15 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
 
     if (isLoading || blocked) return <ScreenSkeleton />;
 
+    if (!courseConfirmed) return <section className="kride-focus-state-card" style={{maxWidth:760,margin:'32px auto',padding:24,color:'#172033',background:'#fff'}}>
+        <h1>코스 안내를 확인해 주세요</h1>
+        <p>현재 서울·당일치기 일반 장소를 안내합니다. 선택한 아티스트와의 연관, 예산 충족, 영업시간·예약 가능 여부는 미확인입니다.</p>
+        <label>안내 언어 <select value={responseLocale} onChange={e=>setResponseLocale(e.target.value as 'ko'|'en'|'ja')}><option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option></select></label>
+        <p><label><input type="checkbox" checked={acknowledged} onChange={e=>setAcknowledged(e.target.checked)}/> 위 조건의 충족을 보장하지 않는 일반 장소 코스로 진행합니다.</label></p>
+        <KrideButton disabled={!acknowledged} onClick={()=>setCourseConfirmed(true)}>코스 만들기</KrideButton>
+        <Link href="/view/INTRO1">지역·기간 바꾸기</Link>
+    </section>;
+
     if (krideItinerary.isLoading) {
         return (
             <div className="page-wrap KRIDE_FOCUS kride-focus-state-page">
@@ -259,6 +271,11 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
                 closeModal={s.closeModal}
             />
 
+            <section aria-label="이 코스에 질문하기" style={{margin:'24px auto',maxWidth:1100}}>
+                <h2>이 코스에 질문하기 · Ask about this course</h2>
+                <KrideChatComponent meta={{labelText:'이 코스에 질문하기'}} data={{courseContext:krideItinerary.data?.courseContext,responseLocale,contextOverride:s.formData}} />
+            </section>
+
             {isChatModalOpen && (
                 <div
                     ref={chatDialogRef}
@@ -270,7 +287,7 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
                 >
                     <KrideChatComponent
                         meta={{ labelText: "K-RIDE 여행봇", cssClass: "h-full w-full" }}
-                        data={{}}
+                        data={{courseContext:krideItinerary.data?.courseContext,responseLocale,contextOverride:s.formData}}
                         onCloseModal={closeChatModal}
                     />
                 </div>

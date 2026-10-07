@@ -3,6 +3,7 @@ import {FormEvent,useContext,useEffect,useState} from 'react';
 import {useRouter,useSearchParams} from 'next/navigation';
 import {AuthContext} from '@/context/AuthContext';
 import KpopNav from './KpopNav';
+import ArtistReturn from './ArtistReturn';
 import {SavedToggle} from './PersonalSaved';
 import {reviewedPhoto} from './ArtistMedia';
 
@@ -37,7 +38,7 @@ export default function FanEventFeed(){
  const apply=(e:FormEvent)=>{e.preventDefault();if(draft.from&&draft.to&&draft.from>draft.to){setInputError('종료일을 시작일 이후로 선택해 주세요.');return;}setInputError('');navigate(draft);};
  const data=current.data,artists=data?.artists??[],top=artists.slice(0,6),back='/view/KPOP_EVENTS?'+new URLSearchParams({...Object.fromEntries(search),scope});
  return <section className="page-wrap fan-events" aria-label="팬 일정">
-  <KpopNav/><div className="fan-event-intro"><div><p className="kpop-eyebrow">FAN MOMENTS · 팬 일정</p><h1>좋아하는 아티스트와 <br/>다음에 만날 순간</h1><p>내 아티스트의 일정을, 원하는 나라와 날짜로 찾아보세요.</p></div><a href={"/view/KPOP_SAVED_ITEMS?kind=artists&returnEvents="+encodeURIComponent(back)}>♡ 내 아티스트 관리</a></div>
+  <KpopNav/><ArtistReturn/><div className="fan-event-intro"><div><p className="kpop-eyebrow">FAN MOMENTS · 팬 일정</p><h1>좋아하는 아티스트와 <br/>다음에 만날 순간</h1><p>내 아티스트의 일정을, 원하는 나라와 날짜로 찾아보세요.</p></div><a href={"/view/KPOP_SAVED_ITEMS?kind=artists&returnEvents="+encodeURIComponent(back)}>♡ 내 아티스트 관리</a></div>
   <div className="fan-filter-row" aria-label="일정 대상"><button aria-pressed={scope==='mine'} onClick={()=>navigate({scope:'mine',artistId:''})}>내 아티스트</button><button aria-pressed={scope==='all'} onClick={()=>navigate({scope:'all',artistId:''})}>전체 아티스트</button></div>
   {auth?.isLoading?<p role="status">로그인을 확인하고 있어요…</p>:current.state==='login'?<div className="fan-event-notice"><h2>내 아티스트의 일정을 모아보세요</h2><p>로그인하면 저장한 아티스트의 일정을 볼 수 있어요. 전체 일정에서는 로그인 없이 직접 아티스트를 고를 수 있어요.</p><a href={'/view/LOGIN_PAGE?returnTo='+encodeURIComponent(back)}>로그인하고 돌아오기</a><button onClick={()=>navigate({scope:'all'})}>전체 일정 둘러보기</button></div>:<>
    <div className="fan-artists"><label htmlFor="fan-artist">누구의 일정을 볼까요?</label><select id="fan-artist" value={artist} onChange={e=>navigate({artistId:e.target.value})}><option value="">함께 보기</option>{artists.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select><div className="fan-artist-chips">{top.map(a=><button key={a.id} aria-pressed={artist===String(a.id)} onClick={()=>navigate({artistId:artist===String(a.id)?'':String(a.id)})}>{reviewedPhoto(a.id)&&<img src={reviewedPhoto(a.id)!.src} alt="" onError={e=>{e.currentTarget.hidden=true;}}/>}{a.name}</button>)}</div>{top.some(a=>reviewedPhoto(a.id))&&<details className="fan-photo-credit"><summary>사진 출처</summary>{top.map(a=>{const p=reviewedPhoto(a.id);return p?<p key={a.id}>{a.name} · {p.credit} · <a href={p.sourceUrl} target="_blank" rel="noreferrer">원본</a> · <a href={p.licenseUrl} target="_blank" rel="noreferrer">{p.license}</a></p>:null;})}</details>}</div>
