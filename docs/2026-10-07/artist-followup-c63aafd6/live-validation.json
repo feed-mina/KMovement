@@ -1,0 +1,56 @@
+{
+  "passed": true,
+  "layouts": [
+    {
+      "width": 1366,
+      "overflow": false,
+      "titleColor": "rgb(23, 32, 51)",
+      "titleBottom": 380.34375,
+      "saveBottom": 525.21875,
+      "officialBottom": 585.21875,
+      "photo": 960
+    },
+    {
+      "width": 1440,
+      "overflow": false,
+      "titleColor": "rgb(23, 32, 51)",
+      "titleBottom": 381.59375,
+      "saveBottom": 526.46875,
+      "officialBottom": 586.46875,
+      "photo": 960
+    },
+    {
+      "width": 1920,
+      "overflow": false,
+      "titleColor": "rgb(23, 32, 51)",
+      "titleBottom": 381.59375,
+      "saveBottom": 526.46875,
+      "officialBottom": 586.46875,
+      "photo": 960
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "titleColor": "rgb(23, 32, 51)",
+      "titleBottom": 747.890625,
+      "saveBottom": 947.140625,
+      "officialBottom": 1007.140625,
+      "photo": 960
+    },
+    {
+      "width": 683,
+      "overflow": false,
+      "titleColor": "rgb(23, 32, 51)",
+      "titleBottom": 756.390625,
+      "saveBottom": 901.265625,
+      "officialBottom": 961.265625,
+      "photo": 960
+    }
+  ],
+  "tabReload": true,
+  "artistEventReturn": true,
+  "guestSaveReturn": true,
+  "photoErrorNamePreserved": true,
+  "pageErrors": [],
+  "actualLoggedInSave": false
+}
