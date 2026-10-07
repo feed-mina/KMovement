@@ -49,10 +49,11 @@ type SavedPage={items:SavedRow[];page:number;pageSize:number;totalCount:number};
 export default function PersonalSavedScreen(_props:ScreenControllerProps) {
  const auth=useContext(AuthContext);const identity=auth?.isLoggedIn&&!auth.isLoading?String(auth.user?.userSqno??auth.user?.userId??''):'';
  const router=useRouter(),search=useSearchParams();
+ const eventReturn=search.get('returnEvents');const eventBack=eventReturn&&/^\/view\/KPOP_EVENTS(?:\?[^#]*)?$/.test(eventReturn)?eventReturn:null;
  const rawKind=search.get('kind');const kind:SavedKind=rawKind==='events'||rawKind==='products'?rawKind:'artists';
  const rawPage=Number(search.get('page')||1);const page=Number.isSafeInteger(rawPage)&&rawPage>0?rawPage:1;
  const [retry,setRetry]=useState(0);
- const navigate=(nextKind:SavedKind,nextPage:number)=>{focus.current=true;router.push('/view/KPOP_SAVED_ITEMS?kind='+nextKind+'&page='+nextPage,{scroll:false});};
+ const navigate=(nextKind:SavedKind,nextPage:number)=>{focus.current=true;router.push('/view/KPOP_SAVED_ITEMS?kind='+nextKind+'&page='+nextPage+(eventBack?'&returnEvents='+encodeURIComponent(eventBack):''),{scroll:false});};
  const key=identity+':'+kind+':'+page;
  const [result,setResult]=useState<{key:string;data?:SavedPage;error?:boolean}>({key:''});
  const [counts,setCounts]=useState<Partial<Record<SavedKind,number>>>({});
@@ -78,6 +79,7 @@ export default function PersonalSavedScreen(_props:ScreenControllerProps) {
  };
  const total=current.data?.totalCount??0;
  return <section className="page-wrap personal-saved" aria-label="내 저장 목록">
+  {eventBack&&<Link href={eventBack}>팬 일정으로 돌아가기</Link>}
   <div className="personal-saved-head"><Link className="personal-saved-back" href="/view/MY_PAGE">← 마이페이지</Link><h1>내 목록</h1><p>나만 볼 수 있는 저장 목록이에요.</p></div>
   <nav className="personal-saved-tabs" aria-label="저장 종류">{(Object.keys(labels) as SavedKind[]).map(k=><button key={k} aria-pressed={kind===k} onClick={()=>{navigate(k,1);}}>{labels[k]}{counts[k]!==undefined&&<b className="personal-saved-tabs__count">{counts[k]}</b>}</button>)}</nav>
   <h2 ref={heading} tabIndex={-1} className="personal-saved-title">{labels[kind]} 저장 목록{current.data?` · ${total}개`:''}</h2>

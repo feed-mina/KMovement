@@ -41,7 +41,8 @@ async function requestItinerary(body: unknown, keepTimer: (timer: ReturnType<typ
         });
         if (res.status === 401) throw new Error('login_required');
         if (!res.ok) {
-            throw new Error(`FastAPI 응답 오류: ${res.status}`);
+            const problem = await res.json().catch(()=>({}));
+            throw new Error(typeof problem.detail==='string'?problem.detail:typeof problem.error==='string'?problem.error:`FastAPI 응답 오류: ${res.status}`);
         }
         return await res.json();
     } finally {
@@ -112,7 +113,8 @@ const IDLE: KrideItineraryResult = {
  */
 export function useKrideItinerary(
     screenId: string,
-    formData: Record<string, any>
+    formData: Record<string, any>,
+    enabled = true
 ): KrideItineraryResult {
     const [data, setData] = useState<KrideItineraryResult["data"]>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -126,7 +128,7 @@ export function useKrideItinerary(
     const formRef = useRef(formData);
     formRef.current = formData;
 
-    const isFocus = screenId === "KRIDE_FOCUS";
+    const isFocus = screenId === "KRIDE_FOCUS" && enabled;
 
     // formData에 온보딩 필수 데이터가 있는지 확인
     const hasFormData = isFocus && !!(
@@ -148,6 +150,8 @@ export function useKrideItinerary(
         try {
             const rawDuration = form?.duration ?? "day";
             const body = {
+                responseLocale: form.responseLocale ?? 'ko',
+                acknowledgeUnverifiedConditions: form.acknowledgeUnverifiedConditions === true,
                 duration: DURATION_TO_KOREAN[rawDuration] ?? rawDuration,
                 artists: Array.isArray(form?.selectedArtists)
                     ? form.selectedArtists.map((a: any) => a.name)
@@ -176,6 +180,10 @@ export function useKrideItinerary(
             const itinerary = json.itinerary ?? [];
             const markers = json.mapData?.markers ?? [];
             setData({
+                courseContext: json.courseContext,
+                itineraryId: json.itineraryId,
+                catalogRevision: json.catalogRevision,
+                responseLocale: json.responseLocale,
                 source_pois: json.source_pois,
                 scopeNotice: json.scopeNotice,
                 itinerary,

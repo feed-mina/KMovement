@@ -129,7 +129,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/tour/holy/submissions").authenticated()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/kpop/artists", "/api/v1/kpop/artists/*",
-                                "/api/v1/kpop/events", "/api/v1/kpop/events/*",
+                                "/api/v1/kpop/event-feed", "/api/v1/kpop/events", "/api/v1/kpop/events/*",
                                 "/api/v1/kpop/product-candidates", "/api/v1/kpop/product-candidates/*").permitAll()
                         .requestMatchers("/api/v1/kpop/**").authenticated()
                         // ── [추가] KRIDE ──

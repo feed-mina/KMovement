@@ -16,6 +16,16 @@ function response(chunks: string[]) {
   return { reader, value: { ok: true, status: 200, body: { getReader: () => reader } } as unknown as Response };
 }
 
+it('keeps a course question read-only and forwards its locale and signed context',async()=>{
+  global.fetch=jest.fn().mockResolvedValue(response(['data: {"content":"answer"}\n\ndata: [DONE]\n\n']).value);
+  const {result}=renderHook(()=>useKrideChatStream({courseContext:'signed-course',responseLocale:'ja'}));
+  await act(async()=>{await result.current.send('이 코스의 두 번째 장소를 설명해 줘')});
+  expect(global.fetch).toHaveBeenCalledTimes(1);
+  const [url,init]=(global.fetch as jest.Mock).mock.calls[0];
+  expect(url).toBe('/api/kride/chat/stream');
+  expect(JSON.parse(init.body)).toMatchObject({intent:'qa',responseLocale:'ja',courseContext:'signed-course'});
+});
+
 it('handles split CRLF, multiline JSON, heartbeats and exactly one completion', async () => {
   const r = response([': heartbeat\r\n\r\ndata: {"content":\r\n', 'data: "서울"}\r\n\r', '\ndata: [DONE]\r\n\r\ndata: {"content":"late"}\n\n']);
   const chunks: string[] = [];

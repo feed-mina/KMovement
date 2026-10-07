@@ -114,6 +114,7 @@ export function KpopArtistCard({ data, meta, onAction, readOnly = false, persona
                 <p>{profile}</p>
                 {isDetail&&<p>마음에 드는 아티스트와 소식은 내 목록에 차곡차곡 담아요.</p>}
                 {personalSave && data?.id && <SavedToggle kind="artists" itemRef={data.id} guestPrompt savedLabel="내 아티스트로 저장됨" saveLabel="내 아티스트로 저장" />}
+                {isDetail && links.find(link=>link.key==='official') && <a className="artist-official-action" href={links.find(link=>link.key==='official')!.href} target="_blank" rel="noreferrer">공식 소식 보기 ↗</a>}
                 {links.length > 0 && (
                     <div className="kpop-social-links" aria-label={`${name} 공식 및 SNS 링크`}>
                         {links.map((link) => (
