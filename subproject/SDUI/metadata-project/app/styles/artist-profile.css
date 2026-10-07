@@ -1,0 +1,40 @@
+/* Detail is explicit: no dependency on an SDUI ancestor screen class. */
+.kride-site-content .kpop-card h3{color:var(--text-strong,#172033)}
+.kride-site-content .kpop-card p{color:var(--text-body,#475569)}
+.kpop-artist-card{background:#fff;color:#172033}
+.kpop-artist-card .kpop-card-body{align-content:start;gap:14px}
+.kride-site-content .kpop-artist-card .kpop-card-body h1{margin:0;color:#172033;font-size:clamp(32px,3.5vw,48px);line-height:1.2;overflow-wrap:anywhere}
+.kpop-artist-card .kpop-card-body h3{color:#172033}
+.kpop-artist-card .kpop-card-body p{color:#475569;line-height:1.7}
+.artist-photo{margin:0;min-width:0;background:#f0f2f5}
+.artist-photo-frame{display:flex;align-items:center;justify-content:center;aspect-ratio:16/10;overflow:hidden;background:#edf0f4}
+.artist-photo-frame img{display:block;width:100%;height:100%;object-fit:contain}
+.artist-photo-placeholder{padding:20px;text-align:center;color:#475569}
+.artist-photo-placeholder span{font-size:38px;color:#a91c39}
+.artist-photo-placeholder p{font-size:20px;font-weight:700;margin:8px 0}
+.artist-photo-placeholder small{font-size:14px}
+.artist-photo-credit{padding:8px 14px;font-size:13px;color:#475569;background:#fff}
+.artist-photo-credit summary{cursor:pointer;min-height:28px}
+.artist-photo-credit p{font-size:13px!important;overflow-wrap:anywhere}
+.artist-photo-credit a{color:#8b1830;text-decoration:underline}
+.kride-site-content .kpop-artist-card.artist-profile{display:grid;grid-template-columns:minmax(0,.42fr) minmax(0,.58fr);width:100%;max-width:1200px;margin:18px 0 0;border-radius:22px;overflow:hidden}
+.artist-profile>.artist-photo{align-self:stretch;display:flex;flex-direction:column}
+.artist-profile .artist-photo-frame{flex:1;min-height:250px;max-height:400px}
+.artist-profile>.kpop-card-body{padding:clamp(24px,3vw,42px);justify-content:stretch;align-content:center}
+.kpop-artist-card .personal-save-action button{background:#ad1835;color:#fff;border:1px solid #ad1835;padding:12px 20px;font-weight:700;min-height:48px;border-radius:12px}
+.kpop-artist-card .personal-save-action button[aria-pressed=true]{background:#fff;color:#8b1830}
+.kpop-artist-card .personal-save-action button:disabled{opacity:.7}
+.kpop-artist-card .personal-save-action p{font-size:15px}
+.kpop-artist-card .kpop-card-actions:empty{display:none}
+.artist-related{grid-column:1/-1;padding:24px 32px;border-top:1px solid #e5e7eb;background:#fffcf9}
+.artist-related h2{margin:0 0 16px!important;color:#172033}
+.artist-section-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.artist-section-buttons button{padding:10px 18px;border:1px solid #a1a7b0;background:white;color:#374151}
+.artist-section-buttons button[aria-pressed=true]{background:#f9e8ed;color:#8b1830;border-color:#ad1835;font-weight:700}
+.artist-related li{margin:12px 0}.artist-related a{color:#8b1830;text-decoration:underline}
+.artist-related-note{font-size:14px}
+.artist-detail-screen>.kpop-section-nav{margin-bottom:12px}
+.artist-sr-only{position:absolute!important;width:1px;height:1px;padding:0!important;margin:-1px!important;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.artist-catalog :is(button,a,summary):focus-visible{outline:3px solid #176890;outline-offset:4px}
+@media(min-width:1100px){.artist-catalog .artist-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:899px){.kride-site-content .kpop-artist-card.artist-profile{grid-template-columns:minmax(0,1fr)}.artist-profile .artist-photo-frame{flex:none;min-height:0;max-height:340px}.artist-related{padding:24px}.artist-profile>.kpop-card-body{padding:24px}}

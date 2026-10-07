@@ -1,6 +1,7 @@
 import React from 'react';
 import {act, fireEvent, render, screen} from '@testing-library/react';
 import ArtistCatalogScreen from '@/components/plugins/kpop/ArtistCatalogScreen';
+jest.mock('@/components/plugins/kpop/ArtistRelated',()=>({__esModule:true,default:()=>null}));
 let query = '';
 const push = jest.fn();
 jest.mock('next/navigation', () => ({usePathname: () => '/view/kpop',useRouter: () => ({push}), useSearchParams: () => new URLSearchParams(query)}));
@@ -21,7 +22,7 @@ test('public cards and eight-item pagination omit F8 actions', async () => {
 test('search resets page and detail retains list conditions', async () => {
     query = 'q=old&page=2'; (fetch as jest.Mock).mockReturnValue(response(pageData()));
     render(<ArtistCatalogScreen screenId="KPOP_EXPLORE" refId={null}/>);
-    await screen.findByText('검증 아티스트');
+    await screen.findByRole('heading',{name:'검증 아티스트'});
     fireEvent.change(screen.getByLabelText('아티스트 이름'), {target:{value:'  새 이름  '}});
     fireEvent.submit(screen.getByRole('search'));
     expect(push).toHaveBeenLastCalledWith('/view/KPOP_EXPLORE?q=%EC%83%88+%EC%9D%B4%EB%A6%84', {scroll:false});
@@ -33,10 +34,10 @@ test('search resets page and detail retains list conditions', async () => {
 test.each(['9','artist-9'])('detail accepts %s without saved/event actions', async ref => {
     query = 'q=test&page=2'; (fetch as jest.Mock).mockReturnValue(response(artist));
     render(<ArtistCatalogScreen screenId="KPOP_ARTIST_DETAIL" refId={ref}/>);
-    await screen.findByText('검증 아티스트');
+    await screen.findByRole('heading',{name:'검증 아티스트'});
     expect(fetch).toHaveBeenCalledWith(`/api/v1/kpop/artists/${ref}?view=profile`,expect.any(Object));
     expect(screen.getByRole('link',{name:'아티스트 목록으로'})).toHaveAttribute('href','/view/KPOP_EXPLORE?q=test&page=2');
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByRole('button',{name:'내 아티스트로 저장'})).toBeInTheDocument();
 });
 test('500 is not 404 and retry recovers using the same conditions', async () => {
     const mock = fetch as jest.Mock;
@@ -45,7 +46,7 @@ test('500 is not 404 and retry recovers using the same conditions', async () => 
     expect(await screen.findByRole('alert')).toHaveTextContent('아티스트를 불러오지 못했어요');
     expect(screen.queryByText(/아티스트를 찾을 수 없어요/)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button',{name:'다시 시도'}));
-    await screen.findByText('검증 아티스트');
+    await screen.findByRole('heading',{name:'검증 아티스트'});
     expect(mock.mock.calls[0][0]).toEqual(mock.mock.calls[1][0]);
 });
 test('404 renders missing without an invented card', async () => {

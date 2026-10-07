@@ -4,8 +4,13 @@ name: Publish Hostinger web image
   workflow_dispatch:
     inputs:
       expected_main_sha:
-        description: Exact 40-character origin/main SHA to publish
+        description: Exact 40-character source branch SHA to publish
         required: true
+        type: string
+      source_ref:
+        description: Branch to publish (main by default; release branches do not trigger EC2 deployment)
+        required: true
+        default: main
         type: string
 
 permissions:
@@ -25,18 +30,20 @@ jobs:
           ref: ${{ inputs.expected_main_sha }}
           fetch-depth: 1
 
-      - name: Require the current main SHA and required public build value
+      - name: Require the current source branch SHA and required public build value
         shell: bash
         env:
           EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+          SOURCE_REF: ${{ inputs.source_ref || 'main' }}
           KAKAO_MAP_APP_KEY: ${{ secrets.NEXT_PUBLIC_KAKAO_MAP_APP_KEY }}
         run: |
           set -euo pipefail
           [[ "$EXPECTED_MAIN_SHA" =~ ^[0-9a-f]{40}$ ]]
           test -n "$KAKAO_MAP_APP_KEY"
-          git fetch --no-tags --depth=1 origin main
+          git check-ref-format --branch "$SOURCE_REF"
+          git fetch --no-tags --depth=1 origin "refs/heads/$SOURCE_REF"
           test "$(git rev-parse HEAD)" = "$EXPECTED_MAIN_SHA"
-          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
+          test "$(git rev-parse FETCH_HEAD)" = "$EXPECTED_MAIN_SHA"
 
       - uses: docker/setup-buildx-action@v3
 
@@ -47,7 +54,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and publish the exact main image
+      - name: Build and publish the exact release image
         id: build
         uses: docker/build-push-action@v6
         with:
@@ -78,7 +85,7 @@ jobs:
           {
             echo "## Hostinger web image"
             echo
-            echo "- main SHA: \`$EXPECTED_MAIN_SHA\`"
+            echo "- release SHA: \`$EXPECTED_MAIN_SHA\`"
             echo "- immutable image: \`$image\`"
             echo "- target: \`kmovement.srv1869569.hstgr.cloud\`"
             echo "- deployment: not performed by this workflow"

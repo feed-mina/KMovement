@@ -94,10 +94,8 @@ export default function ArtistCatalogScreen({screenId, refId}: ScreenControllerP
         router.push(meta.actionUrl + (suffix.toString() ? `?${suffix}` : ''));
     };
 
-    return <section className="page-wrap kpop-screen artist-catalog" aria-label="아티스트 공개 카탈로그">
-        <KpopNav/><p className="kpop-eyebrow">K-POP · 아티스트</p>
-        <h1>{detail ? '아티스트 상세' : '아티스트 찾기'}</h1>
-        <p>로그인 없이 공개된 아티스트 소개와 공식 채널을 볼 수 있어요.</p>
+    return <section className={`page-wrap kpop-screen artist-catalog${detail?' artist-detail-screen':''}`} aria-label="아티스트 공개 카탈로그">
+        <KpopNav/>{!detail&&<><p className="kpop-eyebrow">K-POP · 아티스트</p><h1>좋아하는 아티스트를 만나보세요</h1><p>공식 소식을 살펴보고, 함께하고 싶은 순간을 내 목록에 담아요.</p></>}
         {detail ? <a href={listUrl(query, page)}>아티스트 목록으로</a> : <form onSubmit={search} role="search" className="artist-catalog-search">
             <label htmlFor="artist-query">아티스트 이름</label>
             <div className="artist-catalog-inputs">
@@ -106,7 +104,7 @@ export default function ArtistCatalogScreen({screenId, refId}: ScreenControllerP
                 <button type="button" onClick={() => {setDraft(''); if (!query && page === 1) setRetry(x => x + 1); else navigate('', 1);}}>초기화</button>
             </div>
         </form>}
-        <h2 tabIndex={-1} ref={title} className="artist-catalog-results" aria-live="polite">
+        <h2 tabIndex={-1} ref={title} className={`artist-catalog-results${detail&&current.status==='ready'?' artist-sr-only':''}`} aria-live="polite">
             {current.status === 'loading' ? '아티스트를 불러오는 중…' : current.status === 'error' ? '불러오기 오류' : detail ? '상세 정보' : `${query ? `“${query}” 검색 · ` : ''}${current.page?.totalCount ?? 0}명의 아티스트`}
         </h2>
         <div aria-busy={current.status === 'loading'}>
@@ -115,7 +113,7 @@ export default function ArtistCatalogScreen({screenId, refId}: ScreenControllerP
                 <button onClick={() => {shouldFocus.current = true; setRetry(x => x + 1);}}>다시 시도</button>
             </div>}
             {current.status === 'missing' && <p role="status">아티스트를 찾을 수 없어요. 주소를 확인하거나 목록으로 돌아가 주세요.</p>}
-            {current.status === 'ready' && detail && current.artist && <KpopArtistCard data={current.artist} meta={{componentId: 'kpop_artist_detail'}} readOnly personalSave />}
+            {current.status === 'ready' && detail && current.artist && <KpopArtistCard data={current.artist} variant="detail" meta={{componentId: 'kpop_artist_detail'}} readOnly personalSave />}
             {current.status === 'ready' && !detail && current.page && <>
                 {current.page.items.length === 0 ? <p role="status">{page > 1 ? '이 페이지에 아티스트가 없어요. 첫 페이지로 돌아가 주세요.' : query ? '조건에 맞는 아티스트가 없어요. 이름을 바꾸거나 초기화해 주세요.' : '아직 공개된 아티스트가 없어요.'}</p>
                     : <div className="kpop-grid artist-catalog-grid">{current.page.items.map(artist => <KpopArtistCard key={artist.id} data={artist} readOnly personalSave onAction={openArtist} />)}</div>}
