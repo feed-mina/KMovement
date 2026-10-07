@@ -1,0 +1,65 @@
+{
+  "status": "research-draft-not-public-catalog",
+  "targetCount": 20,
+  "fullyReviewedNewCandidates": 0,
+  "independentGoldReviewed": false,
+  "newHoldoutFrozen": false,
+  "experimentsExecutedThisTask": false,
+  "deploymentExecutedThisTask": false,
+  "entries": [
+    {
+      "researchId": "lead-changdeokgung",
+      "canonicalName": "창덕궁과 후원",
+      "names": {
+        "en": {
+          "value": "Changdeokgung Palace Complex",
+          "sourceUrl": "https://english.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?menuSn=351&vcontsId=94399"
+        },
+        "ja": {
+          "value": "昌徳宮と後苑",
+          "sourceUrl": "https://japanese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=111042"
+        }
+      },
+      "evidenceStatus": "official-naming-observed-awaiting-independent-review",
+      "coordinates": {
+        "status": "unknown"
+      },
+      "region": {
+        "value": "서울",
+        "status": "observed-official-page-awaiting-review"
+      },
+      "price": {
+        "status": "not-validated",
+        "note": "Palace and garden admission scopes must be separated"
+      },
+      "artistEvidence": {
+        "status": "unknown"
+      },
+      "publicEligible": false
+    },
+    {
+      "researchId": "lead-seoul-museum",
+      "canonicalName": "서울역사박물관",
+      "names": {
+        "ja": {
+          "value": "ソウル歴史博物館",
+          "sourceUrl": "https://museum.seoul.go.kr/jpn/jpn-introduction/jpn-mission.jsp"
+        }
+      },
+      "evidenceStatus": "official-naming-observed-awaiting-independent-review",
+      "coordinates": {
+        "status": "unknown"
+      },
+      "region": {
+        "status": "not-validated"
+      },
+      "price": {
+        "status": "not-validated"
+      },
+      "artistEvidence": {
+        "status": "unknown"
+      },
+      "publicEligible": false
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "kind": "easy-guide",
+      "nodeClick": true,
+      "focus": true,
+      "keyboardTabs": true,
+      "languageMockSwitch": true,
+      "mobile390NoOverflow": true,
+      "desktop1440": true
+    },
+    {
+      "kind": "fix-guide",
+      "nodeClick": true,
+      "focus": true,
+      "keyboardTabs": true,
+      "languageMockSwitch": true,
+      "mobile390NoOverflow": true,
+      "desktop1440": true
+    },
+    {
+      "kind": "work-map",
+      "nodeClick": true,
+      "focus": true,
+      "keyboardTabs": true,
+      "languageMockSwitch": true,
+      "mobile390NoOverflow": true,
+      "desktop1440": true
+    }
+  ],
+  "consoleErrors": [],
+  "externalRequests": [],
+  "scope": "report UI only; not application or retrieval evaluation"
+}

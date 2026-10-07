@@ -1,0 +1,65 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>장소 20개부터, 세 언어로 코스와 대화를 이어가요</title><style>*{box-sizing:border-box}body{margin:0;background:#f3f5f8;color:#17263b;font:17px/1.65 system-ui,"Malgun Gothic",sans-serif}main{max-width:1280px;margin:auto;padding:26px}header,section{background:white;border:1px solid #dce4ed;border-radius:20px;padding:26px;margin:22px 0}h1{font-size:34px;line-height:1.3}h2{font-size:25px}h3{font-size:21px}a{color:#155d9c}p,li,td{overflow-wrap:anywhere}button{font:inherit;cursor:pointer;border:1px solid #a9b9cb;background:white;color:#17263b;padding:12px 16px;border-radius:12px}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ed931e;outline-offset:3px}button[aria-pressed=true],button[aria-selected=true]{border:2px solid #165e76;background:#e0f3f2}.goal{position:sticky;top:0;z-index:5;padding:10px 22px;background:#173d52;color:white;font-size:16px}.tag{display:inline-block;padding:5px 12px;background:#fff0d4;border-radius:20px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{padding:18px;background:#eef4f8;border-radius:12px}.card b{display:block;font-size:24px}.flow{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.flow button{flex:1;min-width:120px}.layout{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:start}.detail{padding:24px;background:#edf6fa;border:1px solid #9cbccc;border-radius:16px;scroll-margin-top:85px}.diagram{display:grid;gap:8px;text-align:center}.diagram button{width:100%;text-align:left}.diagram small{display:block}.diagram .arrow{color:#527289}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}.compare{display:grid;grid-template-columns:1fr 1fr;gap:20px}.mock{padding:22px;border:1px solid #bccbd9;border-radius:16px;background:#f9fbfd}.bubble{padding:15px;background:#e4f3ef;border-radius:12px;margin:12px 0}.muted{color:#4b6176}.warn{border-left:4px solid #d88a12;padding:12px;background:#fff4df}.article{max-width:100%;overflow-wrap:anywhere}.article p,.article li{max-width:85ch}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:16px}td,th{padding:12px;border-bottom:1px solid #dce4ed;text-align:left;vertical-align:top;word-break:break-word}code{font-size:15px;overflow-wrap:anywhere}details{border:1px solid #dae3eb;padding:16px;border-radius:12px}summary{cursor:pointer;font-weight:bold}[hidden]{display:none!important}footer{padding:20px;color:#4b6176}body.work .layout .detail{order:2}body.work .diagram{order:1}@media(max-width:760px){main{padding:12px}header,section{padding:18px}h1{font-size:27px}.layout,.compare,.cards{grid-template-columns:1fr}.diagram{order:0!important}.detail{order:1!important}.goal{position:static}.flow button{min-width:100px}td,th{padding:6px;font-size:14px}.detail{scroll-margin-top:15px}}</style></head><body class="guide"><div class="goal">목표 · 코스를 만든 뒤 같은 장소·지도·출처로 세 언어 대화</div><main><header><span class="tag">분석·설계 완료 / 구현·새 시험·배포 미실행</span><h1>장소 20개부터, 세 언어로 코스와 대화를 이어가요</h1><p>후보는 서울 20개로 줄이되, 항목별 근거와 새 시험은 유지합니다.<br>다음 행동: 공개 후보별 출처·다국어 표기 확인표를 준비합니다.</p><div class="cards"><div class="card"><b>20개</b>공개 후보 목표 · 미확보</div><div class="card"><b>0 / 1,000</b>기존 파일럿 공개 적격</div><div class="card"><b>120문항</b>새 시험 제안 · 아직 미고정</div></div><p><a href="easy-guide-20261007-120608-multilingual-course-plan.html">easy-guide</a> · <a href="fix-guide-20261007-120608-multilingual-course-plan.html">fix-guide</a> · <a href="work-map-20261007-120608-multilingual-course-plan.html">work-map</a></p></header><section><h2>현재 분석 → 준비 → 검사 → 공개</h2><div class="flow"><button data-node="scope">① 작은 공개 목록</button> <span aria-hidden="true">→</span> <button data-node="names">② 다국어 이름</button> <span aria-hidden="true">→</span> <button data-node="test">③ 새 시험</button> <span aria-hidden="true">→</span> <button data-node="chat">④ 코스 아래 대화</button> <span aria-hidden="true">→</span> <button data-node="release">⑤ 통과 후 공개</button></div><p class="warn">검사 실패 → 현재 운영 유지 → 개발 수정 → 이미 시험을 봤다면 새로운 시험 준비</p></section><div class="tabs" role="tablist" aria-label="보고서 영역"><button role="tab" aria-selected="true" data-tab="map" aria-controls="map" id="tab-map">작업 지도</button><button role="tab" aria-selected="false" data-tab="screens" aria-controls="screens" id="tab-screens" tabindex="-1">화면 비교</button><button role="tab" aria-selected="false" data-tab="evidence" aria-controls="evidence" id="tab-evidence" tabindex="-1">상세 보고서</button></div><section id="map" role="tabpanel" aria-labelledby="tab-map"><h2>누가 무엇을 준비하나요?</h2><div class="layout"><div class="detail" aria-live="polite"><p class="muted">전체 목표 → 공개 범위와 근거 준비</p><h3 id="node-title" tabindex="-1">① 작은 공개 목록</h3><p id="node-status">준비 예정</p><p id="node-text">20개를 목표로 이름·공식 안내·지도 위치를 확인합니다. 가격·아티스트 근거가 없으면 해당 조건은 미확인/미지원입니다.</p><strong>완료 확인</strong><p id="node-proof">공개 후보별 근거 표와 제외 이유. 새 완전 검수 후보는 아직 0개.</p><p>사용자: 지금 터미널 작업 없음.<br>도우미: 선택한 항목의 자료와 검증 기록 준비.</p></div><div class="diagram" aria-label="역할과 검증 관계"><button data-node="scope" aria-pressed="true">① 작은 공개 목록<small>준비 예정</small></button><span class="arrow" aria-hidden="true">↓ 次の条件へ</span><button data-node="names" aria-pressed="false">② 다국어 이름<small>근거 탐색 2건</small></button><span class="arrow" aria-hidden="true">↓ 次の条件へ</span><button data-node="test" aria-pressed="false">③ 새 시험<small>미준비</small></button><span class="arrow" aria-hidden="true">↓ 次の条件へ</span><button data-node="chat" aria-pressed="false">④ 코스 아래 대화<small>설계 제안</small></button><span class="arrow" aria-hidden="true">↓ 次の条件へ</span><button data-node="release" aria-pressed="false">⑤ 통과 후 공개<small>현재 미통과</small></button></div></div></section><section id="screens" role="tabpanel" aria-labelledby="tab-screens" hidden><h2>Before / After · 실제 캡처가 아닌 모형</h2><div class="compare"><div class="mock"><span class="tag">Before · 확인한 코드 구조 요약</span><h3>코스 → 대화의 연결이 불명확</h3><p>여행 선호를 바탕으로 대화</p><div class="bubble">서울 당일치기 코스 짜줘</div><p>선택 언어와 생성된 일정의 정확한 연결을 더 준비해야 합니다.</p><p class="muted">현재 운영 화면을 새로 촬영한 이미지가 아닙니다.</p></div><div class="mock"><span class="tag">After · 미구현 예상 GUI</span><h3>이 코스에 질문하기</h3><div class="flow"><button data-lang="ko" aria-pressed="true">한국어</button><button data-lang="en" aria-pressed="false">English</button><button data-lang="ja" aria-pressed="false">日本語</button></div><p><b id="poi-name">창덕궁과 후원</b><br><span class="muted">서울 · 같은 장소/지도 연결 유지</span></p><div class="bubble" id="question">두 번째 장소의 공식 안내를 보여줘.</div><p id="answer">같은 장소의 공식 안내를 연결합니다. 가격·예약 조건은 별도 확인합니다.</p><p><a href="https://japanese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=111042">공식 표기 근거 보기</a></p><p class="warn">가격·아티스트 관련성: 이 모형에서는 미확인. 실제 검색·생성 요청은 실행하지 않습니다.</p></div></div></section><section id="evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden><div class="article"><h1>장소 20개부터, 세 언어로 코스와 대화를 이어가요</h1>
+<p>목표: 코스를 만든 뒤 그 아래에서 한국어·영어·일본어로 같은 여행 코스에 질문할 수 있게 합니다.</p>
+<ol>
+<li>앞선 1,000개 장소 시험은 영어·일본어와 출처 확인에서 아직 통과하지 못했습니다.</li>
+<li>우선 서울 장소 20개를 꼼꼼히 준비하는 방법을 제안합니다. 확인 절차를 빼지는 않습니다.</li>
+<li>새 시험과 실제 로그인 검사를 통과한 버전만 공개하고, 문제가 생기면 이전 버전으로 돌아갑니다.</li>
+</ol>
+<h2>지금 어디까지 왔나요?</h2>
+<p>전체 과정은 ‘장소 준비 → 세 언어 확인 → 코스와 대화 연결 → 시험 후 공개’입니다. 지금은 <strong>장소 준비 방법을 정리한 단계</strong>입니다. 이번에 공식 이름 자료 2건을 찾았지만, 모든 조건을 확인한 새 장소는 아직 0개입니다. 새 시험·프로그램 수정·배포는 하지 않았습니다.</p>
+<p>다음 행동 하나: 서울 장소 20개의 이름과 지도 위치, 공식 안내를 하나씩 대조합니다.</p>
+<p>아직 모르는 것: 외국어 이름을 제대로 연결하면 검색이 얼마나 좋아질까요? 확인하는 방법: 연습 문제로 고친 뒤, 미리 보지 않은 새 시험에서 세 언어를 따로 검사합니다.</p>
+<h2>1. 무엇을 줄이고, 무엇을 지키나요?</h2>
+<table>
+<thead>
+<tr>
+<th>줄일 수 있어요</th>
+<th>꼭 지켜요</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>처음 공개할 장소는 20개 목표</td>
+<td>각 장소의 공식 근거와 지도 위치 확인</td>
+</tr>
+<tr>
+<td>서울·당일치기부터 시작</td>
+<td>지원하지 않는 지역을 몰래 다른 지역으로 바꾸지 않기</td>
+</tr>
+<tr>
+<td>한 공식 안내가 여러 사실을 설명하면 함께 활용</td>
+<td>어떤 사실의 근거인지 하나씩 연결하기</td>
+</tr>
+<tr>
+<td>가격·아티스트 정보가 없으면 지원 범위를 줄이기</td>
+<td>모르는 가격을 무료로, 일반 장소를 팬 성지로 말하지 않기</td>
+</tr>
+</tbody>
+</table>
+<p><strong>영어·일본어로 서울을 안내하는 기능</strong>입니다. 해외 여행까지 지원한다는 뜻은 아닙니다. 20개를 다 준비하지 못하면 부족한 점을 먼저 알립니다. 시험에서 틀린 장소만 빼서 합격처럼 만들지 않습니다.</p>
+<h2>2. 이름이 달라도 같은 장소를 가리켜야 해요</h2>
+<p>앞선 개발 문제에서는 동궁과 월지·성산일출봉·해운대·어니언 성수·곰솔마루·창덕궁 질문에 다른 장소가 나왔습니다. 비슷한 종류의 장소를 찾았어도 원하는 장소가 아니면 틀린 답입니다. 외국어 이름 연결이 부족했을 가능성은 있지만, 아직 원인 전부를 증명한 것은 아닙니다.</p>
+<p>창덕궁과 후원은 <a href="https://english.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?menuSn=351&amp;vcontsId=94399">한국관광공사 영어 안내</a>와 <a href="https://japanese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=111042">일본어 안내</a>에서 이름을 확인할 수 있습니다. <a href="https://museum.seoul.go.kr/jpn/jpn-introduction/jpn-mission.jsp">서울역사박물관 일본어 소개</a>도 찾았습니다. 이름 자료를 찾았다고 가격·예약·지도 위치까지 모두 확인된 것은 아닙니다. 궁궐과 후원의 관람 조건도 구분해야 합니다.</p>
+<p>도우미가 할 일: 같은 장소의 세 언어 이름과 공식 안내를 연결하고, 지점이 다른 곳이나 비슷한 이름을 구별합니다. 사람이 확인하기 전까지 새 공개 장소로 표시하지 않습니다.</p>
+<h2>3. 코스 다음 화면은 이렇게 바뀌면 좋아요</h2>
+<p>코스 만들기 → 장소 카드와 지도 보기 → 화면 아래 ‘이 코스에 질문하기’ → 한국어 / English / 日本語 선택 → 같은 코스에 대한 답변과 공식 안내 보기.</p>
+<p>언어를 바꿔도 지도 위치와 장소 순서는 그대로입니다. ‘두 번째 장소를 설명해 줘’라고 물으면 지금 코스의 두 번째 장소를 설명합니다. ‘장소를 바꿔 줘’는 변경안을 먼저 보여줍니다. 단순히 물어봤다고 코스를 마음대로 바꾸지 않습니다.</p>
+<p>가격을 모르면 ‘가격 미확인’, 아티스트와의 관계를 모르면 ‘아티스트 관련 정보 미확인’이라고 보여줍니다. 해당 조건이 꼭 필요하면 지원하지 못함을 알리고 일반 코스로 바꿀지 선택하게 합니다. 알려줄 수 있는 장소 설명까지 전부 거절하지 않는지도 검사합니다.</p>
+<h2>4. 답을 보면서 같은 시험을 고치지 않아요</h2>
+<p>연습 문제에서 개선한 다음, 만든 사람과 분리된 언어 검토자가 정답을 확인합니다. 새 시험은 120문제를 제안합니다. 각 언어에 답할 수 있는 질문 30개, 근거가 없거나 지원하지 않는 질문 10개를 둡니다.</p>
+<p>시험 결과를 보고 고쳤다면 새 시험으로 다시 확인합니다. 이미 본 시험에서 점수만 올린 것을 새 실력처럼 말하지 않습니다. 20개 장소의 좋은 점수가 옛 1,000개 장소 전체가 좋아졌다는 뜻도 아닙니다.</p>
+<p>지금 필요한 것: 독립 언어 검토자와 새 정답 검수. 아직 완료하지 않았습니다. 사용자에게 터미널 명령이나 이미 끝낸 로그인 준비를 다시 요구하는 단계는 아닙니다.</p>
+<h2>5. 공개 전에 확인할 것</h2>
+<ul>
+<li>세 언어에서 원하는 장소를 찾는지 각각 검사합니다.</li>
+<li>일정 카드·지도·대화·공식 안내가 같은 장소를 가리키는지 확인합니다.</li>
+<li>모르는 사실을 만들지 않고, 아는 내용까지 불필요하게 거절하지 않는지 확인합니다.</li>
+<li>실제 로그인 후 첫 답이 오는 시간, 중단·종료·재시도와 계정 전환을 확인합니다.</li>
+<li>하루 합산 최대 1달러·사용자당 10회·동시 2건 제한을 유지합니다. 실제 답변 검사는 필요하면 여러 날 나눕니다.</li>
+<li>통과한 버전과 이전 버전을 함께 보관하고, 문제가 있으면 이전 상태로 돌아갑니다.</li>
+</ul>
+<p>속도 목표는 아직 확정 전 제안입니다. 첫 실제 답변의 대부분이 10초 안에 시작되고 코스는 30초 안에 완성되는지 검사하는 안입니다. 기존 검색 속도만 보고 대화가 빠르다고 판단하지 않습니다. 일부 조건이라도 검사하지 못하면 공개 완료라고 하지 않습니다.</p>
+<h2>내가 할 일과 맡길 일</h2>
+<p><strong>지금 직접 할 일: 터미널 작업 없음.</strong> ‘서울 20개부터 세 언어로 안내하고, 근거 없는 팬 장소·가격은 약속하지 않는다’는 출시 범위를 검토하면 됩니다.</p>
+<p>도우미에게 부탁할 말: “서울 장소 20개의 세 언어 이름과 공식 근거를 준비해줘. 모르는 가격·아티스트 정보는 분명히 적고, 새 시험은 연습과 분리해줘. 코스 아래 대화가 같은 지도와 출처를 이어받도록 설계하고, 통과한 검사와 남은 검사를 구분해서 보여줘.”</p>
+<p>끝났는지 확인하는 법: 장소별 확인표, 새 시험 결과, 실제 로그인 화면, 중단·재시도 결과, 이전 버전으로 돌아가는 방법을 받습니다. 이번에는 이 방법을 담은 보고서까지 만들었습니다. 실제 공개는 아직입니다.</p></div></section><footer>기준일 2026-10-07 · 문서 탐색 버튼은 실행 승인이 아닙니다. 원본·운영 변경 없음.</footer></main><script>const nodes=[["scope", "① 작은 공개 목록", "준비 예정", "20개를 목표로 이름·공식 안내·지도 위치를 확인합니다. 가격·아티스트 근거가 없으면 해당 조건은 미확인/미지원입니다.", "공개 후보별 근거 표와 제외 이유. 새 완전 검수 후보는 아직 0개."], ["names", "② 다국어 이름", "근거 탐색 2건", "개발 질문의 실패를 분류하고 공식 표기·지점·복합 장소를 연결합니다. 별칭 추가 효과는 아직 시험하지 않았습니다.", "언어별 이름·출처·동일 장소 판정. 이름 번역과 장소 위치를 분리하지 않습니다."], ["test", "③ 새 시험", "미준비", "연습 후 설정을 고정하고 독립 검토한 새 120문항으로 검사합니다. 결과를 보고 바꾸면 같은 시험으로 합격을 주장하지 않습니다.", "언어별 정답 검수·잠금 기록·새 시험 결과와 과거절 분모."], ["chat", "④ 코스 아래 대화", "설계 제안", "언어를 바꿔도 같은 코스의 장소·지도·공식 안내를 이어받습니다. 설명 요청과 일정 변경을 구분합니다.", "실제 로그인 후 세 언어 응답, 두 번째 장소 문맥, 종료·재시도·출처 일치."], ["release", "⑤ 통과 후 공개", "현재 미통과", "검색·출처·거절·속도·로그인 검사를 모두 통과한 버전만 공개합니다. 문제가 있으면 이전 버전으로 되돌립니다.", "검사별 판정과 새 버전/이전 버전 복구 기록. 이번 배포는 미실행."]];const tabs=[...document.querySelectorAll('[role=tab]')];function tab(id){tabs.forEach(b=>{const yes=b.dataset.tab===id;b.setAttribute('aria-selected',yes);b.tabIndex=yes?0:-1});document.querySelectorAll('[role=tabpanel]').forEach(p=>p.hidden=p.id!==id)}tabs.forEach((b,i)=>{b.onclick=()=>tab(b.dataset.tab);b.onkeydown=e=>{let j=e.key==='ArrowRight'?(i+1)%tabs.length:e.key==='ArrowLeft'?(i+tabs.length-1)%tabs.length:e.key==='Home'?0:e.key==='End'?tabs.length-1:-1;if(j>=0){e.preventDefault();tab(tabs[j].dataset.tab);tabs[j].focus()}}});document.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>{tab('map');const n=nodes.find(n=>n[0]===b.dataset.node);['title','status','text','proof'].forEach((key,i)=>document.getElementById('node-'+key).textContent=n[i+1]);document.querySelectorAll('[data-node]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.node===n[0]));document.getElementById('node-title').focus({preventScroll:true});document.querySelector('.detail').scrollIntoView({block:'nearest',behavior:'smooth'})});const copy={ko:['창덕궁과 후원','두 번째 장소의 공식 안내를 보여줘.','같은 장소의 공식 안내를 연결합니다. 가격·예약 조건은 별도 확인합니다.'],en:['Changdeokgung Palace Complex','Show the official guide for the second stop.','Use the same place and source. Check admission and reservation conditions separately.'],ja:['昌徳宮と後苑','2番目の場所の公式案内を見せてください。','同じ場所の公式案内を表示します。料金や予約条件は別途確認します。']};document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{const a=copy[b.dataset.lang];['poi-name','question','answer'].forEach((id,i)=>document.getElementById(id).textContent=a[i]);document.querySelectorAll('[data-lang]').forEach(x=>x.setAttribute('aria-pressed',x===b))});</script></body></html>
