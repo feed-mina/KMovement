@@ -1,0 +1,72 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CI 실패 원인·수정·병합·운영 공개 조건</title><style>*{box-sizing:border-box}body{margin:0;background:#f3f5f8;color:#17263b;font:17px/1.65 system-ui,"Malgun Gothic",sans-serif}main{max-width:1280px;margin:auto;padding:26px}header,section{background:white;border:1px solid #dce4ed;border-radius:20px;padding:26px;margin:22px 0}h1{font-size:34px;line-height:1.3}h2{font-size:25px}h3{font-size:21px}a{color:#155d9c}p,li,td{overflow-wrap:anywhere}button{font:inherit;cursor:pointer;border:1px solid #a9b9cb;background:white;color:#17263b;padding:12px 16px;border-radius:12px}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ed931e;outline-offset:3px}button[aria-pressed=true],button[aria-selected=true]{border:2px solid #165e76;background:#e0f3f2}.goal{position:sticky;top:0;z-index:5;padding:10px 22px;background:#173d52;color:white;font-size:16px}.tag{display:inline-block;padding:5px 12px;background:#fff0d4;border-radius:20px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{padding:18px;background:#eef4f8;border-radius:12px}.card b{display:block;font-size:24px}.flow{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.flow button{flex:1;min-width:120px}.layout{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:start}.detail{padding:24px;background:#edf6fa;border:1px solid #9cbccc;border-radius:16px;scroll-margin-top:85px}.diagram{display:grid;gap:8px;text-align:center}.diagram button{width:100%;text-align:left}.diagram small{display:block}.diagram .arrow{color:#527289}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}.compare{display:grid;grid-template-columns:1fr 1fr;gap:20px}.mock{padding:22px;border:1px solid #bccbd9;border-radius:16px;background:#f9fbfd}.bubble{padding:15px;background:#e4f3ef;border-radius:12px;margin:12px 0}.muted{color:#4b6176}.warn{border-left:4px solid #d88a12;padding:12px;background:#fff4df}.article{max-width:100%;overflow-wrap:anywhere}.article p,.article li{max-width:85ch}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:16px}td,th{padding:12px;border-bottom:1px solid #dce4ed;text-align:left;vertical-align:top;word-break:break-word}code{font-size:15px;overflow-wrap:anywhere}details{border:1px solid #dae3eb;padding:16px;border-radius:12px}summary{cursor:pointer;font-weight:bold}[hidden]{display:none!important}footer{padding:20px;color:#4b6176}body.work .layout .detail{order:2}body.work .diagram{order:1}@media(max-width:760px){main{padding:12px}header,section{padding:18px}h1{font-size:27px}.layout,.compare,.cards{grid-template-columns:1fr}.diagram{order:0!important}.detail{order:1!important}.goal{position:static}.flow button{min-width:100px}td,th{padding:6px;font-size:14px}.detail{scroll-margin-top:15px}}</style><body class="guide"><div class="goal">목표 · 같은 코스·지도·출처로 한국어 / 영어 / 일본어 대화</div><main><header><span class="tag">실패 수정·main 병합 완료 / 독립 검수 대기</span><h1>CI 실패 원인·수정·병합·운영 공개 조건</h1><p>실패한 검사를 수정하고 전체 CI 통과 후 main에 병합했습니다. 운영 공개 조건은 아직 미충족입니다.<br>다음 행동: 독립 검수 담당 확정 후 후보와 새 정답·시험을 검토합니다.</p><div class="cards"><div class="card"><b>20곳 · 60개 표기</b>근거 준비 · 독립 검수0곳</div><div class="card"><b>CI 10개 통과</b>전체 테스트·빌드 통과 · 서비스 수용 미검사</div><div class="card"><b>배포 미실행</b>원본·기존 운영 유지</div></div><p><a href="easy-guide-20261007-131816-merge-release-gates.html">easy-guide</a> · <a href="fix-guide-20261007-131816-merge-release-gates.html">fix-guide</a> · <a href="work-map-20261007-131816-merge-release-gates.html">work-map</a></p></header><section><h2>장소 → 검수 → 연결 → 검사 → 공개</h2><div class="flow"><button data-node="scope">① 장소 20개</button> → <button data-node="names">② 독립 검수</button> → <button data-node="chat">③ 코드 병합</button> → <button data-node="test">④ 새 시험</button> → <button data-node="release">⑤ 공개·배포</button></div><p class="warn">검수·시험 실패 → 현재 운영 유지 → 수정 시 새 해시와 필요한 새 시험</p></section><div role="tablist" class="tabs"><button role="tab" aria-controls="map" data-tab="map" aria-selected="true">작업 지도</button><button role="tab" aria-controls="screens" data-tab="screens" aria-selected="false" tabindex="-1">화면 비교</button><button role="tab" aria-controls="evidence" data-tab="evidence" aria-selected="false" tabindex="-1">상세 보고서</button></div><section id="map" role="tabpanel"><h2>현재 준비와 남은 검증</h2><div class="layout"><div class="diagram"><button data-node="scope" aria-pressed="true">① 장소 20개<small>근거 준비 / 검수 대기</small></button><button data-node="names" aria-pressed="false">② 독립 검수<small>담당 선택 대기</small></button><button data-node="chat" aria-pressed="false">③ 코드 병합<small>main 병합 완료 / 실제 수용 미검사</small></button><button data-node="test" aria-pressed="false">④ 새 시험<small>미실행</small></button><button data-node="release" aria-pressed="false">⑤ 공개·배포<small>조건 미충족</small></button></div><div class="detail" aria-live="polite"><h3 id="node-title" tabindex="-1">① 장소 20개</h3><p id="node-status">근거 준비 / 검수 대기</p><p id="node-text">공식 명칭·주소·좌표와 세 언어 표기를 연결했습니다. 가격·아티스트 연관은 unknown입니다.</p><b>근거와 완료 조건</b><p id="node-proof">review-catalog-draft.json · 공개 적격0개</p><details><summary>다음 단계에서 확인할 것</summary><p>같은 장소인지 독립 검수하고, 새 질문을 코드 작성자와 분리해 보관합니다. 모든 검사를 마치기 전 운영 후보로 바꾸지 않습니다.</p></details></div></div></section><section id="screens" role="tabpanel" hidden><h2>사용 흐름 비교 · 설명용 모형</h2><p>실제 운영 화면 캡처가 아닙니다. 코드에 추가한 흐름을 설명하며, 실제 로그인 수용 검사는 남았습니다.</p><div class="compare"><div class="mock"><h3>이전 코드 흐름</h3><p>여행 선호 → 코스 → 여행봇</p><p>응답 언어와 생성된 코스의 장소 순서를 명시적으로 연결하는 정보가 부족했습니다.</p></div><div class="mock"><h3>변경본의 목표 흐름</h3><p>지원 조건 확인 → 코스 생성 → 같은 코스에 질문</p><button data-lang="ko">한국어</button> <button data-lang="en">English</button> <button data-lang="ja">日本語</button><h3 id="poi-name">서울역사박물관</h3><div class="bubble" id="question">두 번째 장소의 공식 안내를 보여줘.</div><p id="answer">같은 장소 ID·지도·출처를 유지합니다. 가격·아티스트 연관은 미확인입니다.</p></div></div></section><section id="evidence" role="tabpanel" hidden><div class="article"><h1>CI 실패 원인·수정·병합·운영 공개 조건</h1>
+<h2>확인과 결과</h2>
+<p>실패한 commit은 <code>f7705ad92ecd8bf09676d412c810ef0e4d618b58</code>이다. Next.js의 KrideFocusScreen 테스트 6개가 새 생성 전 확인 화면을 반영하지 않아 실패했다. 제품 코드의 확인 단계를 제거하지 않고 테스트 진입 절차를 실제 계약에 맞췄다.</p>
+<p>수정 commit: <code>29c4c30405ee5e8705bb7cf4305ca0fdc4104dd4</code>.
+main merge commit: <code>92e3d271a3aa4199a03c5fb668249963a43ecb25</code>.
+2026-10-07 13:14:50 KST 병합. PR #277에 #278·#279·#280의 변경이 포함된다.</p>
+<h2>변경 파일과 검증</h2>
+<p><code>subproject/SDUI/metadata-project/tests/components/KrideFocusScreen.test.tsx</code>에서 다음을 검사한다.</p>
+<ul>
+<li>확인 체크와 생성 버튼을 거친 뒤 오류·채팅 동작 검사.</li>
+<li>처음부터 열리지 않는 모달을 실제 열기 버튼으로 열고 dialog 내부로 쿼리 범위를 한정.</li>
+<li>Escape, Tab 순환, 열기 버튼으로 초점 복귀 검사 유지.</li>
+<li>확인 전 generation enabled=false, 버튼 비활성화, 일본어 선택 후 locale·acknowledgement·enabled 전달 검사 추가.</li>
+<li>로그인 오류는 로그인으로, 후보 없음은 무의미한 재시도 대신 안내로 연결하는 검사 유지.</li>
+</ul>
+<p>PR 최종 HEAD에서 CI 실행 검사 10개 성공: nextjs, sdui-server, fastapi, cpu-image, spring-platform, mobile-address, web-image, compose 2개, traefik-compose. Supabase Preview는 skipped이며 성공으로 세지 않는다. Next.js 전체 테스트와 빌드 단계가 성공했다. 원시 로그의 모든 항목 통과 요약 100줄에서 587개 테스트가 집계되며, 이 수치는 실제 모델 품질 점수가 아니다.</p>
+<p>GitHub의 깨끗한 의존성 설치·전체 테스트·빌드 결과를 근거로 삼았다. 같은 검사를 준비하던 Windows 로컬 npm 설치는 CI 통과 후 불필요해져 이 작업의 해당 프로세스만 중단했다. 로컬 전체 테스트 완료를 주장하지 않는다.</p>
+<h2>main 병합 영향 확인</h2>
+<p>정확한 head SHA를 지정해 merge했다. RunPod 경로 변경이 없고 EC2 자동 배포 조건은 opt-in이다. Hostinger 이미지 발행은 workflow_dispatch이며 이 작업에서 정확한 main merge SHA로 웹·CPU 발행을 요청했다. 이미지 레지스트리 발행과 운영 컨테이너 교체는 별개다.</p>
+<p>웹 발행 run: https://github.com/feed-mina/KMovement/actions/runs/37570577442
+CPU 발행 run: https://github.com/feed-mina/KMovement/actions/runs/37570569992</p>
+<h2>보존과 rollback 준비</h2>
+<p>운영 컨테이너를 읽기 전용으로 조회해 기존 web/spring/CPU image digest, compose 파일 SHA256, mount 정보를 기록했다. 비밀 환경 값은 출력하지 않았다. 관찰 당시 세 컨테이너 healthy는 현재 상태 참고이며 새 기능 수용 성공을 뜻하지 않는다. 운영 서비스·원본·기존 collection을 교체하거나 재색인하지 않았다.</p>
+<h2>아직 통과하지 않은 공개 조건</h2>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현재 상태</th>
+<th>통과 근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>후보·세 언어 명칭</td>
+<td>20곳·60표기 근거 초안</td>
+<td>작성자와 분리된 장소·좌표·명칭 검수 및 승인 파일 해시 필요</td>
+</tr>
+<tr>
+<td>새 정답·holdout</td>
+<td>미고정</td>
+<td>언어별 양성30+근거없음10, 총120문항. 개발·시험 템플릿/의도 분리</td>
+</tr>
+<tr>
+<td>검색 품질</td>
+<td>미실행</td>
+<td>R@5≥0.80, nDCG@10≥0.70, baseline 하락≤0.02 제안. 실행 전 확정</td>
+</tr>
+<tr>
+<td>ANN</td>
+<td>미실행</td>
+<td>exact 대비 Recall@10≥0.99 제안; 문서 변경 C와 고정 벡터 A/B 분리</td>
+</tr>
+<tr>
+<td>출처·거절·과거절</td>
+<td>미실행</td>
+<td>공개 필수 근거 검수100%, 근거없는 주장 수락0/분모, 양성 과거절≤5% 제안</td>
+</tr>
+<tr>
+<td>응답·성능</td>
+<td>미실행</td>
+<td>언어·장소·순서·지도·출처 일치. 첫 유효 응답 p95≤10초, 코스완료 p95≤30초 제안</td>
+</tr>
+<tr>
+<td>로그인 수용</td>
+<td>미실행</td>
+<td>실제 로그인·언어3종·중단·재시도·로그아웃·계정전환·429·공급자 오류</td>
+</tr>
+</tbody>
+</table>
+<p>숫자는 새 시험 통과 결과가 아니다. 독립 검수 담당 선택을 기다린다. 새 시험을 본 뒤 수정하면 다음 버전은 새 시험을 사용한다. 모델 가중치·tokenizer·config·Linux 의존성 개별 해시와 실행 경계 재검증도 필요하다. 생성 호출은 합산 $1/일·사용자10회/일·동시2건을 유지한다.</p>
+<p>모든 gate 통과 후 exact image digest·새 collection·catalog/review SHA·설정 revision을 하나의 release로 고정한다. 이전 image/collection/config를 rollback 대상으로 유지하고 승인되지 않은 초안이나 계약명만으로 guard를 통과시키지 않는다.</p><h2>이미지 준비 시점 기록</h2><p>main 병합 후 CI도 성공했습니다. EC2 배포는 skipped입니다. 웹 이미지 발행 성공, CPU 이미지는 기록 시점 빌드 중입니다. images.json과 workflow 실행 결과를 다시 확인한 뒤 실제 서비스 검사로 진행합니다. 운영 배포 완료가 아닙니다.</p></div></section><footer>기준 시점 20261007-131816 KST · 정적 진행 기록 · 실제 검색과 배포 상태를 자동 조회하지 않습니다.</footer></main><script>const nodes=[["scope", "① 장소 20개", "근거 준비 / 검수 대기", "공식 명칭·주소·좌표와 세 언어 표기를 연결했습니다. 가격·아티스트 연관은 unknown입니다.", "review-catalog-draft.json · 공개 적격0개"], ["names", "② 독립 검수", "담당 선택 대기", "작성자와 분리된 검수로 장소 동일성과 새 정답을 고정해야 합니다.", "새 질문120개 미고정 · 시험 원문 분리 보관"], ["chat", "③ 코드 병합", "main 병합 완료 / 실제 수용 미검사", "사용자별 서명으로 코스 장소·순서를 고정하고 응답 언어를 전달합니다.", "PR #277 병합 · CI 10개 성공 / Preview 1개 skipped"], ["test", "④ 새 시험", "미실행", "실제 모델 검색·응답·거절·성능·로그인 검사를 각각 판정합니다.", "기존 시험을 보고 변경해 같은 시험으로 통과 주장 금지"], ["release", "⑤ 공개·배포", "조건 미충족", "모든 검사를 통과한 정확한 image와 별도 collection만 전환합니다.", "기존 원본/운영 보존 · rollback 식별자 고정 예정"]];const tabs=[...document.querySelectorAll('[data-tab]')];function tab(id){tabs.forEach(b=>{let a=b.dataset.tab===id;b.setAttribute('aria-selected',a);b.tabIndex=a?0:-1;document.getElementById(b.dataset.tab).hidden=!a;})}tabs.forEach((b,i)=>{b.onclick=()=>tab(b.dataset.tab);b.onkeydown=e=>{let j=e.key==='Home'?0:e.key==='End'?2:e.key==='ArrowRight'?(i+1)%3:e.key==='ArrowLeft'?(i+2)%3:null;if(j!==null){e.preventDefault();tab(tabs[j].dataset.tab);tabs[j].focus()}}});document.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>{tab('map');const n=nodes.find(n=>n[0]===b.dataset.node);['title','status','text','proof'].forEach((k,i)=>document.getElementById('node-'+k).textContent=n[i+1]);document.querySelectorAll('[data-node]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.node===n[0]));document.getElementById('node-title').focus({preventScroll:true});document.querySelector('.detail').scrollIntoView({block:'nearest'})});const copy={ko:['서울역사박물관','두 번째 장소의 공식 안내를 보여줘.','같은 장소·지도·출처. 가격·아티스트 연관 미확인.'],en:['Seoul Museum of History','Show the source for the second stop.','Same place, map and source. Prices and artist links are unverified.'],ja:['ソウル歴史博物館','2番目の場所の公式案内を見せてください。','同じ場所・地図・出典。料金とアーティストとの関連は未確認。']};document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{['poi-name','question','answer'].forEach((id,i)=>document.getElementById(id).textContent=copy[b.dataset.lang][i]);});</script></body></html>

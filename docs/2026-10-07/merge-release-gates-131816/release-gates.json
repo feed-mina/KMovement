@@ -1,0 +1,59 @@
+{
+  "at": "2026-10-07T04:13:38.492486+00:00",
+  "targetPr": 277,
+  "head": "29c4c30405ee5e8705bb7cf4305ca0fdc4104dd4",
+  "candidateDraftSha256": "82aac2bcef8708af563466b97cbda05df1970653289aefcf9e75f22aa611b6d4",
+  "candidateCount": 20,
+  "publicEligibleCount": 0,
+  "reviewDecision": "pending-independent-reviewer",
+  "holdout": {
+    "frozen": false,
+    "questions": 120,
+    "perLanguage": {
+      "positive": 30,
+      "unsupported": 10
+    },
+    "languages": [
+      "ko",
+      "en",
+      "ja"
+    ],
+    "mustNotTuneOnObservedHoldout": true
+  },
+  "proposedThresholds": {
+    "recallAt5": 0.8,
+    "ndcgAt10": 0.7,
+    "maxBaselineDrop": 0.02,
+    "annRecallAt10": 0.99,
+    "unsupportedAcceptanceCount": 0,
+    "maxPositiveOverrefusalRate": 0.05,
+    "firstMeaningfulResponseP95Seconds": 10,
+    "courseCompleteP95Seconds": 30
+  },
+  "costLimits": {
+    "dailyUsd": 1,
+    "perUserDailyCalls": 10,
+    "concurrency": 2
+  },
+  "gates": {
+    "codeCI": "passed-10-executed-1-skipped",
+    "independentSources": "pending",
+    "goldHoldout": "pending",
+    "retrieval": "not-run",
+    "responseRefusal": "not-run",
+    "performance": "not-run",
+    "authenticatedAcceptance": "not-run",
+    "productionPromotion": false
+  },
+  "note": "Preparation record only, not a passed release manifest. Original and production data preserved.",
+  "mergeCommit": "92e3d271a3aa4199a03c5fb668249963a43ecb25",
+  "imageBuildRuns": [
+    37570569992,
+    37570577442
+  ],
+  "postMergeCI": {
+    "run": 37570542162,
+    "conclusion": "success"
+  },
+  "ec2Deployment": "skipped"
+}

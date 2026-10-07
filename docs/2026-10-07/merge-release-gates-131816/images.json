@@ -1,0 +1,9 @@
+{
+  "sourceCommit": "92e3d271a3aa4199a03c5fb668249963a43ecb25",
+  "web": "ghcr.io/feed-mina/kmovement-web@sha256:4cfeb846eba184147cedd3005953ffcf92165ce8e1b6f8ae3c7516b565efcaa9",
+  "webRun": 37570577442,
+  "cpuRun": 37570569992,
+  "cpuStatus": "building",
+  "deployed": false,
+  "evidence": "web Verify and record the immutable image step IMAGE_DIGEST and root manifest Digest agree"
+}
