@@ -1,0 +1,63 @@
+{
+  "passed": true,
+  "at": "2026-10-07T02:37:16.829Z",
+  "total": 90,
+  "counts": {
+    "all": 90,
+    "domestic": 3,
+    "overseas": 83,
+    "online": 4,
+    "unknown": 0
+  },
+  "privateGuestStatus": 401,
+  "paginationAllIds": true,
+  "detailFilterReturn": true,
+  "emptyAndInjectedErrorRetry": true,
+  "errors": [],
+  "results": [
+    {
+      "geography": "domestic",
+      "total": 3
+    },
+    {
+      "geography": "overseas",
+      "total": 83
+    },
+    {
+      "geography": "online",
+      "total": 4
+    },
+    {
+      "geography": "unknown",
+      "total": 0
+    },
+    {
+      "width": 1366,
+      "overflow": false,
+      "titleColor": "rgb(17, 17, 17)",
+      "firstRowTop": 664.765625,
+      "firstTitleBottom": 743.5625
+    },
+    {
+      "width": 1440,
+      "overflow": false,
+      "titleColor": "rgb(17, 17, 17)",
+      "firstRowTop": 664.765625,
+      "firstTitleBottom": 743.5625
+    },
+    {
+      "width": 1920,
+      "overflow": false,
+      "titleColor": "rgb(17, 17, 17)",
+      "firstRowTop": 664.765625,
+      "firstTitleBottom": 743.5625
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "titleColor": "rgb(17, 17, 17)",
+      "firstRowTop": 1488.75,
+      "firstTitleBottom": 1561.546875
+    }
+  ]
+}

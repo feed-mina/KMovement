@@ -1,0 +1,9 @@
+{
+  "sha": "da635d5983402d5a3734563b88ae0e9647a5da8d",
+  "web": "ghcr.io/feed-mina/kmovement-web@sha256:c02c007917680fc16217a9f1afc31280d0f5bfa099907a8c79bb8ca7c3dfbf62",
+  "spring": "ghcr.io/feed-mina/kmovement-spring@sha256:851aefa0f64d291056de7dd3bd092d95a2e6b811364ea3549b8831c0f9a9aea2",
+  "componentShas": {
+    "web": "da635d5983402d5a3734563b88ae0e9647a5da8d",
+    "spring": "d76cdc25db68c12487d7df135e56c4ecd2ff8a1f"
+  }
+}
