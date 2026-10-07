@@ -145,6 +145,8 @@ async function streamSseChunks(
 export interface UseKrideChatOptions {
   /** 강제 endpoint override (테스트용) */
   baseUrl?: string;
+  responseLocale?: 'ko' | 'en' | 'ja';
+  courseContext?: string;
   /** 초기 컨텍스트 강제 주입 — 미지정 시 localStorage 에서 자동 로드 */
   contextOverride?: KrideForm;
   /** 모든 응답에 SSE 강제 (intent 분기 무시) */
@@ -198,7 +200,9 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
       setError(null);
 
       const form = opts.contextOverride ?? readKrideForm();
-      const req = buildRequest(trimmed, form);
+      const req = { ...buildRequest(trimmed, form), responseLocale: opts.responseLocale ?? 'ko', courseContext: opts.courseContext };
+      // A question about this course is read-only. Never auto-regenerate on the word '코스'.
+      if (opts.courseContext) req.intent = 'qa';
       if (req.intent === 'itinerary') {
         trackEvent('itinerary_start', { entry_point: 'chat_message' });
         trackEvent('preferences_complete', {
@@ -358,7 +362,7 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
         }
       }
     },
-    [base, opts.contextOverride, opts.forceStream, updateMessage],
+    [base, opts.contextOverride, opts.forceStream, opts.responseLocale, opts.courseContext, updateMessage],
   );
 
   const abort = useCallback(() => {

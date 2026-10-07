@@ -48,6 +48,14 @@ def curated_catalog(path=None, now=None):
 
 
 def public_catalog():
+    reviewed_path = os.environ.get('KRIDE_REVIEWED_CATALOG_PATH')
+    if reviewed_path:
+        from src.api.multilingual_catalog import load_reviewed_catalog
+        review_path = os.environ.get('KRIDE_REVIEWED_CATALOG_REVIEW_PATH')
+        if not review_path:
+            raise RuntimeError('catalog_review_unconfigured')
+        catalog, _ = load_reviewed_catalog(reviewed_path, review_path)
+        return catalog
     result = curated_catalog()
     base = os.environ.get('KRIDE_PUBLIC_CATALOG_URL', '').rstrip('/')
     if not base:
@@ -104,6 +112,9 @@ def index_catalog(client, embed, catalog, model):
 
 
 def search_public(client, embed, catalog, query, model, regions=(), top_k=8):
+    if any(p.get('catalogSha256') for p in catalog.values()):
+        from src.api.multilingual_catalog import search_reviewed
+        return search_reviewed(client, embed, catalog, query, regions, top_k)
     col=client.get_collection(COLLECTION)
     if col.metadata.get('embeddingModel') != model or col.metadata.get('contract') != 'e5-prefix-v1':
         raise RuntimeError('embedding_contract_mismatch')
