@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "files": 3,
+  "desktop1440": true,
+  "mobile390": true,
+  "nodeFocus": true,
+  "keyboardTabs": true,
+  "consoleErrors": [],
+  "externalRequests": [],
+  "scope": "Standalone report browser UI only; actual service login not verified"
+}
