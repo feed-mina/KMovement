@@ -1,0 +1,104 @@
+{
+  "sha": "3611e016323cbc9d5cac51e486ace433eeaca26d",
+  "image": "ghcr.io/feed-mina/kmovement-web@sha256:981f9ac4bb150e25ba58db11fd72916b2d8ee3ea10ad0fb0d63092a01d80fc6b",
+  "pr": "https://github.com/feed-mina/KMovement/pull/277",
+  "jest": {
+    "suites": 6,
+    "tests": 59,
+    "passed": true
+  },
+  "live": {
+    "passed": true,
+    "at": "2026-10-07T01:46:56.003Z",
+    "summary": "PC 1366·1440·1920, 모바일390·좁은683px: 이름·사진·저장 안내·가로 넘침 검사 통과. 사진33건 HTTP200, 사진 실패 대체 및 4개 관련 화면 확인.",
+    "results": [
+      {
+        "width": 1366,
+        "height": 768,
+        "titleColor": "rgb(23, 32, 51)",
+        "bodyColor": "rgb(71, 85, 105)",
+        "photoWidth": 960,
+        "overflow": false,
+        "titleBottom": 380.34375,
+        "buttonBottom": 525.21875,
+        "columns": "469.547px 648.453px"
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "titleColor": "rgb(23, 32, 51)",
+        "bodyColor": "rgb(71, 85, 105)",
+        "photoWidth": 960,
+        "overflow": false,
+        "titleBottom": 381.59375,
+        "buttonBottom": 526.46875,
+        "columns": "469.547px 648.453px"
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "titleColor": "rgb(23, 32, 51)",
+        "bodyColor": "rgb(71, 85, 105)",
+        "photoWidth": 960,
+        "overflow": false,
+        "titleBottom": 381.59375,
+        "buttonBottom": 526.46875,
+        "columns": "469.547px 648.453px"
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "titleColor": "rgb(23, 32, 51)",
+        "bodyColor": "rgb(71, 85, 105)",
+        "photoWidth": 960,
+        "overflow": false,
+        "titleBottom": 747.890625,
+        "buttonBottom": 947.140625,
+        "columns": "364px"
+      },
+      {
+        "width": 683,
+        "height": 768,
+        "titleColor": "rgb(23, 32, 51)",
+        "bodyColor": "rgb(71, 85, 105)",
+        "photoWidth": 960,
+        "overflow": false,
+        "titleBottom": 756.390625,
+        "buttonBottom": 901.265625,
+        "columns": "657px"
+      },
+      {
+        "eventHref": "/view/KPOP_EVENT_DETAIL/518?returnArtist=%2Fview%2FKPOP_ARTIST_DETAIL%2Fbts%3Fq%3DBTS%26page%3D2",
+        "back": "/view/KPOP_ARTIST_DETAIL/bts?q=BTS&page=2"
+      },
+      {
+        "guestLoginReturn": "/view/LOGIN_PAGE?returnTo=%2Fview%2FKPOP_ARTIST_DETAIL%2Fbts%3Fq%3DBTS%26page%3D2",
+        "relatedText": "다음에 함께하고 싶은 순간\n소식·일정\n관련 상품\n\n아직 연결된 공개 상품이 없어요. 새로운 소식을 기다려 주세요.\n\n공개된 상품 정보이며 아티스트의 실제 사용·협찬·정품을 의미하지는 않아요."
+      },
+      {
+        "photoFailureKeepsName": true
+      },
+      {
+        "route": "/view/kpop",
+        "status": 200,
+        "overflow": false
+      },
+      {
+        "route": "/view/KPOP_EVENTS",
+        "status": 200,
+        "overflow": false
+      },
+      {
+        "route": "/view/KPOP_PRODUCTS",
+        "status": 200,
+        "overflow": false
+      },
+      {
+        "route": "/view/MY_PAGE",
+        "status": 200,
+        "overflow": false
+      }
+    ],
+    "pageErrors": []
+  }
+}

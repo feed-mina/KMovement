@@ -1,0 +1,23 @@
+[
+  {
+    "kind": "easy-guide",
+    "static": true,
+    "nodeClick": true,
+    "tabsKeyboard": true,
+    "mobileNoOverflow": true
+  },
+  {
+    "kind": "fix-guide",
+    "static": true,
+    "nodeClick": true,
+    "tabsKeyboard": true,
+    "mobileNoOverflow": true
+  },
+  {
+    "kind": "work-map",
+    "static": true,
+    "nodeClick": true,
+    "tabsKeyboard": true,
+    "mobileNoOverflow": true
+  }
+]
