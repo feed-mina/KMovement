@@ -1,0 +1,224 @@
+{
+  "reviewSha256": "bf347969e19a6ecb205e1ecfb0d781c4c72e8f9d3d25c046403915435ce07213",
+  "baseCrosswalkSha256": "ffd179e6dc14db792ac2577ed9984bb49a22ae124b2dcb845d22e5e602aca77d",
+  "decision": "approved-five-row-identity-crosswalk-and-triage-method-only",
+  "rows": [
+    {
+      "legacyId": "poi_589",
+      "canonicalId": "curated:seoul:102409",
+      "identityDecision": "approved-for-facility-identity-crosswalk-only",
+      "name": "대한민국역사박물관",
+      "scope": "whole-museum",
+      "address": "서울특별시 종로구 세종대로 198",
+      "reasonKo": "공식 한국어 시설명과 세종대로198 일치. 괄호 세종로는 이 행의 법정동 부기이며 분관명이 아니다. 영·일 가이드20쪽 한국어 병기와 주소가 같은 전체 박물관을 지칭한다.",
+      "legacyToOfficialMarkerMeters": 82.089,
+      "coordinateDecision": "no-overwrite; official published marker only; entrance accuracy unverified",
+      "names": {
+        "ko": {
+          "value": "대한민국역사박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\c0d051056caa1267.html",
+          "sha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "pages": null
+        },
+        "en": {
+          "value": "National Museum of Korean Contemporary History",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\40dcd75624b85c8e.pdf",
+          "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            20
+          ]
+        },
+        "ja": {
+          "value": "大韓民国歴史博物館",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\64377bcfc7bb3783.pdf",
+          "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            20
+          ]
+        }
+      },
+      "namesDecision": "approved-official-names-for-this-canonical-facility-only",
+      "price": "unknown",
+      "artist": "unknown",
+      "publicEligible": false,
+      "automaticMergeAllowed": false
+    },
+    {
+      "legacyId": "media_2023_1649",
+      "canonicalId": "curated:seoul:102409",
+      "identityDecision": "approved-for-facility-identity-crosswalk-only",
+      "name": "대한민국역사박물관",
+      "scope": "whole-museum",
+      "address": "서울특별시 종로구 세종대로 198",
+      "reasonKo": "공식 CSV 연번13465의 시설명·주소·좌표 및 설명이 원본 행과 일치한다. 언어별 공식 가이드20쪽도 같은 전체 박물관을 지칭한다. playground 분류는 박물관의 별도 놀이터라는 증거가 아니며 방송/아티스트 관계는 이번 승인 범위에서 제외한다.",
+      "legacyToOfficialMarkerMeters": 41.735,
+      "coordinateDecision": "no-overwrite; official published marker only; entrance accuracy unverified",
+      "names": {
+        "ko": {
+          "value": "대한민국역사박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\c0d051056caa1267.html",
+          "sha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "pages": null
+        },
+        "en": {
+          "value": "National Museum of Korean Contemporary History",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\40dcd75624b85c8e.pdf",
+          "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            20
+          ]
+        },
+        "ja": {
+          "value": "大韓民国歴史博物館",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\64377bcfc7bb3783.pdf",
+          "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            20
+          ]
+        }
+      },
+      "namesDecision": "approved-official-names-for-this-canonical-facility-only",
+      "price": "unknown",
+      "artist": "unknown",
+      "publicEligible": false,
+      "automaticMergeAllowed": false
+    },
+    {
+      "legacyId": "poi_556",
+      "canonicalId": "curated:seoul:100885",
+      "identityDecision": "approved-for-facility-identity-crosswalk-only",
+      "name": "국립현대미술관 서울",
+      "scope": "seoul-branch",
+      "address": "서울특별시 종로구 삼청로 30",
+      "reasonKo": "한국어 공식 시설과 영·일 가이드9쪽 삼청로30 서울관 일치. 덕수궁관은 별도 이름·주소로 인접 기재되어 분관 혼동을 배제한다.",
+      "legacyToOfficialMarkerMeters": 7.808,
+      "coordinateDecision": "no-overwrite; official published marker only; entrance accuracy unverified",
+      "names": {
+        "ko": {
+          "value": "국립현대미술관 서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100885&menuNo=200025",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\5b4efdc0cc0b958c.html",
+          "sha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "pages": null
+        },
+        "en": {
+          "value": "MMCA Seoul",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\40dcd75624b85c8e.pdf",
+          "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            9
+          ]
+        },
+        "ja": {
+          "value": "国立現代美術館ソウル館",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\64377bcfc7bb3783.pdf",
+          "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            9
+          ]
+        }
+      },
+      "namesDecision": "approved-official-names-for-this-canonical-facility-only",
+      "price": "unknown",
+      "artist": "unknown",
+      "publicEligible": false,
+      "automaticMergeAllowed": false
+    },
+    {
+      "legacyId": "poi_638",
+      "canonicalId": "curated:seoul:101632",
+      "identityDecision": "approved-for-facility-identity-crosswalk-only",
+      "name": "서울공예박물관",
+      "scope": "whole-museum",
+      "address": "서울특별시 종로구 율곡로3길 4",
+      "reasonKo": "한국어 공식 시설과 영·일 가이드8쪽 율곡로3길4 일치. 전체 공예박물관 연결이며 어린이박물관·개별전시관을 같은 개체로 자동병합하지 않는다.",
+      "legacyToOfficialMarkerMeters": 5.947,
+      "coordinateDecision": "no-overwrite; official published marker only; entrance accuracy unverified",
+      "names": {
+        "ko": {
+          "value": "서울공예박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101632&menuNo=200025",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\79ed8d9dbaa81372.html",
+          "sha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "pages": null
+        },
+        "en": {
+          "value": "Seoul Museum of Craft Art",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\40dcd75624b85c8e.pdf",
+          "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            8
+          ]
+        },
+        "ja": {
+          "value": "ソウル工芸博物館",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\64377bcfc7bb3783.pdf",
+          "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            8
+          ]
+        }
+      },
+      "namesDecision": "approved-official-names-for-this-canonical-facility-only",
+      "price": "unknown",
+      "artist": "unknown",
+      "publicEligible": false,
+      "automaticMergeAllowed": false
+    },
+    {
+      "legacyId": "poi_754",
+      "canonicalId": "curated:seoul:100293",
+      "identityDecision": "approved-for-facility-identity-crosswalk-only",
+      "name": "전쟁기념관",
+      "scope": "whole-memorial-museum",
+      "address": "서울특별시 용산구 이태원로 29",
+      "reasonKo": "한국어 공식 시설과 영·일 가이드8쪽 이태원로29 일치. 전체 전쟁기념관이며 다른 전쟁 관련 박물관 또는 개별 전시공간의 동일개체 승인이 아니다.",
+      "legacyToOfficialMarkerMeters": 2.828,
+      "coordinateDecision": "no-overwrite; official published marker only; entrance accuracy unverified",
+      "names": {
+        "ko": {
+          "value": "전쟁기념관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100293&menuNo=200025",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\fd9388ebd3c64a15.html",
+          "sha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "pages": null
+        },
+        "en": {
+          "value": "The War Memorial of Korea",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\40dcd75624b85c8e.pdf",
+          "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            8
+          ]
+        },
+        "ja": {
+          "value": "戦争記念館",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\64377bcfc7bb3783.pdf",
+          "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            8
+          ]
+        }
+      },
+      "namesDecision": "approved-official-names-for-this-canonical-facility-only",
+      "price": "unknown",
+      "artist": "unknown",
+      "publicEligible": false,
+      "automaticMergeAllowed": false
+    }
+  ],
+  "executionAllowed": false,
+  "publicEligible": false
+}

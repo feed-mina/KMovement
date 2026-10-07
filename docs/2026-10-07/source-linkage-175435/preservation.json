@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-10-07T08:51:01.056935+00:00",
+  "baseline": "full-source-audit-20261007/audit-result.json",
+  "originalFiles": 54,
+  "changedFiles": [],
+  "unexpectedFiles": [],
+  "originalFilesMatchBaseline": true,
+  "archiveUnchanged": true,
+  "noSnapshotCompletenessClaim": true
+}

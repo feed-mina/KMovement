@@ -1,0 +1,67 @@
+{
+  "checkedAt": "2026-10-07T08:50:07.611664+00:00",
+  "stage": "2 source linkage; partial factual verification",
+  "originalRows": 40664,
+  "duplicateGroups": 3313,
+  "duplicateRows": 7216,
+  "duplicateTriage": {
+    "within-100m": 2798,
+    "same-coordinates": 214,
+    "coordinate-conflict-over-100m": 301
+  },
+  "officialDatasetRows": 15034,
+  "officialSourceUrl": "https://www.data.go.kr/data/15111405/fileData.do",
+  "officialDownloadUrl": "https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId=FILE_000000003000299&fileDetailSn=1&insertDataPrcus=N",
+  "officialCsvSha256": "1eba00010a3274e58a302d3dfdf0b7e56b4d7af3fe03680edfeae9866845ce3c",
+  "officialRowLinkCounts": {
+    "unlinked": 38955,
+    "exact-name-address-coordinates-within-100m": 1667,
+    "exact-name-address-coordinate-review": 42
+  },
+  "officialMatchedLegacyIds": 1709,
+  "multilingualLinkedLegacyRows": 5,
+  "multilingualDistinctFacilities": 4,
+  "multilingualUnlinkedRows": 40659,
+  "sourceLinkedUnionRows": 1712,
+  "addressCoordinateReviewRows": 1472,
+  "reviewFlags": {
+    "address-missing": 1382,
+    "outside-korea-triage-box": 202,
+    "official-coordinate-difference-or-invalid": 42
+  },
+  "originalGraphSha256": "49110f8c6074a1028f687c448d1dda745ed313f5ec94e99d9cfd6af59547903c",
+  "originalGraphUnchanged": true,
+  "catalogSha256": "1789273e4216461313320bfb24576e40303e0b3970e1256fa6a7e1ceab6c067d",
+  "cachedSourceHashes": {
+    "fresh-source-evidence/c0d051056caa1267.html": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+    "fresh-source-evidence/40dcd75624b85c8e.pdf": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+    "fresh-source-evidence/64377bcfc7bb3783.pdf": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+    "fresh-source-evidence/9b3eb2de9428687d.html": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+    "fresh-source-evidence/supplement-a5c606915346.html": "a8958ac8de9a1045d89b8073878b2012c756281c162215e88f5a1f4aec8ec9c6",
+    "fresh-source-evidence/5258bd2f05c95490.html": "a81739dee8467ce30c62f889fb1f4dcdaee905ee971ff47851cfce8b3c705afd",
+    "fresh-source-evidence/f5ff367a4099338d.html": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+    "fresh-source-evidence/2e5abaa848c0f70a.html": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+    "fresh-source-evidence/5b4efdc0cc0b958c.html": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+    "fresh-source-evidence/ee96701b52e4cb8b.html": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+    "fresh-source-evidence/79ed8d9dbaa81372.html": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+    "fresh-source-evidence/4c37040c801537f8.html": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+    "fresh-source-evidence/ed522932ed94086b.html": "65b34ca2869fd577c6fefc10b83c48f7366d65451bc4391dc7384f88cfaaf149",
+    "fresh-source-evidence/e3bc287364410e45.html": "6fb584235decad2e2ec5d87cd3ef870e10a0a16a1780667e1c67facf27dfe571",
+    "fresh-source-evidence/10b26238e082c958.html": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+    "fresh-source-evidence/a4ba059b9da5ddaa.html": "3b481ab1c4c693f4ea22537d3858e336c45d7ad4c2a2c63e7cd47740af41d003",
+    "fresh-source-evidence/a4af802f02a0031e.html": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+    "fresh-source-evidence/fd9388ebd3c64a15.html": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389"
+  },
+  "cachedEvidenceMeaning": "previous independent review reused after hash verification; not a fresh page or on-site review",
+  "automaticMerges": 0,
+  "newPublicApprovals": 0,
+  "searchExecuted": false,
+  "productionChanged": false,
+  "localLedgers": {
+    "place-linkage-local.jsonl": "ed62e829dcab6de80eafa44e375bc4fabdf6c2447851616fa4a2d1ca13c40ee8",
+    "duplicate-review-local.jsonl": "33a82331fcb9d3cd6e52dcd3ec00b94f9d3601a187bd08811d1abe41fd03d8ae",
+    "address-coordinate-review-local.jsonl": "6b8d03d56663d2841fd59e3b94a08d82441519cb956b13e33afd8d0904838f51",
+    "multilingual-crosswalk.json": "ffd179e6dc14db792ac2577ed9984bb49a22ae124b2dcb845d22e5e602aca77d",
+    "rules-v1.json": "6c884f16fbcb2f353f968b4c87fd99b78c597901c275dded1e1b13903c643627"
+  }
+}

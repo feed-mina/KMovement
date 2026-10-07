@@ -1,0 +1,15 @@
+{
+  "version": "source-linkage-v1",
+  "scope": "read-only source crosswalk; no identity auto-merge or public admission",
+  "duplicateKey": "nonempty name,address; strip/casefold/collapse whitespace",
+  "distanceTriageMeters": {
+    "near": 100
+  },
+  "distanceMeaning": "review prioritization only, not identity proof or accuracy threshold",
+  "officialJoin": "exact normalized name and address; retain every matching source row",
+  "names": "reuse hash-verified independent catalog evidence only; no invented translations",
+  "price": "unknown",
+  "artist": "unknown",
+  "executionAllowed": false,
+  "productionPromoted": false
+}

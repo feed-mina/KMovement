@@ -1,0 +1,347 @@
+{
+  "reviewer": "/root/independent_places",
+  "reviewerType": "independent-AI-not-human",
+  "reviewedAt": "2026-10-07T08:53:13.712049+00:00",
+  "decision": "approved-five-row-identity-crosswalk-and-triage-method-only",
+  "inputSha256": {
+    "D:\\KMovement\\work-map-guide\\work\\source-linkage-20261007\\linkage.py": "2eddb97eb3b9871069c4d433c9aac9803b8f491da6133c23857ea6ef8943fa33",
+    "D:\\KMovement\\work-map-guide\\work\\source-linkage-20261007\\linkage-result.json": "b789e4e4145158d77e4cbccd9d1077f0ff42f3ab77d58ecb8d0fbc8a9dfce52d",
+    "D:\\KMovement\\work-map-guide\\work\\source-linkage-20261007\\multilingual-crosswalk.json": "ffd179e6dc14db792ac2577ed9984bb49a22ae124b2dcb845d22e5e602aca77d",
+    "D:\\KMovement\\work-map-guide\\work\\source-linkage-20261007\\duplicate-review-local.jsonl": "33a82331fcb9d3cd6e52dcd3ec00b94f9d3601a187bd08811d1abe41fd03d8ae",
+    "D:\\KMovement\\work-map-guide\\work\\source-linkage-20261007\\place-linkage-local.jsonl": "ed62e829dcab6de80eafa44e375bc4fabdf6c2447851616fa4a2d1ca13c40ee8",
+    "D:\\KMovement\\work-map-guide\\work\\source-linkage-20261007\\address-coordinate-review-local.jsonl": "6b8d03d56663d2841fd59e3b94a08d82441519cb956b13e33afd8d0904838f51",
+    "D:\\KMovement\\work-map-guide\\work\\source-linkage-20261007\\official-media.csv": "1eba00010a3274e58a302d3dfdf0b7e56b4d7af3fe03680edfeae9866845ce3c",
+    "D:\\KMovement\\work-map-guide\\work\\source-linkage-20261007\\data-go-15111405.html": "2bfc61c162c07fee6acbbb15a1c07d989613731a969a00bd877449f483442388",
+    "D:\\KMovement\\work-map-guide\\work\\source-linkage-20261007\\rules-v1.json": "6c884f16fbcb2f353f968b4c87fd99b78c597901c275dded1e1b13903c643627",
+    "D:\\KMovement\\models\\kride_graph.json": "49110f8c6074a1028f687c448d1dda745ed313f5ec94e99d9cfd6af59547903c",
+    "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\catalog-11-v1.json": "1789273e4216461313320bfb24576e40303e0b3970e1256fa6a7e1ceab6c067d",
+    "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\catalog-11-independent-review-v1.json": "2fe5d1eba5b0551f5fcd3439735d04b286ed057188cf9c4a15b2acc4abc988ae"
+  },
+  "cachedOfficialEvidenceSha256": {
+    "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\c0d051056caa1267.html": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+    "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\40dcd75624b85c8e.pdf": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+    "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\64377bcfc7bb3783.pdf": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+    "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\5b4efdc0cc0b958c.html": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+    "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\79ed8d9dbaa81372.html": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+    "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\fd9388ebd3c64a15.html": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389"
+  },
+  "method": [
+    "원본graph의5행 전체필드를 읽어 이름·주소·분류·설명과 canonical 시설범위를 대조했다.",
+    "한국어 공식HTML4개 시설명/주소/게시좌표 및 해시를 재확인했다.",
+    "보관 영문·일문 공식PDF의 물리적8·9·20쪽 전체 텍스트를 재독해 이름·한국어병기·주소·분관구분을 확인했다. 이번에는 새페이지현장확인이나 PDF재렌더링을 하지 않았다.",
+    "원본40664행을 독립 코드로 재분류하고 duplicate-review-local.jsonl3313행 전부의 그룹구성·거리·상태를 검산했다. 기존 linkage.py는 실행하거나 수정하지 않았다.",
+    "공식CSV15034행을 다시 파싱하여 이름/주소 일치1709개 원본행의 모든 매칭행을 보존한 거리 판정을 독립 재계산했다."
+  ],
+  "rows": [
+    {
+      "legacyId": "poi_589",
+      "canonicalId": "curated:seoul:102409",
+      "identityDecision": "approved-for-facility-identity-crosswalk-only",
+      "name": "대한민국역사박물관",
+      "scope": "whole-museum",
+      "address": "서울특별시 종로구 세종대로 198",
+      "reasonKo": "공식 한국어 시설명과 세종대로198 일치. 괄호 세종로는 이 행의 법정동 부기이며 분관명이 아니다. 영·일 가이드20쪽 한국어 병기와 주소가 같은 전체 박물관을 지칭한다.",
+      "legacyToOfficialMarkerMeters": 82.089,
+      "coordinateDecision": "no-overwrite; official published marker only; entrance accuracy unverified",
+      "names": {
+        "ko": {
+          "value": "대한민국역사박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\c0d051056caa1267.html",
+          "sha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "pages": null
+        },
+        "en": {
+          "value": "National Museum of Korean Contemporary History",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\40dcd75624b85c8e.pdf",
+          "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            20
+          ]
+        },
+        "ja": {
+          "value": "大韓民国歴史博物館",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\64377bcfc7bb3783.pdf",
+          "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            20
+          ]
+        }
+      },
+      "namesDecision": "approved-official-names-for-this-canonical-facility-only",
+      "price": "unknown",
+      "artist": "unknown",
+      "publicEligible": false,
+      "automaticMergeAllowed": false
+    },
+    {
+      "legacyId": "media_2023_1649",
+      "canonicalId": "curated:seoul:102409",
+      "identityDecision": "approved-for-facility-identity-crosswalk-only",
+      "name": "대한민국역사박물관",
+      "scope": "whole-museum",
+      "address": "서울특별시 종로구 세종대로 198",
+      "reasonKo": "공식 CSV 연번13465의 시설명·주소·좌표 및 설명이 원본 행과 일치한다. 언어별 공식 가이드20쪽도 같은 전체 박물관을 지칭한다. playground 분류는 박물관의 별도 놀이터라는 증거가 아니며 방송/아티스트 관계는 이번 승인 범위에서 제외한다.",
+      "legacyToOfficialMarkerMeters": 41.735,
+      "coordinateDecision": "no-overwrite; official published marker only; entrance accuracy unverified",
+      "names": {
+        "ko": {
+          "value": "대한민국역사박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\c0d051056caa1267.html",
+          "sha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "pages": null
+        },
+        "en": {
+          "value": "National Museum of Korean Contemporary History",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\40dcd75624b85c8e.pdf",
+          "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            20
+          ]
+        },
+        "ja": {
+          "value": "大韓民国歴史博物館",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\64377bcfc7bb3783.pdf",
+          "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            20
+          ]
+        }
+      },
+      "namesDecision": "approved-official-names-for-this-canonical-facility-only",
+      "price": "unknown",
+      "artist": "unknown",
+      "publicEligible": false,
+      "automaticMergeAllowed": false
+    },
+    {
+      "legacyId": "poi_556",
+      "canonicalId": "curated:seoul:100885",
+      "identityDecision": "approved-for-facility-identity-crosswalk-only",
+      "name": "국립현대미술관 서울",
+      "scope": "seoul-branch",
+      "address": "서울특별시 종로구 삼청로 30",
+      "reasonKo": "한국어 공식 시설과 영·일 가이드9쪽 삼청로30 서울관 일치. 덕수궁관은 별도 이름·주소로 인접 기재되어 분관 혼동을 배제한다.",
+      "legacyToOfficialMarkerMeters": 7.808,
+      "coordinateDecision": "no-overwrite; official published marker only; entrance accuracy unverified",
+      "names": {
+        "ko": {
+          "value": "국립현대미술관 서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100885&menuNo=200025",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\5b4efdc0cc0b958c.html",
+          "sha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "pages": null
+        },
+        "en": {
+          "value": "MMCA Seoul",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\40dcd75624b85c8e.pdf",
+          "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            9
+          ]
+        },
+        "ja": {
+          "value": "国立現代美術館ソウル館",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\64377bcfc7bb3783.pdf",
+          "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            9
+          ]
+        }
+      },
+      "namesDecision": "approved-official-names-for-this-canonical-facility-only",
+      "price": "unknown",
+      "artist": "unknown",
+      "publicEligible": false,
+      "automaticMergeAllowed": false
+    },
+    {
+      "legacyId": "poi_638",
+      "canonicalId": "curated:seoul:101632",
+      "identityDecision": "approved-for-facility-identity-crosswalk-only",
+      "name": "서울공예박물관",
+      "scope": "whole-museum",
+      "address": "서울특별시 종로구 율곡로3길 4",
+      "reasonKo": "한국어 공식 시설과 영·일 가이드8쪽 율곡로3길4 일치. 전체 공예박물관 연결이며 어린이박물관·개별전시관을 같은 개체로 자동병합하지 않는다.",
+      "legacyToOfficialMarkerMeters": 5.947,
+      "coordinateDecision": "no-overwrite; official published marker only; entrance accuracy unverified",
+      "names": {
+        "ko": {
+          "value": "서울공예박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101632&menuNo=200025",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\79ed8d9dbaa81372.html",
+          "sha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "pages": null
+        },
+        "en": {
+          "value": "Seoul Museum of Craft Art",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\40dcd75624b85c8e.pdf",
+          "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            8
+          ]
+        },
+        "ja": {
+          "value": "ソウル工芸博物館",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\64377bcfc7bb3783.pdf",
+          "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            8
+          ]
+        }
+      },
+      "namesDecision": "approved-official-names-for-this-canonical-facility-only",
+      "price": "unknown",
+      "artist": "unknown",
+      "publicEligible": false,
+      "automaticMergeAllowed": false
+    },
+    {
+      "legacyId": "poi_754",
+      "canonicalId": "curated:seoul:100293",
+      "identityDecision": "approved-for-facility-identity-crosswalk-only",
+      "name": "전쟁기념관",
+      "scope": "whole-memorial-museum",
+      "address": "서울특별시 용산구 이태원로 29",
+      "reasonKo": "한국어 공식 시설과 영·일 가이드8쪽 이태원로29 일치. 전체 전쟁기념관이며 다른 전쟁 관련 박물관 또는 개별 전시공간의 동일개체 승인이 아니다.",
+      "legacyToOfficialMarkerMeters": 2.828,
+      "coordinateDecision": "no-overwrite; official published marker only; entrance accuracy unverified",
+      "names": {
+        "ko": {
+          "value": "전쟁기념관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100293&menuNo=200025",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\fd9388ebd3c64a15.html",
+          "sha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "pages": null
+        },
+        "en": {
+          "value": "The War Memorial of Korea",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\40dcd75624b85c8e.pdf",
+          "sha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            8
+          ]
+        },
+        "ja": {
+          "value": "戦争記念館",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceFile": "D:\\KMovement\\work-map-guide\\work\\independent-review-20261007\\places11-source-freeze-v1\\fresh-source-evidence\\64377bcfc7bb3783.pdf",
+          "sha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            8
+          ]
+        }
+      },
+      "namesDecision": "approved-official-names-for-this-canonical-facility-only",
+      "price": "unknown",
+      "artist": "unknown",
+      "publicEligible": false,
+      "automaticMergeAllowed": false
+    }
+  ],
+  "summary": {
+    "legacyRowsReviewed": 5,
+    "distinctCanonicalFacilities": 4,
+    "identityApprovedRows": 5,
+    "identityHeldRows": 0,
+    "koEnJaNameLinksApproved": 15,
+    "duplicateGroupsMechanicallyAudited": 3313,
+    "duplicateGroupsFactuallyIdentityApprovedByThisReview": 0,
+    "automaticMerges": 0,
+    "productionPromotions": 0
+  },
+  "museumPair": {
+    "ids": [
+      "poi_589",
+      "media_2023_1649"
+    ],
+    "decision": "same-whole-museum-for-crosswalk",
+    "legacyMarkerSeparationMeters": 41.991696,
+    "reason": "이름·도로명주소·공식 다국어 시설증거가 합치한다. 거리만으로 승인하지 않았다.",
+    "relatedFacilityExcluded": {
+      "legacyId": "poi_514",
+      "name": "K-컬처 스크린(대한민국역사박물관)",
+      "reason": "같은 주소의 관련시설이나 화면은 전체 박물관과 자동동일개체로 처리할 수 없다. 이번5행 연결에 포함하지 않는다."
+    },
+    "noInheritedClaims": [
+      "방송방문 사실",
+      "아티스트 연관",
+      "입장료",
+      "영업시간",
+      "입구좌표 정확도"
+    ]
+  },
+  "duplicateTriageAudit": {
+    "allRowsParsed": 3313,
+    "rowsInGroups": 7216,
+    "membershipMatchesOriginal": true,
+    "distanceClassificationMismatches": 0,
+    "allPhysicalIdentityPending": true,
+    "counts": {
+      "same-coordinates": 214,
+      "within-100m": 2798,
+      "coordinate-conflict-over-100m": 301
+    },
+    "finding": "코드는 분류를 identity proof로 승격하지 않으며 전체 원장 identityStatus pending-review/publicEligible false 유지. 같은좌표214도 실제개체 동일성이 검증된 것이 아니다.",
+    "limitations": [
+      "이름·주소 정규화 exact grouping은 다른 별칭·번역·주소표기 중복을 놓칠 수 있다.",
+      "100m는 검토 우선순위 경계일 뿐 정확도 허용치나 동일시설 증명 기준이 아니다.",
+      "동일 이름·주소라도 여러 점포/층/분관/관련시설이 있을 수 있어 개별증거 없이 병합하면 안 된다.",
+      "road()의 괄호삭제는 부기주소뿐 아니라 분관/건물표현도 없앨 수 있다. 이번5행의 괄호 세종로만 개별 검토했으며 일반적 자동 승인규칙으로 확장하지 않는다."
+    ]
+  },
+  "officialCsvAudit": {
+    "sourceUrl": "https://www.data.go.kr/data/15111405/fileData.do",
+    "snapshotSha256": "1eba00010a3274e58a302d3dfdf0b7e56b4d7af3fe03680edfeae9866845ce3c",
+    "csvRows": 15034,
+    "matchedLegacyRows": 1709,
+    "within100mRows": 1667,
+    "heldCoordinateRows": 42,
+    "heldIdsMatchLedgerExactly": true,
+    "invalidOfficialCoordinatesAmongHeldMatches": 0,
+    "heldMaximumDistanceRangeMeters": [
+      100.502,
+      4702.742
+    ],
+    "mixedMatchesWithOneExactCoordinateAndAnotherBeyond100m": 4,
+    "mixedMatchLegacyIds": [
+      "media_2023_1604",
+      "media_2023_427",
+      "media_2023_760",
+      "media_2023_1084"
+    ],
+    "holdDecision": "approved-to-remain-pending; no coordinate replacement",
+    "reason": "42행 모두 유효한 좌표지만 적어도 한 매칭 공식행과100m를 넘는다. 4행은 한 공식행과0m이어도 다른 공식행과100m초과라 전체 매칭행 보존 원칙상 보류가 타당하다. 어느 좌표가 오기인지, 이전위치/입구/시설범위 차이인지는 아직 미확인이다.",
+    "noOverclaim": "1709는 원본행 수이지 서로 다른 시설 수가 아니다. 1667의 근접 일치도 개별시설 실체검수 승인이나 정확좌표 승인이 아니다.",
+    "datasetFreshness": "보관CSV를 검수했으며 최신성/현장성을 확인하지 않았다. 박물관 CSV행 최종작성일2022-11-18. 공식배포파일이라는 사실만으로 모든 내용의 현재 정확성이 입증되지 않는다."
+  },
+  "unverified": [
+    "원본좌표와 게시좌표 중 실제 입구/대표점의 정확성",
+    "전체3313개 중복그룹의 개별실체",
+    "공식CSV의 현시점 정보 정확성",
+    "42개 좌표차이의 오류 주체와 수정보안",
+    "가격·아티스트·방송연관·영업시간",
+    "새로운공식페이지 재방문/현장확인"
+  ],
+  "preservation": {
+    "originalGraphSha256BeforeAndAfter": "49110f8c6074a1028f687c448d1dda745ed313f5ec94e99d9cfd6af59547903c",
+    "originalGraphMatchesFrozen": true,
+    "originalModified": false,
+    "productCodeModified": false,
+    "existingArtifactsModified": false,
+    "searchExecuted": false,
+    "productionModified": false,
+    "newHoldoutAccessed": false,
+    "onlyOutput": "independent-review.json"
+  }
+}
