@@ -1,0 +1,9 @@
+{
+  "decision": "pending",
+  "catalogSha256": "82aac2bcef8708af563466b97cbda05df1970653289aefcf9e75f22aa611b6d4",
+  "reviewer": null,
+  "publicEligibleCount": 0,
+  "goldReviewed": false,
+  "newHoldoutFrozen": false,
+  "executionAllowed": false
+}

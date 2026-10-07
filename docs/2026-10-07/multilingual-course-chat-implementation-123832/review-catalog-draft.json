@@ -1,0 +1,1504 @@
+{
+  "contract": "kride-reviewed-multilingual-v2",
+  "author": "implementation-author",
+  "status": "draft-not-approved",
+  "items": [
+    {
+      "id": "curated:seoul:100867",
+      "name": "서울역사박물관",
+      "address": "서울특별시 종로구 새문안로 55",
+      "region": "서울",
+      "lat": 37.570507525011855,
+      "lon": 126.97052372473162,
+      "verifiedAt": "2026-10-07T03:17:42.827818+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "서울역사박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100867&menuNo=200025",
+          "sourceSha256": "7c3730ce396445e2479231c1265e904cd085f6c84f0b4cf5e12893101bd81a92",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Seoul Museum of History",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            8,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 8,48"
+        },
+        "ja": {
+          "value": "ソウル歴史博物館",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            8,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 8,48"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "서울역사박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100867&menuNo=200025",
+          "sourceSha256": "7c3730ce396445e2479231c1265e904cd085f6c84f0b4cf5e12893101bd81a92",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.570507525011855,
+            "lon": 126.97052372473162
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100867&menuNo=200025",
+          "sourceSha256": "7c3730ce396445e2479231c1265e904cd085f6c84f0b4cf5e12893101bd81a92",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100867&menuNo=200025",
+          "sourceSha256": "7c3730ce396445e2479231c1265e904cd085f6c84f0b4cf5e12893101bd81a92",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:100548",
+      "name": "남산골한옥마을",
+      "address": "서울특별시 중구 퇴계로34길 28",
+      "region": "서울",
+      "lat": 37.559304933707146,
+      "lon": 126.994440072131,
+      "verifiedAt": "2026-10-07T03:17:42.867012+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "남산골한옥마을",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100548&menuNo=200025",
+          "sourceSha256": "b702789f777471cd56232816e45e857808535141fd615f368bb9a5dd31a595fb",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Namsangol Hanok Village",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            2,
+            16,
+            46,
+            48,
+            49
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 2,16,46,48,49"
+        },
+        "ja": {
+          "value": "南山コル韓屋村",
+          "sourceUrl": "https://japanese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=110768",
+          "sourceSha256": "eb7729ad5ed680dcf313811eb97be35555ab03aaa754a83c1c2a6f3c4ea76d0e",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "pending-independent-review",
+          "historicalNameOnly": false
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "남산골한옥마을",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100548&menuNo=200025",
+          "sourceSha256": "b702789f777471cd56232816e45e857808535141fd615f368bb9a5dd31a595fb",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.559304933707146,
+            "lon": 126.994440072131
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100548&menuNo=200025",
+          "sourceSha256": "b702789f777471cd56232816e45e857808535141fd615f368bb9a5dd31a595fb",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100548&menuNo=200025",
+          "sourceSha256": "b702789f777471cd56232816e45e857808535141fd615f368bb9a5dd31a595fb",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:100291",
+      "name": "N서울타워",
+      "address": "서울특별시 용산구 남산공원길 105",
+      "region": "서울",
+      "lat": 37.5511225714939,
+      "lon": 126.987867837993,
+      "verifiedAt": "2026-10-07T03:17:42.853919+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "N서울타워",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100291&menuNo=200025",
+          "sourceSha256": "cb04451c89a6f1955e9f659b798e763037617fe3be40c62bb086ac23584d27f3",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Namsan Seoul Tower",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            2,
+            15,
+            26,
+            40,
+            46,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 2,15,26,40,46,48"
+        },
+        "ja": {
+          "value": "Nソウルタワー",
+          "sourceUrl": "https://japanese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=226860",
+          "sourceSha256": "230f8a30877a2f9a9fb19ad5f4a5462131e5f22c74aa6878407abe1be910a336",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "pending-independent-review",
+          "historicalNameOnly": true
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "N서울타워",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100291&menuNo=200025",
+          "sourceSha256": "cb04451c89a6f1955e9f659b798e763037617fe3be40c62bb086ac23584d27f3",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.5511225714939,
+            "lon": 126.987867837993
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100291&menuNo=200025",
+          "sourceSha256": "cb04451c89a6f1955e9f659b798e763037617fe3be40c62bb086ac23584d27f3",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100291&menuNo=200025",
+          "sourceSha256": "cb04451c89a6f1955e9f659b798e763037617fe3be40c62bb086ac23584d27f3",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:102409",
+      "name": "대한민국역사박물관",
+      "address": "서울특별시 종로구 세종대로 198",
+      "region": "서울",
+      "lat": 37.5737136067193,
+      "lon": 126.978339442463,
+      "verifiedAt": "2026-10-07T03:17:43.091593+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "대한민국역사박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+          "sourceSha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "National Museum of Korean Contemporary History",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            20,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 20,48"
+        },
+        "ja": {
+          "value": "大韓民国歴史博物館",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            20,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 20,48"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "대한민국역사박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+          "sourceSha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.5737136067193,
+            "lon": 126.978339442463
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+          "sourceSha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102409&menuNo=200025",
+          "sourceSha256": "d129aabb50d0d36cc5e1104be3540a04c2dc5ac0410572725cc1e1224fda96b1",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:100892",
+      "name": "서울돈화문국악당",
+      "address": "서울  종로구 와룡동 12-2",
+      "region": "서울",
+      "lat": 37.5772502822,
+      "lon": 126.9907306641,
+      "verifiedAt": "2026-10-07T03:17:43.108005+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "서울돈화문국악당",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100892&menuNo=200025",
+          "sourceSha256": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Seoul Donhwamun Traditional Theater",
+          "sourceUrl": "https://english.seoul.go.kr/seoul-gradually-reopens-63-cultural-facilities-that-were-closed/",
+          "sourceSha256": "c1d5150ebe6fa8dfe31e8bb2dd63b3f6c147d93d1dfc18875874d2ff0adfe708",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "pending-independent-review",
+          "historicalNameOnly": true
+        },
+        "ja": {
+          "value": "ソウルトンファムン(敦化門)国楽堂",
+          "sourceUrl": "https://japanese.seoul.go.kr/政策紹介/文化/文化施設/博物館/",
+          "sourceSha256": "3fd929c66781d0774a5d2ce8738826e1a667fd404b2f76564586e541f4aede05",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "pending-independent-review",
+          "historicalNameOnly": true
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "서울돈화문국악당",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100892&menuNo=200025",
+          "sourceSha256": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.5772502822,
+            "lon": 126.9907306641
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100892&menuNo=200025",
+          "sourceSha256": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100892&menuNo=200025",
+          "sourceSha256": "6b40aebed8dab50ad6ee1a72e58c6877c40f5983e5ee424f71f80c9add914b57",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:102065",
+      "name": "창경궁",
+      "address": "서울 종로구 창경궁로 185 창경궁",
+      "region": "서울",
+      "lat": 37.5776239475981,
+      "lon": 126.993841430623,
+      "verifiedAt": "2026-10-07T03:17:43.114392+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "창경궁",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102065&menuNo=200025",
+          "sourceSha256": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Changgyeonggung Palace",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            2,
+            5,
+            23,
+            37,
+            46,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 2,5,23,37,46,48"
+        },
+        "ja": {
+          "value": "昌慶宮",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            2,
+            5,
+            23,
+            37,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 2,5,23,37,48"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "창경궁",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102065&menuNo=200025",
+          "sourceSha256": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.5776239475981,
+            "lon": 126.993841430623
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102065&menuNo=200025",
+          "sourceSha256": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102065&menuNo=200025",
+          "sourceSha256": "6962a53c722a1ed644fd145dd74297b8ae89290f570b4aa9f3a6802861526ede",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:101549",
+      "name": "서울남산국악당",
+      "address": "서울특별시 중구 퇴계로34길 28 서울남산국악당",
+      "region": "서울",
+      "lat": 37.5583499463987,
+      "lon": 126.994021611776,
+      "verifiedAt": "2026-10-07T03:17:43.341068+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "서울남산국악당",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101549&menuNo=200025",
+          "sourceSha256": "76e940b0b2e4e8646ff51e62d42023b04baabd2d0587eea80782cde0471a6fe9",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Seoul Namsan Gukakdang",
+          "sourceUrl": "https://english.seoul.go.kr/seoul-gradually-reopens-63-cultural-facilities-that-were-closed/",
+          "sourceSha256": "c1d5150ebe6fa8dfe31e8bb2dd63b3f6c147d93d1dfc18875874d2ff0adfe708",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "pending-independent-review",
+          "historicalNameOnly": true
+        },
+        "ja": {
+          "value": "ソウルナムサン(南山)国楽堂",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2024/08/2024_aug_newsletter_jp.pdf",
+          "sourceSha256": "09b6bb019c2f9105e65c7f125201541cdf06c614c0a5990bec9302ae722bb929",
+          "locator": "PDF page 8",
+          "matchMethod": "PDF text whitespace normalization",
+          "historicalNameOnly": true,
+          "status": "pending-independent-review"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "서울남산국악당",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101549&menuNo=200025",
+          "sourceSha256": "76e940b0b2e4e8646ff51e62d42023b04baabd2d0587eea80782cde0471a6fe9",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.5583499463987,
+            "lon": 126.994021611776
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101549&menuNo=200025",
+          "sourceSha256": "76e940b0b2e4e8646ff51e62d42023b04baabd2d0587eea80782cde0471a6fe9",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101549&menuNo=200025",
+          "sourceSha256": "76e940b0b2e4e8646ff51e62d42023b04baabd2d0587eea80782cde0471a6fe9",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:102354",
+      "name": "경희궁",
+      "address": "서울특별시 종로구 새문안로 45",
+      "region": "서울",
+      "lat": 37.57078184592975,
+      "lon": 126.96865021365493,
+      "verifiedAt": "2026-10-07T03:17:43.404800+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "경희궁",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102354&menuNo=200025",
+          "sourceSha256": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Gyeonghuigung Palace",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            5,
+            13,
+            41,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 5,13,41,48"
+        },
+        "ja": {
+          "value": "慶熙宮",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            5,
+            13,
+            41,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 5,13,41,48"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "경희궁",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102354&menuNo=200025",
+          "sourceSha256": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.57078184592975,
+            "lon": 126.96865021365493
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102354&menuNo=200025",
+          "sourceSha256": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=102354&menuNo=200025",
+          "sourceSha256": "ba1aea8b8afa41cf8a254633d05ec53923830080d1ac15682e73beef4274a753",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:101612",
+      "name": "청계천박물관 ",
+      "address": "서울특별시 성동구 청계천로 530",
+      "region": "서울",
+      "lat": 37.5712661734969,
+      "lon": 127.03504316401,
+      "verifiedAt": "2026-10-07T03:17:43.341068+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "청계천박물관 ",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101612&menuNo=200025",
+          "sourceSha256": "59a5e4825d2552979d9a423c6c9a2bb0eb505c9ef1e80ef3177482492de1dbf6",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Cheonggyecheon Museum",
+          "sourceUrl": "https://museum.seoul.go.kr/eng/about/cheongGyeMuse.jsp",
+          "sourceSha256": "52ac770e885ad8be23bba19ac33be58209f63135ce8e1877d660af53b44019d2",
+          "hashArtifactKind": "observed-name-excerpt",
+          "locator": "official museum introduction name",
+          "matchMethod": "web-tool-observation",
+          "status": "pending-independent-review"
+        },
+        "ja": {
+          "value": "清溪川博物館",
+          "sourceUrl": "https://museum.seoul.go.kr/jpn/jpn-introduction/jpn-cheongGyeMuse.jsp",
+          "sourceSha256": "705754567998e864e87f73599a87d15cd47f7c8a626da551cf43bb65d7e97a36",
+          "hashArtifactKind": "observed-name-excerpt",
+          "locator": "official museum introduction name",
+          "matchMethod": "web-tool-observation",
+          "status": "pending-independent-review"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "청계천박물관 ",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101612&menuNo=200025",
+          "sourceSha256": "59a5e4825d2552979d9a423c6c9a2bb0eb505c9ef1e80ef3177482492de1dbf6",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.5712661734969,
+            "lon": 127.03504316401
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101612&menuNo=200025",
+          "sourceSha256": "59a5e4825d2552979d9a423c6c9a2bb0eb505c9ef1e80ef3177482492de1dbf6",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101612&menuNo=200025",
+          "sourceSha256": "59a5e4825d2552979d9a423c6c9a2bb0eb505c9ef1e80ef3177482492de1dbf6",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:101680",
+      "name": "국립중앙박물관",
+      "address": "서울특별시 용산구 서빙고로 137",
+      "region": "서울",
+      "lat": 37.52385582212769,
+      "lon": 126.98020301648833,
+      "verifiedAt": "2026-10-07T03:17:43.647231+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "국립중앙박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101680&menuNo=200025",
+          "sourceSha256": "f322195ca72d3b1c9c3e77b9c14b441a89f6fc203c044dd4ba182ba9ab613918",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "National Museum of Korea",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            2,
+            8,
+            12,
+            20,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 2,8,12,20,48"
+        },
+        "ja": {
+          "value": "国立中央博物館",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            2,
+            8,
+            12
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 2,8,12"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "국립중앙박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101680&menuNo=200025",
+          "sourceSha256": "f322195ca72d3b1c9c3e77b9c14b441a89f6fc203c044dd4ba182ba9ab613918",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.52385582212769,
+            "lon": 126.98020301648833
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101680&menuNo=200025",
+          "sourceSha256": "f322195ca72d3b1c9c3e77b9c14b441a89f6fc203c044dd4ba182ba9ab613918",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101680&menuNo=200025",
+          "sourceSha256": "f322195ca72d3b1c9c3e77b9c14b441a89f6fc203c044dd4ba182ba9ab613918",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:100432",
+      "name": "국립민속박물관",
+      "address": "서울특별시 종로구 삼청로 37",
+      "region": "서울",
+      "lat": 37.58167716587645,
+      "lon": 126.9790131306123,
+      "verifiedAt": "2026-10-07T03:17:43.643047+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "국립민속박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100432&menuNo=200025",
+          "sourceSha256": "ced371890c3a7c872d4c2911dc8f767570a3fe706019100623466e73d35808cc",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "National Folk Museum of Korea",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            5,
+            20,
+            23
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 5,20,23"
+        },
+        "ja": {
+          "value": "国立民俗博物館",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            5,
+            20,
+            23
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 5,20,23"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "국립민속박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100432&menuNo=200025",
+          "sourceSha256": "ced371890c3a7c872d4c2911dc8f767570a3fe706019100623466e73d35808cc",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.58167716587645,
+            "lon": 126.9790131306123
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100432&menuNo=200025",
+          "sourceSha256": "ced371890c3a7c872d4c2911dc8f767570a3fe706019100623466e73d35808cc",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100432&menuNo=200025",
+          "sourceSha256": "ced371890c3a7c872d4c2911dc8f767570a3fe706019100623466e73d35808cc",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:100431",
+      "name": "국립고궁박물관",
+      "address": "서울 종로구 효자로 12 국립고궁박물관",
+      "region": "서울",
+      "lat": 37.5765916191985,
+      "lon": 126.974974825074,
+      "verifiedAt": "2026-10-07T03:17:43.623968+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "국립고궁박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100431&menuNo=200025",
+          "sourceSha256": "3c4c4950130b5c1e72e6438d746f479602f8372441fb0befc74736f8a46338e2",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "National Palace Museum of Korea",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            5
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 5"
+        },
+        "ja": {
+          "value": "国立古宮博物館",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            5
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 5"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "국립고궁박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100431&menuNo=200025",
+          "sourceSha256": "3c4c4950130b5c1e72e6438d746f479602f8372441fb0befc74736f8a46338e2",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.5765916191985,
+            "lon": 126.974974825074
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100431&menuNo=200025",
+          "sourceSha256": "3c4c4950130b5c1e72e6438d746f479602f8372441fb0befc74736f8a46338e2",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100431&menuNo=200025",
+          "sourceSha256": "3c4c4950130b5c1e72e6438d746f479602f8372441fb0befc74736f8a46338e2",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:100885",
+      "name": "국립현대미술관 서울",
+      "address": "서울특별시 종로구 삼청로 30",
+      "region": "서울",
+      "lat": 37.5786280284849,
+      "lon": 126.980087994867,
+      "verifiedAt": "2026-10-07T03:17:43.913608+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "국립현대미술관 서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100885&menuNo=200025",
+          "sourceSha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "MMCA Seoul",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            9,
+            23,
+            46,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 9,23,46,48"
+        },
+        "ja": {
+          "value": "国立現代美術館ソウル館",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            9,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 9,48"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "국립현대미술관 서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100885&menuNo=200025",
+          "sourceSha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.5786280284849,
+            "lon": 126.980087994867
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100885&menuNo=200025",
+          "sourceSha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100885&menuNo=200025",
+          "sourceSha256": "9acf7a0bc55a0a8c7c478290d48c9a32b7281ed3ad8caa75e2ea8695b488854e",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:100511",
+      "name": "서울시립미술관 서소문본관",
+      "address": "서울특별시 중구 덕수궁길 61",
+      "region": "서울",
+      "lat": 37.5641060692766,
+      "lon": 126.973699316136,
+      "verifiedAt": "2026-10-07T03:17:43.956612+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "서울시립미술관 서소문본관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100511&menuNo=200025",
+          "sourceSha256": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Seoul Museum of Art (Seosomun Main Building)",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            9
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 9"
+        },
+        "ja": {
+          "value": "ソウル市立美術館 西小門本館",
+          "status": "pending-independent-review",
+          "sourceUrl": null,
+          "sourceSha256": null,
+          "pages": [],
+          "matchMethod": "rendered PDF visual observation; independent identity review pending",
+          "locator": "PDF physical page 9, printed page 015"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "서울시립미술관 서소문본관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100511&menuNo=200025",
+          "sourceSha256": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.5641060692766,
+            "lon": 126.973699316136
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100511&menuNo=200025",
+          "sourceSha256": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100511&menuNo=200025",
+          "sourceSha256": "1403553650b372fb863706d882ac51fe0b5185835bf4035f97e861f132a227d3",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:101632",
+      "name": "서울공예박물관",
+      "address": "서울특별시 종로구 율곡로3길 4",
+      "region": "서울",
+      "lat": 37.5766481740232,
+      "lon": 126.983533363501,
+      "verifiedAt": "2026-10-07T03:17:43.872525+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "서울공예박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101632&menuNo=200025",
+          "sourceSha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Seoul Museum of Craft Art",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            8,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 8,48"
+        },
+        "ja": {
+          "value": "ソウル工芸博物館",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            8,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 8,48"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "서울공예박물관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101632&menuNo=200025",
+          "sourceSha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.5766481740232,
+            "lon": 126.983533363501
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101632&menuNo=200025",
+          "sourceSha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101632&menuNo=200025",
+          "sourceSha256": "2ab1f407cf8917521ee02c60396017950e1a558bf500203ec456de0fc46756d1",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:101144",
+      "name": "북촌문화센터",
+      "address": "서울특별시 종로구 계동길 37",
+      "region": "서울",
+      "lat": 37.57907437956687,
+      "lon": 126.9864318880889,
+      "verifiedAt": "2026-10-07T03:17:44.099874+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "북촌문화센터",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101144&menuNo=200025",
+          "sourceSha256": "31c62b0a8039e472aee7e774705875949351117f01158ce5fe33a2cf58c627e5",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Bukchon Traditional Culture Center",
+          "sourceUrl": "https://english.visitseoul.net/attractions/bukchon-traditional-culture-center-k/ENP018916",
+          "sourceSha256": "1de8a7890813f5ae158c4589d7578b6edd3bd6d47c7ce788d69f6bad78a3c19b",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "pending-independent-review",
+          "historicalNameOnly": false
+        },
+        "ja": {
+          "value": "北村文化センター",
+          "sourceUrl": "https://japanese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=222501",
+          "sourceSha256": "1f092e1cbe2f88d3c5e1c759bf6a8a99c7dbd848a3ded43e2ba9d49ea0b7f4c6",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "pending-independent-review",
+          "historicalNameOnly": false
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "북촌문화센터",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101144&menuNo=200025",
+          "sourceSha256": "31c62b0a8039e472aee7e774705875949351117f01158ce5fe33a2cf58c627e5",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.57907437956687,
+            "lon": 126.9864318880889
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101144&menuNo=200025",
+          "sourceSha256": "31c62b0a8039e472aee7e774705875949351117f01158ce5fe33a2cf58c627e5",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101144&menuNo=200025",
+          "sourceSha256": "31c62b0a8039e472aee7e774705875949351117f01158ce5fe33a2cf58c627e5",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:100462",
+      "name": "운현궁",
+      "address": "서울특별시 종로구 삼일대로 464",
+      "region": "서울",
+      "lat": 37.57607864675475,
+      "lon": 126.98708335796199,
+      "verifiedAt": "2026-10-07T03:17:44.182755+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "운현궁",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100462&menuNo=200025",
+          "sourceSha256": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Unhyeongung Palace",
+          "sourceUrl": "https://english.visitseoul.net/attractions/unhyeongungpalace/ENP000471",
+          "sourceSha256": "3af50ff96f5b970631451c5c3f53ffade1b0431968e67b45948bdeeb2db0eb15",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "pending-independent-review",
+          "historicalNameOnly": false
+        },
+        "ja": {
+          "value": "雲峴宮",
+          "sourceUrl": "https://japanese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=111116",
+          "sourceSha256": "edd45f13c9a139453e507cc3706bc997970474798952a7ef56cac30365342123",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "pending-independent-review",
+          "historicalNameOnly": false
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "운현궁",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100462&menuNo=200025",
+          "sourceSha256": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.57607864675475,
+            "lon": 126.98708335796199
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100462&menuNo=200025",
+          "sourceSha256": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100462&menuNo=200025",
+          "sourceSha256": "b572852759ae44df4184f86d79e9b67f2f2d5b4add4a0e2cb8f77b101883e8ff",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:100186",
+      "name": "서대문형무소역사관",
+      "address": "서울특별시 서대문구 통일로 251",
+      "region": "서울",
+      "lat": 37.5746085138333,
+      "lon": 126.955611774864,
+      "verifiedAt": "2026-10-07T03:17:44.169200+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "서대문형무소역사관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100186&menuNo=200025",
+          "sourceSha256": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Seodaemun Prison History Hall",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            2,
+            8,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 2,8,48"
+        },
+        "ja": {
+          "value": "西大門刑務所歴史館",
+          "sourceUrl": "https://japanese.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?menuSn=351&vcontsId=110714",
+          "sourceSha256": "1c97b23204a07846ad303951fcab5f1c8491a8bc894073b6f295b5da3ec4c578",
+          "locator": "official page name occurrence",
+          "matchMethod": "casefold-whitespace-name-match",
+          "nameObserved": true,
+          "status": "pending-independent-review",
+          "historicalNameOnly": false
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "서대문형무소역사관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100186&menuNo=200025",
+          "sourceSha256": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.5746085138333,
+            "lon": 126.955611774864
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100186&menuNo=200025",
+          "sourceSha256": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100186&menuNo=200025",
+          "sourceSha256": "a64faa20551e8894ce53052d6946c210297482ef43903d9773c9178b96c12983",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:101016",
+      "name": "DDP(동대문디자인플라자)",
+      "address": "서울특별시 중구 을지로 281",
+      "region": "서울",
+      "lat": 37.56735731522952,
+      "lon": 127.00977973484339,
+      "verifiedAt": "2026-10-07T03:17:44.452089+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "DDP(동대문디자인플라자)",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101016&menuNo=200025",
+          "sourceSha256": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "Dongdaemun Design Plaza",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            2,
+            6,
+            17,
+            37,
+            46,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 2,6,17,37,46,48"
+        },
+        "ja": {
+          "value": "東大門デザインプラザ",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            37
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 37"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "DDP(동대문디자인플라자)",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101016&menuNo=200025",
+          "sourceSha256": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.56735731522952,
+            "lon": 127.00977973484339
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101016&menuNo=200025",
+          "sourceSha256": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=101016&menuNo=200025",
+          "sourceSha256": "62ac93a54c1d03c9158e995ce54a7c4160fb53d146f180b1333c01effc5c9967",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    },
+    {
+      "id": "curated:seoul:100293",
+      "name": "전쟁기념관",
+      "address": "서울특별시 용산구 이태원로 29",
+      "region": "서울",
+      "lat": 37.5373140468913,
+      "lon": 126.978466063237,
+      "verifiedAt": "2026-10-07T03:17:44.475370+00:00",
+      "reviewBy": "2026-10-21T00:00:00+00:00",
+      "names": {
+        "ko": {
+          "status": "pending-independent-review",
+          "value": "전쟁기념관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100293&menuNo=200025",
+          "sourceSha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "locator": "official detail facility title"
+        },
+        "en": {
+          "value": "The War Memorial of Korea",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://english.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_EN.pdf",
+          "sourceSha256": "feb746e4eacd24b0d9f25465b2f101752dd3660bac60c09a81c4fc7254c5aa55",
+          "pages": [
+            8,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 8,48"
+        },
+        "ja": {
+          "value": "戦争記念館",
+          "status": "pending-independent-review",
+          "sourceUrl": "https://japanese.seoul.go.kr/wp-content/uploads/2026/03/2026_guidebook_JP.pdf",
+          "sourceSha256": "448d25ede1cd325079ee92fdc9832049d4f8b9d824d9e66e69fcacb187cbe1fa",
+          "pages": [
+            2,
+            8,
+            26,
+            48
+          ],
+          "matchMethod": "whitespace-insensitive-casefold-title-check",
+          "locator": "PDF physical pages 2,8,26,48"
+        }
+      },
+      "evidence": {
+        "name": {
+          "status": "pending-independent-review",
+          "value": "전쟁기념관",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100293&menuNo=200025",
+          "sourceSha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "locator": "facility title"
+        },
+        "coordinates": {
+          "status": "pending-independent-review",
+          "value": {
+            "lat": 37.5373140468913,
+            "lon": 126.978466063237
+          },
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100293&menuNo=200025",
+          "sourceSha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "locator": "markerLocations coordinates"
+        },
+        "region": {
+          "status": "pending-independent-review",
+          "value": "서울",
+          "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100293&menuNo=200025",
+          "sourceSha256": "75178448082f3835d4f5c52f2c9edce101dd93818b24d0676f9ec0b1951aa389",
+          "locator": "official address"
+        },
+        "price": {
+          "status": "unknown"
+        },
+        "artist": {
+          "status": "unknown"
+        }
+      }
+    }
+  ]
+}

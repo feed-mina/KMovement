@@ -1,0 +1,109 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>다국어 코스·챗봇 — 구현 근거와 남은 배포 조건</title><style>*{box-sizing:border-box}body{margin:0;background:#f3f5f8;color:#17263b;font:17px/1.65 system-ui,"Malgun Gothic",sans-serif}main{max-width:1280px;margin:auto;padding:26px}header,section{background:white;border:1px solid #dce4ed;border-radius:20px;padding:26px;margin:22px 0}h1{font-size:34px;line-height:1.3}h2{font-size:25px}h3{font-size:21px}a{color:#155d9c}p,li,td{overflow-wrap:anywhere}button{font:inherit;cursor:pointer;border:1px solid #a9b9cb;background:white;color:#17263b;padding:12px 16px;border-radius:12px}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ed931e;outline-offset:3px}button[aria-pressed=true],button[aria-selected=true]{border:2px solid #165e76;background:#e0f3f2}.goal{position:sticky;top:0;z-index:5;padding:10px 22px;background:#173d52;color:white;font-size:16px}.tag{display:inline-block;padding:5px 12px;background:#fff0d4;border-radius:20px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{padding:18px;background:#eef4f8;border-radius:12px}.card b{display:block;font-size:24px}.flow{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.flow button{flex:1;min-width:120px}.layout{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:start}.detail{padding:24px;background:#edf6fa;border:1px solid #9cbccc;border-radius:16px;scroll-margin-top:85px}.diagram{display:grid;gap:8px;text-align:center}.diagram button{width:100%;text-align:left}.diagram small{display:block}.diagram .arrow{color:#527289}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}.compare{display:grid;grid-template-columns:1fr 1fr;gap:20px}.mock{padding:22px;border:1px solid #bccbd9;border-radius:16px;background:#f9fbfd}.bubble{padding:15px;background:#e4f3ef;border-radius:12px;margin:12px 0}.muted{color:#4b6176}.warn{border-left:4px solid #d88a12;padding:12px;background:#fff4df}.article{max-width:100%;overflow-wrap:anywhere}.article p,.article li{max-width:85ch}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:16px}td,th{padding:12px;border-bottom:1px solid #dce4ed;text-align:left;vertical-align:top;word-break:break-word}code{font-size:15px;overflow-wrap:anywhere}details{border:1px solid #dae3eb;padding:16px;border-radius:12px}summary{cursor:pointer;font-weight:bold}[hidden]{display:none!important}footer{padding:20px;color:#4b6176}body.work .layout .detail{order:2}body.work .diagram{order:1}@media(max-width:760px){main{padding:12px}header,section{padding:18px}h1{font-size:27px}.layout,.compare,.cards{grid-template-columns:1fr}.diagram{order:0!important}.detail{order:1!important}.goal{position:static}.flow button{min-width:100px}td,th{padding:6px;font-size:14px}.detail{scroll-margin-top:15px}}</style><body class="guide"><div class="goal">목표 · 같은 코스·지도·출처로 한국어 / 영어 / 일본어 대화</div><main><header><span class="tag">구현·근거 준비 / 독립 검수 대기 / 배포 전</span><h1>다국어 코스·챗봇 — 구현 근거와 남은 배포 조건</h1><p>코스 문맥과 세 언어 연결 코드를 작성했습니다. 현재 공개 적격과 배포 조건은 미충족입니다.<br>다음 행동: 독립 검수 담당 확정 후 후보와 새 정답·시험을 검토합니다.</p><div class="cards"><div class="card"><b>20곳 · 60개 표기</b>근거 준비 · 독립 검수0곳</div><div class="card"><b>54 + 21 검사</b>계약/프론트 통과 · 실제 품질 미검사</div><div class="card"><b>배포 미실행</b>원본·기존 운영 유지</div></div><p><a href="easy-guide-20261007-123832-multilingual-implementation.html">easy-guide</a> · <a href="fix-guide-20261007-123832-multilingual-implementation.html">fix-guide</a> · <a href="work-map-20261007-123832-multilingual-implementation.html">work-map</a></p></header><section><h2>장소 → 검수 → 연결 → 검사 → 공개</h2><div class="flow"><button data-node="scope">① 장소 20개</button> → <button data-node="names">② 독립 검수</button> → <button data-node="chat">③ 코스·대화 연결</button> → <button data-node="test">④ 새 시험</button> → <button data-node="release">⑤ 공개·배포</button></div><p class="warn">검수·시험 실패 → 현재 운영 유지 → 수정 시 새 해시와 필요한 새 시험</p></section><div role="tablist" class="tabs"><button role="tab" aria-controls="map" data-tab="map" aria-selected="true">작업 지도</button><button role="tab" aria-controls="screens" data-tab="screens" aria-selected="false" tabindex="-1">화면 비교</button><button role="tab" aria-controls="evidence" data-tab="evidence" aria-selected="false" tabindex="-1">상세 보고서</button></div><section id="map" role="tabpanel"><h2>현재 준비와 남은 검증</h2><div class="layout"><div class="diagram"><button data-node="scope" aria-pressed="true">① 장소 20개<small>근거 준비 / 검수 대기</small></button><button data-node="names" aria-pressed="false">② 독립 검수<small>담당 선택 대기</small></button><button data-node="chat" aria-pressed="false">③ 코스·대화 연결<small>코드 구현 / 실제 수용 미검사</small></button><button data-node="test" aria-pressed="false">④ 새 시험<small>미실행</small></button><button data-node="release" aria-pressed="false">⑤ 공개·배포<small>조건 미충족</small></button></div><div class="detail" aria-live="polite"><h3 id="node-title" tabindex="-1">① 장소 20개</h3><p id="node-status">근거 준비 / 검수 대기</p><p id="node-text">공식 명칭·주소·좌표와 세 언어 표기를 연결했습니다. 가격·아티스트 연관은 unknown입니다.</p><b>근거와 완료 조건</b><p id="node-proof">review-catalog-draft.json · 공개 적격0개</p><details><summary>다음 단계에서 확인할 것</summary><p>같은 장소인지 독립 검수하고, 새 질문을 코드 작성자와 분리해 보관합니다. 모든 검사를 마치기 전 운영 후보로 바꾸지 않습니다.</p></details></div></div></section><section id="screens" role="tabpanel" hidden><h2>사용 흐름 비교 · 설명용 모형</h2><p>실제 운영 화면 캡처가 아닙니다. 코드에 추가한 흐름을 설명하며, 실제 로그인 수용 검사는 남았습니다.</p><div class="compare"><div class="mock"><h3>이전 코드 흐름</h3><p>여행 선호 → 코스 → 여행봇</p><p>응답 언어와 생성된 코스의 장소 순서를 명시적으로 연결하는 정보가 부족했습니다.</p></div><div class="mock"><h3>변경본의 목표 흐름</h3><p>지원 조건 확인 → 코스 생성 → 같은 코스에 질문</p><button data-lang="ko">한국어</button> <button data-lang="en">English</button> <button data-lang="ja">日本語</button><h3 id="poi-name">서울역사박물관</h3><div class="bubble" id="question">두 번째 장소의 공식 안내를 보여줘.</div><p id="answer">같은 장소 ID·지도·출처를 유지합니다. 가격·아티스트 연관은 미확인입니다.</p></div></div></section><section id="evidence" role="tabpanel" hidden><div class="article"><h1>다국어 코스·챗봇 — 구현 근거와 남은 배포 조건</h1>
+<h2>결론과 경계</h2>
+<p>구현 초안과 20개 후보의 검수 패킷을 준비했다. 새 공개 적격 후보는 <strong>0개</strong>이며 독립 검수·gold·holdout·실제 수용 검사 전이다. 운영 전환을 요청받았지만 사용자가 정한 all-pass 조건은 아직 충족하지 못했다. 자동 승인 거절이나 새 배포 승인 요구가 아니다. 독립 검수 담당 선택이 남았다.</p>
+<p>코드 commit <code>e617f7aaf4d88e25f2810d962d03224e55603e44</code>, Draft PR <a href="https://github.com/feed-mina/KMovement/pull/280">#280</a>, 기반 <code>feat/artist-profile-followup</code> / <code>c63aafd6fea140ad5426aed8c8c5224b38e5e2a9</code>. 기존 UI 변경을 포함한 분리 작업트리에서 작업했다.</p>
+<h2>1. 후보 계약</h2>
+<p><code>review-catalog-draft.json</code>은 <code>kride-reviewed-multilingual-v2</code> 초안이다. 각 장소의 ID·원문명·ko/en/ja 명칭·공식 URL·출처 SHA256·근거 구간·좌표·지역을 묶었다. 가격과 아티스트 관계는 unknown이다. 모든 상태는 pending이며 검수자가 독립적으로 판단해야 한다.</p>
+<p><code>review-status.json</code>의 catalogSha256은 정확한 초안 파일을 가리킨다. 청계천 외국어 명칭 두 건은 직접 HTTP 라이브러리의 TLS 실패 뒤 웹 열람으로 확인한 짧은 발췌의 해시다. 전체 HTML 해시로 해석하지 않는다. PDF의 오래된 행사 소개는 이름 근거로만 사용했으며 현재 공연·가격 근거가 아니다. 이름·좌표가 페이지에서 발견된 것과 독립 검수는 구분했다.</p>
+<p>사전 교체: 경복궁→대한민국역사박물관, 창덕궁→서울돈화문국악당, 덕수궁→서울남산국악당, 종묘→청계천박물관. 시설 검색이 전체 장소 대신 일부 건물을 반환하거나 정확한 시설이 없어서 시험 전에 교체했다. 성적을 보고 후보를 제거한 것이 아니다.</p>
+<h2>2. 구현 파일과 동작</h2>
+<table>
+<thead>
+<tr>
+<th>파일</th>
+<th>변경과 검증 범위</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>src/api/course_context.py</td>
+<td>1시간 유효한 사용자별 서명에 장소 ID·순서·목록 revision을 묶음. 서명·사용자·만료·현재 출처 변경 시 거절. 서버 저장 레코드 대신 서명된 문맥과 현재 공개 목록 재조회를 사용</td>
+</tr>
+<tr>
+<td>src/api/multilingual_catalog.py</td>
+<td>작성자/검수자 분리 및 정확한 승인 파일 해시, 항목별 공식 근거 검사. 새 collection create-only. 차원384·유한 float32·norm 오차≤1e-5 검사. 원본 upsert/delete 없음</td>
+</tr>
+<tr>
+<td>src/api/public_search.py</td>
+<td>명시적 새 목록 환경 설정이 있을 때만 검수 목록 사용. 색인 metadata·모델 revision·문서 해시·개수 불일치 차단. 기존 경로는 유지</td>
+</tr>
+<tr>
+<td>src/api/torchserve_client.py</td>
+<td>새 목록 사용 시 모델 revision 필수, 로컬 캐시만 로딩. unversioned TorchServe 경유 차단. 모델 실제 가중치·tokenizer·라이브러리 해시 고정은 실행 준비에 남음</td>
+</tr>
+<tr>
+<td>src/api/public_itinerary.py</td>
+<td>미검증 가격/아티스트 조건 안내에 대한 확인, 검토된 이름으로 지도·일정 재구성, 문맥 발급</td>
+</tr>
+<tr>
+<td>src/api/public_chat.py</td>
+<td>코스 문맥은 실제 사용자와 현재 목록으로 확인. 언어 선택과 학습 채팅 모드 분리. 코스 질문에서 기존 순서·장소 사용</td>
+</tr>
+<tr>
+<td>KrideFocusScreen / useKrideItinerary</td>
+<td>생성 전 지원 범위와 언어 선택, 코스 아래 대화. 서버 오류의 detail 전달</td>
+</tr>
+<tr>
+<td>KrideChatComponent / useKrideChatStream / API proxy</td>
+<td>locale와 서명 문맥 전달, 언어 변경 시 대화 초기화. 코스 설명 요청을 자동 재생성으로 처리하지 않음</td>
+</tr>
+</tbody>
+</table>
+<p>이름 매칭은 개발 변경이며 query 접두사 A/B 실험과 다르다. 고정 벡터 A/B와 문서 형식 C, 이름 매칭을 섞어 개선 원인을 주장하지 않는다. 부정문·모호한 지점·근거 없는 질문은 새 평가 대상이다. 요청 ID 기반 중복 청구 방지와 코스 교체 UX는 이번 코드만으로 완료를 주장하지 않는다.</p>
+<h2>3. 실행한 검사</h2>
+<table>
+<thead>
+<tr>
+<th>검사</th>
+<th>결과</th>
+<th>한계</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU 계약 회귀</td>
+<td>54 passed, 2026-10-07 12:34 실행 기록</td>
+<td>모의 모델·DB. 검색 품질/실제 생성 미검사</td>
+</tr>
+<tr>
+<td>프론트 핵심 3개 파일</td>
+<td>21 passed</td>
+<td>API 전달·상태 수명주기 중심; 실제 로그인 아님</td>
+</tr>
+<tr>
+<td>TypeScript</td>
+<td>통과</td>
+<td>제품 화면·접근성 수용 검사를 대신하지 않음</td>
+</tr>
+<tr>
+<td>새로운 공개 목록</td>
+<td>20개·60개 언어 표기 근거 초안</td>
+<td>독립 검수 완료 0개</td>
+</tr>
+<tr>
+<td>새 holdout 120문항</td>
+<td>미고정·미실행</td>
+<td>정답·담당·접근 분리 필요</td>
+</tr>
+<tr>
+<td>실제 검색/LLM/성능/로그인</td>
+<td>미실행</td>
+<td>배포 gate 미통과</td>
+</tr>
+</tbody>
+</table>
+<p>CPU 단위 검사는 exact image <code>ghcr.io/feed-mina/kmovement-cpu@sha256:d7579ff8502166b6d9a74fecd5ef5221fa96e56b2d43a36d352654a7dcffb767</code>에서 실행했다. 네트워크 없음, read-only root, 비root, cap-drop ALL, no-new-privileges, 1CPU·2GiB·pids128, tmpfs256MiB. 새 입력 파일만 readonly 연결하고 archive 및 파일 해시를 확인했다. 운영 volume·인증정보·socket은 연결하지 않았다. 이것은 새로운 검색 파일럿 실행이나 최종 운영 이미지 빌드가 아니다.</p>
+<h2>4. 독립 검수 후 필요한 시험</h2>
+<ol>
+<li>다른 검수자가 동일 장소/지점·명칭·좌표를 검토한다. 정답 검수자 간 불일치도 기록한다. 초안 변경 시 새 파일과 승인 해시로 고정한다.</li>
+<li>각 언어 양성30·근거없음10, 총120문항을 새로 고정한다. 개발 질문과 의도·템플릿 묶음을 분리한다. 시험 원문은 보고서에 공개하지 않는다.</li>
+<li>코드·모델 revision 및 가중치/tokenizer/config·Linux 라이브러리·입력·문서·출력경로를 해시로 고정하고 자원/네트워크 경계를 재검증한다.</li>
+<li>기존 제안 기준을 실행 전에 확정한다: 언어별 Recall@5≥0.80, nDCG@10≥0.70, baseline 하락≤0.02, ANN Recall@10≥0.99. 근거없는 주장 수락0/분모, 양성 과거절≤5%(30개 중 최대1). 이 숫자는 이번 통과 결과가 아니다.</li>
+<li>응답 언어·코스 순서·지도·출처 일치, 실제 로그인·취소·재시도·로그아웃·계정 전환·429·공급자 오류를 검사한다. 첫 유효 응답 p95≤10초, 코스 완료 p95≤30초 제안, cold10/warm30 구분. 전체 검사를 한도 안에서 수행하며 모의 결과를 유료 실측으로 대체하지 않는다.</li>
+<li>holdout을 본 뒤 변경하면 다음 버전은 새 시험으로 평가한다. 작은 서울 공개 목록 통과를 1,000개 또는 원본40,664개 검색 품질로 확대하지 않는다.</li>
+</ol>
+<h2>5. 배포와 rollback</h2>
+<p>모든 gate 통과 후 새 exact CPU/web image digest와 별도 collection·catalog/review SHA·설정 revision을 하나의 release manifest로 묶는다. 현재 운영 digest/collection/config를 rollback 대상으로 먼저 기록한다. 이번에 새 image를 publish하거나 운영 설정을 적용하지 않았다.</p>
+<p>테스트 계정으로 제한된 실제 수용 검사 → 전환 → 응답/출처/오류 관찰 → 실패 시 이전 exact release로 복귀한다. 이전 collection과 원본 DB는 보존한다. 일일 $1·사용자10회·동시2건을 유지한다. 데이터·출처 검수가 실패한 상태에서 guard나 계약 이름만 바꿔 공개하지 않는다.</p>
+<h2>다음 행동</h2>
+<p>독립 검수 담당 선택 답변을 받은 뒤 검수·새 gold/holdout 고정을 진행한다. 터미널 재실행이나 새로운 배포 권한 승인을 요청하는 단계가 아니다. 검수 패킷과 PR을 보존해 이어서 실행할 수 있게 했다.</p></div></section><footer>기준 시점 20261007-123832 KST · 정적 진행 기록 · 실제 검색과 배포 상태를 자동 조회하지 않습니다.</footer></main><script>const nodes=[["scope", "① 장소 20개", "근거 준비 / 검수 대기", "공식 명칭·주소·좌표와 세 언어 표기를 연결했습니다. 가격·아티스트 연관은 unknown입니다.", "review-catalog-draft.json · 공개 적격0개"], ["names", "② 독립 검수", "담당 선택 대기", "작성자와 분리된 검수로 장소 동일성과 새 정답을 고정해야 합니다.", "새 질문120개 미고정 · 시험 원문 분리 보관"], ["chat", "③ 코스·대화 연결", "코드 구현 / 실제 수용 미검사", "사용자별 서명으로 코스 장소·순서를 고정하고 응답 언어를 전달합니다.", "PR #280 · 서버 계약54개 / 프론트21개 통과"], ["test", "④ 새 시험", "미실행", "실제 모델 검색·응답·거절·성능·로그인 검사를 각각 판정합니다.", "기존 시험을 보고 변경해 같은 시험으로 통과 주장 금지"], ["release", "⑤ 공개·배포", "조건 미충족", "모든 검사를 통과한 정확한 image와 별도 collection만 전환합니다.", "기존 원본/운영 보존 · rollback 식별자 고정 예정"]];const tabs=[...document.querySelectorAll('[data-tab]')];function tab(id){tabs.forEach(b=>{let a=b.dataset.tab===id;b.setAttribute('aria-selected',a);b.tabIndex=a?0:-1;document.getElementById(b.dataset.tab).hidden=!a;})}tabs.forEach((b,i)=>{b.onclick=()=>tab(b.dataset.tab);b.onkeydown=e=>{let j=e.key==='Home'?0:e.key==='End'?2:e.key==='ArrowRight'?(i+1)%3:e.key==='ArrowLeft'?(i+2)%3:null;if(j!==null){e.preventDefault();tab(tabs[j].dataset.tab);tabs[j].focus()}}});document.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>{tab('map');const n=nodes.find(n=>n[0]===b.dataset.node);['title','status','text','proof'].forEach((k,i)=>document.getElementById('node-'+k).textContent=n[i+1]);document.querySelectorAll('[data-node]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.node===n[0]));document.getElementById('node-title').focus({preventScroll:true});document.querySelector('.detail').scrollIntoView({block:'nearest'})});const copy={ko:['서울역사박물관','두 번째 장소의 공식 안내를 보여줘.','같은 장소·지도·출처. 가격·아티스트 연관 미확인.'],en:['Seoul Museum of History','Show the source for the second stop.','Same place, map and source. Prices and artist links are unverified.'],ja:['ソウル歴史博物館','2番目の場所の公式案内を見せてください。','同じ場所・地図・出典。料金とアーティストとの関連は未確認。']};document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{['poi-name','question','answer'].forEach((id,i)=>document.getElementById(id).textContent=copy[b.dataset.lang][i]);});</script></body></html>
