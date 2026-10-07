@@ -1,0 +1,18 @@
+{
+  "testContainerStopped": true,
+  "testCollectionWasTmpfs": true,
+  "testCollection": {
+    "collection": "kride_public_v2_live11_20261007_v1",
+    "count": 11,
+    "catalogSha256": "1789273e4216461313320bfb24576e40303e0b3970e1256fa6a7e1ceab6c067d",
+    "documentSha256": "bc3de4a412ed70c3415cd20a761cd318e59616ccf2b4cf16eb903417eeaeeb65",
+    "modelRevision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+    "documentVectorsSha256": "297a45d9e9229103a8be3c442ed04d8ffc99dbf50d1d2296af31d357922c9e4c"
+  },
+  "privateResponsesPreserved": true,
+  "productionHealthy": true,
+  "productionImage": "ghcr.io/feed-mina/kmovement-cpu@sha256:ac97e4f35adcf8a0d7053f14b4d78ac1e62c709b0818f70d98a0105999dfead5",
+  "productionCatalogPromoted": false,
+  "originalChromaMountedInTest": false,
+  "oomKilled": false
+}

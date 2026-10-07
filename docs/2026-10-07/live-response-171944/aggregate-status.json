@@ -1,0 +1,46 @@
+{
+  "status": "stopped_incomplete",
+  "questionCount": 51,
+  "requestsAttempted": 4,
+  "responsesCompleted": 3,
+  "automaticRetries": 0,
+  "stopReason": "http_error",
+  "lockSha256": "65d6b74d7be87aaf984ec8c149ceeee60827194982006b90d15fe39b304c99ae",
+  "responseFileSha256": "301e0c75beb42689616326b40e11da7514641bba3662ad97874c0bf4b80c9a70",
+  "contentDisclosedToImplementationAuthor": false,
+  "courseGenerationEvaluated": false,
+  "sharedBudgetEnforcedBy": "server-ledger",
+  "collectorExitCode": 0,
+  "frozenDenominator": 51,
+  "incompleteCount": 48,
+  "failedHttpRequests": 1,
+  "notAttempted": 47,
+  "independentAnswerReview": "completed-partial-overall-incomplete",
+  "rerunAllowed": false,
+  "infrastructure": {
+    "httpStatusCounts": {
+      "200": 3,
+      "502": 1
+    },
+    "errors": [
+      {
+        "httpStatus": 502,
+        "errorCode": "http_error",
+        "bodyClassification": "provider_connection_generic",
+        "bodySha256": "c474fc29f77dd87255e4328dc028cfae47e1721a992a94fb7b1306a11e1e3f5c"
+      }
+    ]
+  },
+  "ledgerAggregate": {
+    "reportedBy": "root",
+    "reservationCount": 4,
+    "usageRecordedCount": 3,
+    "reservedUsd": 0.0091257,
+    "estimatedUsageUsd": 0.00145725,
+    "remainingTestCalls": 96,
+    "billingStatementVerified": false
+  },
+  "failureCause": "HTTP502 generic provider connection failure; underlying rate-limit/timeout/other cause not established",
+  "testContainerStop": "verified-stopped-private-output-preserved",
+  "updatedAt": "2026-10-07T08:15:56.320246+00:00"
+}

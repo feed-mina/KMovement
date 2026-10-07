@@ -1,0 +1,24 @@
+{
+  "mergedPullRequest": 281,
+  "commit": "7d123d93746584fac5bdc200a81ac44c7a7b86d2",
+  "cpuImage": "ghcr.io/feed-mina/kmovement-cpu@sha256:ac97e4f35adcf8a0d7053f14b4d78ac1e62c709b0818f70d98a0105999dfead5",
+  "previousCpuImage": "ghcr.io/feed-mina/kmovement-cpu@sha256:d7579ff8502166b6d9a74fecd5ef5221fa96e56b2d43a36d352654a7dcffb767",
+  "appliedLimits": {
+    "combinedDailyUsd": 5,
+    "testDailyCalls": 100,
+    "ordinaryDailyCalls": 10,
+    "ordinaryDailyUsd": 1,
+    "concurrency": 2
+  },
+  "healthyAfterDeployment": true,
+  "productionCatalogPromoted": false,
+  "ciTests": 131,
+  "ciErrors": 0,
+  "ciFailures": 0,
+  "ciSkipped": 0,
+  "runtimeFiles": 50356,
+  "runtimeManifestSha256": "ee127c2c2b0bdfab8b5a287c09b33ad96fc0b7680205998fa49fbadbea697d3a",
+  "browserAcceptance": "not-verified-tool-initialization-failure",
+  "originalChromaModified": false,
+  "existingCollectionsReindexed": false
+}
