@@ -43,7 +43,7 @@ C 일본어는 Recall@5가 0.5333으로 늘었지만 nDCG@10은 0.4186으로 A�
 - 실행 전 runtime/model/wheels 27,466개 파일과 압축본3개·입력5개 해시 재대조 통과. 입력 잠금은 run-spec.json 참조.
 - CPU1, RAM4GiB, swap0, PID128, network none, 공개포트 없음, uid65532, cap-drop ALL, no-new-privileges, seccomp, read-only rootfs, 운영 DB/인증정보/socket 미마운트.
 - /output256MiB·/tmp128MiB tmpfs. 검색 자식 최대1800초, 결과 회수 유예300초 후 PID1도 종료. 컨트롤러는 자원 부족 시 중단하고 정상 종료 후에도 컨테이너를 stop한다.
-- 검색 전에 동일13개 경계 assertion을 다시 통과했다. runner 정적 자체검토와 지표 픽스처 테스트를 통과했다. 독립 리뷰어가 검토했다고 주장하지 않는다.
+- 검색 전에 OS 제한 assertion 12개와 보존된 과거 정책의 false 값 확인 1개를 다시 통과했다. 과거 정책 확인은 현재 검색 실행이 비활성이라는 뜻이 아니며, 이번 실행은 새 run-spec의 executionAllowed=true에 근거했다. runner 정적 자체검토와 지표 픽스처 테스트를 통과했다. 독립 리뷰어가 검토했다고 주장하지 않는다.
 - Chroma는 존재하지 않는 /output/new-chroma에만 생성했다. 기존 Chroma client나 운영 볼륨에 연결하지 않았다. 새 DB migration 목록·queue 행 수·색인 파일 목록은 chroma-lifecycle.json에 기록했다. 실패 시 그 실행에서 중단하도록 구현했다.
 - 검색 자식이 종료된 후 살아 있는 컨테이너의 tmpfs를 tar 스트림으로 회수하고 로컬 SHA256을 대조했다. docker cp로 tmpfs를 복사하지 않았다. 보존용 압축본은 서비스 배포 파일이 아니다.
 
