@@ -1,0 +1,32 @@
+# 라이브 확인 기록 (2026-10-20)
+
+## 1. 컨테이너에서 직접 접속 — 차단
+$ curl -sS -o /dev/null -w "%{http_code}" https://kmovement.srv1869569.hstgr.cloud/
+curl: (56) CONNECT tunnel failed, response 403
+(egress 프록시 정책 거부. Playwright/Chromium 캡처 불가. 재시도·우회하지 않음.)
+
+## 2. 서버 측 텍스트 추출(Exa web_fetch) — 성공한 경로와 추출 문구
+### /
+AI K-컬처 여행 플래너 / 좋아하는 K-컬처를 따라 전국을 여행하세요. /
+17개 시·도의 성지와 맛집을 탐색하고, 취향·지역·체류 시간에 맞는 이동 동선을 한 번에 만듭니다. /
+K-POP 성지 코스 / 전국 맛집 코스
+→ app/page.tsx:22-33 과 일치
+
+### /view/kpop
+좋아하는 아티스트를 만나보세요 / 공식 소식을 살펴보고, 함께하고 싶은 순간을 내 목록에 담아요.
+→ ArtistCatalogScreen.tsx:98 과 일치
+
+### /view/KPOP_EVENTS
+좋아하는 아티스트와 다음에 만날 순간
+→ FanEventFeed.tsx:41 과 일치
+
+### /travel/kpop
+K-POP 성지, 공연장이 있는 도시부터 / 서울·경기·인천·부산·강원·대구의 K-POP 권역과 성지를 지역별로 정리했습니다. / 6개 지역 / 출발 전 체크리스트 5항목
+
+### /travel/food
+전국 맛집, 시·도부터 고르고 구·군으로 좁히기 / 17개 시·도 … / 각 지역 카드: "권역 3 · 맛집 5 · 성지 2"
+→ 홈 타일 숫자 재사용 근거
+
+### 추출 실패(클라이언트 렌더, 제목만 반환)
+/view/ROUTE_PLANNER, /view/TOUR_EXPLORE → "KRIDE | AI K-컬처 여행 플래너" 만
+/view/MAIN_PAGE, /view/LOGIN_PAGE → unknown error
