@@ -1,0 +1,654 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KRIDE 공개 6개 화면 UI 벤치마킹 보고서 (2026-10-20)</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f3f0;color:#20232b;font:16px/1.65 system-ui,"Malgun Gothic",sans-serif}
+.goal{position:sticky;top:0;z-index:5;padding:10px 5%;background:#20232b;color:#fff;font-size:15px}
+main{max-width:1280px;margin:auto;padding:28px}
+header,section{background:#fff;border:1px solid #dedfdc;border-radius:20px;margin-bottom:24px;padding:28px}
+h1{font-size:32px;line-height:1.25;margin:.2em 0}h2{font-size:24px;margin-top:0}h3{font-size:18px;margin:22px 0 8px}
+.eyebrow{color:#b80c20;font-weight:700;letter-spacing:1px;font-size:13px}
+.lead{font-size:18px;max-width:80ch}
+.pill{display:inline-block;padding:3px 10px;background:#fff0f1;border-radius:20px;color:#a51426;font-size:13px;margin-right:4px}
+.pill.ok{background:#e9f7ee;color:#1b6b3a}.pill.warn{background:#fff6e0;color:#7a4a00}.pill.bad{background:#fde8e8;color:#a51426}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;vertical-align:top;border-bottom:1px solid #e3e3e0;padding:9px 10px;overflow-wrap:anywhere}th{background:#f7f6f2}
+.table{overflow:auto}code{background:#f1f0ec;padding:1px 5px;border-radius:5px;font-size:13px}
+.toc{display:flex;flex-wrap:wrap;gap:8px}.toc a{border:1px solid #cdd2d8;background:#fff;border-radius:10px;padding:8px 12px;color:#263349;text-decoration:none;font-size:14px}
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;margin-top:12px}
+.ba figure{margin:0;min-width:0}.ba figcaption{font-size:13px;color:#526078;margin-top:8px;line-height:1.55}
+.label{display:inline-block;font-weight:800;font-size:12px;letter-spacing:1px;padding:3px 10px;border-radius:8px;margin-bottom:8px}
+.label.before{background:#eceff3;color:#3d4756}.label.after{background:#e50914;color:#fff}
+.gap{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.gap article{background:#f7f6f2;border-radius:14px;padding:14px;font-size:14px}.gap b{display:block;margin-bottom:4px}
+.muted{color:#566170}details{padding:12px 16px;border:1px solid #ddd;border-radius:12px;margin:12px 0}summary{cursor:pointer;font-weight:700}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;background:#f7f6f2;padding:12px;border-radius:10px}
+.src{font-size:13px;color:#526078}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:4px 12px;font-size:14px}
+.notice{background:#fff6e0;border:1px solid #f1d58a;border-radius:12px;padding:12px 16px;font-size:14px;margin:12px 0}
+@media(max-width:860px){main{padding:12px}.kv{grid-template-columns:1fr}header,section{padding:18px}h1{font-size:26px}.ba,.gap{grid-template-columns:1fr}.goal{font-size:13px}}
+
+/* ---- 화면 목업 공통 (KRIDE 토큰: 레드 #E50914 · 크림 #FDFBF7) ---- */
+.mk{--red:#e50914;--red-dark:#8b0610;--red-soft:#fff0f1;--ink:#111;--body:#374151;--muted:#6b7280;--line:#e5e7eb;--cream:#fdfbf7;--subtle:#f5f1ea;
+ position:relative;font:13px/1.45 system-ui,"Malgun Gothic",sans-serif;color:var(--body);background:var(--cream);border:1px solid #d9d4cc;border-radius:18px;overflow:hidden;min-width:0;max-width:420px;margin:0 auto}
+.mk *{box-sizing:border-box}
+.mk .top{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border-bottom:1px solid var(--line);padding:10px 14px;flex-wrap:wrap}
+.mk .logo{color:var(--red);font-weight:900;font-size:17px;letter-spacing:-.02em}
+.mk .nav{display:flex;gap:2px;font-size:12px;color:#444;flex-wrap:wrap}
+.mk .nav span{padding:6px 8px;border-radius:8px;white-space:nowrap}
+.mk .nav span.on{background:var(--red-soft);color:var(--red-dark);font-weight:700}
+.mk .nav.row2{width:100%;margin-top:4px}
+.mk .body{padding:14px}
+.mk h4{margin:0 0 4px;font-size:18px;line-height:1.25;color:var(--ink);letter-spacing:-.02em}
+.mk h5{margin:14px 0 6px;font-size:14px;color:var(--ink)}
+.mk .p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.mk .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+.mk .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;border:1px solid transparent;min-height:40px}
+.mk .btn.block{display:flex;width:100%}
+.mk .primary{background:var(--red);color:#fff}
+.mk .ghost{background:#fff;border-color:#d6d9df;color:#333}
+.mk .ghost.on{border-color:var(--red);background:var(--red-soft);color:var(--red-dark)}
+.mk .pink{background:#fdbfbc;color:#fff}
+.mk .kakao{background:#fee500;color:rgba(0,0,0,.85)}
+.mk .link{color:#9aa3b2;font-size:12px;text-decoration:underline}
+.mk .chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 10px;font-size:11px;margin:2px 3px 0 0;white-space:nowrap}
+.mk .chip.on{background:var(--red);color:#fff;border-color:var(--red)}
+.mk .chip.burg{border-color:#ae1c3e;background:#fcebf0;color:#941b38;font-weight:700}
+.mk .chip.sq{border-radius:8px;padding:9px 12px;font-size:12px}
+.mk .chips{display:flex;flex-wrap:wrap;gap:0;margin-top:6px}
+.mk .rail{display:flex;gap:6px;overflow:hidden;margin-top:6px;white-space:nowrap}
+.mk .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mk .between{justify-content:space-between}
+.mk .eyebrow{font-size:10px;letter-spacing:1px;font-weight:800;color:var(--red-dark)}
+.mk .pillbadge{display:inline-block;background:#ffe5e7;color:#a30d16;font-size:10px;font-weight:700;padding:4px 9px;border-radius:999px}
+.mk .hero{text-align:center;padding:22px 8px 10px}
+.mk .hero h4{font-size:22px}
+.mk .search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:10px 14px;margin-top:12px;box-shadow:0 6px 18px rgba(0,0,0,.06);font-size:13px;color:var(--muted)}
+.mk .search b{color:var(--ink)}
+.mk .search .go{margin-left:auto;background:var(--red);color:#fff;border-radius:999px;width:30px;height:30px;display:grid;place-items:center;font-size:14px}
+.mk .input{background:#fff;border:1px solid #8b94a3;border-radius:8px;padding:10px 12px;color:#9aa3b2;font-size:13px;margin-top:4px}
+.mk .lbl{display:block;font-size:12px;font-weight:700;color:var(--ink);margin-top:10px}
+.mk .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
+.mk .tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;font-size:12px;min-width:0}
+.mk .tile b{display:block;font-size:13px;color:var(--ink);margin-bottom:2px}
+.mk .tile.k{display:flex;align-items:center;gap:8px}
+.mk .ic{width:30px;height:30px;border-radius:9px;background:var(--red-soft);display:grid;place-items:center;font-size:14px;flex:none}
+.mk .cards3{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+.mk .cards3 .card{margin:0}
+.mk .card h6{margin:0 0 4px;font-size:14px;color:var(--ink)}
+.mk .card .p{min-height:0}
+.mk .dark{background:#25191b;color:#fff;border-radius:16px;padding:18px 14px;text-align:center;margin-top:14px}
+.mk .dark b{display:block;font-size:14px;margin-bottom:10px}
+.mk .foot{color:#999;font-size:11px;text-align:center;padding:14px 0 4px}
+.mk .tabbar{display:flex;justify-content:space-around;background:#fff;border-top:1px solid var(--line);padding:8px 4px 10px;font-size:10px;color:#666}
+.mk .tabbar span{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px}
+.mk .tabbar i{font-style:normal;font-size:16px}
+.mk .tabbar span.on{color:var(--red);font-weight:700}
+.mk .count{font-size:12px;color:var(--muted)}
+.mk .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.mk .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.mk .poi{background:#fff;border:.5px solid #eee;border-radius:14px;overflow:hidden;position:relative;font-size:12px}
+.mk .poi .img{height:76px;background:#f0ebe3;display:grid;place-items:center;color:#b5aa99;font-size:11px}
+.mk .poi .img.r{aspect-ratio:16/10;height:auto;background:linear-gradient(135deg,#f3e9e4,#e6d7cf)}
+.mk .poi .t{padding:8px 10px}
+.mk .poi .t b{display:block;font-size:12px;color:var(--ink)}
+.mk .poi .t small{display:block;color:#888;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mk .poi .heart{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.35);color:#fff;display:grid;place-items:center;font-size:12px}
+.mk .poi .heart.lite{background:#fff;color:var(--red);box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.mk .poi .tag{position:absolute;top:6px;left:6px;font-size:9px;background:var(--red);color:#fff;padding:2px 7px;border-radius:20px}
+.mk .poi .sub{display:block;width:100%;border-top:.5px solid #eee;padding:7px;font-size:11px;text-align:center;color:#555;background:#fafafa}
+.mk .map{background:repeating-linear-gradient(45deg,#e9efe6 0 12px,#dfe7db 12px 24px);border-radius:12px;display:grid;place-items:center;color:#5a6b55;font-size:12px;position:relative}
+.mk .map .pin{position:absolute;width:18px;height:18px;border-radius:50% 50% 50% 0;background:var(--red);transform:rotate(-45deg);border:2px solid #fff}
+.mk .map .pin.n{display:grid;place-items:center;transform:none;border-radius:50%;color:#fff;font-size:10px;font-weight:800;width:20px;height:20px}
+.mk .stat{display:flex;gap:6px;margin-top:10px}
+.mk .stat div{flex:1;background:#f7f7f8;border-radius:10px;padding:8px;text-align:center;font-size:10px;color:#888}
+.mk .stat strong{display:block;font-size:16px;color:#333;font-weight:600}
+.mk .stat strong.r{color:var(--red)}
+.mk .acc{background:#fff;border:.5px solid #eee;border-radius:12px;overflow:hidden;margin-top:8px}
+.mk .acc .hd{display:flex;justify-content:space-between;padding:9px 12px;background:#faf7f8;font-size:13px}
+.mk .acc .hd span:first-child{color:var(--red);font-weight:500}
+.mk .acc .it{display:flex;gap:8px;padding:8px 12px;border-top:.5px solid #f0f0f0;font-size:12px}
+.mk .acc .it i{width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;font-size:10px;display:grid;place-items:center;font-style:normal;flex:none}
+.mk .acc .it small{display:block;color:#888;font-size:10px}
+.mk .seg{display:inline-flex;background:var(--subtle);border-radius:10px;padding:3px;margin-top:8px}
+.mk .seg span{padding:7px 14px;border-radius:8px;font-size:12px;color:#555}
+.mk .seg span.on{background:#fff;color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.mk .steps{display:flex;gap:4px;margin:8px 0}
+.mk .steps i{flex:1;height:4px;border-radius:2px;background:#e8e3dc}
+.mk .steps i.on{background:var(--red)}
+.mk .sticky{background:#fff;border-top:1px solid var(--line);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mk .skel{background:linear-gradient(90deg,#eee 25%,#f6f6f6 50%,#eee 75%);background-size:200% 100%;border-radius:8px;height:12px;margin-top:6px}
+.mk .skel.lg{height:60px}
+.mk .widget{background:#fff;border:1px dashed #cfc6b8;border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:10px}
+.mk .widget small{display:block;color:var(--muted);font-size:10px;letter-spacing:1px}
+.mk .widget .tg{border:1px solid var(--line);border-radius:8px;padding:5px 8px;font-size:11px}
+.mk .secnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.mk .secnav span{padding:9px 13px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:12px}
+.mk .secnav span.on{border-color:var(--red);background:var(--red-soft);color:var(--red-dark);font-weight:700}
+.mk .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.mk .tabs span{padding:8px 10px;font-size:12px;color:#555}
+.mk .tabs span.on{border-bottom:2px solid var(--red);color:var(--red);font-weight:700}
+.mk .artist{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;font-size:12px}
+.mk .artist .ph{width:48px;height:48px;border-radius:50%;background:#e5e1da;display:grid;place-items:center;font-weight:800;color:#555;margin-bottom:8px}
+.mk .artist .ph.init{background:var(--red-soft);color:var(--red)}
+.mk .artist b{display:block;font-size:14px;color:var(--ink)}
+.mk .socials{display:flex;gap:6px;margin:8px 0}
+.mk .socials i{width:22px;height:22px;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center;font-style:normal;font-size:10px;color:#666}
+.mk .agrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.mk .acard{text-align:center;font-size:11px;position:relative}
+.mk .acard .ph{width:64px;height:64px;margin:0 auto 5px;border-radius:50%;background:linear-gradient(135deg,#e9e3da,#d9d0c3);display:grid;place-items:center;font-weight:800;color:#666}
+.mk .acard .ph.init{background:var(--red-soft);color:var(--red)}
+.mk .acard b{display:block;color:var(--ink);font-size:12px}
+.mk .acard small{color:var(--muted);font-size:10px}
+.mk .acard .hv{position:absolute;top:0;right:12px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15);display:grid;place-items:center;font-size:11px;color:var(--red)}
+.mk .pager{display:flex;gap:4px;justify-content:center;margin-top:12px}
+.mk .pager span{width:30px;height:30px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;font-size:12px;background:#fff}
+.mk .pager span.on{background:var(--red);color:#fff;border-color:var(--red)}
+.mk .fbox{background:#fff;border:1px solid #e1e3e8;border-radius:16px;padding:12px;margin-top:10px}
+.mk .fbox b{font-size:12px}
+.mk .select{border:1px solid #c6cbd5;border-radius:12px;padding:9px 12px;font-size:12px;background:#fff;display:inline-flex;gap:8px;align-items:center;margin-top:6px}
+.mk .aside{background:#fff;border:1px solid #e1e3e8;border-radius:16px;padding:12px;margin-top:10px}
+.mk .aside .lbl{margin-top:8px}
+.mk .aside .input{border-color:#aab2c1;border-radius:9px;padding:8px}
+.mk .evrow{display:grid;grid-template-columns:52px 1fr;gap:12px;background:#fff;border:1px solid #e1e3e8;border-radius:16px;padding:14px;margin-top:10px;font-size:12px}
+.mk .evrow .date{display:flex;flex-direction:column;align-items:center;background:#f8f1f4;color:#8c1c3a;border-radius:10px;padding:8px 2px;font-size:10px}
+.mk .evrow .date b{font-size:22px;line-height:1.1}
+.mk .evrow .date.tok{background:var(--red-soft);color:var(--red-dark)}
+.mk .evrow h6{margin:4px 0;font-size:14px;color:#1d293d}
+.mk .evrow small{display:block;color:#888;font-size:10px}
+.mk .evrow .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.mk .evrow .acts span{border:1px solid #c6cbd5;border-radius:12px;padding:8px 10px;font-size:11px;background:#fff}
+.mk .ev2{display:grid;grid-template-columns:44px 1fr 28px;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px;font-size:12px}
+.mk .ev2 .d{text-align:center;color:var(--red-dark);background:var(--red-soft);border-radius:10px;padding:6px 0;font-size:10px}
+.mk .ev2 .d b{display:block;font-size:18px;line-height:1.1}
+.mk .ev2 b.t{display:block;color:var(--ink);font-size:13px}
+.mk .ev2 small{color:var(--muted);font-size:10px}
+.mk .ev2 .h{color:var(--red);font-size:16px;text-align:center}
+.mk .month{font-size:12px;font-weight:800;color:var(--ink);margin:14px 0 2px;display:flex;justify-content:space-between}
+.mk .month small{color:var(--muted);font-weight:400}
+.mk .banner{background:var(--red-soft);border:1px solid #f5c6ca;border-radius:12px;padding:10px 12px;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px}
+.mk .banner b{color:var(--red-dark)}
+.mk .auth{max-width:330px;margin:14px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px}
+.mk .auth h4{font-size:20px}
+.mk .divider{display:flex;align-items:center;gap:8px;color:#aaa;font-size:11px;margin:12px 0}
+.mk .divider::before,.mk .divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.mk .help{font-size:10px;color:#999;margin-top:10px;line-height:1.5}
+.mk .note{position:absolute;z-index:3;width:18px;height:18px;border-radius:50%;background:#1f2a3a;color:#fff;font-size:10px;font-weight:800;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.mk .note.g{background:#1b6b3a}
+.legend{font-size:13px;color:#526078;margin-top:8px}
+.legend i{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#1f2a3a;color:#fff;font-size:10px;font-weight:800;font-style:normal;margin-right:4px}
+.legend i.g{background:#1b6b3a}
+.desk{max-width:100%}
+.desk .top{padding:12px 22px}
+.desk .hero{padding:34px 20px 16px}
+.desk .hero h4{font-size:28px;max-width:520px;margin:0 auto 6px}
+.desk .cards3{grid-template-columns:repeat(3,1fr)}
+.desk .tiles{grid-template-columns:repeat(4,1fr)}
+.desk .body{padding:16px 22px}
+</style></head><body>
+<div class="goal">목표: kmovement.srv1869569.hstgr.cloud 에서 방문자가 처음 만나는 6개 공개 화면을 Tier-1 서비스 3~4개의 공통 패턴(교집합)과 비교해, 진입 동선·위계·상태값의 갭을 Before/After GUI 로 보이고 체크리스트로 남긴다.</div>
+<main>
+<header>
+  <div class="eyebrow">UI BENCHMARKING · ui-benchmarking-analyst 방식 (교집합)</div>
+  <h1>KRIDE 공개 6개 화면 UI 고도화 벤치마킹 보고서</h1>
+  <p class="lead">랜딩 홈 · 여행지 탐색 · 동선 만들기 · 아티스트 · 팬 일정 · 로그인. 지난 10-06 보고서(G0~G8, 코스 위자드·마이·내 목록·채팅)는 구현이 끝났으므로, 이번에는 <b>비로그인 방문자가 링크로 들어와 처음 지나는 화면</b>만 다룬다. 화려한 디자인이 아니라 여러 서비스가 공통으로 택한 구조와 빠진 상태값을 뽑아 현재 코드와 비교했다.</p>
+  <div class="kv">
+    <span class="muted">작성일</span><span>2026-10-20 · 브랜치 <code>claude/brave-fermat-wy8yww</code> (HEAD 899cf5c)</span>
+    <span class="muted">대상</span><span><a href="https://kmovement.srv1869569.hstgr.cloud/">https://kmovement.srv1869569.hstgr.cloud/</a> · 웹앱 <code>subproject/SDUI/metadata-project</code> (Next.js 16)</span>
+    <span class="muted">짝 문서</span><span><code>kride-public-six-screens-ui-spec.md</code> (4축 분해 전체 표 · Props/State 명세 · 체크리스트 · 할 일)</span>
+    <span class="muted">표기</span><span><span class="pill ok">[확인]</span> 2026-10-20 웹 검색으로 출처 확인 · <span class="pill warn">[기억]</span> 확인하지 않음 · 코드 근거는 파일:줄</span>
+  </div>
+  <div class="notice"><b>Before 화면에 대한 안내.</b> 이 보고서를 만든 실행 환경의 네트워크 정책이 해당 호스트로의 브라우저 접속을 차단해(프록시 403) 라이브 스크린샷을 찍지 못했다. 대신 서버 측 텍스트 추출로 <code>/</code>, <code>/view/kpop</code>, <code>/view/KPOP_EVENTS</code>, <code>/travel/kpop</code>, <code>/travel/food</code> 의 배포 문구가 현재 소스와 일치함을 확인했고(<code>evidence/live-fetch.txt</code>), Before 목업은 <b>배포된 소스(JSX + CSS)를 그대로 재현</b>한 것이다. 배포 빌드가 HEAD 와 다를 수 있는 화면은 각 섹션에 적었다.</div>
+  <h3>한눈에 보는 결론</h3>
+  <div class="gap">
+    <article><b>🚨 전역 1 · "홈"이 두 개</b>브랜드 로고는 <code>/</code>(마케팅 랜딩), 메뉴 "홈"은 <code>/view/MAIN_PAGE</code>(SDUI 홈). 방문자가 같은 서비스에서 서로 다른 홈 두 장을 본다. (<code>KrideNav.tsx:6,8</code>)</article>
+    <article><b>🚨 전역 2 · "코스 만들기" 진입점이 두 갈래</b>히어로 CTA "무료로 여행 동선 만들기"는 <code>ROUTE_PLANNER</code>(지역·목적·기간 → 지도), 상단 메뉴·K-POP 서브 메뉴 "코스 만들기"는 <code>INTRO1</code>(5단계 위자드). 같은 말, 다른 화면.</article>
+    <article><b>🚨 전역 3 · 화면마다 다른 팔레트·포커스 링</b>토큰(<code>tokens.css</code>)이 있는데 탐색 <code>#791F1F</code>, 팬 일정 <code>#941b38·#ae1c3e</code>(버건디), 로그인 CSS <code>#FDBFBC</code>(핑크), 포커스 링 3색(<code>#1557a1·#b73848·#285cb2</code>)이 공존.</article>
+    <article><b>전역 4 · 로딩이 전부 텍스트</b>탐색·동선·아티스트·팬 일정 4화면 모두 "불러오는 중…" 한 줄. 10-06 에 만든 <code>ScreenSkeleton</code>·<code>KrideStatePanel</code>을 이 화면들은 쓰지 않는다.</article>
+    <article><b>전역 5 · 모바일 내비가 2줄로 접힘</b>750px 이하에서 헤더가 <code>display:block</code>, 메뉴 6개가 줄바꿈. 하단 탭 바 없음(<code>kride-site-shell</code> 분기는 <code>BottomNav</code> 미사용).</article>
+    <article><b>화면 1 랜딩</b>Primary 빨강 3개(히어로·카드·하단), 진입 링크 11개, 검색/목적지 입력 없음, 실제 숫자(지역·성지 수) 없음.</article>
+    <article><b>화면 2·3 탐색·동선</b>탐색은 구조가 좋으나 150px 카드·기술 문구·저장이 localStorage. 동선은 "시간 설정" 위젯이 최상단, 모드 토글·공유·길찾기 버튼 4개 혼재, 조건 입력이 AI 모드에서만.</article>
+    <article><b>화면 4·5 아티스트·팬 일정</b>아티스트는 submit 검색 + 8명 페이지네이션 + 큰 2열 카드. 팬 일정은 필터가 4층(대상·아티스트·지역·날짜 aside)이라 모바일에서 결과까지 3화면 스크롤.</article>
+    <article><b>화면 6 로그인</b>이메일 폼이 위, 카카오가 아래. 돌아갈 곳 안내 없음, 회원가입 진입 없음, "인증 토큰은 … 보안 쿠키로만" 개발자 문구가 사용자에게 노출.</article>
+  </div>
+  <nav class="toc" style="margin-top:16px"><a href="#s1">1 랜딩 홈</a><a href="#s2">2 여행지 탐색</a><a href="#s3">3 동선 만들기</a><a href="#s4">4 아티스트</a><a href="#s5">5 팬 일정</a><a href="#s6">6 로그인</a><a href="#global">전역 갭</a><a href="#refs">레퍼런스·교집합</a><a href="#check">체크리스트</a><a href="#todo">할 일</a></nav>
+</header>
+
+<!-- ================= 1 ================= -->
+<section id="s1">
+  <div class="eyebrow">SCREEN 1 · <code>/</code> (app/page.tsx + KrideNav)</div>
+  <h2>랜딩 홈 — "좋아하는 K-컬처를 따라 전국을 여행하세요."</h2>
+  <p class="src">Primary Goal(추론): <b>처음 온 사람이 1분 안에 코스 만들기나 탐색을 시작한다.</b> 데이터: 정적 카피, 로그인 전/후 분기 없음, 실제 숫자 없음. 레퍼런스: Airbnb 홈 <span class="pill ok">[확인]</span> · Klook 홈 <span class="pill ok">[확인]</span> · 마이리얼트립 홈 <span class="pill warn">[기억]</span> · 야놀자 홈 <span class="pill warn">[기억]</span> → 교집합: <b>히어로 안에 검색/목적지 입력 1개 + Primary 1개</b>(4/4), 카테고리 아이콘 타일(4/4), 목적지 칩(3/4), 숫자·사회적 증거(3/4), 모바일 하단 탭 바(4/4).</p>
+  <div class="ba">
+    <figure><span class="label before">BEFORE · 소스 재현 (390px)</span>
+      <div class="mk">
+        <div class="top"><span class="logo">KRIDE</span><span class="nav"><span class="on">홈</span><span>K-pop</span><span>코스 만들기</span></span><span class="nav row2"><span>언어 채팅</span><span>마이</span><span>더보기 ▾</span></span><i class="note" style="top:8px;left:62px">1</i></div>
+        <div class="body">
+          <div class="hero"><span class="pillbadge">AI K-컬처 여행 플래너</span><h4 style="margin-top:10px">좋아하는 K-컬처를 따라<br>전국을 여행하세요.</h4><p class="p">17개 시·도의 성지와 맛집을 탐색하고, 취향·지역·체류 시간에 맞는 이동 동선을 한 번에 만듭니다.</p>
+            <div class="row" style="justify-content:center;margin-top:14px"><span class="btn primary">무료로 여행 동선 만들기</span><span class="btn ghost">여행지 먼저 둘러보기</span></div><i class="note" style="top:118px;right:10px">2</i></div>
+          <h5 style="font-size:17px">어떤 여행을 찾고 있나요?</h5>
+          <div class="chips"><span class="chip sq">아티스트 둘러보기</span><span class="chip sq">이벤트 찾기</span><span class="chip sq">상품 살펴보기</span></div>
+          <div class="cards3">
+            <div class="card"><h6>K-POP 성지 코스</h6><p class="p">서울, 부산, 강원 등 공연장과 촬영지가 모인 지역의 탐색 동선을 준비합니다.</p><span class="link" style="color:#9b3036">K-POP 여행 가이드 보기 →</span></div>
+            <div class="card"><h6>전국 맛집 코스</h6><p class="p">17개 시·도의 시장과 골목, 카페를 이동 부담이 적은 하루 코스로 연결합니다.</p><span class="link" style="color:#9b3036">전국 맛집 가이드 보기 →</span></div>
+            <div class="card"><h6>나만의 AI 동선</h6><p class="p">지역, 여행 목적, 기간을 선택하고 맞춤형 방문 순서를 추천받습니다.</p><span class="link" style="color:#9b3036">AI 코스 만들기 →</span></div>
+          </div><i class="note" style="top:560px;right:10px">3</i>
+          <div class="dark"><b>검색부터 이동 순서까지, KRIDE에서 한 번에 시작하세요.</b><span class="btn primary">KRIDE 시작하기</span></div><i class="note" style="bottom:52px;left:10px">4</i>
+          <div class="foot">© KRIDE · AI K-컬처 여행 플래너</div>
+        </div>
+      </div>
+      <figcaption class="legend"><i>1</i>메뉴 5+더보기 5 = 10개가 2줄로 접힘, 하단 탭 없음 (<code>kride-unified.css:2</code> 750px 분기) · <i>2</i>히어로에 검색/목적지 입력이 없고 CTA 2개 · <i>3</i>섹션 하나에 진입 링크 6개(칩 3 + 카드 3), 숫자 없이 추상 카피 · <i>4</i>세 번째 빨간 Primary "KRIDE 시작하기"(히어로와 같은 목적지)</figcaption>
+    </figure>
+    <figure><span class="label after">AFTER · 기대 화면 (390px)</span>
+      <div class="mk">
+        <div class="top"><span class="logo">KRIDE</span><span class="nav"><span class="on">홈</span><span>탐색</span><span>코스</span><span>K-POP</span><span>마이</span></span><i class="note g" style="top:8px;left:62px">1</i></div>
+        <div class="body">
+          <div class="hero" style="padding-top:14px"><h4>좋아하는 K-컬처를 따라<br>전국을 여행하세요.</h4><p class="p">성지 · 맛집 · 공연장을 하루 코스로 이어 드려요.</p>
+            <div class="search"><span>🔍</span><span><b>어디로 떠날까요?</b> 지역·아티스트·작품</span><span class="go">→</span></div>
+            <div class="chips" style="justify-content:center;margin-top:8px"><span class="chip">서울</span><span class="chip">부산</span><span class="chip">제주</span><span class="chip">강원</span><span class="chip">+13</span></div>
+            <span class="btn primary block" style="margin-top:12px">조건만 고르고 코스 받기</span><i class="note g" style="top:60px;right:10px">2</i></div>
+          <div class="tiles" style="margin-top:14px">
+            <div class="tile k"><span class="ic">🎤</span><div><b>성지</b><span class="count">촬영지·공연장</span></div></div>
+            <div class="tile k"><span class="ic">🍜</span><div><b>맛집</b><span class="count">17개 시·도</span></div></div>
+            <div class="tile k"><span class="ic">💜</span><div><b>아티스트</b><span class="count">30팀</span></div></div>
+            <div class="tile k"><span class="ic">📅</span><div><b>팬 일정</b><span class="count">이번 달 12건</span></div></div>
+          </div><i class="note g" style="bottom:218px;right:10px">3</i>
+          <h5>인기 지역 <span class="count" style="font-weight:400">· 권역 · 맛집 · 성지</span></h5>
+          <div class="grid2" style="margin-top:6px">
+            <div class="poi"><div class="img r"></div><div class="t"><b>서울</b><small>권역 3 · 맛집 5 · 성지 2</small></div></div>
+            <div class="poi"><div class="img r"></div><div class="t"><b>부산</b><small>권역 3 · 맛집 5 · 성지 2</small></div></div>
+          </div>
+          <div class="banner"><span><b>로그인</b>하면 저장한 코스를 이어서 볼 수 있어요</span><span class="chip">로그인</span></div><i class="note g" style="bottom:70px;left:10px">4</i>
+          <div class="foot">© KRIDE · AI K-컬처 여행 플래너</div>
+        </div>
+        <div class="tabbar"><span class="on"><i>⌂</i>홈</span><span><i>🧭</i>탐색</span><span><i>🗺</i>코스</span><span><i>🎤</i>K-POP</span><span><i>👤</i>마이</span></div>
+      </div>
+      <figcaption class="legend"><i class="g">1</i>상단 5개 + 모바일 하단 탭 바 5개, 나머지는 "마이 → 더보기"로 · <i class="g">2</i>히어로에 목적지 입력 1개 + 칩, Primary 1개 · <i class="g">3</i>4개 카테고리 타일에 실제 숫자(<code>/travel/food</code>가 이미 노출하는 "권역 3 · 맛집 5 · 성지 2" 재사용) · <i class="g">4</i>하단 반복 CTA 대신 로그인 1줄 배너(로그인 후에는 "이어서 하기" 카드)</figcaption>
+    </figure>
+  </div>
+  <h3>데스크톱(1200px)에서의 같은 변화</h3>
+  <div class="ba">
+    <figure><span class="label before">BEFORE</span>
+      <div class="mk desk"><div class="top"><span class="logo">KRIDE</span><span class="nav"><span class="on">홈</span><span>K-pop</span><span>코스 만들기</span><span>언어 채팅</span><span>마이</span><span>더보기 ▾</span></span></div>
+        <div class="body"><div class="hero"><span class="pillbadge">AI K-컬처 여행 플래너</span><h4>좋아하는 K-컬처를 따라 전국을 여행하세요.</h4><p class="p">17개 시·도의 성지와 맛집을 탐색하고, 취향·지역·체류 시간에 맞는 이동 동선을 한 번에 만듭니다.</p><div class="row" style="justify-content:center;margin-top:14px"><span class="btn primary">무료로 여행 동선 만들기</span><span class="btn ghost">여행지 먼저 둘러보기</span></div></div>
+        <h5 style="font-size:17px">어떤 여행을 찾고 있나요?</h5><div class="chips"><span class="chip sq">아티스트 둘러보기</span><span class="chip sq">이벤트 찾기</span><span class="chip sq">상품 살펴보기</span></div>
+        <div class="cards3"><div class="card"><h6>K-POP 성지 코스</h6><p class="p">서울, 부산, 강원 등 공연장과 촬영지가 모인 지역의 탐색 동선을 준비합니다.</p></div><div class="card"><h6>전국 맛집 코스</h6><p class="p">17개 시·도의 시장과 골목, 카페를 이동 부담이 적은 하루 코스로 연결합니다.</p></div><div class="card"><h6>나만의 AI 동선</h6><p class="p">지역, 여행 목적, 기간을 선택하고 맞춤형 방문 순서를 추천받습니다.</p></div></div>
+        <div class="dark"><b>검색부터 이동 순서까지, KRIDE에서 한 번에 시작하세요.</b><span class="btn primary">KRIDE 시작하기</span></div></div></div>
+      <figcaption>히어로 → 칩 3 → 카드 3 → 다크 CTA. 같은 목적지(<code>ROUTE_PLANNER</code>)로 가는 빨간 버튼이 화면에 3개.</figcaption>
+    </figure>
+    <figure><span class="label after">AFTER</span>
+      <div class="mk desk"><div class="top"><span class="logo">KRIDE</span><span class="nav"><span class="on">홈</span><span>탐색</span><span>코스 만들기</span><span>K-POP</span><span>마이</span></span></div>
+        <div class="body"><div class="hero"><h4>좋아하는 K-컬처를 따라 전국을 여행하세요.</h4><p class="p">성지 · 맛집 · 공연장을 하루 코스로 이어 드려요.</p><div class="search" style="max-width:560px;margin:14px auto 0"><span>🔍</span><span><b>어디로 떠날까요?</b> 지역 · 아티스트 · 작품 이름</span><span class="go">→</span></div><div class="chips" style="justify-content:center;margin-top:8px"><span class="chip">서울</span><span class="chip">부산</span><span class="chip">제주</span><span class="chip">강원</span><span class="chip">경기</span><span class="chip">+12</span></div><span class="btn primary" style="margin-top:12px">조건만 고르고 코스 받기</span></div>
+        <div class="tiles"><div class="tile k"><span class="ic">🎤</span><div><b>성지</b><span class="count">촬영지·공연장</span></div></div><div class="tile k"><span class="ic">🍜</span><div><b>맛집</b><span class="count">17개 시·도</span></div></div><div class="tile k"><span class="ic">💜</span><div><b>아티스트</b><span class="count">30팀</span></div></div><div class="tile k"><span class="ic">📅</span><div><b>팬 일정</b><span class="count">이번 달 12건</span></div></div></div>
+        <h5>인기 지역</h5><div class="tiles"><div class="poi"><div class="img r"></div><div class="t"><b>서울</b><small>권역 3 · 맛집 5 · 성지 2</small></div></div><div class="poi"><div class="img r"></div><div class="t"><b>부산</b><small>권역 3 · 맛집 5 · 성지 2</small></div></div><div class="poi"><div class="img r"></div><div class="t"><b>제주</b><small>권역 3 · 맛집 5 · 성지 2</small></div></div><div class="poi"><div class="img r"></div><div class="t"><b>강원</b><small>권역 3 · 맛집 5 · 성지 2</small></div></div></div>
+        <div class="banner"><span><b>로그인</b>하면 저장한 코스와 아티스트를 이어서 볼 수 있어요</span><span class="chip">카카오로 시작</span></div></div></div>
+      <figcaption>히어로(검색 1 + Primary 1) → 카테고리 타일 4 → 인기 지역 4 → 로그인 배너. 빨간 버튼 1개, 모든 숫자는 실제 값.</figcaption>
+    </figure>
+  </div>
+  <div class="gap">
+    <article><b>갭 1-1 · Primary 3개 → 1개</b><span class="pill bad">다름</span> <code>app/page.tsx:26,37,40</code> 에서 같은 <code>/view/ROUTE_PLANNER</code> 로 가는 <code>primaryButton</code> 이 3곳. 교집합(4/4)은 히어로 Primary 1개. 하단 CTA 삭제, 카드 링크는 텍스트 링크 유지.</article>
+    <article><b>갭 1-2 · 목적지 입력 없음</b><span class="pill bad">없음</span> 여행 홈 4/4 가 히어로에 검색/목적지를 둔다. <code>TourExploreScreen.tsx</code> 가 이미 <code>?area=&amp;category=</code> 를 받으므로(<code>resolveAreaParam</code>) 홈 검색은 그 URL 로 보내기만 하면 된다. 아티스트·작품은 <code>/view/kpop?q=</code>, 성지 작품 필터로 분기.</article>
+    <article><b>갭 1-3 · 숫자·증거 없음</b><span class="pill bad">없음</span> "17개 시·도" 외 실제 값이 없다. <code>FoodHubLanding</code> 이 이미 "권역 3 · 맛집 5 · 성지 2" 를 지역별로 렌더하므로 홈 타일에 같은 데이터 재사용. 아티스트 30팀, 이번 달 일정 n건은 <code>/api/v1/kpop/artists</code>·<code>event-feed</code> 의 totalCount.</article>
+    <article><b>갭 1-4 · 홈 두 벌</b><span class="pill bad">다름</span> 로고 <code>href="/"</code>, 메뉴 "홈" <code>/view/MAIN_PAGE</code>(<code>KrideNav.tsx:6,8</code>). 교집합(4/4): 홈은 한 곳. 제안: <code>/</code> 를 유일한 홈으로 두고 <code>MAIN_PAGE</code> 는 로그인 후 "이어서 하기"·저장 카드를 <code>/</code> 안에 합치거나 301.</article>
+    <article><b>갭 1-5 · 모바일 내비</b><span class="pill bad">다름</span> 750px 이하 헤더 2줄(<code>kride-unified.css:2</code>). 4/4 가 하단 탭 바 4~5개. 기존 <code>BottomNav</code> 컴포넌트를 <code>kride-site-shell</code> 분기에서도 쓰고, 언어 채팅·여행봇·커뮤니티·시간 설정은 "마이/더보기" 안으로.</article>
+    <article><b>갭 1-6 · 로그인 전/후 분기</b><span class="pill bad">없음</span> <code>app/page.tsx</code> 는 서버 컴포넌트라 로그인 상태를 모른다. 3/4 가 홈 상단에 "이어서 하기". 제안: 클라이언트 아일랜드 1개(<code>ResumeCard</code>)가 <code>AuthContext</code> 로 분기, 비로그인은 1줄 배너.</article>
+  </div>
+</section>
+
+<!-- ================= 2 ================= -->
+<section id="s2">
+  <div class="eyebrow">SCREEN 2 · <code>/view/TOUR_EXPLORE</code> (TourExploreScreen.tsx · tour-explore.css)</div>
+  <h2>여행지 탐색 — 카테고리 · 지역 · 지도</h2>
+  <p class="src">Primary Goal(추론): <b>지역·카테고리로 장소를 훑고 마음에 드는 곳을 저장한다.</b> 데이터: TourAPI 24건/페이지, 성지는 자체 DB, 지도 좌표 있음/없음 혼재, 저장은 <code>localStorage 'kride:saved-pois'</code>. 레퍼런스: Airbnb 검색 결과(지도+리스트) <span class="pill warn">[기억]</span> · Klook 검색 결과 <span class="pill ok">[확인]</span> · 네이버 지도 <span class="pill warn">[기억]</span> · 카카오맵 <span class="pill warn">[기억]</span> → 교집합: <b>상단 고정 필터 바(검색 + 칩 1줄)</b>(4/4), 결과 수 + 정렬 한 줄(4/4), 카드에 썸네일·카테고리·거리(3/4), 지도↔리스트 전환 또는 분할(4/4), 로딩 Skeleton 카드(4/4), 저장이 계정과 동기화(3/4).</p>
+  <div class="ba">
+    <figure><span class="label before">BEFORE · 소스 재현 (390px)</span>
+      <div class="mk">
+        <div class="top"><span class="logo">KRIDE</span><span class="nav"><span>홈</span><span>K-pop</span><span>코스 만들기</span></span><span class="nav row2"><span>언어 채팅</span><span>마이</span><span class="on">더보기 ▾</span></span></div>
+        <div class="body">
+          <span class="lbl" style="margin-top:0">불러온 장소 검색</span><div class="input" style="border-color:#c9cdd3;border-radius:12px">장소 이름 또는 주소</div><i class="note" style="top:62px;right:10px">1</i>
+          <div class="chips" style="margin-top:10px"><span class="chip sq">성지</span><span class="chip sq">성지 맛집</span><span class="chip sq on">맛집</span><span class="chip sq">관광지</span><span class="chip sq">문화시설</span></div>
+          <div class="row between" style="margin-top:8px"><span style="font-size:12px">서울 · 전체 · 이름순</span><span class="row" style="gap:4px"><span class="chip sq">세부 필터</span><span class="chip sq">필터 초기화</span></span></div>
+          <p class="p" style="margin-top:8px">불러온 24곳 중 24곳 · 화면에 24곳 표시</p><i class="note" style="top:196px;right:10px">2</i>
+          <div class="row" style="margin-top:6px"><span class="chip sq on" style="background:#fff;color:#263244;border-color:#c9cdd3;font-weight:700">목록 보기</span><span class="chip sq">지도 보기</span></div>
+          <div class="grid2">
+            <div class="poi"><div class="img">사진 없음</div><div class="t"><b>광장시장</b><small>서울 종로구 창경궁로 88</small></div><span class="sub">지도에서 선택</span><span class="heart">♡</span></div>
+            <div class="poi"><div class="img">사진 없음</div><div class="t"><b>통인시장</b><small>서울 종로구 자하문로15길 18</small></div><span class="sub">지도에서 선택</span><span class="heart">♡</span></div>
+            <div class="poi"><div class="img">사진 없음</div><div class="t"><b>남대문시장</b><small>서울 중구 남대문시장4길 21</small></div><span class="sub">지도에서 선택</span><span class="heart">♡</span></div>
+            <div class="poi"><div class="img">사진 없음</div><div class="t"><b>망원시장</b><small>서울 마포구 포은로8길 14</small></div><span class="sub">지도에서 선택</span><span class="heart">♡</span></div>
+          </div><i class="note" style="bottom:120px;right:10px">3</i>
+          <div class="card" style="text-align:center;color:#888;padding:20px">불러오는 중…</div><i class="note" style="bottom:28px;left:10px">4</i>
+        </div>
+      </div>
+      <figcaption class="legend"><i>1</i>"불러온 장소 검색" = 이미 받은 24건 안에서만 찾는 로컬 필터인데 검색창처럼 보임 · <i>2</i>"불러온 24곳 중 24곳 · 화면에 24곳 표시" 기술 문구(<code>:290</code>) · <i>3</i>150px auto-fill 카드(<code>tour-card-grid</code>) + 카드마다 "지도에서 선택" 버튼 행, 카테고리·거리 없음, ♡ 저장은 localStorage(<code>SAVED_KEY</code>) 라 마이페이지 내 목록과 무관 · <i>4</i>로딩·오류가 텍스트 한 줄, 조건을 바꿀 때마다 그리드가 사라졌다 다시 생김</figcaption>
+    </figure>
+    <figure><span class="label after">AFTER · 기대 화면 (390px)</span>
+      <div class="mk">
+        <div class="top"><span class="logo">KRIDE</span><span class="nav"><span>홈</span><span class="on">탐색</span><span>코스</span><span>K-POP</span><span>마이</span></span></div>
+        <div class="body" style="padding-bottom:0">
+          <div class="search" style="margin-top:0;padding:8px 12px"><span>🔍</span><span><b>서울</b> · 맛집</span><span class="chip" style="margin-left:auto">바꾸기</span></div><i class="note g" style="top:50px;right:10px">1</i>
+          <div class="rail"><span class="chip">성지</span><span class="chip">성지 맛집</span><span class="chip on">맛집</span><span class="chip">관광지</span><span class="chip">문화시설</span><span class="chip">종로구 ▾</span></div>
+          <div class="row between" style="margin-top:10px"><b style="color:#111">서울 맛집 24곳</b><span class="chip">이름순 ▾</span></div><i class="note g" style="top:128px;right:10px">2</i>
+          <div class="map" style="height:120px;margin-top:8px"><span>지도 · 핀 24</span><span class="pin n" style="top:30px;left:70px">1</span><span class="pin n" style="top:60px;left:140px">2</span><span class="pin n" style="top:40px;left:230px">3</span><span class="chip" style="position:absolute;bottom:8px;right:8px;background:#fff">전체 화면</span></div>
+          <div class="grid2">
+            <div class="poi"><div class="img r"></div><span class="tag" style="background:#374151">맛집</span><div class="t"><b>광장시장</b><small>종로구 · 1.2km</small></div><span class="heart lite">♡</span></div>
+            <div class="poi"><div class="img r"></div><span class="tag">성지</span><div class="t"><b>통인시장</b><small>종로구 · 2.4km · 드라마 촬영</small></div><span class="heart lite">♥</span></div>
+            <div class="poi"><div class="img r" style="background:none"><div class="skel lg" style="margin:0;border-radius:0;height:100%"></div></div><div class="t"><div class="skel" style="width:70%"></div><div class="skel" style="width:50%"></div></div></div>
+            <div class="poi"><div class="img r" style="background:none"><div class="skel lg" style="margin:0;border-radius:0;height:100%"></div></div><div class="t"><div class="skel" style="width:60%"></div><div class="skel" style="width:40%"></div></div></div>
+          </div><i class="note g" style="bottom:70px;right:10px">3</i>
+          <div class="banner" style="margin-bottom:12px"><span>♥ 저장 3곳 · <b>로그인하면 내 목록에 보관</b></span><span class="chip">로그인</span></div><i class="note g" style="bottom:18px;left:10px">4</i>
+        </div>
+        <div class="tabbar"><span><i>⌂</i>홈</span><span class="on"><i>🧭</i>탐색</span><span><i>🗺</i>코스</span><span><i>🎤</i>K-POP</span><span><i>👤</i>마이</span></div>
+      </div>
+      <figcaption class="legend"><i class="g">1</i>상단 고정 바: 현재 조건(지역·카테고리) 한 줄 + 칩 레일(이미 있는 <code>HorizontalFilterRail</code>), 세부 필터는 바텀시트 · <i class="g">2</i>"서울 맛집 24곳" + 정렬 1개, 기술 문구 제거 · <i class="g">3</i>지도 미리보기 + 2열 카드(16:10 썸네일·카테고리 태그·거리·작품 1줄), 카드 탭 = 지도 핀 하이라이트(별도 버튼 제거), 로딩은 카드 Skeleton 4장 · <i class="g">4</i>저장 수 + 계정 동기화 유도(로그인 시 <code>/me/saved</code> 로 이관)</figcaption>
+    </figure>
+  </div>
+  <div class="gap">
+    <article><b>갭 2-1 · 검색창의 역할</b><span class="pill bad">다름</span> <code>placeQuery</code> 는 받은 24건 내 로컬 필터(<code>:107</code>). 4/4 는 검색창이 서버 검색. 제안: 라벨을 "이 목록에서 찾기"로 바꾸고 접거나, TourAPI <code>keyword</code> 검색으로 승격.</article>
+    <article><b>갭 2-2 · 결과 수 문구</b><span class="pill bad">다름</span> "불러온 n곳 중 m곳 · 화면에 k곳 표시"(<code>:290</code>) 는 디버그 문구. 4/4 는 "지역 카테고리 n곳" + 정렬. 더 불러오기는 "24곳 더 보기" 버튼 1개.</article>
+    <article><b>갭 2-3 · 카드 정보</b><span class="pill bad">다름</span> 카드가 150px 최소 너비·100px 회색 썸네일·주소 1줄. 3/4 는 썸네일 16:10 + 카테고리 + 거리. <code>hasTourCoordinates</code> 가 있으니 현재 지역 중심과의 거리 계산 가능. "지도에서 선택" 버튼 행은 카드 탭으로 흡수.</article>
+    <article><b>갭 2-4 · 저장의 소재</b><span class="pill bad">다름</span> <code>SAVED_KEY='kride:saved-pois'</code>(localStorage) 라 기기·브라우저를 바꾸면 사라지고, 마이페이지 내 목록(<code>/me/saved/*</code>) 에 안 보인다. 3/4 가 계정 동기화. 제안: 로그인 시 서버 저장 + 기존 로컬 항목 병합.</article>
+    <article><b>갭 2-5 · 로딩/오류</b><span class="pill bad">다름</span> <code>loading</code> 중 리스트 영역이 비고 텍스트만. <code>ScreenSkeleton</code>/카드 Skeleton 으로 자리 유지. 오류는 <code>tour-recovery</code> 가 있으나 색이 별도(<code>#fff8f8·#ead0d1</code>) → <code>KrideStatePanel</code> 로 통일.</article>
+    <article><b>갭 2-6 · URL 상태</b><span class="pill bad">다름</span> <code>?area=&amp;category=</code> 는 진입 시만 읽고 이후 칩 선택은 URL 에 안 쓴다(<code>:207</code> 주석). 4/4 는 조건이 URL 에 남아 뒤로가기·공유가 된다. <code>router.replace</code> 로 동기화.</article>
+  </div>
+</section>
+
+<!-- ================= 3 ================= -->
+<section id="s3">
+  <div class="eyebrow">SCREEN 3 · <code>/view/ROUTE_PLANNER</code> (RouteScreen.tsx + RecordTimeComponent)</div>
+  <h2>동선 만들기 — 히어로 CTA 가 도착하는 화면</h2>
+  <p class="src">Primary Goal(추론): <b>지역·목적·기간을 고르고 하루 코스(지도 + 순서)를 받는다.</b> 데이터: 기본 모드는 서울 맛집 12곳 고정(<code>areaCode:'1'</code>), AI 모드는 120초 요청·로그인 필요, 길 찾기 모드는 별도 컴포넌트. 레퍼런스: Wanderlog <span class="pill ok">[확인]</span> · Google Maps 경로 <span class="pill warn">[기억]</span> · 네이버 지도 길찾기 <span class="pill warn">[기억]</span> · 트리플 일정 만들기 <span class="pill warn">[기억]</span> → 교집합: <b>조건 입력 → 결과</b> 순서(4/4), 지도 + 순서 리스트 분할(4/4), 결과 액션(공유·저장·길찾기)은 결과 아래 1줄(3/4), 재생성 시 조건 보존(4/4), 생성 중 진행 표시(3/4).</p>
+  <div class="ba">
+    <figure><span class="label before">BEFORE · 소스 재현 (390px)</span>
+      <div class="mk">
+        <div class="top"><span class="logo">KRIDE</span><span class="nav"><span>홈</span><span>K-pop</span><span>코스 만들기</span></span><span class="nav row2"><span>언어 채팅</span><span>마이</span><span>더보기 ▾</span></span></div>
+        <div class="body">
+          <div class="widget"><div><small>시간 설정</small>약속 시간을 설정해 주세요</div><span class="tg">펼치기 ⌃</span></div><i class="note" style="top:62px;right:10px">1</i>
+          <div class="row between"><span><b style="color:#e50914;font-size:18px;font-weight:600">동선</b> <span class="count">내 취향대로 하루 코스</span></span></div>
+          <div class="chips" style="margin-top:6px"><span class="chip">길 찾기</span><span class="chip" style="background:#fee500;border-color:#fee500">카카오 공유</span><span class="chip on">기본 코스</span><span class="chip">AI 코스</span></div><i class="note" style="top:205px;right:10px">2</i>
+          <div class="stat"><div><strong class="r">12</strong>방문지</div><div><strong>2시간 40분</strong>예상 소요</div><div><strong>8.4km</strong>이동 거리</div></div>
+          <div class="map" style="height:150px;margin-top:10px"><span>지도</span><span class="pin" style="top:40px;left:60px"></span><span class="pin" style="top:70px;left:150px"></span><span class="pin" style="top:50px;left:250px"></span></div><i class="note" style="top:250px;left:10px">3</i>
+          <div class="acc"><div class="hd"><span>Day 1 · 12곳</span><span style="color:#bbb">▲</span></div>
+            <div class="it"><i>1</i><div>광장시장<small>서울 종로구 창경궁로 88</small></div></div>
+            <div class="it"><i>2</i><div>통인시장<small>서울 종로구 자하문로15길 18</small></div></div>
+            <div class="it"><i>3</i><div>남대문시장<small>서울 중구 남대문시장4길 21</small></div></div></div>
+          <div class="card" style="text-align:center;color:#A32D2D;padding:16px">AI 코스를 불러오지 못했어요. 기본 코스로 볼 수 있어요.</div><i class="note" style="bottom:24px;right:10px">4</i>
+        </div>
+      </div>
+      <figcaption class="legend"><i>1</i>"시간 설정" 위젯이 코스 화면 최상단(<code>AppShell.tsx:31</code> <code>ROUTE_PLANNER</code> 분기) — 코스와 무관한 기능이 첫 시선을 차지 · <i>2</i>모드 토글 3개와 카카오 공유가 같은 줄(<code>:119-124</code>), 처음 열면 조건 입력 없이 서울 맛집 12곳이 그려짐(<code>:43</code>) · <i>3</i>조건 칩(지역 3·목적 3·기간 2)은 AI 모드를 눌러야만 나타남(<code>:128</code>) · <i>4</i>오류는 텍스트만, 다시 시도 버튼 없음(<code>:151</code>), 로딩도 텍스트</figcaption>
+    </figure>
+    <figure><span class="label after">AFTER · 기대 화면 (390px)</span>
+      <div class="mk">
+        <div class="top"><span class="logo">KRIDE</span><span class="nav"><span>홈</span><span>탐색</span><span class="on">코스</span><span>K-POP</span><span>마이</span></span></div>
+        <div class="body" style="padding-bottom:0">
+          <h4>하루 코스 만들기</h4><p class="p">조건 3개만 고르면 지도와 순서를 바로 받아요</p><i class="note g" style="top:46px;right:10px">1</i>
+          <div class="card" style="margin-top:10px">
+            <span class="eyebrow">지역</span><div class="chips"><span class="chip on">서울</span><span class="chip">부산</span><span class="chip">제주</span><span class="chip">+14</span></div>
+            <span class="eyebrow" style="display:block;margin-top:8px">목적</span><div class="chips"><span class="chip on">성지순례</span><span class="chip">맛집투어</span><span class="chip">자연·힐링</span></div>
+            <span class="eyebrow" style="display:block;margin-top:8px">기간</span><div class="chips"><span class="chip on">당일치기</span><span class="chip">1박2일</span></div>
+            <div class="seg" style="margin-top:12px"><span class="on">기본 코스</span><span>AI 추천 <span class="pillbadge" style="padding:1px 6px;font-size:9px">로그인</span></span></div><i class="note g" style="top:218px;right:10px">2</i>
+          </div>
+          <div class="stat"><div><strong class="r">7</strong>방문지</div><div><strong>4시간 10분</strong>예상 소요</div><div><strong>11km</strong>이동 거리</div></div>
+          <div class="map" style="height:130px;margin-top:10px"><span>지도</span><span class="pin n" style="top:30px;left:60px">1</span><span class="pin n" style="top:70px;left:150px">2</span><span class="pin n" style="top:40px;left:250px">3</span></div>
+          <div class="acc"><div class="hd"><span>Day 1 · 7곳</span><span style="color:#bbb">▲</span></div>
+            <div class="it"><i>1</i><div>광장시장<small>오전 · 종로구 · 도보 12분 →</small></div></div>
+            <div class="it"><i>2</i><div>통인시장<small>오전 · 종로구 · 지하철 18분 →</small></div></div></div><i class="note g" style="top:596px;left:10px">3</i>
+          <div class="card" style="border-color:#f5c6ca;background:#fff5f5"><b style="color:#111">AI 추천 서버에 문제가 있어요</b><p class="p">고른 조건은 그대로예요. 기본 코스는 이미 보여 드리고 있어요.</p><div class="row" style="margin-top:8px"><span class="btn primary" style="padding:8px 12px;min-height:34px">다시 시도</span><span class="link">조건 바꾸기</span></div></div><i class="note g" style="bottom:60px;right:10px">4</i>
+        </div>
+        <div class="sticky"><span class="chip">🧭 길 찾기</span><span class="chip">↗ 공유</span><span class="btn primary" style="margin-left:auto;padding:8px 14px;min-height:36px">♡ 코스 저장</span></div>
+      </div>
+      <figcaption class="legend"><i class="g">1</i>시간 설정 위젯은 "코스 저장" 시점이나 마이로 이동, 화면 제목이 동사형 · <i class="g">2</i>조건 3줄이 항상 위(기본 코스도 조건을 받음), 모드는 segmented 2개(길 찾기는 결과 액션으로) · <i class="g">3</i>순서 리스트에 시간대·구간 이동 수단 1줄(이미 <code>slot</code> 필드 있음) · <i class="g">4</i>오류는 원인 + 다시 시도 + 조건 보존(<code>fetchedKeyRef</code> 리셋), 하단 고정 액션 바(길 찾기·공유·저장)</figcaption>
+    </figure>
+  </div>
+  <div class="gap">
+    <article><b>갭 3-1 · 조건 → 결과 순서</b><span class="pill bad">다름</span> 기본 모드는 <code>fetchRestaurants({areaCode:'1'})</code> 고정(<code>:43</code>), 조건 칩은 AI 모드 전용(<code>:128</code>). 4/4 가 조건 먼저. 제안: 조건 카드를 상단 고정, 기본 모드도 <code>region</code> 을 areaCode 로 매핑해 사용.</article>
+    <article><b>갭 3-2 · 헤더 버튼 4개</b><span class="pill bad">다름</span> 길 찾기·카카오 공유·기본·AI 가 한 줄(<code>:119-124</code>). 3/4 는 결과 액션을 결과 아래 1줄로. 모드는 segmented 2개, 길 찾기·공유·저장은 하단 바.</article>
+    <article><b>갭 3-3 · 시간 설정 위젯</b><span class="pill bad">다름</span> <code>AppShell.tsx:31</code> 이 <code>ROUTE_PLANNER</code> 에만 <code>RecordTimeComponent</code> 를 최상단에 둔다. 레퍼런스 0/4. 코스 저장 시 "약속 시간 추가" 로 옮기거나 마이로.</article>
+    <article><b>갭 3-4 · 오류·로딩 상태</b><span class="pill bad">다름</span> 기본 모드 오류(<code>:150</code>)·AI 오류(<code>:151</code>) 모두 텍스트, 재시도 없음. 10-06 에 만든 <code>KrideStatePanel</code> + <code>useKrideItinerary.retry()</code> 패턴을 그대로 적용. 생성 중에는 지도·리스트 Skeleton.</article>
+    <article><b>갭 3-5 · 인라인 스타일</b><span class="pill bad">다름</span> 화면 전체가 <code>style={{}}</code> 와 <code>RED</code> 상수. 반응형·다크·토큰 교체가 불가. <code>route-screen.css</code> 로 분리하고 <code>--semantic-accent</code> 사용.</article>
+    <article><b>갭 3-6 · 코스 만들기 두 갈래</b><span class="pill bad">다름</span> 히어로 CTA → 이 화면, 메뉴·K-POP 서브 메뉴 "코스 만들기" → <code>INTRO1</code> 5단계. 제안: 이 화면을 "빠른 코스", INTRO 위자드를 "아티스트 코스(5단계)" 로 이름을 나누고 서로 링크.</article>
+  </div>
+</section>
+
+<!-- ================= 4 ================= -->
+<section id="s4">
+  <div class="eyebrow">SCREEN 4 · <code>/view/kpop</code> (ArtistCatalogScreen.tsx · artist-catalog.css · KpopCards.tsx)</div>
+  <h2>아티스트 — "좋아하는 아티스트를 만나보세요"</h2>
+  <p class="src">Primary Goal(추론): <b>아티스트를 찾아 저장하고, 일정·상품·코스로 이어간다.</b> 데이터: 30팀, 8명/페이지 서버 페이징, 검수 사진 일부(<code>artistPhotos.json</code>), 저장은 로그인 필요. 레퍼런스: Spotify 아티스트 선택 <span class="pill ok">[확인]</span> · Weverse 아티스트 탭 <span class="pill ok">[확인]</span> · 멜론 아티스트 <span class="pill warn">[기억]</span> · Apple Music <span class="pill warn">[기억]</span> → 교집합: <b>원형/정사각 사진 그리드 3~6열</b>(4/4), 입력 즉시 필터되는 검색(4/4), 이름 + 보조 1줄(그룹/솔로·장르)(3/4), 페이지네이션 대신 더 보기/무한(4/4), 이미지 없음 → 이니셜(4/4), 저장 아이콘은 카드 위(3/4).</p>
+  <div class="ba">
+    <figure><span class="label before">BEFORE · 소스 재현 (390px)</span>
+      <div class="mk">
+        <div class="top"><span class="logo">KRIDE</span><span class="nav"><span>홈</span><span class="on">K-pop</span><span>코스 만들기</span></span><span class="nav row2"><span>언어 채팅</span><span>마이</span><span>더보기 ▾</span></span></div>
+        <div class="body">
+          <div class="secnav"><span class="on">아티스트</span><span>이벤트</span><span>상품</span><span>코스 만들기 →</span></div>
+          <span class="eyebrow">K-POP · 아티스트</span><h4 style="font-size:24px">좋아하는 아티스트를 만나보세요</h4><p class="p">공식 소식을 살펴보고, 함께하고 싶은 순간을 내 목록에 담아요.</p>
+          <span class="lbl">아티스트 이름</span><div class="input">한국어 또는 영어 이름</div>
+          <div class="row" style="margin-top:8px"><span class="chip sq" style="border-color:#9ba6b8">검색</span><span class="chip sq" style="border-color:#9ba6b8">초기화</span></div><i class="note" style="top:214px;right:10px">1</i>
+          <h5>30명의 아티스트</h5>
+          <div class="artist"><span class="eyebrow">좋아하는 마음이, 다음 추억으로</span><div class="ph" style="margin-top:6px">BTS</div><b>방탄소년단 <span class="count" style="font-weight:400">BTS</span></b><p class="p">2013년 데뷔한 7인조 보이그룹. 공식 채널과 팬 커뮤니티 링크를 모았어요.</p><div class="socials"><i>YT</i><i>IG</i><i>X</i><i>W</i></div><span class="chip sq">♡ 내 목록에 저장</span></div><i class="note" style="bottom:150px;right:10px">2</i>
+          <div class="artist" style="margin-top:8px"><span class="eyebrow">좋아하는 마음이, 다음 추억으로</span><div class="ph" style="margin-top:6px;background:#1f2937;color:#fff">NJ</div><b>뉴진스 <span class="count" style="font-weight:400">NewJeans</span></b><p class="p">2022년 데뷔한 5인조 걸그룹…</p><div class="socials"><i>YT</i><i>IG</i></div><span class="chip sq">♡ 내 목록에 저장</span></div>
+          <div class="pager"><span class="on">1</span><span>2</span><span>3</span><span>4</span><span>›</span></div>
+          <p class="p" style="text-align:center">1페이지 · 한 페이지에 최대 8명</p><i class="note" style="bottom:18px;left:10px">3</i>
+        </div>
+      </div>
+      <figcaption class="legend"><i>1</i>검색이 submit 형(검색·초기화 버튼 2개, <code>:100-104</code>) · <i>2</i>세로 카드 1열(모바일) ~ 2열, 카드마다 같은 문구 "좋아하는 마음이, 다음 추억으로"(<code>KpopCards.tsx:111</code>) + 소개문 + SNS 4개 + 저장 버튼 → 한 화면에 2팀 · <i>3</i>30팀을 8명씩 4페이지로 넘김(<code>PAGE_SIZE=8</code>) + "1페이지 · 한 페이지에 최대 8명" 문구</figcaption>
+    </figure>
+    <figure><span class="label after">AFTER · 기대 화면 (390px)</span>
+      <div class="mk">
+        <div class="top"><span class="logo">KRIDE</span><span class="nav"><span>홈</span><span>탐색</span><span>코스</span><span class="on">K-POP</span><span>마이</span></span></div>
+        <div class="body" style="padding-bottom:0">
+          <div class="tabs"><span class="on">아티스트 30</span><span>팬 일정 12</span><span>상품</span></div><i class="note g" style="top:50px;right:10px">1</i>
+          <h4>아티스트</h4>
+          <div class="search" style="margin-top:8px;padding:8px 12px;box-shadow:none"><span>🔍</span><span>이름으로 바로 찾기 (한/영)</span></div>
+          <div class="chips"><span class="chip on">전체 30</span><span class="chip">그룹</span><span class="chip">솔로</span><span class="chip">♥ 저장한 2</span></div><i class="note g" style="top:118px;right:10px">2</i>
+          <div class="agrid">
+            <div class="acard"><div class="ph">BTS</div><b>방탄소년단</b><small>그룹 · 7인</small><span class="hv">♥</span></div>
+            <div class="acard"><div class="ph">NJ</div><b>뉴진스</b><small>그룹 · 5인</small><span class="hv">♡</span></div>
+            <div class="acard"><div class="ph init">IU</div><b>아이유</b><small>솔로</small><span class="hv">♡</span></div>
+            <div class="acard"><div class="ph">SVT</div><b>세븐틴</b><small>그룹 · 13인</small><span class="hv">♡</span></div>
+            <div class="acard"><div class="ph init">LS</div><b>르세라핌</b><small>그룹 · 5인</small><span class="hv">♡</span></div>
+            <div class="acard"><div class="ph">BP</div><b>블랙핑크</b><small>그룹 · 4인</small><span class="hv">♥</span></div>
+          </div><i class="note g" style="bottom:98px;right:10px">3</i>
+          <span class="btn ghost block" style="margin:12px 0">더 보기 · 24팀 남음</span><i class="note g" style="bottom:52px;left:10px">4</i>
+        </div>
+        <div class="tabbar"><span><i>⌂</i>홈</span><span><i>🧭</i>탐색</span><span><i>🗺</i>코스</span><span class="on"><i>🎤</i>K-POP</span><span><i>👤</i>마이</span></div>
+      </div>
+      <figcaption class="legend"><i class="g">1</i>서브 메뉴를 탭 + 카운트로("코스 만들기 →" 는 홈·코스 탭으로 이동) · <i class="g">2</i>입력 즉시 필터(디바운스 300ms, <code>?q=</code> 동기화) + 필터 칩, 버튼 2개 제거 · <i class="g">3</i>원형 사진 3열(데스크톱 6열), 이름 + 보조 1줄, 저장 하트는 사진 위, 사진 없으면 브랜드 톤 이니셜(10-06 <code>CardImage</code> 폴백 재사용) · <i class="g">4</i>페이지네이션 → "더 보기 · n팀 남음" 1개</figcaption>
+    </figure>
+  </div>
+  <div class="gap">
+    <article><b>갭 4-1 · 검색 방식</b><span class="pill bad">다름</span> submit + 초기화 버튼(<code>:100-104</code>). 4/4 가 입력 즉시 필터. 30건이라 클라이언트 필터로 충분하고 URL <code>?q=</code> 는 유지.</article>
+    <article><b>갭 4-2 · 카드 밀도</b><span class="pill bad">다름</span> <code>KpopArtistCard</code> 목록 variant 가 상세와 같은 구성(eyebrow·소개·SNS·저장). 4/4 가 사진 + 이름 + 1줄. 상세 정보는 탭 후 <code>KPOP_ARTIST_DETAIL</code> 에서. 반복 문구 <code>:111</code> 은 상세에만.</article>
+    <article><b>갭 4-3 · 페이지네이션</b><span class="pill bad">다름</span> <code>PAGE_SIZE=8</code> + <code>Pagination</code> + 안내 문구. 4/4 가 더 보기/무한. 30건이면 1회 요청 후 클라이언트 "더 보기" 로 충분.</article>
+    <article><b>갭 4-4 · 탭 카운트·이동</b><span class="pill bad">없음</span> <code>KpopNav</code> 는 카운트 없는 버튼 4개. 3/4 가 탭 + 카운트. 팬 일정 totalCount·아티스트 totalCount 를 탭에 표기, "코스 만들기 →" 는 서브 메뉴에서 제거(전역 2 와 연결).</article>
+    <article><b>갭 4-5 · 폴백 사진</b><span class="pill bad">다름</span> 목록 카드의 <code>kpop-card-image</code> 는 레드 소프트 배경이지만 상세 variant 와 크기가 다르고 이니셜 규칙이 문서화돼 있지 않다. <code>CardImage</code>(10-06 G3) 와 같은 2글자 이니셜·브랜드 톤으로 통일.</article>
+    <article><b>갭 4-6 · 포커스·색</b><span class="pill bad">다름</span> <code>artist-catalog.css</code> 포커스 <code>#285cb2</code>, 입력 테두리 <code>#8b94a3</code>, 상태 테두리 <code>#c87941</code>. 전역 3 과 함께 토큰으로.</article>
+  </div>
+</section>
+
+<!-- ================= 5 ================= -->
+<section id="s5">
+  <div class="eyebrow">SCREEN 5 · <code>/view/KPOP_EVENTS</code> (FanEventFeed.tsx · fan-events.css)</div>
+  <h2>팬 일정 — "좋아하는 아티스트와 다음에 만날 순간"</h2>
+  <p class="src">Primary Goal(추론): <b>내(또는 전체) 아티스트의 다가오는 일정을 날짜순으로 보고 저장한다.</b> 데이터: 12건/페이지, 국내·해외·온라인 구분, 로그인 시 "내 아티스트" 기본, 시간대 미확정. 레퍼런스: Ticketmaster(2026-09 개편) <span class="pill ok">[확인]</span> · Weverse 일정 <span class="pill ok">[확인]</span> · 인터파크 티켓 <span class="pill warn">[기억]</span> · Bandsintown <span class="pill warn">[기억]</span> → 교집합: <b>필터는 1줄 칩/드롭다운</b>(4/4), 월 구분 헤더 + 날짜 타일(4/4), 행 = 날짜·제목·아티스트·장소·저장(4/4), 면책 문구는 상단 1회(3/4), 비로그인에는 "내 아티스트" 유도 배너(3/4), 도시/지역 전환(4/4).</p>
+  <div class="ba">
+    <figure><span class="label before">BEFORE · 소스 재현 (390px)</span>
+      <div class="mk">
+        <div class="top"><span class="logo">KRIDE</span><span class="nav"><span>홈</span><span class="on">K-pop</span><span>코스 만들기</span></span><span class="nav row2"><span>언어 채팅</span><span>마이</span><span>더보기 ▾</span></span></div>
+        <div class="body">
+          <div class="secnav"><span>아티스트</span><span class="on">이벤트</span><span>상품</span><span>코스 만들기 →</span></div>
+          <span class="eyebrow">FAN MOMENTS · 팬 일정</span><h4 style="font-size:24px">좋아하는 아티스트와<br>다음에 만날 순간</h4><p class="p">내 아티스트의 일정을, 원하는 나라와 날짜로 찾아보세요.</p><span class="link" style="color:#941b38;display:block;margin-top:6px">♡ 내 아티스트 관리</span>
+          <div class="chips" style="margin-top:10px"><span class="chip sq" style="border-color:#c6cbd5">내 아티스트</span><span class="chip sq burg">전체 아티스트</span></div><i class="note" style="top:200px;right:10px">1</i>
+          <div class="fbox"><b>누구의 일정을 볼까요?</b><div class="select">함께 보기 ▾</div><div class="chips" style="margin-top:8px"><span class="chip sq">▣ 방탄소년단</span><span class="chip sq">▣ 뉴진스</span><span class="chip sq">▣ 세븐틴</span><span class="chip sq">▣ 아이유</span></div></div>
+          <div class="chips" style="margin-top:10px"><span class="chip sq burg">전체 12</span><span class="chip sq">국내 · 대한민국 8</span><span class="chip sq">해외 3</span><span class="chip sq">온라인 1</span><span class="chip sq">위치 미확인 0</span></div>
+          <div class="aside"><b style="font-size:15px;color:#111">언제 함께할까요?</b><span class="lbl">시작일</span><div class="input">연도-월-일</div><span class="lbl">종료일</span><div class="input">연도-월-일</div><span class="chip sq" style="margin-top:8px;border-color:#c6cbd5">날짜 적용</span> <span class="chip sq" style="margin-top:8px;border-color:#c6cbd5">조건 초기화</span><p class="p" style="margin-top:8px">▸ 지역·날짜 안내</p></div><i class="note" style="bottom:214px;right:10px">2</i>
+          <h5 style="font-size:17px">다가오는 팬 일정</h5><p class="p">전체 아티스트 · 전체 · 12건</p>
+          <div class="evrow"><div class="date"><span>10월</span><b>24</b><span>2026</span></div><div><span style="font-size:11px">방탄소년단 <span class="count">국내 · 대한민국</span></span><h6>월드투어 서울 앙코르</h6><span style="font-size:11px">서울 · KSPO DOME</span><small>등록 날짜 · 시간·변경 여부는 공식 안내 확인</small><div class="acts"><span>♡ 일정 저장</span><span>공식 안내 ↗</span></div></div></div><i class="note" style="bottom:20px;right:10px">3</i>
+        </div>
+      </div>
+      <figcaption class="legend"><i>1</i>결과까지 필터가 4층: 대상(내/전체) → 아티스트 박스(select + 칩 6) → 개최 구분 칩 5 → 날짜 aside(폼 + 적용 버튼) — 390px 에서 첫 결과 행이 약 3화면 아래 · <i>2</i>날짜는 입력 후 "날짜 적용" 을 눌러야 반영, 프리셋(이번 주·이번 달) 없음 · <i>3</i>행마다 면책 문구 반복(<code>:48</code>), 버건디 팔레트(<code>#941b38·#8c1c3a</code>)가 브랜드 레드와 다른 톤, 월 구분 없이 평면 리스트</figcaption>
+    </figure>
+    <figure><span class="label after">AFTER · 기대 화면 (390px)</span>
+      <div class="mk">
+        <div class="top"><span class="logo">KRIDE</span><span class="nav"><span>홈</span><span>탐색</span><span>코스</span><span class="on">K-POP</span><span>마이</span></span></div>
+        <div class="body" style="padding-bottom:0">
+          <div class="tabs"><span>아티스트 30</span><span class="on">팬 일정 12</span><span>상품</span></div>
+          <h4>팬 일정</h4>
+          <div class="rail" style="margin-top:8px"><span class="chip on">전체 아티스트 ▾</span><span class="chip">전체 지역 ▾</span><span class="chip">이번 달 ▾</span><span class="chip">초기화</span></div><i class="note g" style="top:96px;right:10px">1</i>
+          <div class="banner"><span><b>내 아티스트</b> 일정만 모아보려면 로그인</span><span class="chip">로그인</span></div><i class="note g" style="top:150px;right:10px">2</i>
+          <p class="p" style="margin-top:8px">12건 · 등록 날짜순 · 시간·변경 여부는 <u>공식 안내</u>에서 확인</p>
+          <div class="month"><span>10월</span><small>4건</small></div>
+          <div class="ev2"><div class="d"><b>24</b>금</div><div><b class="t">월드투어 서울 앙코르</b><small>방탄소년단 · 서울 KSPO DOME · 국내</small></div><span class="h">♥</span></div>
+          <div class="ev2"><div class="d"><b>26</b>일</div><div><b class="t">팬미팅 'Bunnies Day'</b><small>뉴진스 · 인천 인스파이어 아레나 · 국내</small></div><span class="h">♡</span></div>
+          <div class="ev2"><div class="d"><b>31</b>토</div><div><b class="t">팝업 스토어 오픈</b><small>세븐틴 · 서울 성수 · 국내</small></div><span class="h">♡</span></div>
+          <div class="month"><span>11월</span><small>8건</small></div>
+          <div class="ev2"><div class="d"><b>2</b>월</div><div><b class="t">Tokyo Dome Concert</b><small>아이유 · 도쿄 · 해외 🇯🇵</small></div><span class="h">♡</span></div><i class="note g" style="bottom:70px;right:10px">3</i>
+          <div class="ev2" style="margin-bottom:12px"><div class="d" style="background:#eee;color:#888"><div class="skel" style="width:60%;margin:4px auto"></div></div><div><div class="skel" style="width:70%"></div><div class="skel" style="width:50%"></div></div><span></span></div>
+        </div>
+        <div class="tabbar"><span><i>⌂</i>홈</span><span><i>🧭</i>탐색</span><span><i>🗺</i>코스</span><span class="on"><i>🎤</i>K-POP</span><span><i>👤</i>마이</span></div>
+      </div>
+      <figcaption class="legend"><i class="g">1</i>필터 1줄: 아티스트 ▾(검색 가능한 시트) · 지역 ▾(국내/해외/온라인 + 국가) · 기간 ▾(이번 주/이번 달/직접 입력) — 선택 즉시 반영 · <i class="g">2</i>비로그인엔 "내 아티스트" 유도 1줄 배너(토글 대신) · <i class="g">3</i>월 헤더 + 요일 포함 날짜 타일 + 행 1줄 메타, 면책은 상단 1회, 저장 하트는 행 끝, 로딩은 행 Skeleton, 색은 <code>--semantic-accent*</code> 토큰</figcaption>
+    </figure>
+  </div>
+  <div class="gap">
+    <article><b>갭 5-1 · 필터 층수</b><span class="pill bad">다름</span> 대상 토글(<code>:42</code>) + 아티스트 박스(<code>:44</code>) + 개최 구분(<code>:45</code>) + 날짜 aside(<code>:46</code>). 4/4 가 1줄 칩/드롭다운. 기존 <code>navigate()</code> 가 URL 기반이라 UI 만 바꾸면 된다.</article>
+    <article><b>갭 5-2 · 날짜 적용 버튼</b><span class="pill bad">다름</span> 시작/종료 입력 후 submit(<code>:28</code>). 4/4 가 프리셋 선택 즉시 반영. 제안: "이번 주/이번 달/3개월/직접" 프리셋 → <code>from/to</code> 계산.</article>
+    <article><b>갭 5-3 · 월 구분·면책 반복</b><span class="pill bad">다름</span> 평면 리스트 + 행마다 "등록 날짜 · 시간·변경 여부는 공식 안내 확인"(<code>:48</code>). 4/4 가 월 헤더, 3/4 가 면책 1회. 날짜 타일에 요일 추가.</article>
+    <article><b>갭 5-4 · 비로그인 기본값</b><span class="pill warn">다름</span> 비로그인은 자동으로 전체(<code>:17</code>) 로 가고 "내 아티스트" 토글을 누르면 로그인 안내 패널로 바뀐다. 3/4 는 리스트 위 1줄 배너. 토글 대신 배너로 두면 결과가 항상 보인다.</article>
+    <article><b>갭 5-5 · 팔레트</b><span class="pill bad">다름</span> <code>fan-events.css</code> 가 <code>#941b38·#ae1c3e·#fcebf0·#8c1c3a·#202c40</code> 로 별도 버건디/네이비 체계. 토큰 <code>--semantic-accent</code>, <code>--semantic-accent-soft</code>, <code>--text-strong</code> 으로 교체하면 같은 룩.</article>
+    <article><b>갭 5-6 · 로딩</b><span class="pill bad">다름</span> "일정을 불러오고 있어요…"(<code>:53</code>) 텍스트. 행 Skeleton 3개 + 필터 바 유지. 오류는 <code>KrideStatePanel kind="error"</code>.</article>
+  </div>
+</section>
+
+<!-- ================= 6 ================= -->
+<section id="s6">
+  <div class="eyebrow">SCREEN 6 · <code>/view/LOGIN_PAGE</code> (AuthFlowScreen.tsx:56-106 · pages.css auth-flow-* · LOGIN_PAGE.css)</div>
+  <h2>로그인 — 저장·AI 코스·내 아티스트의 관문</h2>
+  <p class="src">Primary Goal(추론): <b>가장 빠른 방법으로 로그인하고 하던 곳으로 돌아간다.</b> 데이터: 이메일/비밀번호 + 카카오, <code>returnTo</code> 쿼리 존재(<code>rememberLoginReturn</code>), 회원가입 화면 별도(<code>REGISTER_PAGE.css</code>). 레퍼런스: 카카오 로그인 디자인 가이드 <span class="pill ok">[확인]</span> · 토스 <span class="pill warn">[기억]</span> · 당근 <span class="pill warn">[기억]</span> · Airbnb 로그인 <span class="pill warn">[기억]</span> → 교집합: <b>소셜(카카오) 버튼이 최상단·가장 큼</b>(국내 3/3), 이메일은 "또는" 아래 보조(3/4), 돌아갈 곳/이유 한 줄(3/4), 회원가입·비밀번호 찾기 링크(4/4), 개발 문구 미노출(4/4), 카카오 버튼은 <code>#FEE500</code> + 심볼 규정 준수(가이드).</p>
+  <div class="ba">
+    <figure><span class="label before">BEFORE · 소스 재현 (390px)</span>
+      <div class="mk">
+        <div class="top"><span class="logo">KRIDE</span><span class="nav"><span>홈</span><span>K-pop</span><span>코스 만들기</span></span><span class="nav row2"><span>언어 채팅</span><span class="on">마이</span><span>더보기 ▾</span></span></div>
+        <div class="body">
+          <div class="auth"><h4>로그인</h4><p class="p">로그인하면 내 프로필과 저장한 K-RIDE 기록을 확인할 수 있어요.</p>
+            <span class="lbl">이메일</span><div class="input" style="border-color:#d6d9df">&nbsp;</div>
+            <span class="lbl">비밀번호</span><div class="input" style="border-color:#d6d9df">&nbsp;</div>
+            <span class="btn primary block" style="margin-top:12px">이메일로 로그인</span><i class="note" style="top:170px;right:12px">1</i>
+            <span class="btn kakao block" style="margin-top:10px">카카오로 로그인</span><i class="note" style="top:222px;right:12px">2</i>
+            <p class="help">인증 토큰은 화면이나 브라우저 저장소에 표시하지 않고 보안 쿠키로만 처리합니다.</p><i class="note" style="bottom:10px;right:12px">3</i>
+          </div>
+        </div>
+      </div>
+      <figcaption class="legend"><i>1</i>이메일 폼이 위, 빨간 Primary 가 "이메일로 로그인" · <i>2</i>카카오 버튼이 두 번째, 심볼 없음(가이드는 심볼 + 레이블), 구분선 없음 · <i>3</i>"인증 토큰은 … 보안 쿠키로만 처리합니다" 개발자 문구가 사용자에게 노출(<code>:103</code>), 회원가입·비밀번호 찾기 링크 없음(<code>:56-106</code> 에 <code>href</code> 0), <code>returnTo</code> 가 있는데 "어디로 돌아가는지" 안내 없음</figcaption>
+    </figure>
+    <figure><span class="label after">AFTER · 기대 화면 (390px)</span>
+      <div class="mk">
+        <div class="top"><span class="logo">KRIDE</span><span class="nav"><span>홈</span><span>탐색</span><span>코스</span><span>K-POP</span><span class="on">마이</span></span></div>
+        <div class="body">
+          <div class="auth"><div style="text-align:center"><span class="logo" style="font-size:22px">KRIDE</span></div><h4 style="text-align:center;margin-top:8px">3초 만에 시작하기</h4><p class="p" style="text-align:center">로그인하면 <b>팬 일정</b>으로 돌아가고, 저장한 아티스트·코스가 유지돼요</p><i class="note g" style="top:56px;right:12px">1</i>
+            <span class="btn kakao block" style="margin-top:14px;min-height:48px"><span style="font-weight:900">💬</span> 카카오로 시작하기</span><i class="note g" style="top:132px;right:12px">2</i>
+            <div class="divider">또는</div>
+            <span class="btn ghost block">이메일로 로그인</span><i class="note g" style="top:214px;right:12px">3</i>
+            <div class="row" style="justify-content:center;gap:14px;margin-top:12px"><span class="link">회원가입</span><span class="link">비밀번호 찾기</span></div>
+            <p class="help" style="text-align:center">로그인 정보는 안전하게 보호돼요 · <u>개인정보 처리방침</u></p>
+          </div>
+        </div>
+      </div>
+      <figcaption class="legend"><i class="g">1</i>제목에 혜택, 설명에 <code>returnTo</code> 화면 이름("팬 일정으로 돌아가고") · <i class="g">2</i>카카오가 최상단·48px·<code>#FEE500</code> + 심볼(가이드 규정, 다른 버튼이 더 눈에 띄면 안 됨) · <i class="g">3</i>이메일은 "또는" 아래 ghost 버튼 → 누르면 폼 펼침, 회원가입·비밀번호 찾기 링크, 개발 문구는 사용자 언어 1줄로</figcaption>
+    </figure>
+  </div>
+  <div class="gap">
+    <article><b>갭 6-1 · 소셜 우선 순서</b><span class="pill bad">다름</span> 이메일 폼 → Primary → 카카오(<code>:64-101</code>). 국내 3/3 이 카카오 최상단. 카카오 가이드는 "다른 로그인 버튼이 더 눈에 띄게 하면 안 된다" 고 명시 <span class="pill ok">[확인]</span>. 빨간 Primary 를 이메일에 쓰는 현재 구성은 이 규정과 충돌.</article>
+    <article><b>갭 6-2 · 카카오 버튼 규정</b><span class="pill warn">확인 필요</span> 텍스트만 "카카오로 로그인"(<code>:101</code>). 가이드: 컨테이너 <code>#FEE500</code> · 심볼 <code>#000</code> · 레이블 85% 검정. <code>--kride-kakao</code> 토큰은 있음. 심볼 SVG 추가.</article>
+    <article><b>갭 6-3 · 돌아갈 곳</b><span class="pill bad">없음</span> <code>returnTo</code> 를 저장만 하고 화면에 말하지 않는다. 3/4 가 "로그인하면 ○○으로 돌아가요". screenId → 한글 이름 맵 1개면 된다.</article>
+    <article><b>갭 6-4 · 보조 링크</b><span class="pill bad">없음</span> 회원가입·비밀번호 찾기 링크 없음. 4/4 가 둘 다. <code>REGISTER_PAGE</code> 가 이미 있으니 링크만.</article>
+    <article><b>갭 6-5 · 개발자 문구</b><span class="pill bad">다름</span> "인증 토큰은 … 보안 쿠키로만 처리합니다"(<code>:103</code>) 는 보안 설계 메모. 사용자 언어로 1줄 + 개인정보 처리방침 링크.</article>
+    <article><b>갭 6-6 · 잔존 CSS</b><span class="pill bad">다름</span> <code>LOGIN_PAGE.css</code> 의 <code>#FDBFBC</code> 핑크 버튼·"또는 SNS 계정으로 로그인" <code>::before</code> 가 현재 마크업(<code>auth-flow-*</code>) 과 맞지 않는 옛 규칙. 삭제 대상.</article>
+  </div>
+</section>
+
+<!-- ================= GLOBAL ================= -->
+<section id="global">
+  <div class="eyebrow">CROSS-SCREEN</div>
+  <h2>모든 화면에 걸친 갭 (가장 먼저)</h2>
+  <div class="table"><table>
+    <tr><th style="width:16%">평가 영역</th><th style="width:22%">업계 표준(교집합)</th><th style="width:26%">추천 구현</th><th style="width:16%">점검 기준</th><th>현재</th></tr>
+    <tr><td>홈 진입점</td><td>홈은 한 곳 (4/4)</td><td><code>/</code> 를 유일한 홈으로. <code>MAIN_PAGE</code> 의 로그인 후 카드("이어서 하기"·저장 3종)를 <code>/</code> 의 클라이언트 아일랜드로 이식, <code>/view/MAIN_PAGE</code> → <code>/</code> 리다이렉트</td><td>로고와 "홈" 메뉴가 같은 화면으로 가는가?</td><td><span class="pill bad">다름</span> 로고 <code>/</code>, 메뉴 <code>/view/MAIN_PAGE</code> (<code>KrideNav.tsx:6,8</code>). 10-06 G4 는 <code>FocusFooterBar</code> 와만 맞췄고 로고는 그대로</td></tr>
+    <tr><td>코스 만들기 진입점</td><td>같은 라벨 = 같은 화면 (4/4)</td><td>히어로/탭 "코스" → <code>ROUTE_PLANNER</code>(빠른 코스). INTRO 위자드는 "아티스트 코스 만들기(5단계)" 로 이름을 바꾸고 K-POP 탭·빠른 코스 결과 아래에서 링크</td><td>"코스 만들기" 라벨이 한 화면으로만 가는가?</td><td><span class="pill bad">다름</span> <code>page.tsx:26</code> → ROUTE_PLANNER, <code>KrideNav.tsx:6</code>·<code>KpopNav.tsx</code> → INTRO1</td></tr>
+    <tr><td>모바일 내비</td><td>하단 탭 바 4~5개 (4/4)</td><td><code>kride-site-shell</code> 분기에서 <code>BottomNav</code>(이미 존재) 를 750px 이하에 렌더, 상단은 로고 + 마이 아이콘만. 언어 채팅·여행봇·커뮤니티·시간 설정·개인정보는 마이 안 "더보기" 목록</td><td>390px 에서 헤더가 1줄이고 하단 탭이 있는가?</td><td><span class="pill bad">다름</span> <code>kride-unified.css:2</code> 750px 이하 <code>display:block</code> + 메뉴 wrap 2줄. 하단 탭 없음</td></tr>
+    <tr><td>색·포커스 토큰</td><td>토큰 한 벌 (4/4)</td><td><code>tour-explore.css</code>·<code>fan-events.css</code>·<code>artist-catalog.css</code>·<code>LOGIN_PAGE.css</code>·<code>RouteScreen.tsx</code> 인라인의 하드코딩 색을 <code>--semantic-*</code>/<code>--text-*</code>/<code>--border-hair</code> 로. 포커스 링은 <code>--kride-focus-ring</code> 1개</td><td>화면별 CSS 에 16진수 색이 없는가?</td><td><span class="pill bad">다름</span> 탐색 <code>#791F1F·#b73848·#c9cdd3</code>, 팬 일정 <code>#941b38·#ae1c3e·#8c1c3a·#202c40</code>, 아티스트 <code>#285cb2·#8b94a3·#c87941</code>, 로그인 <code>#FDBFBC</code>, 동선 <code>RED</code> 상수 + 인라인 60여 곳</td></tr>
+    <tr><td>로딩·오류 상태</td><td>Skeleton + 원인·재시도 패널 (4/4)</td><td>10-06 에 만든 <code>ScreenSkeleton</code>·<code>KrideStatePanel</code> 을 탐색·동선·아티스트·팬 일정에 적용. 조건(필터·칩)은 로딩 중에도 유지</td><td>최초 로딩이 Skeleton 이고 오류에 재시도가 있는가?</td><td><span class="pill bad">다름</span> 4화면 모두 텍스트 로딩. 동선 오류는 재시도 없음(<code>RouteScreen.tsx:150-151</code>)</td></tr>
+    <tr><td>숫자·카운트</td><td>탭·타일에 실제 수 (3/4)</td><td>홈 타일·K-POP 탭에 <code>totalCount</code>/지역 카운트 노출. 값이 없으면 숫자 자리 비움(0 표시 금지)</td><td>사용자가 누르기 전에 양을 아는가?</td><td><span class="pill bad">없음</span> 홈·K-POP 서브 메뉴에 카운트 없음. 팬 일정 개최 구분 칩만 있음</td></tr>
+  </table></div>
+</section>
+
+<!-- ================= REFS ================= -->
+<section id="refs">
+  <div class="eyebrow">REFERENCES · 4-AXIS INTERSECTION</div>
+  <h2>레퍼런스와 교집합 표준</h2>
+  <p class="src">화면당 3~4개, 같은 회사 제품 중복 없음, 국내 1개 이상. 2/3 이상이 같은 선택을 한 항목만 "표준"으로 적었고 한 서비스만의 선택은 "선택지"로 분리했다. 전체 4축(Layout · Interaction · State · Edge) 표는 짝 문서 §2 에 있다.</p>
+  <div class="table"><table>
+    <tr><th>#</th><th>화면</th><th>레퍼런스</th><th>확인한 내용</th><th>표준으로 뽑은 것 (n/N)</th></tr>
+    <tr><td>1</td><td>랜딩 홈</td><td>Airbnb 홈 <span class="pill ok">[확인]</span> · Klook 홈 <span class="pill ok">[확인]</span> · 마이리얼트립 <span class="pill warn">[기억]</span> · 야놀자 <span class="pill warn">[기억]</span></td><td>Airbnb 2022 개편: 카테고리 아이콘 행이 검색 위, 검색은 "Anywhere · Any week" 1개(skift, rentalscaleup). Klook: 홈 상단 카테고리 아이콘 5개 + 목적지 칩 + "where to next"(screensdesign). 마이리얼트립은 커뮤니티 분석글만 확인되어 [기억] 처리</td><td>검색/목적지 입력 1개 (4/4) · Primary 1개 (4/4) · 카테고리 타일 (4/4) · 목적지 칩 (3/4) · 실제 숫자 (3/4) · 하단 탭 (4/4)</td></tr>
+    <tr><td>2</td><td>여행지 탐색</td><td>Klook 검색 결과 <span class="pill ok">[확인]</span> · Airbnb 검색 결과 <span class="pill warn">[기억]</span> · 네이버 지도 <span class="pill warn">[기억]</span> · 카카오맵 <span class="pill warn">[기억]</span></td><td>Klook: 상단 검색 → 날짜/필터 pill → 결과 수 + 정렬 → 세로 카드(평점·예약 수·가격·태그)(screensdesign)</td><td>고정 필터 바 (4/4) · 결과 수 + 정렬 1줄 (4/4) · 썸네일 + 카테고리 + 거리 (3/4) · 지도↔리스트 (4/4) · Skeleton (4/4) · 계정 동기화 저장 (3/4)</td></tr>
+    <tr><td>3</td><td>동선 만들기</td><td>Wanderlog <span class="pill ok">[확인]</span> · Google Maps 경로 <span class="pill warn">[기억]</span> · 네이버 지도 길찾기 <span class="pill warn">[기억]</span> · 트리플 <span class="pill warn">[기억]</span></td><td>Wanderlog: 지도 중심 + 순서 리스트, 장소 추가·재정렬·구간 이동 시간 표시(whistleout, wanderlog.com)</td><td>조건 → 결과 (4/4) · 지도 + 순서 리스트 (4/4) · 구간 이동 시간 (3/4) · 결과 액션 1줄 (3/4) · 재생성 시 조건 보존 (4/4)</td></tr>
+    <tr><td>4</td><td>아티스트</td><td>Spotify 아티스트 선택 <span class="pill ok">[확인·10-06]</span> · Weverse <span class="pill ok">[확인·10-06]</span> · 멜론 <span class="pill warn">[기억]</span> · Apple Music <span class="pill warn">[기억]</span></td><td>Spotify: 원형 사진 그리드 + 즉시 검색 + 선택 카운터(10-06 보고서 출처). Weverse: 전역 아티스트 탭·Shop 연결(weverse.io/notice/18877)</td><td>원형/정사각 그리드 3~6열 (4/4) · 즉시 검색 (4/4) · 이름 + 보조 1줄 (3/4) · 더 보기/무한 (4/4) · 이니셜 폴백 (4/4)</td></tr>
+    <tr><td>5</td><td>팬 일정</td><td>Ticketmaster <span class="pill ok">[확인]</span> · Weverse <span class="pill ok">[확인·10-06]</span> · 인터파크 티켓 <span class="pill warn">[기억]</span> · Bandsintown <span class="pill warn">[기억]</span></td><td>Ticketmaster 2026-09 개편: 홈이 For You/Trending/Last Minute, 위치 전환, Favorites(팔로우)·Watchlist 분리, 검색 개선(livenationentertainment.com, ticketnews.com)</td><td>필터 1줄 (4/4) · 월 헤더 + 날짜 타일 (4/4) · 행 = 날짜·제목·아티스트·장소·저장 (4/4) · 면책 1회 (3/4) · 비로그인 유도 배너 (3/4) · 지역 전환 (4/4)</td></tr>
+    <tr><td>6</td><td>로그인</td><td>카카오 로그인 디자인 가이드 <span class="pill ok">[확인]</span> · 토스 <span class="pill warn">[기억]</span> · 당근 <span class="pill warn">[기억]</span> · Airbnb 로그인 <span class="pill warn">[기억]</span></td><td>카카오: 컨테이너 <code>#FEE500</code>, 심볼 <code>#000</code>, 레이블 85% 검정, 타사 버튼을 더 눈에 띄게 하면 안 됨, 크기는 서비스에 맞게 조정 가능(developers.kakao.com)</td><td>카카오 최상단·가장 큼 (국내 3/3) · 이메일은 "또는" 아래 (3/4) · 돌아갈 곳 안내 (3/4) · 회원가입·비번 찾기 (4/4) · 개발 문구 없음 (4/4)</td></tr>
+  </table></div>
+  <details><summary>확인 출처 URL</summary><pre>Airbnb categories: https://skift.com/2022/05/11/airbnb-reorganizes-its-search-around-curated-categories/ · https://www.rentalscaleup.com/how-do-airbnb-categories-work/
+Klook teardown: https://screensdesign.com/showcase/klook-travel-hotels-leisure · https://screensdesign.com/explore/flows/finding-places/
+Wanderlog: https://wanderlog.com/road-trip-planner · https://www.whistleout.com/CellPhones/Apps/wanderlog-group-trip-planning-app
+Ticketmaster 2026-09: https://news.livenationentertainment.com/news/ticketmasters-newest-app-update-makes-discovering-and-tracking-events-easier-and-more-personalized-than-ever · https://www.ticketnews.com/2026/09/ticketmaster-updates-app-with-watchlist-personalized-recommendations-and-smarter-search/
+Kakao login design guide: https://developers.kakao.com/docs/latest/ko/kakaologin/design-guide
+Weverse (10-06 확인): https://weverse.io/notice/18877 · Spotify taste onboarding (10-06 확인): 10-06 스펙 §1</pre></details>
+</section>
+
+<!-- ================= CHECK ================= -->
+<section id="check">
+  <div class="eyebrow">SELF CHECK · 14 QUESTIONS</div>
+  <h2>자가 진단 체크리스트 (구현 전, 2026-10-20)</h2>
+  <div class="table"><table>
+    <tr><th>#</th><th>점검 문장 (예/아니오)</th><th>1 랜딩</th><th>2 탐색</th><th>3 동선</th><th>4 아티스트</th><th>5 팬 일정</th><th>6 로그인</th></tr>
+    <tr><td>1</td><td>Primary 액션 버튼이 화면에 하나뿐인가?</td><td><b>아니오</b>(3개)</td><td>예(없음)</td><td><b>아니오</b>(모드 3 + 공유)</td><td>예</td><td>예</td><td><b>아니오</b>(빨강 + 카카오 동급)</td></tr>
+    <tr><td>2</td><td>첫 화면에서 사용자가 입력/선택할 것이 하나 보이는가?</td><td><b>아니오</b>(검색 없음)</td><td>예(칩)</td><td><b>아니오</b>(AI 모드 후에야 조건)</td><td>예</td><td>부분(4층)</td><td>예</td></tr>
+    <tr><td>3</td><td>탭·타일에 실제 수량이 보이는가?</td><td><b>아니오</b></td><td>부분(기술 문구)</td><td>예(요약 3)</td><td>부분(h2 만)</td><td>예(개최 구분)</td><td>–</td></tr>
+    <tr><td>4</td><td>최초 로딩이 Skeleton 이고 레이아웃이 튀지 않는가?</td><td>–(정적)</td><td><b>아니오</b></td><td><b>아니오</b></td><td><b>아니오</b></td><td><b>아니오</b></td><td>–</td></tr>
+    <tr><td>5</td><td>재시도·필터 변경 중 입력값·조건이 유지되는가?</td><td>–</td><td>예</td><td>부분(AI 는 유지, 재시도 없음)</td><td>예</td><td>예</td><td>예</td></tr>
+    <tr><td>6</td><td>오류 시 원인 한 줄 + Retry 가 있는가?</td><td>–</td><td>예(색 별도)</td><td><b>아니오</b></td><td>예</td><td>예</td><td>부분(문구만)</td></tr>
+    <tr><td>7</td><td>같은 라벨이 같은 화면으로 가는가? (홈·코스 만들기)</td><td><b>아니오</b></td><td><b>아니오</b>(헤더 공통)</td><td><b>아니오</b></td><td><b>아니오</b>(서브 메뉴)</td><td><b>아니오</b></td><td><b>아니오</b></td></tr>
+    <tr><td>8</td><td>페이지네이션/더 보기가 넘칠 때만 보이는가?</td><td>–</td><td>예</td><td>–</td><td><b>아니오</b>(항상 + 안내 문구)</td><td>예(12 초과)</td><td>–</td></tr>
+    <tr><td>9</td><td>390px 에서 헤더 1줄 + 핵심 행동이 첫 화면에 있는가?</td><td><b>아니오</b>(2줄)</td><td><b>아니오</b></td><td><b>아니오</b></td><td><b>아니오</b></td><td><b>아니오</b>(결과 3화면 아래)</td><td><b>아니오</b>(2줄)</td></tr>
+    <tr><td>10</td><td>aria-label·aria-live·role 이 있는가?</td><td>예</td><td>예</td><td>부분(aria-pressed 만)</td><td>예</td><td>예</td><td>예</td></tr>
+    <tr><td>11</td><td>저장이 계정과 동기화되거나 로그인 유도가 있는가?</td><td>–</td><td><b>아니오</b>(localStorage)</td><td>–(저장 없음)</td><td>예(guestPrompt)</td><td>예(guestPrompt)</td><td>–</td></tr>
+    <tr><td>12</td><td>사용자 언어 문구인가? (기술·개발 문구 없음)</td><td>예</td><td><b>아니오</b>("불러온 n곳 중…")</td><td>예</td><td>부분("한 페이지에 최대 8명")</td><td>부분(면책 반복)</td><td><b>아니오</b>(토큰·쿠키)</td></tr>
+    <tr><td>13</td><td>모바일 하단 탭 또는 1줄 헤더가 있는가?</td><td><b>아니오</b></td><td><b>아니오</b></td><td><b>아니오</b></td><td><b>아니오</b></td><td><b>아니오</b></td><td><b>아니오</b></td></tr>
+    <tr><td>14</td><td>색이 토큰에서만 오는가?</td><td>부분(module.css 하드코딩)</td><td><b>아니오</b></td><td><b>아니오</b>(인라인)</td><td><b>아니오</b></td><td><b>아니오</b></td><td><b>아니오</b>(잔존 CSS)</td></tr>
+  </table></div>
+</section>
+
+<!-- ================= TODO ================= -->
+<section id="todo">
+  <div class="eyebrow">TODO · 효과 큰 순</div>
+  <h2>갭 요약 → 할 일 (H0 → H8)</h2>
+  <ol>
+    <li><b>H0 내비 통일 (전역 1·2·5)</b> — <code>KrideNav</code> 로고·"홈" 을 <code>/</code> 로, 탭 5개(홈·탐색·코스·K-POP·마이) + 750px 이하 <code>BottomNav</code>, "코스 만들기" 라벨을 ROUTE_PLANNER 로 고정하고 INTRO 는 "아티스트 코스(5단계)" 로 개명. 나머지 메뉴는 마이 > 더보기. <span class="muted">파일: KrideNav.tsx, AppShell.tsx, KpopNav.tsx, kride-unified.css, BottomNav.tsx</span></li>
+    <li><b>H1 토큰화 (전역 3)</b> — <code>tour-explore.css</code>·<code>fan-events.css</code>·<code>artist-catalog.css</code> 의 16진수를 토큰으로, <code>LOGIN_PAGE.css</code> 잔존 규칙 삭제, <code>RouteScreen.tsx</code> 인라인을 <code>route-screen.css</code> 로. 포커스 링 1종.</li>
+    <li><b>H2 상태 패널 적용 (전역 4)</b> — 4화면의 텍스트 로딩 → <code>ScreenSkeleton</code>/카드 Skeleton, 오류 → <code>KrideStatePanel</code>, 동선 재시도 추가.</li>
+    <li><b>H3 랜딩 홈</b> — 히어로 검색(지역·아티스트·작품 → TOUR_EXPLORE/kpop 분기) + Primary 1개, 하단 CTA 삭제, 카테고리 타일 4 + 인기 지역 타일(기존 데이터), 로그인 배너/이어서 하기 아일랜드.</li>
+    <li><b>H4 탐색</b> — 고정 필터 바 + 칩 레일, "서울 맛집 24곳" + 정렬, 카드 2열(썸네일·카테고리·거리), 카드 탭 = 핀, URL 동기화, 저장 서버 동기화(로그인 시 병합).</li>
+    <li><b>H5 동선</b> — 조건 카드 상단 고정(기본 모드도 사용), segmented 2개, 시간 설정 위젯 이동, 하단 액션 바(길 찾기·공유·저장), 구간 이동 1줄.</li>
+    <li><b>H6 아티스트</b> — 즉시 검색 + 필터 칩, 원형 그리드 3/6열, 더 보기, 탭 카운트, 목록 카드에서 eyebrow·소개·SNS 제거(상세로).</li>
+    <li><b>H7 팬 일정</b> — 필터 1줄(아티스트 ▾·지역 ▾·기간 프리셋 ▾), 비로그인 배너, 월 헤더 + 요일, 면책 1회, 행 Skeleton.</li>
+    <li><b>H8 로그인</b> — 카카오 최상단(심볼 + #FEE500 + 48px), "또는" 아래 이메일 접기, returnTo 화면 이름 안내, 회원가입·비번 찾기 링크, 개발 문구 교체.</li>
+  </ol>
+  <h3>검증 방법</h3>
+  <p>구현 후 §체크리스트 14문항을 화면별로 다시 채우고, 390px·1200px 에서 6개 화면 스크린샷을 <code>evidence/after-0n-*.png</code> 로 남긴다. 테스트는 <code>npx jest tests --runInBand</code>(10-06 기준 98 스위트) + <code>TourExploreScreen.test.tsx</code>·<code>RouteScreen.test.tsx</code>·<code>FoodHubLanding.test.tsx</code> 가 라벨 변경에 걸리므로 함께 갱신.</p>
+  <h3>하지 않은 것 / 확인 바람</h3>
+  <ul>
+    <li><b>라이브 스크린샷</b>: 실행 환경의 프록시가 <code>kmovement.srv1869569.hstgr.cloud:443</code> CONNECT 를 403 으로 거부해 브라우저 캡처를 하지 못했다. Before 는 소스 재현이며, 사용자가 브라우저에서 찍은 캡처로 바꿔 넣으면 된다(파일명 <code>evidence/before-0n-*.png</code>).</li>
+    <li><b>배포 빌드와 HEAD 의 차이</b>: <code>/</code>·<code>/view/kpop</code>·<code>/view/KPOP_EVENTS</code>·<code>/travel/*</code> 의 문구는 일치 확인. <code>ROUTE_PLANNER</code>·<code>TOUR_EXPLORE</code>·<code>LOGIN_PAGE</code> 는 클라이언트 렌더라 텍스트 추출이 안 돼 미확인.</li>
+    <li><b>로그인 후 화면(MAIN_PAGE·MY_PAGE·내 목록)</b>: 10-06 보고서 범위라 제외. H0 에서 MAIN_PAGE 를 <code>/</code> 에 합칠지는 사용자 결정 필요.</li>
+    <li><b>[기억] 레퍼런스</b>: 마이리얼트립·야놀자·네이버 지도·카카오맵·트리플·멜론·Apple Music·인터파크·Bandsintown·토스·당근·Airbnb 로그인은 웹 검색으로 출처를 확인하지 않았다. 교집합 수치(n/N)에서 이들이 결정적인 항목은 없다.</li>
+    <li><b>코드 미수정</b>: 이 작업은 보고서이며 제품 코드를 바꾸지 않았다.</li>
+  </ul>
+</section>
+</main>
+</body></html>
