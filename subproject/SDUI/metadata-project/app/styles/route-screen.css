@@ -47,3 +47,10 @@
 /* 사이트 셸은 모든 버튼에 48px 최소 높이를 주지만 모드/조건 칩은 한 줄에 여러 개가 놓이는 작은 토글이다 */
 .kride-site-content .route-pill, .kride-site-content .route-chip { min-height: 36px; }
 .route-screen :is(button, a, select, input):focus-visible { outline: 3px solid var(--focus-outline); outline-offset: 3px; }
+
+/* 벤치마킹 H2: 로딩 Skeleton · 공용 상태 패널 */
+.route-skeleton { display: grid; gap: 8px; }
+.route-skeleton .skeleton-box { display: block; border-radius: var(--kride-radius-md); }
+.route-skeleton .route-summary .skeleton-box { flex: 1; width: auto; }
+.route-skeleton__note { margin: 0 0 4px; font-size: 13px; color: var(--text-muted); }
+.route-screen .kride-state-panel { max-width: none; }

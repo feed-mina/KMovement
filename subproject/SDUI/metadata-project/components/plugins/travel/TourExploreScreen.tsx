@@ -18,6 +18,8 @@ import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
 import PoiImage from '@/components/plugins/travel/PoiImage';
 import TourPoiCard from '@/components/plugins/travel/TourPoiCard';
 import TourExploreMap, {hasTourCoordinates, tourPoiKey} from '@/components/plugins/travel/TourExploreMap';
+import Skeleton from '@/components/utils/Skeleton';
+import KrideStatePanel from '@/components/fields/kride/atoms/KrideStatePanel';
 import { trackEvent } from '@/lib/analytics/dataLayer';
 
 // [탐색] 화면 컨트롤러 (여행 플러그인). TourAPI POI를 지역·카테고리·정렬로 탐색.
@@ -197,9 +199,9 @@ function HorizontalFilterRail({
 export default function TourExploreScreen(_props: ScreenControllerProps) {
     const searchParams = useSearchParams();
     const [category, setCategory] = useState(() => resolveCategoryParam(searchParams?.get('category')));
-    // 진입 시점의 ?area= 만 반영한다. 이후 칩 선택은 URL과 무관하게 움직인다.
+    // 진입 시점의 URL 조건을 읽고, 이후 변경은 아래 history 동기화 effect 가 URL 에 다시 쓴다 (벤치마킹 H4).
     const [areaCode, setAreaCode] = useState(() => resolveAreaParam(searchParams?.get('area')));
-    const [sigungu, setSigungu] = useState('');
+    const [sigungu, setSigungu] = useState(() => searchParams?.get('sigungu')?.trim() ?? '');
     const [areas, setAreas] = useState<TourRegion[]>(FALLBACK_AREAS);
     const [districts, setDistricts] = useState<TourRegion[]>(FALLBACK_SEOUL_DISTRICTS);
     const [regionsLoading, setRegionsLoading] = useState(true);
@@ -209,8 +211,8 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const [placesAttempt, setPlacesAttempt] = useState(0);
     const [contentAttempt, setContentAttempt] = useState(0);
     const resultEpoch = useRef(0);
-    const [arrange, setArrange] = useState('A');
-    const [placeQuery, setPlaceQuery] = useState('');
+    const [arrange, setArrange] = useState(() => (searchParams?.get('arrange') === 'C' ? 'C' : 'A'));
+    const [placeQuery, setPlaceQuery] = useState(() => searchParams?.get('q') ?? '');
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [selectedMapId, setSelectedMapId] = useState<string | null>(null);
     const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
@@ -489,32 +491,52 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         setCategory(DEFAULT_CATEGORY); setArrange('A'); setSelectedContent(null); setContentQuery('');
         setSelectedMapId(null); setMobileView('list');
     };
+    const categoryLabel = CATEGORIES.find((item) => item.id === category)?.label ?? '';
+
+    // 벤치마킹 H4: 조건을 URL 에 남겨 뒤로가기·공유가 되게 한다. 라우터를 거치지 않고 history 만 바꾸므로 재조회는 없다.
+    const syncedUrl = useRef<string | null>(null);
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        if (syncedUrl.current === null) syncedUrl.current = `${window.location.pathname}${window.location.search}`;
+        const params = new URLSearchParams();
+        if (areaCode !== DEFAULT_AREA_CODE) params.set('area', areaCode);
+        if (category !== DEFAULT_CATEGORY) params.set('category', category);
+        if (sigungu) params.set('sigungu', sigungu);
+        if (arrange !== 'A') params.set('arrange', arrange);
+        if (placeQuery.trim()) params.set('q', placeQuery.trim());
+        const query = params.toString();
+        const next = `${window.location.pathname}${query ? `?${query}` : ''}`;
+        if (next !== syncedUrl.current) {
+            window.history.replaceState(window.history.state, '', next);
+            syncedUrl.current = next;
+        }
+    }, [areaCode, category, sigungu, arrange, placeQuery]);
 
     return (
-        <div className="page-wrap TOUR_EXPLORE tour-explore" style={{ padding: '14px 16px' }}>
-            <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
-                <span style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                    <span style={{ fontSize: 20, fontWeight: 600, color: RED }}>탐색</span>
-                    <span style={{ fontSize: 13, color: '#888' }}>오늘 어디로 덕질 갈까요?</span>
-                </span>
-                <KakaoShareButton text="Kride에서 K-컬처 여행지·맛집을 찾아보세요!" path="/view/TOUR_EXPLORE" />
-            </header>
-
+        <div className="page-wrap TOUR_EXPLORE tour-explore">
+            <div className="tour-filter-bar">
+                <header className="tour-explore__header">
+                    <span className="tour-explore__heading">
+                        <span className="tour-explore__title">탐색</span>
+                        <span className="tour-explore__subtitle">오늘 어디로 덕질 갈까요?</span>
+                    </span>
+                    <KakaoShareButton text="Kride에서 K-컬처 여행지·맛집을 찾아보세요!" path="/view/TOUR_EXPLORE" />
+                </header>
+                <HorizontalFilterRail label="장소 카테고리">
+                    {CATEGORIES.map((c) => (
+                        <button key={c.id} type="button" className="tour-chip tour-chip--fixed" onClick={() => setCategory(c.id)} aria-pressed={category === c.id}>{c.label}</button>
+                    ))}
+                </HorizontalFilterRail>
+                <div className="tour-filter-summary">
+                    <p aria-label="선택한 필터">{selectedAreaName} · {selectedSigunguName || '전체'}{selectedContent ? ` · ${selectedContent.name}` : ''}</p>
+                    <button type="button" aria-expanded={filtersOpen} aria-controls={filtersId} onClick={() => setFiltersOpen((open) => !open)}>세부 필터</button>
+                    <button type="button" onClick={resetFilters}>필터 초기화</button>
+                </div>
+            </div>
             <div className="tour-search">
-                <label htmlFor="tour-place-search">불러온 장소 검색</label>
+                <label htmlFor="tour-place-search">이 목록에서 찾기</label>
                 <input id="tour-place-search" type="search" value={placeQuery}
-                    onChange={(event) => setPlaceQuery(event.target.value)} placeholder="장소 이름 또는 주소" />
-                <small>현재 불러온 목록에서 검색해요. 더 보기를 누르면 검색 범위도 늘어나요.</small>
-            </div>
-            <div className="tour-category-row" role="group" aria-label="장소 카테고리">
-                {CATEGORIES.map((c) => (
-                    <button key={c.id} type="button" onClick={() => setCategory(c.id)} aria-pressed={category === c.id} style={chipStyle(category === c.id)}>{c.label}</button>
-                ))}
-            </div>
-            <div className="tour-filter-summary">
-                <p aria-label="선택한 필터">{selectedAreaName} · {selectedSigunguName || '전체'} · {SORTS.find((sort) => sort.code === arrange)?.label}{selectedContent ? ` · ${selectedContent.name}` : ''}</p>
-                <button type="button" aria-expanded={filtersOpen} aria-controls={filtersId} onClick={() => setFiltersOpen((open) => !open)}>세부 필터</button>
-                <button type="button" onClick={resetFilters}>필터 초기화</button>
+                    onChange={(event) => setPlaceQuery(event.target.value)} placeholder="불러온 장소 이름 또는 주소" />
             </div>
             <div id={filtersId} hidden={!filtersOpen} className="tour-filter-details">
             <section aria-label="지역 필터" style={{ marginBottom: 10 }}>
@@ -529,7 +551,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 setAreaCode(area.code);
                             }}
                             aria-pressed={areaCode === area.code}
-                            style={chipStyle(areaCode === area.code, true)}
+                            className="tour-chip tour-chip--fixed"
                         >
                             {area.name}
                         </button>
@@ -544,7 +566,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                         type="button"
                         onClick={() => setSigungu('')}
                         aria-pressed={sigungu === ''}
-                        style={chipStyle(sigungu === '', true)}
+                        className="tour-chip tour-chip--fixed"
                     >
                         {selectedAreaName} 전체
                     </button>
@@ -554,7 +576,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             type="button"
                             onClick={() => setSigungu(district.code)}
                             aria-pressed={sigungu === district.code}
-                            style={chipStyle(sigungu === district.code, true)}
+                            className="tour-chip tour-chip--fixed"
                         >
                             {district.name}
                         </button>
@@ -562,16 +584,6 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                 </HorizontalFilterRail>
             </section>
 
-            {/* 카테고리 + 정렬 */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', gap: 4 }}>
-                    {SORTS.map((s) => (
-                        <button key={s.code} type="button" onClick={() => setArrange(s.code)} aria-pressed={arrange === s.code} style={sortStyle(arrange === s.code)}>
-                            {s.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
             </div>
             {(areaError || regionError) && <div role="status" className="tour-recovery" data-error-source="tour-regions">
                 {areaError && <p>{areaError}</p>}{regionError && <p>{regionError}</p>}
@@ -585,7 +597,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                     </label>
                     {selectedContent ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                            <span style={{ ...chipStyle(true, true), display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                            <span className="tour-chip tour-chip--fixed tour-chip--static" aria-pressed="true">
                                 {selectedContent.name}
                                 {CONTENT_CATEGORY_LABELS[selectedContent.category]
                                     ? ` · ${CONTENT_CATEGORY_LABELS[selectedContent.category]}`
@@ -595,7 +607,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 type="button"
                                 aria-label={`${selectedContent.name} 필터 해제`}
                                 onClick={() => { setSelectedContent(null); setContentQuery(''); }}
-                                style={{ ...chipStyle(false, true), cursor: 'pointer' }}
+                                className="tour-chip tour-chip--fixed"
                             >
                                 필터 해제 ✕
                             </button>
@@ -680,14 +692,43 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                 </section>
             )}
 
-            {loading && <div style={{ padding: 24, color: '#888' }}>불러오는 중…</div>}
-            {error && <div role="alert" className="tour-recovery" data-error-source={isHolyCategory(category) ? 'holy-postgres-api' : 'tour-api'}>
-                <p>{error}</p>
-                <button type="button" onClick={() => setPlacesAttempt((value) => value + 1)}>장소 다시 시도</button>
-                <button type="button" onClick={resetFilters}>필터 초기화</button>
-            </div>}
-            {!loading && !error && <p className="tour-result-count" aria-live="polite">불러온 {pois.length}곳 중 {filteredPois.length}곳 · 화면에 {displayedPois.length}곳 표시</p>}
-            {!loading && !error && filteredPois.length === 0 && <div className="tour-recovery"><p>{placeQuery ? '검색 조건에 맞는 장소가 없어요.' : '표시할 장소가 없어요.'}</p><button type="button" onClick={resetFilters}>필터 초기화</button></div>}
+            {loading && <div className="tour-card-grid tour-card-grid--skeleton" aria-hidden="true">{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} height={176} />)}</div>}
+            {error && (
+                <KrideStatePanel
+                    kind="error"
+                    title={isHolyCategory(category) ? '성지를 불러오는 데 문제가 있어요' : '장소를 불러오는 데 문제가 있어요'}
+                    description={error}
+                    attributes={{ 'data-error-source': isHolyCategory(category) ? 'holy-postgres-api' : 'tour-api' }}
+                    primaryAction={{ label: '장소 다시 시도', onClick: () => setPlacesAttempt((value) => value + 1) }}
+                    secondaryAction={{ label: '필터 초기화', onClick: resetFilters }}
+                    className="tour-state-panel"
+                />
+            )}
+            {!loading && !error && (
+                <div className="tour-results-head">
+                    <p className="tour-result-count" aria-live="polite">
+                        <b>{selectedAreaName} {categoryLabel} {filteredPois.length}곳</b>
+                        {placeQuery.trim() ? ` · 불러온 ${pois.length}곳 중` : ''}
+                        {saved.size > 0 && <span className="tour-saved-note"> · ♥ 저장 {saved.size}곳 (이 브라우저에만 보관)</span>}
+                    </p>
+                    {!isHolyCategory(category) && (
+                        <div className="tour-sort-group" role="group" aria-label="정렬">
+                            {SORTS.map((s) => (
+                                <button key={s.code} type="button" className="tour-sort" onClick={() => setArrange(s.code)} aria-pressed={arrange === s.code}>{s.label}</button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+            {!loading && !error && filteredPois.length === 0 && (
+                <KrideStatePanel
+                    kind="empty-filtered"
+                    title={placeQuery ? '검색 조건에 맞는 장소가 없어요' : '표시할 장소가 없어요'}
+                    description={placeQuery ? '검색어를 지우거나 다른 이름으로 찾아보세요.' : '카테고리나 지역을 바꾸면 다른 장소를 볼 수 있어요.'}
+                    primaryAction={{ label: '필터 초기화', onClick: resetFilters }}
+                    className="tour-state-panel"
+                />
+            )}
 
             {!loading && !error && pois.length > 0 && (
                 <>
@@ -704,6 +745,8 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 cardId={`tour-card-${encodeURIComponent(tourPoiKey(poi))}`}
                                 selected={activeMapId === tourPoiKey(poi)}
                                 onMapSelect={hasTourCoordinates(poi) ? () => {setSelectedMapId(tourPoiKey(poi)); setMobileView('map');} : undefined}
+                                onHighlight={hasTourCoordinates(poi) ? () => setSelectedMapId(tourPoiKey(poi)) : undefined}
+                                categoryLabel={poi.contentTypeId === 'HOLY' ? undefined : categoryLabel}
                                 poi={poi}
                                 isSaved={Boolean(poi.contentId && saved.has(poi.contentId))}
                                 priority={index < EAGER_CARD_COUNT}
@@ -713,17 +756,14 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                         ))}
                     </div>
                     {((category === '39' && restaurantHasMore) || (category !== '39' && visibleCount < filteredPois.length)) && (
-                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+                        <div className="tour-load-more">
                             <button
                                 type="button"
+                                className="tour-load-more__btn"
                                 disabled={loadingMore}
                                 onClick={() => {
                                     if (category === '39') void loadMoreRestaurants();
                                     else setVisibleCount((count) => count + PAGE_SIZE);
-                                }}
-                                style={{
-                                    padding: '10px 22px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                                    border: '0.5px solid #ddd', borderRadius: 10, background: '#fff', color: '#333',
                                 }}
                             >
                                 {loadingMore
@@ -735,7 +775,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                         </div>
                     )}
                     {loadMoreError && (
-                        <p role="alert" style={{ margin: '10px 0 0', textAlign: 'center', color: 'var(--danger-strong, #8B0610)', fontSize: 12 }}>
+                        <p role="alert" className="tour-load-more__error">
                             {loadMoreError}
                         </p>
                     )}
@@ -806,22 +846,4 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             )}
         </div>
     );
-}
-
-function chipStyle(active: boolean, flexNone = false): React.CSSProperties {
-    return {
-        flex: flexNone ? 'none' : undefined,
-        fontSize: 12, padding: '6px 14px', borderRadius: 20, cursor: 'pointer',
-        border: '0.5px solid ' + (active ? RED : '#ddd'),
-        background: active ? RED : 'transparent',
-        color: active ? '#fff' : '#555',
-    };
-}
-
-function sortStyle(active: boolean): React.CSSProperties {
-    return {
-        fontSize: 12, padding: '5px 10px', borderRadius: 20, cursor: 'pointer',
-        border: 'none', background: 'transparent',
-        color: active ? RED : '#aaa', fontWeight: active ? 500 : 400,
-    };
 }

@@ -9,6 +9,8 @@ import { normalizeRouteMapData } from '@/components/fields/kride/maps/normalizeR
 import { routeDistanceKm, estimateMinutes, formatMinutes, groupByDay } from '@/components/fields/kride/maps/routeSummary';
 import { fetchRestaurants, TourPoi } from '@/services/tourApi';
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
+import Skeleton from '@/components/utils/Skeleton';
+import KrideStatePanel, { KrideStateChips } from '@/components/fields/kride/atoms/KrideStatePanel';
 import { trackEvent } from '@/lib/analytics/dataLayer';
 import { countItineraryPlaces } from '@/lib/analytics/itinerary';
 
@@ -23,6 +25,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const [pois, setPois] = useState<TourPoi[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [tourAttempt, setTourAttempt] = useState(0);
 
     const [mode, setMode] = useState<'tour' | 'ai' | 'road'>('tour');
     const [region, setRegion] = useState('서울');
@@ -32,17 +35,20 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const [aiData, setAiData] = useState<unknown | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState<string | null>(null);
+    const [aiErrorKind, setAiErrorKind] = useState<'login' | 'empty' | 'server' | null>(null);
     const fetchedKeyRef = useRef<string>('');
     const [openDays, setOpenDays] = useState<Record<number, boolean>>({ 1: true });
 
     useEffect(() => {
         let alive = true;
+        setLoading(true);
+        setError(null);
         fetchRestaurants({ areaCode: '1', numOfRows: 12, pageNo: 1 })
             .then((list) => { if (alive) setPois(list); })
             .catch(() => { if (alive) setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.'); })
             .finally(() => { if (alive) setLoading(false); });
         return () => { alive = false; };
-    }, []);
+    }, [tourAttempt]);
 
     const tourData = useMemo(() => tourPoisToRouteMapData(pois), [pois]);
     const aiRouteData = useMemo(() => (aiData ? normalizeRouteMapData(aiData) : null), [aiData]);
@@ -58,6 +64,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
         setAiData(null);
         setAiSources([]);
         setAiError(null);
+        setAiErrorKind(null);
         trackEvent('preferences_complete', { region, purpose, duration });
         let timer: ReturnType<typeof setTimeout> | undefined;
         try {
@@ -86,7 +93,10 @@ export default function RouteScreen(_props: ScreenControllerProps) {
             setAiSources(Array.isArray(result.source_pois) ? result.source_pois : []);
             trackEvent('itinerary_generated', { place_count: placeCount, duration, source: 'route_planner' });
         } catch (reason) {
-            setAiError(reason instanceof Error && reason.message === 'login_required' ? '로그인 후 AI 코스를 이용해 주세요.' : reason instanceof Error && reason.message === 'empty_candidates' ? '출처가 확인된 추천 자료가 아직 없습니다.' : 'AI 코스를 불러오지 못했어요. 기본 코스로 볼 수 있어요.');
+            const code = reason instanceof Error ? reason.message : '';
+            const kind = code === 'login_required' ? 'login' : code === 'empty_candidates' ? 'empty' : 'server';
+            setAiErrorKind(kind);
+            setAiError(kind === 'login' ? '로그인 후 AI 코스를 이용해 주세요.' : kind === 'empty' ? '출처가 확인된 추천 자료가 아직 없습니다.' : 'AI 코스를 불러오지 못했어요. 기본 코스로 볼 수 있어요.');
             const message = reason instanceof Error ? reason.message : 'unknown';
             trackEvent('itinerary_error', {
                 error_type: message === 'empty_result' ? 'empty_result' : message.includes('aborted') ? 'timeout' : message.startsWith('itinerary ') ? 'http_error' : 'request_error',
@@ -103,6 +113,8 @@ export default function RouteScreen(_props: ScreenControllerProps) {
         setMode('ai');
         void fetchAi();
     };
+    // 실패 후 같은 조건으로 다시 요청 (입력값 보존)
+    const retryAi = () => { fetchedKeyRef.current = ''; void fetchAi(); };
     // AI 모드에서 선호를 바꾸면 재추천
     const changePref = (setter: (v: string) => void, v: string) => {
         setter(v);
@@ -142,10 +154,30 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                 </div>
             )}
 
-            {mode === 'tour' && loading && <div className="route-state">불러오는 중…</div>}
-            {mode === 'tour' && error && <div className="route-state route-state--error">{error}</div>}
-            {mode === 'ai' && aiLoading && <div className="route-state">AI가 하루 코스를 짜는 중이에요…</div>}
-            {mode === 'ai' && aiError && <div className="route-state route-state--error">{aiError}</div>}
+            {mode === 'tour' && loading && <RouteSkeleton label="기본 코스를 불러오는 중" />}
+            {mode === 'tour' && error && (
+                <KrideStatePanel
+                    kind="error"
+                    title="장소를 불러오지 못했어요"
+                    description={error}
+                    primaryAction={{ label: '다시 시도', onClick: () => setTourAttempt((n) => n + 1) }}
+                />
+            )}
+            {mode === 'ai' && aiLoading && <RouteSkeleton label="AI가 하루 코스를 짜는 중이에요" note="AI가 하루 코스를 짜는 중이에요… 최대 2분 정도 걸릴 수 있고, 고른 조건은 그대로예요." />}
+            {mode === 'ai' && aiError && (
+                <KrideStatePanel
+                    kind={aiErrorKind === 'login' ? 'forbidden' : aiErrorKind === 'empty' ? 'empty-first' : 'error'}
+                    title={aiErrorKind === 'login' ? '로그인 후 AI 코스를 받을 수 있어요' : aiErrorKind === 'empty' ? '추천 자료가 아직 없어요' : 'AI 코스를 불러오지 못했어요'}
+                    description={aiError}
+                    context={<KrideStateChips label="고른 조건" items={[{ text: region, accent: true }, { text: purpose }, { text: duration }]} />}
+                    primaryAction={aiErrorKind === 'login'
+                        ? { label: '로그인하기', href: '/view/LOGIN_PAGE?returnTo=' + encodeURIComponent('/view/ROUTE_PLANNER') }
+                        : aiErrorKind === 'empty'
+                            ? { label: '기본 코스 보기', onClick: () => setMode('tour') }
+                            : { label: '다시 시도', onClick: retryAi }}
+                    secondaryAction={aiErrorKind === 'server' ? { label: '기본 코스 보기', onClick: () => setMode('tour') } : undefined}
+                />
+            )}
 
             {mode !== 'road' && (mode === 'ai' || (!loading && !error)) && !(mode === 'ai' && (aiLoading || aiError)) && (
                 <>
@@ -201,6 +233,18 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                     )}
                 </>
             )}
+        </div>
+    );
+}
+
+function RouteSkeleton({ label, note }: { label: string; note?: string }) {
+    return (
+        <div className="route-skeleton" role="status" aria-live="polite" aria-label={label}>
+            {note && <p className="route-skeleton__note">{note}</p>}
+            <div className="route-summary"><Skeleton height={54} /><Skeleton height={54} /><Skeleton height={54} /></div>
+            <Skeleton height={240} />
+            <Skeleton height={44} />
+            <Skeleton height={44} />
         </div>
     );
 }

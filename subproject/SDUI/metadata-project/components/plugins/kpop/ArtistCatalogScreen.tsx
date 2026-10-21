@@ -6,6 +6,8 @@ import {useRouter, useSearchParams} from 'next/navigation';
 import Pagination from '@/components/fields/Pagination';
 import type {ScreenControllerProps} from '@/components/screens/types';
 import {KpopArtistCard} from './KpopCards';
+import Skeleton from '@/components/utils/Skeleton';
+import KrideStatePanel from '@/components/fields/kride/atoms/KrideStatePanel';
 
 type Artist = {id: number; slug?: string; nameKo?: string; nameEn?: string; [key: string]: unknown};
 type ArtistPage = {items: Artist[]; totalCount: number; page: number; pageSize: number; query: string};
@@ -108,14 +110,14 @@ export default function ArtistCatalogScreen({screenId, refId}: ScreenControllerP
             {current.status === 'loading' ? '아티스트를 불러오는 중…' : current.status === 'error' ? '불러오기 오류' : detail ? '상세 정보' : `${query ? `“${query}” 검색 · ` : ''}${current.page?.totalCount ?? 0}명의 아티스트`}
         </h2>
         <div aria-busy={current.status === 'loading'}>
-            {current.status === 'error' && <div role="alert" className="artist-catalog-state">
-                <p>아티스트를 불러오지 못했어요. 검색 조건은 유지됩니다.</p>
-                <button onClick={() => {shouldFocus.current = true; setRetry(x => x + 1);}}>다시 시도</button>
+            {current.status === 'loading' && <div className={`artist-catalog-skeleton${detail ? '' : ' kpop-grid artist-catalog-grid'}`} aria-hidden="true">
+                {Array.from({length: detail ? 1 : 4}, (_, i) => <Skeleton key={i} height={detail ? 320 : 168} />)}
             </div>}
-            {current.status === 'missing' && <p role="status">아티스트를 찾을 수 없어요. 주소를 확인하거나 목록으로 돌아가 주세요.</p>}
+            {current.status === 'error' && <KrideStatePanel kind="error" title="아티스트를 불러오지 못했어요" description="검색 조건은 유지됩니다. 잠시 후 다시 시도해 주세요." primaryAction={{label: '다시 시도', onClick: () => {shouldFocus.current = true; setRetry(x => x + 1);}}} />}
+            {current.status === 'missing' && <KrideStatePanel kind="empty-filtered" title="아티스트를 찾을 수 없어요" description="주소를 확인하거나 목록으로 돌아가 주세요." />}
             {current.status === 'ready' && detail && current.artist && <KpopArtistCard data={current.artist} variant="detail" meta={{componentId: 'kpop_artist_detail'}} readOnly personalSave />}
             {current.status === 'ready' && !detail && current.page && <>
-                {current.page.items.length === 0 ? <p role="status">{page > 1 ? '이 페이지에 아티스트가 없어요. 첫 페이지로 돌아가 주세요.' : query ? '조건에 맞는 아티스트가 없어요. 이름을 바꾸거나 초기화해 주세요.' : '아직 공개된 아티스트가 없어요.'}</p>
+                {current.page.items.length === 0 ? <KrideStatePanel kind={query ? 'empty-filtered' : 'empty-first'} icon="🎤" title={page > 1 ? '이 페이지에 아티스트가 없어요' : query ? '조건에 맞는 아티스트가 없어요' : '아직 공개된 아티스트가 없어요'} description={page > 1 ? '첫 페이지로 돌아가 주세요.' : query ? '이름을 바꾸거나 초기화해 주세요.' : '공개 승인된 아티스트가 등록되면 여기에 보여요.'} />
                     : <div className="kpop-grid artist-catalog-grid">{current.page.items.map(artist => <KpopArtistCard key={artist.id} data={artist} readOnly personalSave onAction={openArtist} />)}</div>}
                 {page > Math.max(1, Math.ceil(current.page.totalCount / PAGE_SIZE)) ? <button onClick={() => navigate(query, 1)}>첫 페이지로</button>
                     : <nav aria-label="아티스트 페이지"><Pagination totalCount={current.page.totalCount} pageSize={PAGE_SIZE} currentPage={page} onPageChange={next => navigate(query, next)} /></nav>}

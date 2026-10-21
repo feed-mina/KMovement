@@ -41,7 +41,8 @@ export default function PoiImage({src, thumbnail, title, variant, priority = fal
                 style={{
                     display: 'flex',
                     width: '100%',
-                    height,
+                    height: variant === 'card' ? undefined : height,
+                    aspectRatio: variant === 'card' ? '16 / 10' : undefined,
                     alignItems: 'center',
                     justifyContent: 'center',
                     overflow: 'hidden',

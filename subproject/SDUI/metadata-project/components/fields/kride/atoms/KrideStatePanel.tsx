@@ -43,6 +43,8 @@ export interface KrideStatePanelProps {
     context?: React.ReactNode;
     children?: React.ReactNode;
     className?: string;
+    /** 루트 div 에 그대로 얹는 data-* 속성 (예: data-error-source) */
+    attributes?: Record<`data-${string}`, string | undefined>;
 }
 
 const DEFAULT_ICON: Record<KrideStateKind, string> = {
@@ -88,12 +90,14 @@ export default function KrideStatePanel({
     context,
     children,
     className = '',
+    attributes,
 }: KrideStatePanelProps) {
     const role = kind === 'error' ? 'alert' : 'status';
     const links = (secondaryLinks ?? []).slice(0, 2);
 
     return (
         <div
+            {...attributes}
             className={`kride-state-panel kride-state-panel--${kind} kride-state-panel--${tone} ${className}`.trim()}
             role={role}
             aria-live={kind === 'error' ? 'assertive' : 'polite'}
