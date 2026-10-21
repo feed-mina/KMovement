@@ -79,9 +79,10 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         render(<TourExploreScreen screenId="TOUR_EXPLORE" refId={null} />);
         expect(screen.getByRole('button', {name: '세부 필터'})).toHaveAttribute('aria-expanded', 'false');
         await screen.findByText('가담');
-        fireEvent.change(screen.getByLabelText('불러온 장소 검색'), {target: {value: '돈까스'}});
+        fireEvent.change(screen.getByLabelText('이 목록에서 찾기'), {target: {value: '돈까스'}});
         expect(screen.queryByText('가담')).not.toBeInTheDocument();
-        expect(screen.getByText(/불러온 2곳 중 1곳/)).toBeInTheDocument();
+        expect(screen.getByText(/서울 맛집 1곳/)).toBeInTheDocument();
+        expect(screen.getByText(/불러온 2곳 중/)).toBeInTheDocument();
         fireEvent.click(screen.getByRole('button', {name: '필터 초기화'}));
         expect(screen.getByText('가담')).toBeInTheDocument();
     });
@@ -527,5 +528,51 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         fireEvent.keyDown(document, { key: 'Escape' });
         await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
         await waitFor(() => expect(trigger).toHaveFocus());
+    });
+});
+
+// 벤치마킹 H4: 조건이 URL 에 남고(뒤로가기·공유), URL 로 들어온 조건을 그대로 읽는다
+describe('TourExploreScreen — URL 동기화', () => {
+    beforeEach(() => {
+        mockSearchParams = new URLSearchParams();
+        mockedRestaurants.mockReset();
+        mockedRestaurants.mockResolvedValue(sample);
+        mockedHolyFetch.mockReset();
+        mockedHolyFetch.mockResolvedValue(HOLY_SITES);
+        mockedAreaFetch.mockReset();
+        mockedAreaFetch.mockResolvedValue([{ code: '1', name: '서울' }, { code: '6', name: '부산' }]);
+        mockedDistrictFetch.mockReset();
+        mockedDistrictFetch.mockResolvedValue([]);
+        mockedContentFetch.mockReset();
+        mockedContentFetch.mockResolvedValue([]);
+    });
+
+    it('카테고리·정렬·검색어를 바꾸면 주소에 반영되고 기본값은 비운다', async () => {
+        // jest.setup 이 window.location 을 정적으로 모킹하므로 history 호출 자체를 본다.
+        const replaceState = jest.spyOn(window.history, 'replaceState').mockImplementation(() => {});
+        const lastUrl = () => String(replaceState.mock.calls[replaceState.mock.calls.length - 1]?.[2] ?? '');
+        try {
+            render(<TourExploreScreen screenId="TOUR_EXPLORE" refId={null} />);
+            await screen.findByText('가담');
+            expect(replaceState).not.toHaveBeenCalled();
+            fireEvent.click(screen.getByText('최신순'));
+            await waitFor(() => expect(lastUrl()).toMatch(/\?arrange=C$/));
+            fireEvent.change(screen.getByLabelText('이 목록에서 찾기'), { target: { value: '가담' } });
+            await waitFor(() => expect(lastUrl()).toMatch(/\?arrange=C&q=%EA%B0%80%EB%8B%B4$/));
+            fireEvent.click(screen.getByRole('button', { name: '필터 초기화' }));
+            await waitFor(() => expect(lastUrl()).not.toContain('?'));
+        } finally {
+            replaceState.mockRestore();
+        }
+    });
+
+    it('URL 의 arrange·q 로 들어오면 그 조건으로 시작한다', async () => {
+        mockSearchParams = new URLSearchParams('arrange=C&q=가나');
+        render(<TourExploreScreen screenId="TOUR_EXPLORE" refId={null} />);
+        await waitFor(() => expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({ arrange: 'C' })));
+        expect(screen.getByLabelText('이 목록에서 찾기')).toHaveValue('가나');
+        await screen.findByText('가나돈까스의집');
+        expect(screen.queryByText('가담')).not.toBeInTheDocument();
+        expect(screen.getByText(/서울 맛집 1곳/)).toBeInTheDocument();
     });
 });

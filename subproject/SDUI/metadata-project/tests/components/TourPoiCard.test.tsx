@@ -1,6 +1,6 @@
 import React from 'react';
 import {fireEvent, render, screen} from '@testing-library/react';
-import TourPoiCard from '@/components/plugins/travel/TourPoiCard';
+import TourPoiCard, { shortAddress } from '@/components/plugins/travel/TourPoiCard';
 
 const basePoi = {
     contentId: 'holy-1',
@@ -57,5 +57,14 @@ describe('TourPoiCard', () => {
         fireEvent.click(screen.getByRole('button', {name: '서울숲 저장'}));
         expect(onToggleSave).toHaveBeenCalledWith('holy-1');
         expect(onOpen).toHaveBeenCalledTimes(1);
+    });
+});
+
+// 벤치마킹 H4: 카드에 카테고리 태그 · 짧은 주소 · 호버/포커스 시 지도 핀 강조
+describe('TourPoiCard — H4', () => {
+    it('shortAddress keeps only the city and district', () => {
+        expect(shortAddress('서울 종로구 창경궁로 88')).toBe('서울 종로구');
+        expect(shortAddress('  부산광역시   해운대구 우동 ')).toBe('부산광역시 해운대구');
+        expect(shortAddress(undefined)).toBe('');
     });
 });

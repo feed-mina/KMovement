@@ -11,37 +11,49 @@ interface TourPoiCardProps {
     onOpen: (poi: TourPoi, trigger: HTMLElement) => void;
     onToggleSave: (contentId?: string) => void;
     selected?: boolean;
+    /** 모바일: 지도 보기로 전환하며 이 장소를 고른다. */
     onMapSelect?: () => void;
+    /** 데스크톱: 카드에 마우스를 올리거나 포커스하면 지도 핀을 강조한다 (벤치마킹 H4: 카드 = 핀). */
+    onHighlight?: () => void;
+    /** 성지가 아닐 때 보여줄 카테고리 라벨 (맛집 · 관광지 · 문화시설). */
+    categoryLabel?: string;
     cardId?: string;
 }
 
-const RED = 'var(--semantic-accent, #E50914)';
+/** "서울 종로구 창경궁로 88" → "서울 종로구". 카드에는 동네까지만, 전체 주소는 title 로. */
+export function shortAddress(addr?: string): string {
+    if (!addr) return '';
+    return addr.trim().split(/\s+/).slice(0, 2).join(' ');
+}
 
-export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onToggleSave, selected, onMapSelect, cardId}: TourPoiCardProps) {
+export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onToggleSave, selected, onMapSelect, onHighlight, categoryLabel, cardId}: TourPoiCardProps) {
     const recommendReason = poi.recommendReason?.trim();
+    const isHoly = poi.contentTypeId === 'HOLY';
 
     return (
-        <article id={cardId} tabIndex={-1} data-selected={Boolean(selected)} className="tour-poi-card" style={{border: '0.5px solid #eee', borderRadius: 14, overflow: 'hidden', background: '#fff', position: 'relative'}}>
+        <article
+            id={cardId}
+            tabIndex={-1}
+            data-selected={Boolean(selected)}
+            className="tour-poi-card"
+            onMouseEnter={onHighlight}
+            onFocus={onHighlight}
+        >
             <button
                 type="button"
+                className="tour-poi-card__open"
                 aria-haspopup="dialog"
                 aria-label={`${poi.title} 상세 보기`}
                 onClick={(event) => onOpen(poi, event.currentTarget)}
-                style={{display: 'block', width: '100%', padding: 0, border: 'none', background: 'transparent', color: 'inherit', textAlign: 'left', cursor: 'pointer'}}
             >
-                <span style={{height: 100, background: '#f5f5f5', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <span className="tour-poi-card__media">
                     <PoiImage src={poi.firstImage} thumbnail={poi.thumbnail} title={poi.title} variant="card" priority={priority}/>
-                    {poi.contentTypeId === 'HOLY' && (
-                        <span style={{position: 'absolute', top: 6, left: 6, fontSize: 10, background: RED, color: '#fff', padding: '2px 7px', borderRadius: 20}}>성지</span>
-                    )}
+                    {isHoly && <span className="tour-poi-card__tag tour-poi-card__tag--holy">성지</span>}
+                    {!isHoly && categoryLabel && <span className="tour-poi-card__tag">{categoryLabel}</span>}
                 </span>
-                <span style={{display: 'block', padding: '8px 10px'}}>
-                    <span style={{display: 'block', margin: 0, fontSize: 13, fontWeight: 500}}>{poi.title}</span>
-                    {poi.addr && (
-                        <span style={{display: 'block', margin: '3px 0 0', fontSize: 11, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
-                            {poi.addr}
-                        </span>
-                    )}
+                <span className="tour-poi-card__body">
+                    <span className="tour-poi-card__title">{poi.title}</span>
+                    {poi.addr && <span className="tour-poi-card__addr" title={poi.addr}>{shortAddress(poi.addr)}</span>}
                     {recommendReason && (
                         <span
                             data-testid="tour-poi-recommend-reason"
@@ -63,12 +75,15 @@ export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onT
                     )}
                 </span>
             </button>
-            {onMapSelect ? <button className="tour-card-map-action" type="button" aria-pressed={Boolean(selected)} aria-label={`${poi.title} 지도에서 선택`} onClick={onMapSelect}>지도에서 선택</button> : cardId ? <span className="tour-card-coordinate-note">지도 좌표 없음 · 주소로 확인</span> : null}
+            {onMapSelect
+                ? <button className="tour-poi-card__map" type="button" aria-pressed={Boolean(selected)} aria-label={`${poi.title} 지도에서 선택`} onClick={onMapSelect}><span aria-hidden="true">📍</span> 지도</button>
+                : cardId ? <span className="tour-card-coordinate-note">좌표 없음 · 주소로 확인</span> : null}
             <button
                 type="button"
+                className="tour-poi-card__save"
                 aria-label={isSaved ? `${poi.title} 저장 취소` : `${poi.title} 저장`}
+                aria-pressed={isSaved}
                 onClick={() => onToggleSave(poi.contentId)}
-                style={{position: 'absolute', top: 6, right: 6, width: 28, height: 28, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.35)', color: isSaved ? RED : '#fff', cursor: 'pointer', fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center'}}
             >
                 {isSaved ? '♥' : '♡'}
             </button>
