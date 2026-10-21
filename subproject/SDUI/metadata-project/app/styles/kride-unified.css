@@ -66,3 +66,11 @@
 .kride-site-shell--focus .kride-site-header nav{display:none}
 .kride-site-shell--focus .kride-site-content{padding-bottom:calc(64px + 24px)}
 }
+
+/* ── 벤치마킹 H6 (2026-10-20): K-POP 서브 메뉴를 탭 + 카운트로 ── */
+.kpop-section-nav{gap:2px;margin-bottom:16px;border-bottom:1px solid var(--border-hair)}
+.kpop-section-nav a{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--text-muted);font-weight:600;margin-bottom:-1px}
+.kpop-section-nav [aria-current=page]{border:0;border-bottom:2px solid var(--semantic-accent);background:transparent;color:var(--semantic-accent-strong);font-weight:700}
+.kpop-section-nav__count{font-size:12px;font-weight:700;color:var(--text-muted);padding:1px 7px;border-radius:999px;background:var(--surface-track)}
+.kpop-section-nav [aria-current=page] .kpop-section-nav__count{background:var(--semantic-accent-soft);color:var(--semantic-accent-strong)}
+@media(max-width:750px){.kpop-section-nav a{padding:10px 10px}}

@@ -1,3 +1,31 @@
- 'use client';
-import Link from 'next/link';import {usePathname} from 'next/navigation';
-export default function KpopNav(){const path=usePathname()||'';return <nav className="kpop-section-nav" aria-label="K-pop 탐색">{[['아티스트','/view/kpop'],['이벤트','/view/KPOP_EVENTS'],['상품','/view/KPOP_PRODUCTS']].map(([label,url],i)=><Link key={url} href={url} aria-current={(i===0?(path==='/view/kpop'||path.includes('ARTIST')||path.includes('EXPLORE')):i===1?path.includes('EVENT'):path.includes('PRODUCT'))?'page':undefined}>{label}</Link>)}<Link href="/view/INTRO1">아티스트 코스 만들기 →</Link></nav>}
+'use client';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+interface Props {
+    /** 화면이 이미 알고 있는 수량만 넘긴다. 없으면 숫자 자리를 비운다 (벤치마킹 H6: 탭 + 카운트). */
+    counts?: { artists?: number; events?: number; products?: number };
+}
+
+const TABS = [
+    { key: 'artists', label: '아티스트', href: '/view/kpop', active: (path: string) => path === '/view/kpop' || path.includes('ARTIST') || path.includes('EXPLORE') },
+    { key: 'events', label: '이벤트', href: '/view/KPOP_EVENTS', active: (path: string) => path.includes('EVENT') },
+    { key: 'products', label: '상품', href: '/view/KPOP_PRODUCTS', active: (path: string) => path.includes('PRODUCT') },
+] as const;
+
+export default function KpopNav({ counts }: Props) {
+    const path = usePathname() || '';
+    return (
+        <nav className="kpop-section-nav" aria-label="K-pop 탐색">
+            {TABS.map((tab) => {
+                const count = counts?.[tab.key];
+                return (
+                    <Link key={tab.href} href={tab.href} aria-current={tab.active(path) ? 'page' : undefined}>
+                        {tab.label}
+                        {Number.isInteger(count) && <span className="kpop-section-nav__count">{count}</span>}
+                    </Link>
+                );
+            })}
+        </nav>
+    );
+}

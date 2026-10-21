@@ -19,3 +19,37 @@
 /* 벤치마킹 H2: 로딩 Skeleton · 공용 상태 패널 */
 .artist-catalog-skeleton .skeleton-box { display: block; border-radius: 16px; }
 .artist-catalog .kride-state-panel { max-width: none; }
+
+/* ── 벤치마킹 H6 (2026-10-20): 즉시 검색 · 원형 그리드 · 더 보기 ── */
+.artist-catalog-search { margin-block: 12px 16px; }
+.artist-catalog-search__label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+.artist-catalog-inputs { position: relative; align-items: center; gap: 8px; }
+.artist-catalog-inputs__icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 14px; pointer-events: none; }
+.artist-catalog-inputs input { padding: 12px 12px 12px 40px; border-radius: var(--kride-radius-pill); background: var(--surface-card); box-sizing: border-box; }
+.artist-catalog-inputs__clear { flex: none; border: 1px solid var(--border-strong); border-radius: var(--kride-radius-pill); background: var(--surface-card); color: var(--text-body); font: inherit; font-size: 13px; }
+.artist-catalog .artist-catalog-grid--compact, .artist-catalog-grid--compact { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.artist-catalog h1 { word-break: keep-all; }
+@media (min-width: 700px) { .artist-catalog .artist-catalog-grid--compact { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .artist-catalog .artist-catalog-grid--compact { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.artist-catalog-grid--compact .skeleton-box { border-radius: 16px; }
+.kpop-artist-card--compact { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 8px 12px; text-align: center; border: 1px solid var(--border-hair); border-radius: 16px; background: var(--surface-card); }
+.kpop-artist-card--compact .artist-photo { width: 72px; background: transparent; }
+.kpop-artist-card--compact .artist-photo-frame { width: 72px; height: 72px; aspect-ratio: 1 / 1; border-radius: 50%; background: var(--semantic-accent-soft); }
+.kpop-artist-card--compact .artist-photo-frame img { object-fit: cover; }
+.kpop-artist-card--compact .artist-photo-loading { font-size: 0; }
+.kpop-artist-card--compact .artist-photo-placeholder { padding: 0; }
+.kpop-artist-card--compact .artist-photo-placeholder span { font-size: 26px; color: var(--semantic-accent); }
+.kpop-artist-card--compact .artist-photo-placeholder p, .kpop-artist-card--compact .artist-photo-placeholder small, .kpop-artist-card--compact .artist-photo-credit { display: none; }
+.kpop-artist-card--compact .kpop-card-body { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0; }
+.kride-site-content .kpop-artist-card--compact .kpop-card-body h3 { margin: 0; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+.kpop-artist-card--compact .kpop-card-subtitle { margin: 0; font-size: 12px; color: var(--text-muted); }
+.kpop-artist-card--compact .kpop-card-actions { margin: 2px 0 0; }
+.kride-site-content .kpop-artist-card--compact .kpop-card-actions button { padding: 6px 12px; min-height: 32px; font-size: 12px; border-radius: var(--kride-radius-pill); }
+.kpop-artist-card--compact .personal-save-action { margin: 0; }
+.kride-site-content .kpop-artist-card--compact .personal-save-action button { min-height: 32px; padding: 6px 12px; font-size: 12px; border-radius: var(--kride-radius-pill); background: var(--surface-card); color: var(--semantic-accent-strong); border: 1px solid var(--border-hair); }
+.kride-site-content .kpop-artist-card--compact .personal-save-action button[aria-pressed=true] { background: var(--semantic-accent-soft); border-color: var(--semantic-accent); }
+.kpop-artist-card--compact .personal-save-action p { font-size: 12px; }
+.artist-catalog-more { display: flex; justify-content: center; margin-top: 16px; }
+.artist-catalog-more button { padding: 10px 22px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface-card); color: var(--text-body); font: inherit; font-size: 13px; font-weight: 600; }
+.artist-catalog-shown { margin: 10px 0 0; text-align: center; font-size: 12px; color: var(--text-muted); }
+@media (max-width: 600px) { .kpop-artist-card--compact { padding: 12px 6px 10px; } .kpop-artist-card--compact .artist-photo, .kpop-artist-card--compact .artist-photo-frame { width: 64px; } .kpop-artist-card--compact .artist-photo-frame { height: 64px; } }
