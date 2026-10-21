@@ -1,27 +1,37 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/services/axios';
 import { useAuth } from '@/context/AuthContext';
 import ScreenSkeleton from '@/components/utils/ScreenSkeleton';
 import type { ScreenControllerProps } from './types';
-import { clearLoginReturn, rememberLoginReturn, safeLoginReturn } from '@/lib/kride/loginReturn';
+import { clearLoginReturn, loginReturnLabel, rememberLoginReturn, safeLoginReturn } from '@/lib/kride/loginReturn';
 
+/**
+ * 로그인 (벤치마킹 H8, 2026-10-20).
+ * 레퍼런스 교집합: 카카오가 최상단·가장 큼(국내 3/3, 카카오 디자인 가이드: 다른 버튼이 더 눈에 띄면 안 됨),
+ * 이메일은 "또는" 아래 접힘, 돌아갈 곳 한 줄, 회원가입 링크, 개발·보안 문구 미노출.
+ */
 function LoginScreen() {
     const router = useRouter();
     const search=useSearchParams();
     const returnTo=safeLoginReturn(search.get('returnTo'));
+    const returnLabel=loginReturnLabel(returnTo);
     const { isLoggedIn, isLoading, login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [emailOpen, setEmailOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
+    const emailInput = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (!isLoading && isLoggedIn) router.replace(returnTo);
     }, [isLoading, isLoggedIn, router, returnTo]);
+
+    useEffect(() => { if (emailOpen) emailInput.current?.focus(); }, [emailOpen]);
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -55,40 +65,16 @@ function LoginScreen() {
 
     return (
         <main className="auth-flow-page" aria-labelledby="login-title">
-            <section className="auth-flow-card">
+            <section className="auth-flow-card auth-login">
                 <header className="auth-flow-heading">
-                    <h1 id="login-title">로그인</h1>
-                    <p>로그인하면 내 프로필과 저장한 K-RIDE 기록을 확인할 수 있어요.</p>
+                    <p className="auth-login__eyebrow">KRIDE 로그인</p>
+                    <h1 id="login-title">3초 만에 시작하기</h1>
+                    <p className="auth-login__return">
+                        {returnLabel
+                            ? <>로그인하면 <b>{returnLabel}</b>으로 돌아가고, 저장한 아티스트·코스가 유지돼요.</>
+                            : <>로그인하면 보던 화면으로 돌아가고, 저장한 아티스트·코스가 유지돼요.</>}
+                    </p>
                 </header>
-
-                <form className="auth-flow-form" onSubmit={handleSubmit}>
-                    <label className="auth-flow-field">
-                        이메일
-                        <input
-                            type="email"
-                            name="email"
-                            autoComplete="username"
-                            value={email}
-                            onChange={(event) => setEmail(event.target.value)}
-                            required
-                        />
-                    </label>
-                    <label className="auth-flow-field">
-                        비밀번호
-                        <input
-                            type="password"
-                            name="password"
-                            autoComplete="current-password"
-                            value={password}
-                            onChange={(event) => setPassword(event.target.value)}
-                            required
-                        />
-                    </label>
-                    {error && <p className="auth-flow-error" role="alert">{error}</p>}
-                    <button className="auth-flow-button primary" type="submit" disabled={submitting}>
-                        {submitting ? '로그인 확인 중…' : '이메일로 로그인'}
-                    </button>
-                </form>
 
                 <button
                     className="auth-flow-button kakao"
@@ -98,11 +84,64 @@ function LoginScreen() {
                         window.location.assign('/api/kakao/authorize?state=web');
                     }}
                 >
-                    카카오로 로그인
+                    <KakaoSymbol />
+                    카카오로 시작하기
                 </button>
-                <p className="auth-flow-help">인증 토큰은 화면이나 브라우저 저장소에 표시하지 않고 보안 쿠키로만 처리합니다.</p>
+
+                <p className="auth-flow-divider" role="presentation"><span>또는</span></p>
+
+                {emailOpen ? (
+                    <form className="auth-flow-form" onSubmit={handleSubmit} aria-label="이메일 로그인">
+                        <label className="auth-flow-field">
+                            이메일
+                            <input
+                                ref={emailInput}
+                                type="email"
+                                name="email"
+                                autoComplete="username"
+                                value={email}
+                                onChange={(event) => setEmail(event.target.value)}
+                                required
+                            />
+                        </label>
+                        <label className="auth-flow-field">
+                            비밀번호
+                            <input
+                                type="password"
+                                name="password"
+                                autoComplete="current-password"
+                                value={password}
+                                onChange={(event) => setPassword(event.target.value)}
+                                required
+                            />
+                        </label>
+                        {error && <p className="auth-flow-error" role="alert">{error}</p>}
+                        <button className="auth-flow-button secondary" type="submit" disabled={submitting}>
+                            {submitting ? '로그인 확인 중…' : '로그인'}
+                        </button>
+                    </form>
+                ) : (
+                    <button className="auth-flow-button ghost" type="button" onClick={() => setEmailOpen(true)} aria-expanded={false}>
+                        이메일로 로그인
+                    </button>
+                )}
+
+                <p className="auth-flow-links">
+                    <span>아직 계정이 없나요?</span>
+                    <Link href={'/view/REGISTER_PAGE?returnTo=' + encodeURIComponent(returnTo)}>회원가입</Link>
+                </p>
+                <p className="auth-flow-help">로그인 정보는 안전하게 보호돼요.</p>
             </section>
         </main>
+    );
+}
+
+/** 카카오 로그인 디자인 가이드의 말풍선 심볼 (컨테이너 #FEE500 · 심볼 #000). */
+function KakaoSymbol() {
+    return (
+        <svg className="auth-login__kakao-symbol" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M12 3C6.48 3 2 6.58 2 11c0 2.83 1.86 5.31 4.65 6.72l-1.02 3.78c-.08.3.26.55.52.38l4.4-2.92c.47.05.95.08 1.45.08 5.52 0 10-3.58 10-8s-4.48-8-10-8Z" />
+        </svg>
     );
 }
 
