@@ -42,3 +42,7 @@
  .tour-browse-map__canvas { height: 360px; }
  .tour-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* 벤치마킹 H2 (2026-10-20): 장소 목록 로딩 Skeleton · 공용 상태 패널 */
+.tour-card-grid--skeleton .skeleton-box { display: block; border-radius: 14px; }
+.tour-explore .tour-state-panel { max-width: none; margin: 8px 0 16px; }

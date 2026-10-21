@@ -18,6 +18,8 @@ import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
 import PoiImage from '@/components/plugins/travel/PoiImage';
 import TourPoiCard from '@/components/plugins/travel/TourPoiCard';
 import TourExploreMap, {hasTourCoordinates, tourPoiKey} from '@/components/plugins/travel/TourExploreMap';
+import Skeleton from '@/components/utils/Skeleton';
+import KrideStatePanel from '@/components/fields/kride/atoms/KrideStatePanel';
 import { trackEvent } from '@/lib/analytics/dataLayer';
 
 // [탐색] 화면 컨트롤러 (여행 플러그인). TourAPI POI를 지역·카테고리·정렬로 탐색.
@@ -680,14 +682,28 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                 </section>
             )}
 
-            {loading && <div style={{ padding: 24, color: '#888' }}>불러오는 중…</div>}
-            {error && <div role="alert" className="tour-recovery" data-error-source={isHolyCategory(category) ? 'holy-postgres-api' : 'tour-api'}>
-                <p>{error}</p>
-                <button type="button" onClick={() => setPlacesAttempt((value) => value + 1)}>장소 다시 시도</button>
-                <button type="button" onClick={resetFilters}>필터 초기화</button>
-            </div>}
+            {loading && <div className="tour-card-grid tour-card-grid--skeleton" aria-hidden="true">{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} height={176} />)}</div>}
+            {error && (
+                <KrideStatePanel
+                    kind="error"
+                    title={isHolyCategory(category) ? '성지를 불러오는 데 문제가 있어요' : '장소를 불러오는 데 문제가 있어요'}
+                    description={error}
+                    attributes={{ 'data-error-source': isHolyCategory(category) ? 'holy-postgres-api' : 'tour-api' }}
+                    primaryAction={{ label: '장소 다시 시도', onClick: () => setPlacesAttempt((value) => value + 1) }}
+                    secondaryAction={{ label: '필터 초기화', onClick: resetFilters }}
+                    className="tour-state-panel"
+                />
+            )}
             {!loading && !error && <p className="tour-result-count" aria-live="polite">불러온 {pois.length}곳 중 {filteredPois.length}곳 · 화면에 {displayedPois.length}곳 표시</p>}
-            {!loading && !error && filteredPois.length === 0 && <div className="tour-recovery"><p>{placeQuery ? '검색 조건에 맞는 장소가 없어요.' : '표시할 장소가 없어요.'}</p><button type="button" onClick={resetFilters}>필터 초기화</button></div>}
+            {!loading && !error && filteredPois.length === 0 && (
+                <KrideStatePanel
+                    kind="empty-filtered"
+                    title={placeQuery ? '검색 조건에 맞는 장소가 없어요' : '표시할 장소가 없어요'}
+                    description={placeQuery ? '검색어를 지우거나 다른 이름으로 찾아보세요.' : '카테고리나 지역을 바꾸면 다른 장소를 볼 수 있어요.'}
+                    primaryAction={{ label: '필터 초기화', onClick: resetFilters }}
+                    className="tour-state-panel"
+                />
+            )}
 
             {!loading && !error && pois.length > 0 && (
                 <>

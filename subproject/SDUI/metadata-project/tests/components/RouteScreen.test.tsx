@@ -66,3 +66,39 @@ describe('RouteScreen — [동선] 기본/AI 코스 토글', () => {
         expect(mockedFetch).toHaveBeenCalledTimes(1);
     });
 });
+
+// 벤치마킹 H2: 기본 코스 조회 실패는 텍스트가 아니라 공용 오류 패널 + 재시도(새로고침 없음)
+describe('RouteScreen — 상태 패널', () => {
+    beforeEach(() => {
+        mockedFetch.mockClear();
+        (fetchRestaurants as jest.Mock).mockClear();
+    });
+
+    it('기본 코스 조회 실패 시 오류 패널을 보이고 다시 시도로 복구한다', async () => {
+        (fetchRestaurants as jest.Mock)
+            .mockRejectedValueOnce(new Error('TourAPI down'))
+            .mockResolvedValueOnce([{ contentId: '1', title: '가나돈까스', mapX: 127.0, mapY: 37.5 }]);
+        render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
+        const alert = await screen.findByRole('alert');
+        expect(alert).toHaveTextContent('장소를 불러오지 못했어요');
+        fireEvent.click(screen.getByRole('button', { name: '다시 시도' }));
+        await waitFor(() => expect(screen.getByTestId('route-map')).toBeInTheDocument());
+        expect(fetchRestaurants).toHaveBeenCalledTimes(2);
+        expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    it('AI 코스 서버 오류는 고른 조건을 보여주고 같은 조건으로 재시도한다', async () => {
+        mockedFetch.mockResolvedValueOnce({ ok: false, status: 500, json: () => Promise.resolve({}) } as never);
+        render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
+        await waitFor(() => expect(screen.getByTestId('route-map')).toBeInTheDocument());
+        fireEvent.click(screen.getByText('AI 코스'));
+        const alert = await screen.findByRole('alert');
+        expect(alert).toHaveTextContent('AI 코스를 불러오지 못했어요');
+        expect(alert).toHaveTextContent('성지순례');
+        fireEvent.click(screen.getByRole('button', { name: '다시 시도' }));
+        await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(2));
+        expect(JSON.parse((mockedFetch.mock.calls[1] as unknown as [string, RequestInit])[1].body as string)).toEqual(
+            JSON.parse((mockedFetch.mock.calls[0] as unknown as [string, RequestInit])[1].body as string),
+        );
+    });
+});

@@ -15,3 +15,7 @@
 .artist-catalog-state { padding: 20px; border: 1px solid var(--warning); border-radius: 12px; }
 .artist-catalog :is(a, button, input):focus-visible, .artist-catalog-results:focus { outline: 3px solid var(--focus-outline); outline-offset: 3px; }
 @media (max-width: 600px) { .artist-catalog { padding: 16px; } .artist-catalog .artist-catalog-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* 벤치마킹 H2: 로딩 Skeleton · 공용 상태 패널 */
+.artist-catalog-skeleton .skeleton-box { display: block; border-radius: 16px; }
+.artist-catalog .kride-state-panel { max-width: none; }
