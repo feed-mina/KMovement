@@ -15,7 +15,7 @@ interface TourPoiCardProps {
     cardId?: string;
 }
 
-const RED = '#E50914';
+const RED = 'var(--semantic-accent, #E50914)';
 
 export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onToggleSave, selected, onMapSelect, cardId}: TourPoiCardProps) {
     const recommendReason = poi.recommendReason?.trim();
@@ -50,7 +50,7 @@ export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onT
                                 display: '-webkit-box',
                                 marginTop: 6,
                                 overflow: 'hidden',
-                                color: '#791F1F',
+                                color: 'var(--semantic-accent-strong, #8B0610)',
                                 fontSize: 11,
                                 lineHeight: 1.45,
                                 overflowWrap: 'anywhere',

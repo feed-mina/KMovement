@@ -112,7 +112,7 @@ function safeExternalUrl(url?: string): string | undefined {
     }
 }
 
-const RED = '#E50914';
+const RED = 'var(--semantic-accent, #E50914)';
 
 function HorizontalFilterRail({
     label,
@@ -580,7 +580,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
 
             {isHolyCategory(category) && (
                 <section aria-label="작품·아티스트 필터" style={{ marginBottom: 14 }}>
-                    <label htmlFor="holy-content-search" style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#791F1F', marginBottom: 6 }}>
+                    <label htmlFor="holy-content-search" style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--semantic-accent-strong, #8B0610)', marginBottom: 6 }}>
                         작품·아티스트로 성지 찾기
                     </label>
                     {selectedContent ? (
@@ -655,15 +655,15 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                     aria-labelledby="holy-submit-heading"
                     style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14,
-                        marginBottom: 14, padding: '12px 14px', border: '0.5px solid #F4B8BB',
-                        borderRadius: 12, background: '#FFF6F6', flexWrap: 'wrap',
+                        marginBottom: 14, padding: '12px 14px', border: '1px solid var(--border-hair, #F4B8BB)',
+                        borderRadius: 12, background: 'var(--danger-soft, #FFF6F6)', flexWrap: 'wrap',
                     }}
                 >
                     <div style={{ flex: '1 1 220px' }}>
-                        <h2 id="holy-submit-heading" style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#791F1F' }}>
+                        <h2 id="holy-submit-heading" style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--semantic-accent-strong, #8B0610)' }}>
                             새로운 팬 성지를 알고 있나요?
                         </h2>
-                        <p id="holy-submit-note" style={{ margin: '4px 0 0', fontSize: 12, lineHeight: 1.5, color: '#8B4A4D' }}>
+                        <p id="holy-submit-note" style={{ margin: '4px 0 0', fontSize: 12, lineHeight: 1.5, color: 'var(--text-muted, #8B4A4D)' }}>
                             제보는 공개 전 운영진이 검수하며, 사진 업로드는 지원하지 않아요.
                         </p>
                     </div>
@@ -735,7 +735,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                         </div>
                     )}
                     {loadMoreError && (
-                        <p role="alert" style={{ margin: '10px 0 0', textAlign: 'center', color: '#A32D2D', fontSize: 12 }}>
+                        <p role="alert" style={{ margin: '10px 0 0', textAlign: 'center', color: 'var(--danger-strong, #8B0610)', fontSize: 12 }}>
                             {loadMoreError}
                         </p>
                     )}
@@ -771,9 +771,9 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             {selected.tel && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#777' }}>☎ {selected.tel}</p>}
 
                             {selected.recommendReason && (
-                                <div style={{ background: '#FCEBEB', borderRadius: 10, padding: '10px 12px', marginTop: 12 }}>
-                                    <div style={{ fontSize: 12, color: '#A32D2D', fontWeight: 500, marginBottom: 4 }}>왜 추천하나요?</div>
-                                    <p style={{ margin: 0, fontSize: 12, color: '#791F1F', lineHeight: 1.5 }}>{selected.recommendReason}</p>
+                                <div style={{ background: 'var(--semantic-accent-soft, #FCEBEB)', borderRadius: 10, padding: '10px 12px', marginTop: 12 }}>
+                                    <div style={{ fontSize: 12, color: 'var(--danger-strong, #8B0610)', fontWeight: 500, marginBottom: 4 }}>왜 추천하나요?</div>
+                                    <p style={{ margin: 0, fontSize: 12, color: 'var(--semantic-accent-strong, #8B0610)', lineHeight: 1.5 }}>{selected.recommendReason}</p>
                                 </div>
                             )}
                             {(selected.fandomInfo || selected.artist) && (

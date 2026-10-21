@@ -8,7 +8,7 @@ export default function FocusFooterBar() {
     return (
         <div className="fixed bottom-0 left-0 right-0 h-16 bg-[#161616] border-t border-gray-800 flex justify-around items-center z-[200]">
             <button 
-                onClick={() => router.push('/view/MAIN_PAGE')} 
+                onClick={() => router.push('/')} 
                 className="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-white transition-colors"
             >
                 <span className="text-xl">🏠</span>
