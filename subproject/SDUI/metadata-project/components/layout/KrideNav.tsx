@@ -32,13 +32,15 @@ export const KRIDE_TABS: Destination[] = [
         icon: icon(<><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>) },
 ];
 
-const MORE: { label: string; href: string; active?: (path: string) => boolean }[] = [
+// 2026-10-21 운영 결정: 커뮤니티·시간 설정·개인정보 설정은 우선 숨긴다(display:none). 되살릴 때 `hidden` 만 지우면 된다.
+// 기록: ME 저장소 01-History/2026-10-21_KMovement_내비_커뮤니티_시간설정_개인정보설정_숨김/README.md
+const MORE: { label: string; href: string; active?: (path: string) => boolean; hidden?: boolean }[] = [
     { label: '아티스트 코스 만들기 (5단계)', href: '/view/INTRO1' },
     { label: '여행봇', href: '/view/CHAT', active: (p) => p === '/view/CHAT' || p.includes('KRIDE_CHAT') },
     { label: '언어 채팅', href: '/view/AI_ENGLISH_CHAT_PAGE', active: (p) => p.includes('CHAT_PAGE') },
     { label: '전국 맛집', href: '/travel/food' },
-    { label: '커뮤니티', href: '/view/COMMUNITY_LIST', active: (p) => p.includes('COMMUNITY') },
-    { label: '시간 설정', href: '/view/SET_TIME_PAGE', active: (p) => p === '/view/SET_TIME_PAGE' },
+    { label: '커뮤니티', href: '/view/COMMUNITY_LIST', active: (p) => p.includes('COMMUNITY'), hidden: true },
+    { label: '시간 설정', href: '/view/SET_TIME_PAGE', active: (p) => p === '/view/SET_TIME_PAGE', hidden: true },
 ];
 
 export default function KrideNav() {
@@ -47,7 +49,7 @@ export default function KrideNav() {
     useEffect(() => { if (more.current) more.current.open = false; }, [path]);
 
     const activeTab = KRIDE_TABS.find((tab) => tab.active(path));
-    const activeMore = activeTab ? undefined : MORE.find((item) => item.active?.(path));
+    const activeMore = activeTab ? undefined : MORE.find((item) => !item.hidden && item.active?.(path));
 
     return (
         <header className="kride-site-header">
@@ -66,9 +68,9 @@ export default function KrideNav() {
                     </summary>
                     <div>
                         {MORE.map((item) => (
-                            <Link key={item.href} href={item.href} aria-current={item === activeMore ? 'page' : undefined}>{item.label}</Link>
+                            <Link key={item.href} href={item.href} aria-current={item === activeMore ? 'page' : undefined} hidden={item.hidden} className={item.hidden ? 'kride-entry-hidden' : undefined}>{item.label}</Link>
                         ))}
-                        <PrivacySettingsButton variant="menu" />
+                        <span hidden className="kride-entry-hidden"><PrivacySettingsButton variant="menu" /></span>
                     </div>
                 </details>
             </nav>

@@ -273,7 +273,8 @@ function ProfileScreen() {
                             로그아웃
                         </button>
                     )}
-                    <Link className="auth-flow-textlink auth-flow-textlink--danger" href="/view/COMMUNITY_LIST">회원 탈퇴 문의</Link>
+                    {/* 2026-10-21: 커뮤니티 진입 경로는 우선 숨김(display:none) */}
+                    <Link className="auth-flow-textlink auth-flow-textlink--danger kride-entry-hidden" href="/view/COMMUNITY_LIST" hidden>회원 탈퇴 문의</Link>
                 </div>
             </section>
         </main>

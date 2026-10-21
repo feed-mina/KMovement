@@ -14,9 +14,11 @@ export default function FocusFooterBar() {
                 <span className="text-xl">🏠</span>
                 <span className="text-[10px] font-semibold">홈</span>
             </button>
+            {/* 2026-10-21: 커뮤니티 진입 경로는 우선 숨김(display:none) */}
             <button 
+                hidden
                 onClick={() => router.push('/view/COMMUNITY_LIST')} 
-                className="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-white transition-colors"
+                className="kride-entry-hidden flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-white transition-colors"
             >
                 <span className="text-xl">💬</span>
                 <span className="text-[10px] font-semibold">커뮤니티</span>

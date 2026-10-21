@@ -21,12 +21,25 @@ test.each([
     ['/view/LOGIN_PAGE', '마이'],
     ['/view/KPOP_SAVED_ITEMS', '마이'],
     ['/view/AI_JAPANESE_CHAT_PAGE', '언어 채팅'],
-    ['/view/COMMUNITY_LIST', '커뮤니티'],
 ])('one active destination at %s', (path, label) => {
     mockPath = path;
     const { container } = render(<KrideNav />);
     expect(container.querySelectorAll('[aria-current=page]')).toHaveLength(1);
     expect(screen.getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
+});
+
+// 2026-10-21 운영 결정: 커뮤니티·시간 설정·개인정보 설정은 더보기에서 숨기고(display:none), 숨긴 항목은 활성 표시도 하지 않는다
+test('community, time setting and privacy entries are hidden in the more menu', () => {
+    mockPath = '/view/COMMUNITY_LIST';
+    const { container } = render(<KrideNav />);
+    for (const label of ['커뮤니티', '시간 설정']) {
+        const link = screen.getByText(label);
+        expect(link).toHaveAttribute('hidden');
+        expect(link).toHaveClass('kride-entry-hidden');
+    }
+    expect(container.querySelectorAll('[aria-current=page]')).toHaveLength(0);
+    expect(container.querySelector('details.kride-more')).not.toHaveClass('kride-more--active');
+    expect(container.querySelector('.kride-more span.kride-entry-hidden')).toHaveAttribute('hidden');
 });
 
 test('home tab and brand both go to the single home `/`', () => {

@@ -64,11 +64,20 @@ describe('Sidebar logo toggle', () => {
         expect(screen.getByRole('button', { name: '홈' }))
             .toHaveAttribute('aria-current', 'page');
 
-        fireEvent.click(screen.getByRole('button', { name: '커뮤니티' }));
+        fireEvent.click(screen.getByRole('button', { name: '홈' }));
         expect(mockHandleAction).toHaveBeenCalledWith({
             actionType: 'ROUTE',
-            actionUrl: '/view/COMMUNITY_LIST',
+            actionUrl: '/view/MAIN_PAGE',
         });
+    });
+
+    // 2026-10-21 운영 결정: 커뮤니티 진입 경로는 우선 숨김(display:none). 접근성 트리에서도 빠진다.
+    it('hides the community entry for now', () => {
+        render(<Sidebar collapsed={false} onToggle={jest.fn()} />);
+        expect(screen.queryByRole('button', { name: '커뮤니티' })).toBeNull();
+        const hidden = screen.getByText('커뮤니티').closest('button');
+        expect(hidden).toHaveAttribute('hidden');
+        expect(hidden).toHaveClass('kride-entry-hidden');
     });
 
     it('로고를 누르면 접기가 아니라 홈으로 이동한다', () => {
