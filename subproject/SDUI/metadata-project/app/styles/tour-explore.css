@@ -1,38 +1,39 @@
-.tour-explore { min-width: 0; color: var(--kride-text-main, #263244); }
+/* 여행지 탐색 (TOUR_EXPLORE). 벤치마킹 H1 (2026-10-20): 색은 tokens.css 의 토큰만 쓴다. */
+.tour-explore { min-width: 0; color: var(--text-body); }
 .tour-explore button, .tour-explore input { font: inherit; }
 .tour-explore button { cursor: pointer; }
-.tour-explore button:focus-visible, .tour-explore input:focus-visible { outline: 3px solid #b73848; outline-offset: 3px; }
+.tour-explore button:focus-visible, .tour-explore input:focus-visible { outline: 3px solid var(--focus-outline); outline-offset: 3px; }
 .tour-search { display: grid; gap: 6px; margin-bottom: 16px; }
 .tour-search label { font-weight: 700; font-size: 14px; }
-.tour-search input { min-width: 0; width: 100%; border: 1px solid #c9cdd3; background: white; border-radius: 12px; padding: 12px 14px; }
-.tour-search small { color: #596575; line-height: 1.5; }
+.tour-search input { min-width: 0; width: 100%; border: 1px solid var(--border-strong); background: var(--surface-card); border-radius: 12px; padding: 12px 14px; }
+.tour-search small { color: var(--text-muted); line-height: 1.5; }
 .tour-category-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .tour-category-row button { min-height: 44px; }
 .tour-filter-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-bottom: 12px; }
 .tour-filter-summary p { flex: 1 1 180px; margin: 0; font-size: 14px; overflow-wrap: anywhere; }
-.tour-filter-summary button, .tour-recovery button, .tour-view-toggle button { border: 1px solid #c9cdd3; border-radius: 10px; background: white; color: #263244; padding: 8px 12px; min-height: 44px; }
-.tour-filter-details { background: #fff; border: 1px solid #e4e7eb; border-radius: 14px; padding: 12px; margin-bottom: 16px; }
+.tour-filter-summary button, .tour-recovery button, .tour-view-toggle button { border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface-card); color: var(--text-body); padding: 8px 12px; min-height: 44px; }
+.tour-filter-details { background: var(--surface-card); border: 1px solid var(--border-hair); border-radius: 14px; padding: 12px; margin-bottom: 16px; }
 .tour-filter-details[hidden] { display: none; }
-.tour-result-count { margin: 8px 0 14px; font-size: 13px; color: #596575; }
-.tour-recovery { padding: 16px; margin: 8px 0 16px; border: 1px solid #ead0d1; border-radius: 12px; background: #fff8f8; line-height: 1.6; }
+.tour-result-count { margin: 8px 0 14px; font-size: 13px; color: var(--text-muted); }
+.tour-recovery { padding: 16px; margin: 8px 0 16px; border: 1px solid var(--border-hair); border-radius: 12px; background: var(--danger-soft); line-height: 1.6; }
 .tour-recovery p { margin: 0 0 10px; }
 .tour-recovery button + button { margin-left: 8px; }
 .tour-results-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
 .tour-results-list, .tour-results-map { min-width: 0; }
 .tour-results-map { position: sticky; top: 18px; }
 .tour-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-.tour-poi-card[data-selected=true] { outline: 3px solid #b7192b; outline-offset: 2px; }
-.tour-card-map-action { width: calc(100% - 16px); margin: 0 8px 8px; min-height: 44px; background: #fff4f5; border: 1px solid #f1c2c6; border-radius: 8px; color: #831325; font-size: 13px !important; }
-.tour-card-coordinate-note { display: block; margin: 8px; font-size: 12px; color: #596575; }
-.tour-browse-map { border: 1px solid #d5dbe1; border-radius: 14px; overflow: hidden; background: #f0f3f6; position: relative; }
+.tour-poi-card[data-selected=true] { outline: 3px solid var(--semantic-accent); outline-offset: 2px; }
+.tour-card-map-action { width: calc(100% - 16px); margin: 0 8px 8px; min-height: 44px; background: var(--semantic-accent-soft); border: 1px solid var(--border-hair); border-radius: 8px; color: var(--semantic-accent-strong); font-size: 13px !important; }
+.tour-card-coordinate-note { display: block; margin: 8px; font-size: 12px; color: var(--text-muted); }
+.tour-browse-map { border: 1px solid var(--border-hair); border-radius: 14px; overflow: hidden; background: var(--surface-track); position: relative; }
 .tour-browse-map__canvas { width: 100%; height: 440px; }
-.tour-map-picker { display: grid; gap: 6px; padding: 12px; background: white; font-size: 13px; }
-.tour-map-picker select { width: 100%; min-width: 0; padding: 10px; border: 1px solid #c9cdd3; border-radius: 8px; }
-.tour-map-caption, .tour-map-selection { padding: 10px 14px; margin: 0; font-size: 13px; background: white; }
-.tour-map-selection { font-weight: 700; color: #831325; }
-.tour-map-state { position: absolute; top: 110px; left: 16px; right: 16px; padding: 16px; border-radius: 10px; background: white; color: #4c5563; line-height: 1.6; }
+.tour-map-picker { display: grid; gap: 6px; padding: 12px; background: var(--surface-card); font-size: 13px; }
+.tour-map-picker select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--border-strong); border-radius: 8px; }
+.tour-map-caption, .tour-map-selection { padding: 10px 14px; margin: 0; font-size: 13px; background: var(--surface-card); }
+.tour-map-selection { font-weight: 700; color: var(--semantic-accent-strong); }
+.tour-map-state { position: absolute; top: 110px; left: 16px; right: 16px; padding: 16px; border-radius: 10px; background: var(--surface-card); color: var(--text-body); line-height: 1.6; }
 .tour-view-toggle { display: none; gap: 8px; margin-bottom: 12px; }
-.tour-view-toggle button[aria-pressed=true] { color: #fff; background: #b7192b; border-color: #b7192b; }
+.tour-view-toggle button[aria-pressed=true] { color: var(--text-invert); background: var(--semantic-accent); border-color: var(--semantic-accent); }
 @media (max-width: 767px) {
  .tour-results-layout { grid-template-columns: minmax(0, 1fr); }
  .tour-results-layout--list .tour-results-map, .tour-results-layout--map .tour-results-list { display: none; }

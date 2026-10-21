@@ -28,6 +28,8 @@
     /* ── 보더 / 상태 ── */
     --kride-border: #E5E7EB;
     --kride-focus-ring: rgba(229, 9, 20, 0.18);
+    --kride-focus-outline: #1557A1;   /* 키보드 포커스 링 (레드 UI 와 대비되는 파랑, 전 화면 공통) */
+    --kride-border-strong: #9CA3AF;   /* 입력창·칩처럼 경계가 보여야 하는 요소의 보더 */
     --kride-kakao: #FEE500;
     --kride-kakao-text: #191919;
 
@@ -69,6 +71,8 @@
     --text-muted: var(--kride-text-sub);
     --text-invert: var(--kride-text-invert);
     --border-hair: var(--kride-border);
+    --border-strong: var(--kride-border-strong);
+    --focus-outline: var(--kride-focus-outline);
     --danger: var(--kride-primary);
     --danger-soft: rgba(229, 9, 20, 0.10);
     --danger-strong: var(--kride-primary-dark);
@@ -90,4 +94,5 @@
     --text-body: #E5E7EB;
     --text-muted: #A3A3A3;
     --border-hair: #2A2A2A;
+    --border-strong: #525252;
 }

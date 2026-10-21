@@ -14,7 +14,6 @@ import { countItineraryPlaces } from '@/lib/analytics/itinerary';
 
 // [동선] 화면 컨트롤러. 기본=TourAPI 최근접이웃 / AI=선호 기반 FastAPI 일정.
 // Epic #74 · #77 · #85.
-const RED = '#E50914';
 const REGIONS = ['서울', '부산', '제주'];
 const PURPOSES = ['성지순례', '맛집투어', '자연·힐링'];
 const DURATIONS = ['당일치기', '1박2일'];
@@ -115,44 +114,44 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     }, [region, purpose, duration]);
 
     return (
-        <div className="page-wrap ROUTE_PLANNER route-screen" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                <span style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                    <span style={{ fontSize: 20, fontWeight: 600, color: RED }}>동선</span>
-                    <span style={{ fontSize: 13, color: '#888' }}>내 취향대로 하루 코스</span>
+        <div className="page-wrap ROUTE_PLANNER route-screen">
+            <header className="route-screen__header">
+                <span className="route-screen__heading">
+                    <span className="route-screen__title">동선</span>
+                    <span className="route-screen__subtitle">내 취향대로 하루 코스</span>
                 </span>
-                <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                    <button type="button" onClick={() => setMode('road')} aria-pressed={mode === 'road'} style={pill(mode === 'road')}>길 찾기</button>
+                <span className="route-screen__modes">
+                    <button type="button" onClick={() => setMode('road')} aria-pressed={mode === 'road'} className="route-pill">길 찾기</button>
                     <KakaoShareButton text="Kride에서 추천받은 하루 코스를 확인해 보세요!" path="/view/ROUTE_PLANNER" />
-                    <button type="button" onClick={() => setMode('tour')} aria-pressed={mode === 'tour'} style={pill(mode === 'tour')}>기본 코스</button>
-                    <button type="button" onClick={requestAiCourse} aria-pressed={mode === 'ai'} style={pill(mode === 'ai')}>AI 코스</button>
+                    <button type="button" onClick={() => setMode('tour')} aria-pressed={mode === 'tour'} className="route-pill">기본 코스</button>
+                    <button type="button" onClick={requestAiCourse} aria-pressed={mode === 'ai'} className="route-pill">AI 코스</button>
                 </span>
             </header>
 
             {mode === 'road' && <RoadRoutePlanner />}
             {mode === 'ai' && (
-                <div style={{ background: '#faf7f8', border: '0.5px solid #eee', borderRadius: 12, padding: '10px 12px' }}>
-                    <div style={{ fontSize: 11, color: '#999', marginBottom: 8 }}>이 조건으로 코스를 짜요 · 바꾸면 다시 추천</div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                        {REGIONS.map((r) => <button key={r} type="button" onClick={() => changePref(setRegion, r)} aria-pressed={region === r} style={miniChip(region === r)}>{r}</button>)}
-                        <span style={{ width: 1, background: '#eee', margin: '0 2px' }} />
-                        {PURPOSES.map((p) => <button key={p} type="button" onClick={() => changePref(setPurpose, p)} aria-pressed={purpose === p} style={miniChip(purpose === p)}>{p}</button>)}
-                        <span style={{ width: 1, background: '#eee', margin: '0 2px' }} />
-                        {DURATIONS.map((d) => <button key={d} type="button" onClick={() => changePref(setDuration, d)} aria-pressed={duration === d} style={miniChip(duration === d)}>{d}</button>)}
+                <div className="route-prefs">
+                    <div className="route-prefs__hint">이 조건으로 코스를 짜요 · 바꾸면 다시 추천</div>
+                    <div className="route-prefs__chips">
+                        {REGIONS.map((r) => <button key={r} type="button" onClick={() => changePref(setRegion, r)} aria-pressed={region === r} className="route-chip">{r}</button>)}
+                        <span className="route-prefs__divider" />
+                        {PURPOSES.map((p) => <button key={p} type="button" onClick={() => changePref(setPurpose, p)} aria-pressed={purpose === p} className="route-chip">{p}</button>)}
+                        <span className="route-prefs__divider" />
+                        {DURATIONS.map((d) => <button key={d} type="button" onClick={() => changePref(setDuration, d)} aria-pressed={duration === d} className="route-chip">{d}</button>)}
                     </div>
                 </div>
             )}
 
-            {mode === 'tour' && loading && <div style={{ padding: 24, color: '#888' }}>불러오는 중…</div>}
-            {mode === 'tour' && error && <div style={{ padding: 24, color: '#A32D2D' }}>{error}</div>}
-            {mode === 'ai' && aiLoading && <div style={{ padding: 24, color: '#888' }}>AI가 하루 코스를 짜는 중이에요…</div>}
-            {mode === 'ai' && aiError && <div style={{ padding: 24, color: '#A32D2D' }}>{aiError}</div>}
+            {mode === 'tour' && loading && <div className="route-state">불러오는 중…</div>}
+            {mode === 'tour' && error && <div className="route-state route-state--error">{error}</div>}
+            {mode === 'ai' && aiLoading && <div className="route-state">AI가 하루 코스를 짜는 중이에요…</div>}
+            {mode === 'ai' && aiError && <div className="route-state route-state--error">{aiError}</div>}
 
             {mode !== 'road' && (mode === 'ai' || (!loading && !error)) && !(mode === 'ai' && (aiLoading || aiError)) && (
                 <>
                     {mode === 'ai' && aiSources.length > 0 && <details><summary>추천 자료 출처와 확인 시각</summary><p>공개 장소 근거 · 영업시간과 여행 지출은 별도 확인이 필요합니다.</p><ul>{aiSources.map(p => <li key={p.id}><a href={p.sourceUrl} target="_blank" rel="noopener noreferrer">{p.name}</a> · 확인 {p.verifiedAt}</li>)}</ul></details>}
                     {markers.length > 0 && (
-                        <div style={{ display: 'flex', gap: 8 }}>
+                        <div className="route-summary">
                             <SummaryCard value={String(markers.length)} label="방문지" accent />
                             <SummaryCard value={formatMinutes(estimateMinutes(markers))} label="예상 소요" />
                             <SummaryCard value={`${routeDistanceKm(markers)}km`} label="이동 거리" />
@@ -160,34 +159,34 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                     )}
 
                     {mapData && (
-                        <div className="map-view w-full" style={{ minHeight: 360, borderRadius: 12, overflow: 'hidden' }}>
+                        <div className="map-view w-full route-map">
                             <RouteMap data={mapData} />
                         </div>
                     )}
 
                     {markers.length > 0 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        <div className="route-days">
                             {dayGroups.map((g) => {
                                 const open = openDays[g.day] ?? true;
                                 return (
-                                    <div key={g.day} style={{ border: '0.5px solid #eee', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+                                    <div key={g.day} className="route-day">
                                         <button
                                             type="button"
                                             onClick={() => setOpenDays((p) => ({ ...p, [g.day]: !open }))}
                                             aria-expanded={open}
-                                            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 12px', background: '#faf7f8', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500 }}
+                                            className="route-day__toggle"
                                         >
-                                            <span style={{ color: RED }}>Day {g.day} · {g.markers.length}곳</span>
-                                            <span style={{ color: '#bbb' }}>{open ? '▲' : '▼'}</span>
+                                            <span className="route-day__title">Day {g.day} · {g.markers.length}곳</span>
+                                            <span className="route-day__caret" aria-hidden="true">{open ? '▲' : '▼'}</span>
                                         </button>
                                         {open && (
-                                            <div style={{ padding: '2px 12px' }}>
-                                                {g.markers.map((m, idx) => (
-                                                    <div key={m.id} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: idx < g.markers.length - 1 ? '0.5px solid #f0f0f0' : 'none' }}>
-                                                        <span style={{ width: 22, height: 22, flex: 'none', borderRadius: '50%', background: RED, color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{m.index + 1}</span>
-                                                        <div style={{ flex: 1 }}>
-                                                            <p style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>{m.name}</p>
-                                                            <p style={{ margin: '2px 0 0', fontSize: 11, color: '#888' }}>
+                                            <div className="route-day__list">
+                                                {g.markers.map((m) => (
+                                                    <div key={m.id} className="route-stop">
+                                                        <span className="route-stop__index">{m.index + 1}</span>
+                                                        <div className="route-stop__body">
+                                                            <p className="route-stop__name">{m.name}</p>
+                                                            <p className="route-stop__meta">
                                                                 {[m.slot ? (SLOT_LABEL[m.slot] ?? m.slot) : null, m.address].filter(Boolean).join(' · ')}
                                                             </p>
                                                         </div>
@@ -208,16 +207,9 @@ export default function RouteScreen(_props: ScreenControllerProps) {
 
 function SummaryCard({ value, label, accent }: { value: string; label: string; accent?: boolean }) {
     return (
-        <div style={{ flex: 1, background: '#f7f7f8', borderRadius: 10, padding: '8px 10px', textAlign: 'center' }}>
-            <div style={{ fontSize: 18, fontWeight: 500, color: accent ? RED : '#333' }}>{value}</div>
-            <div style={{ fontSize: 11, color: '#888' }}>{label}</div>
+        <div className="route-summary__card">
+            <div className={`route-summary__value${accent ? ' route-summary__value--accent' : ''}`}>{value}</div>
+            <div className="route-summary__label">{label}</div>
         </div>
     );
-}
-
-function pill(active: boolean): React.CSSProperties {
-    return { fontSize: 12, padding: '6px 12px', borderRadius: 20, cursor: 'pointer', border: '0.5px solid ' + (active ? RED : '#ddd'), background: active ? RED : 'transparent', color: active ? '#fff' : '#555' };
-}
-function miniChip(active: boolean): React.CSSProperties {
-    return { fontSize: 12, padding: '5px 11px', borderRadius: 20, cursor: 'pointer', border: '0.5px solid ' + (active ? RED : '#ddd'), background: active ? '#FCEBEB' : 'transparent', color: active ? '#A32D2D' : '#666', fontWeight: active ? 500 : 400 };
 }

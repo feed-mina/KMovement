@@ -1,0 +1,49 @@
+/* ==========================================
+   동선 만들기 (ROUTE_PLANNER) — RouteScreen.tsx
+   벤치마킹 H1 (2026-10-20): 인라인 스타일과 하드코딩 색을 토큰 기반 CSS 로 분리
+   ========================================== */
+.route-screen { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+.route-screen__header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.route-screen__heading { display: flex; align-items: baseline; gap: 8px; }
+.route-screen__title { font-size: 20px; font-weight: 600; color: var(--semantic-accent); }
+.route-screen__subtitle { font-size: 13px; color: var(--text-muted); }
+.route-screen__modes { display: flex; gap: 6px; align-items: center; }
+
+.route-pill, .route-chip { font: inherit; font-size: 12px; border-radius: var(--kride-radius-pill); cursor: pointer; }
+.route-pill { padding: 6px 12px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-body); }
+.route-pill[aria-pressed=true] { border-color: var(--semantic-accent); background: var(--semantic-accent); color: var(--text-invert); }
+.route-chip { padding: 5px 11px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-muted); }
+.route-chip[aria-pressed=true] { border-color: var(--semantic-accent); background: var(--semantic-accent-soft); color: var(--semantic-accent-strong); font-weight: 500; }
+
+.route-prefs { padding: 10px 12px; border: 1px solid var(--border-hair); border-radius: var(--kride-radius-md); background: var(--surface-subtle); }
+.route-prefs__hint { margin-bottom: 8px; font-size: 11px; color: var(--text-muted); }
+.route-prefs__chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.route-prefs__divider { width: 1px; margin: 0 2px; background: var(--border-hair); }
+
+.route-state { padding: 24px; color: var(--text-muted); }
+.route-state--error { color: var(--danger-strong); }
+
+.route-summary { display: flex; gap: 8px; }
+.route-summary__card { flex: 1; padding: 8px 10px; border-radius: 10px; background: var(--surface-track); text-align: center; }
+.route-summary__value { font-size: 18px; font-weight: 500; color: var(--text-strong); }
+.route-summary__value--accent { color: var(--semantic-accent); }
+.route-summary__label { font-size: 11px; color: var(--text-muted); }
+
+.route-map { min-height: 360px; border-radius: var(--kride-radius-md); overflow: hidden; }
+
+.route-days { display: flex; flex-direction: column; gap: 8px; }
+.route-day { border: 1px solid var(--border-hair); border-radius: var(--kride-radius-md); overflow: hidden; background: var(--surface-card); }
+.route-day__toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 11px 12px; border: none; background: var(--surface-subtle); color: var(--text-body); cursor: pointer; font: inherit; font-size: 14px; font-weight: 500; }
+.route-day__title { color: var(--semantic-accent); }
+.route-day__caret { color: var(--text-muted); }
+.route-day__list { padding: 2px 12px; }
+.route-stop { display: flex; gap: 10px; padding: 10px 0; }
+.route-stop + .route-stop { border-top: 1px solid var(--border-hair); }
+.route-stop__index { flex: none; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--semantic-accent); color: var(--text-invert); font-size: 11px; }
+.route-stop__body { flex: 1; min-width: 0; }
+.route-stop__name { margin: 0; font-size: 13px; font-weight: 500; color: var(--text-strong); overflow-wrap: anywhere; }
+.route-stop__meta { margin: 2px 0 0; font-size: 11px; color: var(--text-muted); overflow-wrap: anywhere; }
+
+/* 사이트 셸은 모든 버튼에 48px 최소 높이를 주지만 모드/조건 칩은 한 줄에 여러 개가 놓이는 작은 토글이다 */
+.kride-site-content .route-pill, .kride-site-content .route-chip { min-height: 36px; }
+.route-screen :is(button, a, select, input):focus-visible { outline: 3px solid var(--focus-outline); outline-offset: 3px; }
