@@ -6,7 +6,9 @@ import RoadRoutePlanner from './RoadRoutePlanner';
 import RouteMap from '@/components/fields/kride/maps/RouteMap';
 import { tourPoisToRouteMapData } from '@/components/fields/kride/maps/tourToRouteMapData';
 import { normalizeRouteMapData } from '@/components/fields/kride/maps/normalizeRouteMapData';
-import { routeDistanceKm, estimateMinutes, formatMinutes, groupByDay } from '@/components/fields/kride/maps/routeSummary';
+import { routeDistanceKm, estimateMinutes, formatMinutes, groupByDay, haversineKm } from '@/components/fields/kride/maps/routeSummary';
+import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 import { fetchRestaurants, TourPoi } from '@/services/tourApi';
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
 import Skeleton from '@/components/utils/Skeleton';
@@ -17,11 +19,21 @@ import { countItineraryPlaces } from '@/lib/analytics/itinerary';
 // [동선] 화면 컨트롤러. 기본=TourAPI 최근접이웃 / AI=선호 기반 FastAPI 일정.
 // Epic #74 · #77 · #85.
 const REGIONS = ['서울', '부산', '제주'];
+/** 기본 코스(TourAPI 맛집)가 쓰는 시·도 코드. TourExploreScreen 의 FALLBACK_AREAS 와 같은 체계다. */
+const REGION_CODES: Record<string, string> = { 서울: '1', 부산: '6', 제주: '39' };
 const PURPOSES = ['성지순례', '맛집투어', '자연·힐링'];
 const DURATIONS = ['당일치기', '1박2일'];
 const SLOT_LABEL: Record<string, string> = { morning: '오전', afternoon: '오후', evening: '저녁' };
 
+/** 구간 이동 한 줄 (벤치마킹 H5): estimateMinutes 와 같은 15분/km 기준. 1.5km 까지는 도보로 적는다. */
+export function legLabel(km: number): string {
+    const rounded = Math.round(km * 10) / 10;
+    const minutes = Math.max(1, Math.round(km * 15));
+    return `다음까지 ${rounded}km · ${km <= 1.5 ? '도보' : '이동'} 약 ${minutes}분`;
+}
+
 export default function RouteScreen(_props: ScreenControllerProps) {
+    const { isLoggedIn } = useAuth();
     const [pois, setPois] = useState<TourPoi[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -43,12 +55,13 @@ export default function RouteScreen(_props: ScreenControllerProps) {
         let alive = true;
         setLoading(true);
         setError(null);
-        fetchRestaurants({ areaCode: '1', numOfRows: 12, pageNo: 1 })
+        // 기본 코스도 고른 지역을 쓴다 (벤치마킹 H5: 조건 → 결과). 목적·기간은 AI 추천에서만 반영된다.
+        fetchRestaurants({ areaCode: REGION_CODES[region] ?? '1', numOfRows: 12, pageNo: 1 })
             .then((list) => { if (alive) setPois(list); })
             .catch(() => { if (alive) setError('장소를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.'); })
             .finally(() => { if (alive) setLoading(false); });
         return () => { alive = false; };
-    }, [tourAttempt]);
+    }, [tourAttempt, region]);
 
     const tourData = useMemo(() => tourPoisToRouteMapData(pois), [pois]);
     const aiRouteData = useMemo(() => (aiData ? normalizeRouteMapData(aiData) : null), [aiData]);
@@ -129,27 +142,45 @@ export default function RouteScreen(_props: ScreenControllerProps) {
         <div className="page-wrap ROUTE_PLANNER route-screen">
             <header className="route-screen__header">
                 <span className="route-screen__heading">
-                    <span className="route-screen__title">동선</span>
-                    <span className="route-screen__subtitle">내 취향대로 하루 코스</span>
-                </span>
-                <span className="route-screen__modes">
-                    <button type="button" onClick={() => setMode('road')} aria-pressed={mode === 'road'} className="route-pill">길 찾기</button>
-                    <KakaoShareButton text="Kride에서 추천받은 하루 코스를 확인해 보세요!" path="/view/ROUTE_PLANNER" />
-                    <button type="button" onClick={() => setMode('tour')} aria-pressed={mode === 'tour'} className="route-pill">기본 코스</button>
-                    <button type="button" onClick={requestAiCourse} aria-pressed={mode === 'ai'} className="route-pill">AI 코스</button>
+                    <span className="route-screen__title">하루 코스 만들기</span>
+                    <span className="route-screen__subtitle">조건을 고르면 지도와 순서를 바로 받아요</span>
                 </span>
             </header>
 
-            {mode === 'road' && <RoadRoutePlanner />}
-            {mode === 'ai' && (
+            {mode === 'road' ? (
+                <>
+                    <div className="route-road-head">
+                        <h2 className="route-road-head__title">도로 길 찾기</h2>
+                        <button type="button" className="route-pill" onClick={() => setMode('tour')}>코스로 돌아가기</button>
+                    </div>
+                    <RoadRoutePlanner />
+                </>
+            ) : (
                 <div className="route-prefs">
-                    <div className="route-prefs__hint">이 조건으로 코스를 짜요 · 바꾸면 다시 추천</div>
-                    <div className="route-prefs__chips">
-                        {REGIONS.map((r) => <button key={r} type="button" onClick={() => changePref(setRegion, r)} aria-pressed={region === r} className="route-chip">{r}</button>)}
-                        <span className="route-prefs__divider" />
-                        {PURPOSES.map((p) => <button key={p} type="button" onClick={() => changePref(setPurpose, p)} aria-pressed={purpose === p} className="route-chip">{p}</button>)}
-                        <span className="route-prefs__divider" />
-                        {DURATIONS.map((d) => <button key={d} type="button" onClick={() => changePref(setDuration, d)} aria-pressed={duration === d} className="route-chip">{d}</button>)}
+                    <div className="route-prefs__row">
+                        <span className="route-prefs__label">지역</span>
+                        <div className="route-prefs__chips" role="group" aria-label="지역">
+                            {REGIONS.map((r) => <button key={r} type="button" onClick={() => changePref(setRegion, r)} aria-pressed={region === r} className="route-chip">{r}</button>)}
+                        </div>
+                    </div>
+                    <div className="route-prefs__row">
+                        <span className="route-prefs__label">목적</span>
+                        <div className="route-prefs__chips" role="group" aria-label="목적">
+                            {PURPOSES.map((p) => <button key={p} type="button" onClick={() => changePref(setPurpose, p)} aria-pressed={purpose === p} className="route-chip">{p}</button>)}
+                        </div>
+                    </div>
+                    <div className="route-prefs__row">
+                        <span className="route-prefs__label">기간</span>
+                        <div className="route-prefs__chips" role="group" aria-label="기간">
+                            {DURATIONS.map((d) => <button key={d} type="button" onClick={() => changePref(setDuration, d)} aria-pressed={duration === d} className="route-chip">{d}</button>)}
+                        </div>
+                    </div>
+                    <div className="route-prefs__foot">
+                        <div className="route-seg" role="group" aria-label="코스 방식">
+                            <button type="button" onClick={() => setMode('tour')} aria-pressed={mode === 'tour'} className="route-seg__btn"><span>기본 코스</span></button>
+                            <button type="button" onClick={requestAiCourse} aria-pressed={mode === 'ai'} className="route-seg__btn"><span>AI 코스</span>{!isLoggedIn && <span className="route-seg__badge">로그인</span>}</button>
+                        </div>
+                        <p className="route-prefs__hint">{mode === 'ai' ? '이 조건으로 AI가 코스를 짜요 · 바꾸면 다시 추천' : '기본 코스는 고른 지역의 맛집을 가까운 순으로 이어요 · 목적·기간은 AI 코스에 반영'}</p>
                     </div>
                 </div>
             )}
@@ -213,17 +244,21 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                                         </button>
                                         {open && (
                                             <div className="route-day__list">
-                                                {g.markers.map((m) => (
-                                                    <div key={m.id} className="route-stop">
-                                                        <span className="route-stop__index">{m.index + 1}</span>
-                                                        <div className="route-stop__body">
-                                                            <p className="route-stop__name">{m.name}</p>
-                                                            <p className="route-stop__meta">
-                                                                {[m.slot ? (SLOT_LABEL[m.slot] ?? m.slot) : null, m.address].filter(Boolean).join(' · ')}
-                                                            </p>
+                                                {g.markers.map((m, stopIndex) => {
+                                                    const next = g.markers[stopIndex + 1];
+                                                    return (
+                                                        <div key={m.id} className="route-stop">
+                                                            <span className="route-stop__index">{m.index + 1}</span>
+                                                            <div className="route-stop__body">
+                                                                <p className="route-stop__name">{m.name}</p>
+                                                                <p className="route-stop__meta">
+                                                                    {[m.slot ? (SLOT_LABEL[m.slot] ?? m.slot) : null, m.address].filter(Boolean).join(' · ')}
+                                                                </p>
+                                                                {next && <p className="route-stop__leg">↓ {legLabel(haversineKm(m, next))}</p>}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         )}
                                     </div>
@@ -232,6 +267,14 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                         </div>
                     )}
                 </>
+            )}
+
+            {mode !== 'road' && (
+                <div className="route-actions">
+                    <button type="button" className="route-pill" onClick={() => setMode('road')}>🧭 길 찾기</button>
+                    <KakaoShareButton text="Kride에서 추천받은 하루 코스를 확인해 보세요!" path="/view/ROUTE_PLANNER" />
+                    <Link className="route-pill route-actions__link" href="/view/SET_TIME_PAGE">⏰ 약속 시간</Link>
+                </div>
             )}
         </div>
     );

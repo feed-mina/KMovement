@@ -4,7 +4,7 @@
    ========================================== */
 .route-screen { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
 .route-screen__header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-.route-screen__heading { display: flex; align-items: baseline; gap: 8px; }
+.route-screen__heading { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; word-break: keep-all; }
 .route-screen__title { font-size: 20px; font-weight: 600; color: var(--semantic-accent); }
 .route-screen__subtitle { font-size: 13px; color: var(--text-muted); }
 .route-screen__modes { display: flex; gap: 6px; align-items: center; }
@@ -54,3 +54,26 @@
 .route-skeleton .route-summary .skeleton-box { flex: 1; width: auto; }
 .route-skeleton__note { margin: 0 0 4px; font-size: 13px; color: var(--text-muted); }
 .route-screen .kride-state-panel { max-width: none; }
+
+/* ── 벤치마킹 H5 (2026-10-20): 조건 카드 상단 고정 · segmented 모드 · 하단 액션 바 · 구간 이동 ── */
+.route-prefs { display: grid; gap: 8px; padding: 12px 14px; background: var(--surface-card); }
+.route-prefs__row { display: flex; align-items: center; gap: 10px; }
+.route-prefs__label { flex: none; width: 32px; font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--semantic-accent-strong); }
+.route-prefs__foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.route-prefs__foot .route-prefs__hint { margin: 0; flex: 1 1 220px; }
+.route-seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--surface-subtle); }
+.route-seg__btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text-body); font: inherit; font-size: 13px; cursor: pointer; }
+.route-seg__btn[aria-pressed=true] { background: var(--surface-card); color: var(--text-strong); font-weight: 700; box-shadow: 0 1px 3px rgba(0, 0, 0, .1); }
+.route-seg__badge { padding: 1px 6px; border-radius: 6px; background: var(--semantic-accent-soft); color: var(--semantic-accent-strong); font-size: 10px; font-weight: 800; }
+.kride-site-content .route-seg__btn { min-height: 36px; }
+.route-road-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.route-road-head__title { margin: 0; font-size: 16px; }
+.route-stop__leg { margin: 4px 0 0; font-size: 11px; color: var(--text-muted); }
+.route-actions { position: sticky; bottom: 0; z-index: 20; display: flex; align-items: center; gap: 8px; margin: 4px -16px -14px; padding: 10px 16px calc(10px + var(--kride-safe-bottom, 0px)); background: var(--surface-card); border-top: 1px solid var(--border-hair); box-shadow: 0 -8px 24px rgba(0, 0, 0, .06); }
+.route-actions__link { text-decoration: none; }
+.route-actions .route-pill { display: inline-flex; align-items: center; gap: 4px; }
+@media (max-width: 750px) {
+    .route-screen__subtitle { flex-basis: 100%; }
+    .route-actions { bottom: var(--kride-tabbar-h, 0px); }
+    .route-prefs__label { width: 28px; }
+}

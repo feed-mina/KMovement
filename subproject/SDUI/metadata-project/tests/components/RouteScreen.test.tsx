@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import RouteScreen from '@/components/plugins/travel/RouteScreen';
+import RouteScreen, { legLabel } from '@/components/plugins/travel/RouteScreen';
 import { fetchRestaurants } from '@/services/tourApi';
 
 // 지도 SDK 로딩을 피하기 위해 RouteMap을 스텁 처리
@@ -100,5 +100,47 @@ describe('RouteScreen — 상태 패널', () => {
         expect(JSON.parse((mockedFetch.mock.calls[1] as unknown as [string, RequestInit])[1].body as string)).toEqual(
             JSON.parse((mockedFetch.mock.calls[0] as unknown as [string, RequestInit])[1].body as string),
         );
+    });
+});
+
+// 벤치마킹 H5: 조건 카드가 항상 위에 있고 기본 코스도 지역을 쓴다 · segmented 2개 · 하단 액션 바 · 구간 이동 한 줄
+describe('RouteScreen — H5 조건 → 결과', () => {
+    beforeEach(() => {
+        mockedFetch.mockClear();
+        (fetchRestaurants as jest.Mock).mockClear();
+        (fetchRestaurants as jest.Mock).mockResolvedValue([
+            { contentId: '1', title: '가나돈까스', mapX: 127.0, mapY: 37.5 },
+            { contentId: '2', title: '광장시장', mapX: 127.01, mapY: 37.51 },
+        ]);
+    });
+
+    it('기본 코스에서 지역 칩을 바꾸면 그 지역 코드로 다시 불러온다', async () => {
+        render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
+        await waitFor(() => expect(screen.getByTestId('route-map')).toBeInTheDocument());
+        expect(screen.getByRole('group', { name: '지역' })).toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', { name: '부산' }));
+        await waitFor(() => expect(fetchRestaurants).toHaveBeenLastCalledWith({ areaCode: '6', numOfRows: 12, pageNo: 1 }));
+        expect(mockedFetch).not.toHaveBeenCalled();
+    });
+
+    it('모드는 기본/AI 두 개이고 길 찾기·공유·약속 시간은 하단 액션 바에 있다', async () => {
+        render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
+        await waitFor(() => expect(screen.getByTestId('route-map')).toBeInTheDocument());
+        const modes = screen.getByRole('group', { name: '코스 방식' });
+        expect(modes.querySelectorAll('button')).toHaveLength(2);
+        expect(screen.getByRole('button', { name: /길 찾기/ })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: '공유' })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /약속 시간/ })).toHaveAttribute('href', '/view/SET_TIME_PAGE');
+        fireEvent.click(screen.getByRole('button', { name: /길 찾기/ }));
+        expect(screen.getByRole('button', { name: '코스로 돌아가기' })).toBeInTheDocument();
+    });
+
+    it('연속한 방문지 사이에 구간 이동 한 줄을 보여준다', async () => {
+        render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
+        await waitFor(() => expect(screen.getByText('가나돈까스')).toBeInTheDocument());
+        const legs = screen.getAllByText(/다음까지 .*km · (도보|이동) 약 \d+분/);
+        expect(legs).toHaveLength(1); // 방문지 2곳 → 구간 1개
+        expect(legLabel(0.8)).toBe('다음까지 0.8km · 도보 약 12분');
+        expect(legLabel(4.26)).toBe('다음까지 4.3km · 이동 약 64분');
     });
 });
