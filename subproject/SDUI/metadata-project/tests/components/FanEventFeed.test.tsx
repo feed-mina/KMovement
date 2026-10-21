@@ -1,10 +1,10 @@
 import React from 'react';
 import {act,fireEvent,render,screen} from '@testing-library/react';
-import FanEventFeed from '@/components/plugins/kpop/FanEventFeed';
+import FanEventFeed, {presetRange,dateParts} from '@/components/plugins/kpop/FanEventFeed';
 import {AuthContext} from '@/context/AuthContext';
 let query='';const push=jest.fn();
 jest.mock('next/navigation',()=>({usePathname:()=>'/view/KPOP_EVENTS',useRouter:()=>({push}),useSearchParams:()=>new URLSearchParams(query)}));
-jest.mock('@/context/AuthContext',()=>({AuthContext:require('react').createContext(undefined)}));
+jest.mock('@/context/AuthContext',()=>({AuthContext:jest.requireActual('react').createContext(undefined)}));
 jest.mock('@/components/plugins/kpop/PersonalSaved',()=>({SavedToggle:()=> <button>일정 저장</button>}));
 const item={id:2,artistId:1,artistNameKo:'BTS',titleKo:'서울 팬 일정',date:'2026-10-07',region:'서울',venue:'공연장',geography:'domestic'};
 const feed=(extra:any={})=>({items:[item],totalCount:1,page:1,pageSize:12,artists:[{id:1,name:'BTS'}],counts:{all:1,domestic:1,overseas:0,online:0,unknown:0},countries:{JP:'일본'},audience:'all',...extra});
@@ -35,3 +35,25 @@ test('empty favorites differs from filtered zero and server invalid input',async
  (fetch as jest.Mock).mockReturnValue(response(feed({audience:'mine',artists:[],items:[],totalCount:0})));const v=render(<AuthContext.Provider value={auth(1)}><FanEventFeed/></AuthContext.Provider>);await screen.findByText('좋아하는 아티스트부터 담아볼까요?');v.unmount();(fetch as jest.Mock).mockReturnValue(response(null,400));render(<FanEventFeed/>);expect(await screen.findByRole('alert')).toHaveTextContent('날짜와 검색 조건');
 });
 
+
+// 벤치마킹 H7: 기간 프리셋은 즉시 반영 · 비로그인 배너 · 월 헤더 + 요일 · 면책은 상단 1회
+test('period presets navigate immediately with a computed range',async()=>{
+ (fetch as jest.Mock).mockReturnValue(response(feed()));render(<FanEventFeed/>);await screen.findByText('서울 팬 일정');
+ fireEvent.click(screen.getByRole('button',{name:'이번 달'}));const {from,to}=presetRange('month');
+ const p=new URL(push.mock.calls[0][0],'https://test').searchParams;expect(p.get('from')).toBe(from);expect(p.get('to')).toBe(to);expect(p.has('page')).toBe(false);
+ const week=presetRange('week',new Date(2026,9,21));expect(week).toEqual({from:'2026-10-21',to:'2026-10-27'});
+ expect(presetRange('month',new Date(2026,9,21))).toEqual({from:'2026-10-21',to:'2026-10-31'});
+});
+test('guest on the public feed sees a login banner, rows are grouped by month with weekdays, and the disclaimer appears once',async()=>{
+ (fetch as jest.Mock).mockReturnValue(response(feed({items:[item,{...item,id:3,titleKo:'도쿄 팬 일정',date:'2026-11-02',geography:'overseas'}],totalCount:2})));render(<FanEventFeed/>);
+ await screen.findByText('서울 팬 일정');
+ expect(screen.getByRole('link',{name:'로그인'})).toHaveAttribute('href',expect.stringContaining('/view/LOGIN_PAGE?returnTo='));
+ expect(screen.getByRole('heading',{level:3,name:/2026년 10월/})).toHaveTextContent('1건');
+ expect(screen.getByRole('heading',{level:3,name:/2026년 11월/})).toHaveTextContent('1건');
+ expect(dateParts('2026-10-07')).toEqual({month:'2026년 10월',day:'7',weekday:'수'});
+ expect(screen.getAllByText(/시간·변경 여부는/)).toHaveLength(1);
+});
+test('signed-in default feed shows no login banner',async()=>{
+ (fetch as jest.Mock).mockReturnValue(response(feed({audience:'mine'})));render(<AuthContext.Provider value={auth(1)}><FanEventFeed/></AuthContext.Provider>);
+ await screen.findByText('서울 팬 일정');expect(screen.queryByRole('link',{name:'로그인'})).toBeNull();
+});

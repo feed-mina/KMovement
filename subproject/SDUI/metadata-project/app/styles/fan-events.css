@@ -46,3 +46,38 @@
 @media(min-width:761px){.fan-events .kpop-section-nav{margin-bottom:8px}.fan-events .fan-event-intro{margin:8px 0}.fan-events .fan-event-intro p{margin:6px 0}.fan-events .fan-artists{padding:10px 16px}.fan-events .fan-artist-chips button{min-height:44px;padding:5px 10px}.fan-events .fan-artist-chips img{height:32px;width:42px}.fan-events .fan-event-board{margin-top:8px}.fan-events .fan-results-heading h2{margin:0}.fan-events .fan-result-summary{margin:8px 0}}
 /* 벤치마킹 H2: 로딩 Skeleton · 공용 상태 패널 */
 .fan-event-skeleton{display:grid;gap:12px;margin:12px 0}.fan-event-skeleton .skeleton-box{display:block;border-radius:17px}.fan-events .kride-state-panel{max-width:none;margin:12px 0}
+/* ── 벤치마킹 H7 (2026-10-20): 필터 1줄 · 비로그인 배너 · 월 헤더 + 요일 · 면책 1회 ── */
+.fan-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.fan-filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0 10px}
+.fan-filters .fan-filter-row{margin:0;gap:6px}
+.fan-filters button,.fan-filters select{min-height:40px;padding:7px 12px;font-size:13px}
+.fan-seg{display:inline-flex;padding:3px;border-radius:12px;background:var(--surface-subtle)}
+.fan-seg button{border:0;background:transparent;color:var(--text-muted);border-radius:9px}
+.fan-seg button[aria-pressed=true]{background:var(--surface-card);color:var(--text-strong);border:0;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.fan-filters__select select{max-width:220px}
+.fan-presets{align-items:center}
+.fan-custom-range{position:relative;font-size:13px}
+.fan-custom-range summary{display:inline-flex;align-items:center;box-sizing:border-box;min-height:40px;padding:7px 12px;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface-card);color:var(--text-body);cursor:pointer;list-style:none}
+.fan-custom-range summary::-webkit-details-marker{display:none}
+.fan-custom-range[open] summary{border-color:var(--semantic-accent);color:var(--semantic-accent-strong);background:var(--semantic-accent-soft)}
+.fan-custom-range form{position:absolute;left:0;top:calc(100% + 6px);z-index:25;display:grid;gap:10px;min-width:240px;padding:14px;border:1px solid var(--border-hair);border-radius:14px;background:var(--surface-card);box-shadow:0 10px 24px rgba(0,0,0,.1)}
+.fan-custom-range form label{display:grid;gap:4px;font-size:13px}
+.fan-custom-range form input{padding:9px;border:1px solid var(--border-strong);border-radius:9px;font:inherit;width:100%;box-sizing:border-box}
+.fan-reset{border-color:transparent;color:var(--text-muted)}
+.fan-guest-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:10px 14px;border:1px solid var(--border-hair);border-radius:12px;background:var(--semantic-accent-soft);font-size:14px}
+.fan-guest-banner p{margin:0}
+.fan-guest-banner b{color:var(--semantic-accent-strong)}
+.fan-guest-banner a{padding:7px 14px;border-radius:999px;border:1px solid var(--border-hair);background:var(--surface-card);color:var(--text-strong);font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap}
+.fan-events .fan-result-summary{margin:4px 0 6px}
+.fan-events .fan-result-summary a{color:var(--text-muted);text-decoration:underline}
+.fan-month{display:flex;align-items:baseline;justify-content:space-between;margin:18px 0 4px;font-size:15px;font-weight:800;color:var(--text-strong)}
+.fan-month small{font-size:12px;font-weight:400;color:var(--text-muted)}
+.fan-events .fan-event-row{grid-template-columns:52px minmax(0,1fr) auto;gap:12px;padding:12px 14px;margin:8px 0}
+.fan-events .fan-event-date{padding:8px 2px}
+.fan-events .fan-event-date b{font-size:22px;line-height:1.1}
+.fan-events .fan-event-date small{font-size:12px}
+.fan-event-row h4{font-size:16px;color:var(--text-strong);margin:4px 0;overflow-wrap:anywhere}
+.fan-event-row h4 a{color:inherit;text-decoration:none}
+.fan-notice{margin-top:18px;font-size:13px;color:var(--text-muted)}
+.fan-notice p{font-size:13px}
+@media(max-width:760px){.fan-events .fan-event-row{grid-template-columns:44px minmax(0,1fr)}.fan-events .fan-event-actions{grid-column:2}.fan-custom-range form{left:auto;right:0}}

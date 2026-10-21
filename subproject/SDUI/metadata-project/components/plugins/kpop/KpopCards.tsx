@@ -6,7 +6,8 @@ import ArtistMedia from './ArtistMedia';
 import ArtistRelated from './ArtistRelated';
 
 type CardProps = {
-    variant?: 'list' | 'detail';
+    /** compact: 아티스트 카탈로그 그리드용 (벤치마킹 H6) — 사진·이름·저장·상세만 */
+    variant?: 'list' | 'detail' | 'compact';
     readOnly?: boolean;
     personalSave?: boolean;
     data?: Record<string, any>;
@@ -89,6 +90,23 @@ export function KpopArtistCard({ data, meta, onAction, readOnly = false, persona
     const subtitle = nameEn && nameEn !== name ? String(nameEn) : '';
     const profile = `${name}의 공식 소식에서 다음에 함께하고 싶은 순간을 찾아보세요.`;
     const Heading = isDetail ? 'h1' : 'h3';
+
+    const detailUrl = `/view/KPOP_ARTIST_DETAIL/${encodeURIComponent(String(data?.slug || data?.id || ''))}`;
+    if (variant === 'compact') {
+        return (
+            <article className="kpop-card kpop-artist-card kpop-artist-card--compact" aria-labelledby={titleId}>
+                <ArtistMedia id={data?.id} name={String(name)} />
+                <div className="kpop-card-body">
+                    <h3 id={titleId}>{name}</h3>
+                    {subtitle && <p className="kpop-card-subtitle">{subtitle}</p>}
+                    <div className="kpop-card-actions">
+                        <button type="button" onClick={() => onAction?.({ ...meta, actionType: 'ROUTE', actionUrl: detailUrl }, data)}>상세 보기</button>
+                    </div>
+                    {personalSave && data?.id && <SavedToggle kind="artists" itemRef={data.id} guestPrompt savedLabel="♥ 저장됨" saveLabel="♡ 저장" />}
+                </div>
+            </article>
+        );
+    }
 
     const toggleFollow = async () => {
         if (busy || !data?.id) return;

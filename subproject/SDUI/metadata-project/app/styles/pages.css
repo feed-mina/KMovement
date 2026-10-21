@@ -4478,8 +4478,9 @@ button:hover {
 }
 
 .auth-flow-button.kakao {
-    background: #fee500;
-    color: #191919;
+    gap: 8px;
+    background: var(--kride-kakao);
+    color: var(--kride-kakao-text);
 }
 
 .auth-flow-button:disabled {
@@ -4544,6 +4545,19 @@ button:hover {
         grid-template-columns: 1fr;
     }
 }
+
+/* 벤치마킹 H8 (2026-10-20): 카카오 최상단 · "또는" 구분선 · 이메일 접기 · 회원가입 링크 */
+.auth-login { gap: 14px; }
+.auth-login__eyebrow { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: 1px; color: var(--semantic-accent-strong); }
+.auth-login__return b { color: var(--text-strong); font-weight: 700; }
+.auth-login .auth-flow-heading { margin-bottom: 6px; }
+.auth-login__kakao-symbol { flex: none; }
+.auth-flow-divider { display: flex; align-items: center; gap: 12px; margin: 2px 0; color: var(--text-muted); font-size: 13px; }
+.auth-flow-divider::before, .auth-flow-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-hair); }
+.auth-flow-button.ghost { border-color: var(--kride-border-strong); background: transparent; color: var(--text-body); font-weight: 700; }
+.auth-flow-links { display: flex; justify-content: center; gap: 8px; margin: 4px 0 0; font-size: 14px; color: var(--text-muted); }
+.auth-flow-links a { color: var(--text-strong); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.auth-login .auth-flow-help { text-align: center; font-size: 13px; }
 
 @media (prefers-reduced-motion: reduce) {
     .record-time-toggle-icon {

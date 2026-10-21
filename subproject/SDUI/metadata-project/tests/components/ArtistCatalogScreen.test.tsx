@@ -1,5 +1,5 @@
 import React from 'react';
-import {act, fireEvent, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import ArtistCatalogScreen from '@/components/plugins/kpop/ArtistCatalogScreen';
 jest.mock('@/components/plugins/kpop/ArtistRelated',()=>({__esModule:true,default:()=>null}));
 let query = '';
@@ -15,7 +15,7 @@ test('public cards and eight-item pagination omit F8 actions', async () => {
     render(<ArtistCatalogScreen screenId="KPOP_EXPLORE" refId={null}/>);
     expect(await screen.findAllByRole('article')).toHaveLength(8);
     expect(screen.queryByRole('button', {name: '팔로우'})).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', {name: '다음'}));
+    fireEvent.click(screen.getByRole('button', {name: '더 보기 · 1명 남음'}));
     expect(push).toHaveBeenCalledWith('/view/KPOP_EXPLORE?page=2', {scroll:false});
     expect(fetch).toHaveBeenCalledWith(expect.stringContaining('pageSize=8'), expect.objectContaining({credentials:'omit', cache:'no-store'}));
 });
@@ -76,4 +76,33 @@ test('out of range page offers first page recovery', async () => {
     await screen.findByText(/이 페이지에 아티스트가 없어요/);
     fireEvent.click(screen.getByRole('button',{name:'첫 페이지로'}));
     expect(push).toHaveBeenCalledWith('/view/KPOP_EXPLORE',{scroll:false});
+});
+
+// 벤치마킹 H6: 입력 즉시 검색 · 더 보기로 이어 붙이기 · 탭 카운트
+test('typing searches without a submit button (debounced) and the clear button resets', async () => {
+    (fetch as jest.Mock).mockReturnValue(response(pageData()));
+    const view = render(<ArtistCatalogScreen screenId="KPOP_EXPLORE" refId={null}/>);
+    await screen.findByRole('heading',{name:'검증 아티스트'});
+    expect(screen.queryByRole('button',{name:'검색'})).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('아티스트 이름'), {target:{value:'아이유'}});
+    expect(push).not.toHaveBeenCalled();
+    await waitFor(() => expect(push).toHaveBeenLastCalledWith('/view/KPOP_EXPLORE?q=%EC%95%84%EC%9D%B4%EC%9C%A0', {scroll:false}));
+    // 라우터가 모킹돼 주소가 바뀌지 않으므로 검색어가 반영된 화면을 직접 그린다.
+    query='q=아이유'; view.rerender(<ArtistCatalogScreen screenId="KPOP_EXPLORE" refId={null}/>);
+    fireEvent.click(screen.getByRole('button',{name:'초기화'}));
+    expect(push).toHaveBeenLastCalledWith('/view/KPOP_EXPLORE', {scroll:false});
+});
+test('"더 보기" appends the next page instead of replacing it', async () => {
+    const first = Array.from({length: 8}, (_, i) => ({...artist, id: i+1, slug:`a-${i+1}`, nameKo: `아티스트 ${i+1}`}));
+    (fetch as jest.Mock).mockReturnValueOnce(response(pageData(first, 9)));
+    const view = render(<ArtistCatalogScreen screenId="KPOP_EXPLORE" refId={null}/>);
+    expect(await screen.findAllByRole('article')).toHaveLength(8);
+    expect(screen.getByRole('link',{name:/아티스트.*9/})).toHaveAttribute('href','/view/kpop');
+    (fetch as jest.Mock).mockReturnValueOnce(response({...pageData([{...artist, id: 9, slug:'a-9', nameKo:'아티스트 9'}], 9), page: 2}));
+    fireEvent.click(screen.getByRole('button',{name:'더 보기 · 1명 남음'}));
+    query='page=2'; view.rerender(<ArtistCatalogScreen screenId="KPOP_EXPLORE" refId={null}/>);
+    await screen.findByText('아티스트 9');
+    expect(screen.getAllByRole('article')).toHaveLength(9);
+    expect(screen.queryByRole('button',{name:/더 보기/})).not.toBeInTheDocument();
+    expect(screen.getByText('9명 표시 · 전체 9명')).toBeInTheDocument();
 });

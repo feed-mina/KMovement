@@ -9,6 +9,7 @@ const login = jest.fn();
 const logout = jest.fn().mockResolvedValue(undefined);
 const apiPost = jest.fn();
 const apiGet = jest.fn();
+let query = '';
 
 let authState: any = {
     user: null,
@@ -20,7 +21,7 @@ let authState: any = {
 
 jest.mock('next/navigation', () => ({
     useRouter: () => ({ replace, push }),
-    useSearchParams: () => new URLSearchParams(),
+    useSearchParams: () => new URLSearchParams(query),
 }));
 
 jest.mock('@/context/AuthContext', () => ({
@@ -38,6 +39,8 @@ jest.mock('@/services/axios', () => ({
 describe('F7 auth flow screen', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        query = '';
+        sessionStorage.clear();
         global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ data: { totalCount: 3 } }) }) as any;
         authState = {
             user: null,
@@ -60,9 +63,12 @@ describe('F7 auth flow screen', () => {
         apiGet.mockResolvedValueOnce({ data: currentUser });
 
         render(<AuthFlowScreen screenId="LOGIN_PAGE" refId={null} />);
+        // 벤치마킹 H8: 이메일 폼은 "또는" 아래에 접혀 있다
+        expect(screen.queryByLabelText('이메일')).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: '이메일로 로그인' }));
         fireEvent.change(screen.getByLabelText('이메일'), { target: { value: 'mina@example.com' } });
         fireEvent.change(screen.getByLabelText('비밀번호'), { target: { value: 'safe-password' } });
-        fireEvent.click(screen.getByRole('button', { name: '이메일로 로그인' }));
+        fireEvent.click(screen.getByRole('button', { name: '로그인' }));
 
         await waitFor(() => expect(apiPost).toHaveBeenCalledWith(
             '/api/auth/login',
@@ -128,5 +134,44 @@ describe('MY_PAGE hierarchy (benchmark G5)', () => {
         fireEvent.click(screen.getByRole('button', { name: '네, 로그아웃' }));
         expect(await screen.findByRole('alert')).toHaveTextContent('로그아웃하지 못했어요');
         expect(screen.getByRole('button', { name: '다시 시도' })).toBeEnabled();
+    });
+});
+
+// 벤치마킹 H8: 카카오 최상단 · 돌아갈 곳 한 줄 · 회원가입 링크 · 개발 문구 없음
+describe('LOGIN_PAGE hierarchy (benchmark H8)', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        sessionStorage.clear();
+        authState = { user: null, isLoggedIn: false, isLoading: false, login, logout };
+    });
+
+    it('puts the Kakao button first, remembers the return address and starts the Kakao flow', () => {
+        query = 'returnTo=' + encodeURIComponent('/view/KPOP_EVENTS?scope=mine');
+        const { container } = render(<AuthFlowScreen screenId="LOGIN_PAGE" refId={null} />);
+        const buttons = container.querySelectorAll('button');
+        expect(buttons[0]).toHaveTextContent('카카오로 시작하기');
+        expect(buttons[0].querySelector('svg')).not.toBeNull();
+        expect(container.querySelector('.auth-flow-button.primary')).toBeNull();
+        expect(screen.getByText(/로그인하면/)).toHaveTextContent('팬 일정으로 돌아가고');
+        expect(screen.getByRole('link', { name: '회원가입' })).toHaveAttribute('href', '/view/REGISTER_PAGE?returnTo=' + encodeURIComponent('/view/KPOP_EVENTS?scope=mine'));
+        expect(screen.queryByText(/인증 토큰/)).toBeNull();
+
+        fireEvent.click(buttons[0]);
+        expect(window.location.assign).toHaveBeenCalledWith('/api/kakao/authorize?state=web');
+        expect(JSON.parse(sessionStorage.getItem('kride.login-return') || '{}').path).toBe('/view/KPOP_EVENTS?scope=mine');
+    });
+
+    it('falls back to generic copy for an unknown return screen and keeps the form open after an error', async () => {
+        query = 'returnTo=' + encodeURIComponent('/view/SOMETHING_NEW');
+        apiPost.mockRejectedValueOnce({ response: { status: 401 } });
+        render(<AuthFlowScreen screenId="LOGIN_PAGE" refId={null} />);
+        expect(screen.getByText(/로그인하면/)).toHaveTextContent('보던 화면으로 돌아가고');
+        fireEvent.click(screen.getByRole('button', { name: '이메일로 로그인' }));
+        expect(screen.getByLabelText('이메일')).toHaveFocus();
+        fireEvent.change(screen.getByLabelText('이메일'), { target: { value: 'mina@example.com' } });
+        fireEvent.change(screen.getByLabelText('비밀번호'), { target: { value: 'wrong' } });
+        fireEvent.click(screen.getByRole('button', { name: '로그인' }));
+        expect(await screen.findByRole('alert')).toHaveTextContent('이메일 또는 비밀번호');
+        expect(screen.getByLabelText('이메일')).toBeInTheDocument();
     });
 });
