@@ -43,3 +43,25 @@
 .kride-next-bar__hint{margin:0;font-size:13px;color:var(--text-muted)}
 /* 더보기 메뉴 안 개인정보 설정 버튼 */
 .kride-more .kride-privacy-menu-btn{display:block;width:100%;padding:10px;border:0;border-top:1px solid var(--border-hair);background:transparent;color:var(--text-body);font:inherit;text-align:left;cursor:pointer;min-height:44px}
+
+/* ── 벤치마킹 H0 (2026-10-20): 상단 탭 5개 + 더보기, 750px 이하에서는 같은 nav 가 하단 탭 바 ── */
+.kride-site-header nav>a,.kride-more summary{gap:6px}
+.kride-site-header .kride-tab-icon{display:none}
+.kride-more--active>summary{background:var(--semantic-accent-soft,#fff0f1);color:var(--semantic-accent-strong,#8b0610);font-weight:700}
+.kride-more div a[aria-current=page]{background:var(--semantic-accent-soft,#fff0f1);color:var(--semantic-accent-strong,#8b0610);font-weight:700;border-radius:8px}
+@media(max-width:750px){
+.kride-site-shell{--kride-tabbar-h:calc(60px + var(--kride-safe-bottom,0px))}
+.kride-site-header{display:flex;padding:10px 12px}
+.kride-site-header nav{position:fixed;left:0;right:0;bottom:0;z-index:60;margin:0;gap:0;flex-wrap:nowrap;justify-content:space-around;background:var(--surface-card,#fff);border-top:1px solid var(--border-hair,#ddd);padding:4px 2px var(--kride-safe-bottom,0px);box-shadow:0 -1px 4px rgba(0,0,0,.05)}
+.kride-site-header nav>a,.kride-more summary{flex:1 1 0;min-width:0;flex-direction:column;justify-content:center;gap:3px;min-height:52px;padding:6px 2px;font-size:11px;line-height:1;border-radius:10px;color:var(--text-muted,#6b7280);white-space:nowrap}
+.kride-site-header nav>a[aria-current=page],.kride-more--active>summary{background:transparent;color:var(--semantic-accent,#e50914);font-weight:700}
+.kride-site-header .kride-tab-icon{display:flex}
+.kride-more{flex:1 1 0;min-width:0;display:flex}
+.kride-more summary{width:100%}
+.kride-more[open]>summary{background:var(--surface-subtle,#f5f1ea)}
+.kride-more div{position:absolute;left:auto;right:8px;top:auto;bottom:calc(100% + 8px);min-width:220px}
+.kride-site-content{padding-bottom:calc(var(--kride-tabbar-h) + 24px)}
+.kride-site-content .page-wrap:is(.KRIDE_INTRO2,.KRIDE_INTRO3,.KRIDE_INTRO4,.KRIDE_INTRO5) .kride-next-bar,.kride-site-content .language-composer{bottom:var(--kride-tabbar-h)}
+.kride-site-shell--focus .kride-site-header nav{display:none}
+.kride-site-shell--focus .kride-site-content{padding-bottom:calc(64px + 24px)}
+}
