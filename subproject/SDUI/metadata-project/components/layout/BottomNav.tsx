@@ -10,6 +10,7 @@ interface NavTab {
     // 활성 판정: 정확 일치 또는 prefix 매칭용 후보
     match: (pathname: string) => boolean;
     icon: React.ReactNode;
+    hidden?: boolean;
 }
 
 const iconProps = {
@@ -34,6 +35,7 @@ const TABS: NavTab[] = [
         label: '커뮤니티',
         url: '/view/COMMUNITY_LIST',
         match: (p) => p.startsWith('/view/COMMUNITY'),
+        hidden: true, // 2026-10-21: 커뮤니티 진입 경로는 우선 숨김(display:none)
         icon: (<svg {...iconProps} aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>),
     },
     {
@@ -77,7 +79,8 @@ export default function BottomNav() {
                     <button
                         key={tab.url}
                         type="button"
-                        className={`bottom-nav-item${active ? ' active' : ''}`}
+                        className={`bottom-nav-item${active ? ' active' : ''}${tab.hidden ? ' kride-entry-hidden' : ''}`}
+                        hidden={tab.hidden}
                         aria-current={active ? 'page' : undefined}
                         onClick={() => router.push(tab.url)}
                     >

@@ -142,7 +142,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                                 </button>
                                 <button type="button"
                                     aria-current={pathname?.startsWith('/view/COMMUNITY') ? 'page' : undefined}
-                                    className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname?.startsWith('/view/COMMUNITY') ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}
+                                    className={`kride-entry-hidden nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname?.startsWith('/view/COMMUNITY') ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}
+                                    hidden
                                     onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/COMMUNITY_LIST' })}>
                                     커뮤니티
                                 </button>
@@ -191,7 +192,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                             </button>
                             <button type="button"
                                 aria-current={pathname?.startsWith('/view/COMMUNITY') ? 'page' : undefined}
-                                className={`nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname?.startsWith('/view/COMMUNITY') ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}
+                                className={`kride-entry-hidden nav-item w-full border-0 p-2 text-left rounded cursor-pointer ${pathname?.startsWith('/view/COMMUNITY') ? 'bg-accent-soft text-accent font-bold' : 'bg-transparent'}`}
+                                hidden
                                 onClick={() => handleAction({ actionType: 'ROUTE', actionUrl: '/view/COMMUNITY_LIST' })}>
                                 커뮤니티
                             </button>

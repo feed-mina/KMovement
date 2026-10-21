@@ -29,11 +29,14 @@ describe('BottomNav — 관광 IA 리프레임', () => {
         mockPush.mockClear();
     });
 
-    it('관광 라벨(탐색·동선·통역·커뮤니티·마이)을 렌더링해야 함', () => {
+    it('관광 라벨(탐색·동선·통역·마이)을 렌더링하고 커뮤니티는 우선 숨긴다(2026-10-21)', () => {
         render(<BottomNav />);
-        ['탐색', '동선', '통역', '커뮤니티', '마이'].forEach(label => {
+        ['탐색', '동선', '통역', '마이'].forEach(label => {
             expect(screen.getByText(label)).toBeInTheDocument();
+            expect(screen.getByText(label).closest('button')).not.toHaveAttribute('hidden');
         });
+        expect(screen.getByText('커뮤니티').closest('button')).toHaveAttribute('hidden');
+        expect(screen.getByText('커뮤니티').closest('button')).toHaveClass('kride-entry-hidden');
     });
 
     it('구 라벨(콘텐츠·약속·AI 채팅)은 더 이상 없어야 함', () => {
