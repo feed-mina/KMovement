@@ -17,12 +17,12 @@ describe('toUserMessage', () => {
 
     it('네트워크 실패도 같은 안내로 묶는다', () => {
         expect(toUserMessage(new TypeError('Failed to fetch')))
-            .toBe('추천 서버 응답이 늦어요. 잠시 후 다시 시도해 주세요.');
+            .toBe('추천 서버에 연결하지 못했습니다. 인터넷 연결을 확인해 주세요.');
     });
 
     it('결과가 비었을 때는 조건을 바꾸라고 안내한다', () => {
         expect(toUserMessage(new Error('empty_result')))
-            .toBe('조건에 맞는 코스를 찾지 못했어요. 지역이나 기간을 바꿔 보세요.');
+            .toBe('조건에 맞는 코스를 찾지 못했어요. 여행 목적을 바꿔 다시 시도해 주세요.');
     });
 
     it('서버 오류와 그 외를 구분한다', () => {

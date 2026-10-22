@@ -4,7 +4,7 @@ import json
 import os
 from typing import Annotated, Literal
 from fastapi import APIRouter,Header,HTTPException
-from pydantic import BaseModel,Field
+from pydantic import BaseModel,Field,StrictBool
 from src.api.public_search import public_catalog,search_public
 from src.api.itinerary_budget import reserve_budget,record_usage
 from src.api import ai_runtime
@@ -19,7 +19,7 @@ class PublicItineraryRequest(BaseModel):
     purposes:list[Annotated[str,Field(min_length=1,max_length=100)]]=Field(default_factory=list,max_length=5)
     budget:dict=Field(default_factory=dict)
     responseLocale:Literal['ko','en','ja']='ko'
-    acknowledgeUnverifiedConditions:bool=False
+    acknowledgeUnverifiedConditions:StrictBool=False
 
 def ground_plan(raw,catalog,max_days=3):
     days=[];markers=[];rejected=0;seen=set()
@@ -82,9 +82,9 @@ def generate_public(req,identity):
 async def itinerary(req:PublicItineraryRequest,x_kride_token:str=Header(default=''),x_kride_user:str=Header(default='')):
     ai_runtime.authenticate(x_kride_token,x_kride_user)
     if req.duration != '당일치기' or req.regions != ['서울']:
-        raise HTTPException(422,'현재 서울 당일치기만 검증 중입니다.')
+        raise HTTPException(422,{'code':'unsupported_conditions','message':'현재 서울 당일치기만 검증 중입니다.'})
     if (req.artists or req.budget) and not req.acknowledgeUnverifiedConditions:
-        raise HTTPException(422,'아티스트 연관과 예산 충족은 미확인입니다. 일반 장소 코스 안내에 동의한 후 진행해 주세요.')
+        raise HTTPException(422,{'code':'consent_required','message':'아티스트 연관과 예산 충족은 미확인입니다. 일반 장소 코스 안내에 동의한 후 진행해 주세요.'})
     await ai_runtime.acquire_slot()
     task=asyncio.create_task(asyncio.to_thread(generate_public,req,x_kride_user))
     task.add_done_callback(lambda finished: (ai_runtime.slots.release(), finished.exception() if not finished.cancelled() else None))

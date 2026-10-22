@@ -201,12 +201,14 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
         const kind = krideItinerary.errorKind ?? (krideItinerary.requiresLogin ? 'login' : krideItinerary.candidatesUnavailable ? 'candidates' : 'server');
         const failCount = krideItinerary.failCount ?? 0;
         const cooled = failCount >= RETRY_COOLDOWN_AFTER;
-        const title = kind === 'login' ? '로그인이 필요해요'
+        const title = kind === 'consent' ? '코스 안내 동의를 확인해 주세요'
+            : kind === 'unsupported' || kind === 'validation' ? '여행 조건을 확인해 주세요'
+            : kind === 'login' ? '로그인이 필요해요'
             : kind === 'candidates' ? '추천 자료를 준비 중이에요'
             : kind === 'no-route' ? '조건에 맞는 코스를 못 찾았어요'
             : kind === 'offline' ? '인터넷 연결을 확인해 주세요'
             : '코스를 아직 못 만들었어요';
-        const description = cooled && kind !== 'login' && kind !== 'candidates'
+        const description = cooled && ['server', 'timeout', 'upstream', 'unavailable', 'network', 'unknown'].includes(kind)
             ? `${failCount}번 연속 실패했어요. 잠시 후 다시 시도하거나 조건을 바꿔 보세요. (재시도는 ${RETRY_COOLDOWN_MS / 1000}초 뒤 다시 열려요)`
             : krideItinerary.error;
         // 사용자가 넣은 조건을 그대로 보여준다 (레퍼런스 3/4). 새로고침이 아니라 retry() 라서 조건이 사라지지 않는다.
@@ -216,7 +218,11 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
             ...((form.selectedRegions ?? []) as any[]).map((r) => ({ text: r?.name ?? String(r) })),
             ...(form.duration ? [{ text: ({ day: '당일치기', onenight: '1박 2일', twonight: '2박 3일' } as Record<string, string>)[form.duration] ?? String(form.duration) }] : []),
         ];
-        const primary = kind === 'login'
+        const primary = kind === 'consent'
+            ? { label: '동의 안내로', onClick: () => { setAcknowledged(false); setCourseConfirmed(false); } }
+            : kind === 'unsupported' || kind === 'validation'
+            ? { label: '조건 바꾸기', onClick: () => router.push('/view/INTRO1') }
+            : kind === 'login'
             ? { label: '로그인하기', onClick: () => router.push('/view/LOGIN_PAGE') }
             : kind === 'candidates'
                 ? { label: '홈으로', onClick: () => router.push('/') }
@@ -237,7 +243,7 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
                         <KrideButton onClick={primary.onClick} disabled={primary.disabled}>
                             {primary.label}
                         </KrideButton>
-                        {kind !== 'login' && kind !== 'candidates' && (
+                        {!['login', 'candidates', 'unsupported', 'validation'].includes(kind) && (
                             <KrideButton variant="ghost" onClick={() => router.push('/view/INTRO1')}>
                                 조건 바꾸기
                             </KrideButton>

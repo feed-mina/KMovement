@@ -13,7 +13,9 @@ export async function POST(request:NextRequest){
   const text=await request.text();if(text.length>8000)return reply({error:'입력이 너무 깁니다.'},413);
   let body;try{body=JSON.parse(text);}catch{return reply({error:'입력을 확인해 주세요.'},400);}
   const result=await fetch(`${base}/api/public/itinerary`,{method:'POST',headers:{'Content-Type':'application/json','X-Kride-Token':token,'X-Kride-User':String(user.userSqno)},body:JSON.stringify(body),signal:controller.signal,cache:'no-store'});
-  const payload=await result.json().catch(()=>({error:'추천 서버 응답을 확인하지 못했습니다.'}));
+  let payload;
+  try { payload=await result.json(); }
+  catch { return reply({error:'추천 서버 응답을 확인하지 못했습니다.'},result.ok?502:result.status); }
   return reply(payload,result.status);
- }catch(e){return reply({error:e instanceof Error&&e.name==='AbortError'?'추천 시간이 초과됐습니다.':'추천 서버에 연결하지 못했습니다.'},e instanceof Error&&e.name==='AbortError'?504:502);}finally{clearTimeout(timer);}
+ }catch(e){const timeout=e instanceof Error&&(e.name==='AbortError'||e.name==='TimeoutError');return reply({error:timeout?'추천 시간이 초과됐습니다.':'추천 서버에 연결하지 못했습니다.'},timeout?504:502);}finally{clearTimeout(timer);}
 }
