@@ -15,6 +15,7 @@ import Skeleton from '@/components/utils/Skeleton';
 import KrideStatePanel, { KrideStateChips } from '@/components/fields/kride/atoms/KrideStatePanel';
 import { trackEvent } from '@/lib/analytics/dataLayer';
 import { countItineraryPlaces } from '@/lib/analytics/itinerary';
+import { buildItineraryRequest, validateItineraryRequest, itineraryHttpError, classifyItineraryError, itineraryErrorMessage } from '@/lib/kride/itineraryRequest';
 
 // [동선] 화면 컨트롤러. 기본=TourAPI 최근접이웃 / AI=선호 기반 FastAPI 일정.
 // Epic #74 · #77 · #85.
@@ -44,10 +45,13 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const [purpose, setPurpose] = useState('성지순례');
     const [duration, setDuration] = useState('당일치기');
     const [aiSources, setAiSources] = useState<{id:string;name:string;sourceUrl:string;verifiedAt:string}[]>([]);
+    const [acknowledged, setAcknowledged] = useState(false);
+    const [responseLocale, setResponseLocale] = useState<'ko' | 'en' | 'ja'>('ko');
+    const inFlightRef = useRef(false);
     const [aiData, setAiData] = useState<unknown | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState<string | null>(null);
-    const [aiErrorKind, setAiErrorKind] = useState<'login' | 'empty' | 'server' | null>(null);
+    const [aiErrorKind, setAiErrorKind] = useState<import('@/lib/kride/itineraryRequest').ItineraryErrorKind | null>(null);
     const fetchedKeyRef = useRef<string>('');
     const [openDays, setOpenDays] = useState<Record<number, boolean>>({ 1: true });
 
@@ -70,9 +74,19 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const dayGroups = useMemo(() => groupByDay(markers), [markers]);
 
     const fetchAi = async () => {
-        const key = JSON.stringify({ region, purpose, duration });
+        let body;
+        try {
+            body = buildItineraryRequest({ duration, regions: [region], purposes: [purpose], artists: [], responseLocale, acknowledgeUnverifiedConditions: acknowledged });
+            validateItineraryRequest(body);
+        } catch (reason) {
+            setAiErrorKind(classifyItineraryError(reason));
+            setAiError(itineraryErrorMessage(reason));
+            return;
+        }
+        const key = JSON.stringify(body);
         if (fetchedKeyRef.current === key) return; // 같은 조건이면 재요청 안 함
-        if (aiLoading) return;
+        if (inFlightRef.current) return;
+        inFlightRef.current = true;
         setAiLoading(true);
         setAiData(null);
         setAiSources([]);
@@ -86,37 +100,28 @@ export default function RouteScreen(_props: ScreenControllerProps) {
             const res = await fetch('/api/kride/recommend/itinerary', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    duration,
-                    regions: [region],
-                    purposes: [purpose],
-                    artists: [],
-                    budget: { min: 30000, max: 2000000 },
-                }),
+                body: JSON.stringify(body),
                 signal: controller.signal,
             });
-            if (res.status === 401) throw new Error('login_required');
-            if (!res.ok) throw new Error(`itinerary ${res.status}`);
+            if (!res.ok) throw itineraryHttpError(res.status, await res.json().catch(() => ({})));
             const result = await res.json();
             if (result.status === 'empty_candidates') throw new Error('empty_candidates');
-            fetchedKeyRef.current = key;
             const placeCount = countItineraryPlaces(result);
             if (placeCount === 0) throw new Error('empty_result');
+            fetchedKeyRef.current = key;
             setAiData(result);
             setAiSources(Array.isArray(result.source_pois) ? result.source_pois : []);
             trackEvent('itinerary_generated', { place_count: placeCount, duration, source: 'route_planner' });
         } catch (reason) {
-            const code = reason instanceof Error ? reason.message : '';
-            const kind = code === 'login_required' ? 'login' : code === 'empty_candidates' ? 'empty' : 'server';
-            setAiErrorKind(kind);
-            setAiError(kind === 'login' ? '로그인 후 AI 코스를 이용해 주세요.' : kind === 'empty' ? '출처가 확인된 추천 자료가 아직 없습니다.' : 'AI 코스를 불러오지 못했어요. 기본 코스로 볼 수 있어요.');
-            const message = reason instanceof Error ? reason.message : 'unknown';
+            setAiErrorKind(classifyItineraryError(reason));
+            setAiError(itineraryErrorMessage(reason));
             trackEvent('itinerary_error', {
-                error_type: message === 'empty_result' ? 'empty_result' : message.includes('aborted') ? 'timeout' : message.startsWith('itinerary ') ? 'http_error' : 'request_error',
+                error_type: classifyItineraryError(reason),
                 source: 'route_planner',
             });
         } finally {
             if (timer) clearTimeout(timer);
+            inFlightRef.current = false;
             setAiLoading(false);
         }
     };
@@ -124,19 +129,15 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const requestAiCourse = () => {
         trackEvent('itinerary_start', { entry_point: 'route_planner_ai_button' });
         setMode('ai');
-        void fetchAi();
     };
     // 실패 후 같은 조건으로 다시 요청 (입력값 보존)
     const retryAi = () => { fetchedKeyRef.current = ''; void fetchAi(); };
     // AI 모드에서 선호를 바꾸면 재추천
     const changePref = (setter: (v: string) => void, v: string) => {
         setter(v);
-        if (mode === 'ai') { fetchedKeyRef.current = ''; }
+        if (mode === 'ai') { fetchedKeyRef.current = ''; setAiData(null); setAiError(null); }
     };
-    useEffect(() => {
-        if (mode === 'ai') void fetchAi();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [region, purpose, duration]);
+
 
     return (
         <div className="page-wrap ROUTE_PLANNER route-screen">
@@ -160,19 +161,19 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                     <div className="route-prefs__row">
                         <span className="route-prefs__label">지역</span>
                         <div className="route-prefs__chips" role="group" aria-label="지역">
-                            {REGIONS.map((r) => <button key={r} type="button" onClick={() => changePref(setRegion, r)} aria-pressed={region === r} className="route-chip">{r}</button>)}
+                            {REGIONS.map((r) => <button key={r} type="button" disabled={aiLoading} onClick={() => changePref(setRegion, r)} aria-pressed={region === r} className="route-chip">{r}</button>)}
                         </div>
                     </div>
                     <div className="route-prefs__row">
                         <span className="route-prefs__label">목적</span>
                         <div className="route-prefs__chips" role="group" aria-label="목적">
-                            {PURPOSES.map((p) => <button key={p} type="button" onClick={() => changePref(setPurpose, p)} aria-pressed={purpose === p} className="route-chip">{p}</button>)}
+                            {PURPOSES.map((p) => <button key={p} type="button" disabled={aiLoading} onClick={() => changePref(setPurpose, p)} aria-pressed={purpose === p} className="route-chip">{p}</button>)}
                         </div>
                     </div>
                     <div className="route-prefs__row">
                         <span className="route-prefs__label">기간</span>
                         <div className="route-prefs__chips" role="group" aria-label="기간">
-                            {DURATIONS.map((d) => <button key={d} type="button" onClick={() => changePref(setDuration, d)} aria-pressed={duration === d} className="route-chip">{d}</button>)}
+                            {DURATIONS.map((d) => <button key={d} type="button" disabled={aiLoading} onClick={() => changePref(setDuration, d)} aria-pressed={duration === d} className="route-chip">{d}</button>)}
                         </div>
                     </div>
                     <div className="route-prefs__foot">
@@ -180,8 +181,15 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                             <button type="button" onClick={() => setMode('tour')} aria-pressed={mode === 'tour'} className="route-seg__btn"><span>기본 코스</span></button>
                             <button type="button" onClick={requestAiCourse} aria-pressed={mode === 'ai'} className="route-seg__btn"><span>AI 코스</span>{!isLoggedIn && <span className="route-seg__badge">로그인</span>}</button>
                         </div>
-                        <p className="route-prefs__hint">{mode === 'ai' ? '이 조건으로 AI가 코스를 짜요 · 바꾸면 다시 추천' : '기본 코스는 고른 지역의 맛집을 가까운 순으로 이어요 · 목적·기간은 AI 코스에 반영'}</p>
+                        <p className="route-prefs__hint">{mode === 'ai' ? '조건을 확인한 뒤 코스 만들기를 눌러 주세요' : '기본 코스는 고른 지역의 맛집을 가까운 순으로 이어요 · 목적·기간은 AI 코스에 반영'}</p>
                     </div>
+                    {mode === 'ai' && <section aria-label="AI 코스 안내">
+                    <p>현재 서울 당일치기만 지원합니다. 아티스트 연관·예산 충족·영업시간·예약 가능 여부는 미확인입니다.</p>
+                    <label>안내 언어 <select value={responseLocale} disabled={aiLoading} onChange={e => { setResponseLocale(e.target.value as 'ko' | 'en' | 'ja'); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }}><option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option></select></label>
+                    <p><label><input type="checkbox" checked={acknowledged} disabled={aiLoading} onChange={e => { setAcknowledged(e.target.checked); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }} /> 위 조건의 충족을 보장하지 않는 일반 장소 코스로 진행합니다.</label></p>
+                    {!acknowledged && <p role="status">일반 장소 코스 안내에 직접 동의한 후 코스를 만들 수 있습니다.</p>}
+                    <button type="button" disabled={!acknowledged || aiLoading} onClick={() => void fetchAi()}>코스 만들기</button>
+                    </section>}
                 </div>
             )}
 
@@ -197,14 +205,16 @@ export default function RouteScreen(_props: ScreenControllerProps) {
             {mode === 'ai' && aiLoading && <RouteSkeleton label="AI가 하루 코스를 짜는 중이에요" note="AI가 하루 코스를 짜는 중이에요… 최대 2분 정도 걸릴 수 있고, 고른 조건은 그대로예요." />}
             {mode === 'ai' && aiError && (
                 <KrideStatePanel
-                    kind={aiErrorKind === 'login' ? 'forbidden' : aiErrorKind === 'empty' ? 'empty-first' : 'error'}
-                    title={aiErrorKind === 'login' ? '로그인 후 AI 코스를 받을 수 있어요' : aiErrorKind === 'empty' ? '추천 자료가 아직 없어요' : 'AI 코스를 불러오지 못했어요'}
+                    kind={aiErrorKind === 'login' ? 'forbidden' : aiErrorKind === 'candidates' || aiErrorKind === 'no-route' ? 'empty-first' : 'error'}
+                    title={aiErrorKind === 'login' ? '로그인 후 AI 코스를 받을 수 있어요' : aiErrorKind === 'candidates' || aiErrorKind === 'no-route' ? '추천 자료가 아직 없어요' : 'AI 코스를 불러오지 못했어요'}
                     description={aiError}
                     context={<KrideStateChips label="고른 조건" items={[{ text: region, accent: true }, { text: purpose }, { text: duration }]} />}
                     primaryAction={aiErrorKind === 'login'
                         ? { label: '로그인하기', href: '/view/LOGIN_PAGE?returnTo=' + encodeURIComponent('/view/ROUTE_PLANNER') }
-                        : aiErrorKind === 'empty'
+                        : aiErrorKind === 'candidates' || aiErrorKind === 'no-route'
                             ? { label: '기본 코스 보기', onClick: () => setMode('tour') }
+                            : ['consent', 'unsupported', 'validation', 'forbidden'].includes(aiErrorKind ?? '')
+                            ? { label: '조건 확인하기', onClick: () => setAiError(null) }
                             : { label: '다시 시도', onClick: retryAi }}
                     secondaryAction={aiErrorKind === 'server' ? { label: '기본 코스 보기', onClick: () => setMode('tour') } : undefined}
                 />

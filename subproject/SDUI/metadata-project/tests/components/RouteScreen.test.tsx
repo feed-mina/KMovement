@@ -17,7 +17,7 @@ jest.mock('@/services/tourApi', () => ({
 }));
 
 const mockedFetch = jest.fn(() =>
-    Promise.resolve({ ok: true, json: () => Promise.resolve({ itinerary: [], mapData: { markers: [] } }) }),
+    Promise.resolve({ ok: true, json: () => Promise.resolve({ itinerary: [{ day: 1, morning: { places: [{ name: '장소' }] } }], mapData: { markers: [] } }) }),
 );
 // @ts-expect-error jsdom global
 global.fetch = mockedFetch;
@@ -50,6 +50,8 @@ describe('RouteScreen — [동선] 기본/AI 코스 토글', () => {
         await waitFor(() => expect(screen.getByTestId('route-map')).toBeInTheDocument());
 
         fireEvent.click(screen.getByText('AI 코스'));
+        fireEvent.click(screen.getByRole('checkbox'));
+        fireEvent.click(screen.getByRole('button', { name: '코스 만들기' }));
 
         await waitFor(() => expect(mockedFetch).toHaveBeenCalled());
         expect(mockedFetch).toHaveBeenCalledWith('/api/kride/recommend/itinerary', expect.objectContaining({ method: 'POST' }));
@@ -60,9 +62,12 @@ describe('RouteScreen — [동선] 기본/AI 코스 토글', () => {
         await waitFor(() => expect(screen.getByTestId('route-map')).toBeInTheDocument());
 
         fireEvent.click(screen.getByText('AI 코스'));
+        fireEvent.click(screen.getByRole('checkbox'));
+        fireEvent.click(screen.getByRole('button', { name: '코스 만들기' }));
         await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
         fireEvent.click(screen.getByText('기본 코스'));
         fireEvent.click(screen.getByText('AI 코스'));
+        fireEvent.click(screen.getByRole('button', { name: '코스 만들기' }));
         expect(mockedFetch).toHaveBeenCalledTimes(1);
     });
 });
@@ -92,6 +97,8 @@ describe('RouteScreen — 상태 패널', () => {
         render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
         await waitFor(() => expect(screen.getByTestId('route-map')).toBeInTheDocument());
         fireEvent.click(screen.getByText('AI 코스'));
+        fireEvent.click(screen.getByRole('checkbox'));
+        fireEvent.click(screen.getByRole('button', { name: '코스 만들기' }));
         const alert = await screen.findByRole('alert');
         expect(alert).toHaveTextContent('AI 코스를 불러오지 못했어요');
         expect(alert).toHaveTextContent('성지순례');
@@ -143,4 +150,35 @@ describe('RouteScreen — H5 조건 → 결과', () => {
         expect(legLabel(0.8)).toBe('다음까지 0.8km · 도보 약 12분');
         expect(legLabel(4.26)).toBe('다음까지 4.3km · 이동 약 64분');
     });
+});
+
+test('AI view requires unchecked consent and never sends on view or preference changes', async () => {
+    mockedFetch.mockClear();
+    render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
+    fireEvent.click(screen.getByText('AI 코스'));
+    expect(screen.getByRole('checkbox')).not.toBeChecked();
+    expect(screen.getByRole('button', {name: '코스 만들기'})).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', {name: '부산'}));
+    expect(mockedFetch).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', {name: '코스 만들기'}));
+    expect(await screen.findByText('현재 서울 당일치기만 지원합니다. 지역과 기간을 바꿔 주세요.')).toBeInTheDocument();
+    expect(mockedFetch).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', {name: '서울'}));
+    fireEvent.change(screen.getByRole('combobox', {name: '안내 언어'}), {target: {value: 'en'}});
+    fireEvent.click(screen.getByRole('button', {name: '코스 만들기'}));
+    await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
+    expect(JSON.parse((mockedFetch.mock.calls[0] as unknown as [string, RequestInit])[1].body as string)).toMatchObject({regions: ['서울'], duration: '당일치기', responseLocale: 'en', acknowledgeUnverifiedConditions: true, budget: {min: 30000, max: 2000000}});
+});
+
+test('empty AI result can be retried with identical conditions', async () => {
+    mockedFetch.mockClear();
+    mockedFetch.mockResolvedValueOnce({ok: true, status: 200, json: async () => ({itinerary: []})} as never);
+    render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
+    fireEvent.click(screen.getByText('AI 코스'));
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', {name: '코스 만들기'}));
+    await screen.findByText('조건에 맞는 코스를 찾지 못했어요. 여행 목적을 바꿔 다시 시도해 주세요.');
+    fireEvent.click(screen.getByRole('button', {name: '코스 만들기'}));
+    await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(2));
 });
