@@ -1,5 +1,7 @@
 # KMovement Hostinger VPS 실배포 복사 실행 런북
 
+> 이 문서는 2026-10-02 최초 설치 당시의 기록입니다. 이미 운영 중인 웹을 main 버전으로 업데이트할 때는 [main 반영 후 Hostinger 웹 배포 가이드](../../docs/operations/hostinger-main-deploy.md)를 사용하세요. 기존 백엔드 연결과 환경 파일을 보존하는 재배포 절차입니다.
+
 > 작성 기준: 2026-10-02, `origin/main` 병합 커밋
 > `a51c52f4d4c34f4ffa36feed2363b7153a1c8fc1`
 

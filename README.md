@@ -6,6 +6,10 @@
 
 ---
 
+## 웹 배포 안내
+
+현재 Hostinger 웹의 main 반영 후 배포는 [Hostinger 웹 배포 가이드](docs/operations/hostinger-main-deploy.md)를 따릅니다. 이미지 게시, 기존 설정 보존, 웹 교체, 실제 확인, 이전 버전 복구를 순서대로 설명합니다. main 병합만으로 Hostinger가 자동 배포되지는 않습니다.
+
 ## 🌐 서비스 주소 (Web Entry Points)
 
 | 화면 | URL | 비고 |

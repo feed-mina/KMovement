@@ -39,3 +39,8 @@ Framer Motion은 기존 의존성을 사용하며 패키지 버전을 변경하�
 
 기존 `.github/workflows/hostinger-web-publish.yml`은 정확한 소스 SHA를 받아 이미지만 게시한다. 이 워크플로 성공만으로 Hostinger 컨테이너 교체 완료로 판단하지 않는다.
 배포 시 기존 환경변수를 보존하고 웹 컨테이너만 교체하며, 기존 이미지·환경 파일로 복구할 수 있게 기록해야 한다.
+
+
+## main 병합 후 배포 방법
+
+[Hostinger 웹 배포 가이드](../../operations/hostinger-main-deploy.md)에서 이미지 게시부터 운영 확인·복구까지 확인할 수 있습니다. main 병합, 이미지 게시, 운영 반영은 서로 다른 단계입니다.
