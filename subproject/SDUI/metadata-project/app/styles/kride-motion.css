@@ -19,3 +19,8 @@
  .kride-motion-ripple { display: none; }
  .kride-motion-card, .tour-poi-card { transform: none !important; }
 }
+
+.kride-share-control { display: inline-flex; align-items: center; }
+.kride-share-feedback { position: fixed; left: 50%; bottom: calc(var(--kride-tabbar-h, 0px) + 80px); z-index: 1100; translate: -50% 0; max-width: min(360px, 90vw); padding: 10px 16px; border-radius: 12px; background: #172033; color: #fff; font: 13px/1.5 system-ui; box-shadow: 0 5px 20px #0002; pointer-events: none; animation: kride-share-enter .15s ease-out; }
+@keyframes kride-share-enter { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .kride-share-feedback { animation: none; } }

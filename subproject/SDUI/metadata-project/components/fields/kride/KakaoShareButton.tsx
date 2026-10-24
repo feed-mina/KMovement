@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import {MotionButton} from '@/components/motion/KrideMotion';
 import { loadKakaoShare } from '@/lib/kakao/loadKakaoShare';
 import { trackEvent } from '@/lib/analytics/dataLayer';
 
@@ -37,7 +38,6 @@ async function shareWithoutKakao(text: string, url: string) {
     }
     if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url);
-        alert('공유 링크를 복사했어요.');
         return 'clipboard';
     }
     throw new Error('share fallback unavailable');
@@ -52,10 +52,17 @@ interface Props {
 // 카카오톡 친구에게 공유(공유 픽커). Epic #74.
 export default function KakaoShareButton({ text, path, label = '공유' }: Props) {
     const [busy, setBusy] = useState(false);
+    const [message, setMessage] = useState('');
+    useEffect(() => {
+        if (!message) return;
+        const timer = window.setTimeout(() => setMessage(''), 2500);
+        return () => window.clearTimeout(timer);
+    }, [message]);
 
     const onShare = async () => {
         if (busy) return;
         setBusy(true);
+        setMessage('');
         try {
             const Kakao = await loadKakaoShare();
             const url = getShareUrl(path);
@@ -68,9 +75,10 @@ export default function KakaoShareButton({ text, path, label = '공유' }: Props
         } catch {
             try {
                 const method = await shareWithoutKakao(text, getShareUrl(path));
+                if (method === 'clipboard') setMessage('공유 링크를 복사했어요.');
                 trackEvent('share', { method, content_type: 'travel_route', item_id: path });
-            } catch {
-                alert('공유 기능을 사용할 수 없어요. 잠시 후 다시 시도해 주세요.');
+            } catch (reason) {
+                if (!(reason instanceof Error && reason.name === 'AbortError')) setMessage('공유 기능을 사용할 수 없어요. 잠시 후 다시 시도해 주세요.');
             }
         } finally {
             setBusy(false);
@@ -78,7 +86,8 @@ export default function KakaoShareButton({ text, path, label = '공유' }: Props
     };
 
     return (
-        <button
+        <span className="kride-share-control">
+        <MotionButton
             type="button"
             onClick={onShare}
             disabled={busy}
@@ -91,6 +100,8 @@ export default function KakaoShareButton({ text, path, label = '공유' }: Props
         >
             <i className="ti ti-share" aria-hidden="true" style={{ fontSize: 14 }} />
             {busy ? '공유 중…' : label}
-        </button>
+        </MotionButton>
+        {message && <span role="status" className="kride-share-feedback">{message}</span>}
+        </span>
     );
 }

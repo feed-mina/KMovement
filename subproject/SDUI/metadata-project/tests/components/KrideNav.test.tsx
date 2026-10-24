@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import KrideNav from '@/components/layout/KrideNav';
 
 let mockPath = '/';
@@ -79,5 +79,27 @@ test('more menu closes after changing destination', () => {
     more.open = true;
     mockPath = '/view/kpop';
     rerender(<KrideNav />);
+    expect(more.open).toBe(false);
+});
+
+test('more menu closes on outside pointer press and Escape restores the trigger focus', () => {
+    mockPath = '/view/ROUTE_PLANNER';
+    const {container} = render(<KrideNav />);
+    const more = container.querySelector('details')!;
+    more.open = true;
+    fireEvent.pointerDown(document.body);
+    expect(more.open).toBe(false);
+    more.open = true;
+    fireEvent.keyDown(document, {key: 'Escape'});
+    expect(more.open).toBe(false);
+    expect(more.querySelector('summary')).toHaveFocus();
+});
+
+test('selecting a menu destination closes it even before pathname changes', () => {
+    mockPath = '/travel/food';
+    const {container} = render(<KrideNav />);
+    const more = container.querySelector('details')!;
+    more.open = true;
+    fireEvent.click(screen.getByRole('link', {name: '전국 맛집'}));
     expect(more.open).toBe(false);
 });

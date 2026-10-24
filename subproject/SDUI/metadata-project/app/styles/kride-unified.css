@@ -78,3 +78,13 @@
 /* 2026-10-21 운영 결정: 커뮤니티·시간 설정·개인정보 설정 진입 경로는 우선 숨긴다. 화면 자체는 URL 로 열린다.
    되살릴 때는 각 요소의 `hidden` 속성과 이 클래스를 지운다. 기록: ME 저장소 01-History/2026-10-21_KMovement_내비_커뮤니티_시간설정_개인정보설정_숨김/ */
 .kride-entry-hidden,[hidden].kride-entry-hidden{display:none!important}
+
+/* Navigation is outside the isolated map; its dropdown must stay in front. */
+.kride-site-header { z-index: 60; overflow: visible; }
+.kride-more > div { z-index: 1; top: calc(100% + 8px); max-width: min(320px, calc(100vw - 24px)); max-height: calc(100dvh - var(--kride-header-h, 81px) - 24px); overflow-y: auto; }
+.kride-more[open] > div { animation: kride-menu-enter .15s ease-out; }
+@keyframes kride-menu-enter { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 750px) {
+ .kride-more > div { top: auto; bottom: calc(100% + 8px); max-height: calc(100dvh - var(--kride-tabbar-h, 60px) - 80px); }
+}
+@media (prefers-reduced-motion: reduce) { .kride-more[open] > div { animation: none; } }
