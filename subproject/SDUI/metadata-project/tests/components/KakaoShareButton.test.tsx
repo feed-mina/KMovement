@@ -39,8 +39,24 @@ describe('KakaoShareButton', () => {
         render(<KakaoShareButton text="x" path="/view/TOUR_EXPLORE" />);
         fireEvent.click(screen.getByLabelText('공유'));
         await waitFor(() => expect(writeText).toHaveBeenCalledWith('https://yerin.duckdns.org/view/TOUR_EXPLORE'));
-        expect(alertSpy).toHaveBeenCalledWith('공유 링크를 복사했어요.');
+        expect(await screen.findByRole('status')).toHaveTextContent('공유 링크를 복사했어요.');
+        expect(alertSpy).not.toHaveBeenCalled();
         expect(sendDefault).not.toHaveBeenCalled();
         alertSpy.mockRestore();
     });
+});
+
+test('does not announce copy completion until the clipboard promise succeeds', async () => {
+    mockedLoad.mockRejectedValueOnce(new Error('SDK unavailable'));
+    let finishCopy!: () => void;
+    const pending = new Promise<void>((resolve) => {finishCopy = resolve;});
+    const writeText = jest.fn(() => pending);
+    Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {writeText}});
+    render(<KakaoShareButton text="하루 코스" path="/view/ROUTE_PLANNER" />);
+    fireEvent.click(screen.getByRole('button', {name: '공유'}));
+    await waitFor(() => expect(writeText).toHaveBeenCalled());
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', {name: '공유'})).toBeDisabled();
+    finishCopy();
+    expect(await screen.findByRole('status')).toHaveTextContent('공유 링크를 복사했어요.');
 });

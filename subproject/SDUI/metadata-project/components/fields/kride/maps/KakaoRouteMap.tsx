@@ -1,5 +1,6 @@
 'use client';
 
+import {useKrideReducedMotion} from '@/components/motion/KrideMotion';
 import { useEffect, useRef, useState } from 'react';
 import { buildMarkerInfoHtml, RouteMapData, RouteMapMarker } from './mapTypes';
 import LeafletFallbackMap from './LeafletFallbackMap';
@@ -17,17 +18,18 @@ function toKakaoLevel(zoom: number) {
 }
 
 export default function KakaoRouteMap({ appKey, data, selectedMarkerId, onMarkerSelect }: Props) {
+  const reducedMotion = useKrideReducedMotion();
+  const [ready, setReady] = useState(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
   const markerRefs = useRef<Record<string, any>>({});
   const infoRefs = useRef<Record<string, any>>({});
-  const [error, setError] = useState('');
+  const [error, setError] = useState<{data: RouteMapData; key: string; message: string} | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     const overlays: any[] = [];
 
-    setError('');
     loadKakaoMaps(appKey)
       .then((kakao) => {
         if (cancelled || !containerRef.current) return;
@@ -38,6 +40,7 @@ export default function KakaoRouteMap({ appKey, data, selectedMarkerId, onMarker
           level: toKakaoLevel(data.zoom),
         });
         mapRef.current = map;
+        setReady((value) => value + 1);
         markerRefs.current = {};
         infoRefs.current = {};
 
@@ -85,7 +88,7 @@ export default function KakaoRouteMap({ appKey, data, selectedMarkerId, onMarker
         }
       })
       .catch((loadError) => {
-        if (!cancelled) setError(loadError?.message ?? 'Kakao Maps load failed.');
+        if (!cancelled) setError({data, key: appKey, message: loadError?.message ?? 'Kakao Maps load failed.'});
       });
 
     return () => {
@@ -106,15 +109,17 @@ export default function KakaoRouteMap({ appKey, data, selectedMarkerId, onMarker
     if (!marker || !kakaoMarker || !infoWindow || !kakao?.maps) return;
 
     const position = new kakao.maps.LatLng(marker.lat, marker.lng);
-    mapRef.current.setLevel(4, { animate: true });
-    mapRef.current.panTo(position);
+    Object.entries(markerRefs.current).forEach(([id, item]) => item.setZIndex?.(id === selectedMarkerId ? 10 : 1));
+    mapRef.current.setLevel(4, { animate: !reducedMotion });
+    if (reducedMotion) mapRef.current.setCenter(position);
+    else mapRef.current.panTo(position);
     infoWindow.open(mapRef.current, kakaoMarker);
-  }, [data.markers, selectedMarkerId]);
+  }, [data.markers, selectedMarkerId, ready, reducedMotion]);
 
-  if (error) {
+  if (error?.data === data && error.key === appKey) {
     return (
       <>
-        <LeafletFallbackMap data={data} selectedMarkerId={selectedMarkerId} />
+        <LeafletFallbackMap data={data} selectedMarkerId={selectedMarkerId} onMarkerSelect={onMarkerSelect} />
         <div className="route-map__fallback-notice" role="status">
           Kakao Maps is unavailable. Showing the fallback map.
         </div>

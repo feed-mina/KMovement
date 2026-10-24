@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ScreenControllerProps } from '@/components/screens/types';
+import {MotionButton} from '@/components/motion/KrideMotion';
+import {ROUTE_MARKER_SELECT_EVENT, type RouteMapMarker} from '@/components/fields/kride/maps/mapTypes';
 import RoadRoutePlanner from './RoadRoutePlanner';
 import RouteMap from '@/components/fields/kride/maps/RouteMap';
 import { tourPoisToRouteMapData } from '@/components/fields/kride/maps/tourToRouteMapData';
@@ -34,6 +36,8 @@ export function legLabel(km: number): string {
 }
 
 export default function RouteScreen(_props: ScreenControllerProps) {
+    const [selectedStopId, setSelectedStopId] = useState<string>();
+    const selectStop = useCallback((marker: RouteMapMarker) => setSelectedStopId(marker.id), []);
     const { isLoggedIn } = useAuth();
     const [pois, setPois] = useState<TourPoi[]>([]);
     const [loading, setLoading] = useState(true);
@@ -152,7 +156,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                 <>
                     <div className="route-road-head">
                         <h2 className="route-road-head__title">도로 길 찾기</h2>
-                        <button type="button" className="route-pill" onClick={() => setMode('tour')}>코스로 돌아가기</button>
+                        <MotionButton type="button" className="route-pill" onClick={() => setMode('tour')}>코스로 돌아가기</MotionButton>
                     </div>
                     <RoadRoutePlanner />
                 </>
@@ -161,25 +165,25 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                     <div className="route-prefs__row">
                         <span className="route-prefs__label">지역</span>
                         <div className="route-prefs__chips" role="group" aria-label="지역">
-                            {REGIONS.map((r) => <button key={r} type="button" disabled={aiLoading} onClick={() => changePref(setRegion, r)} aria-pressed={region === r} className="route-chip">{r}</button>)}
+                            {REGIONS.map((r) => <MotionButton key={r} type="button" disabled={aiLoading} onClick={() => changePref(setRegion, r)} aria-pressed={region === r} className="route-chip">{r}</MotionButton>)}
                         </div>
                     </div>
                     <div className="route-prefs__row">
                         <span className="route-prefs__label">목적</span>
                         <div className="route-prefs__chips" role="group" aria-label="목적">
-                            {PURPOSES.map((p) => <button key={p} type="button" disabled={aiLoading} onClick={() => changePref(setPurpose, p)} aria-pressed={purpose === p} className="route-chip">{p}</button>)}
+                            {PURPOSES.map((p) => <MotionButton key={p} type="button" disabled={aiLoading} onClick={() => changePref(setPurpose, p)} aria-pressed={purpose === p} className="route-chip">{p}</MotionButton>)}
                         </div>
                     </div>
                     <div className="route-prefs__row">
                         <span className="route-prefs__label">기간</span>
                         <div className="route-prefs__chips" role="group" aria-label="기간">
-                            {DURATIONS.map((d) => <button key={d} type="button" disabled={aiLoading} onClick={() => changePref(setDuration, d)} aria-pressed={duration === d} className="route-chip">{d}</button>)}
+                            {DURATIONS.map((d) => <MotionButton key={d} type="button" disabled={aiLoading} onClick={() => changePref(setDuration, d)} aria-pressed={duration === d} className="route-chip">{d}</MotionButton>)}
                         </div>
                     </div>
                     <div className="route-prefs__foot">
                         <div className="route-seg" role="group" aria-label="코스 방식">
-                            <button type="button" onClick={() => setMode('tour')} aria-pressed={mode === 'tour'} className="route-seg__btn"><span>기본 코스</span></button>
-                            <button type="button" onClick={requestAiCourse} aria-pressed={mode === 'ai'} className="route-seg__btn"><span>AI 코스</span>{!isLoggedIn && <span className="route-seg__badge">로그인</span>}</button>
+                            <MotionButton type="button" onClick={() => setMode('tour')} aria-pressed={mode === 'tour'} className="route-seg__btn"><span>기본 코스</span></MotionButton>
+                            <MotionButton type="button" onClick={requestAiCourse} aria-pressed={mode === 'ai'} className="route-seg__btn"><span>AI 코스</span>{!isLoggedIn && <span className="route-seg__badge">로그인</span>}</MotionButton>
                         </div>
                         <p className="route-prefs__hint">{mode === 'ai' ? '조건을 확인한 뒤 코스 만들기를 눌러 주세요' : '기본 코스는 고른 지역의 맛집을 가까운 순으로 이어요 · 목적·기간은 AI 코스에 반영'}</p>
                     </div>
@@ -188,7 +192,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                     <label>안내 언어 <select value={responseLocale} disabled={aiLoading} onChange={e => { setResponseLocale(e.target.value as 'ko' | 'en' | 'ja'); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }}><option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option></select></label>
                     <p><label><input type="checkbox" checked={acknowledged} disabled={aiLoading} onChange={e => { setAcknowledged(e.target.checked); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }} /> 위 조건의 충족을 보장하지 않는 일반 장소 코스로 진행합니다.</label></p>
                     {!acknowledged && <p role="status">일반 장소 코스 안내에 직접 동의한 후 코스를 만들 수 있습니다.</p>}
-                    <button type="button" disabled={!acknowledged || aiLoading} onClick={() => void fetchAi()}>코스 만들기</button>
+                    <MotionButton type="button" disabled={!acknowledged || aiLoading} onClick={() => void fetchAi()}>코스 만들기</MotionButton>
                     </section>}
                 </div>
             )}
@@ -232,8 +236,8 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                     )}
 
                     {mapData && (
-                        <div className="map-view w-full route-map">
-                            <RouteMap data={mapData} />
+                        <div className="route-result-map">
+                            <RouteMap data={mapData} onSelect={selectStop} />
                         </div>
                     )}
 
@@ -243,7 +247,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                                 const open = openDays[g.day] ?? true;
                                 return (
                                     <div key={g.day} className="route-day">
-                                        <button
+                                        <MotionButton
                                             type="button"
                                             onClick={() => setOpenDays((p) => ({ ...p, [g.day]: !open }))}
                                             aria-expanded={open}
@@ -251,16 +255,17 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                                         >
                                             <span className="route-day__title">Day {g.day} · {g.markers.length}곳</span>
                                             <span className="route-day__caret" aria-hidden="true">{open ? '▲' : '▼'}</span>
-                                        </button>
+                                        </MotionButton>
                                         {open && (
                                             <div className="route-day__list">
                                                 {g.markers.map((m, stopIndex) => {
                                                     const next = g.markers[stopIndex + 1];
                                                     return (
-                                                        <div key={m.id} className="route-stop">
+                                                        <div key={m.id} className="route-stop" data-selected={selectedStopId === m.id} style={{animationDelay: `${stopIndex < 6 ? stopIndex * 40 : 0}ms`}}>
                                                             <span className="route-stop__index">{m.index + 1}</span>
                                                             <div className="route-stop__body">
-                                                                <p className="route-stop__name">{m.name}</p>
+                                                                <MotionButton type="button" className="route-stop__name" aria-label={`${m.name} 지도에서 선택`} aria-pressed={selectedStopId === m.id}
+                                                                    onClick={() => window.dispatchEvent(new CustomEvent(ROUTE_MARKER_SELECT_EVENT, {detail: {id: m.id}}))}>{m.name}</MotionButton>
                                                                 <p className="route-stop__meta">
                                                                     {[m.slot ? (SLOT_LABEL[m.slot] ?? m.slot) : null, m.address].filter(Boolean).join(' · ')}
                                                                 </p>
@@ -281,9 +286,9 @@ export default function RouteScreen(_props: ScreenControllerProps) {
 
             {mode !== 'road' && (
                 <div className="route-actions">
-                    <button type="button" className="route-pill" onClick={() => setMode('road')}>🧭 길 찾기</button>
+                    <MotionButton type="button" className="route-pill" onClick={() => setMode('road')}>길 찾기</MotionButton>
                     <KakaoShareButton text="Kride에서 추천받은 하루 코스를 확인해 보세요!" path="/view/ROUTE_PLANNER" />
-                    <Link className="route-pill route-actions__link" href="/view/SET_TIME_PAGE">⏰ 약속 시간</Link>
+                    <Link className="route-pill route-actions__link" href="/view/SET_TIME_PAGE">약속 시간</Link>
                 </div>
             )}
         </div>

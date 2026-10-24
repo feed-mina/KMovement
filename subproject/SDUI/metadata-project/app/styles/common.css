@@ -86,22 +86,31 @@
 
 .route-map {
     position: relative;
-    background: #0b0f14;
+    isolation: isolate;
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    background: var(--surface-card, #fff);
 }
 
 .route-map__toolbar {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 1000;
-    display: inline-flex;
-    gap: 4px;
-    padding: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-hair, #ddd);
+    background: var(--surface-card, #fff);
 }
+.route-map__toolbar-label { margin-right: auto; font-size: 13px; font-weight: 700; color: var(--text-strong, #172033); }
+.route-map__providers { display: inline-flex; gap: 4px; padding: 3px; border-radius: 10px; background: var(--surface-subtle, #f4f4f5); }
+.route-map__provider-note { flex-basis: 100%; font-size: 12px; color: var(--text-muted, #64748b); }
+.route-map__provider-label { position: relative; z-index: 1; }
+.route-map__provider-indicator { position: absolute; inset: 0; background: var(--surface-card, #fff); border-radius: inherit; z-index: 0; box-shadow: 0 1px 3px #0001; }
 
 .route-map__provider {
     min-width: 72px;
@@ -109,24 +118,30 @@
     border: 0;
     border-radius: 6px;
     background: transparent;
-    color: rgba(255, 255, 255, 0.78);
+    color: var(--text-body, #374151);
     cursor: pointer;
     font-size: 13px;
     font-weight: 700;
 }
 
 .route-map__provider--active {
-    background: #ffffff;
-    color: #111827;
+    background: transparent;
+    color: var(--semantic-accent-strong, #8b0610);
 }
 
 .route-map__body {
     position: relative;
+    isolation: isolate;
+    z-index: 0;
+    height: auto;
+    min-height: 400px;
+    flex: none;
 }
 
+.route-map__canvas,
 .route-map .leaflet-container {
     width: 100%;
-    height: 100%;
+    height: clamp(400px, 55vh, 560px);
     min-height: 400px;
 }
 
@@ -145,19 +160,14 @@
 }
 
 .route-map__fallback-notice {
-    position: absolute;
-    right: 12px;
-    bottom: 12px;
-    z-index: 1000;
-    max-width: calc(100% - 24px);
+    position: relative;
+    margin: 0;
     padding: 8px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
-    color: #ffffff;
-    background: rgba(17, 24, 39, 0.88);
+    border-top: 1px solid var(--border-hair, #ddd);
+    color: var(--text-body, #374151);
+    background: var(--surface-subtle, #f4f4f5);
     font-size: 12px;
-    font-weight: 600;
-    pointer-events: none;
+    line-height: 1.5;
 }
 
 .route-node {

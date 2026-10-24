@@ -1,7 +1,8 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import {useKrideReducedMotion} from '@/components/motion/KrideMotion';
 import 'leaflet/dist/leaflet.css';
 import type { RouteMapMarker } from './maps/mapTypes';
 
@@ -30,10 +31,12 @@ interface Props {
   markers?: Array<RouteMarker | RouteMapMarker>;
   zoom?: number;
   selectedMarkerId?: string;
+  onMarkerSelect?: (marker: RouteMapMarker) => void;
 }
 
 function MapController({ markers, selectedMarkerId }: { markers: Array<RouteMarker | RouteMapMarker>; selectedMarkerId?: string }) {
   const map = useMap();
+  const reducedMotion = useKrideReducedMotion();
   
   useEffect(() => {
     if (!selectedMarkerId) return;
@@ -45,14 +48,17 @@ function MapController({ markers, selectedMarkerId }: { markers: Array<RouteMark
     
     const lng = marker.lng ?? ('lon' in marker ? marker.lon : undefined);
     if (marker.lat != null && lng != null) {
-      map.flyTo([marker.lat, lng], 15, { animate: true, duration: 1.5 });
+      map.stop();
+      if (reducedMotion) map.setView([marker.lat, lng], 15, {animate: false});
+      else map.flyTo([marker.lat, lng], 15, {animate: true, duration: 0.5});
     }
-  }, [map, markers, selectedMarkerId]);
+    return () => {map.stop();};
+  }, [map, markers, selectedMarkerId, reducedMotion]);
   
   return null;
 }
 
-export default function MapViewInner({ center = [37.5665, 126.978], markers = [], zoom = 13, selectedMarkerId }: Props) {
+export default function MapViewInner({ center = [37.5665, 126.978], markers = [], zoom = 13, selectedMarkerId, onMarkerSelect }: Props) {
   const positions = markers
     .map((marker) => {
       const lng = marker.lng ?? ('lon' in marker ? marker.lon : undefined);
@@ -65,7 +71,7 @@ export default function MapViewInner({ center = [37.5665, 126.978], markers = []
       center={center}
       zoom={zoom}
       scrollWheelZoom={true}
-      style={{ width: '100%', height: '100%', minHeight: '400px' }}
+      style={{ width: '100%', height: 'clamp(400px, 55vh, 560px)', minHeight: '400px' }}
     >
       <MapController markers={markers} selectedMarkerId={selectedMarkerId} />
       <TileLayer
@@ -77,20 +83,32 @@ export default function MapViewInner({ center = [37.5665, 126.978], markers = []
         const lng = m.lng ?? ('lon' in m ? m.lon : undefined);
         if (m.lat == null || lng == null) return null;
         
-        const num = m.index != null ? m.index + 1 : i + 1;
-        const numberedIcon = L.divIcon({
-          className: 'custom-leaflet-marker',
-          html: `<div style="background-color: #dc2626; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); border: 2px solid white;">${num}</div>`,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12],
-        });
-
-        return (
-          <Marker key={`${m.name}-${i}`} position={[m.lat, lng]} icon={numberedIcon}>
-            <Popup>{m.index != null ? `${m.index + 1}. ` : ''}{m.name}</Popup>
-          </Marker>
-        );
+        return <NumberedRouteMarker key={'id' in m ? m.id : `${m.name}-${i}`} marker={m} number={m.index != null ? m.index + 1 : i + 1}
+          lng={lng} selected={'id' in m && m.id === selectedMarkerId} onSelect={onMarkerSelect} />;
       })}
     </MapContainer>
   );
+}
+
+
+/** Leaflet owns the outer marker transform; only the inner dot scales. */
+function NumberedRouteMarker({marker, number, lng, selected, onSelect}: {
+  marker: RouteMarker | RouteMapMarker; number: number; lng: number; selected: boolean;
+  onSelect?: (marker: RouteMapMarker) => void;
+}) {
+  const ref = useRef<L.Marker>(null);
+  const icon = useMemo(() => L.divIcon({
+    className: 'custom-leaflet-marker',
+    html: `<span class="route-pin__dot">${number}</span>`,
+    iconSize: [30, 30], iconAnchor: [15, 15],
+  }), [number]);
+  useEffect(() => {
+    const dot = ref.current?.getElement()?.querySelector<HTMLElement>('.route-pin__dot');
+    if (dot) dot.dataset.selected = String(selected);
+    ref.current?.setZIndexOffset(selected ? 1000 : 0);
+  }, [selected]);
+  return <Marker ref={ref} position={[marker.lat, lng]} icon={icon} title={marker.name} alt={`${number}. ${marker.name}`}
+    eventHandlers={{click: () => {if ('id' in marker) onSelect?.(marker);}}}>
+    <Popup>{number}. {marker.name}</Popup>
+  </Marker>;
 }

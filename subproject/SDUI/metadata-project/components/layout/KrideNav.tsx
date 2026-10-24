@@ -47,6 +47,23 @@ export default function KrideNav() {
     const path = usePathname() || '/';
     const more = useRef<HTMLDetailsElement>(null);
     useEffect(() => { if (more.current) more.current.open = false; }, [path]);
+    useEffect(() => {
+        const closeOutside = (event: PointerEvent) => {
+            const menu = more.current;
+            if (menu?.open && event.target instanceof Node && !menu.contains(event.target)) menu.open = false;
+        };
+        const closeWithEscape = (event: KeyboardEvent) => {
+            if (event.key !== 'Escape' || !more.current?.open) return;
+            more.current.open = false;
+            more.current.querySelector('summary')?.focus();
+        };
+        document.addEventListener('pointerdown', closeOutside);
+        document.addEventListener('keydown', closeWithEscape);
+        return () => {
+            document.removeEventListener('pointerdown', closeOutside);
+            document.removeEventListener('keydown', closeWithEscape);
+        };
+    }, []);
 
     const activeTab = KRIDE_TABS.find((tab) => tab.active(path));
     const activeMore = activeTab ? undefined : MORE.find((item) => !item.hidden && item.active?.(path));
@@ -66,7 +83,9 @@ export default function KrideNav() {
                         <span className="kride-tab-icon">{icon(<><line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" /></>)}</span>
                         <span className="kride-tab-label">더보기</span>
                     </summary>
-                    <div>
+                    <div onClick={(event) => {
+                        if ((event.target as HTMLElement).closest('a') && more.current) more.current.open = false;
+                    }}>
                         {MORE.map((item) => (
                             <Link key={item.href} href={item.href} aria-current={item === activeMore ? 'page' : undefined} hidden={item.hidden} className={item.hidden ? 'kride-entry-hidden' : undefined}>{item.label}</Link>
                         ))}

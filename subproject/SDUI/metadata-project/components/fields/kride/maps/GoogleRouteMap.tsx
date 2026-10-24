@@ -1,5 +1,6 @@
 'use client';
 
+import {useKrideReducedMotion} from '@/components/motion/KrideMotion';
 import { useEffect, useRef, useState } from 'react';
 import { buildMarkerInfoHtml, RouteMapData, RouteMapMarker } from './mapTypes';
 import LeafletFallbackMap from './LeafletFallbackMap';
@@ -13,18 +14,19 @@ type Props = {
 };
 
 export default function GoogleRouteMap({ apiKey, data, selectedMarkerId, onMarkerSelect }: Props) {
+  const reducedMotion = useKrideReducedMotion();
+  const [ready, setReady] = useState(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
   const markerRefs = useRef<Record<string, any>>({});
   const infoRefs = useRef<Record<string, any>>({});
-  const [error, setError] = useState('');
+  const [error, setError] = useState<{data: RouteMapData; key: string; message: string} | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     const overlays: any[] = [];
     let renderCheckTimer: number | null = null;
 
-    setError('');
     loadGoogleMaps(apiKey)
       .then((google) => {
         if (cancelled || !containerRef.current) return;
@@ -37,6 +39,7 @@ export default function GoogleRouteMap({ apiKey, data, selectedMarkerId, onMarke
           fullscreenControl: true,
         });
         mapRef.current = map;
+        setReady((value) => value + 1);
         markerRefs.current = {};
         infoRefs.current = {};
 
@@ -90,12 +93,12 @@ export default function GoogleRouteMap({ apiKey, data, selectedMarkerId, onMarke
             '.gm-err-container, .gm-err-title, .gm-err-message'
           );
           if (googleError) {
-            setError('Google Maps failed to render.');
+            setError({data, key: apiKey, message: 'Google Maps failed to render.'});
           }
         }, 1500);
       })
       .catch((loadError) => {
-        if (!cancelled) setError(loadError?.message ?? 'Google Maps load failed.');
+        if (!cancelled) setError({data, key: apiKey, message: loadError?.message ?? 'Google Maps load failed.'});
       });
 
     return () => {
@@ -115,15 +118,17 @@ export default function GoogleRouteMap({ apiKey, data, selectedMarkerId, onMarke
     const infoWindow = infoRefs.current[selectedMarkerId];
     if (!marker || !googleMarker || !infoWindow) return;
 
-    mapRef.current.panTo({ lat: marker.lat, lng: marker.lng });
+    Object.entries(markerRefs.current).forEach(([id, item]) => item.setZIndex?.(id === selectedMarkerId ? 10 : 1));
+    if (reducedMotion) mapRef.current.setCenter({lat: marker.lat, lng: marker.lng});
+    else mapRef.current.panTo({ lat: marker.lat, lng: marker.lng });
     mapRef.current.setZoom(Math.max(mapRef.current.getZoom() ?? data.zoom, 14));
     infoWindow.open({ anchor: googleMarker, map: mapRef.current });
-  }, [data.markers, data.zoom, selectedMarkerId]);
+  }, [data.markers, data.zoom, selectedMarkerId, ready, reducedMotion]);
 
-  if (error) {
+  if (error?.data === data && error.key === apiKey) {
     return (
       <>
-        <LeafletFallbackMap data={data} selectedMarkerId={selectedMarkerId} />
+        <LeafletFallbackMap data={data} selectedMarkerId={selectedMarkerId} onMarkerSelect={onMarkerSelect} />
         <div className="route-map__fallback-notice" role="status">
           Google Maps is unavailable. Showing the fallback map.
         </div>
