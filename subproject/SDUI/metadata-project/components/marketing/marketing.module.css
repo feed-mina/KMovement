@@ -91,3 +91,20 @@
 .tile > span:last-child > span { font-size: 13px; color: var(--text-muted, #6b7280); }
 @media (max-width: 980px) { .tileGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 720px) { .hero h1 { font-size: clamp(30px, 8.2vw, 38px); } .hero h1 br { display: none; } .search { margin-top: 20px; } .strip { padding: 0 16px; } .stripInner { flex-direction: column; align-items: flex-start; } }
+
+/* Pastel hero and small, reversible interaction feedback. */
+.hero { position: relative; isolation: isolate; border-radius: 28px; margin-bottom: 28px; }
+.hero h1, .hero p, .eyebrow { animation: kride-hero-reveal .45s ease-out both; }
+.hero p { animation-delay: .06s; }
+.primaryButton, .secondaryButton, .chip, .tile, .areaCard { transition: transform .18s, color .18s, background-color .18s, border-color .18s, box-shadow .2s; }
+@keyframes kride-hero-reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (hover: hover) and (pointer: fine) {
+ .primaryButton:hover, .secondaryButton:hover { transform: scale(1.025); box-shadow: 0 6px 18px #692d3b20; }
+ .chip:hover { transform: translateY(-2px); }
+ .primaryButton:active, .secondaryButton:active { transform: scale(.98); }
+ .tile:hover, .areaCard:hover { box-shadow: 0 10px 24px #692d3b12; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .hero h1, .hero p, .eyebrow { animation: none; }
+ .primaryButton, .secondaryButton, .chip, .tile, .areaCard { transition: none; transform: none !important; }
+}

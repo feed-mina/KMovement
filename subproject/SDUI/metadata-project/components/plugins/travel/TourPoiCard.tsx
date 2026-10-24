@@ -1,5 +1,7 @@
 'use client';
 
+import {motion} from 'framer-motion';
+import {useCardTilt, useKrideReducedMotion} from '@/components/motion/KrideMotion';
 import type {TourPoi} from '@/services/tourApi';
 import PoiImage from '@/components/plugins/travel/PoiImage';
 
@@ -18,6 +20,7 @@ interface TourPoiCardProps {
     /** 성지가 아닐 때 보여줄 카테고리 라벨 (맛집 · 관광지 · 문화시설). */
     categoryLabel?: string;
     cardId?: string;
+    entranceIndex?: number;
 }
 
 /** "서울 종로구 창경궁로 88" → "서울 종로구". 카드에는 동네까지만, 전체 주소는 title 로. */
@@ -26,12 +29,20 @@ export function shortAddress(addr?: string): string {
     return addr.trim().split(/\s+/).slice(0, 2).join(' ');
 }
 
-export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onToggleSave, selected, onMapSelect, onHighlight, categoryLabel, cardId}: TourPoiCardProps) {
+export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onToggleSave, selected, onMapSelect, onHighlight, categoryLabel, cardId, entranceIndex = 0}: TourPoiCardProps) {
+    const tilt = useCardTilt();
+    const reduced = useKrideReducedMotion();
     const recommendReason = poi.recommendReason?.trim();
     const isHoly = poi.contentTypeId === 'HOLY';
 
     return (
-        <article
+        <motion.article
+            {...tilt}
+            layout="position"
+            initial={reduced ? false : {opacity: 0, y: 8}}
+            animate={{opacity: 1, y: 0}}
+            transition={{duration: 0.22, delay: entranceIndex < 6 ? entranceIndex * 0.04 : 0, layout: {duration: 0.2}}}
+            whileHover={reduced ? undefined : {y: -3}}
             id={cardId}
             tabIndex={-1}
             data-selected={Boolean(selected)}
@@ -76,9 +87,13 @@ export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onT
                 </span>
             </button>
             {onMapSelect
-                ? <button className="tour-poi-card__map" type="button" aria-pressed={Boolean(selected)} aria-label={`${poi.title} 지도에서 선택`} onClick={onMapSelect}><span aria-hidden="true">📍</span> 지도</button>
+                ? <button className="tour-poi-card__map" type="button" aria-pressed={Boolean(selected)} aria-label={`${poi.title} 지도에서 선택`} onClick={onMapSelect}>지도</button>
                 : cardId ? <span className="tour-card-coordinate-note">좌표 없음 · 주소로 확인</span> : null}
-            <button
+            <motion.button
+                initial={false}
+                whileTap={reduced ? undefined : {scale: 0.88}}
+                animate={{scale: isSaved && !reduced ? [1, 1.15, 1] : 1}}
+                transition={{duration: 0.18}}
                 type="button"
                 className="tour-poi-card__save"
                 aria-label={isSaved ? `${poi.title} 저장 취소` : `${poi.title} 저장`}
@@ -86,7 +101,7 @@ export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onT
                 onClick={() => onToggleSave(poi.contentId)}
             >
                 {isSaved ? '♥' : '♡'}
-            </button>
-        </article>
+            </motion.button>
+        </motion.article>
     );
 }

@@ -276,7 +276,7 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         await waitFor(() => expect(mockedRestaurants).toHaveBeenCalledWith(expect.objectContaining({ areaCode: '31', sigunguCode: '' })));
     });
 
-    it('지역 필터 이동 버튼으로 칩 레일을 부드럽게 스크롤하고 끝 지점을 표시한다', async () => {
+    it('환경 설정 API가 없으면 칩 레일을 즉시 이동하고 끝 지점을 표시한다', async () => {
         renderScreen();
         const rail = screen.getByRole('group', { name: '시·도 선택' });
         const scrollBy = jest.fn();
@@ -291,7 +291,7 @@ describe('TourExploreScreen — [탐색] TourAPI 카드', () => {
         const nextButton = screen.getByRole('button', { name: '시·도 선택 다음 항목' });
         await waitFor(() => expect(nextButton).toBeEnabled());
         fireEvent.click(nextButton);
-        expect(scrollBy).toHaveBeenCalledWith({ left: 220, behavior: 'smooth' });
+        expect(scrollBy).toHaveBeenCalledWith({ left: 220, behavior: 'auto' });
 
         Object.defineProperty(rail, 'scrollLeft', { configurable: true, value: 600 });
         fireEvent.scroll(rail);

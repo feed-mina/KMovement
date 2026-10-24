@@ -1,3 +1,4 @@
+import {PastelBackdrop} from '@/components/motion/KrideMotion';
 import Link from 'next/link';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import TrackedLink from '@/components/analytics/TrackedLink';
@@ -17,6 +18,7 @@ export default function FoodHubLanding() {
             ]} />
             <MarketingNav />
             <header className={styles.hero}>
+                <PastelBackdrop />
                 <span className={styles.eyebrow}>{foodHub.eyebrow}</span>
                 <h1>{foodHub.title}</h1>
                 <p>{foodHub.description}</p>

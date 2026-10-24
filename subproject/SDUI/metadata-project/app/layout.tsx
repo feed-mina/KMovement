@@ -1,4 +1,6 @@
 import "./styles/index.css";
+import "./styles/kride-motion.css";
+import {KrideMotionProvider} from "@/components/motion/KrideMotion";
 import type { Metadata, Viewport } from 'next';
 import AppProviders from '@/components/providers/AppProviders';
 import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
@@ -68,7 +70,7 @@ export default function RootLayout({children}: Readonly<{
         </head>
         <body className="antialiased">
             <AnalyticsProvider>
-                <AppProviders>{children}</AppProviders>
+                <KrideMotionProvider><AppProviders>{children}</AppProviders></KrideMotionProvider>
             </AnalyticsProvider>
         </body>
         </html>

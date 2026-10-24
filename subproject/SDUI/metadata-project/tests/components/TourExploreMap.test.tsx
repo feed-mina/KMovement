@@ -12,25 +12,36 @@ it('유효한 경도/위도만 허용하며 0,0과 비정상 좌표를 제외한
     }
 });
 
-it('mapY를 위도, mapX를 경도로 사용하고 핀 선택과 카드 선택을 연결한다', async () => {
-    const panTo = jest.fn(); const removeListener = jest.fn(); const handlers: Array<() => void> = [];
-    const markers: any[]=[];
-    const LatLng = jest.fn((lat,lng)=>({lat,lng}));
-    const kakao={maps:{LatLng,Map:jest.fn(()=>({setBounds:jest.fn(),panTo,relayout:jest.fn()})),LatLngBounds:jest.fn(()=>({extend:jest.fn()})),
-        Marker:jest.fn(({position})=>{const marker={setMap:jest.fn(),setZIndex:jest.fn(),setOpacity:jest.fn(),getPosition:()=>position}; markers.push(marker);return marker;}),
-        event:{addListener:jest.fn((_m,_e,handler)=>handlers.push(handler)),removeListener}}};
-    window.kakao=kakao; load.mockResolvedValue(kakao);
-    const onSelect=jest.fn();
-    const {rerender,unmount}=render(<TourExploreMap pois={pois} selectedId={null} onSelect={onSelect}/>);
-    await waitFor(()=>expect(handlers).toHaveLength(2));
-    expect(LatLng).toHaveBeenCalledWith(37.5,127);
-    handlers[1](); expect(onSelect).toHaveBeenCalledWith('b');
+it('좌표와 키보드 가능한 핀을 연결하고 선택 강조·이벤트 정리를 유지한다', async () => {
+    const panTo = jest.fn(); const setCenter = jest.fn();
+    const overlays: any[] = [];
+    const LatLng = jest.fn((lat, lng) => ({lat, lng}));
+    const kakao = {maps: {
+        LatLng, Map: jest.fn(() => ({setBounds: jest.fn(), panTo, setCenter, relayout: jest.fn()})),
+        LatLngBounds: jest.fn(() => ({extend: jest.fn()})),
+        CustomOverlay: jest.fn(({position, content}) => {
+            const overlay = {setMap: jest.fn(), setZIndex: jest.fn(), getPosition: () => position, content};
+            overlays.push(overlay); return overlay;
+        }),
+    }};
+    load.mockResolvedValue(kakao);
+    const onSelect = jest.fn();
+    const {rerender, unmount} = render(<TourExploreMap pois={pois} selectedId={null} onSelect={onSelect}/>);
+    await waitFor(() => expect(overlays).toHaveLength(2));
+    expect(LatLng).toHaveBeenCalledWith(37.5, 127);
+    expect(overlays[1].content.tagName).toBe('BUTTON');
+    expect(overlays[1].content).toHaveAccessibleName('장소 B 지도 핀');
+    fireEvent.click(overlays[1].content);
+    expect(onSelect).toHaveBeenCalledWith('b');
     rerender(<TourExploreMap pois={pois} selectedId="a" onSelect={onSelect}/>);
-    expect(panTo).toHaveBeenCalledWith({lat:37.5,lng:127});
-    expect(markers[1].setOpacity).toHaveBeenLastCalledWith(0.55);
-    unmount(); expect(removeListener).toHaveBeenCalledTimes(2);
-    expect(markers[0].setMap).toHaveBeenCalledWith(null);
-    delete window.kakao;
+    expect(setCenter).toHaveBeenCalledWith({lat:37.5, lng:127});
+    expect(overlays[0].content).toHaveAttribute('aria-pressed', 'true');
+    expect(overlays[1].content).toHaveAttribute('data-dimmed', 'true');
+    const detachedPin = overlays[1].content;
+    unmount();
+    expect(overlays[0].setMap).toHaveBeenCalledWith(null);
+    onSelect.mockClear(); fireEvent.click(detachedPin);
+    expect(onSelect).not.toHaveBeenCalled();
 });
 
 it('지도 SDK 실패를 목록 오류와 구분한다', async () => {

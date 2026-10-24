@@ -92,3 +92,29 @@
 .tour-load-more__btn { padding: 10px 22px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface-card); color: var(--text-body); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
 .tour-load-more__error { margin: 10px 0 0; text-align: center; color: var(--danger-strong); font-size: 12px; }
 @media (max-width: 767px) { .tour-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .tour-poi-card__body { padding: 8px 10px 6px; } .tour-poi-card__map { margin: 0 10px 8px; } }
+
+/* Motion accents: filters stay readable and the map SDK owns pin positioning. */
+.tour-explore__header { position: relative; isolation: isolate; border-radius: 14px; min-height: 100px; padding: 16px 14px 38px; box-sizing: border-box; }
+.tour-explore__heading { flex-wrap: wrap; }
+.tour-chip__text { position: relative; z-index: 1; }
+.tour-chip { transition: border-color .18s, color .18s, background-color .18s; }
+.tour-poi-card { transition: box-shadow .2s; }
+.tour-poi-card__media { overflow: hidden; }
+.tour-poi-card__media img { transition: transform .25s ease-out; }
+.tour-poi-card__save[aria-pressed=true] { background: var(--semantic-accent-soft); }
+.tour-map-pin { display: grid; place-items: center; width: 38px; height: 38px; min-height: 38px !important; border: 2px solid white; border-radius: 50% 50% 50% 10%; background: var(--semantic-accent, #e50914); color: white; font: 700 13px system-ui; box-shadow: 0 3px 10px #391a2730; cursor: pointer; animation: tour-pin-enter .3s ease-out both; transition: scale .2s, opacity .2s, box-shadow .2s; }
+.tour-map-pin[data-dimmed=true] { opacity: .6; }
+.tour-map-pin[aria-pressed=true] { scale: 1.16; box-shadow: 0 0 0 5px #e5091426, 0 4px 12px #391a2730; }
+.tour-map-pin:focus-visible { outline: 3px solid var(--focus-outline, #1557a1); outline-offset: 4px; }
+@keyframes tour-pin-enter { 0% { opacity: 0; transform: translateY(-10px) scale(.85); } 65% { opacity: 1; transform: translateY(2px) scale(1.03); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+@media (hover: hover) and (pointer: fine) {
+ .tour-poi-card:hover { box-shadow: 0 10px 24px #692d3b14; }
+ .tour-poi-card:hover .tour-poi-card__media img { transform: scale(1.03); }
+}
+@media (prefers-reduced-motion: reduce) {
+ .tour-map-pin { animation: none; transition: none; }
+ .tour-map-pin[aria-pressed=true] { scale: 1; outline: 3px solid var(--semantic-accent-strong); outline-offset: 3px; }
+ .tour-poi-card__media img { transition: none; transform: none !important; }
+ .tour-poi-card, .tour-chip { transition: none; }
+ .tour-detail-panel { transform: none !important; }
+}

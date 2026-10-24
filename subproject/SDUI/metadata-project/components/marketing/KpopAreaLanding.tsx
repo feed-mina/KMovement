@@ -1,3 +1,4 @@
+import {PastelBackdrop} from '@/components/motion/KrideMotion';
 import Link from 'next/link';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import SpotThumbnail from '@/components/marketing/SpotThumbnail';
@@ -46,6 +47,7 @@ export default function KpopAreaLanding({ area, spots }: { area: KpopAreaGuide; 
                 {area.name}
             </p>
             <header className={styles.hero}>
+                <PastelBackdrop />
                 <span className={styles.eyebrow}>{area.fullName} K-POP 여행 가이드</span>
                 <h1>{area.name} K-POP 성지, {area.tagline}</h1>
                 <p>{area.description}</p>
