@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import {motion} from 'framer-motion';
+import {MotionButton, PastelBackdrop, useKrideReducedMotion} from '@/components/motion/KrideMotion';
 import { useSearchParams } from 'next/navigation';
 import type { ScreenControllerProps } from '@/components/screens/types';
 import {
@@ -125,6 +127,7 @@ function HorizontalFilterRail({
     busy?: boolean;
     children: React.ReactNode;
 }) {
+    const reducedMotion = useKrideReducedMotion();
     const scrollRef = useRef<HTMLDivElement>(null);
     const [scrollState, setScrollState] = useState({ left: false, right: false });
 
@@ -159,13 +162,13 @@ function HorizontalFilterRail({
         if (!rail) return;
         rail.scrollBy({
             left: direction * Math.max(rail.clientWidth * 0.72, 220),
-            behavior: 'smooth',
+            behavior: reducedMotion ? 'auto' : 'smooth',
         });
     };
 
     return (
         <div className="tour-filter-rail">
-            <button
+            <MotionButton
                 type="button"
                 className="tour-filter-rail__control"
                 aria-label={`${label} 이전 항목`}
@@ -173,7 +176,7 @@ function HorizontalFilterRail({
                 onClick={() => move(-1)}
             >
                 <span aria-hidden="true">‹</span>
-            </button>
+            </MotionButton>
             <div
                 ref={scrollRef}
                 role="group"
@@ -183,7 +186,7 @@ function HorizontalFilterRail({
             >
                 {children}
             </div>
-            <button
+            <MotionButton
                 type="button"
                 className="tour-filter-rail__control"
                 aria-label={`${label} 다음 항목`}
@@ -191,12 +194,14 @@ function HorizontalFilterRail({
                 onClick={() => move(1)}
             >
                 <span aria-hidden="true">›</span>
-            </button>
+            </MotionButton>
         </div>
     );
 }
 
 export default function TourExploreScreen(_props: ScreenControllerProps) {
+    const reducedMotion = useKrideReducedMotion();
+    const categoryIndicatorId = useId();
     const searchParams = useSearchParams();
     const [category, setCategory] = useState(() => resolveCategoryParam(searchParams?.get('category')));
     // 진입 시점의 URL 조건을 읽고, 이후 변경은 아래 history 동기화 effect 가 URL 에 다시 쓴다 (벤치마킹 H4).
@@ -221,10 +226,10 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         setMobileView('list');
         requestAnimationFrame(() => {
             const card = document.getElementById(`tour-card-${encodeURIComponent(id)}`);
-            card?.scrollIntoView?.({block: 'nearest', behavior: 'smooth'});
+            card?.scrollIntoView?.({block: 'nearest', behavior: reducedMotion ? 'auto' : 'smooth'});
             card?.focus({preventScroll: true});
         });
-    }, []);
+    }, [reducedMotion]);
     const filtersId = useId();
     const [pois, setPois] = useState<TourPoi[]>([]);
     // 성지는 서버가 최대 300건(TourService.HOLY_MAX_RESULTS)을 한 번에 내려준다.
@@ -516,6 +521,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
         <div className="page-wrap TOUR_EXPLORE tour-explore">
             <div className="tour-filter-bar">
                 <header className="tour-explore__header">
+                    <PastelBackdrop />
                     <span className="tour-explore__heading">
                         <span className="tour-explore__title">탐색</span>
                         <span className="tour-explore__subtitle">오늘 어디로 덕질 갈까요?</span>
@@ -524,13 +530,16 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                 </header>
                 <HorizontalFilterRail label="장소 카테고리">
                     {CATEGORIES.map((c) => (
-                        <button key={c.id} type="button" className="tour-chip tour-chip--fixed" onClick={() => setCategory(c.id)} aria-pressed={category === c.id}>{c.label}</button>
+                        <MotionButton key={c.id} type="button" className="tour-chip tour-chip--fixed" onClick={() => setCategory(c.id)} aria-pressed={category === c.id}>
+                            {category === c.id && <motion.span aria-hidden="true" className="kride-selection-indicator" layoutId={categoryIndicatorId} transition={{duration: 0.2}} />}
+                            <span className="tour-chip__text">{c.label}</span>
+                        </MotionButton>
                     ))}
                 </HorizontalFilterRail>
                 <div className="tour-filter-summary">
                     <p aria-label="선택한 필터">{selectedAreaName} · {selectedSigunguName || '전체'}{selectedContent ? ` · ${selectedContent.name}` : ''}</p>
-                    <button type="button" aria-expanded={filtersOpen} aria-controls={filtersId} onClick={() => setFiltersOpen((open) => !open)}>세부 필터</button>
-                    <button type="button" onClick={resetFilters}>필터 초기화</button>
+                    <MotionButton type="button" aria-expanded={filtersOpen} aria-controls={filtersId} onClick={() => setFiltersOpen((open) => !open)}>세부 필터</MotionButton>
+                    <MotionButton type="button" onClick={resetFilters}>필터 초기화</MotionButton>
                 </div>
             </div>
             <div className="tour-search">
@@ -542,7 +551,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             <section aria-label="지역 필터" style={{ marginBottom: 10 }}>
                 <HorizontalFilterRail label="시·도 선택">
                     {areas.map((area) => (
-                        <button
+                        <MotionButton
                             key={area.code}
                             type="button"
                             onClick={() => {
@@ -554,7 +563,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             className="tour-chip tour-chip--fixed"
                         >
                             {area.name}
-                        </button>
+                        </MotionButton>
                     ))}
                 </HorizontalFilterRail>
 
@@ -562,16 +571,16 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                     label={`${selectedAreaName} 시·군·구 선택`}
                     busy={regionsLoading}
                 >
-                    <button
+                    <MotionButton
                         type="button"
                         onClick={() => setSigungu('')}
                         aria-pressed={sigungu === ''}
                         className="tour-chip tour-chip--fixed"
                     >
                         {selectedAreaName} 전체
-                    </button>
+                    </MotionButton>
                     {districts.map((district) => (
-                        <button
+                        <MotionButton
                             key={district.code}
                             type="button"
                             onClick={() => setSigungu(district.code)}
@@ -579,7 +588,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             className="tour-chip tour-chip--fixed"
                         >
                             {district.name}
-                        </button>
+                        </MotionButton>
                     ))}
                 </HorizontalFilterRail>
             </section>
@@ -587,7 +596,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             </div>
             {(areaError || regionError) && <div role="status" className="tour-recovery" data-error-source="tour-regions">
                 {areaError && <p>{areaError}</p>}{regionError && <p>{regionError}</p>}
-                <button type="button" onClick={() => setRegionAttempt((value) => value + 1)}>지역 다시 시도</button>
+                <MotionButton type="button" onClick={() => setRegionAttempt((value) => value + 1)}>지역 다시 시도</MotionButton>
             </div>}
 
             {isHolyCategory(category) && (
@@ -603,14 +612,14 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                     ? ` · ${CONTENT_CATEGORY_LABELS[selectedContent.category]}`
                                     : ''}
                             </span>
-                            <button
+                            <MotionButton
                                 type="button"
                                 aria-label={`${selectedContent.name} 필터 해제`}
                                 onClick={() => { setSelectedContent(null); setContentQuery(''); }}
                                 className="tour-chip tour-chip--fixed"
                             >
                                 필터 해제 ✕
-                            </button>
+                            </MotionButton>
                         </div>
                     ) : (
                         <>
@@ -629,7 +638,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 <ul aria-label="작품·아티스트 검색 결과" style={{ listStyle: 'none', margin: '8px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 4, maxWidth: 360 }}>
                                     {contentOptions.map((option) => (
                                         <li key={option.contentSqno}>
-                                            <button
+                                            <MotionButton
                                                 type="button"
                                                 onClick={() => {
                                                     setSelectedContent(option);
@@ -646,7 +655,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                                     {CONTENT_CATEGORY_LABELS[option.category] ?? option.category}
                                                     {` · 성지 ${option.poiCount}곳`}
                                                 </span>
-                                            </button>
+                                            </MotionButton>
                                         </li>
                                     ))}
                                 </ul>
@@ -654,7 +663,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             {contentError && (
                                 <div role="alert" className="tour-recovery" data-error-source="holy-content">
                                     {contentError}
-                                    <button type="button" onClick={() => setContentAttempt((value) => value + 1)}>작품 검색 다시 시도</button>
+                                    <MotionButton type="button" onClick={() => setContentAttempt((value) => value + 1)}>작품 검색 다시 시도</MotionButton>
                                 </div>
                             )}
                         </>
@@ -714,7 +723,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                     {!isHolyCategory(category) && (
                         <div className="tour-sort-group" role="group" aria-label="정렬">
                             {SORTS.map((s) => (
-                                <button key={s.code} type="button" className="tour-sort" onClick={() => setArrange(s.code)} aria-pressed={arrange === s.code}>{s.label}</button>
+                                <MotionButton key={s.code} type="button" className="tour-sort" onClick={() => setArrange(s.code)} aria-pressed={arrange === s.code}>{s.label}</MotionButton>
                             ))}
                         </div>
                     )}
@@ -733,8 +742,8 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
             {!loading && !error && pois.length > 0 && (
                 <>
                     <div className="tour-view-toggle" role="group" aria-label="탐색 보기">
-                        <button type="button" aria-pressed={mobileView === 'list'} onClick={() => setMobileView('list')}>목록 보기</button>
-                        <button type="button" aria-pressed={mobileView === 'map'} onClick={() => setMobileView('map')}>지도 보기</button>
+                        <MotionButton type="button" aria-pressed={mobileView === 'list'} onClick={() => setMobileView('list')}>목록 보기</MotionButton>
+                        <MotionButton type="button" aria-pressed={mobileView === 'map'} onClick={() => setMobileView('map')}>지도 보기</MotionButton>
                     </div>
                     <div className={`tour-results-layout tour-results-layout--${mobileView}`}>
                     <div className="tour-results-list">
@@ -749,6 +758,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 categoryLabel={poi.contentTypeId === 'HOLY' ? undefined : categoryLabel}
                                 poi={poi}
                                 isSaved={Boolean(poi.contentId && saved.has(poi.contentId))}
+                                entranceIndex={index}
                                 priority={index < EAGER_CARD_COUNT}
                                 onOpen={openPlace}
                                 onToggleSave={toggleSave}
@@ -757,7 +767,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                     </div>
                     {((category === '39' && restaurantHasMore) || (category !== '39' && visibleCount < filteredPois.length)) && (
                         <div className="tour-load-more">
-                            <button
+                            <MotionButton
                                 type="button"
                                 className="tour-load-more__btn"
                                 disabled={loadingMore}
@@ -771,7 +781,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                     : category === '39'
                                         ? `더 보기 (${pois.length}개 표시)`
                                         : `더 보기 (${Math.min(visibleCount, filteredPois.length)}/${filteredPois.length})`}
-                            </button>
+                            </MotionButton>
                         </div>
                     )}
                     {loadMoreError && (
@@ -794,7 +804,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                     onClick={closePlace}
                     style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 1000 }}
                 >
-                    <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: '#fff', borderRadius: 16, overflow: 'hidden', maxHeight: '86vh', overflowY: 'auto' }}>
+                    <motion.div className="tour-detail-panel" initial={reducedMotion ? false : {opacity: 0, y: 16}} animate={{opacity: 1, y: 0}} transition={{duration: 0.22}} onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: '#fff', borderRadius: 16, overflow: 'hidden', maxHeight: '86vh', overflowY: 'auto' }}>
                         <div style={{ background: '#f5f5f5', position: 'relative' }}>
                             <PoiImage
                                 src={selected.firstImage}
@@ -803,7 +813,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 sourceUrl={selected.imageSourceUrl}
                                 credit={selected.imageCredit}
                             />
-                            <button ref={closeButtonRef} type="button" aria-label="닫기" onClick={closePlace} style={{ position: 'absolute', top: 10, right: 10, width: 30, height: 30, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.45)', color: '#fff', cursor: 'pointer', fontSize: 16 }}>✕</button>
+                            <MotionButton ref={closeButtonRef} type="button" aria-label="닫기" onClick={closePlace} style={{ position: 'absolute', top: 10, right: 10, width: 30, height: 30, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.45)', color: '#fff', cursor: 'pointer', fontSize: 16 }}>✕</MotionButton>
                         </div>
                         <div style={{ padding: '14px 16px' }}>
                             <h2 id={dialogTitleId} style={{ margin: 0, fontSize: 17, fontWeight: 600 }}>{selected.title}</h2>
@@ -836,12 +846,12 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 <a href={mapsUrl(selected)} target="_blank" rel="noreferrer" onClick={() => trackEvent('map_open', { provider: 'google_maps', item_id: selected.contentId || 'unknown' })} style={{ flex: 1, textAlign: 'center', fontSize: 13, fontWeight: 500, color: '#fff', background: RED, borderRadius: 10, padding: '11px 0', textDecoration: 'none' }}>
                                     구글지도에서 보기
                                 </a>
-                                <button type="button" aria-label={selected.contentId && saved.has(selected.contentId) ? `${selected.title} 저장 취소` : `${selected.title} 저장`} onClick={() => toggleSave(selected.contentId)} style={{ border: '0.5px solid #ddd', background: 'transparent', borderRadius: 10, padding: '11px 16px', cursor: 'pointer', color: selected.contentId && saved.has(selected.contentId) ? RED : '#555', fontSize: 15 }}>
+                                <MotionButton type="button" aria-label={selected.contentId && saved.has(selected.contentId) ? `${selected.title} 저장 취소` : `${selected.title} 저장`} onClick={() => toggleSave(selected.contentId)} style={{ border: '0.5px solid #ddd', background: 'transparent', borderRadius: 10, padding: '11px 16px', cursor: 'pointer', color: selected.contentId && saved.has(selected.contentId) ? RED : '#555', fontSize: 15 }}>
                                     {selected.contentId && saved.has(selected.contentId) ? '♥' : '♡'}
-                                </button>
+                                </MotionButton>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             )}
         </div>

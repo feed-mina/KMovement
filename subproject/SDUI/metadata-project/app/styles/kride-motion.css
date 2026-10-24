@@ -1,0 +1,21 @@
+/* Motion decor stays behind text; animate transforms instead of large painted gradients. */
+.kride-pastel { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; z-index: -1; background: #fbfcff; }
+.kride-pastel > span { position: absolute; width: 85%; height: 130%; border-radius: 50%; opacity: .75; animation: kride-pastel-drift 20s ease-in-out infinite alternate; animation-play-state: paused; }
+.kride-pastel[data-moving=true] > span { animation-play-state: running; }
+.kride-pastel__pink { left: -30%; top: -60%; background: radial-gradient(ellipse, #fbdce9, transparent 68%); }
+.kride-pastel__mint { right: -30%; top: -45%; background: radial-gradient(ellipse, #d6f5ea, transparent 68%); animation-delay: -7s !important; }
+.kride-pastel__blue { left: 20%; bottom: -80%; background: radial-gradient(ellipse, #dcecff, transparent 68%); animation-delay: -13s !important; }
+@keyframes kride-pastel-drift { from { transform: translate3d(-5%, -3%, 0) scale(1); } to { transform: translate3d(12%, 8%, 0) scale(1.15); } }
+.kride-motion-pause { position: absolute; right: 14px; bottom: 10px; min-height: 32px; padding: 5px 10px; border: 1px solid #c9ced8; border-radius: 999px; color: #4c5362; background: #ffffffdb; font: inherit; font-size: 11px; cursor: pointer; }
+.kride-motion-pause:focus-visible { outline: 3px solid var(--focus-outline, #1557a1); outline-offset: 3px; }
+.kride-motion-card { min-width: 0; height: 100%; }
+.kride-motion-card > * { box-sizing: border-box; height: 100%; }
+.kride-motion-button { position: relative; isolation: isolate; overflow: hidden; }
+.kride-motion-button__label { position: static; }
+.kride-motion-ripple { position: absolute; border-radius: 50%; background: currentColor; pointer-events: none; translate: -50% -50%; }
+.kride-selection-indicator { position: absolute; inset: 0; border-radius: inherit; background: var(--semantic-accent); z-index: 0; }
+@media (prefers-reduced-motion: reduce) {
+ .kride-pastel > span { animation: none; }
+ .kride-motion-ripple { display: none; }
+ .kride-motion-card, .tour-poi-card { transform: none !important; }
+}

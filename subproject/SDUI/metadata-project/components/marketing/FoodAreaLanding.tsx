@@ -1,3 +1,4 @@
+import {PastelBackdrop} from '@/components/motion/KrideMotion';
 import Link from 'next/link';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import SpotThumbnail from '@/components/marketing/SpotThumbnail';
@@ -87,6 +88,7 @@ export default function FoodAreaLanding({ area, spots }: { area: FoodAreaGuide; 
                 {area.name}
             </p>
             <header className={styles.hero}>
+                <PastelBackdrop />
                 <span className={styles.eyebrow}>{area.fullName} 맛집 여행 가이드</span>
                 <h1>{area.name} 맛집, {area.tagline}</h1>
                 <p>{area.description}</p>

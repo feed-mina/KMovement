@@ -1,3 +1,4 @@
+import {PastelBackdrop} from '@/components/motion/KrideMotion';
 import Link from 'next/link';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import TrackedLink from '@/components/analytics/TrackedLink';
@@ -17,6 +18,7 @@ export default function KpopHubLanding() {
             ]} />
             <MarketingNav />
             <header className={styles.hero}>
+                <PastelBackdrop />
                 <span className={styles.eyebrow}>{kpopHub.eyebrow}</span>
                 <h1>{kpopHub.title}</h1>
                 <p>{kpopHub.description}</p>
