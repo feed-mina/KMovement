@@ -211,7 +211,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                     {unsupportedAi && <div className="route-ai-scope" role="status">
                         <p>{region} · {duration} AI 코스는 아직 준비 중이에요. 고른 지역의 기본 코스와 길찾기는 이용할 수 있어요.</p>
                         <MotionButton type="button" className="route-pill" onClick={() => setMode('tour')}>{region} 기본 코스 보기</MotionButton>
-                        <MotionButton type="button" className="route-pill" onClick={() => { setRegion('서울'); setDuration('당일치기'); setPois([]); setSelectedStopId(undefined); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }}>서울 당일치기로 바꾸기</MotionButton>
+                        <MotionButton type="button" className="route-pill" onClick={() => { setRegion('서울'); setDuration('당일치기'); if (region !== '서울') setPois([]); setSelectedStopId(undefined); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }}>서울 당일치기로 바꾸기</MotionButton>
                     </div>}
                     <MotionButton type="button" disabled={!acknowledged || aiLoading || unsupportedAi} onClick={() => void fetchAi()}>코스 만들기</MotionButton>
                     </section>}

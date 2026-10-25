@@ -216,3 +216,18 @@ test('switching to supported AI conditions is explicit and never opts the user i
     expect(screen.getByRole('checkbox')).not.toBeChecked();
     expect(mockedFetch).not.toHaveBeenCalled();
 });
+
+test('changing only the unsupported duration keeps the existing Seoul basic course', async () => {
+    mockedFetch.mockClear();
+    (fetchRestaurants as jest.Mock).mockResolvedValue([{contentId: 's1', title: '서울 장소', mapX: 127, mapY: 37.5}]);
+    render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
+    await screen.findByText('서울 장소');
+    fireEvent.click(screen.getByText('AI 코스'));
+    fireEvent.click(screen.getByRole('button', {name: '1박2일'}));
+    expect(screen.getByRole('button', {name: '코스 만들기'})).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', {name: '서울 당일치기로 바꾸기'}));
+    fireEvent.click(screen.getByText('기본 코스'));
+    expect(screen.getByText('서울 장소')).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: '당일치기'})).toHaveAttribute('aria-pressed', 'true');
+    expect(mockedFetch).not.toHaveBeenCalled();
+});
