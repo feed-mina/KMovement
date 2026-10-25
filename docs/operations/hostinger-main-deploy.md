@@ -1,5 +1,14 @@
 # main 반영 후 Hostinger 웹 배포 가이드
 
+2026-10-25 개정: **기본 배포 경로는 main 검사 성공 → Hostinger 웹 자동 배포입니다.** 최초 SSH 연결 두 항목 등록과 실행 방법은 [자동 배포 안내](hostinger-auto-deploy.md)를 따릅니다. 연결값 등록과 첫 운영 배포 성공 여부는 별도로 확인해야 합니다.
+
+기존 수동 이미지 발행·교체·복구 절차는 장애 대응과 수동 복구를 위해 아래에 보존했습니다. 아래의 “자동 배포하지 않는다”는 설명은 자동화 도입 전 기록입니다.
+
+<details>
+<summary>기존 수동 배포·복구 절차 펼치기</summary>
+
+# main 반영 후 Hostinger 웹 배포 가이드
+
 작성 기준: 2026-10-24. 대상은 `kmovement.srv1869569.hstgr.cloud`의 **기존 웹 서비스 업데이트**입니다.
 최초 설치나 DB 변경 절차는 아닙니다. 아래 명령은 설명용으로 검토했으며, 이 문서 작성 중 운영 서버에서 실행하지 않았습니다.
 
@@ -362,3 +371,5 @@ DB 변경이 있는 릴리스에는 마이그레이션·백업·호환성 절차
 - [이번 모션 변경과 시험 범위](../2026-10-24/kride-explore-motion/README.md)
 - [Docker Compose config](https://docs.docker.com/reference/cli/docker/compose/config/)
 - [Docker Compose up](https://docs.docker.com/reference/cli/docker/compose/up/)
+
+</details>

@@ -71,6 +71,7 @@ jobs:
             NEXT_PUBLIC_BACKEND_URL=http://spring:8080
             FASTAPI_URL=http://fastapi:8000
             NEXT_PUBLIC_KAKAO_MAP_APP_KEY=${{ secrets.NEXT_PUBLIC_KAKAO_MAP_APP_KEY }}
+            KMOVEMENT_RELEASE_SHA=${{ inputs.expected_main_sha }}
 
       - name: Verify and record the immutable image
         shell: bash
