@@ -67,7 +67,7 @@ public class ArtistEvidenceReviewController {
     @Transactional
     public ApiResponse<?> evidence(@RequestBody Evidence r, @AuthenticationPrincipal CustomUserDetails user) {
         String actor=reviewer(user); id(r.contentId()); id(r.artistId()); id(r.poiId());
-        require(r.action()!=null && Set.of("MV","CONTENT_VISIT","SNS","POPUP").contains(r.action()));
+        require(r.action()!=null && Set.of("MV","CONTENT_VISIT","SNS","POPUP","ALBUM_PHOTO","COLLABORATION_EVENT").contains(r.action()));
         url(r.sourceUrl()); text(r.artistEvidence()); text(r.placeEvidence()); text(r.actionEvidence()); text(r.locator()); expiry(r.reviewBy());
         // A reviewed tuple must explicitly exist; no member/group expansion is performed.
         jdbc.update("INSERT INTO holy_content_poi(content_sqno,poi_sqno,relationship) VALUES (?,?,?) ON CONFLICT DO NOTHING",
@@ -108,14 +108,14 @@ public class ArtistEvidenceReviewController {
     @Transactional
     public ApiResponse<?> revoke(@PathVariable Long evidenceId, @AuthenticationPrincipal CustomUserDetails user) {
         String actor=reviewer(user); id(evidenceId);
-        jdbc.update("UPDATE artist_place_evidence SET status='REVOKED',reviewer=? WHERE evidence_id=?",actor,evidenceId);
+        jdbc.update("UPDATE artist_place_evidence SET status='REVOKED',revoked_by=?,revoked_at=now() WHERE evidence_id=?",actor,evidenceId);
         return ApiResponse.success("revoked");
     }
     @PostMapping("/visit-policy/{poiId}/revoke")
     @Transactional
     public ApiResponse<?> revokePolicy(@PathVariable Long poiId, @AuthenticationPrincipal CustomUserDetails user) {
         String actor=reviewer(user);id(poiId);
-        jdbc.update("UPDATE poi_visit_policy SET status='REVOKED',reviewer=? WHERE poi_sqno=?",actor,poiId);
+        jdbc.update("UPDATE poi_visit_policy SET status='REVOKED',revoked_by=?,revoked_at=now() WHERE poi_sqno=?",actor,poiId);
         return ApiResponse.success("revoked");
     }
 }

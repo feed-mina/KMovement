@@ -4,7 +4,7 @@ import { buildItineraryRequest } from '@/lib/kride/itineraryRequest';
 
 const saved = { ...process.env };
 const originalFetch = global.fetch;
-const body = buildItineraryRequest({ duration: 'day', selectedRegions: [{name: '서울'}], budget: [30000, 200000], responseLocale: 'en', acknowledgeUnverifiedConditions: true });
+const body = buildItineraryRequest({ visitDate: '2026-10-26', duration: 'day', selectedRegions: [{name: '서울'}], budget: [30000, 200000], responseLocale: 'en', acknowledgeUnverifiedConditions: true });
 const request = (value = body) => new Request('http://web/api/kride/recommend/itinerary', { method: 'POST', headers: {cookie: 'session=fixture'}, body: JSON.stringify(value) }) as any;
 beforeEach(() => {
     process.env.FASTAPI_URL = 'http://cpu'; process.env.AUTH_BACKEND_URL = 'http://auth'; process.env.KRIDE_INTERNAL_TOKEN = 'fixture';

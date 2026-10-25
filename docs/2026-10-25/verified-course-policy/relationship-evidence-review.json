@@ -1,0 +1,52 @@
+{
+  "reviewedOn": "2026-10-25",
+  "scope": "two_existing_primary_source_cases_not_full_artist_list",
+  "databaseModified": false,
+  "records": [
+    {
+      "artistId": 1,
+      "contentIds": [
+        415
+      ],
+      "candidatePoiId": 3661,
+      "poiId": null,
+      "action": "ALBUM_PHOTO",
+      "status": "PENDING",
+      "sourceUrl": "https://english.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?vcontsId=200162",
+      "artistEvidence": "관광공사의 BTS Bus Stop 안내가 그룹 BTS를 직접 특정한다.",
+      "placeEvidence": "강릉시 주문진읍 향호리의 버스정류장이다. 운영 3661번은 향호해변 전체여서 같은 세부 지점으로 확정하지 않았다.",
+      "actionEvidence": "앨범 재킷 촬영용으로 만들어진 장소이며 촬영 후 철거한 정류장을 관광용으로 재설치했다는 안내다. MV 촬영이라고 기록하지 않는다.",
+      "locator": "Introduction 첫 문단 및 Address, 2026-10-25 조회",
+      "sourceExcerpt": "created specially for album jacket filming",
+      "blockingReasons": [
+        "exact_bus_stop_coordinate_not_verified",
+        "parent_beach_is_not_the_same_poi",
+        "opening_hours_and_visit_cost_unknown"
+      ],
+      "recommendationEligible": false
+    },
+    {
+      "artistId": 2,
+      "contentIds": [
+        466
+      ],
+      "candidatePoiId": 825,
+      "poiId": null,
+      "action": "COLLABORATION_EVENT",
+      "status": "PENDING",
+      "sourceUrl": "https://weverse.io/blackpink/notice/33735",
+      "corroboratingSourceUrl": "https://www.museum.go.kr/MUSEUM/contents/M0701040000.do?arcId=23422&catCustomType=post&schM=view",
+      "artistEvidence": "BLACKPINK 공식 공지와 박물관 공지가 같은 협업을 특정한다.",
+      "placeEvidence": "서빙고로 137 국립중앙박물관, 박물관 공지의 세부 공간은 역사의 길 리스닝 존이다. 825번은 박물관 전체이므로 개별 리스닝 공간으로 자동 연결하지 않는다.",
+      "actionEvidence": "앨범 청취 협업과 음성 도슨트 참여에 대한 안내다. 멤버의 현장 방문·공연·MV 촬영 근거로 바꾸지 않는다.",
+      "locator": "Weverse Listening Zone / 박물관 공지 ‘박물관 공간을 확장하는 새로운 관람 경험’, 2026-10-25 조회",
+      "historicalPeriod": "2026-02-27 / 2026-03-08",
+      "blockingReasons": [
+        "museum_is_not_the_same_poi_as_listening_zone",
+        "member_physical_visit_not_proven",
+        "current_hours_and_cost_not_verified"
+      ],
+      "recommendationEligible": false
+    }
+  ]
+}

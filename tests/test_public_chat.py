@@ -113,7 +113,7 @@ def test_shared_slots_and_f12_scope(setup):
     async def run():
         await ai_runtime.acquire_slot();await ai_runtime.acquire_slot()
         with pytest.raises(HTTPException) as error:
-            await public_itinerary.itinerary(public_itinerary.PublicItineraryRequest(regions=['서울']),'fixture','7')
+            await public_itinerary.itinerary(public_itinerary.PublicItineraryRequest(regions=['서울'],visitDate='2026-10-26'),'fixture','7')
         assert error.value.status_code==429
         ai_runtime.slots.release();ai_runtime.slots.release()
         with pytest.raises(HTTPException) as error:

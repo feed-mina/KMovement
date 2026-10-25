@@ -52,6 +52,7 @@ jest.mock('@/components/fields/kride/chat/KrideChatComponent', () => ({
 }));
 
 function confirmCourse() {
+    fireEvent.change(screen.getByLabelText('방문 날짜'),{target:{value:'2026-10-26'}});
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', {name: '코스 만들기'}));
 }
@@ -135,7 +136,7 @@ it('does not ask users to retry an unavailable catalog', () => {
   expect(mockPush).toHaveBeenCalledWith('/');
 });
 
-it('requires acknowledgement before enabling generation and forwards the chosen language', () => {
+it('requires date and forwards the explicit fallback choice and chosen language', () => {
     mockItinerary = {data: null, isLoading: false, error: null, requiresLogin: false, candidatesUnavailable: false};
     render(<KrideFocusScreen screenId="KRIDE_FOCUS" refId={null} />);
     expect(screen.getByRole('button', {name: '코스 만들기'})).toBeDisabled();
@@ -144,4 +145,14 @@ it('requires acknowledgement before enabling generation and forwards the chosen 
     fireEvent.change(screen.getByRole('combobox', {name: '안내 언어'}), {target: {value: 'ja'}});
     confirmCourse();
     expect(mockUseItinerary.mock.calls.at(-1)).toEqual(['KRIDE_FOCUS', expect.objectContaining({responseLocale: 'ja', acknowledgeUnverifiedConditions: true}), true]);
+});
+
+it('keeps general fallback unchecked while generating a verified course',()=>{
+    mockItinerary = {data:null,isLoading:false,error:null,requiresLogin:false,candidatesUnavailable:false};
+    render(<KrideFocusScreen screenId="KRIDE_FOCUS" refId={null}/>);
+    expect(screen.getByRole('checkbox')).not.toBeChecked();
+    fireEvent.change(screen.getByLabelText('방문 날짜'),{target:{value:'2026-10-26'}});
+    expect(screen.getByRole('button',{name:'코스 만들기'})).toBeEnabled();
+    fireEvent.click(screen.getByRole('button',{name:'코스 만들기'}));
+    expect(mockUseItinerary.mock.calls.at(-1)).toEqual(['KRIDE_FOCUS',expect.objectContaining({visitDate:'2026-10-26',acknowledgeUnverifiedConditions:false}),true]);
 });

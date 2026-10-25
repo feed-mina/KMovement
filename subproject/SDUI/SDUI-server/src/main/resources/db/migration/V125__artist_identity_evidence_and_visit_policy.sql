@@ -15,7 +15,7 @@ CREATE TABLE artist_place_evidence (
  poi_address_snapshot TEXT NOT NULL,
  poi_lat_snapshot DOUBLE PRECISION NOT NULL,
  poi_lon_snapshot DOUBLE PRECISION NOT NULL,
- action VARCHAR(30) NOT NULL CHECK(action IN ('MV','CONTENT_VISIT','SNS','POPUP')),
+ action VARCHAR(30) NOT NULL CHECK(action IN ('MV','CONTENT_VISIT','SNS','POPUP','ALBUM_PHOTO','COLLABORATION_EVENT')),
  source_url TEXT NOT NULL CHECK(source_url ~ '^https://[^/]+'),
  artist_evidence TEXT NOT NULL CHECK(length(trim(artist_evidence)) > 0),
  place_evidence TEXT NOT NULL CHECK(length(trim(place_evidence)) > 0),
@@ -25,6 +25,8 @@ CREATE TABLE artist_place_evidence (
  verified_at TIMESTAMPTZ,
  review_by TIMESTAMPTZ,
  reviewer TEXT,
+ revoked_by TEXT,
+ revoked_at TIMESTAMPTZ,
  FOREIGN KEY(content_sqno,artist_id) REFERENCES holy_content_artist(content_sqno,artist_id),
  FOREIGN KEY(content_sqno,poi_sqno) REFERENCES holy_content_poi(content_sqno,poi_sqno),
  CHECK(status <> 'VERIFIED' OR (verified_at IS NOT NULL AND review_by IS NOT NULL AND reviewer IS NOT NULL AND review_by > verified_at AND length(trim(reviewer)) > 0))
@@ -47,6 +49,8 @@ CREATE TABLE poi_visit_policy (
  verified_at TIMESTAMPTZ,
  review_by TIMESTAMPTZ,
  reviewer TEXT,
+ revoked_by TEXT,
+ revoked_at TIMESTAMPTZ,
  CHECK(status <> 'VERIFIED' OR (verified_at IS NOT NULL AND review_by IS NOT NULL AND reviewer IS NOT NULL AND review_by > verified_at AND length(trim(reviewer)) > 0))
 );
 -- A catalog row uses the actual poi_sqno, never an ambiguous source label.

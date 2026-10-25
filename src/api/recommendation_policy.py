@@ -52,7 +52,7 @@ def verified_relations(place, artist_ids, now=None):
         if (type(e.get("artistId")) is not int or e["artistId"] not in artist_ids
             or type(e.get("contentId")) is not int or e["contentId"] <= 0
             or e.get("poiId") != place.get("id")
-            or e.get("action") not in ("MV", "CONTENT_VISIT", "SNS", "POPUP")
+            or e.get("action") not in ("MV", "CONTENT_VISIT", "SNS", "POPUP", "ALBUM_PHOTO", "COLLABORATION_EVENT")
             or not all(isinstance(e.get(k), str) and e[k].strip()
                        for k in ("artistEvidence", "placeEvidence", "actionEvidence", "locator"))):
             continue
