@@ -1,0 +1,27 @@
+services:
+  photo-video:
+    build:
+      context: ../..
+      dockerfile: deploy/photo_video/Dockerfile
+    environment:
+      PHOTO_VIDEO_DATA_DIR: /data/photo-video
+      PHOTO_VIDEO_INTERNAL_KEY: ${PHOTO_VIDEO_INTERNAL_KEY:?Set a random internal key of at least 32 characters}
+    volumes:
+      - photo-video-data:/data/photo-video
+    expose:
+      - "8085"
+    restart: unless-stopped
+  photo-video-worker:
+    build:
+      context: ../..
+      dockerfile: deploy/photo_video/Dockerfile
+    command: ["python", "-m", "deploy.photo_video.worker"]
+    environment:
+      PHOTO_VIDEO_DATA_DIR: /data/photo-video
+    volumes:
+      - photo-video-data:/data/photo-video
+    depends_on:
+      - photo-video
+    restart: unless-stopped
+volumes:
+  photo-video-data:

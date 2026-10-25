@@ -15,6 +15,16 @@ export default function TravelVideoPage() {
   const requestId = useRef('');
   const submitting = useRef(false);
   const [pollKey, setPollKey] = useState(0);
+  const [history, setHistory] = useState<VideoJob[]>([]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/api/travel-video/jobs', { cache: 'no-store', signal: controller.signal }).then(async response => {
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || '이전 작업을 불러오지 못했습니다.');
+      setHistory(data.items);
+    }).catch(e => { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : '이전 작업을 불러오지 못했습니다.'); });
+    return () => controller.abort();
+  }, [job?.status]);
   useEffect(() => {
     if (!job || !['QUEUED', 'RUNNING'].includes(job.status)) return;
     let stopped = false;
@@ -89,8 +99,15 @@ export default function TravelVideoPage() {
     {photoId && <><p>기본 방식: 사진을 천천히 확대·이동하는 짧은 영상입니다. 생성형 AI 영상과 구분됩니다.</p>
       <button type="button" disabled={busy || !!job} onClick={generate}>영상 만들기</button></>}
     {job && <section aria-label="영상 작업 상태"><p role="status">{labels[job.status] || job.status}</p><p>{job.methodLabel}</p>
+      {job.status === 'COMPLETED' && job.videoUrl && <><video controls playsInline preload="metadata" src={job.videoUrl} style={{ width: '100%' }} onError={() => setError('영상을 재생하지 못했습니다. 다시 불러오거나 다운로드해주세요.')} />
+        <p><a href={job.videoUrl} download="travel.mp4">영상 다운로드</a></p></>}
       <button type="button" onClick={() => { setError(''); setPollKey(v => v + 1); }}>상태 다시 확인</button>
     </section>}
+    <section aria-label="이전 영상 작업"><h2>이전 작업</h2>{!history.length && <p>아직 작업 기록이 없습니다.</p>}
+      <ul>{history.map(item => <li key={item.jobId}><button type="button" disabled={busy} onClick={() => {
+        setJob(item); setPhotoId(item.photoId); setPollKey(v => v + 1); setError('');
+      }}>{labels[item.status] || item.status} · {item.jobId.slice(0, 8)}</button></li>)}</ul>
+    </section>
     {error && <p role="alert">{error}</p>}
   </main>;
 }
