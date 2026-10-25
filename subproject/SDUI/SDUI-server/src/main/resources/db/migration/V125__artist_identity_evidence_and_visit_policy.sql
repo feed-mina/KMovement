@@ -12,6 +12,7 @@ CREATE TABLE artist_place_evidence (
  content_sqno BIGINT NOT NULL,
  artist_id BIGINT NOT NULL,
  poi_sqno BIGINT NOT NULL REFERENCES tour_poi(poi_sqno),
+ poi_name_snapshot TEXT NOT NULL,
  poi_address_snapshot TEXT NOT NULL,
  poi_lat_snapshot DOUBLE PRECISION NOT NULL,
  poi_lon_snapshot DOUBLE PRECISION NOT NULL,
@@ -36,6 +37,7 @@ CREATE INDEX idx_ape_content_poi ON artist_place_evidence(content_sqno,poi_sqno)
 
 CREATE TABLE poi_visit_policy (
  poi_sqno BIGINT PRIMARY KEY REFERENCES tour_poi(poi_sqno),
+ poi_name_snapshot TEXT NOT NULL,
  poi_address_snapshot TEXT NOT NULL,
  poi_lat_snapshot DOUBLE PRECISION NOT NULL,
  poi_lon_snapshot DOUBLE PRECISION NOT NULL,
@@ -70,12 +72,12 @@ SELECT p.poi_sqno,
       'actionEvidence',e.action_evidence,'locator',e.locator,'status','verified','verifiedAt',e.verified_at,'reviewBy',e.review_by)
       ORDER BY e.evidence_id)
     FROM artist_place_evidence e JOIN artist a ON a.artist_id=e.artist_id AND a.approved_yn='Y'
-    WHERE e.poi_sqno=p.poi_sqno AND e.poi_address_snapshot=p.addr AND e.poi_lat_snapshot=p.map_y AND e.poi_lon_snapshot=p.map_x AND e.status='VERIFIED' AND e.verified_at<=now() AND e.review_by>now()
+    WHERE e.poi_sqno=p.poi_sqno AND e.poi_name_snapshot=p.title AND e.poi_address_snapshot=p.addr AND e.poi_lat_snapshot=p.map_y AND e.poi_lon_snapshot=p.map_x AND e.status='VERIFIED' AND e.verified_at<=now() AND e.review_by>now()
   ),'[]'::jsonb)
  ) AS payload
 FROM tour_poi p JOIN poi_visit_policy v ON v.poi_sqno=p.poi_sqno
 WHERE p.source IN ('CRAWL','TOURAPI','SEED') AND p.review_status='APPROVED' AND p.map_y IS NOT NULL AND p.map_x IS NOT NULL
- AND v.poi_address_snapshot=p.addr AND v.poi_lat_snapshot=p.map_y AND v.poi_lon_snapshot=p.map_x
+ AND v.poi_name_snapshot=p.title AND v.poi_address_snapshot=p.addr AND v.poi_lat_snapshot=p.map_y AND v.poi_lon_snapshot=p.map_x
  AND v.status='VERIFIED' AND v.verified_at<=now() AND v.review_by>now();
 -- Identity-only backfill is generated below from audited numeric IDs/source refs.
 -- No legacy place relationship is promoted to VERIFIED.

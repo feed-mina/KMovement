@@ -33,9 +33,9 @@ class ArtistEvidencePostgresTests(unittest.TestCase):
     def insert_policy(self):
         cid,aid,pid=self.tuple()
         self.conn.execute("""
-          INSERT INTO poi_visit_policy(poi_sqno,poi_address_snapshot,poi_lat_snapshot,poi_lon_snapshot,weekly_hours,hours_source_url,
+          INSERT INTO poi_visit_policy(poi_sqno,poi_name_snapshot,poi_address_snapshot,poi_lat_snapshot,poi_lon_snapshot,weekly_hours,hours_source_url,
           cost_krw,cost_source_url,cost_evidence,status,verified_at,review_by,reviewer)
-          SELECT poi_sqno,addr,map_y,map_x,%s::jsonb,'https://official.example.test/hours',10000,
+          SELECT poi_sqno,title,addr,map_y,map_x,%s::jsonb,'https://official.example.test/hours',10000,
           'https://official.example.test/cost','SYNTHETIC cost fixture','VERIFIED',now(),now()+interval '1 day','fixture-reviewer'
           FROM tour_poi WHERE poi_sqno=%s
         """,(json.dumps({str(d):[[540,1200]] for d in range(7)}),pid))
@@ -43,9 +43,9 @@ class ArtistEvidencePostgresTests(unittest.TestCase):
     def insert_evidence(self):
         cid,aid,pid=self.insert_policy()
         self.conn.execute("""
-          INSERT INTO artist_place_evidence(content_sqno,artist_id,poi_sqno,poi_address_snapshot,poi_lat_snapshot,poi_lon_snapshot,action,
+          INSERT INTO artist_place_evidence(content_sqno,artist_id,poi_sqno,poi_name_snapshot,poi_address_snapshot,poi_lat_snapshot,poi_lon_snapshot,action,
           source_url,artist_evidence,place_evidence,action_evidence,locator,status,verified_at,review_by,reviewer)
-          SELECT %s,%s,poi_sqno,addr,map_y,map_x,'CONTENT_VISIT','https://official.example.test/video','SYNTHETIC identity',
+          SELECT %s,%s,poi_sqno,title,addr,map_y,map_x,'CONTENT_VISIT','https://official.example.test/video','SYNTHETIC identity',
           'SYNTHETIC branch','SYNTHETIC action','00:10','VERIFIED',now(),now()+interval '1 day','fixture-reviewer'
           FROM tour_poi WHERE poi_sqno=%s
         """,(cid,aid,pid))
@@ -78,6 +78,10 @@ class ArtistEvidencePostgresTests(unittest.TestCase):
         payload=self.conn.execute("SELECT payload FROM verified_visit_catalog WHERE poi_sqno=%s",(pid,)).fetchone()[0]
         self.assertEqual(payload["artistEvidence"],[])
         self.conn.execute("UPDATE poi_visit_policy SET status='REVOKED'")
+        self.assertEqual(self.conn.execute("SELECT count(*) FROM verified_visit_catalog").fetchone()[0],0)
+    def test_renamed_business_requires_fresh_branch_review(self):
+        cid,aid,pid=self.insert_evidence()
+        self.conn.execute("UPDATE tour_poi SET title='SYNTHETIC replacement shop' WHERE poi_sqno=%s",(pid,))
         self.assertEqual(self.conn.execute("SELECT count(*) FROM verified_visit_catalog").fetchone()[0],0)
     def test_address_edit_invalidates_old_branch_review(self):
         cid,aid,pid=self.insert_evidence()
