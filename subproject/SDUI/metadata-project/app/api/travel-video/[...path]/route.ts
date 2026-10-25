@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 export const runtime = 'nodejs';
 const MAX_BODY = 10 * 1024 * 1024;
 const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}';
-const allowed = new RegExp(`^(photos|photos/${UUID})$`);
+const allowed = new RegExp(`^(photos|photos/${UUID}|jobs|jobs/${UUID})$`);
 const reply = (detail: string, status: number) => Response.json({ detail }, {
   status, headers: { 'Cache-Control': 'private, no-store' },
 });
