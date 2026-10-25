@@ -96,12 +96,12 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const unsupportedAi = region !== '서울' || duration !== '당일치기';
 
     const fetchAi = async () => {
-        setAiData(null);setAiSources([]);setAiScope('');
         let body;
         try {
             body = buildItineraryRequest({ duration, regions: [region], purposes: [purpose], artists: [], visitDate, budget:{min:budgetMin,max:budgetMax}, responseLocale, acknowledgeUnverifiedConditions: acknowledged });
             validateItineraryRequest(body);
         } catch (reason) {
+            setAiData(null);setAiSources([]);setAiScope('');
             setAiErrorKind(classifyItineraryError(reason));
             setAiError(itineraryErrorMessage(reason));
             return;

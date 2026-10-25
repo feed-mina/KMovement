@@ -72,6 +72,8 @@ def candidates(req, catalog, general=False, now=None):
     for identity, p in catalog.items():
         if not isinstance(p, dict) or p.get("visibility") != "PUBLIC" or p.get("id") != identity:
             continue
+        if req.regions and not any(r in p.get("address","") for r in req.regions):
+            continue
         amount = cost_amount(p, now)
         slots = open_slots(p, req.visitDate, now)
         evidence = verified_relations(p, req.artistIds, now)

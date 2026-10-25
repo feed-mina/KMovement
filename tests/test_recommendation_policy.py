@@ -118,6 +118,19 @@ class RecommendationPolicyTests(unittest.TestCase):
         result,_=self.generate({'poi:1':p,'poi:2':q},{'poi:1':p,'poi:2':q},
           {'itinerary':[{'morning':{'places':[{'poiId':'poi:1'}]},'afternoon':{'places':[{'poiId':'poi:2'}]}}]})
         self.assertFalse(result['itinerary']);self.assertEqual(result['status'],'empty_result')
+    def test_other_region_cannot_block_requested_region_fallback(self):
+        p=place();p['address']='부산 시험 주소'
+        q=place('poi:2',artist_id=38)
+        with self.assertRaises(HTTPException):
+            select_scope(request(),{'poi:1':p,'poi:2':q})
+        allowed,general=select_scope(request(acknowledgeUnverifiedConditions=True),{'poi:1':p,'poi:2':q})
+        self.assertEqual(list(allowed),['poi:2']);self.assertTrue(general)
+    def test_new_db_facts_do_not_change_immutable_search_index_contract(self):
+        from src.api.public_search import search_public
+        indexed={'id':'curated:one','catalogSha256':'fixture-sha'}
+        with patch('src.api.multilingual_catalog.search_reviewed',return_value=[]) as search:
+            search_public(None,None,{'curated:one':indexed,'poi:1':place()},'서울','fixture-model')
+            self.assertEqual(search.call_args.args[2],{'curated:one':indexed})
     def test_no_paid_call_when_no_verified_candidates(self):
         with patch.object(api,"public_catalog",return_value={"poi:1":place(cost=50000)}),\
              patch.object(api,"validate_signing_configuration"),patch.object(api,"reserve_budget") as paid:

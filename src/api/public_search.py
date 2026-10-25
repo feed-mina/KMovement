@@ -127,7 +127,8 @@ def index_catalog(client, embed, catalog, model):
 def search_public(client, embed, catalog, query, model, regions=(), top_k=8):
     if any(p.get('catalogSha256') for p in catalog.values()):
         from src.api.multilingual_catalog import search_reviewed
-        return search_reviewed(client, embed, catalog, query, regions, top_k)
+        indexed={identity:p for identity,p in catalog.items() if p.get('catalogSha256')}
+        return search_reviewed(client, embed, indexed, query, regions, top_k)
     col=client.get_collection(COLLECTION)
     if col.metadata.get('embeddingModel') != model or col.metadata.get('contract') != 'e5-prefix-v1':
         raise RuntimeError('embedding_contract_mismatch')

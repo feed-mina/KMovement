@@ -101,7 +101,7 @@ export function classifyItineraryError(error: unknown): ItineraryErrorKind {
 
 export function itineraryErrorMessage(error: unknown): string {
     const messages: Record<ItineraryErrorKind, string> = {
-        consent: '아티스트 연관과 예산 충족은 미확인입니다. 일반 장소 코스 안내에 직접 동의해 주세요.',
+        consent: '선택한 아티스트의 검증된 후보가 없습니다. 일반 코스 전환은 직접 동의해 주세요.',
         unsupported: '현재 서울 당일치기만 지원합니다. 지역과 기간을 바꿔 주세요.',
         validation: '요청 조건을 확인해 주세요. 지역·기간·예산·안내 언어 입력이 올바르지 않습니다.',
         login: '로그인 후 AI 코스를 이용해 주세요.',
