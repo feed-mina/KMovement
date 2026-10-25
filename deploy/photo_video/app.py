@@ -6,6 +6,7 @@ import os
 import sqlite3
 import uuid
 import warnings
+from contextlib import contextmanager
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
@@ -14,10 +15,22 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class TripContext(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    itineraryId: str = Field(pattern=r'^[0-9a-f]{32}$')
+    catalogRevision: str = Field(pattern=r'^[0-9a-f]{64}$')
+    poiId: str = Field(min_length=1, max_length=150)
+    placeName: str = Field(min_length=1, max_length=500)
+    placeAddress: str = Field(max_length=1000)
+    contextIssuedAt: str = Field(max_length=50)
+    notice: str = Field(max_length=500)
+
+
 class JobRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     photoId: uuid.UUID
     requestId: uuid.UUID
+    trip: TripContext | None = None
 
 
 class RetryRequest(BaseModel):
@@ -34,10 +47,15 @@ def create_app(root: Path | None = None) -> FastAPI:
     storage.chmod(0o700)
     database = storage / "workflow.sqlite3"
 
+    @contextmanager
     def connect():
         con = sqlite3.connect(database, timeout=15)
         con.row_factory = sqlite3.Row
-        return con
+        try:
+            with con:
+                yield con
+        finally:
+            con.close()
 
     with connect() as con:
         con.execute("""CREATE TABLE IF NOT EXISTS photos (
@@ -51,7 +69,7 @@ def create_app(root: Path | None = None) -> FastAPI:
             UNIQUE(owner, request_id), FOREIGN KEY(photo_id) REFERENCES photos(id))""")
         con.execute("CREATE INDEX IF NOT EXISTS jobs_owner_created ON jobs(owner,created_at)")
         columns = {row[1] for row in con.execute("PRAGMA table_info(jobs)")}
-        for name, definition in [("retry_of", "TEXT"), ("render_ms", "INTEGER")]:
+        for name, definition in [("retry_of", "TEXT"), ("render_ms", "INTEGER"), ("trip_json", "TEXT")]:
             if name not in columns:
                 con.execute(f"ALTER TABLE jobs ADD COLUMN {name} {definition}")
 
@@ -131,22 +149,26 @@ def create_app(root: Path | None = None) -> FastAPI:
         return FileResponse(storage / f"{photo_id}.jpg", media_type="image/jpeg")
 
     def job_response(row):
+        import json
         duration = row["render_ms"]
         return {"jobId": row["id"], "photoId": row["photo_id"], "status": row["status"],
                 "createdAt": row["created_at"], "startedAt": row["started_at"],
                 "finishedAt": row["finished_at"], "errorCode": row["error_code"],
                 "renderMilliseconds": duration, "retryOf": row["retry_of"],
+                "trip": json.loads(row["trip_json"]) if row["trip_json"] else None,
                 "cost": {"providerCharge": 0, "currency": "USD", "infrastructureCost": None,
                          "note": "외부 생성 모델 비용 없음. 서버·저장소·전송 비용은 미산정."},
                 "videoUrl": f"/api/travel-video/jobs/{row['id']}/video" if row["status"] == "COMPLETED" else None,
                 "method": "photo_motion", "methodLabel": "사진 확대·이동 영상 (생성형 AI 아님)"}
 
     def enqueue(body: JobRequest, user: int, retry_of: str | None = None):
+        import json
+        trip_json = json.dumps(body.trip.model_dump(), ensure_ascii=False, sort_keys=True) if body.trip else None
         with connect() as con:
             con.execute("BEGIN IMMEDIATE")
             old = con.execute("SELECT * FROM jobs WHERE owner=? AND request_id=?", (user, str(body.requestId))).fetchone()
             if old:
-                if old["photo_id"] != str(body.photoId) or old["retry_of"] != retry_of:
+                if old["photo_id"] != str(body.photoId) or old["retry_of"] != retry_of or old["trip_json"] != trip_json:
                     raise HTTPException(409, "같은 요청 번호에 다른 사진을 사용할 수 없습니다.")
                 return job_response(old)
             if retry_of:
@@ -162,11 +184,11 @@ def create_app(root: Path | None = None) -> FastAPI:
             if not photo:
                 raise HTTPException(404, "사진을 찾을 수 없습니다.")
             active = con.execute("SELECT COUNT(*) FROM jobs WHERE owner=? AND status IN ('QUEUED','RUNNING')", (user,)).fetchone()[0]
-            daily = con.execute("SELECT COUNT(*) FROM jobs WHERE owner=? AND created_at>=datetime('now','start of day')", (user,)).fetchone()[0]
+            daily = con.execute("SELECT COUNT(*) FROM jobs WHERE owner=? AND created_at>=datetime('now','+9 hours','start of day','-9 hours')", (user,)).fetchone()[0]
             if active >= 2 or daily >= 10:
                 raise HTTPException(429, "동시 2개·하루 10개 생성 한도를 확인해주세요.")
             job_id = str(uuid.uuid4())
-            con.execute("INSERT INTO jobs(id,owner,photo_id,request_id,retry_of) VALUES (?,?,?,?,?)", (job_id, user, str(body.photoId), str(body.requestId), retry_of))
+            con.execute("INSERT INTO jobs(id,owner,photo_id,request_id,retry_of,trip_json) VALUES (?,?,?,?,?,?)", (job_id, user, str(body.photoId), str(body.requestId), retry_of, trip_json))
             return job_response(con.execute("SELECT * FROM jobs WHERE id=?", (job_id,)).fetchone())
 
     @app.post("/jobs", status_code=202)
@@ -175,11 +197,13 @@ def create_app(root: Path | None = None) -> FastAPI:
 
     @app.post("/jobs/{job_id}/retry", status_code=202)
     def retry(job_id: uuid.UUID, body: RetryRequest, user: int = Depends(owner)):
+        import json
         with connect() as con:
-            row = con.execute("SELECT photo_id FROM jobs WHERE id=? AND owner=?", (str(job_id), user)).fetchone()
+            row = con.execute("SELECT photo_id,trip_json FROM jobs WHERE id=? AND owner=?", (str(job_id), user)).fetchone()
         if not row:
             raise HTTPException(404, "작업을 찾을 수 없습니다.")
-        return enqueue(JobRequest(photoId=row["photo_id"], requestId=body.requestId), user, str(job_id))
+        return enqueue(JobRequest(photoId=row["photo_id"], requestId=body.requestId,
+                                  trip=json.loads(row["trip_json"]) if row["trip_json"] else None), user, str(job_id))
 
     @app.get("/jobs/{job_id}")
     def status(job_id: uuid.UUID, user: int = Depends(owner)):

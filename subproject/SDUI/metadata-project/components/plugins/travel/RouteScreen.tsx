@@ -11,6 +11,7 @@ import { tourPoisToRouteMapData } from '@/components/fields/kride/maps/tourToRou
 import { normalizeRouteMapData } from '@/components/fields/kride/maps/normalizeRouteMapData';
 import { routeDistanceKm, estimateMinutes, formatMinutes, groupByDay, haversineKm } from '@/components/fields/kride/maps/routeSummary';
 import Link from 'next/link';
+import PhotoVideoCourseLink from '@/components/fields/kride/PhotoVideoCourseLink';
 import { useAuth } from '@/context/AuthContext';
 import { fetchRestaurants, TourPoi } from '@/services/tourApi';
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
@@ -320,6 +321,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
 
             {mode !== 'road' && (
                 <div className="route-actions">
+                    {mode === 'ai' && <PhotoVideoCourseLink data={aiData} />}
                     <MotionButton type="button" className="route-pill" onClick={() => openDirections()}>길 찾기</MotionButton>
                     <KakaoShareButton text="Kride에서 추천받은 하루 코스를 확인해 보세요!" path="/view/ROUTE_PLANNER" />
                     <Link className="route-pill route-actions__link" href="/view/SET_TIME_PAGE">약속 시간</Link>

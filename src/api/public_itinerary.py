@@ -2,7 +2,7 @@
 import asyncio
 import json
 import os
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import Annotated, Literal
 from fastapi import APIRouter,Header,HTTPException
 from pydantic import BaseModel,Field,StrictBool,StrictInt
@@ -12,6 +12,7 @@ from src.api import ai_runtime
 from src.api.course_context import issue_context, localized_place, scope_notice, validate_signing_configuration
 
 from src.api.recommendation_policy import select_scope, candidates as eligible_candidates, check_budget, SLOTS
+from src.api.course_context import resolve_context
 
 router=APIRouter()
 SCOPE_NOTICE='서울 당일치기 일반 장소입니다. 아티스트 연관·영업시간·가격·예약 가능 여부는 검증하지 않았습니다. 방문 전 출처를 확인하세요.'
@@ -143,3 +144,27 @@ async def itinerary(req:PublicItineraryRequest,x_kride_token:str=Header(default=
     except RuntimeError as e:
         raise HTTPException(429 if str(e)=='budget_exhausted' else 503,'추천 한도에 도달했습니다.' if str(e)=='budget_exhausted' else '추천 자료 또는 비용 설정을 준비 중입니다.')
     except Exception:raise HTTPException(502,'추천 자료를 확인하지 못했습니다.')
+
+
+class VideoContextRequest(BaseModel):
+    courseContext: str = Field(min_length=1, max_length=8000)
+    poiId: str = Field(min_length=1, max_length=150)
+
+
+@router.post('/api/public/itinerary/video-context')
+def video_context(req: VideoContextRequest, x_kride_token: str = Header(default=''), x_kride_user: str = Header(default='')):
+    """Resolve the existing signed, owner-bound course; no new recommendation."""
+    ai_runtime.authenticate(x_kride_token, x_kride_user)
+    try:
+        record, places = resolve_context(req.courseContext, x_kride_user, public_catalog())
+    except ValueError:
+        raise HTTPException(409, '코스가 만료되거나 근거가 변경됐습니다. 코스를 다시 확인해주세요.')
+    except RuntimeError:
+        raise HTTPException(503, '코스 연결 서버 설정이 필요합니다.')
+    place = next((p for p in places if p['id'] == req.poiId), None)
+    if not place:
+        raise HTTPException(422, '이 코스에 포함된 장소를 선택해주세요.')
+    return {'itineraryId': record['itineraryId'], 'catalogRevision': record['catalogRevision'],
+            'poiId': place['id'], 'placeName': place['name'], 'placeAddress': place['address'],
+            'contextIssuedAt': datetime.fromtimestamp(record['exp'] - 3600, timezone.utc).isoformat(),
+            'notice': '코스에서 사용자가 선택한 장소입니다. 사진의 실제 촬영 위치나 아티스트 방문 사실을 증명하지 않습니다.'}

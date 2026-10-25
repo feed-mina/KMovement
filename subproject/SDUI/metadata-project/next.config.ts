@@ -9,6 +9,7 @@ const withPWA = require('next-pwa')({
             // Personal responses must never fall back to another session's offline cache.
             urlPattern: ({ url }: { url: URL }) =>
                 url.pathname.startsWith('/api/admin/tour/holy/') ||
+                url.pathname.startsWith('/api/travel-video/') || url.pathname === '/travel/video' ||
                 url.pathname === '/admin/holy-review' ||
                 (url.pathname.startsWith('/api/v1/kpop/me/') || url.pathname === '/api/v1/kpop/event-feed') ||
                 url.pathname === '/view/KPOP_EVENTS' ||
@@ -76,7 +77,7 @@ const nextConfig: NextConfig = {
             },
             {
                 // Keep dynamic F11 route handlers in Next; other APIs still use Spring.
-                source: '/api/:path((?!kride/route/).*)',
+                source: '/api/:path((?!kride/route/|travel-video/).*)',
                 destination: `${BACKEND_URL}/api/:path*`,
             },
         ];
