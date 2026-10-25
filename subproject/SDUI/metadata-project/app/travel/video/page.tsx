@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { PHOTO_VIDEO_CONTEXT_KEY } from '@/components/fields/kride/PhotoVideoCourseLink';
 
-type VideoJob = { jobId: string; photoId: string; status: string; errorCode?: string; videoUrl?: string; methodLabel: string; renderMilliseconds?: number; cost?: { note: string } };
+type VideoJob = { jobId: string; photoId: string; status: string; errorCode?: string; videoUrl?: string; methodLabel: string; renderMilliseconds?: number; cost?: { note: string }; trip?: { itineraryId: string; poiId: string; placeName: string; notice: string } };
+type Course = { courseContext: string; places: { id: string; name: string }[] };
 const labels: Record<string, string> = { QUEUED: '생성 대기 중', RUNNING: '영상 생성 중', COMPLETED: '영상 생성 완료', FAILED: '영상 생성 실패' };
 const failures: Record<string, string> = { RENDER_TIMEOUT: '영상 생성 시간이 초과됐습니다.', RENDER_FAILED: '사진 처리 또는 영상 생성에 실패했습니다.', WORKER_INTERRUPTED: '처리 서버가 중단됐습니다.' };
 
@@ -18,6 +20,18 @@ export default function TravelVideoPage() {
   const [pollKey, setPollKey] = useState(0);
   const [history, setHistory] = useState<VideoJob[]>([]);
   const [historyPage, setHistoryPage] = useState(1);
+  const [course, setCourse] = useState<Course | null>(null);
+  const [poiId, setPoiId] = useState('');
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(PHOTO_VIDEO_CONTEXT_KEY);
+      if (!stored || stored.length > 24000) return;
+      const data = JSON.parse(stored);
+      if (typeof data.courseContext !== 'string' || data.courseContext.length > 8000 || !Array.isArray(data.places) || data.places.length > 24) return;
+      if (!data.places.every((p: { id?: unknown; name?: unknown }) => p && typeof p.id === 'string' && typeof p.name === 'string')) return;
+      setCourse(data);
+    } catch { setError('코스 연결 정보를 읽지 못했습니다. 코스 화면에서 다시 연결해주세요.'); }
+  }, []);
   useEffect(() => {
     const controller = new AbortController();
     fetch(`/api/travel-video/jobs?page=${historyPage}`, { cache: 'no-store', signal: controller.signal }).then(async response => {
@@ -58,7 +72,7 @@ export default function TravelVideoPage() {
     submitting.current = true; setBusy(true); setError('');
     requestId.current ||= crypto.randomUUID();
     try {
-      const response = await fetch('/api/travel-video/jobs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoId, requestId: requestId.current }) });
+      const response = await fetch('/api/travel-video/jobs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoId, requestId: requestId.current, ...(course ? { courseContext: course.courseContext, poiId } : {}) }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || '생성을 요청하지 못했습니다.');
       setJob(data);
@@ -85,19 +99,28 @@ export default function TravelVideoPage() {
     return () => URL.revokeObjectURL(url);
   }, [file]);
   async function upload() {
-    if (!file || busy) return;
-    setBusy(true); setError('');
+    if (!file || busy || submitting.current) return;
+    submitting.current = true; setBusy(true); setError('');
     try {
       const response = await fetch('/api/travel-video/photos', { method: 'POST', body: file, headers: { 'Content-Type': file.type } });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || '사진을 올리지 못했습니다.');
       setPhotoId(data.photoId);
     } catch (e) { setError(e instanceof Error ? e.message : '사진을 올리지 못했습니다.'); }
-    finally { setBusy(false); }
+    finally { submitting.current = false; setBusy(false); }
   }
   return <main style={{ maxWidth: 720, margin: '0 auto', padding: 24 }}>
     <h1>여행 사진으로 영상 만들기</h1>
     <p>사진 한 장으로 시작합니다. 로그인한 본인만 사진을 조회할 수 있습니다.</p>
+    <p><a href="/view/LOGIN_PAGE">로그인</a> · <a href="/view/ROUTE_PLANNER">여행 코스로 돌아가기</a></p>
+    {course && <section aria-label="여행 코스 연결"><h2>이 사진과 연결할 코스 장소</h2>
+      <label>장소 선택 <select value={poiId} disabled={busy || !!job} onChange={e => { setPoiId(e.target.value); requestId.current = ''; }}>
+        <option value="">직접 장소를 선택해주세요</option>
+        {course.places.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+      </select></label>
+      <p>사진의 실제 촬영 위치를 자동 판정하지 않습니다. 선택한 코스와 장소 번호를 기록합니다.</p>
+      <button type="button" disabled={busy || !!job} onClick={() => { setCourse(null); setPoiId(''); requestId.current = ''; sessionStorage.removeItem(PHOTO_VIDEO_CONTEXT_KEY); }}>코스 연결 없이 만들기</button>
+    </section>}
     <label>여행 사진 선택 (JPEG·PNG·WebP, 최대 10MB)
       <input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy || !!job && ['QUEUED', 'RUNNING'].includes(job.status)} onChange={e => {
         const next = e.target.files?.[0]; setPhotoId(''); setError(''); setFile(null); setJob(null); requestId.current = '';
@@ -108,12 +131,13 @@ export default function TravelVideoPage() {
         setFile(next);
       }} />
     </label>
-    {preview && <img src={preview} alt="선택한 여행 사진" style={{ width: '100%', maxHeight: 400, objectFit: 'contain' }} />}
+    {(preview || photoId) && <img src={preview || `/api/travel-video/photos/${photoId}`} alt="선택한 여행 사진" style={{ width: '100%', maxHeight: 400, objectFit: 'contain' }} />}
     <p><button type="button" disabled={!file || busy || !!photoId} onClick={upload}>{busy ? '사진을 올리는 중' : '사진 올리기'}</button></p>
     {photoId && <p role="status">사진을 저장했습니다.</p>}
     {photoId && <><p>기본 방식: 사진을 천천히 확대·이동하는 짧은 영상입니다. 생성형 AI 영상과 구분됩니다.</p>
-      <button type="button" disabled={busy || !!job} onClick={generate}>영상 만들기</button></>}
+      <button type="button" disabled={busy || !!job || !!course && !poiId} onClick={generate}>영상 만들기</button></>}
     {job && <section aria-label="영상 작업 상태"><p role="status">{labels[job.status] || job.status}</p><p>{job.methodLabel}</p>
+      {job.trip && <p>연결 장소: {job.trip.placeName} · 코스 번호 {job.trip.itineraryId.slice(0, 8)}<br />{job.trip.notice}</p>}
       {job.errorCode && <p role="alert">{failures[job.errorCode] || '작업에 실패했습니다.'}</p>}
       {job.status === 'FAILED' && <button type="button" disabled={busy} onClick={retry}>실패한 영상 다시 만들기</button>}
       {job.renderMilliseconds != null && <p>영상 처리 시간: {(job.renderMilliseconds / 1000).toFixed(1)}초</p>}
@@ -124,7 +148,7 @@ export default function TravelVideoPage() {
     </section>}
     <section aria-label="이전 영상 작업"><h2>이전 작업</h2>{!history.length && <p>아직 작업 기록이 없습니다.</p>}
       <ul>{history.map(item => <li key={item.jobId}><button type="button" disabled={busy} onClick={() => {
-        setJob(item); setPhotoId(item.photoId); setPollKey(v => v + 1); setError('');
+        setFile(null); setJob(item); setPhotoId(item.photoId); setPollKey(v => v + 1); setError('');
       }}>{labels[item.status] || item.status} · {item.jobId.slice(0, 8)}</button></li>)}</ul>
       <button type="button" disabled={historyPage === 1} onClick={() => setHistoryPage(v => v - 1)}>이전 기록</button>
       <button type="button" disabled={history.length < 20} onClick={() => setHistoryPage(v => v + 1)}>다음 기록</button>

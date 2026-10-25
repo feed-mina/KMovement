@@ -12,7 +12,7 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   if (process.env.PHOTO_VIDEO_ENABLED !== 'true') return reply('사진 영상 기능이 준비 중입니다.', 503);
   const base = process.env.PHOTO_VIDEO_URL;
   const key = process.env.PHOTO_VIDEO_INTERNAL_KEY;
-  const backend = process.env.BACKEND_URL;
+  const backend = process.env.AUTH_BACKEND_URL || process.env.BACKEND_URL;
   if (!base || !key || key.length < 32 || !backend) return reply('서버 연결 설정이 필요합니다.', 503);
   const { path } = await context.params;
   const target = path.join('/');
@@ -45,14 +45,38 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
     }
     const page = request.nextUrl.searchParams.get('page');
     const query = target === 'jobs' && request.method === 'GET' && page && /^[1-9][0-9]{0,3}$/.test(page) ? `?page=${page}` : '';
+    let body: BodyInit | undefined = request.method === 'GET' ? undefined : Buffer.concat(chunks);
+    if (target === 'jobs' && request.method === 'POST') {
+      let payload;
+      try { payload = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
+      catch { return reply('입력을 확인해주세요.', 422); }
+      if (!payload || typeof payload !== 'object' || Array.isArray(payload) ||
+          Object.keys(payload).some(key => !['photoId', 'requestId', 'courseContext', 'poiId'].includes(key))) return reply('입력을 확인해주세요.', 422);
+      const normalized: Record<string, unknown> = { photoId: payload.photoId, requestId: payload.requestId };
+      if (payload.courseContext || payload.poiId) {
+        if (typeof payload.courseContext !== 'string' || payload.courseContext.length > 8000 || typeof payload.poiId !== 'string') return reply('코스 연결 정보를 확인해주세요.', 422);
+        const ai = process.env.FASTAPI_URL || process.env.KRIDE_FASTAPI_URL;
+        const token = process.env.KRIDE_INTERNAL_TOKEN;
+        if (!ai || !token) return reply('코스 연결 서버를 준비 중입니다.', 503);
+        const contextResponse = await fetch(`${ai.replace(/\/$/, '')}/api/public/itinerary/video-context`, {
+          method: 'POST', cache: 'no-store', signal: AbortSignal.timeout(10_000), redirect: 'error',
+          headers: { 'Content-Type': 'application/json', 'X-Kride-Token': token, 'X-Kride-User': String(user.userSqno) },
+          body: JSON.stringify({ courseContext: payload.courseContext, poiId: payload.poiId }),
+        });
+        const trip = await contextResponse.json();
+        if (!contextResponse.ok) return reply(typeof trip.detail === 'string' ? trip.detail : '코스 연결 정보를 다시 확인해주세요.', contextResponse.status);
+        normalized.trip = trip;
+      }
+      body = JSON.stringify(normalized);
+    }
     const response = await fetch(`${base.replace(/\/$/, '')}/${target}${query}`, {
       method: request.method,
       headers: {
         'X-Photo-Video-Key': key, 'X-Photo-Video-Owner': String(user.userSqno),
-        'Content-Type': request.headers.get('content-type') || 'application/json',
+        'Content-Type': target === 'jobs' ? 'application/json' : request.headers.get('content-type') || 'application/json',
         ...(request.headers.get('range') ? { Range: request.headers.get('range')! } : {}),
       },
-      body: request.method === 'GET' ? undefined : Buffer.concat(chunks),
+      body,
       cache: 'no-store', signal: AbortSignal.timeout(30_000), redirect: 'error',
     });
     return new Response(response.body, { status: response.status, headers: {

@@ -128,3 +128,38 @@ def test_abandoned_job_recovery(tmp_path, monkeypatch):
         con.execute("UPDATE jobs SET status='RUNNING',started_at=datetime('now','-11 minutes') WHERE id=?", (job,))
     assert not run_once(tmp_path)
     assert c.get(f'/jobs/{job}', headers=headers()).json()['errorCode'] == 'WORKER_INTERRUPTED'
+
+
+def test_trip_snapshot_and_retry_keep_same_course(tmp_path, monkeypatch):
+    import deploy.photo_video.worker as worker
+    c = client(tmp_path, monkeypatch)
+    photo = c.post('/photos', content=picture(), headers=headers()).json()['photoId']
+    trip = {'itineraryId': 'a' * 32, 'catalogRevision': 'b' * 64, 'poiId': 'poi:17',
+            'placeName': '검증 자료의 장소 이름', 'placeAddress': '서울',
+            'contextIssuedAt': '2026-10-25T00:00:00Z', 'notice': '촬영 위치 확인 아님'}
+    body = {'photoId': photo, 'requestId': str(uuid.uuid4()), 'trip': trip}
+    h = {**headers(), 'Content-Type': 'application/json'}
+    result = c.post('/jobs', json=body, headers=h)
+    assert result.status_code == 202
+    job = result.json()['jobId']
+    assert c.post('/jobs', json=body, headers=h).json()['jobId'] == job
+    def fail(*args):
+        raise RuntimeError('test')
+    monkeypatch.setattr(worker, 'render_photo', fail)
+    worker.run_once(tmp_path)
+    c = client(tmp_path, monkeypatch)
+    assert c.get(f'/jobs/{job}', headers=headers()).json()['trip'] == trip
+    retry = c.post(f'/jobs/{job}/retry', json={'requestId': str(uuid.uuid4())}, headers=h)
+    assert retry.json()['trip'] == trip
+
+
+def test_upload_drops_location_metadata(tmp_path, monkeypatch):
+    c = client(tmp_path, monkeypatch)
+    image = Image.new('RGB', (20, 10), 'red')
+    exif = Image.Exif()
+    exif[270] = 'private location note'
+    output = io.BytesIO()
+    image.save(output, 'JPEG', exif=exif)
+    response = c.post('/photos', content=output.getvalue(), headers={**headers(), 'Content-Type': 'image/jpeg'})
+    content = c.get('/photos/' + response.json()['photoId'], headers=headers()).content
+    assert not Image.open(io.BytesIO(content)).getexif()

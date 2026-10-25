@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import CollapseHeader from "./atoms/CollapseHeader";
 import CollapseBody from "./atoms/CollapseBody";
 import RouteNode from "./atoms/RouteNode";
+import PhotoVideoCourseLink from './PhotoVideoCourseLink';
 import { normalizePlaceName, ROUTE_MARKER_SELECT_EVENT } from "./maps/mapTypes";
 
 type AnyRecord = Record<string, any>;
@@ -273,6 +274,7 @@ export default function ItineraryPanel({ id, data }: any) {
       </div>
 
       <div className={`flex flex-col gap-4 overflow-y-auto px-6 pb-6 transition-all duration-300 ${isPanelOpen ? 'max-h-[60vh] opacity-100' : 'max-h-0 opacity-0 px-6 pb-0 overflow-hidden'}`}>
+        <PhotoVideoCourseLink data={data} />
         {Array.from({ length: dayCount }, (_, dayIdx) => {
           const plan = itinerary[dayIdx];
           const morningKey = `day${dayIdx}-morning`;

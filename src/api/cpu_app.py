@@ -11,7 +11,7 @@ from src.api.fastapi_server import app as source
 from src.api.public_itinerary import router
 from src.api.public_chat import router as chat_router
 
-ALLOWED={'/api/health','/api/ready','/api/route','/api/course','/api/facilities','/api/pois','/api/weather','/api/public/itinerary'}
+ALLOWED={'/api/health','/api/ready','/api/route','/api/course','/api/facilities','/api/pois','/api/weather','/api/public/itinerary','/api/public/itinerary/video-context'}
 @asynccontextmanager
 async def lifespan(app):
     if os.environ.get('KRIDE_PRELOAD_EMBEDDER')=='true':

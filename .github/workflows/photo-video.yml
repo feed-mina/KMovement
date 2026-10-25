@@ -1,0 +1,50 @@
+name: Private photo video
+on:
+  pull_request:
+    paths:
+      - deploy/photo_video/**
+      - tests/test_photo_video*.py
+      - src/api/public_itinerary.py
+      - src/api/cpu_app.py
+      - subproject/SDUI/metadata-project/next.config.ts
+      - subproject/SDUI/metadata-project/app/travel/video/**
+      - subproject/SDUI/metadata-project/app/api/travel-video/**
+      - subproject/SDUI/metadata-project/components/fields/kride/PhotoVideoCourseLink.tsx
+      - subproject/SDUI/metadata-project/tests/api/travelVideoProxy.test.ts
+      - subproject/SDUI/metadata-project/tests/app/travelVideo.test.tsx
+      - subproject/SDUI/metadata-project/tests/components/PhotoVideoCourseLink.test.tsx
+      - .github/workflows/photo-video.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  private-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: python -m pip install -r deploy/photo_video/requirements.txt pytest==8.3.5 networkx==3.4.2 pandas==2.3.3 python-dotenv==1.2.2
+      - run: python -m pytest tests/test_photo_video.py tests/test_photo_video_context.py tests/test_course_context.py -q
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: subproject/SDUI/metadata-project/package-lock.json
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: subproject/SDUI/metadata-project
+      - run: npx jest tests/api/travelVideoProxy.test.ts tests/app/travelVideo.test.tsx tests/components/PhotoVideoCourseLink.test.tsx --runInBand --reporters=default
+        working-directory: subproject/SDUI/metadata-project
+      - run: npx tsc --noEmit --incremental false
+        working-directory: subproject/SDUI/metadata-project
+      - run: npm run build
+        working-directory: subproject/SDUI/metadata-project
+        env:
+          FASTAPI_URL: http://127.0.0.1:8000
+          BACKEND_URL: http://127.0.0.1:8080
+      - run: python -m pytest tests/test_photo_video_http.py -q
+        env:
+          PHOTO_VIDEO_HTTP_E2E: '1'
