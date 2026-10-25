@@ -236,6 +236,7 @@ class ContractTests(unittest.TestCase):
     def test_rollback_snapshot_escapes_literal_dollars(self):
         value = {"services": {"web": {"environment": {"TOKEN": "literal$value${MORE}"}}}}
         escaped = runner.escape_compose_literals(value)
+        self.assertEqual(runner.unescape_compose_literals(escaped), value)
         self.assertEqual(escaped["services"]["web"]["environment"]["TOKEN"], "literal$$value$${MORE}")
         self.assertEqual(value["services"]["web"]["environment"]["TOKEN"], "literal$value${MORE}")
 

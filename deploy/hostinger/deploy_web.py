@@ -73,7 +73,7 @@ def escape_compose_literals(value):
 def unescape_compose_literals(value):
     """Compose config escapes dollars for re-reading; restore engine values for comparison."""
     if isinstance(value, str):
-        return value.replace("$", "$")
+        return value.replace("$$", "$")
     if isinstance(value, list):
         return [unescape_compose_literals(item) for item in value]
     if isinstance(value, dict):
