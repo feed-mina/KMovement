@@ -16,10 +16,6 @@ name: Auto deploy Hostinger web
 permissions:
   contents: read
 
-concurrency:
-  group: hostinger-web-production
-  cancel-in-progress: false
-
 jobs:
   validate:
     if: >-
@@ -30,6 +26,8 @@ jobs:
        github.event.workflow_run.head_branch == 'main' &&
        github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
+    outputs:
+      current: ${{ steps.current.outputs.current }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -41,17 +39,35 @@ jobs:
       - run: bash -n deploy/hostinger/setup_ci_ssh.sh
       - run: python -m pip install pyyaml
       - run: python -m unittest discover -s tests -p test_hostinger_web_deploy.py -v
+      - name: Ignore stale CI before entering the deployment queue
+        if: github.event_name != 'pull_request'
+        id: current
+        env:
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(git ls-remote origin refs/heads/main | cut -f1)" = "$RELEASE_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            echo "Newer main exists; this CI will not enter the deployment queue."
+          fi
 
   deploy:
     needs: validate
     if: >-
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      needs.validate.outputs.current == 'true' &&
+      ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.event == 'push' &&
        github.event.workflow_run.head_branch == 'main' &&
-       github.event.workflow_run.head_repository.full_name == github.repository)
+       github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-latest
+    concurrency:
+      group: hostinger-web-production
+      cancel-in-progress: false
     timeout-minutes: 35
     environment: hostinger-production
     permissions:

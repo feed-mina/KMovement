@@ -247,7 +247,7 @@ class ContractTests(unittest.TestCase):
         path.write_text(json.dumps(runner.escape_compose_literals(original)), encoding="utf-8")
         result = subprocess.run(["docker", "compose", "-p", "kmovement-snapshot-test", "-f", str(path),
                                  "config", "--format", "json"], check=True, text=True, capture_output=True)
-        restored = json.loads(result.stdout)
+        restored = runner.unescape_compose_literals(json.loads(result.stdout))
         self.assertEqual(restored["services"]["web"]["environment"]["TOKEN"], "literal$value${MORE}")
 
     def test_mixed_settings_override_is_never_pruned(self):
@@ -268,7 +268,8 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("github.event.workflow_run.head_repository.full_name == github.repository", guard)
         self.assertIn("github.event.workflow_run.head_branch == 'main'", guard)
         self.assertNotIn("pull_request", guard)
-        self.assertEqual(workflow["concurrency"]["cancel-in-progress"], "false")
+        self.assertIn("needs.validate.outputs.current", guard)
+        self.assertEqual(job["concurrency"]["cancel-in-progress"], "false")
 
     def test_host_verification_is_pinned_not_scanned_on_runner(self):
         workflow = (ROOT / ".github/workflows/hostinger-web-deploy.yml").read_text(encoding="utf-8")

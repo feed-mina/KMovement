@@ -70,6 +70,17 @@ def escape_compose_literals(value):
     return value
 
 
+def unescape_compose_literals(value):
+    """Compose config escapes dollars for re-reading; restore engine values for comparison."""
+    if isinstance(value, str):
+        return value.replace("$", "$")
+    if isinstance(value, list):
+        return [unescape_compose_literals(item) for item in value]
+    if isinstance(value, dict):
+        return {key: unescape_compose_literals(item) for key, item in value.items()}
+    return value
+
+
 def is_image_override(path):
     try:
         value = json.loads(path.read_text())
@@ -146,7 +157,7 @@ class Deployment:
         return self.json_command(["docker", "inspect", ids[0]], "Inspect active web")[0]
 
     def config(self, command):
-        return self.json_command(command + ["config", "--format", "json"], "Resolve Compose")
+        return unescape_compose_literals(self.json_command(command + ["config", "--format", "json"], "Resolve Compose"))
 
     def prepare(self):
         container = self.container()
