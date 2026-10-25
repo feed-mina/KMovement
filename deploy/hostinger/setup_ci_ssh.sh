@@ -17,7 +17,7 @@ test -f "$HOSTINGER_CI_DIR/id_ed25519.pub"
 touch /root/.ssh/authorized_keys
 chmod 0600 /root/.ssh/authorized_keys "$HOSTINGER_CI_DIR/id_ed25519"
 if ! grep -Fq -- "$(cat "$HOSTINGER_CI_DIR/id_ed25519.pub")" /root/.ssh/authorized_keys; then
-  printf 'restrict %s\n' "$(cat "$HOSTINGER_CI_DIR/id_ed25519.pub")" >> /root/.ssh/authorized_keys
+  printf '\nrestrict %s\n' "$(cat "$HOSTINGER_CI_DIR/id_ed25519.pub")" >> /root/.ssh/authorized_keys
 fi
 
 # This key comes from the server console, not an unauthenticated network scan.
