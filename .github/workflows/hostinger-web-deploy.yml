@@ -1,0 +1,179 @@
+name: Auto deploy Hostinger web
+
+"on":
+  workflow_run:
+    workflows: ["CI - Build Verification"]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/hostinger-web-deploy.yml"
+      - "deploy/hostinger/deploy_web.py"
+      - "deploy/hostinger/setup_ci_ssh.sh"
+      - "tests/test_hostinger_web_deploy.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hostinger-web-production
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: >-
+      github.event_name == 'pull_request' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: bash -n deploy/hostinger/setup_ci_ssh.sh
+      - run: python -m pip install pyyaml
+      - run: python -m unittest discover -s tests -p test_hostinger_web_deploy.py -v
+
+  deploy:
+    needs: validate
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment: hostinger-production
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+    env:
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+          persist-credentials: false
+
+      - name: Require current main and successful push CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$RELEASE_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$RELEASE_SHA&event=push&per_page=20" \
+            | jq -e --arg sha "$RELEASE_SHA" \
+                '.workflow_runs | any(.head_sha == $sha and .head_branch == "main" and .event == "push" and .conclusion == "success")' >/dev/null
+
+      - name: Configure pinned SSH and check Hostinger connection
+        shell: bash
+        env:
+          SSH_HOST: ${{ vars.HOSTINGER_SSH_HOST || 'kmovement.srv1869569.hstgr.cloud' }}
+          SSH_PORT: ${{ vars.HOSTINGER_SSH_PORT || '22' }}
+          SSH_USER: ${{ vars.HOSTINGER_SSH_USER || 'root' }}
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
+          KAKAO_KEY: ${{ secrets.NEXT_PUBLIC_KAKAO_MAP_APP_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$SSH_PRIVATE_KEY" || { echo "::error::Register HOSTINGER_SSH_PRIVATE_KEY before enabling deployment."; exit 1; }
+          test -n "$SSH_KNOWN_HOSTS" || { echo "::error::Register HOSTINGER_SSH_KNOWN_HOSTS from the trusted server console."; exit 1; }
+          test -n "$KAKAO_KEY" || { echo "::error::NEXT_PUBLIC_KAKAO_MAP_APP_KEY is required."; exit 1; }
+          [[ "$SSH_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ "$SSH_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          [[ "$SSH_PORT" =~ ^[0-9]{1,5}$ ]]
+          test "$SSH_PORT" -ge 1 && test "$SSH_PORT" -le 65535
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/kmovement-ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$RUNNER_TEMP/kmovement-ssh/key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" | tr -d '\r' > "$RUNNER_TEMP/kmovement-ssh/known_hosts"
+          ssh-keygen -y -P '' -f "$RUNNER_TEMP/kmovement-ssh/key" >/dev/null
+          ssh-keygen -l -f "$RUNNER_TEMP/kmovement-ssh/known_hosts" >/dev/null
+          cat > "$RUNNER_TEMP/kmovement-ssh/config" <<EOF
+          Host kmovement-hostinger
+            HostName $SSH_HOST
+            Port $SSH_PORT
+            User $SSH_USER
+            IdentityFile $RUNNER_TEMP/kmovement-ssh/key
+            UserKnownHostsFile $RUNNER_TEMP/kmovement-ssh/known_hosts
+            StrictHostKeyChecking yes
+            IdentitiesOnly yes
+            BatchMode yes
+            ConnectTimeout 15
+            ServerAliveInterval 15
+            ServerAliveCountMax 3
+          EOF
+          ssh -F "$RUNNER_TEMP/kmovement-ssh/config" kmovement-hostinger \
+            'test "$(hostname)" = srv1869569 && docker compose version >/dev/null && python3 --version'
+
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish verified main image
+        id: image
+        uses: docker/build-push-action@v6
+        with:
+          context: subproject/SDUI/metadata-project
+          platforms: linux/amd64
+          pull: true
+          push: true
+          tags: ghcr.io/feed-mina/kmovement-web:${{ env.RELEASE_SHA }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/feed-mina/KMovement
+            org.opencontainers.image.revision=${{ env.RELEASE_SHA }}
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=https://kmovement.srv1869569.hstgr.cloud
+            NEXT_PUBLIC_BACKEND_URL=http://spring:8080
+            FASTAPI_URL=http://fastapi:8000
+            NEXT_PUBLIC_KAKAO_MAP_APP_KEY=${{ secrets.NEXT_PUBLIC_KAKAO_MAP_APP_KEY }}
+            KMOVEMENT_RELEASE_SHA=${{ env.RELEASE_SHA }}
+
+      - name: Replace only web and verify public revision
+        shell: bash
+        env:
+          IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          set -euo pipefail
+          [[ "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$RELEASE_SHA"
+          IMAGE="ghcr.io/feed-mina/kmovement-web@$IMAGE_DIGEST"
+          ssh -F "$RUNNER_TEMP/kmovement-ssh/config" kmovement-hostinger \
+            "python3 - '$RELEASE_SHA' '$IMAGE'" < deploy/hostinger/deploy_web.py
+          {
+            echo "## Hostinger web deployed and verified"
+            echo "- source SHA: $RELEASE_SHA"
+            echo "- image: $IMAGE"
+            echo "- pages: home, explore, route planner"
+            echo "- public revision: https://kmovement.srv1869569.hstgr.cloud/health/release"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report incomplete deployment
+        if: failure()
+        shell: bash
+        run: |
+          echo "## Hostinger web deployment did not finish successfully" >> "$GITHUB_STEP_SUMMARY"
+          echo "Check the failed step. If replacement began, the server attempted rollback; only rolled_back means rollback verification succeeded." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove runner SSH files
+        if: always()
+        shell: bash
+        run: |
+          rm -f "$RUNNER_TEMP/kmovement-ssh/key" "$RUNNER_TEMP/kmovement-ssh/known_hosts" "$RUNNER_TEMP/kmovement-ssh/config"

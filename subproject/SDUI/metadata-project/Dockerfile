@@ -59,6 +59,8 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
+ARG KMOVEMENT_RELEASE_SHA
+ENV KMOVEMENT_RELEASE_SHA=$KMOVEMENT_RELEASE_SHA
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
