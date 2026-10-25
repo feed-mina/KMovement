@@ -29,6 +29,11 @@ public class ArtistEvidenceReviewController {
         String artistEvidence, String placeEvidence, String actionEvidence, String locator, OffsetDateTime reviewBy) {}
     public record VisitPolicy(Long poiId, JsonNode weekly, JsonNode dateOverrides, String hoursSourceUrl,
         Integer costKrw, String costSourceUrl, String costEvidence, OffsetDateTime reviewBy) {}
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public java.util.Map<String,String> invalidReference() {
+        return java.util.Map.of("code","invalid_reference","message","Check the explicit content, artist and place IDs.");
+    }
     static void require(boolean condition) {
         if (!condition) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incomplete review evidence");
     }
@@ -92,7 +97,7 @@ public class ArtistEvidenceReviewController {
             try { LocalDate.parse(e.getKey()); } catch (Exception ex) { require(false); }
             intervals(e.getValue());
         });
-        jdbc.update("""
+        int changed=jdbc.update("""
             INSERT INTO poi_visit_policy(poi_sqno,poi_name_snapshot,poi_address_snapshot,poi_lat_snapshot,poi_lon_snapshot,weekly_hours,date_overrides,hours_source_url,cost_krw,cost_source_url,
              cost_evidence,status,verified_at,review_by,reviewer)
             SELECT p.poi_sqno,p.title,p.addr,p.map_y,p.map_x,?::jsonb,?::jsonb,?,?,?,?,'VERIFIED',now(),?,? FROM tour_poi p WHERE p.poi_sqno=?
@@ -102,6 +107,7 @@ public class ArtistEvidenceReviewController {
              cost_evidence=EXCLUDED.cost_evidence,status='VERIFIED',verified_at=now(),review_by=EXCLUDED.review_by,reviewer=EXCLUDED.reviewer
             """,r.weekly().toString(),r.dateOverrides().toString(),r.hoursSourceUrl(),r.costKrw(),r.costSourceUrl(),
             r.costEvidence(),r.reviewBy(),actor,r.poiId());
+        if(changed!=1) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Place not found");
         return ApiResponse.success("visit policy reviewed");
     }
     @PostMapping("/{evidenceId}/revoke")

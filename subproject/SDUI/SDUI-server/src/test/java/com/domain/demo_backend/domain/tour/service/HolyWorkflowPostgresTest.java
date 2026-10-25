@@ -144,6 +144,10 @@ class HolyWorkflowPostgresTest {
             policy.put("hoursSourceUrl","https://example.test/synthetic-hours");policy.put("costKrw",10000);
             policy.put("costSourceUrl","https://example.test/synthetic-cost");policy.put("costEvidence","SYNTHETIC per-person place fee");
             policy.put("reviewBy","2099-01-01T00:00:00Z");
+            policy.put("poiId",Long.MAX_VALUE);
+            mvc.perform(post("/api/admin/tour/artist-evidence/visit-policy").with(user(admin)).contentType("application/json")
+                .content(json.writeValueAsString(policy))).andExpect(status().isNotFound());
+            policy.put("poiId",poi);
             mvc.perform(post("/api/admin/tour/artist-evidence/visit-policy").with(user(admin)).contentType("application/json")
                 .content(json.writeValueAsString(policy))).andExpect(status().isOk());
             String catalog=mvc.perform(get("/api/v1/tour/recommendation-catalog")).andExpect(status().isOk())
