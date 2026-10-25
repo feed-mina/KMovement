@@ -63,3 +63,14 @@ test('validation arrays, timeout and network failures remain distinct', () => {
 
 test('rejects legacy onboarding IDs without official artistId',()=>{expect(()=>validateItineraryRequest(buildItineraryRequest({...form,selectedArtists:[{id:3,name:'EXO'}]}))).toThrow('validation');});
 test('requires a real date',()=>{expect(()=>validateItineraryRequest(buildItineraryRequest({...form,visitDate:'2026-02-30'}))).toThrow('validation');});
+
+test('returning to confirmation permits one new explicit request without enabling consent',async()=>{
+    const value={...form,acknowledgeUnverifiedConditions:false};
+    const {rerender}=renderHook(({enabled})=>useKrideItinerary('KRIDE_FOCUS',value,enabled),{initialProps:{enabled:true}});
+    await waitFor(()=>expect(fetch).toHaveBeenCalledTimes(1));
+    rerender({enabled:false});
+    expect(fetch).toHaveBeenCalledTimes(1);
+    rerender({enabled:true});
+    await waitFor(()=>expect(fetch).toHaveBeenCalledTimes(2));
+    expect(JSON.parse((fetch as jest.Mock).mock.calls[1][1].body).acknowledgeUnverifiedConditions).toBe(false);
+});
