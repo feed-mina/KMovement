@@ -154,7 +154,8 @@ export function useKrideItinerary(
     }, []);
 
     useEffect(() => {
-        if (!isFocus || !hasFormData || calledRef.current) return;
+        if (!isFocus) { calledRef.current = false; return; }
+        if (!hasFormData || calledRef.current) return;
         calledRef.current = true;
         fetchItinerary('focus_auto_generation');
     }, [isFocus, hasFormData, fetchItinerary]);

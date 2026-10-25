@@ -1,0 +1,27 @@
+name: Artist and place identity review
+on:
+  pull_request:
+    paths:
+      - 'scripts/review_artist_place_identity.py'
+      - 'tests/test_artist_place_identity_review.py'
+      - 'docs/2026-10-25/identity-branch-review/**'
+      - '.github/workflows/artist-place-identity-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test branch separation and identity policy
+        run: python -m unittest tests.test_artist_place_identity_review tests.test_artist_catalog_reconciliation
+      - name: Reproduce read-only audit from public snapshot
+        run: |
+          python -c "import gzip,pathlib,hashlib; p=pathlib.Path('work/identity-snapshot.json'); p.parent.mkdir(exist_ok=True); b=gzip.decompress(pathlib.Path('docs/2026-10-25/identity-branch-review/production-public-snapshot.json.gz').read_bytes()); assert hashlib.sha256(b).hexdigest() == '29e47dcb67d14734f441db9202a894b52d7991a38681bacacb81ff6ae22085d6'; p.write_bytes(b)"
+          python scripts/reconcile_artist_catalog.py --master-json work/identity-snapshot.json --output docs/2026-10-25/identity-branch-review/live-catalog
+          python scripts/review_artist_place_identity.py --snapshot work/identity-snapshot.json --output docs/2026-10-25/identity-branch-review
+          git diff --exit-code -- docs/2026-10-25/identity-branch-review

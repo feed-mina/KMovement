@@ -17,19 +17,18 @@ def endpoint(monkeypatch):
 
 
 HEADERS = {'X-Kride-Token': 'contract-fixture', 'X-Kride-User': '7'}
-BODY = {'duration': '당일치기', 'regions': ['서울'], 'artists': ['BTS'], 'purposes': ['문화체험'], 'budget': {'min': 30000, 'max': 200000}, 'responseLocale': 'ja'}
+BODY = {'duration': '당일치기', 'regions': ['서울'], 'artists': ['BTS'], 'artistIds': [1], 'visitDate': '2026-10-26', 'purposes': ['문화체험'], 'budget': {'min': 30000, 'max': 200000}, 'responseLocale': 'ja'}
 
 
 @pytest.mark.parametrize('consent', [None, False])
-def test_missing_or_false_consent_rejected_before_generation(endpoint, consent):
+def test_verified_course_keeps_missing_or_false_general_consent(endpoint, consent):
     client, generated = endpoint
     body = dict(BODY)
     if consent is not None:
         body['acknowledgeUnverifiedConditions'] = consent
     result = client.post('/api/public/itinerary', json=body, headers=HEADERS)
-    assert result.status_code == 422
-    assert result.json()['detail']['code'] == 'consent_required'
-    generated.assert_not_called()
+    assert result.status_code == 200
+    assert generated.call_args.args[0].acknowledgeUnverifiedConditions is False
 
 
 def test_explicit_consent_preserves_full_contract(endpoint):

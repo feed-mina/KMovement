@@ -7,14 +7,14 @@
   - kride_db_artist_poi.csv : tmp_artist_id,tmp_poi_id,relationship_type,artist_name,poi_name
 
 출력:
-  subproject/SDUI/SDUI-server/src/main/resources/db/migration/V90__holy_poi_nationwide_seed.sql
+  --output으로 지정하는 새 검토용 SQL (Flyway 마이그레이션 폴더 금지)
 
 정책:
   - 성지 성격 행만: category ∈ {kculture, kpop} (food/tourism/facility는 TourAPI 실시간과 중복.
     특히 category=food는 전부 source=tourapi_food 공공 덤프로 방영 이력이 없다)
   - (name, address) 중복 제거, sido 없는 행 제외
-  - source='CRAWL' + review_status='APPROVED' (공공 kcisa_media_2023 출처)
-  - content_id='kride-media-{tmp_poi_id}' 로 재실행 안전(DELETE 후 INSERT)
+  - source='CRAWL' + review_status='PENDING' (공공 kcisa_media_2023 출처)
+  - content_id 충돌 시 기존 행 보존 (ON CONFLICT DO NOTHING)
   - sido → TourAPI areaCode 매핑, sigungu 이름은 raw_json에 보존(주소 LIKE 필터용)
   - 대표 아티스트/작품 1개를 tour_poi.artist 에 기록 (연결 수 최다 → 최소 tmp_artist_id)
   - 식당·카페 촬영지는 content_type_id='HOLY_FOOD' ('성지 맛집' 칩, V92와 동일 기준)
@@ -24,10 +24,11 @@
     데이터 갱신은 새 번호의 마이그레이션으로 만들 것.
 
 사용:
-  python scripts/build_holy_poi_seed.py
+  python scripts/build_holy_poi_seed.py --output staging-holy-pending.sql
 """
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import sys
@@ -36,10 +37,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATASET = REPO_ROOT / "dataset"
-OUT_SQL = (
-    REPO_ROOT
-    / "subproject/SDUI/SDUI-server/src/main/resources/db/migration/V90__holy_poi_nationwide_seed.sql"
-)
+
 
 # TourAPI 표준 시/도 areaCode (TourExploreScreen/TourService 전국 fallback과 동일해야 함)
 SIDO_TO_AREA = {
@@ -90,7 +88,18 @@ def clip(value: str, limit: int) -> str:
     return value[:limit]
 
 
-def main() -> int:
+def output_path(value):
+    path = Path(value).resolve()
+    migrations = (REPO_ROOT / "subproject/SDUI/SDUI-server/src/main/resources/db/migration").resolve()
+    if path.is_relative_to(migrations) or path.exists():
+        raise ValueError("Use a new staging SQL path outside Flyway migrations.")
+    return path
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description="Generate PENDING staging SQL; never rewrite V90.")
+    parser.add_argument("--output", required=True, type=output_path)
+    args = parser.parse_args(argv)
     poi_path = DATASET / "kride_db_poi.csv"
     link_path = DATASET / "kride_db_artist_poi.csv"
     if not poi_path.exists() or not link_path.exists():
@@ -125,6 +134,9 @@ def main() -> int:
                 skipped["name"] += 1
                 continue
             addr = clip(row.get("address") or "", MAX_ADDR)
+            if not addr:
+                skipped["missing_address"] += 1
+                continue
             dedupe_key = (name, addr)
             if dedupe_key in seen:
                 skipped["dup"] += 1
@@ -179,7 +191,7 @@ def main() -> int:
     lines.append("-- 생성기: scripts/build_holy_poi_seed.py (수동 편집 금지, 재생성으로 갱신)")
     lines.append(f"-- 행 수: {len(rows)} (kculture/kpop만; 맛집·관광지·문화시설은 TourAPI 실시간 사용)")
     lines.append("")
-    lines.append("DELETE FROM tour_poi WHERE content_id LIKE 'kride-media-%';")
+    lines.append("-- Existing rows are preserved; candidates require factual review.")
     lines.append("")
     for start in range(0, len(rows), BATCH):
         batch = rows[start : start + BATCH]
@@ -190,7 +202,7 @@ def main() -> int:
         values = []
         for r in batch:
             values.append(
-                "({cid}, {kind}, 'CRAWL', {title}, {addr}, {lon}, {lat}, {img}, {area}, {artist}, {reason}, 'APPROVED', {raw}::jsonb)".format(
+                "({cid}, {kind}, 'CRAWL', {title}, {addr}, {lon}, {lat}, {img}, {area}, {artist}, {reason}, 'PENDING', {raw}::jsonb)".format(
                     cid=q(r["content_id"]),
                     kind=q(r["kind"]),
                     title=q(r["title"]),
@@ -204,11 +216,12 @@ def main() -> int:
                     raw=q(r["raw"]),
                 )
             )
-        lines.append(",\n".join(values) + ";")
+        lines.append(",\n".join(values) + " ON CONFLICT (content_id) DO NOTHING;")
         lines.append("")
 
-    OUT_SQL.write_text("\n".join(lines), encoding="utf-8")
-    print(f"[INFO] wrote {OUT_SQL} ({OUT_SQL.stat().st_size / 1024 / 1024:.2f} MB)")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text("\n".join(lines), encoding="utf-8")
+    print(f"[INFO] wrote {args.output} ({args.output.stat().st_size / 1024 / 1024:.2f} MB)")
     return 0
 
 

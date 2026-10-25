@@ -25,6 +25,7 @@ export default function RouteNode({ data, index = 0, onSelect }: Props) {
   const desc = data?.description || data?.address || "";
   const reason = data?.reason || data?.tip || "";
   const urls = buildExternalUrls(data);
+  const evidenceUrl = data?.artistEvidence?.[0]?.sourceUrl ?? data?.sourceUrl;
 
   return (
     <div className="route-node flex w-full items-start gap-3 py-2">
@@ -55,10 +56,11 @@ export default function RouteNode({ data, index = 0, onSelect }: Props) {
               </span>
             )}
           </p>
+          {data?.visitTime && <p className="text-gray-300 text-xs">방문 {data.visitTime} · 1인 방문비 {Number(data.visitCostKrw).toLocaleString()}원</p>}
           {reason && <p className="text-yellow-400/80 text-[11px] mt-0.5 truncate">{reason}</p>}
         </div>
       </button>
-      {typeof data?.sourceUrl==='string'&&/^https?:\/\//.test(data.sourceUrl)&&<a href={data.sourceUrl} target="_blank" rel="noopener noreferrer" className="route-node__link" aria-label={`${name} 출처 확인`}>출처</a>}
+      {typeof evidenceUrl==='string'&&/^https?:\/\//.test(evidenceUrl)&&<a href={evidenceUrl} target="_blank" rel="noopener noreferrer" className="route-node__link" aria-label={`${name} 출처 확인`}>출처</a>}
       {urls && (
         <div className="flex-shrink-0 flex gap-1 items-center pt-0.5">
           <a

@@ -117,5 +117,63 @@ class HolyWorkflowPostgresTest {
             assertThat(jdbc.queryForObject("select count(*) from holy_review_audit where poi_sqno=?",Integer.class,id)).isEqualTo(1);
         } finally { pool.shutdownNow(); }
     }
+    @Test void numericIdentityEvidenceAndVisitPolicyAreExplicitAdminReviews() throws Exception {
+        Long artist=jdbc.queryForObject("SELECT artist_id FROM artist WHERE approved_yn='Y' ORDER BY artist_id LIMIT 1",Long.class);
+        Long poi=jdbc.queryForObject("SELECT poi_sqno FROM tour_poi WHERE source='CRAWL' AND review_status='APPROVED' AND map_y IS NOT NULL AND map_x IS NOT NULL AND addr IS NOT NULL LIMIT 1",Long.class);
+        Long content=jdbc.queryForObject("INSERT INTO holy_content(source_ref,name,category) VALUES (?,'Synthetic policy test','kpop') RETURNING content_sqno",Long.class,"policy-"+UUID.randomUUID().toString().replace("-",""));
+        try {
+            String identity=json.writeValueAsString(Map.of("contentId",content,"artistId",artist,"basis","SYNTHETIC identity review"));
+            mvc.perform(post("/api/admin/tour/artist-evidence/identity").contentType("application/json").content(identity)).andExpect(status().isUnauthorized());
+            mvc.perform(post("/api/admin/tour/artist-evidence/identity").with(user(member)).contentType("application/json").content(identity)).andExpect(status().isForbidden());
+            mvc.perform(post("/api/admin/tour/artist-evidence/identity").with(user(admin)).contentType("application/json").content(identity)).andExpect(status().isOk());
+            String incomplete=json.writeValueAsString(Map.of("contentId",content,"artistId",artist,"poiId",poi,"sourceUrl","https://example.test/proof"));
+            mvc.perform(post("/api/admin/tour/artist-evidence").with(user(admin)).contentType("application/json").content(incomplete)).andExpect(status().isBadRequest());
+            var evidence=new LinkedHashMap<String,Object>();
+            evidence.put("contentId",content); evidence.put("artistId",artist); evidence.put("poiId",poi);
+            evidence.put("action","CONTENT_VISIT"); evidence.put("sourceUrl","https://example.test/synthetic-proof");
+            evidence.put("artistEvidence","SYNTHETIC artist identity"); evidence.put("placeEvidence","SYNTHETIC exact branch");
+            evidence.put("actionEvidence","SYNTHETIC visit action"); evidence.put("locator","00:10-00:30");
+            evidence.put("reviewBy","2099-01-01T00:00:00Z");
+            String result=mvc.perform(post("/api/admin/tour/artist-evidence").with(user(admin)).contentType("application/json")
+                .content(json.writeValueAsString(evidence))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            long evidenceId=json.readTree(result).path("data").asLong();
+            var weekly=new LinkedHashMap<String,Object>();
+            for(int day=0;day<7;day++)weekly.put(String.valueOf(day),List.of(List.of(540,1200)));
+            var policy=new LinkedHashMap<String,Object>();
+            policy.put("poiId",poi);policy.put("weekly",weekly);policy.put("dateOverrides",Map.of("2026-10-26",List.of()));
+            policy.put("hoursSourceUrl","https://example.test/synthetic-hours");policy.put("costKrw",10000);
+            policy.put("costSourceUrl","https://example.test/synthetic-cost");policy.put("costEvidence","SYNTHETIC per-person place fee");
+            policy.put("reviewBy","2099-01-01T00:00:00Z");
+            policy.put("poiId",Long.MAX_VALUE);
+            mvc.perform(post("/api/admin/tour/artist-evidence/visit-policy").with(user(admin)).contentType("application/json")
+                .content(json.writeValueAsString(policy))).andExpect(status().isNotFound());
+            policy.put("poiId",poi);
+            mvc.perform(post("/api/admin/tour/artist-evidence/visit-policy").with(user(admin)).contentType("application/json")
+                .content(json.writeValueAsString(policy))).andExpect(status().isOk());
+            String catalog=mvc.perform(get("/api/v1/tour/recommendation-catalog")).andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control","no-store")).andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+            var payload=json.readTree(catalog).path("data");
+            boolean found=false;
+            for(var item:payload)if(item.path("id").asText().equals("poi:"+poi)){
+                found=true;
+                assertThat(item.path("artistEvidence").get(0).path("artistId").asLong()).isEqualTo(artist);
+                assertThat(item.path("artistEvidence").get(0).path("placeEvidence").asText()).isEqualTo("SYNTHETIC exact branch");
+                assertThat(item.path("openingHours").path("dateOverrides").path("2026-10-26").isEmpty()).isTrue();
+                assertThat(item.path("cost").path("amountKrw").asInt()).isEqualTo(10000);
+            }
+            assertThat(found).isTrue();
+            mvc.perform(post("/api/admin/tour/artist-evidence/"+evidenceId+"/revoke").with(user(admin))).andExpect(status().isOk());
+            assertThat(jdbc.queryForObject("SELECT status FROM artist_place_evidence WHERE evidence_id=?",String.class,evidenceId)).isEqualTo("REVOKED");
+            mvc.perform(post("/api/admin/tour/artist-evidence/visit-policy/"+poi+"/revoke").with(user(admin))).andExpect(status().isOk());
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM verified_visit_catalog WHERE poi_sqno=?",Integer.class,poi)).isZero();
+        } finally {
+            jdbc.update("DELETE FROM artist_place_evidence WHERE content_sqno=?",content);
+            jdbc.update("DELETE FROM poi_visit_policy WHERE poi_sqno=?",poi);
+            jdbc.update("DELETE FROM holy_content_poi WHERE content_sqno=?",content);
+            jdbc.update("DELETE FROM holy_content_artist WHERE content_sqno=?",content);
+            jdbc.update("DELETE FROM holy_content WHERE content_sqno=?",content);
+        }
+    }
+
 }
 

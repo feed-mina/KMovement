@@ -1,0 +1,27 @@
+{
+  "capturedAt": "2026-10-25T06:15:20.758806+00:00",
+  "snapshotSha256": "29e47dcb67d14734f441db9202a894b52d7991a38681bacacb81ff6ae22085d6",
+  "workflowRun": "https://github.com/feed-mina/KMovement/actions/runs/40168383015",
+  "liveArtists": 48,
+  "liveContents": 117,
+  "liveRelations": 1968,
+  "livePlaces": 1621,
+  "selectedCsvRows": 1936,
+  "nameAddressBuckets": 1600,
+  "placeMatches": {
+    "exact_text": 1587,
+    "unresolved_name": 6,
+    "same_name_address_differs": 7
+  },
+  "exactMatchCoordinateConflictsOver50M": 0,
+  "sharedAddressDifferentNames": 16,
+  "contentCrosswalk": {
+    "hold": 5,
+    "unique_exact_alias_candidate": 112
+  },
+  "databaseModified": false,
+  "artistIdsReassigned": 0,
+  "placeIdsMerged": 0,
+  "inheritedGroupLinks": 0,
+  "verificationNote": "Text matching and desk review do not verify artist visits or current opening hours."
+}

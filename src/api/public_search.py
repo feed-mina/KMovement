@@ -8,6 +8,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 from datetime import datetime, timezone
 import httpx
+from src.api.artist_place_policy import legacy_general_place
 
 COLLECTION = 'kride_public_poi_v1'
 log = logging.getLogger(__name__)
@@ -47,6 +48,31 @@ def curated_catalog(path=None, now=None):
     return result
 
 
+def _with_verified_visits(result,base):
+    if not base:return result
+    # New numeric-ID catalog is authoritative for reviewed relationship/hour/cost facts.
+    # An old Spring deployment returns 404; legacy places remain searchable but are
+    # ineligible for the strict itinerary rather than being silently trusted.
+    try:
+        reviewed = httpx.get(base + '/api/v1/tour/recommendation-catalog', timeout=8)
+        reviewed.raise_for_status()
+        feed = reviewed.json().get('data')
+        if not isinstance(feed,list):raise ValueError('invalid_visit_catalog')
+        for p in feed:
+            if (not isinstance(p,dict) or p.get('visibility')!='PUBLIC' or not re.fullmatch(r'poi:[1-9][0-9]*',str(p.get('id','')))
+                or not all(isinstance(p.get(k),str) and p[k].strip() for k in ('name','address'))
+                or not isinstance(p.get('artistEvidence'),list)):
+                continue
+            try:
+                if not (math.isfinite(float(p['lat'])) and math.isfinite(float(p['lon']))
+                    and 33<=float(p['lat'])<=39 and 124<=float(p['lon'])<=132):continue
+            except (KeyError,TypeError,ValueError):continue
+            result[p['id']]={**p,'artist':'','poi_id':p['id']}
+    except (httpx.HTTPError,ValueError,TypeError):
+        log.warning('Reviewed visit catalog unavailable; strict itinerary has no verified replacement')
+    return result
+
+
 def public_catalog():
     reviewed_path = os.environ.get('KRIDE_REVIEWED_CATALOG_PATH')
     if reviewed_path:
@@ -55,11 +81,12 @@ def public_catalog():
         if not review_path:
             raise RuntimeError('catalog_review_unconfigured')
         catalog, _ = load_reviewed_catalog(reviewed_path, review_path)
-        return catalog
+        return _with_verified_visits(catalog,os.environ.get('KRIDE_PUBLIC_CATALOG_URL','').rstrip('/'))
     result = curated_catalog()
     base = os.environ.get('KRIDE_PUBLIC_CATALOG_URL', '').rstrip('/')
     if not base:
         raise RuntimeError('public_catalog_unconfigured')
+    result=_with_verified_visits(result,base)
     try:
         response = httpx.get(base + '/api/v1/tour/holy', timeout=8)
         response.raise_for_status()
@@ -73,24 +100,11 @@ def public_catalog():
         # No old third-party catalog response is cached or served on failure.
         log.warning('Public legacy catalog unavailable; reviewed locations only')
         rows = []
-    checked = datetime.now(timezone.utc).isoformat()
+    fetched_at = datetime.now(timezone.utc).isoformat()
     for row in rows:
-        if not isinstance(row, dict):
-            continue
-        identity, name, address = row.get('contentId'), row.get('title'), row.get('addr')
-        source = row.get('sourceUrl') or ''
-        try:
-            lat, lon = float(row['mapY']), float(row['mapX'])
-        except (KeyError, TypeError, ValueError):
-            continue
-        if not identity or not name or not address or not source.startswith(('https://','http://')):
-            continue
-        if not (math.isfinite(lat) and math.isfinite(lon) and 33 <= lat <= 39 and 124 <= lon <= 132):
-            continue
-        identity = 'tour:' + str(identity)
-        result[identity] = dict(id=identity, poi_id=identity, name=name, address=address,
-            lat=lat, lon=lon, sourceUrl=source, verifiedAt=checked, artist=row.get('artist') or '',
-            visibility='PUBLIC', evidenceGrade='PUBLIC_CATALOG')
+        place = legacy_general_place(row, fetched_at)
+        if place is not None:
+            result[place["id"]] = place
     return result
 
 
@@ -105,7 +119,7 @@ def index_catalog(client, embed, catalog, model):
     for start in range(0,len(catalog),64):
         rows=list(catalog.values())[start:start+64]
         docs=['passage: '+p['name']+' | '+p['address']+' | '+p['artist'] for p in rows]
-        col.upsert(ids=[p['id'] for p in rows],documents=docs,metadatas=rows,embeddings=embed(docs))
+        col.upsert(ids=[p['id'] for p in rows],documents=docs,metadatas=[{k:p[k] for k in ('id','name','address','artist')} for p in rows],embeddings=embed(docs))
     stale=existing-set(catalog)
     if stale:col.delete(ids=sorted(stale))
     return {'collection':COLLECTION,'count':col.count(),'removed':len(stale),'embeddingModel':model}
@@ -114,7 +128,8 @@ def index_catalog(client, embed, catalog, model):
 def search_public(client, embed, catalog, query, model, regions=(), top_k=8):
     if any(p.get('catalogSha256') for p in catalog.values()):
         from src.api.multilingual_catalog import search_reviewed
-        return search_reviewed(client, embed, catalog, query, regions, top_k)
+        indexed={identity:p for identity,p in catalog.items() if p.get('catalogSha256')}
+        return search_reviewed(client, embed, indexed, query, regions, top_k)
     col=client.get_collection(COLLECTION)
     if col.metadata.get('embeddingModel') != model or col.metadata.get('contract') != 'e5-prefix-v1':
         raise RuntimeError('embedding_contract_mismatch')

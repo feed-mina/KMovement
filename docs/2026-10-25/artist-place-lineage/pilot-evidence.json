@@ -1,0 +1,84 @@
+{
+  "reviewedOn": "2026-10-25",
+  "reviewMethod": "primary_source_desk_research_by_implementing_assistant",
+  "independentReview": false,
+  "scope": "two_artist_method_pilot_not_full_relation_verification",
+  "records": [
+    {
+      "id": "bts-jumunjin-album-photo",
+      "artistSlug": "bts",
+      "placeName": "주문진 향호해변 BTS 버스정류장",
+      "relationType": "ALBUM_PHOTO",
+      "relationFactStatus": "supported_by_public_tourism_source",
+      "relationSummary": "한국관광공사 여행 코스가 You Never Walk Alone 앨범 커버 촬영 장소로 안내한다. MV 촬영으로 바꾸어 기록하지 않는다.",
+      "sourceUrls": [
+        "https://english.visitkorea.or.kr/svc/whereToGo/hdrdslt/hdrdsltView.do?crsSn=352453",
+        "https://english.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?vcontsId=200162"
+      ],
+      "sourcePublishedOn": null,
+      "exactBranchStatus": "locality_identified_coordinate_check_pending",
+      "lat": null,
+      "lon": null,
+      "openingHours": null,
+      "hoursStatus": "unknown",
+      "publicAccessStatus": "tourism_photo_spot_current_restrictions_unchecked",
+      "personalizedEligible": false,
+      "blockingReasons": [
+        "exact_coordinate_and_branch_review_pending",
+        "opening_hours_and_current_access_unconfirmed",
+        "independent_review_pending"
+      ],
+      "csvCandidateId": null
+    },
+    {
+      "id": "blackpink-nmk-deadline-listening",
+      "artistSlug": "blackpink",
+      "placeName": "국립중앙박물관 역사의 길 리스닝 존",
+      "address": "서울특별시 용산구 서빙고로 137",
+      "relationType": "COLLABORATION_EVENT",
+      "relationFactStatus": "supported_by_artist_and_operator_notice",
+      "relationSummary": "음반 청취 협업 행사다. 멤버의 직접 방문·공연·MV 촬영을 입증하지 않는다.",
+      "sourceUrls": [
+        "https://weverse.io/blackpink/notice/33735",
+        "https://www.museum.go.kr/MUSEUM/contents/M0701040000.do?arcId=23422&catCustomType=post&schM=view"
+      ],
+      "sourcePublishedOn": "2026-02-12 (museum notice)",
+      "timezone": "Asia/Seoul",
+      "validFrom": "2026-02-27T14:00:00+09:00",
+      "validThrough": "2026-03-08",
+      "historicalAnnouncedHours": {
+        "default": "10:00-18:00",
+        "WednesdaySaturday": "10:00-21:00",
+        "firstDayStart": "14:00"
+      },
+      "reservation": "walk_in_according_to_historical_notice",
+      "eventStatusAtReview": "ended",
+      "currentMuseumHoursStatus": "not_verified_by_expired_event_notice",
+      "personalizedEligible": false,
+      "blockingReasons": [
+        "event_period_ended",
+        "not_a_permanent_artist_attraction"
+      ],
+      "csvCandidateId": null
+    },
+    {
+      "id": "blackpink-house-episode-1",
+      "artistSlug": "blackpink",
+      "placeName": null,
+      "relationType": "UNKNOWN",
+      "relationFactStatus": "U",
+      "relationSummary": "소속사 페이지에서 공식 프로그램 영상의 존재와 게시일만 확인했다. 특정 가게·주소·지점을 확인한 것으로 처리하지 않는다.",
+      "sourceUrls": [
+        "https://yg-life.com/archives/96102?lang=en"
+      ],
+      "sourcePublishedOn": "2018-01-06",
+      "hoursStatus": "unknown",
+      "personalizedEligible": false,
+      "blockingReasons": [
+        "specific_place_and_branch_not_established",
+        "public_access_and_current_hours_unknown"
+      ],
+      "csvCandidateId": null
+    }
+  ]
+}

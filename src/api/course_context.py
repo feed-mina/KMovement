@@ -15,7 +15,8 @@ import uuid
 
 def catalog_revision(catalog):
     fields = ('id', 'name', 'address', 'lat', 'lon', 'artist', 'names', 'sourceUrl',
-              'coordinateSourceUrl', 'sourceSha256', 'reviewBy', 'evidenceGrade')
+              'coordinateSourceUrl', 'sourceSha256', 'reviewBy', 'evidenceGrade',
+              'artistEvidence', 'openingHours', 'cost')
     stable = json.dumps({i: {k: p.get(k) for k in fields} for i, p in catalog.items()},
                         ensure_ascii=False, sort_keys=True, separators=(',', ':'))
     return hashlib.sha256(stable.encode()).hexdigest()

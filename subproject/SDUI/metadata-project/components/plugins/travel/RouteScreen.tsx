@@ -53,9 +53,13 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const [purpose, setPurpose] = useState('성지순례');
     const [duration, setDuration] = useState('당일치기');
     const [aiSources, setAiSources] = useState<{id:string;name:string;sourceUrl:string;verifiedAt:string}[]>([]);
+    const [budgetMin,setBudgetMin] = useState(30000);
+    const [budgetMax,setBudgetMax] = useState(2000000);
+    const [visitDate, setVisitDate] = useState('');
     const [acknowledged, setAcknowledged] = useState(false);
     const [responseLocale, setResponseLocale] = useState<'ko' | 'en' | 'ja'>('ko');
     const inFlightRef = useRef(false);
+    const [aiScope, setAiScope] = useState('');
     const [aiData, setAiData] = useState<unknown | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState<string | null>(null);
@@ -94,9 +98,10 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const fetchAi = async () => {
         let body;
         try {
-            body = buildItineraryRequest({ duration, regions: [region], purposes: [purpose], artists: [], responseLocale, acknowledgeUnverifiedConditions: acknowledged });
+            body = buildItineraryRequest({ duration, regions: [region], purposes: [purpose], artists: [], visitDate, budget:{min:budgetMin,max:budgetMax}, responseLocale, acknowledgeUnverifiedConditions: acknowledged });
             validateItineraryRequest(body);
         } catch (reason) {
+            setAiData(null);setAiSources([]);setAiScope('');
             setAiErrorKind(classifyItineraryError(reason));
             setAiError(itineraryErrorMessage(reason));
             return;
@@ -123,6 +128,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
             });
             if (!res.ok) throw itineraryHttpError(res.status, await res.json().catch(() => ({})));
             const result = await res.json();
+            setAiScope(result.scopeNotice ?? '');
             if (result.status === 'empty_candidates') throw new Error('empty_candidates');
             const placeCount = countItineraryPlaces(result);
             if (placeCount === 0) throw new Error('empty_result');
@@ -204,20 +210,25 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                         <p className="route-prefs__hint">{mode === 'ai' ? '조건을 확인한 뒤 코스 만들기를 눌러 주세요' : '기본 코스는 고른 지역의 맛집을 가까운 순으로 이어요 · 목적·기간은 AI 코스에 반영'}</p>
                     </div>
                     {mode === 'ai' && <section aria-label="AI 코스 안내">
-                    <p>현재 서울 당일치기만 지원합니다. 아티스트 연관·예산 충족·영업시간·예약 가능 여부는 미확인입니다.</p>
+                    <p>현재 서울 당일치기만 지원합니다. 휴무일·영업시간·1인 장소 방문비를 검사합니다. 교통·숙박비는 별도이며 예약 가능 여부는 검사하지 않습니다.</p>
+                    <p>예산은 1인 장소 방문비 합계입니다. 교통·숙박비는 별도입니다.</p>
+                    <label>최소 방문비(원) <input type="number" min="0" max="100000000" value={budgetMin} disabled={aiLoading} onChange={e=>{setBudgetMin(Number(e.target.value));setAiData(null);fetchedKeyRef.current='';}}/></label>
+                    <label>최대 방문비(원) <input type="number" min="0" max="100000000" value={budgetMax} disabled={aiLoading} onChange={e=>{setBudgetMax(Number(e.target.value));setAiData(null);fetchedKeyRef.current='';}}/></label>
+                    <label>방문 날짜 <input type="date" value={visitDate} disabled={aiLoading} onChange={e=>{setVisitDate(e.target.value);setAiData(null);fetchedKeyRef.current='';}}/></label>
                     <label>안내 언어 <select value={responseLocale} disabled={aiLoading} onChange={e => { setResponseLocale(e.target.value as 'ko' | 'en' | 'ja'); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }}><option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option></select></label>
-                    <p><label><input type="checkbox" checked={acknowledged} disabled={aiLoading} onChange={e => { setAcknowledged(e.target.checked); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }} /> 위 조건의 충족을 보장하지 않는 일반 장소 코스로 진행합니다.</label></p>
-                    {!acknowledged && <p role="status">일반 장소 코스 안내에 직접 동의한 후 코스를 만들 수 있습니다.</p>}
+                    <p><label><input type="checkbox" checked={acknowledged} disabled={aiLoading} onChange={e => { setAcknowledged(e.target.checked); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }} /> 아티스트 후보가 없을 때 일반 장소 코스로 전환하는 데 동의합니다. 시간·방문비 조건은 유지합니다.</label></p>
+                    {!acknowledged && <p role="status">일반 코스 전환 동의는 선택 사항입니다. 아티스트를 고르지 않은 이 화면에서는 시간·방문비 조건으로 코스를 만듭니다.</p>}
                     {unsupportedAi && <div className="route-ai-scope" role="status">
                         <p>{region} · {duration} AI 코스는 아직 준비 중이에요. 고른 지역의 기본 코스와 길찾기는 이용할 수 있어요.</p>
                         <MotionButton type="button" className="route-pill" onClick={() => setMode('tour')}>{region} 기본 코스 보기</MotionButton>
                         <MotionButton type="button" className="route-pill" onClick={() => { setRegion('서울'); setDuration('당일치기'); if (region !== '서울') setPois([]); setSelectedStopId(undefined); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }}>서울 당일치기로 바꾸기</MotionButton>
                     </div>}
-                    <MotionButton type="button" disabled={!acknowledged || aiLoading || unsupportedAi} onClick={() => void fetchAi()}>코스 만들기</MotionButton>
+                    <MotionButton type="button" disabled={!visitDate || aiLoading || unsupportedAi} onClick={() => void fetchAi()}>코스 만들기</MotionButton>
                     </section>}
                 </div>
             )}
 
+            {mode === 'ai' && aiScope && <p role="status">{aiScope}</p>}
             {mode === 'tour' && loading && <RouteSkeleton label="기본 코스를 불러오는 중" />}
             {mode === 'tour' && error && (
                 <KrideStatePanel

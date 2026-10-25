@@ -1,0 +1,632 @@
+candidateId,artistSlug,artistId,rawArtist,placeName,address,sourceRows,mappingStatus,relationStatus,relationType,sourceUrl,hoursStatus,visitStatus,personalizedEligible
+cb83bf11bef9d2c54581c000,Red Velvet,,레드벨벳,허브빌리지,경기도 연천군 왕징면 북삼리 222,[274],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+833e63e7528797eeca20e4c6,Red Velvet,,레드벨벳,에버랜드,경기도 용인시 처인구 포곡읍 에버랜드로 199,[275],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+287a2737a59df31f50d8f807,Red Velvet,,레드벨벳,벽초지수목원,경기도 파주시 광탄면 부흥로 242,[276],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+75b32616e482ddede9728627,Red Velvet,,레드벨벳,봉암몽돌해수욕장,경상남도 남해군 삼동면 독일로 89-7,[277],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+88e732589e230ad070bc4c7f,Red Velvet,,레드벨벳,남해독일마을,경상남도 남해군 삼동면 독일로 92,[278],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+059ac005e1349585ab6caed4,Red Velvet,,레드벨벳,남해양떼목장 양모리학교,경상남도 남해군 설천면 설천로775번길 256-17,[279],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3fff22622f250df8e0893624,Red Velvet,,레드벨벳,핑크트리 풀빌라,경상남도 밀양시 산내면 산내용전길 154-9,[280],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d43ddd9cc18ff256ef1204fd,Red Velvet,,레드벨벳,통영 한산마리나호텔&리조트,경상남도 통영시 산양읍 삼칭이해안길 820,[281],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+82b339a6b24a0be3f2ac5da0,Red Velvet,,레드벨벳,카페 달콤한썸띵,광주광역시 남구 진제길 5,[282],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+44ddb7f54aa52854a11e175a,Red Velvet,,레드벨벳,더달달,서울특별시 강남구 강남대로102길 38-6,[283],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+daacc4cc2383bfe181b6be36,Red Velvet,,레드벨벳,인량훠궈,서울특별시 강남구 강남대로140길 9 비피유빌딩 지하1층,[284],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+1401e77df95e574461321e32,Red Velvet,,레드벨벳,볼피노,서울특별시 강남구 도산대로45길 10-7 신사동K빌딩 1층,[285],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2b5437bf604510a9256dde1a,Red Velvet,,레드벨벳,스위츠플래닛,서울특별시 강남구 선릉로131길 23,[286],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+382d07c9d1ea9bfa6cfb4388,Red Velvet,,레드벨벳,아이엠씨,서울특별시 강남구 압구정로 461 지하 106호,[287],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+627a648be10109e335e8cc01,Red Velvet,,레드벨벳,플랫폼엘,서울특별시 강남구 언주로133길 11,[288],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+06700593815f01e5e3bdb0b3,Red Velvet,,레드벨벳,피닉스 현대백화점무역센터점,서울특별시 강남구 테헤란로 517,[289],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+22acd44290408df4595e2732,Red Velvet,,레드벨벳,엘림들깨수제비칼국수,서울특별시 강북구 삼각산로 67,[290],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4e1bae1e72f4839c3d3bde69,Red Velvet,,레드벨벳,더큐이스케이프,서울특별시 마포구 홍익로6길 15 삼주빌딩 4층,[291],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a45fd995eab5e292b73c013c,Red Velvet,,레드벨벳,피피스튜디오,서울특별시 서대문구 증가로2안길 7,[292],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a42535aa3ff88b3a92970be0,Red Velvet,,레드벨벳,에스쁘아 강남점,서울특별시 서초구 강남대로 415 대동빌딩 1층,[293],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a1295b3e5e48c0ef067b8f71,Red Velvet,,레드벨벳,은행골 강남역점,서울특별시 서초구 서초대로75길 34 3층,[294],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a2e8e68d9edd2983d66e8e70,Red Velvet,,레드벨벳,Scene,서울특별시 성동구 연무장5길 20,[295],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3b308ce440175bdb20fbc164,Red Velvet,,레드벨벳,언더스탠드 에비뉴,서울특별시 성동구 왕십리로 63,[296],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5078b32af1df2e086b2587b2,Red Velvet,,레드벨벳,송파파크하비오워터킹덤워터파크&찜질스파,서울특별시 송파구 송파대로 111 202동 지하1층,[297],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2483f19a3d31450661d7ad22,Red Velvet,,레드벨벳,더큐이스케이프 대학로점,서울특별시 종로구 대학로12길 15,[298],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+56a33a3831058469e977b640,Red Velvet,,레드벨벳,경복궁,서울특별시 종로구 사직로 161,[299],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a2a06e81db92b28181aabd7c,Red Velvet,,레드벨벳,얼큰한 조벡이 수제비,서울특별시 종로구 인사동5길 15-1,[300],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3882d6bef21fc92ac8a96a1b,Red Velvet,,레드벨벳,용마랜드,서울특별시 중랑구 망우로70길 118,[301],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+320ddc6763fb71e64fd7de25,Red Velvet,,레드벨벳,월미테마파크,인천광역시 중구 월미문화로 81,[302],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2381e91f607bb6c5d80c94a0,Red Velvet,,레드벨벳,꽃돌게장1번가,전라남도 여수시 봉산2로 36,[303],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d6a8c0ef56683bda01350c6f,Red Velvet,,레드벨벳,여수 낭만포차거리,전라남도 여수시 하멜로 102,[304],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a7788b08a5d5ff24d8b6a96e,Red Velvet,,레드벨벳,로드129,제주특별자치도 제주시 애월읍 애월로 129,[305],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+383eaf199f01f663985bab22,Red Velvet,,레드벨벳,당당,제주특별자치도 제주시 애월읍 중엄안1길 25,[306],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d0ecab53c39c6f8d2b44dc6d,Red Velvet,,레드벨벳,세계꽃식물원,충청남도 아산시 도고면 아산만로 37-37,[307],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7cce500917b71312f9df2a2f,bts,,방탄소년단,정동심곡 바다부채길,강원도 강릉시 강동면 심곡리 114-3,[405],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+125f71d64fe71e8d0fcd8e02,bts,,방탄소년단,엠꼼마카롱,강원도 강릉시 경강로 2115번길 15,[406],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+dee67f69c1e9f5f8f2111b49,bts,,방탄소년단,향호해변,강원도 강릉시 주문진읍 동해대로,[407],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6ed1017a4d92055a5014b3f6,bts,,방탄소년단,맹방해수욕장,강원도 삼척시 근덕면 맹방해변로,[408],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+bd0299d2f42c00e7ff8dd5cf,bts,,방탄소년단,금강산대게횟집,강원도 양양군 강현면 해맞이길 8-5,[409],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ec8c0ae0c42535b27fb0b2d2,bts,,방탄소년단,뮤지엄 산,강원도 원주시 지정면 오크밸리2길 260,[410],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+00b12df8f2555e0a397189e2,bts,,방탄소년단,내린천번지점프장,강원도 인제군 인제읍 설악로 2254,[411],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+1aef035bd37a3dc019e6d2c0,bts,,방탄소년단,제이드가든,강원도 춘천시 남산면 햇골길 80,[412],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+bafa68603923963b00626008,bts,,방탄소년단,달아실,강원도 춘천시 동면 금옥길 228,[413],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3d71413e455cd8f33bee4fc5,bts,,방탄소년단,소양강댐 물 문화관,강원도 춘천시 신북읍 신샘밭로 1128,[414],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+523b9cc7df065b9420360648,bts,,방탄소년단,어스17,강원도 춘천시 신북읍 천전리 34-5,[415],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ce558dbfd98916ad082952c7,bts,,방탄소년단,AD646 펜션,경기도 가평군 가평읍 용추로 508-78,[416],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+82540a0f066cad0fe3a06d35,bts,,방탄소년단,원조연탄갈비,경기도 고양시 일산동구 애니골길 42,[417],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ecd17c3d217045701fadd25d,bts,,방탄소년단,다람쥐마을 누룽지백숙,경기도 고양시 일산동구 애니골길43번길 48,[418],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+15b656db00b055fa446d4aba,bts,,방탄소년단,효교,경기도 고양시 일산동구 일산로380번길 41,[419],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ac67645634d90a01b982d191,bts,,방탄소년단,포러데이 팔당,경기도 남양주시 와부읍 경강로926번길 8-7,[420],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+eaea07d77d2d4bbb15690246,bts,,방탄소년단,일영역,경기도 양주시 장흥면 일영로647번길 25,[421],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9db6a97be0a0448cbb3bbf1a,bts,,방탄소년단,서후리숲,경기도 양평군 서종면 거북바위1길 200,[422],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6c283e692d93ffc6b360b3ec,bts,,방탄소년단,까사누아,경기도 양평군 서종면 내수입길 130-8,[423],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7e803f80570fae9c730e5b97,bts,,방탄소년단,구하우스미술관,경기도 양평군 서종면 무내미길 49-12,[424],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e6db7097cf1978459a1af1ea,bts,,방탄소년단,체인지업캠퍼스 양평캠프,경기도 양평군 용문면 연수로 209,[425],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+96acd5af24f1fc52a4c48495,bts,,방탄소년단,구둔역 폐역,경기도 양평군 지평면 구둔역길 3,[426],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0b33f1f95906926f4ca8a890,bts,,방탄소년단,용인대장금파크,경기도 용인시 처인구 백암면 용천드라마길 25,[427],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3942c9b942290f284af1411a,bts,,방탄소년단,에버랜드,경기도 용인시 처인구 포곡읍 에버랜드로 199,[428],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0f4da7e91a8831ed0b5ee30b,bts,,방탄소년단,의정부미술도서관,경기도 의정부시 민락로 248,[429],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6d32b57ae00b27e915fcca16,bts,,방탄소년단,하남 스타필드 스포츠 몬스터,경기도 하남시 미사대로 750 스타필드 하남 4층,[430],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2321cacf92bda92e35330372,bts,,방탄소년단,검단산,경기도 하남시 배알미동 산 13-6,[431],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5e410636eb291f509151600b,bts,,방탄소년단,형도,경기도 화성시 송산면 독지리,[432],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+18ef41c288c06f6b06a61f9e,bts,,방탄소년단,지브로 하우스 & studio,경상남도 거제시 연초면 국산로 17,[433],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b7f01d96b700050d5f4991e0,bts,,방탄소년단,월정교,경상북도 경주시 교동 274,[434],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+684991921ffb27dccc65a491,bts,,방탄소년단,교촌마을,경상북도 경주시 교촌길 39-2,[435],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0bb59d1846e2efe50844eb9a,bts,,방탄소년단,브라운 슈가,경상북도 경주시 밝은마을길 5,[436],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+62d1551121ebe49602aef587,bts,,방탄소년단,불국사,경상북도 경주시 불국로 385,[437],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c62036e73beb24ea8e1d31df,bts,,방탄소년단,한국대중음악박물관,경상북도 경주시 엑스포로 9,[438],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+517313cc8ae3c1161ca340b1,bts,,방탄소년단,경주 역사 유적지구,경상북도 경주시 인왕동 839-1,[439],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2f8ea6a2a7f310ac9d188553,bts,,방탄소년단,대릉원,경상북도 경주시 황남동 계림로 9,[440],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b9ab3dfbad4b7b45b6b84735,bts,,방탄소년단,달성공원,대구광역시 중구 달성공원로 35 달성공원,[441],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+71778d1e3d541a8461f3ab8e,bts,,방탄소년단,용문각,부산광역시 금정구 금사로 149,[442],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d55aaa995c53071331e2630b,bts,,방탄소년단,맛나분식,부산광역시 금정구 서동시장길 42-4,[443],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ca5ba5adf1b2152a8707542a,bts,,방탄소년단,오륙도,부산광역시 남구 용호동 936-941,[444],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+423b490eca0e4c1226037d15,bts,,방탄소년단,동래밀면 본점,부산광역시 동래구 명륜로 47,[445],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a8740d974f4e579fbde0de9d,bts,,방탄소년단,곱창쌀롱연탄구이,부산광역시 부산진구 동평로 223번길 44,[446],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ae5729dbf39f6321ce043cc5,bts,,방탄소년단,콘피오,부산광역시 부산진구 성지로8번길 33,[447],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d816dba745d17235cd0efbd0,bts,,방탄소년단,부산시민공원,부산광역시 부산진구 연지동 195-1,[448],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+625974f935bbb13f7892f4b0,bts,,방탄소년단,다대포 해수욕장,부산광역시 사하구 몰운대1길 14,[449],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+927d566be2b4e2cb801b8dd2,bts,,방탄소년단,광안대교,부산광역시 수영구 민락동 광안대교,[450],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8d488a1b4e105ed0eb6e90c9,bts,,방탄소년단,달맞이길,부산광역시 해운대구 달맞이길 190,[451],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e1ab4e96ae67a119bc87c011,bts,,방탄소년단,해운대 부산횟집,부산광역시 해운대구 달맞이길62번길 28 1층,[452],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+60da767a0f85b1ff3316f853,bts,,방탄소년단,부산시립미술관,부산광역시 해운대구 APEC로 58,[453],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d2a27e4f0c179d517a598088,bts,,방탄소년단,난장캠프,서울특별시 강남구 강남대로114길 10 2층,[454],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+00a2679cdbf6397aa27181d0,bts,,방탄소년단,학동공원,서울특별시 강남구 강남대로140길 47,[455],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5543c1115983b216a9c91260,bts,,방탄소년단,은행골 신사점,서울특별시 강남구 강남대로152길 42 2층,[456],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6f827f30de7b64b0b61c4555,bts,,방탄소년단,네모집 논현점,서울특별시 강남구 논현로 149길 12,[457],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+73b1721f55cad5fc38163c7f,bts,,방탄소년단,다독인더시티,서울특별시 강남구 논현로101길 10,[458],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4fd65a9104df485cea7583a0,bts,,방탄소년단,듀자미,서울특별시 강남구 도산대로 11길 28,[459],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e382eb14a1a07502a5f2ba31,bts,,방탄소년단,도산족발&칼국수,서울특별시 강남구 도산대로 45길 8-8 2층,[460],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+86a8432b0f169b7239f5d15b,bts,,방탄소년단,지아니스나폴리 가로수길점,서울특별시 강남구 도산대로15길 15,[461],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e6bbc3d9a9a672c5920a5913,bts,,방탄소년단,유정식당,서울특별시 강남구 도산대로28길 14,[462],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b26c815776b35d9b07c790da,bts,,방탄소년단,우가,서울특별시 강남구 도산대로49길 22 B1,[463],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+cbddb1efc74214c19219dbec,bts,,방탄소년단,Scopa The Chef,서울특별시 강남구 도산대로89길 13,[464],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a47f2abf6444f1734fa6be88,bts,,방탄소년단,잔비워,서울특별시 강남구 도산대로89길 17,[465],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+43bf935c02f48c129e9f2d86,bts,,방탄소년단,벨뷰,서울특별시 강남구 선릉로 152길 30,[466],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+09fd15a0945a5ee429106e19,bts,,방탄소년단,K STAR ROAD,서울특별시 강남구 압구정로 339-3,[467],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8efe622f0b086da8a89106fb,bts,,방탄소년단,카페 캠프통,서울특별시 강남구 압구정로42길 27,[468],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c3b1b25e5d326a797b8e06f1,bts,,방탄소년단,질할브로스 청담점,서울특별시 강남구 압구정로79길 32 1층,[469],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3c3239176ad107dd14580a77,bts,,방탄소년단,우돈청,서울특별시 강남구 언주로 170길 37,[470],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+92d0778b279118c15e82f9c1,bts,,방탄소년단,더이삭플라워,서울특별시 강남구 언주로 313,[471],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c2e753e42a84d7a95da5e6b0,bts,,방탄소년단,꽃새우 영번지 역삼점,서울특별시 강남구 언주로 536,[472],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+53425c31597d99fb5d1b777d,bts,,방탄소년단,개그맨 정용국의 용곱창 강남본점,서울특별시 강남구 언주로108길 8,[473],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8955f0a95f49d4e6726d22dd,bts,,방탄소년단,페인팅룸,서울특별시 강남구 언주로170길 24 은미르빌딩 지하 1층,[474],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4f3817e272fe848ae209a29c,bts,,방탄소년단,돝고기506,서울특별시 강남구 역삼로17길 53,[475],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+da5aa3f08d362cc501e8c762,bts,,방탄소년단,CHAI797 역삼GFC점,서울특별시 강남구 테헤란로 152,[476],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f9fd47d31122c9daa3c5cdff,bts,,방탄소년단,NY B&B,서울특별시 강남구 테헤란로6길 30,[477],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a04b9ca61afe19e98d16c208,bts,,방탄소년단,갯벌의진주본점,서울특별시 강남구 학동로2길 55,[478],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+621a10be5a079660a1bdb47a,bts,,방탄소년단,안동참찜닭 본점,서울특별시 광진구 동일로 20길 117,[479],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a06d862fee4bc37b1845e3db,bts,,방탄소년단,쑤담샤브샤브,"서울특별시 광진구 아차산로 241 연한빌딩 3층 301,302호",[480],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ee56d4b40d2891dc478bcc52,bts,,방탄소년단,화랑대 철도공원,서울특별시 노원구 공릉동 29-51,[481],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c49bd1e2bffc36ffea0387d9,bts,,방탄소년단,서울시립 북서울미술관,서울특별시 노원구 동일로 1238,[482],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fa92912120cfbae7622ea407,bts,,방탄소년단,홍대 벽화거리,서울특별시 마포구 독막로19길 42,[483],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3fe776420e41d9f35bd8851f,bts,,방탄소년단,월드컵대교,서울특별시 마포구 마포나루길 316,[484],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0f38fdb184364db604ee64bf,bts,,방탄소년단,고메오드,서울특별시 마포구 백범로24길 1-9 1층,[485],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+67c5f18accf0b5d59aae08a0,bts,,방탄소년단,평화의 공원,서울특별시 마포구 상암동 월드컵로 243-60,[486],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+031d3936370900147c38ac38,bts,,방탄소년단,스타스퀘어,서울특별시 마포구 어울마당로 68 3~7층,[487],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+89ea8e1ae989f945174c593e,bts,,방탄소년단,문화비축기지,서울특별시 마포구 증산로 87,[488],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+89ae1e266026be49508848e1,bts,,방탄소년단,CaFace,서울특별시 마포구 홍익로3길 20 지하2층,[489],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+34ac95527534077e10163cf8,bts,,방탄소년단,개미마을,서울특별시 서대문구 세검정로4길 100-58,[490],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6e82dee8f3d315af1bd9b42c,bts,,방탄소년단,목란,서울특별시 서대문구 연희로15길 21,[491],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f6e08854d8aad664332c0f4d,bts,,방탄소년단,그 집,서울특별시 서초구 강남대로34길 46,[492],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e1f8fb0df5e40cbe8e2fee81,bts,,방탄소년단,길상도예,서울특별시 서초구 강남대로39길 15-9 101호,[493],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+89cc949fea314c4c8e04e61b,bts,,방탄소년단,동작대교 주차장,서울특별시 서초구 동작대로 350 (구름카페 앞 주차장),[494],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8c7187df33ff10ea17f248be,bts,,방탄소년단,반포한강공원,서울특별시 서초구 신반포로11길 40,[495],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+81b4c18f8b89d7a62b97932d,bts,,방탄소년단,서울숲,서울특별시 성동구 뚝섬로 273,[496],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+59fb96f1544187e67f12efd3,bts,,방탄소년단,본앤브레드,서울특별시 성동구 마장로42길 1,[497],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+1c7c61f170d79a589453a4a2,bts,,방탄소년단,성수연방,서울특별시 성동구 성수이로14길 14,[498],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c80e49d6140546974d53ac18,bts,,방탄소년단,멜로워 성수 더 플래그쉽,서울특별시 성동구 성수이로7길 39,[499],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+065dc71550629cd785bbe0e8,bts,,방탄소년단,동호대교,서울특별시 성동구 옥수동,[500],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+59c6306ffbc2a6464aa338be,bts,,방탄소년단,오쓰세이로무시,서울특별시 송파구 백제고분로45길 30 미석빌딩 1층 1호,[501],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9d3c931746083fc49f3c4da0,bts,,방탄소년단,함경도찹쌀순대,서울특별시 송파구 송파대로28길 32,[502],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ccc38df0d7247e0953850bf0,bts,,방탄소년단,올림픽공원 나홀로나무,서울특별시 송파구 올림픽로 424,[503],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ab829c5a22c62d851c3ca275,bts,,방탄소년단,석촌호수,서울특별시 송파구 잠실동 47,[504],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+288a4d43d703d4175d1d32fa,bts,,방탄소년단,삼보 청국장,서울특별시 영등포구 여의나루로 42 여의도종합상가 1층,[505],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ab83286c1e6d31466e7c6ed0,bts,,방탄소년단,N서울타워,서울특별시 용산구 남산공원길 105,[506],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+dd2931c0d022e607cdf6054f,bts,,방탄소년단,오브스토리지 앤게더,서울특별시 용산구 독서당로 39 한남동신성미소시티,[507],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ccdca4161f3c07883b38658b,bts,,방탄소년단,열봉부엌,서울특별시 용산구 백범로87길 46,[508],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+853cd52eb1015a1b4fd5674b,bts,,방탄소년단,국립중앙박물관,서울특별시 용산구 서빙고로 137,[509],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+43c152d239d02c25c67e2580,bts,,방탄소년단,노들섬,서울특별시 용산구 양녕로 445,[510],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+dd690840046bdbdf9ac827d3,bts,,방탄소년단,해쉬더우드,서울특별시 용산구 후암로 38,[511],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e8e11e14ca71049a0f880a69,bts,,방탄소년단,인왕산,서울특별시 종로구 무악동 산2-1,[512],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e530a342306fd3fec8db09e6,bts,,방탄소년단,북악팔각정,서울특별시 종로구 북악산로 267,[513],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d9487d0ef2c586e0784d54c3,bts,,방탄소년단,경복궁,서울특별시 종로구 사직로 161,[514],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6e67c5e87eb5373e9b66fd39,bts,,방탄소년단,학고재,서울특별시 종로구 삼청로 50,[515],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f0beaa293b3d169c185f2ec6,bts,,방탄소년단,돈의문 박물관 마을,서울특별시 종로구 송월길 14-3,[516],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6c0ceaae611c901ba9313be0,bts,,방탄소년단,조계사,서울특별시 종로구 우정국로 55,[517],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+575df817d6f8ade34b7d41b6,bts,,방탄소년단,대선칼국수,서울특별시 종로구 자하문로4길 6,[518],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+56409879a3aef60c789b5176,bts,,방탄소년단,윤동주문학관,서울특별시 종로구 창의문로 119,[519],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8653576d224f1c03ae8dda45,bts,,방탄소년단,청와대 사랑채,서울특별시 종로구 효자로13길 45,[520],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c4fe2e6d7fa2fa1e53606e57,bts,,방탄소년단,롯데백화점 본점,서울특별시 중구 남대문로 81,[521],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9a77d4db757bb7d40d3bf4be,bts,,방탄소년단,금돼지식당,서울특별시 중구 다산로 149,[522],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+88c474642acdf320aa6e464d,bts,,방탄소년단,국립현대미술관 덕수궁,서울특별시 중구 세종대로 99,[523],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6b67084f4c66ad5291290c5d,bts,,방탄소년단,덕수궁 돌담길,서울특별시 중구 세종대로 99,[524],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5a5a80d32889e2b530d092a3,bts,,방탄소년단,코끼리볼링장,서울특별시 중구 퇴계로 166 흥국빌딩,[525],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+571860e290603350c84133e7,bts,,방탄소년단,한국의 집,서울특별시 중구 퇴계로36길 10,[526],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+1349d24f5ff75980dabb5a57,bts,,방탄소년단,피크닉,서울특별시 중구 퇴계로6가길 30,[527],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ec15e0023d8ab9f9f68a4587,bts,,방탄소년단,정서진광장,인천광역시 서구 정서진남로 95,[528],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4d100bdb59906c77c4cdf2f5,bts,,방탄소년단,월미도,인천광역시 중구 북성동1가 산 1,[529],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5550df679e53951faf288dbb,bts,,방탄소년단,인천배낚시 광복낚시,인천광역시 중구 축항대로 150,[530],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5872e222edc52641ff403914,bts,,방탄소년단,소쇄원,전라남도 담양군 가사문학면 소쇄원길 17,[531],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+1642dd4eba8f7e05a0d526a9,bts,,방탄소년단,죽녹원,전라남도 담양군 담양읍 죽녹원로 119,[532],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5418c1b51153ec18f0153064,bts,,방탄소년단,메타세쿼이아 가로수길,전라남도 담양군 담양읍 학동리 633,[533],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f9992ffbfc4e2021accc9694,bts,,방탄소년단,순천만 국가정원,전라남도 순천시 국가정원1호길 47,[534],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+15a54735cc879b6d850e90be,bts,,방탄소년단,향일암,전라남도 여수시 돌산읍 향일암로 60,[535],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2de1dafad9794135d5598a23,bts,,방탄소년단,자산공원 일출정,전라남도 여수시 자산4길 45,[536],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6e0e947430fc7ca7feef40ff,bts,,방탄소년단,새만금홍보관,전라북도 부안군 변산면 새만금로 6,[537],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7dee7dc07b665adc6ea66100,bts,,방탄소년단,대승 한지마을,전라북도 완주군 소양면 복은길 18,[538],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+16884d415e04e342f0797660,bts,,방탄소년단,오성한옥마을,전라북도 완주군 소양면 송광수만로 472-23,[539],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5c2a27b80d947326c84df235,bts,,방탄소년단,아원,전라북도 완주군 소양면 송광수만로 516-7,[540],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+398243ca9215d3babac87226,bts,,방탄소년단,전주드림랜드,전라북도 전주시 덕진구 소리로 68,[541],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2d65df7641aa5c0b3099368b,bts,,방탄소년단,호남각,전라북도 전주시 덕진구 송천동2가 560-3,[542],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4d8410ea5706acf180f7de7c,bts,,방탄소년단,풍년제과 한옥마을3호점,전라북도 전주시 완산구 어진길 42,[543],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3250dadef4228776f55f3d12,bts,,방탄소년단,전주전통술박물관,전라북도 전주시 완산구 한지길 74,[544],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+159aa3909cb8bf5259baf904,bts,,방탄소년단,외돌개,제주특별자치도 서귀포시 서홍동 791,[545],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e4ddd3e7c2b79c4f597668e5,bts,,방탄소년단,카멜리아힐,제주특별자치도 서귀포시 안덕면 병악로 166,[546],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+900981e7a79c31fa5096190f,bts,,방탄소년단,본태박물관,제주특별자치도 서귀포시 안덕면 산록남로762번길 69,[547],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e371318204469192d90bdbeb,bts,,방탄소년단,유리네식당,제주특별자치도 제주시 연북로 146,[548],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6072e2cc53f58abbc79e578f,bts,,방탄소년단,스위스마을 컬러스테이,제주특별자치도 제주시 조천읍 함와로 566-27,[549],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+aba5cd6ac7387418b671405b,bts,,방탄소년단,환상숲곶자왈공원,제주특별자치도 제주시 한경면 녹차분재로 594-1,[550],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+12994f444374c3790fb63f00,bts,,방탄소년단,생각하는정원,제주특별자치도 제주시 한경면 녹차분재로 675 생각하는 정원,[551],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b152cbd603ce34a6d6e23d8f,bts,,방탄소년단,다람쥐식탁,제주특별자치도 제주시 한림읍 명월성로 10 1층,[552],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+707333b1826b91f3d7c31095,bts,,방탄소년단,문쏘 제주협재점,제주특별자치도 제주시 한림읍 한림상로 15-5,[553],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ef2eddb11c2bb1bb55e7d723,bts,,방탄소년단,아라리오갤러리,충청남도 천안시 동남구 만남로 43,[554],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+16f6ff49ec4c48e417c4f883,bts,,방탄소년단,제천 모산 비행장,충청북도 제천시 고암동 1200-1,[555],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+abbd120dc7633326c0cdcfcb,blackpink,,블랙핑크,위촌리전통한우,강원도 강릉시 성산면 소목길 203-10,[608],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a3b042ed2dddab2793239e59,blackpink,,블랙핑크,엘리시안 강촌스키장,강원도 춘천시 남산면 북한강변길 688,[609],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+52ec7492a8a7e1b8d0632650,blackpink,,블랙핑크,대관령 하늘목장,강원도 평창군 대관령면 꽃밭양지길 458-23,[610],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+df4cbe06e9a414fc786d5c05,blackpink,,블랙핑크,오션월드,강원도 홍천군 서면 한치골길 262,[611],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3de0218a696eddf6a290e523,blackpink,,블랙핑크,롤러비트,경기도 고양시 덕양구 행신로 131-11,[612],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+19ab5b1f4b4d453c8f8c7a20,blackpink,,블랙핑크,준 179,경기도 양평군 용문면 덕촌길 31,[613],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+248967caf3d603d574afdeaf,blackpink,,블랙핑크,용두 휴게소,경기도 양평군 청운면 설악로 167,[614],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6bbbf64a166de2f290f4f2b2,blackpink,,블랙핑크,에버랜드,경기도 용인시 처인구 포곡읍 에버랜드로 199,[615],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2a6c57abbb581ed080dd0ebe,blackpink,,블랙핑크,벅구베이크,경기도 파주시 가재울로 96,[616],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a3401620addcf670140f9b6a,blackpink,,블랙핑크,벽초지수목원,경기도 파주시 광탄면 부흥로 242,[617],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9b7b13eb38ebba014d90e424,blackpink,,블랙핑크,스피드파크,경기도 파주시 파평면 청송로652번길 42-191,[618],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+352fa6438153f1f968cd738e,blackpink,,블랙핑크,보아즈맨션,경기도 평택시 장안웃길 85,[619],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fb6d2af23970fa3d70c0b22c,blackpink,,블랙핑크,흥환간이해수욕장,경상북도 포항시 남구 동해면 호미로,[620],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c675bdc9bc3f2b26f19394be,blackpink,,블랙핑크,은행골 신사점,서울특별시 강남구 강남대로152길 42 2층,[621],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e0617076acd9c37a940d6cc7,blackpink,,블랙핑크,서울호떡 논현직영점,서울특별시 강남구 논현로149길 19 1층,[622],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+741520dc7a8aeac20cad5a3d,blackpink,,블랙핑크,쿠시마사 본점,서울특별시 강남구 논현로150길 35,[623],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+15e4adc6261d1bf9229c50f9,blackpink,,블랙핑크,로칼즈버거바,서울특별시 강남구 도산대로 92길 26,[624],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9f3aa15496d21871a394614e,blackpink,,블랙핑크,콘피에르,서울특별시 강남구 도산대로49길 10-2 2F,[625],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+dd32600b5ed578e11f41e220,blackpink,,블랙핑크,우가,서울특별시 강남구 도산대로49길 22 B1,[626],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7649464bfac4fbd9832b0e6b,blackpink,,블랙핑크,인스턴트펑크 압구정 플래그십 스토어,서울특별시 강남구 도산대로51길 12,[627],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c138774787a54b1386777f98,blackpink,,블랙핑크,옐로우,서울특별시 강남구 도산대로55길 42,[628],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f0a3cfe100824db36c8c88b2,blackpink,,블랙핑크,미엘,서울특별시 강남구 도산대로67길 13-12 퍼즐하우스,[629],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b4c487969d81b29288d89340,blackpink,,블랙핑크,밍글스,서울특별시 강남구 도산대로67길 19 힐탑빌딩 2층,[630],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+57cf752f04fdcfb729505be5,blackpink,,블랙핑크,라미띠에,서울특별시 강남구 도산대로67길 30 2층,[631],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+903dd7e557e695ad31c9357c,blackpink,,블랙핑크,스시 마츠 모토,서울특별시 강남구 도산대로75길 5 102호,[632],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8624e5df99ec312812cd3f4e,blackpink,,블랙핑크,페어링 룸,서울특별시 강남구 도산대로81길 14,[633],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a2a3c6587998947e29e8d784,blackpink,,블랙핑크,고운님,서울특별시 강남구 삼성로 81길 22 한정빌딩 2층 201호,[634],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+eeae3461d5aa636c196cb42d,blackpink,,블랙핑크,빙빙빙,서울특별시 강남구 삼성로149길 32,[635],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+17039f9ff0619f5c4e053100,blackpink,,블랙핑크,릴리펏 청담본점,서울특별시 강남구 선릉로 820 남한강빌딩,[636],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0f975877587c01b436ad3a1c,blackpink,,블랙핑크,울프강 스테이크 하우스,서울특별시 강남구 선릉로152길 21,[637],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+04d5d4d879eabcc9d7bb2ec8,blackpink,,블랙핑크,수아에피스,서울특별시 강남구 선릉로157길 27 1층 2층,[638],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5bc959549ee0ad2e5980e12e,blackpink,,블랙핑크,고센인코퍼레이티드 청담점,서울특별시 강남구 선릉로158길 18,[639],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2d39912c3b33f47c4fa4e1a7,blackpink,,블랙핑크,10꼬르소꼬모 카페 청담점,서울특별시 강남구 압구정로 416,[640],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+96428b5e26873cf8a0477faf,blackpink,,블랙핑크,루이비통 메종 서울,서울특별시 강남구 압구정로 454,[641],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fc7f2a386f008c0ffe375b0f,blackpink,,블랙핑크,서울 하우스오브디올,서울특별시 강남구 압구정로 464,[642],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+16156d0a206a03ce6f68470a,blackpink,,블랙핑크,도산맘마미아,서울특별시 강남구 압구정로42길 45,[643],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7e88c80774bedebb69be08a7,blackpink,,블랙핑크,클라로,서울특별시 강남구 압구정로60길 11 2층,[644],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c20e8a9e64213c30ab1c0783,blackpink,,블랙핑크,CELINE 플래그십스토어,서울특별시 강남구 압구정로60길 17,[645],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+95f383cc6bef4a27748eecaf,blackpink,,블랙핑크,분더샵 청담,서울특별시 강남구 압구정로60길 21,[646],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0edaca8ab84c265e3fc88361,blackpink,,블랙핑크,누앙스,서울특별시 강남구 압구정로72길 7,[647],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a6b268e308991547eebf5b09,blackpink,,블랙핑크,블레스 유 플라워,서울특별시 강남구 압구정로72길 7,[648],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+338c501505f8a4ea0c2cac68,blackpink,,블랙핑크,쏭타이 역삼점,서울특별시 강남구 테헤란로39길 51 옥산빌딩 1층 102호,[649],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d0f0f292b7df3a8f02c2b132,blackpink,,블랙핑크,메이필드 호텔,서울특별시 강서구 방화대로 94,[650],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c2ef7e29ddf235b0b6a091b9,blackpink,,블랙핑크,상도실내포장마차,서울특별시 동작구 상도로 288,[651],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4191812b59971b56e31760a6,blackpink,,블랙핑크,인솔커피 상수점,서울특별시 마포구 독막로18길 16 1층,[652],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+683e5b9f44f90230ee8737c3,blackpink,,블랙핑크,De vaha studio,서울특별시 마포구 독막로7길 33,[653],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+80a0abb9542f60ba0c92b75d,blackpink,,블랙핑크,불이아 홍대본점,서울특별시 마포구 동교로 182-6,[654],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+90121a79ffc270fea96fe417,blackpink,,블랙핑크,포포브레드,서울특별시 마포구 동교로18길 13 세원빌딩 1층,[655],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0e4e00ef210a3e24f73c5508,blackpink,,블랙핑크,카페 늘보,서울특별시 마포구 동교로51안길 26 2층,[656],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ffb362dea0bd5bf464c305b3,blackpink,,블랙핑크,나일론 맨,서울특별시 마포구 신촌로2안길 12,[657],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ca88c11d867270b5b8350ebf,blackpink,,블랙핑크,미미도넛,서울특별시 마포구 신촌로2안길 34,[658],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+de2897f21c63d3366bb512e3,blackpink,,블랙핑크,도자기 카페 줄,서울특별시 마포구 신촌로4길 11 세광빌딩 3층,[659],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c50ea7347263909027f52ce8,blackpink,,블랙핑크,Mon Cafe Gregory,서울특별시 마포구 양화로6길 84,[660],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+14d82ee2abac065567e3f814,blackpink,,블랙핑크,경주식당,서울특별시 마포구 와우산로13길 49-7,[661],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5d6c4ee2f79517c25a102ae2,blackpink,,블랙핑크,내맘대로 폰케이스 홍대점,서울특별시 마포구 와우산로19길 21,[662],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+785d82a033e8334db94b18dd,blackpink,,블랙핑크,미어캣 프랜즈,서울특별시 마포구 와우산로21길 19-12 2층,[663],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+64e73f108b76d1a2545f1d5c,blackpink,,블랙핑크,마시타야,서울특별시 마포구 와우산로29라길 26 지하 1층,[664],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+db2a2779ed18eb8a649a821c,blackpink,,블랙핑크,오유네일,서울특별시 마포구 와우산로29바길 10 1층,[665],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d41880438c8d84fd4cd845ed,blackpink,,블랙핑크,홍대 셀픽스,서울특별시 마포구 와우산로29바길 9,[666],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+dc36969a0f7700507dae45b0,blackpink,,블랙핑크,철길왕갈비살,서울특별시 마포구 와우산로32길 24,[667],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7fa3af46460a31b4b4ed090d,blackpink,,블랙핑크,메종 키티버니포니 서울,서울특별시 마포구 월드컵로5길 33-16,[668],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3e98f4ab9004ac3161184bce,blackpink,,블랙핑크,월드컵공원,서울특별시 마포구 하늘공원로 86,[669],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0380d220e9f65d0e69e35e29,blackpink,,블랙핑크,숲속한방랜드,서울특별시 서대문구 봉원사길 75-7,[670],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a9d5efc9245c5effe9388748,blackpink,,블랙핑크,쭈꾸미달인 신촌점,서울특별시 서대문구 연세로11길 32,[671],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5b534966b9f4841ede2290a2,blackpink,,블랙핑크,르솔레이,서울특별시 서대문구 연희맛로 7-29 지하1층,[672],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+26be3db265b325797976be38,blackpink,,블랙핑크,피터팬 1978,서울특별시 서대문구 증가로 10,[673],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2a762200345791c7b99a8ee0,blackpink,,블랙핑크,영동교집 강남직영점,서울특별시 서초구 강남대로 499 동일빌딩 2층,[674],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3acead81653ad6657b77c82e,blackpink,,블랙핑크,레프레미스,서울특별시 서초구 남부순환로337길 36,[675],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+277e1fcd383a7b285a8a725a,blackpink,,블랙핑크,크레마주,서울특별시 서초구 양재천로9길 2 1층,[676],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2d6a2a37979eda1b55a202d8,blackpink,,블랙핑크,본앤브레드,서울특별시 성동구 마장로42길 1,[677],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+390d105b409f941f14140d3f,blackpink,,블랙핑크,메이플탑,서울특별시 성동구 성수이로14길 14 성수연방 A동 2층,[678],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+16a964438faa2ad298ced5f8,blackpink,,블랙핑크,긴자료코 성신여대점,서울특별시 성북구 보문로 34가길 5,[679],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9a95163610a6b7805eceedfc,blackpink,,블랙핑크,롯데월드타워 아쿠아리움,서울특별시 송파구 올림픽로 300 롯데월드몰 B1,[680],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+58da2febd7f15406d52e4c1f,blackpink,,블랙핑크,STAY,서울특별시 송파구 올림픽로 300 롯데월드타워 81층,[681],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8b1c64b1a7fe527d0c308428,blackpink,,블랙핑크,사시미야센,서울특별시 양천구 목동동로 266,[682],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+173d9362f9eb6045933c7295,blackpink,,블랙핑크,티에이티디,서울특별시 영등포구 경인로77길 12 3층,[683],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fd7d7f29144516a8ce9f0cfd,blackpink,,블랙핑크,LSR X STILL BOOKS,서울특별시 영등포구 여의대로 108 더현대서울 B2,[684],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5288bda8a5a8338f5caa47bb,blackpink,,블랙핑크,내추럴하이,서울특별시 용산구 녹사평대로 248 1층,[685],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+684364bcba9420034fb9efcc,blackpink,,블랙핑크,로네펠트티하우스 한남점,서울특별시 용산구 대사관로11길 51 지상층,[686],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2573af54e52d1a6b99d5bca9,blackpink,,블랙핑크,볼하우스 한남,서울특별시 용산구 독서당로 46 지하2층,[687],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2dadd171eaaa5352965b9e42,blackpink,,블랙핑크,카페콤포트,서울특별시 용산구 두텁바위로60길 45,[688],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b3d4265c8009e272059af97f,blackpink,,블랙핑크,오리올,서울특별시 용산구 신흥로20길 43,[689],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+42d0a52aad15bb601e5796e1,blackpink,,블랙핑크,바다식당,서울특별시 용산구 이태원로 245 2층,[690],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b6a933cd37d1da3cffe59441,blackpink,,블랙핑크,HOPE GARDEN HANNAM,서울특별시 용산구 이태원로54가길 13,[691],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+85441e0c9fbf58e10ce71aa3,blackpink,,블랙핑크,보르고한남,서울특별시 용산구 이태원로54길 31 3층 보르고한남,[692],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7e6edde6f8ce3c5d7cf613bc,blackpink,,블랙핑크,도화아파트먼트 용산,서울특별시 용산구 한강대로38가길 31 1-3F,[693],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4daee263d42d4517654b7763,blackpink,,블랙핑크,쏭타이치앙마이 신용산본점,서울특별시 용산구 한강대로40길 39-5 1층,[694],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a1830fe041cd0ef34c5aa290,blackpink,,블랙핑크,라쿠치나,서울특별시 용산구 회나무로44길 10,[695],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a69db70edf38d2dcc678c8f7,blackpink,,블랙핑크,락고재 서울,서울특별시 종로구 계동길 49-21,[696],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d45dbf4436f8d3deee08488e,blackpink,,블랙핑크,커뮤니티하우스 마실,서울특별시 중구 명동11길 14,[697],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9f0153071066bd1d0caf2699,blackpink,,블랙핑크,피에르 가니에르 서울,서울특별시 중구 을지로 30 신관 35층,[698],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+97b3d1a8ac19c4fa5b893f7a,blackpink,,블랙핑크,라망시크레,서울특별시 중구 퇴계로 67 레스케이프 호텔 26층,[699],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d033a836de013e3ef86baac8,blackpink,,블랙핑크,마크다모르,서울특별시 중구 퇴계로 67 레스케이프 호텔 26층,[700],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4ac2c3a2f6d87b6be0b1ac5d,blackpink,,블랙핑크,레스케이프 호텔,"서울특별시 중구 퇴계로 67 에이케이타워 B동 지하 8층, 6~25층",[701],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+73f2328a47e007b129ee324e,blackpink,,블랙핑크,용마랜드,서울특별시 중랑구 망우로70길 118,[702],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e9f0eb1443bd09b5711ddacf,blackpink,,블랙핑크,파라다이스시티,인천광역시 중구 영종해안남로321번길 186,[703],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3f868667f3f0914bb94181b0,blackpink,,블랙핑크,전주한옥마을,전라북도 전주시 완산구 기린대로 99,[704],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6c08fb43ffbfc00dad1ccda9,blackpink,,블랙핑크,카멜리아힐,제주특별자치도 서귀포시 안덕면 병악로 166,[705],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3889e07ef89b35cd880eb25c,blackpink,,블랙핑크,제주선,제주특별자치도 서귀포시 안덕면 신화역사로304번길 38,[706],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+22b62f79ce95d8ea66237f4e,blackpink,,블랙핑크,이정의댁,제주특별자치도 서귀포시 예래로144번길 22-1,[707],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8bce126e87411c96b30ddcf3,blackpink,,블랙핑크,스누피 가든,제주특별자치도 제주시 구좌읍 금백조로 930,[708],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fa5523709b8bf4b72748a889,blackpink,,블랙핑크,메이즈랜드,제주특별자치도 제주시 구좌읍 비자림로 2134-47,[709],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fda9802ea430cf2f4afa28b3,blackpink,,블랙핑크,오일장떡볶이,제주특별자치도 제주시 동문로4길 17,[710],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+105527a91899f4e337b0d9e9,blackpink,,블랙핑크,애월 더 선셋,제주특별자치도 제주시 애월읍 일주서로 6111,[711],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5ded525c66f4f372e8e8c96e,blackpink,,블랙핑크,우유부단,제주특별자치도 제주시 한림읍 금악동길 38,[712],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+014016b156a56c888b3ffea0,blackpink,,블랙핑크,협재해수욕장,제주특별자치도 제주시 한림읍 한림로 329-10,[713],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b3250a9c0c88ac186eafddf0,blackpink,,블랙핑크,서쪽가게,제주특별자치도 제주시 한림읍 한림로 372-7,[714],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3fd799e6d44276a90089d3e6,blackpink,,블랙핑크,모루,충청북도 청주시 청원구 1순환로 102-1 1층,[715],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4e1c05485d21838b0babcc35,성시경,,성시경,서촌계단집,서울특별시 종로구 자하문로1길 15,[820],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c1200cdf14e972ffe025686a,성시경,,성시경,세계술박물관,제주특별자치도 서귀포시 표선면 한마음초등로 431,[821],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+077496dd53b423e83fcb942f,seventeen,,세븐틴,메밀꽃필무렵,강원도 평창군 봉평면 이효석길 33-11,[822],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+178fe78f6396ea4d476efa19,seventeen,,세븐틴,평창 송어축제,강원도 평창군 진부면 경강로 3562번지,[823],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d90d4f0ae8d13ba955640b98,seventeen,,세븐틴,월정사 전나무 숲길,강원도 평창군 진부면 오대산로 350-1,[824],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+afef032a87c7f9e772a2cdc3,seventeen,,세븐틴,가평 리버하임 펜션,경기도 가평군 청평면 북한강로 1706-118,[825],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e9dbb7f9379550dc8562edeb,seventeen,,세븐틴,블러썸 스튜디오,경기도 고양시 덕양구 덕은1로 5 1층,[826],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+478bda3842053f595463cec3,seventeen,,세븐틴,GRC서킷,경기도 김포시 통진읍 김포대로 1966,[827],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+31b369c5f4ac233673449700,seventeen,,세븐틴,엘마트,경기도 안산시 단원구 대부황금로 1295,[828],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e5de766a6adb3fc690815a77,seventeen,,세븐틴,33호 할머니 칼국수,경기도 안산시 단원구 대부황금로 1297 1층,[829],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ea2c74a12d25ee0dfc2208ea,seventeen,,세븐틴,이영화 교동짬뽕 본점,경기도 안산시 단원구 대선로 87,[830],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+1f80d38db3ed08860404fa53,seventeen,,세븐틴,유가네 칼국수,경기도 안산시 단원구 서위길 14 1층,[831],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+90e892f4b9863826051570b8,seventeen,,세븐틴,화이트 플레이스,경기도 안양시 만안구 박달로 406 삼봉프라자 B202호,[832],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+1a338474af4e9e3da2955879,seventeen,,세븐틴,팜트리아트펜션,경기도 양평군 옥천면 고읍로 296-1,[833],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fa11aa3f2ffb921ffd9ced2b,seventeen,,세븐틴,용두 휴게소,경기도 양평군 청운면 설악로 167,[834],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d367a73de81e914b0ff49cee,seventeen,,세븐틴,두리캠핑장,경기도 여주시 흥천면 이여로 778-10,[835],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+48e27ea557841de0e1a604af,seventeen,,세븐틴,공룡알 화석산지,경기도 화성시 송산면 공룡로 659,[836],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c69badab798e815c3da536ea,seventeen,,세븐틴,계명대학교 대명캠퍼스,대구광역시 남구 명덕로 104,[837],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0e32209fa69471f07a6216c3,seventeen,,세븐틴,광안리해수욕장,부산광역시 수영구 광안해변로 219,[838],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fe99389e696d090ff8f02102,seventeen,,세븐틴,알베르,서울특별시 강남구 강남대로102길 34,[839],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4804b43b6d5d49f579a47022,seventeen,,세븐틴,알로하포케 학동점,서울특별시 강남구 논현로131길 24,[840],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+aebc9727111bc54b2ae90cce,seventeen,,세븐틴,잔비워,서울특별시 강남구 도산대로89길 17,[841],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+64f9bfd295188fcf9389a9c7,seventeen,,세븐틴,스타필드 코엑스몰,서울특별시 강남구 봉은사로 524,[842],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+39c10bccf1aad66e86f811d3,seventeen,,세븐틴,URBAN81,서울특별시 강남구 봉은사로67길 14,[843],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a684db4095fd9beec267a976,seventeen,,세븐틴,한우오마카세 비플리끄,서울특별시 강남구 선릉로152길 33,[844],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+cfd572593506325142465f25,seventeen,,세븐틴,Ginos NY Pizza,서울특별시 강남구 선릉로155길 15,[845],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a6224962cf9069a2d6199b84,seventeen,,세븐틴,다크룸 포토매틱,서울특별시 강남구 압구정로4길 27-2 지하 1층 다크룸,[846],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e141f301f2ca0a46c9fae1d1,seventeen,,세븐틴,볼트 스테이크하우스,서울특별시 강남구 압구정로72길 22 2층,[847],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+80d8da4805766bc9b167640c,seventeen,,세븐틴,우돈청,서울특별시 강남구 언주로 170길 37,[848],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8484a88ec4d90883c0a1e302,seventeen,,세븐틴,잠수교집 5호점,서울특별시 강남구 언주로153길 14,[849],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ed1b05429b2a0192d8d008d0,seventeen,,세븐틴,란수사,서울특별시 강남구 언주로93길 14-3,[850],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5d0a871c95757771e0ec27b4,seventeen,,세븐틴,아메리칸테이블,서울특별시 강남구 영동대로112길 66,[851],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+54a8d7cde1d997ecad44db64,seventeen,,세븐틴,위징쉔,서울특별시 강남구 학동로2길 45,[852],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+cdfff56dcb012b8db5b39761,seventeen,,세븐틴,서프오션,서울특별시 광진구 자양동 94,[853],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a5b749982e3185700a6e8834,seventeen,,세븐틴,고수포차,서울특별시 마포구 독막로 76-1,[854],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3809cc8c11c4c426c53ed8bb,seventeen,,세븐틴,어반플랜트 합정,서울특별시 마포구 독막로4길 3,[855],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0c18a89c3937996e7f24e73a,seventeen,,세븐틴,비안빈,서울특별시 마포구 상암산로 76,[856],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+24e7065051e76486a5ea6194,seventeen,,세븐틴,연남장,서울특별시 서대문구 연희로5길 22,[857],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f32880821a90ab5e2ac6ffdd,seventeen,,세븐틴,청춘식당 미래소년,서울특별시 서초구 나루터로12길 30,[858],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+507201b89e9cd1cbdc17b205,seventeen,,세븐틴,하이디라오 서초지점,서울특별시 서초구 서초대로77길 54,[859],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+262998ecdbb243bf10622cee,seventeen,,세븐틴,포동푸딩,서울특별시 성동구 서울숲2길 21 1층,[860],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+424f74882b62b510c999c955,seventeen,,세븐틴,우리옛돌박물관,서울특별시 성북구 대사관로13길 66,[861],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4dccfd746d4538af84eb185c,seventeen,,세븐틴,화정체육관,서울특별시 성북구 안암로 145,[862],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+45eed9c7e1349cac68794b3e,seventeen,,세븐틴,음레코드,서울특별시 용산구 우사단로10길 145,[863],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+322cccdee291d089e221f2db,seventeen,,세븐틴,동작대교,서울특별시 용산구 이촌동 동작대교,[864],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6923a3e7c3943d4813375cac,seventeen,,세븐틴,마로니에 공원,서울특별시 종로구 대학로 104,[865],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3f90d652b3d4d259bbcb1d8d,seventeen,,세븐틴,한옥집,서울특별시 종로구 대학로1길 39,[866],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d09914cd6e0230773edc15b0,seventeen,,세븐틴,통큰누이네 육회빈대떡,서울특별시 종로구 동호로 403-24,[867],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9ed2c8d5499a811aba56428b,seventeen,,세븐틴,창화당 익선동,서울특별시 종로구 수표로28길 23,[868],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7f584d60547d98e7427c4034,seventeen,,세븐틴,광장시장,서울특별시 종로구 창경궁로 88,[869],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b1c700f107b1d085fc24168e,seventeen,,세븐틴,원조누드치즈김밥,서울특별시 종로구 창경궁로 88 광장시장 내 41호,[870],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8f038242c16a1e3f776d5689,seventeen,,세븐틴,럭키스트라이크볼링센터,인천광역시 연수구 해돋이로120번길 23 아크리아2,[871],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c71c51b9bcda56f1fc3953ce,seventeen,,세븐틴,완도연안여객선터미널,전라남도 완도군 완도읍 장보고대로 339,[872],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+abb319c1ab63273624b91a19,seventeen,,세븐틴,청실횟집,전라남도 완도군 완도읍 해변공원로 51-1,[873],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+88f9e932077834a2fb937ae1,seventeen,,세븐틴,범바위,전라남도 완도군 청산면 청계리,[874],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d28f91fef8f8d47a01df3984,seventeen,,세븐틴,태백칼국수,전라북도 익산시 중앙로 15-5,[875],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5c27e38962c594e0a0e7db17,seventeen,,세븐틴,제주실탄사격장,제주특별자치도 서귀포시 소보리당로 164번길 62,[876],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+290775322fbe0299c028769c,seventeen,,세븐틴,춘심이네 본점,제주특별자치도 서귀포시 안덕면 창천중앙로24번길 16,[877],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+df927d611faceb02803638b9,seventeen,,세븐틴,베이힐풀앤빌라,제주특별자치도 서귀포시 예래로 424,[878],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b8ea94842397e03f8c9dcc1d,seventeen,,세븐틴,성읍랜드,제주특별자치도 서귀포시 표선면 번영로 2650,[879],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2e39ca3108176fcb49839550,seventeen,,세븐틴,올래국수,제주특별자치도 제주시 귀아랑길 24,[880],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ec085aea97310ff68953d488,seventeen,,세븐틴,함덕해수욕장,제주특별자치도 제주시 조천읍 조함해안로 525,[881],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7e69239302b12aeacba88401,seventeen,,세븐틴,협재해수욕장,제주특별자치도 제주시 한림읍 한림로 329-10,[882],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fb596b3959b4e4eabf260f2b,seventeen,,세븐틴,금강휴게소,충청북도 옥천군 동이면 금강로 596,[883],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+00b0fe48287253a22833a5eb,Stray Kids,,스트레이키즈,남이섬,강원도 춘천시 남산면 남이섬길 1,[1028],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+31e9fd43daf346eb42027bf8,Stray Kids,,스트레이키즈,한국민속촌,경기도 용인시 기흥구 민속촌로 90,[1029],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b7346625a5528bca65510dbb,Stray Kids,,스트레이키즈,광안리해수욕장,부산광역시 수영구 광안해변로 219,[1030],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d2fa6577bab830fc4194c67d,Stray Kids,,스트레이키즈,N서울타워,서울특별시 용산구 남산공원길 105,[1031],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+967c03d34ec69bc51f807e89,Stray Kids,,스트레이키즈,중앙고등학교,서울특별시 종로구 창덕궁길 164,[1032],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+717278e46830dcca795adbb1,ive,,아이브,연남동홈,서울특별시 마포구 성미산로26길 14 1층,[1087],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7af20c1716f9b07a1abcc15c,아이유(IU),,아이유,강원 영월 요선암,강원도 영월군 무릉도원면 무릉리 산 139,[1088],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ab310edfbd42dcb39f238ccf,아이유(IU),,아이유,가평종합운동장,경기도 가평군 가평읍 문화로 131,[1089],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+560ab8866ec803174c5a659d,아이유(IU),,아이유,구둔역 폐역,경기도 양평군 지평면 구둔역길 3,[1090],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2f67d72f8596f8f47cd47511,아이유(IU),,아이유,위양못,경상남도 밀양시 부북면 위양리 294,[1091],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+dd937ebafce33677f20d7278,아이유(IU),,아이유,카페 초량 1941,부산광역시 동구 망양로 533-5,[1092],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+dcc231e0e3726fe2bcda57bd,아이유(IU),,아이유,문화공감수정,부산광역시 동구 홍곡로 75,[1093],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9e3c3ab5b80467c38e3c656b,아이유(IU),,아이유,씨라이프부산아쿠아리움,부산광역시 해운대구 해운대해변로 266,[1094],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a84db825e21d9e54f50bb211,아이유(IU),,아이유,언플러그드,서울특별시 마포구 와우산로33길 26,[1095],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9f20728847507fe84f9a145b,아이유(IU),,아이유,백빈 건널목,서울특별시 용산구 한강로동 40-816,[1096],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+80ed772a70534f6b08ae68b0,아이유(IU),,아이유,물나무 사진관,서울특별시 종로구 계동길 84-3,[1097],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+51421a0aac4fa3a1093a7f0a,아이유(IU),,아이유,순라길 비비,서울특별시 종로구 서순라길 55,[1098],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f01c34d0a85aa0d844ffee4b,아이유(IU),,아이유,만연사,전라남도 화순군 화순읍 진각로 367,[1099],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+432249fc4ed78b72d7afcf71,아이유(IU),,아이유,제주도 마라도 팔각정,제주특별자치도 서귀포시 대정읍 가파리,[1100],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+453c4ea6d12d6b8c7a729a67,아이유(IU),,아이유,원조마라도해물짜장면집,제주특별자치도 서귀포시 대정읍 마라로101번길 46,[1101],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e2c907b1f0390a8dd9294967,아이유(IU),,아이유,천왕사,제주특별자치도 제주시 1100로 2528-171,[1102],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f6c2d712e70adeb1a5eab902,아이유(IU),,아이유,바그다드,제주특별자치도 제주시 관덕로8길 34,[1103],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d88c5c3eb658c33f70d43de0,아이유(IU),,아이유,리듬앤브루스,제주특별자치도 제주시 무근성7길 11,[1104],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e003e0fa29abb901a04d459e,아이유(IU),,아이유,새별오름,제주특별자치도 제주시 애월읍 봉성리 산 59-8,[1105],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ef1cf893129f0e4ddcae6fb7,아이유(IU),,아이유,애월한담공원&애월한담해안산책로,제주특별자치도 제주시 애월읍 애월로 11,[1106],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+61fee3b85484e0f7d1dacc9d,아이유(IU),,아이유,애월튀김간,제주특별자치도 제주시 애월읍 애월로 118,[1107],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ef9a33d4206b4cf714e48615,아이유(IU),,아이유,몽상드애월,제주특별자치도 제주시 애월읍 애월북서길 56-1,[1108],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fbd6719e5756af406c66c167,아이유(IU),,아이유,궷물오름,제주특별자치도 제주시 애월읍 유수암리 산 136,[1109],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+10e4ccaf7d60631ab7f13b80,아이유(IU),,아이유,제주민속오일시장,제주특별자치도 제주시 오일장서길 26,[1110],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+387801ee55350a918ea87b99,아이유(IU),,아이유,사려니 숲길,제주특별자치도 제주시 조천읍 교래리 산 137-1,[1111],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+024dc9145ddf6d02fac79c05,아이유(IU),,아이유,타무라,제주특별자치도 제주시 조천읍 중산간동로 670,[1112],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9c6245356b5a8935861fe7c7,아이유(IU),,아이유,모퉁이옷장,제주특별자치도 제주시 중앙로12길 40,[1113],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fc0f9e149bd146cdf0beebad,아이유(IU),,아이유,금오름,제주특별자치도 제주시 한림읍 금악리 산1-1,[1114],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+220842781108887818b35f86,악뮤(AKMU),,악뮤,문화공감수정,부산광역시 동구 홍곡로 75,[1138],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+87ee62269275a279f23f0d66,악뮤(AKMU),,악뮤,노라바,제주특별자치도 제주시 애월읍 구엄길 100,[1139],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d2aaf4617ccce8c9df4e98f7,악뮤(AKMU),,악뮤,모립,제주특별자치도 제주시 애월읍 애월로 1길 26-7,[1140],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5c3896c31874752aa3ae3f16,악뮤(AKMU),,악뮤,애월 더 선셋,제주특별자치도 제주시 애월읍 일주서로 6111,[1141],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+11d4cef03b936a673bd266d8,악뮤(AKMU),,악뮤,사려니 숲길,제주특별자치도 제주시 조천읍 교래리 산 137-1,[1142],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2f24e4aba292151d4b064e06,EXO,,엑소,투썸플레이스 춘천구봉산점,강원도 춘천시 동면 순환대로 1154-105,[1212],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d054a4812079d445bf02a0da,EXO,,엑소,도암식당,강원도 평창군 대관령면 대관령로 103,[1213],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+80e83143e5697c0d37a96732,EXO,,엑소,오늘은 봄날,경기도 가평군 청평면 북한강로 2199,[1214],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+cc9af29e3bd606a1cef0d877,EXO,,엑소,포러데이,경기도 남양주시 와부읍 경강로926번길 8-7,[1215],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fd1f6ec36b6afe1857d577a7,EXO,,엑소,나인블럭 뷰 팔당점,경기도 남양주시 와부읍 다산로 56,[1216],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f77a2f8270bb1a85d018ac84,EXO,,엑소,설하식당,경기도 남양주시 조안면 북한강로855번길 81,[1217],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+cb903058dcbdcc7b6ccea44d,EXO,,엑소,88오락실,경기도 시흥시 오이도로 157-1,[1218],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c662a7ba82ee915bfa635e34,EXO,,엑소,폴콘,경기도 파주시 월롱면 다락고개길 98-10,[1219],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+27bc79617974c5489a60de0f,EXO,,엑소,경기영어마을 파주캠퍼스,경기도 파주시 탄현면 얼음실로 40,"[1220, 1841]",suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d5e3ba917fd02ea0b9d2a579,EXO,,엑소,인사동촌,서울특별시 강남구 강남대로 152길 29,[1221],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+67fc476997c7fbe7b2d319e6,EXO,,엑소,압구정 변강쇠 떡볶이,서울특별시 강남구 도산대로46길 21,[1222],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+37b666e54b1a4cede7a1477e,EXO,,엑소,무등산,서울특별시 강남구 선릉로146길 3 승봉빌딩,[1223],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6bd4bc64931ba0b9d148bd02,EXO,,엑소,강남돌곱창,서울특별시 강남구 압구정로18길 17,[1224],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0af3a5723d3f837a222dcb7f,EXO,,엑소,청담 25,서울특별시 강남구 압구정로79길 32,[1225],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f3503e0e45ebe5beeef7e94d,EXO,,엑소,꽃새우 영번지 역삼점,서울특별시 강남구 언주로 536,[1226],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+36b8fe0c19fe5d0215210f2f,EXO,,엑소,커피더쏠,서울특별시 광진구 능동로 18 이튼타워리버3차 1층,[1227],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+00e35460e76e92da250948c9,EXO,,엑소,강쇠네,서울특별시 광진구 뚝섬로 535,[1228],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3e5df9d143f912f58b45940d,EXO,,엑소,듀펠센터,서울특별시 동대문구 한천로26길 48-12,[1229],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+51e03dc3aad800b450de2a23,EXO,,엑소,샤로스톤,서울특별시 동대문구 휘경로2가길 5,[1230],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7e143fb0b6edbae977f33767,EXO,,엑소,진미식당,서울특별시 마포구 마포대로 186-6,[1231],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ceb4d5d9d0f56a4e72318a59,EXO,,엑소,멘야하나비 신사점,서울특별시 서초구 강남대로101안길 18-1,[1232],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+477abd5be0ae0e0029b164cd,EXO,,엑소,카몽,서울특별시 서초구 서초대로42길 17,[1233],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+dd24dda3d84555e2092fcb33,EXO,,엑소,수피,서울특별시 성동구 성수이로 71,[1234],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8faf5e41e9fc2ba356c378fc,EXO,,엑소,레이어 57,서울특별시 성동구 성수이로20길 57,[1235],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c276e7210146b99d17d17b56,EXO,,엑소,장가,서울특별시 성동구 성수이로7길 27 서울특별시숲코오롱디지탈타워,[1236],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4cb6e393c0f1e14def4c6fee,EXO,,엑소,우리옛돌박물관,서울특별시 성북구 대사관로13길 66,[1237],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3b56a405e774b9573335c96d,EXO,,엑소,다운타우너 잠실점,서울특별시 송파구 백제고분로45길 3,[1238],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b6a1081b4a90ab6491591f04,EXO,,엑소,남경막국수,서울특별시 송파구 백제고분로7길 52-29,[1239],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c59a83b71abf9345b3567910,EXO,,엑소,인디에이,서울특별시 용산구 이태원로54길 78,[1240],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d9afde9967f924e30cc7fcad,EXO,,엑소,MUJABEE,서울특별시 용산구 한강대로84길 11-18,[1241],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+422e4ef658fb000e9a0feb4b,EXO,,엑소,혜화동 버거,서울특별시 종로구 동숭3길 6-4 1층,[1242],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+84a68260dfb89aa1074d5553,EXO,,엑소,밀타운,서울특별시 종로구 팔판길 33,[1243],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a2f762176d6ecc7e87071531,EXO,,엑소,용마랜드,서울특별시 중랑구 망우로70길 118,[1244],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7eb88f668583becdf11d4c49,EXO,,엑소,오르다,제주특별자치도 서귀포시 성산읍 한도로 269-37,[1245],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0126b0e97bcdbd685a3e68a5,EXO,,엑소,마노커피하우스,제주특별자치도 서귀포시 중문상로 97,[1246],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+62f07d114efc193b13811049,EXO,,엑소,성읍랜드,제주특별자치도 서귀포시 표선면 번영로 2650,[1247],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6a8091db1054f6dd1bf6e450,EXO,,엑소,어느날 문득 제주,제주특별자치도 제주시 구좌읍 계룡길 25-10,[1248],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9b137ab515099817b8d8c186,(여자)아이들,,여자아이들,무아레478&F1,경기도 가평군 청평면 북한강로 1619,[1249],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+633ffd63667a01528373cec9,(여자)아이들,,여자아이들,일산호수공원,경기도 고양시 일산동구 호수로 731,[1250],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ad3f217387ea25029ba2839a,(여자)아이들,,여자아이들,오늘 와인한잔 김포구래점,경기도 김포시 김포한강8로 420 1층,[1251],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+056cb883630932c5e36fd701,(여자)아이들,,여자아이들,펜션121,경기도 남양주시 조안면 북한강로855번길 115,[1252],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e072ff9c8ae689c4ef595aa0,(여자)아이들,,여자아이들,양계장집아들 시흥은계점,경기도 시흥시 은계번영길 27 104-105호,[1253],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+96983008ac0e0f2a94b2a7cd,(여자)아이들,,여자아이들,에버랜드,경기도 용인시 처인구 포곡읍 에버랜드로 199,[1254],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7437164103fa2d7822da0fe0,(여자)아이들,,여자아이들,설봉공원,경기도 이천시 경충대로2709번길 128,[1255],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7cc62afa8b51903d9275494e,(여자)아이들,,여자아이들,벽초지수목원,경기도 파주시 광탄면 부흥로 242,[1256],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+32dd9692d188a7e28818ff67,(여자)아이들,,여자아이들,지노카페,경기도 파주시 탄현면 새오리로 211-31,[1257],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2f7939207cb3d560a7dedecf,(여자)아이들,,여자아이들,까폼,서울특별시 강남구 선릉로153길 18,[1258],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a04a669571d8ca7e2f22a28d,(여자)아이들,,여자아이들,아야 커피,서울특별시 강남구 언주로94길 11 1층,[1259],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a9586d49c4ecb8814d8c1601,(여자)아이들,,여자아이들,영화사,서울특별시 광진구 영화사로 107,[1260],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e70c3446d0c0562720ebc83f,(여자)아이들,,여자아이들,테이블에이 동물원,서울특별시 마포구 와우산로 146,[1261],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+75a8e22d00263cdba18f1894,(여자)아이들,,여자아이들,플럼프,서울특별시 성동구 아차산로 83 1층,[1262],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+627d0cb5add882ceff937cd4,(여자)아이들,,여자아이들,와플 목공방,서울특별시 성동구 왕십리로10길 5-6,[1263],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+368a852154340ee88fc91e1f,(여자)아이들,,여자아이들,바바코아문래,서울특별시 영등포구 경인로78길 2,[1264],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+28045ce1f05a90f09bba9a24,(여자)아이들,,여자아이들,커들쏘머취,서울특별시 종로구 인사동길 44 3층,[1265],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+dbd2bbbeedd2d1188aae0f31,임영웅,,임영웅,그레이트풀 그라운드,경기도 가평군 설악면 유명로 2277-12,[1436],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6e89345f6c84697e54ede489,임영웅,,임영웅,구들짱황소곱창 영통점,경기도 수원시 영통구 영통로218번길 6,[1437],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7287aa940eb96d4d6751711e,임영웅,,임영웅,수원전통문화관,경기도 수원시 팔달구 정조로 893,[1438],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+11eec2b6a55b2c48afb20982,임영웅,,임영웅,서울YMCA다락원캠프장,경기도 의정부시 평화로49번길 63,[1439],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+04f59e05b1c3d2a110934630,임영웅,,임영웅,8요일키친,경기도 포천시 호국로 879,[1440],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2ff241a86567b6304cc5d7af,임영웅,,임영웅,쌍둥이돼지국밥,부산광역시 남구 유엔평화로 35-1,[1441],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+184afa95b8ab5834c82eec56,임영웅,,임영웅,교대이층집 상암점,서울특별시 마포구 월드컵북로48길 19,[1442],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e7456fa1870996c191c3fead,임영웅,,임영웅,서산동 시화골목길,전라남도 목포시 보리마당로 14,[1443],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+240ec8874ddb273d0f62d2d5,임영웅,,임영웅,보리마당,전라남도 목포시 서산동 31-1,[1444],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ad4c571aef5414042afcebb5,임영웅,,임영웅,목포근대역사관 1관,전라남도 목포시 영산로29번길 6,[1445],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5d081f24f81aea9ce4788dbc,임영웅,,임영웅,최피디해물칼국수,충청북도 청주시 서원구 남이면 청남로 1677,[1446],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ee38d40773a78c29d13c0fcd,G-DRAGON,,지드래곤,마가만두,부산광역시 동구 대영로243번길 56,[1464],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+33a4159130ed2eb73ffcca6e,G-DRAGON,,지드래곤,해운대기와집대구탕,부산광역시 해운대구 달맞이길104번길 46,[1465],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+200f8e3b79412bb562b2650d,G-DRAGON,,지드래곤,와세다야 청담점,서울특별시 강남구 압구정로79길 51,[1466],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7df4074386f873ea6ffe50c3,G-DRAGON,,지드래곤,열봉찜닭 강남점,서울특별시 강남구 테헤란로38길 29,[1467],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a66383c04f27a5867115f3b2,G-DRAGON,,지드래곤,삼성원조양곱창,서울특별시 강남구 학동로101길 7 승창빌딩 1층,[1468],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+40136481038729e672607c11,G-DRAGON,,지드래곤,갯벌의진주본점,서울특별시 강남구 학동로2길 55,[1469],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a05aafb1d919735a4a866935,G-DRAGON,,지드래곤,아소정,서울특별시 마포구 백범로25길 9,[1470],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6e6a60a79312e11e877b6305,G-DRAGON,,지드래곤,옛집,서울특별시 마포구 신촌로10길 8,[1471],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9df0abceba600e9e8356dee1,G-DRAGON,,지드래곤,아날로그 테이블 연남,서울특별시 마포구 월드컵북로2길 93,[1472],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+acb9bc106f59d37c2982f87a,G-DRAGON,,지드래곤,대성정육식당,서울특별시 용산구 서빙고로95길 22,[1473],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+1d09788971da1ba79fbfbff4,G-DRAGON,,지드래곤,바다식당,서울특별시 용산구 이태원로 245 2층,[1474],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ce37012d576a0985ebe9a8de,G-DRAGON,,지드래곤,일미식당,서울특별시 종로구 삼일대로 428 낙원상가 지하 B1 148호,[1475],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+97e7130352810ac69596b01b,G-DRAGON,,지드래곤,원조남산왕돈까스,서울특별시 중구 소파로 107,[1476],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f1450dbfa653fd0a6335ae03,G-DRAGON,,지드래곤,따룽훠궈 송도점,인천광역시 연수구 세트럴로 160 103동 C동 2층,[1477],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e53b5d65228c921e3ef79fed,G-DRAGON,,지드래곤,오는정김밥,제주특별자치도 서귀포시 동문동로 2,[1478],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ee1d850b8798d7d0e157338c,G-DRAGON,,지드래곤,천짓골식당,제주특별자치도 서귀포시 중앙로41번길 4,[1479],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+656d9240389202652b078b30,G-DRAGON,,지드래곤,돈사돈 별관,제주특별자치도 제주시 광평동로 15,[1480],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+1747744d1afd95176b7c09ba,G-DRAGON,,지드래곤,대우정,제주특별자치도 제주시 서사로 152,[1481],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b604e581e5b55f53f9025063,G-DRAGON,,지드래곤,몽상드애월,제주특별자치도 제주시 애월읍 애월부서길 56-1,[1482],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+598dee1f2882a2a44a0ec581,G-DRAGON,,지드래곤,유리네식당,제주특별자치도 제주시 연북로 146,[1483],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+754a35c07923e63cf71bc38f,G-DRAGON,,지드래곤,알동네집,제주특별자치도 제주시 한경면 연명로 545,[1484],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+52db79c6781acefa97e51e17,TWICE,,트와이스,이가 닭강정,강원도 영월군 영월읍 영월로 2105-1,[1534],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3350a87b3acf7e0dc83615df,TWICE,,트와이스,김포함상공원,경기도 김포시 대곶면 대명항1로 110-36,[1535],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4a76bf3496571901f9daf9dd,TWICE,,트와이스,텍사스바베큐,경기도 동두천시 중앙로 366,[1536],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f213a0769f30ab5d27325fef,TWICE,,트와이스,항아리보쌈 위례점,경기도 성남시 수정구 위례서일로3길 33-4,[1537],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4a03fed09014f9959aedf5e5,TWICE,,트와이스,명랑핫도그 신구대점,경기도 성남시 중원구 금빛로 52,[1538],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+448dbf383086bbb0f77800d5,TWICE,,트와이스,두물머리,경기도 양평군 양서면 두물머리길,[1539],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+60e5e6258bba7de293e0a212,TWICE,,트와이스,용문역,경기도 양평군 용문면 용문역길 21,[1540],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ac5cc57e3493dca92edb9957,TWICE,,트와이스,경기영어마을 파주캠퍼스,경기도 파주시 탄현면 얼음실로 40,[1541],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8874362c6efa5726c2b15459,TWICE,,트와이스,문화마실,경상북도 포항시 남구 구룡포읍 구룡포길 133-1,[1542],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b133cb75652fd0170ee9b980,TWICE,,트와이스,뉴그린다방,부산광역시 북구 의성로 80,[1543],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+efbfff2ddaa5463d1129bf85,TWICE,,트와이스,영진돼지국밥코스트코센텀점,부산광역시 수영구 구락로 86,[1544],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b15b0f78f1bbd5f56416607e,TWICE,,트와이스,원조밀면,부산광역시 중구 중구로 31-1,[1545],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8f9165e55b32d209dbb24d80,TWICE,,트와이스,새아침식당,부산광역시 해운대구 달맞이길62번길 28 새아침맛집,[1546],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ce46340962a8690313438c64,TWICE,,트와이스,추풍령칼삼겹살 압구정점,서울특별시 강남구 도산대로 51길 41,[1547],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+cd66f1bef35ea9047d0b0037,TWICE,,트와이스,페어링 룸,서울특별시 강남구 도산대로81길 14,[1548],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+48ebcf1990bd1f30232a9133,TWICE,,트와이스,공리 청담점,서울특별시 강남구 도산대로92길 6,[1549],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f22e800f56d38eb5bf075aea,TWICE,,트와이스,신전떡볶이 대치점,서울특별시 강남구 선릉로 420,[1550],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b35ad4dec861f499a07a8c4a,TWICE,,트와이스,할라고 압구정선상점,서울특별시 강남구 압구정로11길 37-53,[1551],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+61d49aa7b9610dca7efdbfa5,TWICE,,트와이스,서강쇠떡볶이,서울특별시 강남구 압구정로50길 22 1층 5호,[1552],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8c98bcafea8d0ba83063907a,TWICE,,트와이스,골목식당,서울특별시 강남구 압구정로79길 47,[1553],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+96be071650eb441604ab47e2,TWICE,,트와이스,슈퍼집,서울특별시 강남구 언주로130길 14,[1554],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4631e79bc400d89c93938c73,TWICE,,트와이스,공수간 코엑스몰점,서울특별시 강남구 영동대로 513,[1555],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c3ee9f3d146c986b37f5b7d5,TWICE,,트와이스,곰바위 본점,서울특별시 강남구 영동대로115길 10,[1556],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+90a5dc83a92ea75a6a3a6ede,TWICE,,트와이스,항아리보쌈 선릉점,서울특별시 강남구 테헤란로 51길 16,[1557],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0946ecd206c982e6b1a70806,TWICE,,트와이스,플랫폼창동61,서울특별시 도봉구 마들로 11길 74,[1558],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b1340cfb1ff5705f6e5c5b65,TWICE,,트와이스,가츠신 본점,서울특별시 마포구 독막로2길 22,[1559],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+dea903c40346baa5cd5258ca,TWICE,,트와이스,혼가츠,서울특별시 마포구 와우산로21길 36-6 1층 102호,[1560],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c01e8e3bd718534acee2c635,TWICE,,트와이스,프로간장게장,서울특별시 서초구 강남대로97길 9,[1561],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+aad289d8a1d149139b8e3e29,TWICE,,트와이스,미쓰윤,서울특별시 서초구 양재천로17길 3,[1562],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+4d146af8877059b7df1eb68c,TWICE,,트와이스,세빛섬 튜브스터,서울특별시 서초구 올림픽대로 2085-14,[1563],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ad5432951a6e2cc8d194ace9,TWICE,,트와이스,동천곱창,서울특별시 송파구 석촌호수로 12길 22,[1564],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f3b14b6a8cc98a5243759f62,TWICE,,트와이스,차 마시는 뜰,서울특별시 종로구 북촌로11나길 26,[1565],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e3aaf9a188017edeb841bef3,TWICE,,트와이스,소선재,서울특별시 종로구 삼청로 113-1,[1566],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+aeb3f6716a806a7eb47a9e5d,TWICE,,트와이스,창신동매운족발,서울특별시 종로구 종로51길 23,[1567],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+85fce656ec21e04862eec114,TWICE,,트와이스,옛날 국밥집,서울특별시 종로구 종로58길 12,[1568],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+809c5011b320bdbe6946f324,TWICE,,트와이스,금돼지식당,서울특별시 중구 다산로 149,[1569],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+156cc15ea541859a7d16c85f,TWICE,,트와이스,만족오향족발 시청점,서울특별시 중구 서소문로 134-7,[1570],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8d83b08e584133e39c217bdd,TWICE,,트와이스,뚱뚱이할머니집,서울특별시 중구 장충단로 174-1,[1571],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+686946f94364d01b5b72a2c3,TWICE,,트와이스,용마랜드,서울특별시 중랑구 망우로70길 118,[1572],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+21db03ef1e5e82e37d252aed,TWICE,,트와이스,소창체험관,인천광역시 강화군 강화읍 남문안길20번길 8,[1573],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+500ec7a0ec59f012a3c0320c,TWICE,,트와이스,조양방직,인천광역시 강화군 강화읍 향나무길5번길 12,[1574],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a40dc5d163d01f68d272c31c,TWICE,,트와이스,강화 씨사이드리조트 루지,인천광역시 강화군 길상면 장흥로 217,[1575],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+04fb0b37a0d153c844813384,TWICE,,트와이스,일년내내칼국수맛있는집,인천광역시 강화군 화도면 해안남로 1421,[1576],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+17c164d4c8c01fa9ae167cca,TWICE,,트와이스,마호가니 강화점,인천광역시 강화군 화도면 해안남로 1844번길 19,[1577],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fade6959dc1f36006f299021,TWICE,,트와이스,트라몬토 카페,인천광역시 강화군 화도면 해안남로 2680-16,[1578],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9dadd498399bc7df2cf430a2,TWICE,,트와이스,월미테마파크,인천광역시 중구 월미문화로 81,[1579],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d19dcc3614b8b810c80889b2,TWICE,,트와이스,빛의 벙커,제주특별자치도 서귀포시 성산읍 고성리 2039-22,[1580],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+fdd01f4c642db4ad571f7b51,TWICE,,트와이스,오설록 티 뮤지엄,제주특별자치도 서귀포시 안덕면 신화역사로 15,[1581],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3228aff62e48ebeafb541c18,TWICE,,트와이스,메이즈랜드,제주특별자치도 제주시 구좌읍 비자림로 2134-47,[1582],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0ea755931099089e01c36c7a,TWICE,,트와이스,CAFERI 카페리,제주특별자치도 제주시 구좌읍 평대2길 39,[1583],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e6f63ae1335af3e36b4c9165,TWICE,,트와이스,광평도새기촌 본점,제주특별자치도 제주시 애월읍 구엄동3길 64,[1584],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2aa50c544a91ec3f6163562a,TWICE,,트와이스,에코랜드 테마파크,제주특별자치도 제주시 조천읍 번영로 1278-169,[1585],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a2c0ab100d62e9bc20746499,TWICE,,트와이스,금오름,제주특별자치도 제주시 한림읍 금악리 산1-1,[1586],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f9895f7ec6b0e9c454783b53,ATEEZ,,ATEEZ,캠프통 아일랜드,경기도 가평군 청평면 호반로 976,[1727],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+77b44f81f6d519a8e712ee8f,ATEEZ,,ATEEZ,백남준아트센터,경기도 용인시 기흥구 백남준로 10,[1728],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d59ec92e429e9b72aee9ab79,ATEEZ,,ATEEZ,터알,경기도 용인시 기흥구 흥덕4로 22,[1729],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+002e5a6cf427ef0913feac00,ATEEZ,,ATEEZ,플라이스테이션코리아,경기도 용인시 처인구 포곡읍 성산로 521,[1730],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b513913a2edd29eeca14a695,ATEEZ,,ATEEZ,설봉공원,경기도 이천시 경충대로2709번길 128,[1731],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e65ee436116b4dd792057bc9,ATEEZ,,ATEEZ,클럽300롤러,광주광역시 서구 시청로 67 프리미엄아울렛2층,[1732],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3b485a3031ed5b92827a56b7,ATEEZ,,ATEEZ,광안리해수욕장,부산광역시 수영구 광안해변로 219,[1733],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+742ce844d8f21816021b0182,ATEEZ,,ATEEZ,조이전농프라자,서울특별시 동대문구 서울시립대로 36 옥상,[1734],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+25dff6376dbb719b88758def,ATEEZ,,ATEEZ,홍일품간장게장,서울특별시 마포구 독막로 47-1,[1735],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d29e0f2363cee3303e934eb6,ATEEZ,,ATEEZ,거북이집,서울특별시 서대문구 연희맛로 12-1,[1736],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d97616568f25b2a3ce9c6324,ATEEZ,,ATEEZ,삼청동 코리아게스트 하우스,서울특별시 종로구 삼청로4길 12-1,[1737],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+13fa0b6f9ed345cb82f91980,ATEEZ,,ATEEZ,소노캄 제주,제주특별자치도 서귀포시 표선면 일주동로 6347-17,[1738],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+93aaf3beb92f1244f426462d,DAY6,,Day6,옥산장 돌과이야기,강원도 정선군 여량면 여량 3길 79,[1810],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+1824a07031af1e613b20017e,DAY6,,Day6,경주 양동마을,경상북도 경주시 강동면 양동리 125,[1811],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+cce859c04629a69d3a475c54,DAY6,,Day6,교촌마을,경상북도 경주시 교촌길 39-2,[1812],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b0f1e1474568978dab17651f,DAY6,,Day6,경주 성동시장,경상북도 경주시 동문로 24번길 12,[1813],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ecdac996cf8791b8d161a8e0,DAY6,,Day6,추억의달동네,경상북도 경주시 보불로 216-8,[1814],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d19c2ee8155513301c718e20,DAY6,,Day6,동궁과 월지,경상북도 경주시 원화로 102,[1815],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3bff5c4304e7b6e4e01e5907,DAY6,,Day6,첨성대,경상북도 경주시 첨성로 140-25,[1816],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+7b5be366adf64a1a8da52e63,DAY6,,Day6,영진돼지국밥 본점,부산광역시 사하구 하신번영로157번길 39,[1817],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+03106f7efa7f7399a0e578fa,DAY6,,Day6,청양수산,서울 동작구 노들로 674 노량진수산시장 1층 활어 40호,[1818],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d1036aeb511e962c44164834,DAY6,,Day6,잔비워,서울특별시 강남구 도산대로89길 17,[1819],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a4fb755a5362e785728d147b,DAY6,,Day6,영천영화 뜰,서울특별시 강남구 도산대로90길 3 상민빌딩 5층,[1820],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b99b7285bff7b66c376077f5,DAY6,,Day6,웅골 본점,서울특별시 강동구 강동대로 53길 18,[1821],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2f1bcd42147bba632ab5dfb4,DAY6,,Day6,카페아셀,서울특별시 강동구 강동대로 53길 35,[1822],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+829f8a4e4b1acabb3e2c5d39,DAY6,,Day6,램니쿠야 둔촌 본점,서울특별시 강동구 양재대로 87길 23,[1823],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+46158d63b772d878f9479af0,EXO,,EXO,강촌레일파크,강원도 춘천시 남산면 서백길 57,[1840],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+782944e1c43cdb952513c253,ITZY,,Itzy,하남 스타필드 스포츠 몬스터,경기도 하남시 미사대로 750 스타필드 하남 4층,[1884],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+614ccc16fb13fedb308037d6,ITZY,,Itzy,벤스쿠키 가로수길점,서울특별시 강남구 도산대로 11길 33,[1885],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ba2708e52f3689ee8f61729b,ITZY,,Itzy,소울컵,서울특별시 강동구 강동대로 205,[1886],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b5b30ffd68cc87b9ed4b7a2d,ITZY,,Itzy,보성갈비 본점,서울특별시 강동구 양재대로89가길 14,[1887],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f11b0425ac7dcee666f2c52a,ITZY,,Itzy,파사주,서울특별시 마포구 성지5길 8 1층,[1888],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+56bd1db5d8812dca9bb1bae9,ITZY,,Itzy,성수미술관,서울특별시 성동구 성수일로8길 39 지층 B02,[1889],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e5729a7f3776965d8d6e7417,ITZY,,Itzy,아리수 한정식,서울특별시 양천구 목동서로 213,[1890],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+58b15f55cf07fa57ff3ed515,ITZY,,Itzy,인생네컷 종로익선동한옥거리점,서울특별시 종로구 수표로28길 17-34,[1891],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+40175f9e5d85c95aa57bae3a,ITZY,,Itzy,젠젠 오네스타점,인천광역시 연수구 송도동 168-2 오네스타몰 3층,[1892],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+f76a420229a4746f6f771c8f,ITZY,,Itzy,비고 리조트,전라남도 여수시 돌산읍 3155-1,[1893],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+16d8fc946e09712a9e29e53b,NCT,,NCT,송지호해수욕장,강원도 고성군 죽왕면,[1894],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8d9dfda591de4ca8b052c335,NCT,,NCT,춘천의암호스카이워크,강원도 춘천시 칠전동 486,[1895],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+96ac66d12c9939ab29e8f03b,NCT,,NCT,보니타샌드위치,강원도 춘천시 효자로 102 1층,[1896],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+76654ec644c94345f4c62415,NCT,,NCT,루지월드,강원도 홍천군 서면 한치골길 262,[1897],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0d7b23ea675ddc4b9eb97af1,NCT,,NCT,당주당반점,경기도 고양시 덕양구 중앙로 232,[1898],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+1217bc8c9d5f5157539e8e32,NCT,,NCT,두리랜드,경기도 양주시 장흥면 권율로 120,[1899],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+22a230100ad6b0e2d7b79822,NCT,,NCT,빌라드파넬,경기도 용인시 처인구 백암면 박곡로 192,[1900],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+52b0502ae99d36f60d537c59,NCT,,NCT,장림포구,부산광역시 사하구 장림로93번길 72,[1901],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+df6659ded30e4c090cb77ad3,NCT,,NCT,카페 해인,부산광역시 서구 암남로94번길 62,[1902],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+81d18a116096bc0913a99521,NCT,,NCT,수영 돼지국밥,부산광역시 수영구 무학로 6,[1903],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3319c27b26c936245bcec936,NCT,,NCT,태종대사랑방조개구이,부산광역시 영도구 태종로 816,[1904],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9d6507817ce9a0cd03536507,NCT,,NCT,라마다앙코르 바이 윈덤 부산 해운대,부산광역시 해운대구 구남로 9,[1905],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3c9510d604fd30e9a9d6bce0,NCT,,NCT,도산족발&칼국수,서울특별시 강남구 도산대로 45길 8-8 2층,[1906],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+bfdd20e98bb385c4ddca0be7,NCT,,NCT,르자당 도산점,서울특별시 강남구 도산대로45길 10-3 3층,[1907],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+ba1b5ad57298ff8498668b2e,NCT,,NCT,울프강 스테이크 하우스,서울특별시 강남구 선릉로152길 21,[1908],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+aa3588378b6589ba78ff3dc5,NCT,,NCT,고센인코퍼레이티드 청담점,서울특별시 강남구 선릉로158길 18,[1909],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+798f6a54ed48dc730b169253,NCT,,NCT,더청담수산,서울특별시 강남구 압구정로 338 1층,[1910],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+9d48834186b59f584d128d30,NCT,,NCT,마사 타코,서울특별시 강남구 압구정로10길 30-8,[1911],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+c92fad1e262acd239e6014c7,NCT,,NCT,도쿄수플레,서울특별시 강남구 압구정로10길 35 1층,[1912],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a095a901fdec029f339488ae,NCT,,NCT,하이디라오 건대지점,서울특별시 광진구 능동로 110,[1913],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+87125a81b08d2601508bc28f,NCT,,NCT,플레이독스,서울특별시 광진구 능동로 163,[1914],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+45b3787668549d42ca4f2f3d,NCT,,NCT,망원한강공원,서울특별시 마포구 마포나루길 467 망원한강공원 내,[1915],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+bb4fab19be76e4be5891db55,NCT,,NCT,꾸머카페,서울특별시 마포구 성지길 40,[1916],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a06bee78e338fe6080895884,NCT,,NCT,커피탐이나,서울특별시 마포구 잔다리로3안길 31,[1917],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+aa6707a6c74c89a2ecc0ec7d,NCT,,NCT,잠수교,서울특별시 서초구 반포동,[1918],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+81a56cbcf1bfc163ddf094f6,NCT,,NCT,센토리,서울특별시 서초구 신반포로49길 12 하늘정원빌딩,[1919],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+3568a38b40f68a8bf55d65e7,NCT,,NCT,카페 앤 아더,서울특별시 성동구 서울숲2길 40-10,[1920],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+b5e7f273507573ea8ede3959,NCT,,NCT,점프스카이,서울특별시 송파구 송파대로 111 201동 B103호,[1921],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e596e5d59891d978e0ed5810,NCT,,NCT,서울스카이,서울특별시 송파구 올림픽로 300 117~123층,[1922],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e80e95b076f8ba4eefdfcec9,NCT,,NCT,볼하우스 한남,서울특별시 용산구 독서당로 46 지하2층,[1923],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6ceedaed6338209a98439bea,NCT,,NCT,바캉스 커피,서울특별시 중구 남대문로9길 12,[1924],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+190ef39484d4b52b1a3e2402,NCT,,NCT,마복림떡볶이,서울특별시 중구 다산로35길 5,[1925],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8047cf536fdba6857136255e,NCT,,NCT,볼링볼링,서울특별시 중구 청계천로 400 롯데캐슬베네치아 메가몰동 지하1층,[1926],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+cf50c22e915812cc03d93716,NCT,,NCT,소무의도,인천광역시 중구 무의동 산369,[1927],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+66eb40702f860ce56baf19ef,TOMORROW X TOGETHER,,TXT,강문해변,강원도 강릉시 창해로350번길 5,[1938],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+6ee297ff81be2a8b5dc19eb7,TOMORROW X TOGETHER,,TXT,캠프통 아일랜드,경기도 가평군 청평면 호반로 976,[1939],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+cd2fec8a884eb50a892df0fb,TOMORROW X TOGETHER,,TXT,55갤런,경기도 김포시 양촌읍 김포대로 1619,[1940],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e59e29bd8670e467bd7288d8,TOMORROW X TOGETHER,,TXT,바운스트램폴린파크 용인 죽전센터,경기도 용인시 처인구 모현읍 오산로13번길 46 1동 1층,[1941],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+47bdb550d7b219383a0b50c5,TOMORROW X TOGETHER,,TXT,에버랜드,경기도 용인시 처인구 포곡읍 에버랜드로 199,[1942],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+943c69e814dab9a3b7e9b64d,TOMORROW X TOGETHER,,TXT,하남 스타필드 스포츠 몬스터,경기도 하남시 미사대로 750 스타필드 하남 4층,[1943],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+5c2d047fbd365a00e8a3c0a3,TOMORROW X TOGETHER,,TXT,어반리 st 동탄점,경기도 화성시 장지로 60-12,[1944],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e258f2e58b78b73b9cda917d,TOMORROW X TOGETHER,,TXT,인스턴트펑크 압구정 플래그십 스토어,서울특별시 강남구 도산대로51길 12,[1945],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+be18b1b22a34d47670d934fa,TOMORROW X TOGETHER,,TXT,최인아 책방,서울특별시 강남구 선릉로 521,[1946],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+43f5402425947e4c551be72c,TOMORROW X TOGETHER,,TXT,버터핑거팬케이크 청담점,서울특별시 강남구 선릉로152길 11,[1947],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8e280a3000412cb315d9510d,TOMORROW X TOGETHER,,TXT,우텐더,서울특별시 강남구 압구정로 42길 25-10,[1948],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+2094a51030566a717b29984b,TOMORROW X TOGETHER,,TXT,더 키친 일뽀르노 청담점,서울특별시 강남구 언주로164길 29,[1949],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+bb6d527a54a1d36321aed5e6,TOMORROW X TOGETHER,,TXT,카페 더 왈츠 애견카페,서울특별시 강남구 역삼로 134,[1950],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0e0734bcbf462daec212393a,TOMORROW X TOGETHER,,TXT,보노보노 삼성점,서울특별시 강남구 테헤란로 508,[1951],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+d563c1057340e1d30b5656b9,TOMORROW X TOGETHER,,TXT,펀시티 건대점,서울특별시 광진구 동일로22길 81 1층,[1952],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+dc6f68ea2a93322d005f9b87,TOMORROW X TOGETHER,,TXT,캘리포니아도넛클럽 & 비라티오 홍대점,서울특별시 마포구 잔다리로 28,[1953],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+8ad3156ccd46a4d4346f14bb,TOMORROW X TOGETHER,,TXT,그 아저씨 공방,서울특별시 성동구 무학봉15길 27,[1954],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+527666a94c340a108a6e3fb3,TOMORROW X TOGETHER,,TXT,그러하다 스튜디오 PART 1,서울특별시 성북구 삼양로 139나길 54,[1955],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+209e0ace86f610f92c893ca1,TOMORROW X TOGETHER,,TXT,풍납나들목,서울특별시 송파구 신천동 풍납나들목,[1956],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a6947b62df4cfa25121dd398,TOMORROW X TOGETHER,,TXT,현대카드 바이닐앤플라스틱,서울특별시 용산구 이태원로 248,[1957],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+434227c6c53b60c1536bdb95,TOMORROW X TOGETHER,,TXT,서울커피 익선점,서울특별시 종로구 수표로28길 33-3,[1958],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+bf196ffa20d0e0ac7cf91844,TOMORROW X TOGETHER,,TXT,와이엔,서울특별시 종로구 윤보선길 71 1층,[1959],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+0dd98538f581132a3a8f2c62,TOMORROW X TOGETHER,,TXT,롯데백화점 본점,서울특별시 중구 남대문로 81,[1960],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+e11a10cf0b9b58271814449b,TOMORROW X TOGETHER,,TXT,볼링볼링,서울특별시 중구 청계천로 400 롯데캐슬베네치아 메가몰동 지하1층,[1961],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+a439568203580a2e345ba8a0,TOMORROW X TOGETHER,,TXT,라마다 제주함덕호텔,제주특별자치도 제주시 조천읍 신북로 470,[1962],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False
+56186e0c8d05db38aab936fd,TOMORROW X TOGETHER,,TXT,함덕해수욕장,제주특별자치도 제주시 조천읍 조함해안로 525,[1963],suggested_not_verified,U,UNKNOWN,,unknown,unknown,False

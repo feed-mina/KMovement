@@ -1,0 +1,23 @@
+name: Artist catalog reconciliation
+on:
+  pull_request:
+    paths:
+      - 'dataset/policies/artist-catalog-expansion.json'
+      - 'scripts/reconcile_artist_catalog.py'
+      - 'tests/test_artist_catalog_reconciliation.py'
+      - 'docs/2026-10-25/artist-catalog-reconciliation/**'
+      - '.github/workflows/artist-catalog-reconciliation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p test_artist_catalog_reconciliation.py -v
+      - run: python scripts/reconcile_artist_catalog.py --output /tmp/catalog-reconciliation
+      - run: diff -r docs/2026-10-25/artist-catalog-reconciliation /tmp/catalog-reconciliation --exclude=README.md

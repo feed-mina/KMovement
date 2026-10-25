@@ -1,0 +1,31 @@
+{
+  "scopeBasis": "source_seed_expected_not_live_db",
+  "sourceSha256": "6d5145eb6f5e10227e5cf365a14e87730c22929f34d62e166cd2a6c2d932ed21",
+  "sourceRows": 1962,
+  "rawArtistLabels": 117,
+  "targetArtists": 48,
+  "artistsWithAliasCandidates": 19,
+  "matchedRawRows": 632,
+  "uniqueCandidateRelations": 631,
+  "duplicateExtraRows": 1,
+  "outsideScopeRawRows": 1330,
+  "outsideScopeLabels": 97,
+  "entityTypes": {
+    "music_group": 21,
+    "music_individual": 13,
+    "entertainer": 1,
+    "creator": 9,
+    "channel": 4
+  },
+  "V": 0,
+  "I": 0,
+  "U": 631,
+  "factAccuracy": null,
+  "verifiedCoverage": null,
+  "metricStatus": "identity_mapping_and_factual_review_pending",
+  "rebuildDecision": "not_determined_by_unreviewed_data",
+  "operationalDatabaseQueried": false,
+  "sourceRevision": "38b056177f645d16d54f3bf7028a58ae808055f5",
+  "sourcePath": "dataset/source/kculture_media/kcisa_media_locations_2023.csv",
+  "sourceHashMode": "sha256_utf8_lf"
+}

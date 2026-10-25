@@ -1,0 +1,49 @@
+artist_id,slug,canonical_name,entity_type,type_status,candidate_rows,unique_candidates,V,I,U,relation_accuracy,hours_verified_count,personalized_eligible_count,next_action
+,bts,BTS,music_group,provisional_catalog_classification,151,151,0,0,151,,0,0,verify_identity_branch_relation_and_hours
+,blackpink,BLACKPINK,music_group,provisional_catalog_classification,108,108,0,0,108,,0,0,verify_identity_branch_relation_and_hours
+,seventeen,SEVENTEEN,music_group,provisional_catalog_classification,62,62,0,0,62,,0,0,verify_identity_branch_relation_and_hours
+,ive,IVE,music_group,provisional_catalog_classification,1,1,0,0,1,,0,0,verify_identity_branch_relation_and_hours
+,aespa,aespa,music_group,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,NewJeans,NewJeans,music_group,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,TWICE,TWICE,music_group,provisional_catalog_classification,53,53,0,0,53,,0,0,verify_identity_branch_relation_and_hours
+,Stray Kids,Stray Kids,music_group,provisional_catalog_classification,5,5,0,0,5,,0,0,verify_identity_branch_relation_and_hours
+,EXO,EXO,music_group,provisional_catalog_classification,39,38,0,0,38,,0,0,verify_identity_branch_relation_and_hours
+,NCT,NCT,music_group,provisional_catalog_classification,34,34,0,0,34,,0,0,verify_identity_branch_relation_and_hours
+,ATEEZ,ATEEZ,music_group,provisional_catalog_classification,12,12,0,0,12,,0,0,verify_identity_branch_relation_and_hours
+,LE SSERAFIM,LE SSERAFIM,music_group,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,아이유(IU),아이유(IU),music_individual,provisional_catalog_classification,27,27,0,0,27,,0,0,verify_identity_branch_relation_and_hours
+,태연(Taeyeon),태연(Taeyeon),music_individual,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,임영웅,임영웅,music_individual,provisional_catalog_classification,11,11,0,0,11,,0,0,verify_identity_branch_relation_and_hours
+,지코(ZICO),지코(ZICO),music_individual,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,악뮤(AKMU),악뮤(AKMU),music_group,provisional_catalog_classification,5,5,0,0,5,,0,0,verify_identity_branch_relation_and_hours
+,DAY6,DAY6,music_group,provisional_catalog_classification,14,14,0,0,14,,0,0,verify_identity_branch_relation_and_hours
+,(여자)아이들,(여자)아이들,music_group,provisional_catalog_classification,17,17,0,0,17,,0,0,verify_identity_branch_relation_and_hours
+,RIIZE,RIIZE,music_group,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,BOYNEXTDOOR,BOYNEXTDOOR,music_group,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,TOMORROW X TOGETHER,TOMORROW X TOGETHER,music_group,provisional_catalog_classification,26,26,0,0,26,,0,0,verify_identity_branch_relation_and_hours
+,ENHYPEN,ENHYPEN,music_group,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,Red Velvet,Red Velvet,music_group,provisional_catalog_classification,34,34,0,0,34,,0,0,verify_identity_branch_relation_and_hours
+,ITZY,ITZY,music_group,provisional_catalog_classification,10,10,0,0,10,,0,0,verify_identity_branch_relation_and_hours
+,G-DRAGON,G-DRAGON,music_individual,provisional_catalog_classification,21,21,0,0,21,,0,0,verify_identity_branch_relation_and_hours
+,박효신,박효신,music_individual,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,이무진,이무진,music_individual,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,볼빨간사춘기,볼빨간사춘기,music_individual,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,백예린,백예린,music_individual,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,성시경,성시경,music_individual,provisional_catalog_classification,2,2,0,0,2,,0,0,verify_identity_branch_relation_and_hours
+,장원영,장원영,music_individual,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,차은우,차은우,music_individual,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,유재석,유재석,entertainer,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,침착맨,침착맨,creator,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,쯔양,쯔양,creator,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,곽튜브,곽튜브,creator,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,빠니보틀,빠니보틀,creator,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,감스트,감스트,creator,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,이영지,이영지,music_individual,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,혜안,혜안,creator,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,원지의하루,원지의하루,creator,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,피식대학,피식대학,channel,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,숏박스,숏박스,channel,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,문복희,문복희,creator,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,입짧은햇님,입짧은햇님,creator,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,워크맨,워크맨,channel,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
+,딩고뮤직,딩고뮤직,channel,provisional_catalog_classification,0,0,0,0,0,,0,0,collect_from_official_artist_and_place_sources
