@@ -59,7 +59,7 @@ def _with_verified_visits(result,base):
         feed = reviewed.json().get('data')
         if not isinstance(feed,list):raise ValueError('invalid_visit_catalog')
         for p in feed:
-            if (not isinstance(p,dict) or not re.fullmatch(r'poi:[1-9][0-9]*',str(p.get('id','')))
+            if (not isinstance(p,dict) or p.get('visibility')!='PUBLIC' or not re.fullmatch(r'poi:[1-9][0-9]*',str(p.get('id','')))
                 or not all(isinstance(p.get(k),str) and p[k].strip() for k in ('name','address'))
                 or not isinstance(p.get('artistEvidence'),list)):
                 continue
@@ -86,6 +86,7 @@ def public_catalog():
     base = os.environ.get('KRIDE_PUBLIC_CATALOG_URL', '').rstrip('/')
     if not base:
         raise RuntimeError('public_catalog_unconfigured')
+    result=_with_verified_visits(result,base)
     try:
         response = httpx.get(base + '/api/v1/tour/holy', timeout=8)
         response.raise_for_status()
@@ -104,7 +105,7 @@ def public_catalog():
         place = legacy_general_place(row, fetched_at)
         if place is not None:
             result[place["id"]] = place
-    return _with_verified_visits(result,base)
+    return result
 
 
 def index_catalog(client, embed, catalog, model):
