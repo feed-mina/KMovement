@@ -37,7 +37,7 @@ def compare(rows,snapshot,deferred):
 def write_csv(path,items):
     if not items:return
     with path.open("w",encoding="utf-8",newline="") as f:
-        writer=csv.DictWriter(f,fieldnames=list(items[0]));writer.writeheader()
+        writer=csv.DictWriter(f,fieldnames=list(items[0]),lineterminator="\n");writer.writeheader()
         writer.writerows({k:json.dumps(v,ensure_ascii=False) if isinstance(v,(list,dict)) else v for k,v in row.items()} for row in items)
 def main():
     p=argparse.ArgumentParser();p.add_argument("--snapshot",type=Path,required=True);p.add_argument("--output",type=Path,required=True)
