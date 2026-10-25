@@ -8,6 +8,8 @@ import subprocess
 import time
 from pathlib import Path
 
+from deploy.photo_video.database import connect, require_current_schema
+
 
 def render_photo(source: Path, target: Path) -> None:
     temporary = target.with_suffix('.partial.mp4')
@@ -36,8 +38,8 @@ def run_once(root: Path) -> bool:
     database = root / 'workflow.sqlite3'
     if not database.exists():
         return False
-    with sqlite3.connect(database, timeout=15) as con:
-        con.row_factory = sqlite3.Row
+    with connect(database) as con:
+        require_current_schema(con)
         con.execute('BEGIN IMMEDIATE')
         # Recover abandoned work without silently submitting an external paid job.
         con.execute("UPDATE jobs SET status='FAILED',error_code='WORKER_INTERRUPTED',finished_at=CURRENT_TIMESTAMP WHERE status='RUNNING' AND started_at<datetime('now','-10 minutes')")
@@ -54,7 +56,8 @@ def run_once(root: Path) -> bool:
         status, error = 'FAILED', 'RENDER_TIMEOUT'
     except Exception:
         status, error = 'FAILED', 'RENDER_FAILED'
-    with sqlite3.connect(database, timeout=15) as con:
+    with connect(database) as con:
+        require_current_schema(con)
         con.execute("UPDATE jobs SET status=?,error_code=?,render_ms=?,finished_at=strftime('%Y-%m-%d %H:%M:%f','now') WHERE id=? AND status=?",
                     (status, error, round((time.perf_counter() - started) * 1000), row['id'], 'RUNNING'))
     return True
