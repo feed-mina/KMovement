@@ -8,6 +8,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 from datetime import datetime, timezone
 import httpx
+from src.api.artist_place_policy import legacy_general_place
 
 COLLECTION = 'kride_public_poi_v1'
 log = logging.getLogger(__name__)
@@ -73,24 +74,11 @@ def public_catalog():
         # No old third-party catalog response is cached or served on failure.
         log.warning('Public legacy catalog unavailable; reviewed locations only')
         rows = []
-    checked = datetime.now(timezone.utc).isoformat()
+    fetched_at = datetime.now(timezone.utc).isoformat()
     for row in rows:
-        if not isinstance(row, dict):
-            continue
-        identity, name, address = row.get('contentId'), row.get('title'), row.get('addr')
-        source = row.get('sourceUrl') or ''
-        try:
-            lat, lon = float(row['mapY']), float(row['mapX'])
-        except (KeyError, TypeError, ValueError):
-            continue
-        if not identity or not name or not address or not source.startswith(('https://','http://')):
-            continue
-        if not (math.isfinite(lat) and math.isfinite(lon) and 33 <= lat <= 39 and 124 <= lon <= 132):
-            continue
-        identity = 'tour:' + str(identity)
-        result[identity] = dict(id=identity, poi_id=identity, name=name, address=address,
-            lat=lat, lon=lon, sourceUrl=source, verifiedAt=checked, artist=row.get('artist') or '',
-            visibility='PUBLIC', evidenceGrade='PUBLIC_CATALOG')
+        place = legacy_general_place(row, fetched_at)
+        if place is not None:
+            result[place["id"]] = place
     return result
 
 

@@ -1,0 +1,90 @@
+name: Artist place lineage and recommendation policy
+on:
+  pull_request:
+    paths:
+      - 'deploy/hostinger/audit_artist_place.py'
+      - 'scripts/audit_artist_place_lineage.py'
+      - 'src/api/artist_place_policy.py'
+      - 'src/api/public_search.py'
+      - 'src/db/load_kcisa_kpop_data.py'
+      - 'dataset/policies/**'
+      - 'docs/2026-10-25/artist-place-lineage/**'
+      - 'tests/test_artist_place_lineage.py'
+      - '.github/workflows/artist-place-lineage.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'deploy/hostinger/audit_artist_place.py'
+      - 'scripts/audit_artist_place_lineage.py'
+      - 'src/api/artist_place_policy.py'
+      - 'dataset/policies/**'
+      - 'tests/test_artist_place_lineage.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install "httpx>=0.27,<1"
+      - run: python -m unittest discover -s tests -p test_artist_place_lineage.py -v
+      - run: python scripts/audit_artist_place_lineage.py --output /tmp/artist-place-lineage
+      - name: Verify committed audit artifacts reproduce
+        run: diff -r docs/2026-10-25/artist-place-lineage /tmp/artist-place-lineage --exclude=README.md --exclude=pilot-evidence.json
+
+  live-snapshot:
+    needs: audit
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: hostinger-production
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Read approved artist master and aggregate counts without changing DB
+        shell: bash
+        env:
+          SSH_HOST: ${{ vars.HOSTINGER_SSH_HOST || 'kmovement.srv1869569.hstgr.cloud' }}
+          SSH_PORT: ${{ vars.HOSTINGER_SSH_PORT || '22' }}
+          SSH_USER: ${{ vars.HOSTINGER_SSH_USER || 'root' }}
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$SSH_PRIVATE_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+          [[ "$SSH_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ "$SSH_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          [[ "$SSH_PORT" =~ ^[0-9]{1,5}$ ]]
+          test "$SSH_PORT" -ge 1 && test "$SSH_PORT" -le 65535
+          install -d -m 0700 "$RUNNER_TEMP/lineage-ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$RUNNER_TEMP/lineage-ssh/key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" | tr -d '\r' > "$RUNNER_TEMP/lineage-ssh/known_hosts"
+          ssh-keygen -y -P '' -f "$RUNNER_TEMP/lineage-ssh/key" >/dev/null
+          mkdir -p live-lineage
+          ssh -p "$SSH_PORT" -i "$RUNNER_TEMP/lineage-ssh/key" \
+            -o UserKnownHostsFile="$RUNNER_TEMP/lineage-ssh/known_hosts" \
+            -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 \
+            "$SSH_USER@$SSH_HOST" 'python3 -' \
+            < deploy/hostinger/audit_artist_place.py > live-lineage/master.json
+          python scripts/audit_artist_place_lineage.py \
+            --master-json live-lineage/master.json --output live-lineage/audit
+          python -c 'import json; d=json.load(open("live-lineage/master.json")); print(json.dumps(d,ensure_ascii=True))'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: artist-place-live-snapshot
+          path: live-lineage/
+          retention-days: 7
+      - name: Remove temporary SSH material
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/lineage-ssh"

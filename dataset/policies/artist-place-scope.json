@@ -1,0 +1,480 @@
+{
+  "version": 1,
+  "scope": "service_master_only",
+  "basis": "source_seed_expected_not_live_db",
+  "sourceRevision": "38b056177f645d16d54f3bf7028a58ae808055f5",
+  "unknownRelations": "exclude_personalized_recommendations",
+  "items": [
+    {
+      "slug": "bts",
+      "displayName": "BTS",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "방탄소년단"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "blackpink",
+      "displayName": "BLACKPINK",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "블랙핑크"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "seventeen",
+      "displayName": "SEVENTEEN",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "세븐틴"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "ive",
+      "displayName": "IVE",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "아이브"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "aespa",
+      "displayName": "aespa",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "NewJeans",
+      "displayName": "NewJeans",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "TWICE",
+      "displayName": "TWICE",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "트와이스"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "Stray Kids",
+      "displayName": "Stray Kids",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "스트레이키즈"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "EXO",
+      "displayName": "EXO",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "엑소",
+        "EXO"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "NCT",
+      "displayName": "NCT",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "NCT"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "ATEEZ",
+      "displayName": "ATEEZ",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "ATEEZ"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "LE SSERAFIM",
+      "displayName": "LE SSERAFIM",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "아이유(IU)",
+      "displayName": "아이유(IU)",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "아이유"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "태연(Taeyeon)",
+      "displayName": "태연(Taeyeon)",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "임영웅",
+      "displayName": "임영웅",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "임영웅"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "지코(ZICO)",
+      "displayName": "지코(ZICO)",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "악뮤(AKMU)",
+      "displayName": "악뮤(AKMU)",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "악뮤"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "DAY6",
+      "displayName": "DAY6",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "Day6"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "(여자)아이들",
+      "displayName": "(여자)아이들",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "여자아이들"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "RIIZE",
+      "displayName": "RIIZE",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "BOYNEXTDOOR",
+      "displayName": "BOYNEXTDOOR",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "TOMORROW X TOGETHER",
+      "displayName": "TOMORROW X TOGETHER",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "TXT"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "ENHYPEN",
+      "displayName": "ENHYPEN",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "Red Velvet",
+      "displayName": "Red Velvet",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "레드벨벳"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "ITZY",
+      "displayName": "ITZY",
+      "entityType": "music_group",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "Itzy"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "G-DRAGON",
+      "displayName": "G-DRAGON",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "지드래곤"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "박효신",
+      "displayName": "박효신",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "이무진",
+      "displayName": "이무진",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "볼빨간사춘기",
+      "displayName": "볼빨간사춘기",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "백예린",
+      "displayName": "백예린",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "성시경",
+      "displayName": "성시경",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [
+        "성시경"
+      ],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "장원영",
+      "displayName": "장원영",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "차은우",
+      "displayName": "차은우",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "유재석",
+      "displayName": "유재석",
+      "entityType": "entertainer",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "침착맨",
+      "displayName": "침착맨",
+      "entityType": "creator",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "쯔양",
+      "displayName": "쯔양",
+      "entityType": "creator",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "곽튜브",
+      "displayName": "곽튜브",
+      "entityType": "creator",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "빠니보틀",
+      "displayName": "빠니보틀",
+      "entityType": "creator",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "감스트",
+      "displayName": "감스트",
+      "entityType": "creator",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "이영지",
+      "displayName": "이영지",
+      "entityType": "music_individual",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "혜안",
+      "displayName": "혜안",
+      "entityType": "creator",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "원지의하루",
+      "displayName": "원지의하루",
+      "entityType": "creator",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "피식대학",
+      "displayName": "피식대학",
+      "entityType": "channel",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "숏박스",
+      "displayName": "숏박스",
+      "entityType": "channel",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "문복희",
+      "displayName": "문복희",
+      "entityType": "creator",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "입짧은햇님",
+      "displayName": "입짧은햇님",
+      "entityType": "creator",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "워크맨",
+      "displayName": "워크맨",
+      "entityType": "channel",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    },
+    {
+      "slug": "딩고뮤직",
+      "displayName": "딩고뮤직",
+      "entityType": "channel",
+      "typeStatus": "provisional_catalog_classification",
+      "candidateAliases": [],
+      "aliasStatus": "candidate_only",
+      "inheritGroupPlaces": false
+    }
+  ]
+}

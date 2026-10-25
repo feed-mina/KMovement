@@ -18,6 +18,9 @@ from dotenv import load_dotenv
 load_dotenv()
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
+# Historical 20-artist loader for the OLD artist(id)/poi schema only.
+# The service-wide audit lives in scripts/audit_artist_place_lineage.py.
+# Do not run this loader against Spring artist(artist_id).
 CSV_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "..", "..", "dataset", "source", "kculture_media", "kcisa_media_locations_2023.csv",
@@ -88,6 +91,9 @@ def load_data():
     for _, row in unique_places.iterrows():
         place_name = str(row["장소명"]).strip()
         address = str(row.get("주소", "")).strip()
+        if not place_name or not address:
+            print("  skipped: missing place name/address; manual branch review required")
+            continue
         key = (place_name, address)
 
         # 이미 처리한 POI
@@ -104,12 +110,7 @@ def load_data():
             poi_map[key] = res[0]
             continue
 
-        # 이름만으로도 확인
-        cur.execute("SELECT id FROM poi WHERE name = %s LIMIT 1", (place_name,))
-        res = cur.fetchone()
-        if res:
-            poi_map[key] = res[0]
-            continue
+        # Different addresses are different branch candidates; never reuse by name alone.
 
         # 신규 POI 삽입 (CSV에 위도/경도 포함)
         lat = row.get("위도")
@@ -147,6 +148,9 @@ def load_data():
         kcisa_name = row["아티스트"]
         place_name = str(row["장소명"]).strip()
         address = str(row.get("주소", "")).strip()
+        if not place_name or not address:
+            print("  skipped: missing place name/address; manual branch review required")
+            continue
         key = (place_name, address)
 
         if kcisa_name in artist_map and key in poi_map:
