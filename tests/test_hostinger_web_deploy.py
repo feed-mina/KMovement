@@ -220,6 +220,19 @@ class ContractTests(unittest.TestCase):
         with self.assertRaises(runner.DeployError):
             runner.assert_image_only(before, after, before["services"]["web"]["image"])
 
+    def test_closed_ssh_output_cannot_block_rollback(self):
+        original_print = print
+        def closed_output(*args, **kwargs):
+            if args and "rolling_back" in str(args[0]):
+                raise BrokenPipeError("simulated disconnected SSH channel")
+            return original_print(*args, **kwargs)
+        self.deployment.fail_new_up = True
+        with patch("builtins.print", closed_output):
+            with self.assertRaises(runner.DeployError):
+                self.deployment.execute()
+        self.assertEqual(self.deployment.record["status"], "rolled_back")
+        self.assertEqual(self.deployment.active["Image"], OLD_ID)
+
     def test_record_write_failure_cannot_block_rollback(self):
         original_write = Path.write_text
         def write(path, *args, **kwargs):

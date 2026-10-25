@@ -34,6 +34,14 @@ class DeployError(RuntimeError):
     pass
 
 
+def log(message):
+    # A disconnected SSH stdout must not prevent restoring the previous image.
+    try:
+        print(message, flush=True)
+    except OSError:
+        pass
+
+
 def validate_inputs(sha, image):
     if not SHA.fullmatch(sha) or not IMAGE.fullmatch(image):
         raise DeployError("Invalid release SHA or image digest.")
@@ -144,8 +152,8 @@ class Deployment:
             try:
                 (self.release / "release.json").write_text(json.dumps(self.record, indent=2) + "\n")
             except OSError:
-                print("Hostinger web: record write unavailable; recovery continues.", flush=True)
-        print("Hostinger web: " + state, flush=True)
+                log("Hostinger web: record write unavailable; recovery continues.")
+        log("Hostinger web: " + state)
 
     def container(self):
         ids = self.command([
@@ -217,7 +225,7 @@ class Deployment:
         self.record["previous_image_id"] = self.previous
         self.record["release_directory"] = str(self.release)
         self.status("prepared")
-        print("Release record: " + str(self.release / "release.json"), flush=True)
+        log("Release record: " + str(self.release / "release.json"))
 
     @staticmethod
     def up_command(base):
