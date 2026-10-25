@@ -162,7 +162,8 @@ test('AI view requires unchecked consent and never sends on view or preference c
     expect(mockedFetch).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', {name: '코스 만들기'}));
-    expect(await screen.findByText('현재 서울 당일치기만 지원합니다. 지역과 기간을 바꿔 주세요.')).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: '코스 만들기'})).toBeDisabled();
+    expect(screen.getByText(/부산 · 당일치기 AI 코스는 아직 준비 중/)).toBeInTheDocument();
     expect(mockedFetch).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', {name: '서울'}));
     fireEvent.change(screen.getByRole('combobox', {name: '안내 언어'}), {target: {value: 'en'}});
@@ -181,4 +182,52 @@ test('empty AI result can be retried with identical conditions', async () => {
     await screen.findByText('조건에 맞는 코스를 찾지 못했어요. 여행 목적을 바꿔 다시 시도해 주세요.');
     fireEvent.click(screen.getByRole('button', {name: '코스 만들기'}));
     await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(2));
+});
+
+test('Busan directions preserve the region, the selected stop, and the course on return', async () => {
+    mockedFetch.mockClear();
+    (fetchRestaurants as jest.Mock).mockImplementation(({areaCode}: {areaCode: string}) => Promise.resolve([
+        areaCode === '6'
+            ? {contentId: 'busan-1', title: '부산 카페', addr: '부산 중구', mapX: 129.04, mapY: 35.11}
+            : {contentId: 'seoul-1', title: '서울 카페', mapX: 127, mapY: 37.5},
+    ]));
+    render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
+    await screen.findByText('서울 카페');
+    fireEvent.click(screen.getByRole('button', {name: '부산'}));
+    await screen.findByText('부산 카페');
+    fireEvent.click(screen.getByRole('button', {name: '부산 카페 길찾기'}));
+    expect(screen.getByRole('heading', {name: '부산 길찾기'})).toBeInTheDocument();
+    expect(screen.getByLabelText('도착 장소·주소')).toHaveValue('부산 카페');
+    expect(screen.queryByText('서울 도로 길 찾기')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', {name: '코스로 돌아가기'}));
+    expect(screen.getByRole('button', {name: '부산'})).toHaveAttribute('aria-pressed', 'true');
+    expect(mockedFetch).not.toHaveBeenCalled();
+});
+
+test('switching to supported AI conditions is explicit and never opts the user in', async () => {
+    mockedFetch.mockClear();
+    render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
+    fireEvent.click(screen.getByText('AI 코스'));
+    fireEvent.click(screen.getByRole('button', {name: '부산'}));
+    expect(screen.getByRole('checkbox')).not.toBeChecked();
+    expect(screen.getByRole('button', {name: '코스 만들기'})).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', {name: '서울 당일치기로 바꾸기'}));
+    expect(screen.getByRole('button', {name: '서울'})).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('checkbox')).not.toBeChecked();
+    expect(mockedFetch).not.toHaveBeenCalled();
+});
+
+test('changing only the unsupported duration keeps the existing Seoul basic course', async () => {
+    mockedFetch.mockClear();
+    (fetchRestaurants as jest.Mock).mockResolvedValue([{contentId: 's1', title: '서울 장소', mapX: 127, mapY: 37.5}]);
+    render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
+    await screen.findByText('서울 장소');
+    fireEvent.click(screen.getByText('AI 코스'));
+    fireEvent.click(screen.getByRole('button', {name: '1박2일'}));
+    expect(screen.getByRole('button', {name: '코스 만들기'})).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', {name: '서울 당일치기로 바꾸기'}));
+    fireEvent.click(screen.getByText('기본 코스'));
+    expect(screen.getByText('서울 장소')).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: '당일치기'})).toHaveAttribute('aria-pressed', 'true');
+    expect(mockedFetch).not.toHaveBeenCalled();
 });

@@ -99,3 +99,37 @@
  .route-actions :is(button, a):active { transform: none; }
  .route-pin__dot[data-selected=true] { scale: 1; outline: 3px solid var(--semantic-accent-strong); outline-offset: 2px; }
 }
+
+/* Address-first directions: comfortable touch targets, no coordinate entry. */
+.directions { display: grid; gap: 20px; width: 100%; max-width: 720px; margin: 0 auto; color: var(--text-body, #374151); }
+.directions-heading h2 { margin: 4px 0 8px; font-size: clamp(22px, 4vw, 28px); color: var(--text-strong, #172033); }
+.directions p { line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
+.directions-eyebrow { margin: 0; color: var(--semantic-accent-strong, #8b0610); font-size: 13px; font-weight: 700; }
+.directions-step { padding: 20px; border: 1px solid var(--border-hair, #e5e7eb); border-radius: 16px; background: var(--surface-card, white); }
+.directions-step h3 { margin: 0 0 14px; font-size: 16px; color: var(--text-strong, #172033); }
+.directions :is(button, input, select, a) { font: inherit; }
+.directions button, .directions select { min-height: 48px; padding: 10px 14px; border: 1px solid var(--border-strong, #b8bec8); border-radius: 10px; background: var(--surface-card, white); color: var(--text-strong, #172033); cursor: pointer; }
+.directions button:disabled { cursor: default; opacity: .6; }
+.directions-location { width: 100%; text-align: center; font-weight: 700 !important; border-color: var(--semantic-accent, #b91c1c) !important; color: var(--semantic-accent-strong, #8b0610) !important; }
+.directions-note, .directions-handoff p { font-size: 13px; color: var(--text-muted, #64748b); }
+.directions-place label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+.directions-search-row { display: flex; gap: 8px; }
+.directions-search-row input { flex: 1; min-width: 0; width: 100%; min-height: 48px; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--border-strong, #b8bec8); border-radius: 10px; background: var(--surface-card, white); color: var(--text-strong, #172033); font-size: 16px; }
+.directions-selected { padding: 12px; border-radius: 10px; background: var(--semantic-accent-soft, #fff0f1); }
+.directions-selected span, .directions-results span { display: block; margin-top: 4px; font-size: 13px; font-weight: 400; }
+.directions-results { list-style: none; display: grid; gap: 8px; padding: 0; max-height: 320px; overflow-y: auto; }
+.directions-results button { width: 100%; text-align: left; overflow-wrap: anywhere; }
+.directions-stops { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; max-height: 200px; overflow-y: auto; }
+.directions-stops button { font-size: 13px; }
+.directions-stops button[aria-pressed=true] { border-color: var(--semantic-accent, #b91c1c); background: var(--semantic-accent-soft, #fff0f1); }
+.directions-handoff { display: grid; gap: 6px; }
+.directions-handoff .directions-primary { display: flex; justify-content: center; align-items: center; min-height: 50px; box-sizing: border-box; padding: 12px 16px; border: 0; border-radius: 12px; background: var(--semantic-accent, #b91c1c); color: white; font-weight: 700; text-decoration: none; }
+.directions-handoff a:not(.directions-primary) { display: inline-flex; align-items: center; min-height: 44px; color: var(--semantic-accent-strong, #8b0610); text-underline-offset: 3px; }
+.directions-preview { border-top: 1px solid var(--border-hair, #e5e7eb); padding-top: 14px; }
+.directions-preview summary { padding: 12px 0; cursor: pointer; }
+.directions-preview label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; }
+.directions [role=alert] { color: var(--danger-strong, #8b0610); }
+.route-stop__directions { margin-top: 8px; padding: 8px 12px; min-height: 44px; border: 1px solid var(--border-strong, #b8bec8); border-radius: 10px; background: var(--surface-card, white); color: var(--semantic-accent-strong, #8b0610); font: inherit; font-size: 13px; cursor: pointer; }
+.route-ai-scope { padding: 12px; margin: 12px 0; border-radius: 12px; background: var(--semantic-accent-soft, #fff0f1); }
+.route-ai-scope button { margin: 4px; }
+@media (max-width: 480px) { .directions-step { padding: 16px; } .directions { gap: 16px; } }
