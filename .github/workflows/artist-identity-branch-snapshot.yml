@@ -1,0 +1,87 @@
+name: Read-only artist identity and branch snapshot
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deploy/hostinger/snapshot_identity_branches.py'
+      - 'tests/test_identity_branch_snapshot.py'
+      - '.github/workflows/artist-identity-branch-snapshot.yml'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'deploy/hostinger/snapshot_identity_branches.py'
+      - 'tests/test_identity_branch_snapshot.py'
+      - '.github/workflows/artist-identity-branch-snapshot.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p test_identity_branch_snapshot.py -v
+  snapshot:
+    needs: validate
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: hostinger-production
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Read artist and non-UGC place metadata without changing DB
+        shell: bash
+        env:
+          SSH_HOST: ${{ vars.HOSTINGER_SSH_HOST || 'kmovement.srv1869569.hstgr.cloud' }}
+          SSH_PORT: ${{ vars.HOSTINGER_SSH_PORT || '22' }}
+          SSH_USER: ${{ vars.HOSTINGER_SSH_USER || 'root' }}
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$SSH_PRIVATE_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+          [[ "$SSH_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ "$SSH_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          [[ "$SSH_PORT" =~ ^[0-9]{1,5}$ ]]
+          test "$SSH_PORT" -ge 1 && test "$SSH_PORT" -le 65535
+          install -d -m 0700 "$RUNNER_TEMP/identity-ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$RUNNER_TEMP/identity-ssh/key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" | tr -d '\r' > "$RUNNER_TEMP/identity-ssh/known_hosts"
+          ssh-keygen -y -P '' -f "$RUNNER_TEMP/identity-ssh/key" >/dev/null
+          mkdir -p identity-snapshot
+          ssh -p "$SSH_PORT" -i "$RUNNER_TEMP/identity-ssh/key" \
+            -o UserKnownHostsFile="$RUNNER_TEMP/identity-ssh/known_hosts" \
+            -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 \
+            "$SSH_USER@$SSH_HOST" 'python3 -' \
+            < deploy/hostinger/snapshot_identity_branches.py > identity-snapshot/public-metadata.json
+      - name: Summarize metadata and make a reproducible transport record
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64,gzip,json,pathlib
+          raw=pathlib.Path('identity-snapshot/public-metadata.json').read_bytes()
+          data=json.loads(raw)
+          print(json.dumps(dict(artists=data['allArtistCount'],contents=len(data['contents']),
+              places=len(data['places']),relations=len(data['relations']),capturedAt=data['capturedAt'])))
+          encoded=base64.b64encode(gzip.compress(raw,mtime=0)).decode()
+          for i in range(0,len(encoded),50000):
+              print('PUBLIC_PLACE_METADATA_GZIP_PART='+encoded[i:i+50000])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-artist-place-metadata
+          path: identity-snapshot/public-metadata.json
+          retention-days: 7
+      - name: Remove temporary SSH material
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/identity-ssh"
