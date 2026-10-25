@@ -70,7 +70,7 @@ def test_internal_auth_and_empty_result(monkeypatch):
     monkeypatch.setenv('KRIDE_AI_TEST_USERS','7')
     assert client.post('/api/public/itinerary',json={}).status_code==401
     monkeypatch.setattr(module,'generate_public',lambda *_:{'itinerary':[],'status':'empty_candidates'})
-    r=client.post('/api/public/itinerary',json={'regions':['서울']},headers={'X-Kride-Token':'fixture-only','X-Kride-User':'7'})
+    r=client.post('/api/public/itinerary',json={'regions':['서울'],'visitDate':'2026-10-26'},headers={'X-Kride-Token':'fixture-only','X-Kride-User':'7'})
     assert r.status_code==200 and r.json()['status']=='empty_candidates'
 
 def test_empty_candidates_never_load_paid_client(monkeypatch):
@@ -80,13 +80,14 @@ def test_empty_candidates_never_load_paid_client(monkeypatch):
     monkeypatch.setattr(module,'search_public',lambda *_:[])
     monkeypatch.setattr(rag_client,'get_chroma',lambda:object())
     monkeypatch.delenv('GROQ_API_KEY',raising=False)
-    assert module.generate_public(module.PublicItineraryRequest(),'7')['usage'] is None
+    assert module.generate_public(module.PublicItineraryRequest(visitDate='2026-10-26'),'7')['usage'] is None
 
 def test_full_generation_rechecks_approval_and_records_usage(tmp_path,monkeypatch):
     monkeypatch.setenv('KRIDE_AI_MODEL','fixture-model')
     import groq
     from src.api import public_itinerary as module,rag_client
-    source={'a':{'id':'a','name':'공개 장소','address':'서울','lat':37.5,'lon':127},'b':{'id':'b','name':'취소 예정','address':'서울','lat':37.6,'lon':127}}
+    from tests.test_recommendation_policy import place
+    source={'a':place('a'),'b':place('b')}
     calls=iter([source,{'a':source['a']}])
     monkeypatch.setattr(module,'public_catalog',lambda:next(calls))
     monkeypatch.setattr(module,'search_public',lambda *_:list(source.values()))
@@ -94,7 +95,7 @@ def test_full_generation_rechecks_approval_and_records_usage(tmp_path,monkeypatc
     response=SimpleNamespace(usage=SimpleNamespace(prompt_tokens=100,completion_tokens=50),choices=[SimpleNamespace(message=SimpleNamespace(content='{"itinerary":[{"morning":{"places":[{"poiId":"a"},{"poiId":"b"},{"poiId":"invented"}]}}]}'))])
     monkeypatch.setattr(groq,'Groq',lambda **_:SimpleNamespace(close=lambda:None,chat=SimpleNamespace(completions=SimpleNamespace(create=lambda **_:response))))
     for key,value in {'GROQ_API_KEY':'fixture','ITINERARY_BUDGET_DB':str(tmp_path/'usage.sqlite'),'ITINERARY_INPUT_USD_PER_M':'1','ITINERARY_OUTPUT_USD_PER_M':'1','ITINERARY_DAILY_USD':'1'}.items():monkeypatch.setenv(key,value)
-    result=module.generate_public(module.PublicItineraryRequest(regions=['서울']),'7')
+    result=module.generate_public(module.PublicItineraryRequest(regions=['서울'],visitDate='2026-10-26'),'7')
     assert result['resolvedMarkerCount']==1 and result['rejectedPlaceCount']==2
     assert result['sourcePoiCount']==1 and result['usage']['inputTokens']==100
 

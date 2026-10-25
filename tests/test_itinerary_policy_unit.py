@@ -5,18 +5,19 @@ from fastapi import HTTPException
 from pydantic import ValidationError
 from src.api import public_itinerary as module
 
-BODY = {'duration': '당일치기', 'regions': ['서울'], 'artists': ['BTS'], 'budget': {'min': 30000, 'max': 200000}, 'responseLocale': 'ja'}
+BODY = {'duration': '당일치기', 'regions': ['서울'], 'artists': ['BTS'], 'artistIds': [1], 'visitDate': '2026-10-26', 'budget': {'min': 30000, 'max': 200000}, 'responseLocale': 'ja'}
 
 
 @pytest.mark.parametrize('consent', [False, None])
-def test_consent_policy_runs_before_any_await(monkeypatch, consent):
+def test_verified_course_does_not_precheck_or_enable_general_consent(monkeypatch, consent):
+    class Admitted(Exception): pass
+    async def admission(): raise Admitted()
     monkeypatch.setattr(module.ai_runtime, 'authenticate', Mock())
-    request = module.PublicItineraryRequest(**BODY, **({'acknowledgeUnverifiedConditions': consent} if consent is not None else {}))
-    call = module.itinerary(request, 'fixture', '7')
-    with pytest.raises(HTTPException) as error:
-        call.send(None)
-    assert error.value.status_code == 422
-    assert error.value.detail['code'] == 'consent_required'
+    monkeypatch.setattr(module.ai_runtime, 'acquire_slot', admission)
+    request=module.PublicItineraryRequest(**BODY, **({'acknowledgeUnverifiedConditions':consent} if consent is not None else {}))
+    with pytest.raises(Admitted):
+        module.itinerary(request,'fixture','7').send(None)
+    assert request.acknowledgeUnverifiedConditions is False
 
 
 @pytest.mark.parametrize('change', [{'regions': ['부산']}, {'duration': '1박2일'}, {'regions': []}, {'regions': ['서울', '제주']}])

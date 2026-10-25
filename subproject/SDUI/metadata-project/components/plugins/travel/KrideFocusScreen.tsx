@@ -23,10 +23,11 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
     const router = useRouter();
     const { isLoading, blocked } = useScreenGuard(screenId);
     const s = useSduiScreen(screenId, refId);
+    const [visitDate,setVisitDate] = useState('');
     const [courseConfirmed,setCourseConfirmed] = useState(false);
     const [acknowledged,setAcknowledged] = useState(false);
     const [responseLocale,setResponseLocale] = useState<'ko'|'en'|'ja'>('ko');
-    const krideItinerary = useKrideItinerary(screenId, {...s.formData,responseLocale,acknowledgeUnverifiedConditions:acknowledged},courseConfirmed);
+    const krideItinerary = useKrideItinerary(screenId, {...s.formData,visitDate,responseLocale,acknowledgeUnverifiedConditions:acknowledged},courseConfirmed);
 
     // FOCUS 진입 시 챗 모달 기본 오픈
     const [isChatModalOpen, setIsChatModalOpen] = useState(false);
@@ -182,10 +183,11 @@ export default function KrideFocusScreen({ screenId, refId }: ScreenControllerPr
 
     if (!courseConfirmed) return <section className="kride-focus-state-card" style={{maxWidth:760,margin:'32px auto',padding:24,color:'#172033',background:'#fff'}}>
         <h1>코스 안내를 확인해 주세요</h1>
-        <p>현재 서울·당일치기 일반 장소를 안내합니다. 선택한 아티스트와의 연관, 예산 충족, 영업시간·예약 가능 여부는 미확인입니다.</p>
+        <p>서울 당일치기 코스입니다. 아티스트 관계·휴무일·영업시간·1인 장소 방문비를 확인한 후보로 만듭니다. 교통·숙박비는 별도이며 예약 가능 여부는 검사하지 않습니다.</p>
+        <label>방문 날짜 <input type="date" value={visitDate} onChange={e=>setVisitDate(e.target.value)}/></label>
         <label>안내 언어 <select value={responseLocale} onChange={e=>setResponseLocale(e.target.value as 'ko'|'en'|'ja')}><option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option></select></label>
-        <p><label><input type="checkbox" checked={acknowledged} onChange={e=>setAcknowledged(e.target.checked)}/> 위 조건의 충족을 보장하지 않는 일반 장소 코스로 진행합니다.</label></p>
-        <KrideButton disabled={!acknowledged} onClick={()=>setCourseConfirmed(true)}>코스 만들기</KrideButton>
+        <p><label><input type="checkbox" checked={acknowledged} onChange={e=>setAcknowledged(e.target.checked)}/> 아티스트 후보가 없을 때 일반 장소 코스로 전환하는 데 동의합니다. 시간·방문비 조건은 유지합니다.</label></p>
+        <KrideButton disabled={!visitDate} onClick={()=>setCourseConfirmed(true)}>코스 만들기</KrideButton>
         <Link href="/view/INTRO1">지역·기간 바꾸기</Link>
     </section>;
 

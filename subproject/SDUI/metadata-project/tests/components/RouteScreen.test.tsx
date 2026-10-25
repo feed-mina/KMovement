@@ -50,6 +50,7 @@ describe('RouteScreen — [동선] 기본/AI 코스 토글', () => {
         await waitFor(() => expect(screen.getByTestId('route-map')).toBeInTheDocument());
 
         fireEvent.click(screen.getByText('AI 코스'));
+        fireEvent.change(screen.getByLabelText('방문 날짜'),{target:{value:'2026-10-26'}});
         fireEvent.click(screen.getByRole('checkbox'));
         fireEvent.click(screen.getByRole('button', { name: '코스 만들기' }));
 
@@ -62,11 +63,13 @@ describe('RouteScreen — [동선] 기본/AI 코스 토글', () => {
         await waitFor(() => expect(screen.getByTestId('route-map')).toBeInTheDocument());
 
         fireEvent.click(screen.getByText('AI 코스'));
+        fireEvent.change(screen.getByLabelText('방문 날짜'),{target:{value:'2026-10-26'}});
         fireEvent.click(screen.getByRole('checkbox'));
         fireEvent.click(screen.getByRole('button', { name: '코스 만들기' }));
         await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
         fireEvent.click(screen.getByText('기본 코스'));
         fireEvent.click(screen.getByText('AI 코스'));
+        fireEvent.change(screen.getByLabelText('방문 날짜'),{target:{value:'2026-10-26'}});
         fireEvent.click(screen.getByRole('button', { name: '코스 만들기' }));
         expect(mockedFetch).toHaveBeenCalledTimes(1);
     });
@@ -97,6 +100,7 @@ describe('RouteScreen — 상태 패널', () => {
         render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
         await waitFor(() => expect(screen.getByTestId('route-map')).toBeInTheDocument());
         fireEvent.click(screen.getByText('AI 코스'));
+        fireEvent.change(screen.getByLabelText('방문 날짜'),{target:{value:'2026-10-26'}});
         fireEvent.click(screen.getByRole('checkbox'));
         fireEvent.click(screen.getByRole('button', { name: '코스 만들기' }));
         const alert = await screen.findByRole('alert');
@@ -152,12 +156,13 @@ describe('RouteScreen — H5 조건 → 결과', () => {
     });
 });
 
-test('AI view requires unchecked consent and never sends on view or preference changes', async () => {
+test('AI view never enables optional fallback or sends on view or preference changes', async () => {
     mockedFetch.mockClear();
     render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
     fireEvent.click(screen.getByText('AI 코스'));
+        fireEvent.change(screen.getByLabelText('방문 날짜'),{target:{value:'2026-10-26'}});
     expect(screen.getByRole('checkbox')).not.toBeChecked();
-    expect(screen.getByRole('button', {name: '코스 만들기'})).toBeDisabled();
+    expect(screen.getByRole('button', {name: '코스 만들기'})).toBeEnabled();
     fireEvent.click(screen.getByRole('button', {name: '부산'}));
     expect(mockedFetch).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('checkbox'));
@@ -177,6 +182,7 @@ test('empty AI result can be retried with identical conditions', async () => {
     mockedFetch.mockResolvedValueOnce({ok: true, status: 200, json: async () => ({itinerary: []})} as never);
     render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
     fireEvent.click(screen.getByText('AI 코스'));
+        fireEvent.change(screen.getByLabelText('방문 날짜'),{target:{value:'2026-10-26'}});
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', {name: '코스 만들기'}));
     await screen.findByText('조건에 맞는 코스를 찾지 못했어요. 여행 목적을 바꿔 다시 시도해 주세요.');
@@ -208,6 +214,7 @@ test('switching to supported AI conditions is explicit and never opts the user i
     mockedFetch.mockClear();
     render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
     fireEvent.click(screen.getByText('AI 코스'));
+        fireEvent.change(screen.getByLabelText('방문 날짜'),{target:{value:'2026-10-26'}});
     fireEvent.click(screen.getByRole('button', {name: '부산'}));
     expect(screen.getByRole('checkbox')).not.toBeChecked();
     expect(screen.getByRole('button', {name: '코스 만들기'})).toBeDisabled();
@@ -223,6 +230,7 @@ test('changing only the unsupported duration keeps the existing Seoul basic cour
     render(<RouteScreen screenId="ROUTE_PLANNER" refId={null} />);
     await screen.findByText('서울 장소');
     fireEvent.click(screen.getByText('AI 코스'));
+        fireEvent.change(screen.getByLabelText('방문 날짜'),{target:{value:'2026-10-26'}});
     fireEvent.click(screen.getByRole('button', {name: '1박2일'}));
     expect(screen.getByRole('button', {name: '코스 만들기'})).toBeDisabled();
     fireEvent.click(screen.getByRole('button', {name: '서울 당일치기로 바꾸기'}));

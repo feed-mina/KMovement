@@ -48,6 +48,31 @@ def curated_catalog(path=None, now=None):
     return result
 
 
+def _with_verified_visits(result,base):
+    if not base:return result
+    # New numeric-ID catalog is authoritative for reviewed relationship/hour/cost facts.
+    # An old Spring deployment returns 404; legacy places remain searchable but are
+    # ineligible for the strict itinerary rather than being silently trusted.
+    try:
+        reviewed = httpx.get(base + '/api/v1/tour/recommendation-catalog', timeout=8)
+        reviewed.raise_for_status()
+        feed = reviewed.json().get('data')
+        if not isinstance(feed,list):raise ValueError('invalid_visit_catalog')
+        for p in feed:
+            if (not isinstance(p,dict) or not re.fullmatch(r'poi:[1-9][0-9]*',str(p.get('id','')))
+                or not all(isinstance(p.get(k),str) and p[k].strip() for k in ('name','address'))
+                or not isinstance(p.get('artistEvidence'),list)):
+                continue
+            try:
+                if not (math.isfinite(float(p['lat'])) and math.isfinite(float(p['lon']))
+                    and 33<=float(p['lat'])<=39 and 124<=float(p['lon'])<=132):continue
+            except (KeyError,TypeError,ValueError):continue
+            result[p['id']]={**p,'artist':'','poi_id':p['id']}
+    except (httpx.HTTPError,ValueError,TypeError):
+        log.warning('Reviewed visit catalog unavailable; strict itinerary has no verified replacement')
+    return result
+
+
 def public_catalog():
     reviewed_path = os.environ.get('KRIDE_REVIEWED_CATALOG_PATH')
     if reviewed_path:
@@ -56,7 +81,7 @@ def public_catalog():
         if not review_path:
             raise RuntimeError('catalog_review_unconfigured')
         catalog, _ = load_reviewed_catalog(reviewed_path, review_path)
-        return catalog
+        return _with_verified_visits(catalog,os.environ.get('KRIDE_PUBLIC_CATALOG_URL','').rstrip('/'))
     result = curated_catalog()
     base = os.environ.get('KRIDE_PUBLIC_CATALOG_URL', '').rstrip('/')
     if not base:
@@ -79,7 +104,7 @@ def public_catalog():
         place = legacy_general_place(row, fetched_at)
         if place is not None:
             result[place["id"]] = place
-    return result
+    return _with_verified_visits(result,base)
 
 
 def index_catalog(client, embed, catalog, model):
@@ -93,7 +118,7 @@ def index_catalog(client, embed, catalog, model):
     for start in range(0,len(catalog),64):
         rows=list(catalog.values())[start:start+64]
         docs=['passage: '+p['name']+' | '+p['address']+' | '+p['artist'] for p in rows]
-        col.upsert(ids=[p['id'] for p in rows],documents=docs,metadatas=rows,embeddings=embed(docs))
+        col.upsert(ids=[p['id'] for p in rows],documents=docs,metadatas=[{k:p[k] for k in ('id','name','address','artist')} for p in rows],embeddings=embed(docs))
     stale=existing-set(catalog)
     if stale:col.delete(ids=sorted(stale))
     return {'collection':COLLECTION,'count':col.count(),'removed':len(stale),'embeddingModel':model}

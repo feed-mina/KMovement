@@ -11,6 +11,8 @@ const DURATIONS: Record<string, string> = { day: '당일치기', onenight: '1박
 export interface ItineraryRequest {
     duration: string;
     artists: string[];
+    artistIds: number[];
+    visitDate?: string;
     regions: string[];
     purposes: string[];
     budget: Record<string, unknown>;
@@ -39,7 +41,12 @@ export function buildItineraryRequest(form: Record<string, unknown>): ItineraryR
         budget = { min: budget[0], max: budget[1] };
     }
     if (!budget || typeof budget !== 'object') throw new ItineraryRequestError('validation');
+    const selected = form.selectedArtists ?? form.artists ?? [];
+    const rawIds = form.artistIds ?? (Array.isArray(selected) ? selected.map(item => typeof item === 'object' && item !== null ? item.artistId : undefined) : []);
+    const artistIds = Array.isArray(rawIds) ? rawIds.filter((id): id is number => Number.isSafeInteger(id) && id > 0) : [];
     return {
+        artistIds,
+        visitDate: typeof form.visitDate === 'string' ? form.visitDate : undefined,
         duration: DURATIONS[rawDuration] ?? rawDuration,
         artists: names(form.selectedArtists ?? form.artists, 5),
         regions: names(form.selectedRegions ?? form.regions, 3),
@@ -55,8 +62,17 @@ export function validateItineraryRequest(body: ItineraryRequest): void {
     if (body.duration !== '당일치기' || body.regions.length !== 1 || body.regions[0] !== '서울') {
         throw new ItineraryRequestError('unsupported', 422);
     }
-    if ((body.artists.length > 0 || Object.keys(body.budget).length > 0) && !body.acknowledgeUnverifiedConditions) {
-        throw new ItineraryRequestError('consent', 422);
+    if (body.artists.length && body.artists.length !== body.artistIds.length) {
+        throw new ItineraryRequestError('validation', 422);
+    }
+    if (!body.visitDate || !/^\d{4}-\d{2}-\d{2}$/.test(body.visitDate)
+        || !Number.isFinite(Date.parse(body.visitDate)) || new Date(body.visitDate).toISOString().slice(0, 10) !== body.visitDate) {
+        throw new ItineraryRequestError('validation', 422);
+    }
+    const { min, max } = body.budget;
+    if (!Number.isSafeInteger(min) || !Number.isSafeInteger(max) || (min as number) < 0
+        || (min as number) > (max as number) || (max as number) > 100000000) {
+        throw new ItineraryRequestError('validation', 422);
     }
 }
 
@@ -96,7 +112,7 @@ export function itineraryErrorMessage(error: unknown): string {
         timeout: '추천 서버 응답이 늦어요. 잠시 후 다시 시도해 주세요.',
         offline: '인터넷 연결이 끊겼어요. 연결을 확인한 뒤 다시 시도해 주세요.',
         network: '추천 서버에 연결하지 못했습니다. 인터넷 연결을 확인해 주세요.',
-        candidates: '출처가 확인된 추천 자료가 아직 없습니다.',
+        candidates: '선택한 아티스트·휴무일·영업시간·방문비 조건을 확인한 후보가 아직 없습니다.',
         'no-route': '조건에 맞는 코스를 찾지 못했어요. 여행 목적을 바꿔 다시 시도해 주세요.',
         server: '추천 서버에 문제가 있어요. 잠시 후 다시 시도해 주세요.',
         unknown: '코스를 만들지 못했어요. 잠시 후 다시 시도해 주세요.',
