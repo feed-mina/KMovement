@@ -46,6 +46,7 @@ def run_once(root: Path) -> bool:
             return False
         con.execute("UPDATE jobs SET status='RUNNING',started_at=CURRENT_TIMESTAMP WHERE id=?", (row['id'],))
     output = root / f"{row['id']}.mp4"
+    started = time.perf_counter()
     try:
         render_photo(root / f"{row['photo_id']}.jpg", output)
         status, error = 'COMPLETED', None
@@ -54,8 +55,8 @@ def run_once(root: Path) -> bool:
     except Exception:
         status, error = 'FAILED', 'RENDER_FAILED'
     with sqlite3.connect(database, timeout=15) as con:
-        con.execute('UPDATE jobs SET status=?,error_code=?,finished_at=CURRENT_TIMESTAMP WHERE id=? AND status=?',
-                    (status, error, row['id'], 'RUNNING'))
+        con.execute("UPDATE jobs SET status=?,error_code=?,render_ms=?,finished_at=strftime('%Y-%m-%d %H:%M:%f','now') WHERE id=? AND status=?",
+                    (status, error, round((time.perf_counter() - started) * 1000), row['id'], 'RUNNING'))
     return True
 
 

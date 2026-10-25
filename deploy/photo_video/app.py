@@ -19,6 +19,11 @@ class JobRequest(BaseModel):
     photoId: uuid.UUID
     requestId: uuid.UUID
 
+
+class RetryRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    requestId: uuid.UUID
+
 MAX_UPLOAD = 10 * 1024 * 1024
 Image.MAX_IMAGE_PIXELS = 24_000_000
 
@@ -45,6 +50,10 @@ def create_app(root: Path | None = None) -> FastAPI:
             started_at TEXT, finished_at TEXT, error_code TEXT,
             UNIQUE(owner, request_id), FOREIGN KEY(photo_id) REFERENCES photos(id))""")
         con.execute("CREATE INDEX IF NOT EXISTS jobs_owner_created ON jobs(owner,created_at)")
+        columns = {row[1] for row in con.execute("PRAGMA table_info(jobs)")}
+        for name, definition in [("retry_of", "TEXT"), ("render_ms", "INTEGER")]:
+            if name not in columns:
+                con.execute(f"ALTER TABLE jobs ADD COLUMN {name} {definition}")
 
     app = FastAPI(title="KMovement private photo video", docs_url=None, redoc_url=None)
     app.state.storage = storage
@@ -122,21 +131,33 @@ def create_app(root: Path | None = None) -> FastAPI:
         return FileResponse(storage / f"{photo_id}.jpg", media_type="image/jpeg")
 
     def job_response(row):
+        duration = row["render_ms"]
         return {"jobId": row["id"], "photoId": row["photo_id"], "status": row["status"],
                 "createdAt": row["created_at"], "startedAt": row["started_at"],
                 "finishedAt": row["finished_at"], "errorCode": row["error_code"],
+                "renderMilliseconds": duration, "retryOf": row["retry_of"],
+                "cost": {"providerCharge": 0, "currency": "USD", "infrastructureCost": None,
+                         "note": "외부 생성 모델 비용 없음. 서버·저장소·전송 비용은 미산정."},
                 "videoUrl": f"/api/travel-video/jobs/{row['id']}/video" if row["status"] == "COMPLETED" else None,
                 "method": "photo_motion", "methodLabel": "사진 확대·이동 영상 (생성형 AI 아님)"}
 
-    @app.post("/jobs", status_code=202)
-    def submit(body: JobRequest, user: int = Depends(owner)):
+    def enqueue(body: JobRequest, user: int, retry_of: str | None = None):
         with connect() as con:
             con.execute("BEGIN IMMEDIATE")
             old = con.execute("SELECT * FROM jobs WHERE owner=? AND request_id=?", (user, str(body.requestId))).fetchone()
             if old:
-                if old["photo_id"] != str(body.photoId):
+                if old["photo_id"] != str(body.photoId) or old["retry_of"] != retry_of:
                     raise HTTPException(409, "같은 요청 번호에 다른 사진을 사용할 수 없습니다.")
                 return job_response(old)
+            if retry_of:
+                original = con.execute("SELECT status FROM jobs WHERE id=? AND owner=?", (retry_of, user)).fetchone()
+                if not original:
+                    raise HTTPException(404, "작업을 찾을 수 없습니다.")
+                if original["status"] != "FAILED":
+                    raise HTTPException(409, "실패한 작업만 새 작업으로 다시 시도할 수 있습니다.")
+                newer = con.execute("SELECT id FROM jobs WHERE retry_of=? AND status IN ('QUEUED','RUNNING','COMPLETED')", (retry_of,)).fetchone()
+                if newer:
+                    raise HTTPException(409, "이미 다시 시도한 작업이 있습니다. 이전 작업 목록에서 확인해주세요.")
             photo = con.execute("SELECT id FROM photos WHERE id=? AND owner=?", (str(body.photoId), user)).fetchone()
             if not photo:
                 raise HTTPException(404, "사진을 찾을 수 없습니다.")
@@ -145,8 +166,20 @@ def create_app(root: Path | None = None) -> FastAPI:
             if active >= 2 or daily >= 10:
                 raise HTTPException(429, "동시 2개·하루 10개 생성 한도를 확인해주세요.")
             job_id = str(uuid.uuid4())
-            con.execute("INSERT INTO jobs(id,owner,photo_id,request_id) VALUES (?,?,?,?)", (job_id, user, str(body.photoId), str(body.requestId)))
+            con.execute("INSERT INTO jobs(id,owner,photo_id,request_id,retry_of) VALUES (?,?,?,?,?)", (job_id, user, str(body.photoId), str(body.requestId), retry_of))
             return job_response(con.execute("SELECT * FROM jobs WHERE id=?", (job_id,)).fetchone())
+
+    @app.post("/jobs", status_code=202)
+    def submit(body: JobRequest, user: int = Depends(owner)):
+        return enqueue(body, user)
+
+    @app.post("/jobs/{job_id}/retry", status_code=202)
+    def retry(job_id: uuid.UUID, body: RetryRequest, user: int = Depends(owner)):
+        with connect() as con:
+            row = con.execute("SELECT photo_id FROM jobs WHERE id=? AND owner=?", (str(job_id), user)).fetchone()
+        if not row:
+            raise HTTPException(404, "작업을 찾을 수 없습니다.")
+        return enqueue(JobRequest(photoId=row["photo_id"], requestId=body.requestId), user, str(job_id))
 
     @app.get("/jobs/{job_id}")
     def status(job_id: uuid.UUID, user: int = Depends(owner)):
