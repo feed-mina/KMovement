@@ -72,3 +72,20 @@ def test_job_ownership_idempotency_and_limit(tmp_path, monkeypatch):
     assert new_job(c)[1].status_code == 202
     assert new_job(c)[1].status_code == 429
     assert c.post('/jobs', json={**body, 'owner': 2}, headers={**headers(), 'Content-Type': 'application/json'}).status_code == 422
+
+
+def test_real_video_and_range_survive_restart(tmp_path, monkeypatch):
+    from deploy.photo_video.worker import run_once
+    c = client(tmp_path, monkeypatch)
+    _, result = new_job(c)
+    job = result.json()['jobId']
+    assert c.get(f'/jobs/{job}/video', headers=headers()).status_code == 409
+    assert run_once(tmp_path)
+    c = client(tmp_path, monkeypatch)
+    assert c.get(f'/jobs/{job}', headers=headers()).json()['status'] == 'COMPLETED'
+    assert c.get('/jobs', headers=headers(2)).json()['items'] == []
+    video = c.get(f'/jobs/{job}/video', headers={**headers(), 'Range': 'bytes=0-63'})
+    assert video.status_code == 206
+    assert len(video.content) == 64
+    assert c.get(f'/jobs/{job}/video', headers=headers(2)).status_code == 404
+    assert not run_once(tmp_path)

@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 export const runtime = 'nodejs';
 const MAX_BODY = 10 * 1024 * 1024;
 const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}';
-const allowed = new RegExp(`^(photos|photos/${UUID}|jobs|jobs/${UUID})$`);
+const allowed = new RegExp(`^(photos|photos/${UUID}|jobs|jobs/${UUID}|jobs/${UUID}/video)$`);
 const reply = (detail: string, status: number) => Response.json({ detail }, {
   status, headers: { 'Cache-Control': 'private, no-store' },
 });
@@ -48,6 +48,7 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
       headers: {
         'X-Photo-Video-Key': key, 'X-Photo-Video-Owner': String(user.userSqno),
         'Content-Type': request.headers.get('content-type') || 'application/json',
+        ...(request.headers.get('range') ? { Range: request.headers.get('range')! } : {}),
       },
       body: request.method === 'GET' ? undefined : Buffer.concat(chunks),
       cache: 'no-store', signal: AbortSignal.timeout(30_000), redirect: 'error',
@@ -55,6 +56,9 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
     return new Response(response.body, { status: response.status, headers: {
       'Content-Type': response.headers.get('content-type') || 'application/json',
       'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff',
+      ...Object.fromEntries(['content-range', 'accept-ranges', 'content-length', 'content-disposition'].flatMap(name => {
+        const value = response.headers.get(name); return value ? [[name, value]] : [];
+      })),
     } });
   } catch { return reply('서버에 연결하지 못했습니다. 잠시 후 다시 확인해주세요.', 503); }
 }

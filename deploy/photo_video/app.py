@@ -156,4 +156,23 @@ def create_app(root: Path | None = None) -> FastAPI:
             raise HTTPException(404, "작업을 찾을 수 없습니다.")
         return job_response(row)
 
+    @app.get("/jobs")
+    def history(user: int = Depends(owner), page: int = 1):
+        if not 1 <= page <= 10000:
+            raise HTTPException(422, "페이지 번호를 확인해주세요.")
+        with connect() as con:
+            rows = con.execute("SELECT * FROM jobs WHERE owner=? ORDER BY created_at DESC,id DESC LIMIT 20 OFFSET ?", (user, (page - 1) * 20)).fetchall()
+        return {"items": [job_response(row) for row in rows], "page": page}
+
+    @app.get("/jobs/{job_id}/video")
+    def video(job_id: uuid.UUID, user: int = Depends(owner)):
+        with connect() as con:
+            row = con.execute("SELECT status FROM jobs WHERE id=? AND owner=?", (str(job_id), user)).fetchone()
+        if not row:
+            raise HTTPException(404, "영상을 찾을 수 없습니다.")
+        path = storage / f"{job_id}.mp4"
+        if row["status"] != "COMPLETED" or not path.is_file():
+            raise HTTPException(409, "아직 재생할 수 있는 영상이 없습니다.")
+        return FileResponse(path, media_type="video/mp4", filename=f"travel-{job_id}.mp4", content_disposition_type="inline")
+
     return app
