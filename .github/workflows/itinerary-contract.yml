@@ -41,13 +41,14 @@ jobs:
       - run: npm ci
       - name: Check consent, unsupported conditions and address-first directions
         run: >-
-          npx jest --runInBand --reporters=default
+          npx jest --runInBand
           tests/components/RouteScreen.test.tsx
           tests/components/RoadRoutePlanner.test.tsx
           tests/services/directions.test.ts
           tests/hooks/itineraryRequestContract.test.ts
           tests/hooks/krideItinerarySources.test.ts
           tests/components/RouteMap.test.tsx
+          --reporters=default
       - name: Type check
         run: npx tsc --noEmit --incremental false
       - name: Lint changed directions components
