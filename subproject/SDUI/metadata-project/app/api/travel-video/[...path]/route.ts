@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 export const runtime = 'nodejs';
 const MAX_BODY = 10 * 1024 * 1024;
 const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}';
-const allowed = new RegExp(`^(photos|photos/${UUID}|jobs|jobs/${UUID}|jobs/${UUID}/video)$`);
+const allowed = new RegExp(`^(photos|photos/${UUID}|jobs|jobs/${UUID}|jobs/${UUID}/(video|retry))$`);
 const reply = (detail: string, status: number) => Response.json({ detail }, {
   status, headers: { 'Cache-Control': 'private, no-store' },
 });
@@ -43,7 +43,9 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
         chunks.push(value);
       }
     }
-    const response = await fetch(`${base.replace(/\/$/, '')}/${target}`, {
+    const page = request.nextUrl.searchParams.get('page');
+    const query = target === 'jobs' && request.method === 'GET' && page && /^[1-9][0-9]{0,3}$/.test(page) ? `?page=${page}` : '';
+    const response = await fetch(`${base.replace(/\/$/, '')}/${target}${query}`, {
       method: request.method,
       headers: {
         'X-Photo-Video-Key': key, 'X-Photo-Video-Owner': String(user.userSqno),

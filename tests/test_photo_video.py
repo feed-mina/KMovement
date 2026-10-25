@@ -89,3 +89,42 @@ def test_real_video_and_range_survive_restart(tmp_path, monkeypatch):
     assert len(video.content) == 64
     assert c.get(f'/jobs/{job}/video', headers=headers(2)).status_code == 404
     assert not run_once(tmp_path)
+
+
+def test_failed_retry_is_explicit_and_preserves_metrics(tmp_path, monkeypatch):
+    import deploy.photo_video.worker as worker
+    c = client(tmp_path, monkeypatch)
+    _, response = new_job(c)
+    original = response.json()['jobId']
+    retry_body = {'requestId': str(uuid.uuid4())}
+    json_headers = {**headers(), 'Content-Type': 'application/json'}
+    assert c.post(f'/jobs/{original}/retry', json=retry_body, headers=json_headers).status_code == 409
+    def fail(*args):
+        raise RuntimeError('do not expose secret paths or provider messages')
+    monkeypatch.setattr(worker, 'render_photo', fail)
+    assert worker.run_once(tmp_path)
+    failed = c.get(f'/jobs/{original}', headers=headers()).json()
+    assert failed['status'] == 'FAILED'
+    assert failed['errorCode'] == 'RENDER_FAILED'
+    assert failed['renderMilliseconds'] >= 0
+    assert failed['cost']['infrastructureCost'] is None
+    retried = c.post(f'/jobs/{original}/retry', json=retry_body, headers=json_headers)
+    assert retried.status_code == 202
+    assert retried.json()['retryOf'] == original
+    assert retried.json()['jobId'] != original
+    assert c.post(f'/jobs/{original}/retry', json=retry_body, headers=json_headers).json()['jobId'] == retried.json()['jobId']
+    assert c.post(f'/jobs/{original}/retry', json={'requestId': str(uuid.uuid4())}, headers=json_headers).status_code == 409
+    assert c.get(f'/jobs/{original}', headers=headers()).json()['status'] == 'FAILED'
+    assert len(c.get('/jobs', headers=headers()).json()['items']) == 2
+
+
+def test_abandoned_job_recovery(tmp_path, monkeypatch):
+    import sqlite3
+    from deploy.photo_video.worker import run_once
+    c = client(tmp_path, monkeypatch)
+    _, result = new_job(c)
+    job = result.json()['jobId']
+    with sqlite3.connect(tmp_path / 'workflow.sqlite3') as con:
+        con.execute("UPDATE jobs SET status='RUNNING',started_at=datetime('now','-11 minutes') WHERE id=?", (job,))
+    assert not run_once(tmp_path)
+    assert c.get(f'/jobs/{job}', headers=headers()).json()['errorCode'] == 'WORKER_INTERRUPTED'

@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-type VideoJob = { jobId: string; photoId: string; status: string; errorCode?: string; videoUrl?: string; methodLabel: string };
+type VideoJob = { jobId: string; photoId: string; status: string; errorCode?: string; videoUrl?: string; methodLabel: string; renderMilliseconds?: number; cost?: { note: string } };
 const labels: Record<string, string> = { QUEUED: '생성 대기 중', RUNNING: '영상 생성 중', COMPLETED: '영상 생성 완료', FAILED: '영상 생성 실패' };
+const failures: Record<string, string> = { RENDER_TIMEOUT: '영상 생성 시간이 초과됐습니다.', RENDER_FAILED: '사진 처리 또는 영상 생성에 실패했습니다.', WORKER_INTERRUPTED: '처리 서버가 중단됐습니다.' };
 
 export default function TravelVideoPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -16,15 +17,16 @@ export default function TravelVideoPage() {
   const submitting = useRef(false);
   const [pollKey, setPollKey] = useState(0);
   const [history, setHistory] = useState<VideoJob[]>([]);
+  const [historyPage, setHistoryPage] = useState(1);
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/travel-video/jobs', { cache: 'no-store', signal: controller.signal }).then(async response => {
+    fetch(`/api/travel-video/jobs?page=${historyPage}`, { cache: 'no-store', signal: controller.signal }).then(async response => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || '이전 작업을 불러오지 못했습니다.');
       setHistory(data.items);
     }).catch(e => { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : '이전 작업을 불러오지 못했습니다.'); });
     return () => controller.abort();
-  }, [job?.status]);
+  }, [job?.status, historyPage]);
   useEffect(() => {
     if (!job || !['QUEUED', 'RUNNING'].includes(job.status)) return;
     let stopped = false;
@@ -63,6 +65,19 @@ export default function TravelVideoPage() {
     } catch (e) { setError(e instanceof Error ? e.message : '생성을 요청하지 못했습니다.'); }
     finally { submitting.current = false; setBusy(false); }
   }
+  async function retry() {
+    if (!job || job.status !== 'FAILED' || submitting.current) return;
+    submitting.current = true; setBusy(true); setError('');
+    requestId.current ||= crypto.randomUUID();
+    try {
+      const response = await fetch(`/api/travel-video/jobs/${job.jobId}/retry`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId: requestId.current }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || '재시도를 요청하지 못했습니다.');
+      setJob(data);
+    } catch (e) { setError(e instanceof Error ? e.message : '재시도를 요청하지 못했습니다.'); }
+    finally { submitting.current = false; setBusy(false); }
+  }
+  useEffect(() => { requestId.current = ''; }, [job?.jobId]);
   useEffect(() => {
     if (!file) { setPreview(''); return; }
     const url = URL.createObjectURL(file);
@@ -99,14 +114,20 @@ export default function TravelVideoPage() {
     {photoId && <><p>기본 방식: 사진을 천천히 확대·이동하는 짧은 영상입니다. 생성형 AI 영상과 구분됩니다.</p>
       <button type="button" disabled={busy || !!job} onClick={generate}>영상 만들기</button></>}
     {job && <section aria-label="영상 작업 상태"><p role="status">{labels[job.status] || job.status}</p><p>{job.methodLabel}</p>
+      {job.errorCode && <p role="alert">{failures[job.errorCode] || '작업에 실패했습니다.'}</p>}
+      {job.status === 'FAILED' && <button type="button" disabled={busy} onClick={retry}>실패한 영상 다시 만들기</button>}
+      {job.renderMilliseconds != null && <p>영상 처리 시간: {(job.renderMilliseconds / 1000).toFixed(1)}초</p>}
+      {job.cost && <p>{job.cost.note}</p>}
       {job.status === 'COMPLETED' && job.videoUrl && <><video controls playsInline preload="metadata" src={job.videoUrl} style={{ width: '100%' }} onError={() => setError('영상을 재생하지 못했습니다. 다시 불러오거나 다운로드해주세요.')} />
         <p><a href={job.videoUrl} download="travel.mp4">영상 다운로드</a></p></>}
-      <button type="button" onClick={() => { setError(''); setPollKey(v => v + 1); }}>상태 다시 확인</button>
+      {['QUEUED', 'RUNNING'].includes(job.status) && <button type="button" onClick={() => { setError(''); setPollKey(v => v + 1); }}>상태 다시 확인</button>}
     </section>}
     <section aria-label="이전 영상 작업"><h2>이전 작업</h2>{!history.length && <p>아직 작업 기록이 없습니다.</p>}
       <ul>{history.map(item => <li key={item.jobId}><button type="button" disabled={busy} onClick={() => {
         setJob(item); setPhotoId(item.photoId); setPollKey(v => v + 1); setError('');
       }}>{labels[item.status] || item.status} · {item.jobId.slice(0, 8)}</button></li>)}</ul>
+      <button type="button" disabled={historyPage === 1} onClick={() => setHistoryPage(v => v - 1)}>이전 기록</button>
+      <button type="button" disabled={history.length < 20} onClick={() => setHistoryPage(v => v + 1)}>다음 기록</button>
     </section>
     {error && <p role="alert">{error}</p>}
   </main>;
