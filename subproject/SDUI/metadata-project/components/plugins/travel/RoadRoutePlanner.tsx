@@ -172,7 +172,7 @@ export default function RoadRoutePlanner({ region = '서울', destinations = [],
             <button type="button" className="directions-location" disabled={locating} onClick={useCurrentLocation}>
                 {locating ? '현재 위치 확인 중…' : '현재 위치 사용'}
             </button>
-            <p className="directions-note">선택하면 브라우저가 위치 사용을 물어요. 위치는 저장하지 않아요.</p>
+            <p className="directions-note">위치 사용을 허용하면 출발지에 자동으로 입력해요. 주소로도 정할 수 있어요.</p>
             {locationError && <p role="alert">{locationError}</p>}
             <PlaceSearch label="출발 장소·주소" selected={start} query={startQuery}
                 onQuery={query => chooseStart(null, query)} onSelect={place => chooseStart(place, place.name)} />
