@@ -1,0 +1,112 @@
+[
+  {
+    "name": "청담골",
+    "dbIds": [
+      5712,
+      8358
+    ],
+    "decision": "동일 지점 근거 확보",
+    "reason": "선릉로148길 48 / 선릉로 148길 48. 좌표 차이 약 6.5m. 관광공사 주소와 일치한다. 5712를 대표 후보로 삼고 8358은 이력으로 보존하는 안이며 실제 병합하지 않았다.",
+    "sourceUrl": "https://english.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?vcontsId=52084",
+    "checkedOn": "2026-10-25",
+    "mergeApplied": false,
+    "artistVisitVerified": false
+  },
+  {
+    "name": "더파크12 글램핑펜션",
+    "dbIds": [
+      7216
+    ],
+    "decision": "동일 숙박시설 근거 확보",
+    "reason": "원본의 밤벌길과 DB의 밤범길을 비교했다. 고캠핑은 밤벌길2번길 35로 안내한다. DB 오타 정정 후보이며 객실·개별 촬영 지점까지 같다는 뜻은 아니다.",
+    "sourceUrl": "https://gocamping.or.kr/bsite/camp/info/read.do?c_no=3198",
+    "checkedOn": "2026-10-25",
+    "mergeApplied": false,
+    "artistVisitVerified": false
+  },
+  {
+    "name": "연곡꾹저구탕",
+    "dbIds": [
+      4028
+    ],
+    "decision": "동일 지점 근거 확보",
+    "reason": "원본 2680과 DB 2679의 좌표는 같다. 관광공사는 진고개로 2679로 안내한다. 원본 주소 정정 후보이며 현재 방문 가능 여부는 별도 확인한다.",
+    "sourceUrl": "https://english.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?vcontsId=49343",
+    "checkedOn": "2026-10-25",
+    "mergeApplied": false,
+    "artistVisitVerified": false
+  },
+  {
+    "name": "망원한강공원",
+    "dbIds": [
+      1206
+    ],
+    "decision": "같은 공원으로 연결 가능",
+    "reason": "주소 뒤 ‘망원한강공원 내’만 다르다. 서울시 공식 주소 마포나루길 467과 일치한다. 공원 전체만 같고 공원 안의 점포·촬영 위치까지 통합하지 않는다.",
+    "sourceUrl": "https://hangang.seoul.go.kr/www/contents/666.do?mid=468",
+    "checkedOn": "2026-10-25",
+    "mergeApplied": false,
+    "artistVisitVerified": false
+  },
+  {
+    "name": "송돗골",
+    "dbIds": [
+      6108
+    ],
+    "decision": "주소 띄어쓰기 차이",
+    "reason": "앵고개로 103번길 15 / 앵고개로103번길 15. 공백을 제외한 문자와 원본·DB 좌표가 같다. 표기 정리 후보이며 공식 지점 확인 완료로 승격하지 않는다.",
+    "sourceUrl": "",
+    "checkedOn": "2026-10-25",
+    "mergeApplied": false,
+    "artistVisitVerified": false
+  },
+  {
+    "name": "옛집",
+    "dbIds": [
+      7097,
+      7634
+    ],
+    "decision": "서로 다른 장소로 유지",
+    "reason": "광진구 아차산로76가길 18과 마포구 신촌로10길 8이다. 이름은 같지만 구·도로명·좌표가 달라 분리한다. 각 아티스트의 방문 사실은 별도 검증한다.",
+    "sourceUrl": "",
+    "checkedOn": "2026-10-25",
+    "mergeApplied": false,
+    "artistVisitVerified": false
+  },
+  {
+    "name": "몽상드애월",
+    "dbIds": [
+      1420
+    ],
+    "decision": "판단 보류",
+    "reason": "애월북서길 / 애월부서길은 좌표가 같아 오타 후보지만, 좌표 일치만으로 확정하지 않는다. 정확한 공식 주소와 과거 지점 이력을 추가 확인한다.",
+    "sourceUrl": "",
+    "checkedOn": "2026-10-25",
+    "mergeApplied": false,
+    "artistVisitVerified": false
+  },
+  {
+    "name": "락고재 서울",
+    "dbIds": [
+      3913
+    ],
+    "decision": "판단 보류",
+    "reason": "계동길 49-21 / 49-23. 좌표가 같더라도 같은 숙박 브랜드의 별관·개별 건물일 수 있어 건물 단위 연결을 보류한다.",
+    "sourceUrl": "",
+    "checkedOn": "2026-10-25",
+    "mergeApplied": false,
+    "artistVisitVerified": false
+  },
+  {
+    "name": "일미식당",
+    "dbIds": [
+      2255
+    ],
+    "decision": "판단 보류",
+    "reason": "원본은 낙원상가 지하 B1 148호, DB는 삼일대로 428까지만 있다. 상가 안의 정확한 점포를 확인하기 전에는 같은 지점 확정으로 처리하지 않는다.",
+    "sourceUrl": "",
+    "checkedOn": "2026-10-25",
+    "mergeApplied": false,
+    "artistVisitVerified": false
+  }
+]

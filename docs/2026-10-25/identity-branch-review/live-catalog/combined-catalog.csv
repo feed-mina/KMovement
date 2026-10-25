@@ -1,0 +1,141 @@
+recordKey,artistId,slug,displayName,entityType,approvedYn,aliases,status,idState,inheritGroupPlaces,placeRelationsAdded
+existing:1,1,bts,BTS,unclassified,Y,"[""bts"", ""BTS"", ""방탄소년단""]",retained,observed_id_unchanged,False,0
+existing:2,2,blackpink,BLACKPINK,unclassified,Y,"[""blackpink"", ""BLACKPINK"", ""블랙핑크""]",retained,observed_id_unchanged,False,0
+existing:3,3,seventeen,SEVENTEEN,unclassified,Y,"[""seventeen"", ""SEVENTEEN"", ""세븐틴""]",retained,observed_id_unchanged,False,0
+existing:4,4,ive,IVE,unclassified,Y,"[""ive"", ""IVE"", ""아이브""]",retained,observed_id_unchanged,False,0
+existing:9,9,aespa,aespa,unclassified,Y,"[""aespa""]",retained,observed_id_unchanged,False,0
+existing:10,10,NewJeans,NewJeans,unclassified,Y,"[""NewJeans""]",retained,observed_id_unchanged,False,0
+existing:11,11,TWICE,TWICE,unclassified,Y,"[""TWICE"", ""트와이스""]",retained,observed_id_unchanged,False,0
+existing:12,12,Stray Kids,Stray Kids,unclassified,Y,"[""Stray Kids"", ""스트레이키즈""]",retained,observed_id_unchanged,False,0
+existing:13,13,EXO,EXO,unclassified,Y,"[""EXO"", ""엑소""]",retained,observed_id_unchanged,False,0
+existing:14,14,NCT,NCT,unclassified,Y,"[""NCT""]",retained,observed_id_unchanged,False,0
+existing:15,15,ATEEZ,ATEEZ,unclassified,Y,"[""ATEEZ""]",retained,observed_id_unchanged,False,0
+existing:16,16,LE SSERAFIM,LE SSERAFIM,unclassified,Y,"[""LE SSERAFIM""]",retained,observed_id_unchanged,False,0
+existing:17,17,아이유(IU),아이유(IU),unclassified,Y,"[""아이유(IU)"", ""아이유"", ""IU""]",retained,observed_id_unchanged,False,0
+existing:18,18,태연(Taeyeon),태연(Taeyeon),unclassified,Y,"[""태연(Taeyeon)"", ""태연"", ""Taeyeon""]",retained,observed_id_unchanged,False,0
+existing:19,19,임영웅,임영웅,unclassified,Y,"[""임영웅""]",retained,observed_id_unchanged,False,0
+existing:20,20,지코(ZICO),지코(ZICO),unclassified,Y,"[""지코(ZICO)"", ""지코"", ""ZICO""]",retained,observed_id_unchanged,False,0
+existing:21,21,악뮤(AKMU),악뮤(AKMU),unclassified,Y,"[""악뮤(AKMU)"", ""악뮤"", ""AKMU""]",retained,observed_id_unchanged,False,0
+existing:22,22,DAY6,DAY6,unclassified,Y,"[""DAY6"", ""Day6""]",retained,observed_id_unchanged,False,0
+existing:23,23,(여자)아이들,(여자)아이들,unclassified,Y,"[""(여자)아이들"", ""여자아이들""]",retained,observed_id_unchanged,False,0
+existing:24,24,RIIZE,RIIZE,unclassified,Y,"[""RIIZE""]",retained,observed_id_unchanged,False,0
+existing:25,25,BOYNEXTDOOR,BOYNEXTDOOR,unclassified,Y,"[""BOYNEXTDOOR""]",retained,observed_id_unchanged,False,0
+existing:26,26,TOMORROW X TOGETHER,TOMORROW X TOGETHER,unclassified,Y,"[""TOMORROW X TOGETHER"", ""TXT""]",retained,observed_id_unchanged,False,0
+existing:27,27,ENHYPEN,ENHYPEN,unclassified,Y,"[""ENHYPEN""]",retained,observed_id_unchanged,False,0
+existing:28,28,Red Velvet,Red Velvet,unclassified,Y,"[""Red Velvet"", ""레드벨벳""]",retained,observed_id_unchanged,False,0
+existing:29,29,ITZY,ITZY,unclassified,Y,"[""ITZY"", ""Itzy""]",retained,observed_id_unchanged,False,0
+existing:31,31,G-DRAGON,G-DRAGON,unclassified,Y,"[""G-DRAGON"", ""지드래곤""]",retained,observed_id_unchanged,False,0
+existing:32,32,박효신,박효신,unclassified,Y,"[""박효신""]",retained,observed_id_unchanged,False,0
+existing:33,33,이무진,이무진,unclassified,Y,"[""이무진""]",retained,observed_id_unchanged,False,0
+existing:34,34,볼빨간사춘기,볼빨간사춘기,unclassified,Y,"[""볼빨간사춘기""]",retained,observed_id_unchanged,False,0
+existing:35,35,백예린,백예린,unclassified,Y,"[""백예린""]",retained,observed_id_unchanged,False,0
+existing:36,36,성시경,성시경,unclassified,Y,"[""성시경""]",retained,observed_id_unchanged,False,0
+existing:37,37,장원영,장원영,unclassified,Y,"[""장원영""]",retained,observed_id_unchanged,False,0
+existing:38,38,차은우,차은우,unclassified,Y,"[""차은우""]",retained,observed_id_unchanged,False,0
+existing:39,39,유재석,유재석,unclassified,Y,"[""유재석""]",retained,observed_id_unchanged,False,0
+existing:40,40,침착맨,침착맨,unclassified,Y,"[""침착맨""]",retained,observed_id_unchanged,False,0
+existing:41,41,쯔양,쯔양,unclassified,Y,"[""쯔양""]",retained,observed_id_unchanged,False,0
+existing:42,42,곽튜브,곽튜브,unclassified,Y,"[""곽튜브""]",retained,observed_id_unchanged,False,0
+existing:43,43,빠니보틀,빠니보틀,unclassified,Y,"[""빠니보틀""]",retained,observed_id_unchanged,False,0
+existing:44,44,감스트,감스트,unclassified,Y,"[""감스트""]",retained,observed_id_unchanged,False,0
+existing:45,45,이영지,이영지,unclassified,Y,"[""이영지""]",retained,observed_id_unchanged,False,0
+existing:46,46,혜안,혜안,unclassified,Y,"[""혜안""]",retained,observed_id_unchanged,False,0
+existing:47,47,원지의하루,원지의하루,unclassified,Y,"[""원지의하루""]",retained,observed_id_unchanged,False,0
+existing:48,48,피식대학,피식대학,unclassified,Y,"[""피식대학""]",retained,observed_id_unchanged,False,0
+existing:49,49,숏박스,숏박스,unclassified,Y,"[""숏박스""]",retained,observed_id_unchanged,False,0
+existing:50,50,문복희,문복희,unclassified,Y,"[""문복희""]",retained,observed_id_unchanged,False,0
+existing:51,51,입짧은햇님,입짧은햇님,unclassified,Y,"[""입짧은햇님""]",retained,observed_id_unchanged,False,0
+existing:52,52,워크맨,워크맨,unclassified,Y,"[""워크맨""]",retained,observed_id_unchanged,False,0
+existing:53,53,딩고뮤직,딩고뮤직,unclassified,Y,"[""딩고뮤직""]",retained,observed_id_unchanged,False,0
+proposal:11ad4998100ca3750a30,,,A.C.E,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:efddeba6b728d6d92db3,,,AB6IX,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:e67ad8db8a32ec45d3e2,,,AOA,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:1bceae8ab5a69b20d72b,,,B1A4,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:443008e2af1323530681,,,BTOB,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:e98bf2404c5352efd146,,,CIX,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:abd20cfd254f52ba36b5,,,CLC,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:22c6fedb6b2f3ab9351e,,,EXID,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:8fda50515ccfa393beee,,,GOT7,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:2af343ffe475a0d559f1,,,I.O.I,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:5f89d363d96aa9cae72e,,,SF9,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:5723360ef11043a87952,,,god,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:bf850f5166fb8a872f71,,,강다니엘,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:d703c023e43f65858d50,,,개리,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:f4b4ade54640d2ac14e2,,,걸스데이,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:2e50cd65093bd7703614,,,골든차일드,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:d275d9a4fb1258e9891a,,,구구단,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:bd53a7367d81c004a1a3,,,그레이,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:e5e0522b3772e12f818f,,,김요한,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:e7e9baed73f99f9c9a85,,,김재환,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:a69f8bf5cc882bd224a8,,,뉴이스트,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:0eb4554f78c5630d8581,,,다비치,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:e4356d85dd14af55c593,,,다이나믹 듀오,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:49839023368bdcafe246,,,다이아,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:4f775ef28fa9e635d7ab,,,더보이즈,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:1b94444231c19f2d6682,,,동방신기,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:728c0b165bd09767f2d7,,,드림캐쳐,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:1f5ef41588e1edbc2e6d,,,라붐,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:dda484b244512ea402ae,,,러블리즈,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:5aab9c0298b3f0d7e77d,,,레인보우,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:8545821ec4e2e818292b,,,로꼬,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:669a6050e2fb9b72ea8c,,,마마무,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:bb173b105e4c86503f49,,,모모랜드,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:65eee9590116b9ac9f1b,,,몬스타엑스,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:fd974e0d00d11b078fed,,,민경훈,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:4ea20f50e422bc8ab74a,,,박재범,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:52ec3d9fde73a46dd9b6,,,박지훈,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:161c8f4d34e10e67e142,,,백현,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:214e696e1bc2277b417b,,,벤,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:91d82bf64508e27dac4b,,,보아,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:0c8665666e38965dad20,,,브라운 아이드 걸스,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:2f308b640c894de7d646,,,블락비,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:5e0d62698b44a4342d26,,,비,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:31baa91d2524f60078cb,,,빅스,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:c2fcbbddb4083bce4de7,,,빅톤,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:f75413d66bda7471e0d4,,,사이먼 도미닉,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:5c261fcdfd49ad8df1d3,,,산다라박,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:c2dc72b49f0bb9dfe483,,,샤이니,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:2d70b302ad40eaecf642,,,소녀시대,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:8623adc2f2ecdf2abf13,,,손담비,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:e66d89a6380a10e59a1b,,,수지,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:4fb63ad99c64d4ebd088,,,슈퍼주니어,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:c99f2fddaf384bb202a7,,,신화,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:0d3f4a7581b9fa7b3da1,,,싸이,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:ca1822dddfb4fde9dce8,,,씨스타,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:a56b21b3a1c3cfcad37d,,,아스트로,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:ba9e56af8f21b7280c95,,,아이즈원,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:1d080437d8462ce9b306,,,아이콘,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:cba9b9b40d7dfa4cd748,,,업텐션,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:4897fa29d3bb3c014eec,,,에릭남,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:eeb57d3068ed7eb5e220,,,에버글로우,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:946f7416acdd4e1858ce,,,에이프릴,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:cae52a3bfede542381e6,,,에이핑크,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:3ff155936f9450d23d4a,,,여자친구,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:2441b53ac0475095ea3d,,,오마이걸,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:15af4b5038f4f4505684,,,온앤오프,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:929994c011b3d28fdae2,,,옹성우,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:c50ab1ab04acc94c7670,,,우주소녀,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:09a3aa534bbd1bf0e7db,,,워너원,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:21828a0ca935d45488b2,,,위너,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:cb3da772dcb2a05133bd,,,위키미키,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:da307b76738c7b298a41,,,이승기,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:8e2ac77f77e662f0556b,,,이홍기,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:f399644c799f19d8fe30,,,이효리,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:1add28fcd52345fed90a,,,인피니트,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:13ad400cd316d8849768,,,정용화,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:7ed68c4ab2321cb5f937,,,제국의 아이들,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:f9829e1e188f6a8d5099,,,제시,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:12f279af0083d6088020,,,청하,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:dcaf7c0da1f7907b8b8e,,,체리블렛,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:2e200d87705200acf080,,,케이윌,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:506e7a890386fcde5e07,,,크래비티,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:3cc1f372d2086037d72b,,,태양,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:512905963ba63430a24e,,,틴탑,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:4150ac2ac987ea73247e,,,펜타곤,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:8a106adecb283de586ea,,,프로미스나인,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:86d31e126388c2c5e03c,,,하성운,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:1b7d4d304e4c08757953,,,하이라이트,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:0adf4992bf760614b229,,,헤이즈,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:f71008f41865d0ebce98,,,현아,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:03e99017a0742f31d922,,,홍진영,unclassified,,[],new_candidate,not_allocated,False,0
+proposal:89916f69a4b5b33742ff,,,황치열,unclassified,,[],new_candidate,not_allocated,False,0

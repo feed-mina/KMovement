@@ -1,0 +1,17 @@
+{
+  "basis": "provided_all_artist_master",
+  "retainedCount": 48,
+  "incomingCount": 92,
+  "duplicateCount": 0,
+  "newCount": 92,
+  "holdCount": 0,
+  "deferredOutsideIncoming": 5,
+  "combinedPlannedCount": 140,
+  "operationalIdsObserved": true,
+  "databaseModified": false,
+  "registrationApplied": false,
+  "existingIdsReassigned": 0,
+  "groupPlaceRelationsInherited": 0,
+  "placeRelationsAdded": 0,
+  "unresolvedIdentityReview": true
+}
