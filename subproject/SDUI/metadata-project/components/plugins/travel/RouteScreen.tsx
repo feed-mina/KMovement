@@ -5,6 +5,7 @@ import type { ScreenControllerProps } from '@/components/screens/types';
 import {MotionButton} from '@/components/motion/KrideMotion';
 import {ROUTE_MARKER_SELECT_EVENT, type RouteMapMarker} from '@/components/fields/kride/maps/mapTypes';
 import RoadRoutePlanner from './RoadRoutePlanner';
+import { type DirectionPlace, validDirectionPlace } from '@/lib/kride/directions';
 import RouteMap from '@/components/fields/kride/maps/RouteMap';
 import { tourPoisToRouteMapData } from '@/components/fields/kride/maps/tourToRouteMapData';
 import { normalizeRouteMapData } from '@/components/fields/kride/maps/normalizeRouteMapData';
@@ -37,6 +38,9 @@ export function legLabel(km: number): string {
 
 export default function RouteScreen(_props: ScreenControllerProps) {
     const [selectedStopId, setSelectedStopId] = useState<string>();
+    const [roadDestination, setRoadDestination] = useState<DirectionPlace>();
+    const [roadReturnMode, setRoadReturnMode] = useState<'tour' | 'ai'>('tour');
+    const roadHeading = useRef<HTMLHeadingElement>(null);
     const selectStop = useCallback((marker: RouteMapMarker) => setSelectedStopId(marker.id), []);
     const { isLoggedIn } = useAuth();
     const [pois, setPois] = useState<TourPoi[]>([]);
@@ -76,6 +80,16 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const mapData = mode === 'ai' ? aiRouteData : tourData;
     const markers = useMemo(() => mapData?.markers ?? [], [mapData]);
     const dayGroups = useMemo(() => groupByDay(markers), [markers]);
+    const directionsMarkers = (roadReturnMode === 'ai' && mode === 'road' ? aiRouteData : mapData)?.markers ?? [];
+    const destinations = directionsMarkers.map(m => ({ id: m.id, name: m.name, address: m.address, lat: m.lat, lon: m.lng })).filter(validDirectionPlace);
+    const openDirections = (destination?: DirectionPlace) => {
+        if (mode === 'road') return;
+        setRoadReturnMode(mode);
+        setRoadDestination(destination ?? destinations.find(place => place.id === selectedStopId));
+        setMode('road');
+    };
+    useEffect(() => { if (mode === 'road') roadHeading.current?.focus(); }, [mode]);
+    const unsupportedAi = region !== '서울' || duration !== '당일치기';
 
     const fetchAi = async () => {
         let body;
@@ -139,6 +153,8 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     // AI 모드에서 선호를 바꾸면 재추천
     const changePref = (setter: (v: string) => void, v: string) => {
         setter(v);
+        setSelectedStopId(undefined);
+        if (setter === setRegion) setPois([]);
         if (mode === 'ai') { fetchedKeyRef.current = ''; setAiData(null); setAiError(null); }
     };
 
@@ -155,10 +171,10 @@ export default function RouteScreen(_props: ScreenControllerProps) {
             {mode === 'road' ? (
                 <>
                     <div className="route-road-head">
-                        <h2 className="route-road-head__title">도로 길 찾기</h2>
-                        <MotionButton type="button" className="route-pill" onClick={() => setMode('tour')}>코스로 돌아가기</MotionButton>
+                        <h2 className="route-road-head__title" ref={roadHeading} tabIndex={-1}>{region} 길찾기</h2>
+                        <MotionButton type="button" className="route-pill" onClick={() => setMode(roadReturnMode)}>코스로 돌아가기</MotionButton>
                     </div>
-                    <RoadRoutePlanner />
+                    <RoadRoutePlanner region={region} destinations={destinations} initialDestination={roadDestination} />
                 </>
             ) : (
                 <div className="route-prefs">
@@ -192,7 +208,12 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                     <label>안내 언어 <select value={responseLocale} disabled={aiLoading} onChange={e => { setResponseLocale(e.target.value as 'ko' | 'en' | 'ja'); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }}><option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option></select></label>
                     <p><label><input type="checkbox" checked={acknowledged} disabled={aiLoading} onChange={e => { setAcknowledged(e.target.checked); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }} /> 위 조건의 충족을 보장하지 않는 일반 장소 코스로 진행합니다.</label></p>
                     {!acknowledged && <p role="status">일반 장소 코스 안내에 직접 동의한 후 코스를 만들 수 있습니다.</p>}
-                    <MotionButton type="button" disabled={!acknowledged || aiLoading} onClick={() => void fetchAi()}>코스 만들기</MotionButton>
+                    {unsupportedAi && <div className="route-ai-scope" role="status">
+                        <p>{region} · {duration} AI 코스는 아직 준비 중이에요. 고른 지역의 기본 코스와 길찾기는 이용할 수 있어요.</p>
+                        <MotionButton type="button" className="route-pill" onClick={() => setMode('tour')}>{region} 기본 코스 보기</MotionButton>
+                        <MotionButton type="button" className="route-pill" onClick={() => { setRegion('서울'); setDuration('당일치기'); setPois([]); setSelectedStopId(undefined); setAiData(null); setAiError(null); fetchedKeyRef.current = ''; }}>서울 당일치기로 바꾸기</MotionButton>
+                    </div>}
+                    <MotionButton type="button" disabled={!acknowledged || aiLoading || unsupportedAi} onClick={() => void fetchAi()}>코스 만들기</MotionButton>
                     </section>}
                 </div>
             )}
@@ -269,6 +290,8 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                                                                 <p className="route-stop__meta">
                                                                     {[m.slot ? (SLOT_LABEL[m.slot] ?? m.slot) : null, m.address].filter(Boolean).join(' · ')}
                                                                 </p>
+                                                                <MotionButton type="button" className="route-stop__directions" aria-label={m.name + ' 길찾기'}
+                                                                    onClick={() => openDirections({id: m.id, name: m.name, address: m.address, lat: m.lat, lon: m.lng})}>여기로 길찾기</MotionButton>
                                                                 {next && <p className="route-stop__leg">↓ {legLabel(haversineKm(m, next))}</p>}
                                                             </div>
                                                         </div>
@@ -286,7 +309,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
 
             {mode !== 'road' && (
                 <div className="route-actions">
-                    <MotionButton type="button" className="route-pill" onClick={() => setMode('road')}>길 찾기</MotionButton>
+                    <MotionButton type="button" className="route-pill" onClick={() => openDirections()}>길 찾기</MotionButton>
                     <KakaoShareButton text="Kride에서 추천받은 하루 코스를 확인해 보세요!" path="/view/ROUTE_PLANNER" />
                     <Link className="route-pill route-actions__link" href="/view/SET_TIME_PAGE">약속 시간</Link>
                 </div>
