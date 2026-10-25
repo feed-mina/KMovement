@@ -1,0 +1,44 @@
+# Merge with compose.yml on a single Docker host. No public API port.
+services:
+  photo-video:
+    image: kmovement-photo-video:${PHOTO_VIDEO_REVISION:?Set the reviewed Git commit}
+    build:
+      args:
+        PHOTO_VIDEO_REVISION: ${PHOTO_VIDEO_REVISION}
+    networks: [default, kmovement-web]
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    cpus: 0.5
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8085/health',timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+  photo-video-worker:
+    image: kmovement-photo-video:${PHOTO_VIDEO_REVISION:?Set the reviewed Git commit}
+    build:
+      args:
+        PHOTO_VIDEO_REVISION: ${PHOTO_VIDEO_REVISION}
+    depends_on:
+      photo-video:
+        condition: service_healthy
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    cpus: 2.0
+    mem_limit: 1g
+volumes:
+  photo-video-data:
+    external: true
+    name: kmovement-photo-video-data
+networks:
+  default:
+    internal: true
+  kmovement-web:
+    external: true
+    name: kmovement-web_kmovement

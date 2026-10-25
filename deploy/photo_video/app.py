@@ -6,13 +6,14 @@ import os
 import sqlite3
 import uuid
 import warnings
-from contextlib import contextmanager
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from PIL import Image, ImageOps, UnidentifiedImageError
 from pydantic import BaseModel, ConfigDict, Field
+
+from deploy.photo_video.database import connect as database_connect, initialize_schema
 
 
 class TripContext(BaseModel):
@@ -47,35 +48,18 @@ def create_app(root: Path | None = None) -> FastAPI:
     storage.chmod(0o700)
     database = storage / "workflow.sqlite3"
 
-    @contextmanager
     def connect():
-        con = sqlite3.connect(database, timeout=15)
-        con.row_factory = sqlite3.Row
-        try:
-            with con:
-                yield con
-        finally:
-            con.close()
+        return database_connect(database)
 
-    with connect() as con:
-        con.execute("""CREATE TABLE IF NOT EXISTS photos (
-            id TEXT PRIMARY KEY, owner INTEGER NOT NULL,
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)""")
-        con.execute("""CREATE TABLE IF NOT EXISTS jobs (
-            id TEXT PRIMARY KEY, owner INTEGER NOT NULL, photo_id TEXT NOT NULL,
-            request_id TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'QUEUED',
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            started_at TEXT, finished_at TEXT, error_code TEXT,
-            UNIQUE(owner, request_id), FOREIGN KEY(photo_id) REFERENCES photos(id))""")
-        con.execute("CREATE INDEX IF NOT EXISTS jobs_owner_created ON jobs(owner,created_at)")
-        columns = {row[1] for row in con.execute("PRAGMA table_info(jobs)")}
-        for name, definition in [("retry_of", "TEXT"), ("render_ms", "INTEGER"), ("trip_json", "TEXT")]:
-            if name not in columns:
-                con.execute(f"ALTER TABLE jobs ADD COLUMN {name} {definition}")
+    initialize_schema(database)
 
     app = FastAPI(title="KMovement private photo video", docs_url=None, redoc_url=None)
     app.state.storage = storage
     app.state.connect = connect
+
+    @app.exception_handler(sqlite3.IntegrityError)
+    async def invalid_reference(request: Request, exc: sqlite3.IntegrityError):
+        return JSONResponse(status_code=409, content={"detail": "사진·작업 연결을 확인해주세요."})
 
     def owner(
         key: str = Header(default="", alias="X-Photo-Video-Key"),
