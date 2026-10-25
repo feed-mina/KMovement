@@ -1,4 +1,5 @@
 import io
+import uuid
 
 from fastapi.testclient import TestClient
 from PIL import Image
@@ -49,3 +50,25 @@ def test_unconfigured_server_rejects(tmp_path, monkeypatch):
     c = client(tmp_path, monkeypatch)
     monkeypatch.delenv('PHOTO_VIDEO_INTERNAL_KEY')
     assert c.post('/photos', content=picture(), headers=headers()).status_code == 503
+
+
+def new_job(c, owner=1):
+    photo = c.post('/photos', content=picture(), headers=headers(owner)).json()['photoId']
+    body = {'photoId': photo, 'requestId': str(uuid.uuid4())}
+    return body, c.post('/jobs', json=body, headers={**headers(owner), 'Content-Type': 'application/json'})
+
+
+def test_job_ownership_idempotency_and_limit(tmp_path, monkeypatch):
+    c = client(tmp_path, monkeypatch)
+    body, result = new_job(c)
+    assert result.status_code == 202
+    job_id = result.json()['jobId']
+    assert result.json()['status'] == 'QUEUED'
+    assert c.post('/jobs', json=body, headers={**headers(), 'Content-Type': 'application/json'}).json()['jobId'] == job_id
+    assert c.get(f'/jobs/{job_id}', headers=headers(2)).status_code == 404
+    assert c.get(f'/jobs/{job_id}', headers=headers()).status_code == 200
+    foreign = c.post('/jobs', json={**body, 'requestId': str(uuid.uuid4())}, headers={**headers(2), 'Content-Type': 'application/json'})
+    assert foreign.status_code == 404
+    assert new_job(c)[1].status_code == 202
+    assert new_job(c)[1].status_code == 429
+    assert c.post('/jobs', json={**body, 'owner': 2}, headers={**headers(), 'Content-Type': 'application/json'}).status_code == 422
