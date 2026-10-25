@@ -25,13 +25,16 @@ function PlaceSearch({ label, selected, query, region, onQuery, onSelect }: {
     const [busy, setBusy] = useState(false);
     const [results, setResults] = useState<DirectionPlace[]>([]);
     const [message, setMessage] = useState('');
+    const [searchKey, setSearchKey] = useState('');
+    const activeSearchKey = JSON.stringify([query, selected?.id ?? '']);
+    const activeSearch = searchKey === activeSearchKey;
     useEffect(() => () => { requestRef.current++; }, []);
     async function search(event: FormEvent) {
         event.preventDefault();
         const text = query.trim();
         if (!text) return;
         const request = ++requestRef.current;
-        setBusy(true); setResults([]); setMessage('');
+        setSearchKey(activeSearchKey); setBusy(true); setResults([]); setMessage('');
         try {
             const rows = await searchDirectionPlaces(text, region);
             if (request !== requestRef.current) return;
@@ -52,12 +55,12 @@ function PlaceSearch({ label, selected, query, region, onQuery, onSelect }: {
             <div className="directions-search-row">
                 <input id={id} type="search" maxLength={160} value={query} onChange={e => edit(e.target.value)}
                     placeholder="장소명이나 도로명 주소" autoComplete="off" enterKeyHint="search" />
-                <button type="submit" disabled={busy || !query.trim()}>{busy ? '검색 중…' : '검색'}</button>
+                <button type="submit" disabled={(busy && activeSearch) || !query.trim()}>{busy && activeSearch ? '검색 중…' : '검색'}</button>
             </div>
         </form>
         {selected && <p className="directions-selected" role="status"><strong>{selected.name}</strong>{selected.address && <span>{selected.address}</span>}</p>}
-        {message && <p role="status">{message}</p>}
-        {results.length > 0 && <ul className="directions-results" aria-label={label + ' 검색 결과'}>
+        {activeSearch && message && <p role="status">{message}</p>}
+        {activeSearch && results.length > 0 && <ul className="directions-results" aria-label={label + ' 검색 결과'}>
             {results.map(place => <li key={place.id}>
                 <button type="button" onClick={() => {
                     requestRef.current++; setResults([]); setMessage(''); setBusy(false); onSelect(place);
@@ -171,7 +174,7 @@ export default function RoadRoutePlanner({ region = '서울', destinations = [],
             </button>
             <p className="directions-note">선택하면 브라우저가 위치 사용을 물어요. 위치는 저장하지 않아요.</p>
             {locationError && <p role="alert">{locationError}</p>}
-            <PlaceSearch key={start?.id ?? "start-search"} label="출발 장소·주소" selected={start} query={startQuery}
+            <PlaceSearch label="출발 장소·주소" selected={start} query={startQuery}
                 onQuery={query => chooseStart(null, query)} onSelect={place => chooseStart(place, place.name)} />
         </div>
         <div className="directions-step">
@@ -180,7 +183,7 @@ export default function RoadRoutePlanner({ region = '서울', destinations = [],
                 {destinations.map(place => <button key={place.id} type="button" aria-pressed={end?.id === place.id}
                     onClick={() => chooseEnd(place, place.name)}>{place.name}</button>)}
             </div>}
-            <PlaceSearch key={end?.id ?? "end-search"} label="도착 장소·주소" selected={end} query={endQuery} region={region}
+            <PlaceSearch label="도착 장소·주소" selected={end} query={endQuery} region={region}
                 onQuery={query => chooseEnd(null, query)} onSelect={place => chooseEnd(place, place.name)} />
         </div>
         <div className="directions-handoff">

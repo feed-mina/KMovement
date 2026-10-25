@@ -123,7 +123,11 @@ test('editing a selected address clears the old route link', async () => {
     render(<RoadRoutePlanner initialDestination={seoul} />);
     await searchOrigin();
     expect(screen.getByRole('link', { name: '카카오맵에서 길찾기' })).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('도착 장소·주소'), { target: { value: '다른 장소' } });
+    const input = screen.getByLabelText('도착 장소·주소');
+    input.focus();
+    fireEvent.change(input, { target: { value: '다른 장소' } });
+    expect(screen.getByLabelText('도착 장소·주소')).toBe(input);
+    expect(input).toHaveFocus();
     expect(screen.queryByRole('link', { name: '카카오맵에서 길찾기' })).not.toBeInTheDocument();
 });
 
@@ -160,4 +164,17 @@ test('preview failure preserves external directions and never shows a successful
     expect(await screen.findByRole('alert')).toHaveTextContent('범위 밖');
     expect(screen.getByRole('link', { name: '카카오맵에서 길찾기' })).toBeInTheDocument();
     expect(screen.queryByTestId('road-map')).not.toBeInTheDocument();
+});
+
+test('late place search cannot display stale results after choosing current location', async () => {
+    let finish!: (rows: typeof seoul[]) => void;
+    (searchDirectionPlaces as jest.Mock).mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    render(<RoadRoutePlanner initialDestination={beach} />);
+    fireEvent.change(screen.getByLabelText('출발 장소·주소'), { target: { value: '서울역' } });
+    fireEvent.submit(screen.getByRole('form', { name: '출발 장소·주소 검색' }));
+    fireEvent.click(screen.getByRole('button', { name: '현재 위치 사용' }));
+    act(() => getPosition.mock.calls[0][0]({ coords: { latitude: 35.12, longitude: 129.04, accuracy: 20 } }));
+    await act(async () => finish([seoul]));
+    expect(screen.queryByRole('list', { name: '출발 장소·주소 검색 결과' })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('출발 장소·주소')).toHaveValue('현재 위치');
 });

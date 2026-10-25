@@ -103,7 +103,7 @@
 /* Address-first directions: comfortable touch targets, no coordinate entry. */
 .directions { display: grid; gap: 20px; width: 100%; max-width: 720px; margin: 0 auto; color: var(--text-body, #374151); }
 .directions-heading h2 { margin: 4px 0 8px; font-size: clamp(22px, 4vw, 28px); color: var(--text-strong, #172033); }
-.directions p { line-height: 1.6; overflow-wrap: anywhere; }
+.directions p { line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
 .directions-eyebrow { margin: 0; color: var(--semantic-accent-strong, #8b0610); font-size: 13px; font-weight: 700; }
 .directions-step { padding: 20px; border: 1px solid var(--border-hair, #e5e7eb); border-radius: 16px; background: var(--surface-card, white); }
 .directions-step h3 { margin: 0 0 14px; font-size: 16px; color: var(--text-strong, #172033); }
