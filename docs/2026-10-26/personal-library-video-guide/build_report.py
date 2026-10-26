@@ -101,7 +101,7 @@ s+='</g></svg>'
 
 s=svg_begin('R1 소스 기준 Tora 단일과 미디어·배치 분기',1140,820)
 s+=txt(30,44,'R1 · 작업 종류와 엔드포인트를 구분',24,700)
-s+=txt(30,72,'코드의 분기 / 운영 ID·이미지·최근 작업은 미확인',15,color='#8a432f')
+s+=txt(30,72,'소스 분기 / 콘솔 미디어 설정 확인 · 서버 매핑·Tora 실적 미확인',15,color='#8a432f')
 s+=box(390,105,360,76,'Spring 영상 요청','POST /jobs/runpod 또는 /batch')
 s+=box(55,239,460,76,'단일 route = tora_cogvideox_i2v','대체 생성 허용 안 함')
 s+=box(625,239,460,76,'일반 단일 또는 batch_video','배치는 미디어 엔드포인트 사용')
@@ -116,6 +116,81 @@ s+=box(260,680,620,85,'결과: /v2/{endpoint}/status/{job_id}','Spring은 작업
 s+=arrow(285,451,380,680,'상태 조회');s+=arrow(855,606,760,680,'상태 조회')
 s+='</g></svg>'
 (A/'runpod-routing.svg').write_text(s,encoding='utf-8')
+
+
+s=svg_begin('T1 현재 코스 연결 화면의 코드 기반 재구성',1140,660)
+s+=txt(30,44,'T1 · 코스에서 선택한 장소를 영상에 기록',24,700)
+s+=txt(30,74,'현재 코드 기반 재구성 / 운영 캡처 아님 / 장소·번호·상태는 설명용 예시',15,color='#52606d')
+for x,title in [(28,'코스 결과'),(404,'개인 영상 · 만들기'),(780,'선택한 영상 작업')]:
+ s+=f'<rect x="{x}" y="105" width="332" height="510" rx="16" fill="white" stroke="#ccd4d9"/>'
+ s+=txt(x+20,145,title,22,700)
+s+=box(48,180,292,96,'서울 당일치기 코스','설명용 서울 장소 · poi:17')
+s+=box(48,315,292,106,'이 코스의 여행 사진으로','영상 만들기',fill='#fce8dd')
+s+=txt(48,465,'토큰 + 선택용 장소 목록',16)
+s+=txt(48,495,'브라우저에 임시 보관 후 이동',14,color='#52606d')
+s+=txt(424,193,'이 사진과 연결할 코스 장소',17,700)
+s+=box(424,217,292,76,'장소 선택  ▾','설명용 서울 장소')
+s+=txt(424,329,'촬영 위치를 자동 판정하지 않음',14,color='#8a432f')
+s+=box(424,357,292,76,'코스 연결 없이 만들기','선택 정보만 해제')
+s+=box(424,459,292,88,'사진 올리기 → 영상 만들기','서버가 장소를 다시 검증',fill='#e4efec')
+s+=box(800,180,292,76,'영상 생성 완료','사진 확대·이동 / 5초')
+s+=txt(800,309,'연결 장소: 설명용 서울 장소',15,700)
+s+=txt(800,343,'코스 번호 11111111',15)
+s+=txt(800,390,'사진의 실제 촬영 위치·',15,color='#52606d')
+s+=txt(800,421,'아티스트 방문 사실은 증명 안 함',14,color='#52606d')
+s+=box(800,465,292,82,'영상 재생 / 다운로드','코스 전체 복원 기능은 없음')
+s+='</g></svg>'
+(A/'course-screen.svg').write_text(s,encoding='utf-8')
+
+s=svg_begin('T2 코스 검증 후 개인 작업 저장 흐름',1140,1040)
+s+=txt(30,44,'T2 · 새 작업에서만 코스 연결을 검증',24,700)
+s+=txt(30,74,'실선: 실제 처리 순서 / 각 실패는 새 개인 작업 저장 전에 종료',15,color='#52606d')
+s+=box(390,104,360,78,'V1 로그인·요청 필드 확인','Spring /auth/me → owner 확정')
+s+=arrow(570,182,570,232,'입력 정상')
+s+=box(390,232,360,78,'코스 필드가 있는가?','courseContext + poiId')
+s+=arrow(750,270,955,270,'있음')
+s+=box(800,334,310,94,'V2 코스 검증 API 호출','내부 인증 + 허용 계정',fill='#fce8dd')
+s+=arrow(955,270,955,334)
+s+=arrow(390,270,185,270,'없음')
+s+=box(30,334,310,94,'코스 연결 없이 진행','trip = 없음 / 검증 API 생략')
+s+=arrow(185,270,185,334)
+s+=box(630,485,480,82,'V3 서명·소유자·만료·자료 버전','현재 공개 카탈로그와 비교')
+s+=arrow(955,428,955,485,'인증 성공')
+s+=box(630,627,480,82,'V4 선택 장소의 코스 포함 확인','성공: 서버가 장소 정보 7필드 반환')
+s+=arrow(870,567,870,627,'토큰 유효')
+s+=box(30,520,420,109,'실패 → 요청 종료','401 / 403 / 409 / 422 / 503',fill='#fce8dd')
+s+=txt(50,605,'아직 jobs INSERT 없음',15,color='#8a432f')
+s+=arrow(630,526,450,570,'검증 실패')
+s+=arrow(630,668,450,600,'코스 밖 장소')
+s+=box(390,800,550,90,'V5 개인 API가 사진 소유권·요청 확인','trip → JSON TEXT → SQLite jobs.trip_json',fill='#e4efec')
+s+=arrow(870,709,800,800,'검증된 trip')
+s+=arrow(185,428,185,465);s+=arrow(185,465,15,465);s+=arrow(15,465,15,845);s+=arrow(15,845,390,845,'trip 없음')
+s+=box(390,940,550,72,'작업 응답 · 이후 CPU 렌더링','FFmpeg는 사진 ID만 사용 / trip은 이력 설명')
+s+=arrow(665,890,665,940,'저장 성공')
+s+='</g></svg>'
+(A/'course-context.svg').write_text(s,encoding='utf-8')
+
+s=svg_begin('T3 공개 코스 자료와 개인 작업 저장 경계',1140,850)
+s+=txt(30,44,'T3 · API 연결과 DB 외래키를 구분',24,700)
+s+=txt(30,74,'실선: 요청·저장·응답 / 점선: 값으로 남긴 논리 참조 / 외래키는 SQLite 내부만',15,color='#52606d')
+s+=box(30,116,460,85,'공개 장소 카탈로그','검수 파일 + Spring PostgreSQL 공개 뷰')
+s+=box(650,116,460,85,'브라우저의 코스 선택','sessionStorage: 서명 토큰 + id/name')
+s+=box(330,285,480,92,'코스 검증 API','토큰 + 로그인 owner + 선택 poiId → trip')
+s+=arrow(300,201,410,285,'현재 자료 조회')
+s+=arrow(880,201,735,285,'선택 값 전송')
+s+=box(30,486,420,110,'개인 SQLite · jobs','owner / photo_id / 상태 / trip_json',fill='#e4efec')
+s+=txt(50,573,'trip은 선택 장소의 당시 정보',15,color='#52606d')
+s+=arrow(490,377,300,486,'검증 응답 저장')
+s+=box(650,486,460,110,'개인 SQLite · photos','id + owner ↔ jobs.photo_id + owner',fill='#e4efec')
+s+=txt(670,573,'같은 DB 안의 복합 외래키',15,color='#52606d')
+s+=arrow(450,535,650,535,'FK 참조')
+s+=arrow(30,541,15,541,dash=True);s+=arrow(15,541,15,236,dash=True);s+=arrow(15,236,30,158,dash=True);s+=txt(34,445,'poiId·버전 값만 보존',14,color='#52606d')
+s+=box(30,704,420,92,'응답 trip · 연결 장소 표시','문자열 → JSON 객체 / owner별 이력 조회')
+s+=arrow(240,596,240,704,'복원')
+s+=box(650,704,460,92,'개인 파일 · 사진과 MP4','CPU FFmpeg / 보호된 재생 API')
+s+=arrow(880,596,880,704,'사진 ID로 처리')
+s+='</g></svg>'
+(A/'trip-storage.svg').write_text(s,encoding='utf-8')
 
 sourcebase='https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/'
 w='subproject/SDUI/metadata-project/'
@@ -150,7 +225,7 @@ def embed(m):
  return f'<figure id="fig-{name}">{(ROOT/f).read_text(encoding="utf-8")}<figcaption><span>{esc(alt)}</span><button class="quiet" data-zoom="fig-{name}" type="button">그림 크게 보기</button></figcaption></figure>'
 body=re.sub(r'<img alt="([^"]*)" src="([^"]*)"\s*/?>',lambda m:embed(type('M',(),{'group':lambda self,i:m.group(2 if i==1 else 1)})()),body)
 body=re.sub(r'(?s)<table>(.*?)</table>',r'<div class="table-wrap"><table>\1</table></div>',body)
-nav=[('scope','목표·범위'),('current','현재 화면'),('after','개선 화면'),('flow','이동·조회 흐름'),('files','함수·수정 파일'),('login','로그인 복귀'),('history','조회 상태'),('contracts','API·저장 경계'),('steps','구현 순서'),('tests','시험 계획'),('maintenance','진단·복구'),('verification','확인 범위'),('runpod-operations','RunPod 운영 분석')]
+nav=[('scope','목표·범위'),('current','현재 화면'),('after','개선 화면'),('flow','이동·조회 흐름'),('files','함수·수정 파일'),('login','로그인 복귀'),('history','조회 상태'),('contracts','API·저장 경계'),('steps','구현 순서'),('tests','시험 계획'),('maintenance','진단·복구'),('verification','확인 범위'),('runpod-operations','RunPod 운영 분석'),('trip-context','코스 연결·trip_json')]
 page='<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>내 목록과 내 영상 연결 가이드</title><style>'+CSS+'</style></head><body><a class="skip" href="#content">본문으로 이동</a><header class="cover"><span class="eyebrow">KMOVEMENT / IMPLEMENTATION GUIDE</span><h1>내 목록에서 내 영상까지</h1><p>같은 보관 경험으로 이어지는 화면 연결 가이드. 현재 구현과 다음 변경을 구분하고, 기존 데이터와 소유권을 유지합니다.</p></header><div class="shell"><aside aria-label="보고서 목차">'+''.join(f'<a href="#{k}">{v}</a>' for k,v in nav)+'</aside><main id="content">'+body+'</main></div><dialog id="zoom-dialog" aria-label="그림 확대"><div class="dialog-bar"><span>그림 확대</span><div><button id="zoom-plus" class="quiet">확대</button> <button id="zoom-reset" class="quiet">원래 크기</button> <button id="zoom-close" class="quiet">닫기</button></div></div><div id="zoom-stage" class="zoom-stage"></div></dialog><footer>현재 화면은 코드 기반 재구성, 개선 화면은 미구현 모형입니다. 체험은 문서 내부에서만 동작합니다.</footer><script>'+JS+'</script></body></html>'
 (ROOT/'guide.html').write_text(page,encoding='utf-8')
 print('Generated guide.html and',len(list(A.glob('*.svg'))),'SVG assets')

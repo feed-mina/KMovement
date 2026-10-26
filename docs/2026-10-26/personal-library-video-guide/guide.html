@@ -1,8 +1,8 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>내 목록과 내 영상 연결 가이드</title><style>
 :root{--ink:#1c2a35;--muted:#536471;--line:#dce2e5;--paper:#fff;--accent:#b94d31;--wash:#f4f5ef;--soft:#fbe9df;--mint:#e5efeb}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;color:var(--ink);font:16px/1.8 "Malgun Gothic","Noto Sans KR",sans-serif;background:var(--wash)}a{color:#235e7d;text-decoration-thickness:1px;text-underline-offset:3px}button,select{font:inherit}button,a,select{touch-action:manipulation}button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #a23d28;outline-offset:4px}header.cover{padding:58px max(28px,calc((100vw - 1200px)/2));background:#1c2d35;color:#fff;border-bottom:6px solid #e8bb8f}header.cover p{max-width:760px;color:#d5e0e1}header.cover h1{font-size:clamp(28px,4vw,48px);margin:10px 0;line-height:1.35}.eyebrow{letter-spacing:2px;font-size:13px}.shell{max-width:1370px;margin:auto;display:grid;grid-template-columns:218px minmax(0,1fr);gap:24px;padding:28px}aside{position:sticky;top:20px;align-self:start}aside a{display:block;padding:7px 12px;color:var(--muted);text-decoration:none;border-left:2px solid var(--line);font-size:14px}aside a:hover{background:#fff;border-color:var(--accent)}main{min-width:0;background:var(--paper);padding:36px 42px;border:1px solid var(--line);border-radius:20px}main h1{font-size:30px;line-height:1.45}h2{font-size:25px;border-top:1px solid var(--line);padding-top:38px;margin:44px 0 20px;line-height:1.5}h3{font-size:20px;margin-top:26px}p,li{overflow-wrap:anywhere}li+li{margin-top:8px}strong{font-weight:750}.table-wrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.75}th,td{padding:13px 15px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}th{background:#edf2ef;min-width:110px}tr:last-child td{border:0}td code{overflow-wrap:anywhere;white-space:normal}pre{padding:22px;background:#162831;color:#edf6f5;border-radius:12px;overflow-x:auto;font-size:13px;line-height:1.75}code{font-family:Consolas,monospace;font-size:.9em;background:#eff2f2;padding:2px 4px;border-radius:4px}pre code{background:none;padding:0;color:inherit}figure{margin:26px 0;padding:14px;background:#f5f5f0;border:1px solid var(--line);border-radius:16px}figure svg{width:100%;height:auto;display:block}figcaption{font-size:13px;color:var(--muted);margin-top:12px;display:flex;gap:12px;justify-content:space-between;align-items:center}.quiet{border:1px solid #bbc6ca;background:white;border-radius:8px;padding:7px 12px;color:var(--ink)}.notice{padding:18px 22px;background:var(--soft);border-left:4px solid var(--accent);border-radius:8px}.prototype{border:1px solid var(--line);border-radius:18px;padding:24px;background:#fafbf7;margin:24px 0}.proto-nav{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 18px}.proto-nav button{background:white;border:1px solid #bcc8cd;border-radius:24px;padding:8px 22px}.proto-nav button[aria-selected=true]{background:#233c40;color:#fff;border-color:#233c40}.demo-row{padding:18px;background:white;border:1px solid var(--line);border-radius:12px;margin-top:12px}.demo-row p{margin:4px 0}.small{color:var(--muted);font-size:13px}.inspect{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;padding:20px;background:#edf3ef;border-radius:16px}.inspect-detail{background:white;border-radius:12px;padding:20px;border:1px solid var(--line)}.inspect-map{display:grid;grid-template-columns:1fr 1fr;gap:10px}.inspect-map button{border:1px solid #aebdb6;background:#fff;padding:13px 10px;border-radius:10px;font-size:14px;text-align:left}.inspect-map button[aria-pressed=true]{background:#243d38;color:#fff}.inspect-detail h4{margin:0 0 8px;font-size:19px}.skip{position:absolute;top:-80px;left:15px}.skip:focus{top:12px;background:white;padding:10px;z-index:10}dialog{border:1px solid #b5bfc3;border-radius:14px;max-width:96vw;width:1250px;padding:18px}dialog::backdrop{background:#15212bba}.dialog-bar{display:flex;justify-content:space-between;gap:12px;position:sticky;top:0;background:white;padding:5px}.zoom-stage{max-height:80vh;overflow:auto}.zoom-stage svg{width:100%;min-width:600px;height:auto}.qa{font-size:14px;padding:15px;background:var(--mint);border-radius:10px}footer{max-width:1200px;margin:0 auto 40px;padding:20px;color:var(--muted);font-size:13px}@media(max-width:850px){.shell{display:block;padding:16px}aside{position:static;display:flex;gap:5px;overflow-x:auto;margin-bottom:16px}aside a{white-space:nowrap;border:1px solid var(--line);border-radius:18px;padding:6px 12px;background:white}main{padding:23px 18px;border-radius:14px}header.cover{padding:32px 22px}.inspect{grid-template-columns:1fr}.prototype{padding:16px}table{min-width:580px}h2{font-size:22px}main h1{font-size:26px}pre{font-size:12px;padding:14px}figcaption{align-items:flex-start;flex-direction:column}.dialog-bar{flex-wrap:wrap}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{aside,.quiet,.prototype,dialog{display:none}.shell{display:block;padding:0}main{border:0;padding:0}header.cover{padding:20px}a{color:inherit}figure,table{break-inside:avoid}}
-</style></head><body><a class="skip" href="#content">본문으로 이동</a><header class="cover"><span class="eyebrow">KMOVEMENT / IMPLEMENTATION GUIDE</span><h1>내 목록에서 내 영상까지</h1><p>같은 보관 경험으로 이어지는 화면 연결 가이드. 현재 구현과 다음 변경을 구분하고, 기존 데이터와 소유권을 유지합니다.</p></header><div class="shell"><aside aria-label="보고서 목차"><a href="#scope">목표·범위</a><a href="#current">현재 화면</a><a href="#after">개선 화면</a><a href="#flow">이동·조회 흐름</a><a href="#files">함수·수정 파일</a><a href="#login">로그인 복귀</a><a href="#history">조회 상태</a><a href="#contracts">API·저장 경계</a><a href="#steps">구현 순서</a><a href="#tests">시험 계획</a><a href="#maintenance">진단·복구</a><a href="#verification">확인 범위</a><a href="#runpod-operations">RunPod 운영 분석</a></aside><main id="content"><h1>내 목록과 내 영상 연결 가이드</h1>
+</style></head><body><a class="skip" href="#content">본문으로 이동</a><header class="cover"><span class="eyebrow">KMOVEMENT / IMPLEMENTATION GUIDE</span><h1>내 목록에서 내 영상까지</h1><p>같은 보관 경험으로 이어지는 화면 연결 가이드. 현재 구현과 다음 변경을 구분하고, 기존 데이터와 소유권을 유지합니다.</p></header><div class="shell"><aside aria-label="보고서 목차"><a href="#scope">목표·범위</a><a href="#current">현재 화면</a><a href="#after">개선 화면</a><a href="#flow">이동·조회 흐름</a><a href="#files">함수·수정 파일</a><a href="#login">로그인 복귀</a><a href="#history">조회 상태</a><a href="#contracts">API·저장 경계</a><a href="#steps">구현 순서</a><a href="#tests">시험 계획</a><a href="#maintenance">진단·복구</a><a href="#verification">확인 범위</a><a href="#runpod-operations">RunPod 운영 분석</a><a href="#trip-context">코스 연결·trip_json</a></aside><main id="content"><h1>내 목록과 내 영상 연결 가이드</h1>
 <p><strong>핵심 한 줄: 기존 저장소와 소유권 검사를 유지하고, 내 목록과 개인 영상에 공통 탐색 메뉴·로그인 복귀·조회 상태를 연결한다.</strong></p>
-<p>작성일: 2026-10-26. 소스 기준: KMovement main <code>46a2d5ae83451befb0fa465acffe96257b7811d6</code>. 이 main은 직전 분석 이후 문서만 추가됐으며 아래 실행 코드는 PR #299 병합 상태와 같다.</p>
+<p>작성일: 2026-10-26. 소스 대조: KMovement main <code>ba68455a101f2be0d5bec35ff09293d0f0d135a5</code>. 문서만 추가된 main과 조사용 소스를 대조했다. 아래 실행 코드는 PR #299 병합 상태와 같다. RunPod 콘솔 확인과 코스 연결 분석을 추가했다.</p>
 <p><a href="guide.html">HTML 보고서</a> · <a href="../saved-item-media-storage-audit.md">앞선 저장 경로 조사</a></p>
 <p><a id="scope"></a></p>
 <h2>1. 목표와 읽는 순서</h2>
@@ -45,7 +45,7 @@
 </tbody>
 </table></div>
 <p>API(Application Programming Interface)는 프로그램의 요청·응답 창구, DB(Database)는 데이터베이스다. UI(User Interface)는 화면 구성, UX(User Experience)는 화면을 사용하는 과정이다. SVG(Scalable Vector Graphics)는 확대해도 선명한 그림 파일 형식이다.</p>
-<p><a href="#current">현재 화면</a> · <a href="#after">개선 화면</a> · <a href="#flow">이동 흐름</a> · <a href="#files">함수와 파일</a> · <a href="#login">로그인 복귀</a> · <a href="#history">조회 상태</a> · <a href="#contracts">API·DB</a> · <a href="#steps">구현 순서</a> · <a href="#tests">시험</a></p>
+<p><a href="#current">현재 화면</a> · <a href="#after">개선 화면</a> · <a href="#flow">이동 흐름</a> · <a href="#files">함수와 파일</a> · <a href="#login">로그인 복귀</a> · <a href="#history">조회 상태</a> · <a href="#contracts">API·DB</a> · <a href="#steps">구현 순서</a> · <a href="#tests">시험</a> · <a href="#runpod-operations">RunPod 운영</a> · <a href="#trip-context">여행 코스와 trip_json</a></p>
 <p><a id="current"></a></p>
 <h2>2. 현재 화면에서 끊기는 부분</h2>
 <p><figure id="fig-current-screens"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 700" role="img" aria-label="G1 코드 기반 현재 화면 재구성"><title>G1 코드 기반 현재 화면 재구성</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs><rect width="1140" height="700" rx="18" fill="#f5f5f0"/><g font-family="'Malgun Gothic','Noto Sans KR',sans-serif" fill="#15212c"><text x="30" y="42" font-size="24" font-weight="700" fill="#15212c">G1 · 현재 코드 기반 재구성 / 운영 캡처 아님</text><text x="30" y="72" font-size="15" font-weight="400" fill="#586875">모든 이름·숫자·작업 상태는 설명용 예시입니다.</text><rect x="28" y="100" width="332" height="558" rx="18" fill="white" stroke="#cfd7dc"/><text x="50" y="138" font-size="23" font-weight="700" fill="#15212c">마이페이지</text><text x="50" y="180" font-size="17" font-weight="400" fill="#15212c">설명용 회원</text><rect x="404" y="100" width="332" height="558" rx="18" fill="white" stroke="#cfd7dc"/><text x="426" y="138" font-size="23" font-weight="700" fill="#15212c">내 목록</text><rect x="780" y="100" width="332" height="558" rx="18" fill="white" stroke="#cfd7dc"/><text x="802" y="138" font-size="23" font-weight="700" fill="#15212c">내 영상</text><rect x="48" y="220" width="292" height="77" rx="12" fill="white" stroke="#ccd4d9"/><text x="66" y="251" font-size="18" font-weight="700" fill="#15212c">저장 아티스트  3</text><text x="66" y="279" font-size="14" font-weight="400" fill="#52606d">저장 일정  2   /   상품  1</text><rect x="48" y="323" width="292" height="58" rx="12" fill="white" stroke="#ccd4d9"/><text x="66" y="354" font-size="18" font-weight="700" fill="#15212c">내 목록 보기</text><rect x="48" y="396" width="292" height="58" rx="12" fill="white" stroke="#ccd4d9"/><text x="66" y="427" font-size="18" font-weight="700" fill="#15212c">홈으로</text><text x="50" y="510" font-size="16" font-weight="700" fill="#9d432f">C1  개인 영상 진입 없음</text><text x="426" y="182" font-size="16" font-weight="700" fill="#15212c">아티스트   일정   상품</text><rect x="424" y="220" width="292" height="86" rx="12" fill="white" stroke="#ccd4d9"/><text x="442" y="251" font-size="18" font-weight="700" fill="#15212c">설명용 팬 일정</text><text x="442" y="279" font-size="14" font-weight="400" fill="#52606d">공개     보기     삭제</text><text x="426" y="352" font-size="15" font-weight="400" fill="#15212c">마이페이지로 돌아가기</text><text x="426" y="510" font-size="16" font-weight="700" fill="#9d432f">C2  개인 영상 이동 없음</text><text x="802" y="183" font-size="14" font-weight="400" fill="#15212c">로그인 · 여행 코스로 돌아가기</text><rect x="800" y="218" width="292" height="94" rx="12" fill="white" stroke="#ccd4d9"/><text x="818" y="249" font-size="18" font-weight="700" fill="#15212c">여행 사진 선택</text><text x="818" y="277" font-size="14" font-weight="400" fill="#52606d">사진 올리기  /  영상 만들기</text><rect x="800" y="334" width="292" height="92" rx="12" fill="white" stroke="#ccd4d9"/><text x="818" y="365" font-size="18" font-weight="700" fill="#15212c">이전 작업</text><text x="818" y="393" font-size="14" font-weight="400" fill="#52606d">생성 완료 · 설명용 작업</text><text x="802" y="488" font-size="15" font-weight="700" fill="#9d432f">C3  이력 상태 표시 보강 필요</text><text x="802" y="521" font-size="14" font-weight="400" fill="#52606d">로그인 후 영상 복귀도 보강</text></g></svg><figcaption><span>G1 현재 화면: 코드 기반 재구성</span><button class="quiet" data-zoom="fig-current-screens" type="button">그림 크게 보기</button></figcaption></figure></p>
@@ -655,7 +655,7 @@ npx tsc --noEmit --incremental false
 </ul>
 <p><a id="runpod-operations"></a></p>
 <h2>13. RunPod 운영 경로 추가 분석</h2>
-<p>분석 기준: 2026-10-26, main <code>b5822659c7bc0e0adc20cf69f921a23edf191992</code>. 이전 가이드 작성 이후 애플리케이션 소스 변경은 없다. <strong>아래 표는 현재 코드의 동작이며 실제 운영 계정의 사용 실적과 구분한다.</strong></p>
+<p>분석 기준: 2026-10-26(한국 시간), main 코드는 앞의 소스 대조 기준과 동일하다. <strong>소스의 분기, 로그인한 RunPod 콘솔에서 관찰한 설정, 아직 확인하지 못한 운영 실적을 구분한다.</strong></p>
 <h3>13.1 먼저 구분할 운영 상태</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -692,13 +692,29 @@ npx tsc --noEmit --incremental false
 <td>컨테이너 환경값·실제 Spring 접속 대상·운영 DB 작업 건수는 확인하지 못함</td>
 </tr>
 <tr>
-<td>RunPod 콘솔</td>
-<td>Serverless 페이지 접근 시 로그인 필요 화면 확인</td>
-<td>엔드포인트 ID·연결 이미지·현재 작업자·최근 성공 작업은 미확인</td>
+<td>RunPod 콘솔의 미디어 계열</td>
+<td><code>KMovement</code> 엔드포인트에 저장소 <code>feed-mina/KMovement</code>, main, <code>deploy/media_motion/Dockerfile.runpod</code>, build context <code>.</code>가 연결됨</td>
+<td>일반 미디어 이미지 계열임은 확인. Spring의 실효 <code>RUNPOD_MEDIA_ENDPOINT_ID</code>와 일치하는지는 미확인</td>
+</tr>
+<tr>
+<td>미디어 작업자 설정</td>
+<td>GPU 1개·24GB 등급, Active workers 0, <strong>Max workers 0</strong>, idle timeout 300초, execution timeout 3600초. Overview에서 Idle·실행 작업자 0·진행 작업 0·대기 작업 0</td>
+<td>관찰 시점 설정. 최소 작업자 0에 따른 유휴 상태와 다르게 <strong>확장 상한도 0</strong>이라는 해석. 설정을 변경하지 않음</td>
+</tr>
+<tr>
+<td>미디어 최근 표시 범위</td>
+<td>Overview 기본 <code>Past hour</code>: Total·Completed·Retried·Failed 모두 0</td>
+<td>최근 한 시간 표시 결과. 전체 사용 이력·하루 실적·영구 미사용으로 확대하지 않음</td>
+</tr>
+<tr>
+<td>Tora 후보</td>
+<td>별도 141GB 엔드포인트가 목록에 있었음. 상세 조회는 Chrome 확장 UI 차단으로 중단</td>
+<td>GPU 크기와 이름만으로 Tora라고 확정하지 않음. 이미지·볼륨·설정·성공 작업 미확인</td>
 </tr>
 </tbody>
 </table></div>
-<p>따라서 <strong>현재 Tora·미디어 엔드포인트가 운영에서 정상 사용 중이라는 결론은 아직 낼 수 없다.</strong> 반대로 미사용·중지 상태라고 확정할 근거도 없다. 웹 배포 성공, 이미지 빌드 성공, 외부 생성 성공은 각각 다른 증거다.</p>
+<p>따라서 <strong>미디어 계열 엔드포인트의 존재·저장소 연결·최대 작업자 0 설정은 확인했지만, Tora·일반 영상·배치의 실제 성공 사용은 입증하지 못했다.</strong> 과거 미사용이나 전체 서비스 중지로 확대하지 않는다. 웹 배포 성공, 이미지 빌드 성공, 외부 생성 성공은 각각 다른 증거다.</p>
+<p>미디어 Releases 최상단에는 Release #137·짧은 커밋 <code>1340024</code>가 표시됐다. 이는 콘솔의 릴리스 목록 관찰이며 현재 활성 이미지 digest나 최신 main 실행 증거는 아니다. 실행 작업자가 0이므로 실행 중인 이미지도 확인하지 못했다. Requests 탭은 과거 기록이 아니라 <code>/run</code> 입력·실행 도구여서 실행하지 않았다. Logs의 기본 Live 보기에는 항목이 보이지 않았지만 과거 로그가 없다는 뜻은 아니다. 편집 창은 값을 바꾸지 않고 Cancel로 닫았다.</p>
 <h3>13.2 단일 영상과 배치의 실제 분기</h3>
 <p>엔드포인트(endpoint)는 요청을 받는 실행 창구다. 여기서 <code>route</code>는 작업 종류, <code>photo_route</code>는 배치 안의 사진 처리 방식이다. 같은 필드가 아니다. I2V(Image-to-Video)는 사진을 입력해 영상을 만드는 방식이다.</p>
 <div class="table-wrap"><table>
@@ -756,8 +772,8 @@ npx tsc --noEmit --incremental false
 </tbody>
 </table></div>
 <p>근거: <a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/subproject/SDUI/metadata-project/components/community/CommunityPage.tsx">커뮤니티 화면</a>, <a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/subproject/SDUI/SDUI-server/src/main/java/com/domain/demo_backend/domain/community/service/AnimationService.java">Spring 영상 서비스</a>, <a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/src/api/fastapi_server.py">FastAPI 프록시</a>, <a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/media_motion/batch_video_worker.py">배치 작업자</a>. 현재 커뮤니티 진입 링크를 숨긴 정책도 유지되고 있어, 화면 코드의 존재만으로 사용자가 운영에서 도달한다고 단정하지 않는다.</p>
-<p><figure id="fig-runpod-routing"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 820" role="img" aria-label="R1 소스 기준 Tora 단일과 미디어·배치 분기"><title>R1 소스 기준 Tora 단일과 미디어·배치 분기</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs><rect width="1140" height="820" rx="18" fill="#f5f5f0"/><g font-family="'Malgun Gothic','Noto Sans KR',sans-serif" fill="#15212c"><text x="30" y="44" font-size="24" font-weight="700" fill="#15212c">R1 · 작업 종류와 엔드포인트를 구분</text><text x="30" y="72" font-size="15" font-weight="400" fill="#8a432f">코드의 분기 / 운영 ID·이미지·최근 작업은 미확인</text><rect x="390" y="105" width="360" height="76" rx="12" fill="white" stroke="#ccd4d9"/><text x="408" y="136" font-size="18" font-weight="700" fill="#15212c">Spring 영상 요청</text><text x="408" y="164" font-size="14" font-weight="400" fill="#52606d">POST /jobs/runpod 또는 /batch</text><rect x="55" y="239" width="460" height="76" rx="12" fill="white" stroke="#ccd4d9"/><text x="73" y="270" font-size="18" font-weight="700" fill="#15212c">단일 route = tora_cogvideox_i2v</text><text x="73" y="298" font-size="14" font-weight="400" fill="#52606d">대체 생성 허용 안 함</text><rect x="625" y="239" width="460" height="76" rx="12" fill="white" stroke="#ccd4d9"/><text x="643" y="270" font-size="18" font-weight="700" fill="#15212c">일반 단일 또는 batch_video</text><text x="643" y="298" font-size="14" font-weight="400" fill="#52606d">배치는 미디어 엔드포인트 사용</text><path d="M450,181 L285,239" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="375.5" y="203.0" font-size="13" font-weight="400" fill="#475569">Tora 단일</text><path d="M695,181 L855,239" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="783.0" y="203.0" font-size="13" font-weight="400" fill="#475569">그 외·배치</text><rect x="55" y="371" width="460" height="80" rx="12" fill="#fce8dd" stroke="#ccd4d9"/><text x="73" y="402" font-size="18" font-weight="700" fill="#15212c">Tora ID 또는 레거시 ID</text><text x="73" y="430" font-size="14" font-weight="400" fill="#52606d">/v2/{endpoint}/run</text><rect x="625" y="371" width="460" height="80" rx="12" fill="#e4efec" stroke="#ccd4d9"/><text x="643" y="402" font-size="18" font-weight="700" fill="#15212c">Media ID 또는 레거시 ID</text><text x="643" y="430" font-size="14" font-weight="400" fill="#52606d">/v2/{endpoint}/run</text><path d="M285,315 L285,371" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="293.0" y="336.0" font-size="13" font-weight="400" fill="#475569">제출</text><path d="M855,315 L855,371" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="863.0" y="336.0" font-size="13" font-weight="400" fill="#475569">제출</text><rect x="625" y="500" width="460" height="106" rx="12" fill="white" stroke="#ccd4d9"/><text x="643" y="531" font-size="18" font-weight="700" fill="#15212c">배치: 같은 작업자 안에서 처리</text><text x="643" y="559" font-size="14" font-weight="400" fill="#52606d">auto: Tora 선택 없음 / 명시 Tora: 로컬 시도</text><text x="646" y="585" font-size="15" font-weight="400" fill="#52606d">Tora 실패 → CogVideoX → 3d_photo_light</text><path d="M855,451 L855,500" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="863.0" y="468.5" font-size="13" font-weight="400" fill="#475569">batch_video일 때</text><rect x="260" y="680" width="620" height="85" rx="12" fill="white" stroke="#ccd4d9"/><text x="278" y="711" font-size="18" font-weight="700" fill="#15212c">결과: /v2/{endpoint}/status/{job_id}</text><text x="278" y="739" font-size="14" font-weight="400" fill="#52606d">Spring은 작업 ID·route 저장 / endpoint ID 전용 저장 없음</text><path d="M285,451 L380,680" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="340.5" y="558.5" font-size="13" font-weight="400" fill="#475569">상태 조회</text><path d="M855,606 L760,680" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="815.5" y="636.0" font-size="13" font-weight="400" fill="#475569">상태 조회</text></g></svg><figcaption><span>R1 단일 Tora와 미디어·배치 분기</span><button class="quiet" data-zoom="fig-runpod-routing" type="button">그림 크게 보기</button></figcaption></figure></p>
-<p>R1은 <strong>소스 기준 실행 분기</strong>다. 운영에 두 엔드포인트가 실제로 분리되어 있다는 의미가 아니다.</p>
+<p><figure id="fig-runpod-routing"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 820" role="img" aria-label="R1 소스 기준 Tora 단일과 미디어·배치 분기"><title>R1 소스 기준 Tora 단일과 미디어·배치 분기</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs><rect width="1140" height="820" rx="18" fill="#f5f5f0"/><g font-family="'Malgun Gothic','Noto Sans KR',sans-serif" fill="#15212c"><text x="30" y="44" font-size="24" font-weight="700" fill="#15212c">R1 · 작업 종류와 엔드포인트를 구분</text><text x="30" y="72" font-size="15" font-weight="400" fill="#8a432f">소스 분기 / 콘솔 미디어 설정 확인 · 서버 매핑·Tora 실적 미확인</text><rect x="390" y="105" width="360" height="76" rx="12" fill="white" stroke="#ccd4d9"/><text x="408" y="136" font-size="18" font-weight="700" fill="#15212c">Spring 영상 요청</text><text x="408" y="164" font-size="14" font-weight="400" fill="#52606d">POST /jobs/runpod 또는 /batch</text><rect x="55" y="239" width="460" height="76" rx="12" fill="white" stroke="#ccd4d9"/><text x="73" y="270" font-size="18" font-weight="700" fill="#15212c">단일 route = tora_cogvideox_i2v</text><text x="73" y="298" font-size="14" font-weight="400" fill="#52606d">대체 생성 허용 안 함</text><rect x="625" y="239" width="460" height="76" rx="12" fill="white" stroke="#ccd4d9"/><text x="643" y="270" font-size="18" font-weight="700" fill="#15212c">일반 단일 또는 batch_video</text><text x="643" y="298" font-size="14" font-weight="400" fill="#52606d">배치는 미디어 엔드포인트 사용</text><path d="M450,181 L285,239" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="375.5" y="203.0" font-size="13" font-weight="400" fill="#475569">Tora 단일</text><path d="M695,181 L855,239" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="783.0" y="203.0" font-size="13" font-weight="400" fill="#475569">그 외·배치</text><rect x="55" y="371" width="460" height="80" rx="12" fill="#fce8dd" stroke="#ccd4d9"/><text x="73" y="402" font-size="18" font-weight="700" fill="#15212c">Tora ID 또는 레거시 ID</text><text x="73" y="430" font-size="14" font-weight="400" fill="#52606d">/v2/{endpoint}/run</text><rect x="625" y="371" width="460" height="80" rx="12" fill="#e4efec" stroke="#ccd4d9"/><text x="643" y="402" font-size="18" font-weight="700" fill="#15212c">Media ID 또는 레거시 ID</text><text x="643" y="430" font-size="14" font-weight="400" fill="#52606d">/v2/{endpoint}/run</text><path d="M285,315 L285,371" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="293.0" y="336.0" font-size="13" font-weight="400" fill="#475569">제출</text><path d="M855,315 L855,371" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="863.0" y="336.0" font-size="13" font-weight="400" fill="#475569">제출</text><rect x="625" y="500" width="460" height="106" rx="12" fill="white" stroke="#ccd4d9"/><text x="643" y="531" font-size="18" font-weight="700" fill="#15212c">배치: 같은 작업자 안에서 처리</text><text x="643" y="559" font-size="14" font-weight="400" fill="#52606d">auto: Tora 선택 없음 / 명시 Tora: 로컬 시도</text><text x="646" y="585" font-size="15" font-weight="400" fill="#52606d">Tora 실패 → CogVideoX → 3d_photo_light</text><path d="M855,451 L855,500" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="863.0" y="468.5" font-size="13" font-weight="400" fill="#475569">batch_video일 때</text><rect x="260" y="680" width="620" height="85" rx="12" fill="white" stroke="#ccd4d9"/><text x="278" y="711" font-size="18" font-weight="700" fill="#15212c">결과: /v2/{endpoint}/status/{job_id}</text><text x="278" y="739" font-size="14" font-weight="400" fill="#52606d">Spring은 작업 ID·route 저장 / endpoint ID 전용 저장 없음</text><path d="M285,451 L380,680" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="340.5" y="558.5" font-size="13" font-weight="400" fill="#475569">상태 조회</text><path d="M855,606 L760,680" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="815.5" y="636.0" font-size="13" font-weight="400" fill="#475569">상태 조회</text></g></svg><figcaption><span>R1 단일 Tora와 미디어·배치 분기</span><button class="quiet" data-zoom="fig-runpod-routing" type="button">그림 크게 보기</button></figcaption></figure></p>
+<p>R1은 <strong>소스 기준 실행 분기</strong>다. 콘솔의 미디어 계열 설정은 확인했으나, 운영 환경변수와 두 역할의 실제 매핑은 아직 확인하지 못했다.</p>
 <h3>13.3 현재 배치 자동 선택에서는 Tora가 나오지 않는다</h3>
 <p><code>CommunityPage.submitBatchAnimation()</code>이 <code>photoRoute='auto'</code>를 명시적으로 전달한다. 서비스 기본값 <code>cogvideox_real</code>과 혼동하면 안 된다.</p>
 <ol>
@@ -842,7 +858,7 @@ npx tsc --noEmit --incremental false
 <tr>
 <td><a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/.github/workflows/deploy-runpod-tora.yml">Tora</a>/<a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/.github/workflows/deploy-runpod.yml">Media</a> GitHub 워크플로</td>
 <td>각각 Docker 이미지 <code>latest</code>·커밋 태그를 레지스트리에 게시</td>
-<td>RunPod 엔드포인트가 그 이미지를 선택했는지. 워크플로 자체는 엔드포인트를 자동 교체하지 않음</td>
+<td>RunPod 엔드포인트가 그 이미지를 선택했는지. 워크플로 자체는 엔드포인트를 자동 교체하지 않음. 다만 콘솔에는 별도의 GitHub 저장소 연동·Releases가 존재하므로 자동 적용 여부는 그 연동에서도 확인해야 함</td>
 </tr>
 <tr>
 <td><code>.runpod/hub.json</code></td>
@@ -853,7 +869,7 @@ npx tsc --noEmit --incremental false
 </table></div>
 <p>일반 미디어 Dockerfile에서 전용 Tora 저장소·체크포인트를 설치하는 단계는 확인되지 않았다. 별도 볼륨·이미지·환경 덮어쓰기가 없다면 미디어 작업자에서 명시적 Tora 배치를 성공시킬 전제가 부족할 수 있다는 <strong>추론</strong>이다. 실제 미디어 엔드포인트가 무엇을 실행 중인지 확인하기 전에는 실패를 확정하지 않는다.</p>
 <h3>13.7 운영 확정에 필요한 최소 증거</h3>
-<p>RunPod 로그인과 운영 읽기 권한이 확보되면 새 과금 작업을 제출하지 않고 기존 정보부터 확인한다.</p>
+<p>RunPod 로그인 후 미디어 설정을 일부 확인했다. 다음 증거를 기존 기록의 읽기 전용 조회로 보완한다. 새 과금 작업·워커 실행은 수행하지 않았다.</p>
 <ol>
 <li>운영 Spring의 활성 프로필과 <strong>실효</strong> <code>kride.fastapi.url</code>, 대상 서비스의 실행 모듈이 전체 FastAPI·Cloud Gateway·CPU 앱 중 무엇인지.</li>
 <li>Tora·미디어·레거시 변수의 설정 여부와 동일 ID 여부. 보고서에는 키 원문을 쓰지 않고 별칭으로 표시.</li>
@@ -862,14 +878,247 @@ npx tsc --noEmit --incremental false
 <li>PostgreSQL 작업의 <code>route</code>, <code>status</code>, <code>runpod_job_id</code>, <code>actual_model</code>, <code>actual_model_executed</code>, 결과 URL 보존 상태를 기존 외부 기록과 대조.</li>
 <li>개인 영상은 별도로 SQLite/FFmpeg 경로인지 확인하고, 위 RunPod 사용량과 섞어 집계하지 않음.</li>
 </ol>
-<p><strong>현재 남은 확인:</strong> RunPod 콘솔 로그인과 운영 설정·기존 작업 기록 조회다. 확인 전까지 운영 사용률·실행 성공률·사용 엔드포인트 수는 수치로 제시하지 않는다.</p>
+<p><strong>현재 남은 확인:</strong> Tora 후보 상세, 실제 서버의 엔드포인트 매핑·활성 이미지, 기존 작업·실행 모델·결과 저장 대조다. Chrome은 “다른 확장 프로그램 UI가 열려 있음”을 이유로 추가 조회를 차단했다. 이 제한을 우회하지 않았다. 운영 사용률·실행 성공률은 제시하지 않는다.</p>
 <h3>13.8 연결 가이드에 반영할 결정</h3>
 <ul>
 <li>내 목록 ↔ 개인 영상의 P1~P5는 기존 SQLite·FFmpeg 경로로 계속 설계한다. RunPod 운영 확인을 완료 조건으로 잘못 묶지 않는다.</li>
 <li>외부 AI 생성 도입은 운영 게이트웨이와 실제 이미지·모델 성공 증거부터 확보한 뒤 별도 단계로 둔다.</li>
 <li>Tora 배치가 필요하면 전용 실행을 조정하는 구조를 설계하거나 검증된 작업자에만 허용한다. 현재 미디어 배치에서 Tora를 요청했다는 사실만으로 Tora 완료를 표시하지 않는다.</li>
 <li>엔드포인트와 실행 이미지·모델의 이력 보존은 신규 작업부터 추가하는 방안을 검토하고, 기존 작업은 현재 탐색 방식으로 호환한다. 이번 분석에서는 실제 적용하지 않았다.</li>
-</ul></main></div><dialog id="zoom-dialog" aria-label="그림 확대"><div class="dialog-bar"><span>그림 확대</span><div><button id="zoom-plus" class="quiet">확대</button> <button id="zoom-reset" class="quiet">원래 크기</button> <button id="zoom-close" class="quiet">닫기</button></div></div><div id="zoom-stage" class="zoom-stage"></div></dialog><footer>현재 화면은 코드 기반 재구성, 개선 화면은 미구현 모형입니다. 체험은 문서 내부에서만 동작합니다.</footer><script>
+</ul>
+<p><a id="trip-context"></a></p>
+<h2>14. 개인 영상과 여행 코스의 간접 연결, trip_json의 의미</h2>
+<p><strong>간접 연결은 ‘코스에서 고른 장소를 서버가 검증한 뒤 개인 영상 작업에 설명 정보로 붙이는 것’이다.</strong> 여행 DB와 영상 DB를 합치거나 코스로 영상을 자동 생성한다는 뜻은 아니다. 예를 들어 사용자가 코스의 한 장소를 직접 골라 사진 한 장을 올리면, 영상 작업에 그 장소의 번호·이름·주소와 코스 식별 정보가 함께 보존된다. 현재 영상은 사진만으로 확대·이동 효과를 만든다.</p>
+<h3>14.1 화면에서 어떤 값이 이동하는가</h3>
+<p><figure id="fig-course-screen"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 660" role="img" aria-label="T1 현재 코스 연결 화면의 코드 기반 재구성"><title>T1 현재 코스 연결 화면의 코드 기반 재구성</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs><rect width="1140" height="660" rx="18" fill="#f5f5f0"/><g font-family="'Malgun Gothic','Noto Sans KR',sans-serif" fill="#15212c"><text x="30" y="44" font-size="24" font-weight="700" fill="#15212c">T1 · 코스에서 선택한 장소를 영상에 기록</text><text x="30" y="74" font-size="15" font-weight="400" fill="#52606d">현재 코드 기반 재구성 / 운영 캡처 아님 / 장소·번호·상태는 설명용 예시</text><rect x="28" y="105" width="332" height="510" rx="16" fill="white" stroke="#ccd4d9"/><text x="48" y="145" font-size="22" font-weight="700" fill="#15212c">코스 결과</text><rect x="404" y="105" width="332" height="510" rx="16" fill="white" stroke="#ccd4d9"/><text x="424" y="145" font-size="22" font-weight="700" fill="#15212c">개인 영상 · 만들기</text><rect x="780" y="105" width="332" height="510" rx="16" fill="white" stroke="#ccd4d9"/><text x="800" y="145" font-size="22" font-weight="700" fill="#15212c">선택한 영상 작업</text><rect x="48" y="180" width="292" height="96" rx="12" fill="white" stroke="#ccd4d9"/><text x="66" y="211" font-size="18" font-weight="700" fill="#15212c">서울 당일치기 코스</text><text x="66" y="239" font-size="14" font-weight="400" fill="#52606d">설명용 서울 장소 · poi:17</text><rect x="48" y="315" width="292" height="106" rx="12" fill="#fce8dd" stroke="#ccd4d9"/><text x="66" y="346" font-size="18" font-weight="700" fill="#15212c">이 코스의 여행 사진으로</text><text x="66" y="374" font-size="14" font-weight="400" fill="#52606d">영상 만들기</text><text x="48" y="465" font-size="16" font-weight="400" fill="#15212c">토큰 + 선택용 장소 목록</text><text x="48" y="495" font-size="14" font-weight="400" fill="#52606d">브라우저에 임시 보관 후 이동</text><text x="424" y="193" font-size="17" font-weight="700" fill="#15212c">이 사진과 연결할 코스 장소</text><rect x="424" y="217" width="292" height="76" rx="12" fill="white" stroke="#ccd4d9"/><text x="442" y="248" font-size="18" font-weight="700" fill="#15212c">장소 선택  ▾</text><text x="442" y="276" font-size="14" font-weight="400" fill="#52606d">설명용 서울 장소</text><text x="424" y="329" font-size="14" font-weight="400" fill="#8a432f">촬영 위치를 자동 판정하지 않음</text><rect x="424" y="357" width="292" height="76" rx="12" fill="white" stroke="#ccd4d9"/><text x="442" y="388" font-size="18" font-weight="700" fill="#15212c">코스 연결 없이 만들기</text><text x="442" y="416" font-size="14" font-weight="400" fill="#52606d">선택 정보만 해제</text><rect x="424" y="459" width="292" height="88" rx="12" fill="#e4efec" stroke="#ccd4d9"/><text x="442" y="490" font-size="18" font-weight="700" fill="#15212c">사진 올리기 → 영상 만들기</text><text x="442" y="518" font-size="14" font-weight="400" fill="#52606d">서버가 장소를 다시 검증</text><rect x="800" y="180" width="292" height="76" rx="12" fill="white" stroke="#ccd4d9"/><text x="818" y="211" font-size="18" font-weight="700" fill="#15212c">영상 생성 완료</text><text x="818" y="239" font-size="14" font-weight="400" fill="#52606d">사진 확대·이동 / 5초</text><text x="800" y="309" font-size="15" font-weight="700" fill="#15212c">연결 장소: 설명용 서울 장소</text><text x="800" y="343" font-size="15" font-weight="400" fill="#15212c">코스 번호 11111111</text><text x="800" y="390" font-size="15" font-weight="400" fill="#52606d">사진의 실제 촬영 위치·</text><text x="800" y="421" font-size="14" font-weight="400" fill="#52606d">아티스트 방문 사실은 증명 안 함</text><rect x="800" y="465" width="292" height="82" rx="12" fill="white" stroke="#ccd4d9"/><text x="818" y="496" font-size="18" font-weight="700" fill="#15212c">영상 재생 / 다운로드</text><text x="818" y="524" font-size="14" font-weight="400" fill="#52606d">코스 전체 복원 기능은 없음</text></g></svg><figcaption><span>T1 코스에서 장소를 골라 영상에 연결하는 현재 화면 재구성</span><button class="quiet" data-zoom="fig-course-screen" type="button">그림 크게 보기</button></figcaption></figure></p>
+<p>T1은 코드 기반 재구성이며 장소명·번호는 설명용 예시다. 실제 운영 화면이나 사용자 사진이 아니다. 버튼은 <code>NEXT_PUBLIC_PHOTO_VIDEO_ENABLED=true</code>이고 코스 응답에 <code>courseContext</code>와 장소가 있을 때만 나타난다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>사용자 행동과 화면</th>
+<th>실제 함수·값과 결과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T1 코스에서 이동</td>
+<td>코스 결과의 ‘이 코스의 여행 사진으로 영상 만들기’</td>
+<td><code>ItineraryPanel</code> → <code>PhotoVideoCourseLink</code>. 서명 토큰과 <code>{id,name}</code> 장소 목록만 <code>sessionStorage['kride_photo_video_course']</code>에 쓰고 <code>/travel/video</code>로 이동. 클릭 함수는 별도 데이터를 반환하지 않음</td>
+</tr>
+<tr>
+<td>T2 직접 장소 선택</td>
+<td>개인 영상의 ‘이 사진과 연결할 코스 장소’에서 한 곳 선택</td>
+<td><code>TravelVideoPage</code>가 저장값을 읽어 <code>course</code> 상태에 놓음. <code>poiId</code>는 처음 빈 값. 자동 선택·촬영 위치 자동 판정 없음</td>
+</tr>
+<tr>
+<td>T3 사진과 생성 요청</td>
+<td>사진 업로드 후 영상 만들기</td>
+<td><code>upload()</code> → <code>/photos</code>에서 <code>photoId</code> 수신. <code>generate()</code> → <code>/jobs</code>에 <code>photoId</code>, <code>requestId</code>, 선택적으로 <code>courseContext</code>, <code>poiId</code> 전송</td>
+</tr>
+<tr>
+<td>T4 연결 완료 표시</td>
+<td>선택 작업에 연결 장소·코스 번호·안내 문구</td>
+<td>응답 <code>job.trip.placeName</code>, <code>itineraryId</code> 앞 8자리, <code>notice</code> 표시. 코스 전체를 복원하는 링크는 현재 없음</td>
+</tr>
+</tbody>
+</table></div>
+<p>‘코스 연결 없이 만들기’는 화면의 코스·선택 장소와 sessionStorage 값을 지운다. 이후 생성은 <code>trip</code> 없이 가능하다. 단, 이미 생성된 작업의 연결 정보는 수정하지 않는다. 계정 전환 때 남은 브라우저 코스 값은 서버 소유권 검증에서 거절되지만, 화면의 옛 장소명까지 자동 제거하는 구현은 확인되지 않았다. 로그인·로그아웃·계정 전환 때 정리하는 보강이 필요하다.</p>
+<h3>14.2 검증 API가 확인하는 범위와 실제 호출 순서</h3>
+<p>코스 생성 API <code>/api/public/itinerary</code>는 추천 결과의 장소를 현재 공개 자료와 대조하고, 조건·예산 검사를 통과한 장소가 있을 때 <code>issue_context()</code>로 토큰을 발급한다. 이 최초 추천에는 Groq 호출이 있을 수 있다. <strong>영상 연결 시의 <code>/video-context</code>는 새 추천·RunPod 작업을 만들지 않는다.</strong></p>
+<p><figure id="fig-course-context"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 1040" role="img" aria-label="T2 코스 검증 후 개인 작업 저장 흐름"><title>T2 코스 검증 후 개인 작업 저장 흐름</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs><rect width="1140" height="1040" rx="18" fill="#f5f5f0"/><g font-family="'Malgun Gothic','Noto Sans KR',sans-serif" fill="#15212c"><text x="30" y="44" font-size="24" font-weight="700" fill="#15212c">T2 · 새 작업에서만 코스 연결을 검증</text><text x="30" y="74" font-size="15" font-weight="400" fill="#52606d">실선: 실제 처리 순서 / 각 실패는 새 개인 작업 저장 전에 종료</text><rect x="390" y="104" width="360" height="78" rx="12" fill="white" stroke="#ccd4d9"/><text x="408" y="135" font-size="18" font-weight="700" fill="#15212c">V1 로그인·요청 필드 확인</text><text x="408" y="163" font-size="14" font-weight="400" fill="#52606d">Spring /auth/me → owner 확정</text><path d="M570,182 L570,232" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="578.0" y="200.0" font-size="13" font-weight="400" fill="#475569">입력 정상</text><rect x="390" y="232" width="360" height="78" rx="12" fill="white" stroke="#ccd4d9"/><text x="408" y="263" font-size="18" font-weight="700" fill="#15212c">코스 필드가 있는가?</text><text x="408" y="291" font-size="14" font-weight="400" fill="#52606d">courseContext + poiId</text><path d="M750,270 L955,270" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="860.5" y="263.0" font-size="13" font-weight="400" fill="#475569">있음</text><rect x="800" y="334" width="310" height="94" rx="12" fill="#fce8dd" stroke="#ccd4d9"/><text x="818" y="365" font-size="18" font-weight="700" fill="#15212c">V2 코스 검증 API 호출</text><text x="818" y="393" font-size="14" font-weight="400" fill="#52606d">내부 인증 + 허용 계정</text><path d="M955,270 L955,334" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><path d="M390,270 L185,270" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="295.5" y="263.0" font-size="13" font-weight="400" fill="#475569">없음</text><rect x="30" y="334" width="310" height="94" rx="12" fill="white" stroke="#ccd4d9"/><text x="48" y="365" font-size="18" font-weight="700" fill="#15212c">코스 연결 없이 진행</text><text x="48" y="393" font-size="14" font-weight="400" fill="#52606d">trip = 없음 / 검증 API 생략</text><path d="M185,270 L185,334" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><rect x="630" y="485" width="480" height="82" rx="12" fill="white" stroke="#ccd4d9"/><text x="648" y="516" font-size="18" font-weight="700" fill="#15212c">V3 서명·소유자·만료·자료 버전</text><text x="648" y="544" font-size="14" font-weight="400" fill="#52606d">현재 공개 카탈로그와 비교</text><path d="M955,428 L955,485" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="963.0" y="449.5" font-size="13" font-weight="400" fill="#475569">인증 성공</text><rect x="630" y="627" width="480" height="82" rx="12" fill="white" stroke="#ccd4d9"/><text x="648" y="658" font-size="18" font-weight="700" fill="#15212c">V4 선택 장소의 코스 포함 확인</text><text x="648" y="686" font-size="14" font-weight="400" fill="#52606d">성공: 서버가 장소 정보 7필드 반환</text><path d="M870,567 L870,627" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="878.0" y="590.0" font-size="13" font-weight="400" fill="#475569">토큰 유효</text><rect x="30" y="520" width="420" height="109" rx="12" fill="#fce8dd" stroke="#ccd4d9"/><text x="48" y="551" font-size="18" font-weight="700" fill="#15212c">실패 → 요청 종료</text><text x="48" y="579" font-size="14" font-weight="400" fill="#52606d">401 / 403 / 409 / 422 / 503</text><text x="50" y="605" font-size="15" font-weight="400" fill="#8a432f">아직 jobs INSERT 없음</text><path d="M630,526 L450,570" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="548.0" y="541.0" font-size="13" font-weight="400" fill="#475569">검증 실패</text><path d="M630,668 L450,600" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="548.0" y="627.0" font-size="13" font-weight="400" fill="#475569">코스 밖 장소</text><rect x="390" y="800" width="550" height="90" rx="12" fill="#e4efec" stroke="#ccd4d9"/><text x="408" y="831" font-size="18" font-weight="700" fill="#15212c">V5 개인 API가 사진 소유권·요청 확인</text><text x="408" y="859" font-size="14" font-weight="400" fill="#52606d">trip → JSON TEXT → SQLite jobs.trip_json</text><path d="M870,709 L800,800" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="843.0" y="747.5" font-size="13" font-weight="400" fill="#475569">검증된 trip</text><path d="M185,428 L185,465" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><path d="M185,465 L15,465" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><path d="M15,465 L15,845" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><path d="M15,845 L390,845" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="210.5" y="838.0" font-size="13" font-weight="400" fill="#475569">trip 없음</text><rect x="390" y="940" width="550" height="72" rx="12" fill="white" stroke="#ccd4d9"/><text x="408" y="971" font-size="18" font-weight="700" fill="#15212c">작업 응답 · 이후 CPU 렌더링</text><text x="408" y="999" font-size="14" font-weight="400" fill="#52606d">FFmpeg는 사진 ID만 사용 / trip은 이력 설명</text><path d="M665,890 L665,940" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="673.0" y="908.0" font-size="13" font-weight="400" fill="#475569">저장 성공</text></g></svg><figcaption><span>T2 개인 영상 생성 요청의 코스 검증 분기</span><button class="quiet" data-zoom="fig-course-context" type="button">그림 크게 보기</button></figcaption></figure></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>담당 코드와 입력</th>
+<th>확인·처리</th>
+<th>반환 또는 중단</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V1 로그인과 요청 정리</td>
+<td>Next <code>proxy()</code>, 쿠키·사진·요청 번호·선택 정보</td>
+<td>Spring <code>/api/auth/me</code>에서 실효 <code>userSqno</code> 확인. POST의 같은 사이트 조건 검사. 브라우저가 보낸 <code>trip</code> 등 허용 외 필드는 거절</td>
+<td>인증 실패 401/503, 잘못된 입력 422. 아직 개인 작업을 저장하지 않음</td>
+</tr>
+<tr>
+<td>V2 연결 API 호출</td>
+<td>코스 필드가 있으면 <code>POST /api/public/itinerary/video-context</code></td>
+<td>서버가 <code>X-Kride-Token</code>, 로그인 소유자의 <code>X-Kride-User</code>, <code>courseContext</code>, <code>poiId</code> 전달. 코스 필드가 모두 없으면 이 단계를 생략</td>
+<td>내부 연결 설정이 없으면 503. 코스 사용 계정은 <code>KRIDE_AI_TEST_USERS</code> 허용 목록에도 있어야 하며 불허 시 403</td>
+</tr>
+<tr>
+<td>V3 코스 토큰 확인</td>
+<td><code>video_context()</code> → <code>resolve_context(token,user,public_catalog())</code></td>
+<td>HMAC-SHA256 서명, 버전 1, 소유자 해시 일치, 만료 전·잔여 최대 1시간, 현재 카탈로그 지문 일치, 장소 목록 구조 확인</td>
+<td>변조·다른 계정·만료·자료 변경 409. 키 설정 문제 503</td>
+</tr>
+<tr>
+<td>V4 선택 장소 확인</td>
+<td>검증된 코스의 장소 목록과 <code>poiId</code></td>
+<td>선택 번호가 해당 코스 목록에 실제 있는지 확인. 이름·주소는 현재 서버 자료에서 가져옴</td>
+<td>코스 밖 장소 422. 성공하면 아래 7필드 객체 반환</td>
+</tr>
+<tr>
+<td>V5 작업 보존</td>
+<td>Next가 응답을 <code>normalized.trip</code>으로 넣어 개인 API <code>/jobs</code>에 전달</td>
+<td>개인 API가 내부 키·owner·<code>TripContext</code> 형식과 사진 소유권·제한·중복 요청을 확인. <code>enqueue()</code>가 JSON 문자열로 변환해 SQLite에 INSERT</td>
+<td>작업 응답 202 또는 기존 동일 요청 반환. 실패 시 새 작업 미저장</td>
+</tr>
+</tbody>
+</table></div>
+<p>검증 대상은 <strong>서버가 발급한 코스 참조와 현재 장소 자료의 일치</strong>다. 사진 속 장소, EXIF/GPS 위치, 실제 방문·아티스트 방문, 예약 가능 여부를 보증하지 않는다. 또한 <code>/video-context</code>는 최초 코스의 방문 날짜·시간·예산 계산을 다시 실행하지 않는다. 토큰에 그 조건 전체가 저장돼 있지 않다. 최초 추천 조건 검사와 영상 연결 검사를 같은 의미로 부르면 안 된다.</p>
+<h3>14.3 trip_json에 들어가는 정확한 값</h3>
+<p><code>trip_json</code>은 개인 SQLite <code>jobs.trip_json</code>의 <strong>선택적인 TEXT 열</strong>이다. <code>json.dumps(body.trip.model_dump(), ensure_ascii=False, sort_keys=True)</code>로 만든 문자열이며, 코스 연결이 없으면 SQL <code>NULL</code>이다. 전체 여행 일정 JSON이라는 이름으로 이해하면 범위가 지나치게 넓어진다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>필드</th>
+<th>의미·형식</th>
+<th>화면 또는 검증 용도</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>itineraryId</code></td>
+<td>코스 참조 발급 시 만든 무작위 UUID의 하이픈 없는 32자리 소문자 16진수</td>
+<td>같은 코스 발급 건을 구별. 화면은 앞 8자리 표시. PostgreSQL 코스 행의 PK라는 근거 없음</td>
+</tr>
+<tr>
+<td><code>catalogRevision</code></td>
+<td><code>catalog_revision()</code>이 현재 <strong>전체 공개 카탈로그의 지정 필드</strong>로 만든 SHA-256, 64자리 16진수</td>
+<td>발급 당시 자료 버전. 선택하지 않은 다른 장소의 관련 필드 변경도 토큰을 무효화할 수 있음</td>
+</tr>
+<tr>
+<td><code>poiId</code></td>
+<td>사용자가 선택한 장소 번호, 1~150자</td>
+<td>추천용 숫자 장소는 <code>poi:&lt;poi_sqno&gt;</code> 형식. 서버 카탈로그의 ID이며 <code>saved_item.item_ref</code>와 같은 키가 아님</td>
+</tr>
+<tr>
+<td><code>placeName</code></td>
+<td>서버에서 읽은 장소명, 1~500자</td>
+<td>완료·이력의 연결 장소 표시. 현재 API는 기본 카탈로그 이름을 반환하며 화면의 번역 이름과 다를 수 있음</td>
+</tr>
+<tr>
+<td><code>placeAddress</code></td>
+<td>서버에서 읽은 주소, 최대 1,000자</td>
+<td>연결 당시 주소 보존. 현재 개인 영상 화면은 표시하지 않음</td>
+</tr>
+<tr>
+<td><code>contextIssuedAt</code></td>
+<td>토큰 <code>exp - 3600</code>을 UTC ISO 8601로 변환한 발급 시각</td>
+<td>영상 완료 시각이나 검증 완료 시각이 아님</td>
+</tr>
+<tr>
+<td><code>notice</code></td>
+<td>연결 의미와 한계를 설명하는 서버 문구, 최대 500자</td>
+<td>코스 장소 선택이며 촬영 위치·방문 증거가 아니라는 안내</td>
+</tr>
+</tbody>
+</table></div>
+<p>설명용 예시다. 아래 번호·지문·장소·시각은 운영 데이터가 아니다. JSON 객체가 SQLite TEXT에 직렬화되어 들어가며, 속성 순서는 의미가 없다.</p>
+<pre><code class="language-json">{
+  &quot;itineraryId&quot;: &quot;11111111111141118111111111111111&quot;,
+  &quot;catalogRevision&quot;: &quot;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&quot;,
+  &quot;poiId&quot;: &quot;poi:17&quot;,
+  &quot;placeName&quot;: &quot;설명용 서울 장소&quot;,
+  &quot;placeAddress&quot;: &quot;설명용 서울 주소&quot;,
+  &quot;contextIssuedAt&quot;: &quot;2026-10-26T00:00:00+00:00&quot;,
+  &quot;notice&quot;: &quot;코스에서 사용자가 선택한 장소입니다. 사진의 실제 촬영 위치나 아티스트 방문 사실을 증명하지 않습니다.&quot;
+}
+</code></pre>
+<p>여기에 전체 <code>itinerary</code>·아침/오후/저녁 순서·지도·방문 날짜·예산·전체 장소 목록·<code>courseContext</code> 원문·토큰 서명·소유자 해시·만료 시각·Cloudinary URL은 들어가지 않는다. 소유자는 같은 행의 <code>owner</code>, 사진은 <code>photo_id</code>로 따로 연결된다.</p>
+<h3>14.4 DB 관계와 영상 파일은 어디에 남는가</h3>
+<p><figure id="fig-trip-storage"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 850" role="img" aria-label="T3 공개 코스 자료와 개인 작업 저장 경계"><title>T3 공개 코스 자료와 개인 작업 저장 경계</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs><rect width="1140" height="850" rx="18" fill="#f5f5f0"/><g font-family="'Malgun Gothic','Noto Sans KR',sans-serif" fill="#15212c"><text x="30" y="44" font-size="24" font-weight="700" fill="#15212c">T3 · API 연결과 DB 외래키를 구분</text><text x="30" y="74" font-size="15" font-weight="400" fill="#52606d">실선: 요청·저장·응답 / 점선: 값으로 남긴 논리 참조 / 외래키는 SQLite 내부만</text><rect x="30" y="116" width="460" height="85" rx="12" fill="white" stroke="#ccd4d9"/><text x="48" y="147" font-size="18" font-weight="700" fill="#15212c">공개 장소 카탈로그</text><text x="48" y="175" font-size="14" font-weight="400" fill="#52606d">검수 파일 + Spring PostgreSQL 공개 뷰</text><rect x="650" y="116" width="460" height="85" rx="12" fill="white" stroke="#ccd4d9"/><text x="668" y="147" font-size="18" font-weight="700" fill="#15212c">브라우저의 코스 선택</text><text x="668" y="175" font-size="14" font-weight="400" fill="#52606d">sessionStorage: 서명 토큰 + id/name</text><rect x="330" y="285" width="480" height="92" rx="12" fill="white" stroke="#ccd4d9"/><text x="348" y="316" font-size="18" font-weight="700" fill="#15212c">코스 검증 API</text><text x="348" y="344" font-size="14" font-weight="400" fill="#52606d">토큰 + 로그인 owner + 선택 poiId → trip</text><path d="M300,201 L410,285" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="363.0" y="236.0" font-size="13" font-weight="400" fill="#475569">현재 자료 조회</text><path d="M880,201 L735,285" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="815.5" y="236.0" font-size="13" font-weight="400" fill="#475569">선택 값 전송</text><rect x="30" y="486" width="420" height="110" rx="12" fill="#e4efec" stroke="#ccd4d9"/><text x="48" y="517" font-size="18" font-weight="700" fill="#15212c">개인 SQLite · jobs</text><text x="48" y="545" font-size="14" font-weight="400" fill="#52606d">owner / photo_id / 상태 / trip_json</text><text x="50" y="573" font-size="15" font-weight="400" fill="#52606d">trip은 선택 장소의 당시 정보</text><path d="M490,377 L300,486" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="403.0" y="424.5" font-size="13" font-weight="400" fill="#475569">검증 응답 저장</text><rect x="650" y="486" width="460" height="110" rx="12" fill="#e4efec" stroke="#ccd4d9"/><text x="668" y="517" font-size="18" font-weight="700" fill="#15212c">개인 SQLite · photos</text><text x="668" y="545" font-size="14" font-weight="400" fill="#52606d">id + owner ↔ jobs.photo_id + owner</text><text x="670" y="573" font-size="15" font-weight="400" fill="#52606d">같은 DB 안의 복합 외래키</text><path d="M450,535 L650,535" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="558.0" y="528.0" font-size="13" font-weight="400" fill="#475569">FK 참조</text><path d="M30,541 L15,541" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="7 5"/><path d="M15,541 L15,236" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="7 5"/><path d="M15,236 L30,158" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="7 5"/><text x="34" y="445" font-size="14" font-weight="400" fill="#52606d">poiId·버전 값만 보존</text><rect x="30" y="704" width="420" height="92" rx="12" fill="white" stroke="#ccd4d9"/><text x="48" y="735" font-size="18" font-weight="700" fill="#15212c">응답 trip · 연결 장소 표시</text><text x="48" y="763" font-size="14" font-weight="400" fill="#52606d">문자열 → JSON 객체 / owner별 이력 조회</text><path d="M240,596 L240,704" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="248.0" y="643.0" font-size="13" font-weight="400" fill="#475569">복원</text><rect x="650" y="704" width="460" height="92" rx="12" fill="white" stroke="#ccd4d9"/><text x="668" y="735" font-size="18" font-weight="700" fill="#15212c">개인 파일 · 사진과 MP4</text><text x="668" y="763" font-size="14" font-weight="400" fill="#52606d">CPU FFmpeg / 보호된 재생 API</text><path d="M880,596 L880,704" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="888.0" y="643.0" font-size="13" font-weight="400" fill="#475569">사진 ID로 처리</text></g></svg><figcaption><span>T3 코스 자료와 개인 작업의 저장 경계</span><button class="quiet" data-zoom="fig-trip-storage" type="button">그림 크게 보기</button></figcaption></figure></p>
+<p>T3에서 실선은 현재 API 호출·저장·응답, 점선은 값으로만 남기는 논리 참조다. SQLite <code>photos ↔ jobs</code>만 해당 영역의 실제 복합 외래키다. <code>itineraryId</code>·<code>poiId</code>·<code>catalogRevision</code>에는 여행 DB를 향한 외래키가 없다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>저장 위치</th>
+<th>보존하는 것</th>
+<th>보존하지 않는 것·연결 경계</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>공개 장소 자료</td>
+<td><code>public_catalog()</code>가 검수 파일과 Spring 공개 API를 조합. 숫자 장소의 <code>/api/v1/tour/recommendation-catalog</code>는 PostgreSQL <code>verified_visit_catalog</code> 뷰를 조회</td>
+<td><code>saved_item</code>을 읽지 않음. 뷰는 <code>tour_poi</code>·방문 정책·검수된 아티스트 관계를 기반으로 함</td>
+</tr>
+<tr>
+<td>브라우저 sessionStorage</td>
+<td>서명된 <code>courseContext</code>와 화면 선택용 <code>{id,name}</code> 목록</td>
+<td>서버의 영구 코스 저장소가 아님. URL에 토큰을 넣지 않음. 서명은 변조 방지이며 암호화가 아님</td>
+</tr>
+<tr>
+<td>개인 <code>${PHOTO_VIDEO_DATA_DIR}/workflow.sqlite3</code></td>
+<td><code>photos</code>의 번호·owner, <code>jobs</code>의 상태·번호·<code>trip_json</code>·재시도 관계</td>
+<td>기본 루트 <code>/data/photo-video</code>. 사진·MP4 바이너리와 Cloudinary URL은 저장하지 않음</td>
+</tr>
+<tr>
+<td>같은 개인 데이터 디렉터리</td>
+<td><code>&lt;photoId&gt;.jpg</code>, <code>&lt;jobId&gt;.mp4</code></td>
+<td>코스별 폴더·RunPod 객체·Cloudinary 객체로 이동하지 않음</td>
+</tr>
+<tr>
+<td>작업 응답</td>
+<td><code>job_response()</code>가 JSON 문자열을 객체 <code>trip</code>으로 복원, 완료 시 <code>/api/travel-video/jobs/&lt;id&gt;/video</code> 조립</td>
+<td>영상 URL을 DB에 영구 컬럼으로 쓰는 구조가 아님. 재생마다 로그인·owner·상태·파일 확인</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>worker.run_once()</code>는 작업 행에서 사진 ID를 골라 <code>render_photo(source,target)</code>를 호출한다. <code>trip_json</code>을 읽어 자막·장소 이미지·카메라 경로를 만들지 않는다. 따라서 코스를 붙여도 현재 5초 사진 확대·이동 MP4의 생성 방식은 같다. RunPod의 <code>job_id</code>, Tora의 route, 커뮤니티 PostgreSQL 작업 번호는 이 개인 <code>jobId</code>와 별개다.</p>
+<h3>14.5 만료·재시도·중복 요청의 의미</h3>
+<ul>
+<li><strong>새 코스 연결 생성:</strong> 토큰은 발급 후 1시간 안에 검증돼야 한다. 현재 전체 카탈로그 지문이 달라지면 그 전에도 409가 된다. 브라우저가 장소명을 고쳐도 서버 반환 이름·주소로 정리된다.</li>
+<li><strong>저장된 이력·재생:</strong> 이미 저장한 <code>trip_json</code>은 당시 연결을 설명하는 스냅샷이다. 이력·상태·재생은 토큰을 다시 검증하지 않으므로 토큰 만료가 곧 영상 만료는 아니다. 현재 장소가 여전히 승인됐다는 보증도 아니다.</li>
+<li><strong>실패한 작업의 재시도:</strong> <code>/jobs/&lt;id&gt;/retry</code>는 원작업의 <code>photo_id</code>와 <code>trip_json</code>을 복사한다. 이 경로는 <code>/video-context</code>를 다시 호출하지 않는다. 같은 소유자·사진·실패 원작업·같은 연결 내용 조건을 DB도 강제한다.</li>
+<li><strong>같은 생성 요청 재전송:</strong> <code>(owner,request_id)</code>가 같으면 사진·재시도 원본·직렬화된 연결 정보까지 같아야 기존 작업을 돌려준다. 다르면 409. 다만 프록시가 코스 검증을 먼저 하므로 토큰이 만료된 뒤 <code>/jobs</code>를 재전송하면 기존 작업 중복 확인까지 도달하지 못할 수 있다. 이때 이력/상태 조회로 기존 작업부터 확인한다.</li>
+<li><strong>신뢰 경계:</strong> 개인 Python API는 내부 키·owner와 <code>TripContext</code> 형식을 확인하지만 서명 토큰을 자체 검증하지 않는다. 검증 책임은 Next→코스 API에 있다. 개인 API의 외부 비공개·키 보호가 유지돼야 이 전제가 성립한다.</li>
+</ul>
+<h3>14.6 연결 화면을 위한 최소 변경과 검증 기준</h3>
+<p>현재 요구에는 DB 통합이 필요하지 않다. 내 목록은 기존 PostgreSQL 저장 항목, 내 영상은 기존 SQLite 이력으로 계속 조회하면서 공통 탐색을 제공한다. 코스와 연결된 작업은 기존 <code>trip</code> 응답만으로 구분할 수 있다. <code>saved_item.item_ref</code>에 개인 <code>jobId</code>나 URL을 넣는 방식은 현재 정수 타입·허용 대상과 맞지 않는다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>제안</th>
+<th>최소 변경 위치와 사용자 소유권·기존 데이터 보존</th>
+<th>완료 기준</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>연결 의미를 화면에 설명</td>
+<td>개인 영상 카드·상세에 기존 장소명·연결 안내를 표시. ‘촬영 장소 인증’ 대신 ‘사용자가 선택한 코스 장소’로 설명</td>
+<td>연결 없는 과거 작업도 정상 표시. 주소·시각을 추가하면 위 필드 의미를 유지</td>
+</tr>
+<tr>
+<td>코스 임시 선택 정리</td>
+<td>계정 전환·로그아웃 시 sessionStorage와 <code>course</code>·<code>poiId</code> 정리. API 소유권 검사는 유지</td>
+<td>다른 계정의 옛 장소명이 남지 않음. 원작업·사진·파일은 삭제하지 않음</td>
+</tr>
+<tr>
+<td>코스 연계 이력 탐색</td>
+<td>필요 시 기존 owner 조건 <strong>안에서</strong> <code>trip.itineraryId</code>별 묶기·표시를 추가. 전체 조회/서버 필터가 없는 현재 페이지에서 전역 건수를 추정하지 않음</td>
+<td>선택 코스·연결 없는 작업을 각각 조회해도 다른 계정 작업이 섞이지 않음</td>
+</tr>
+<tr>
+<td>원래 코스 다시 열기</td>
+<td>전체 코스 영구 복원은 후속 설계. <code>trip_json</code>만으로 일정을 재구성하지 않음. 필요하면 owner가 있는 별도 불변 코스 스냅샷 저장/API를 추가하고 신규 연결부터 사용</td>
+<td>과거 작업은 ‘연결 장소 정보만 있음’으로 유지. 임의 코스 생성·추정 백필 없음</td>
+</tr>
+<tr>
+<td>생성 요청 실패 복구</td>
+<td>코스 검증 오류와 전송 실패를 구분하고 이력/상태 확인을 제공. 멱등 조회 경로를 추가한다면 owner·requestId로만 기존 작업을 확인</td>
+<td>오류 후 자동으로 새 요청 ID나 새 과금 작업을 만들지 않음</td>
+</tr>
+</tbody>
+</table></div>
+<p>정적 분석은 <a href="https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/src/api/course_context.py">코스 토큰</a>·<a href="https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/src/api/public_itinerary.py">코스 생성/검증 API</a>·<a href="https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/src/api/public_search.py">공개 장소 자료</a>·<a href="https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/subproject/SDUI/SDUI-server/src/main/java/com/domain/demo_backend/domain/tour/controller/VerifiedVisitCatalogController.java">Spring 공개 뷰 조회</a>·<a href="https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/subproject/SDUI/metadata-project/components/fields/kride/PhotoVideoCourseLink.tsx">현재 화면 버튼</a>·<a href="https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/subproject/SDUI/metadata-project/app/api/travel-video/%5B...path%5D/route.ts">Next 프록시</a>·<a href="https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/deploy/photo_video/app.py">개인 API</a>·<a href="https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/deploy/photo_video/database.py">개인 DB 제약</a>·<a href="https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/deploy/photo_video/worker.py">CPU 작업자</a>를 대조했다.</p>
+<p>이번 추가 검증에서는 조사용 소스 루트에서 <code>python -m unittest tests.test_course_context -q</code>를 실행해 <strong>6개 통과</strong>했다. 순서·식별자, 다른 소유자·변조, 만료·자료 변경, 잘못된 장소 목록, 지문에서 임시 조회 시각 제외, 검수된 번역을 확인한 단위 시험이다. <code>pytest</code> 기반 API·DB 시험은 현재 선택된 Python에 pytest가 없어 재실행하지 못했다. 따라서 운영 로그인→코스 선택→사진 업로드→SQLite 저장→재생 성공으로 확대하지 않는다. 앞선 문서의 과거 시험 결과와 이번 실행을 구분한다.</p>
+<p>운영 검증은 기능 플래그·허용 계정·코스 API 주소·서명 키의 <strong>설정 여부</strong>·개인 데이터 볼륨·배포 버전을 먼저 대조해야 한다. 키나 토큰 원문을 수집하지 않는다. 실제 업로드·새 영상 생성 없이 가능한 설정·기존 본인 작업 조회부터 확인하고, 새 생성 검증은 별도 작업으로 진행한다. 이번 보고서 갱신은 운영 데이터·DB·애플리케이션 코드를 변경하지 않았다.</p></main></div><dialog id="zoom-dialog" aria-label="그림 확대"><div class="dialog-bar"><span>그림 확대</span><div><button id="zoom-plus" class="quiet">확대</button> <button id="zoom-reset" class="quiet">원래 크기</button> <button id="zoom-close" class="quiet">닫기</button></div></div><div id="zoom-stage" class="zoom-stage"></div></dialog><footer>현재 화면은 코드 기반 재구성, 개선 화면은 미구현 모형입니다. 체험은 문서 내부에서만 동작합니다.</footer><script>
 const details=[["A1 마이페이지", "ProfileScreen에 개인 영상 진입을 추가한다. 현재 개인 영상 API는 총 건수를 반환하지 않으므로 숫자를 만들어 넣지 않는다."], ["A2 내 목록", "PersonalSavedScreen의 종류·페이지·공개 여부·삭제 처리를 유지한다. 공통 메뉴는 링크만 제공한다."], ["A3 개인 영상", "TravelVideoPage의 생성·이력·선택 작업을 구분한다. 제안한 view/page/job 쿼리는 새 구현이 필요하다."], ["A4 로그인 복귀", "safeLoginReturn의 정확한 /travel/video 허용과 복귀 문구·힌트 소비를 함께 바꾼다. 외부 주소는 거절한다."], ["A5 독립 조회", "각 화면은 자기 API를 호출한다. 목록 응답의 data.items와 영상 응답의 items를 구분한다."], ["A6 저장 경계", "PostgreSQL 후보와 SQLite 작업·파일을 유지한다. 화면 연결에 새 외래키·Cloudinary 업로드는 필요하지 않다."]];
 for(const b of document.querySelectorAll('[data-inspect]'))b.addEventListener('click',()=>{for(const x of document.querySelectorAll('[data-inspect]'))x.setAttribute('aria-pressed',String(x===b));const [title,copy]=details[Number(b.dataset.inspect)];const d=document.getElementById('inspect-detail');d.replaceChildren(Object.assign(document.createElement('h4'),{textContent:title}),Object.assign(document.createElement('p'),{textContent:copy}));});
 let demo='saved';const state=document.getElementById('demo-state');

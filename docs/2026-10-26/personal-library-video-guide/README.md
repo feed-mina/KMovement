@@ -2,7 +2,7 @@
 
 **핵심 한 줄: 기존 저장소와 소유권 검사를 유지하고, 내 목록과 개인 영상에 공통 탐색 메뉴·로그인 복귀·조회 상태를 연결한다.**
 
-작성일: 2026-10-26. 소스 기준: KMovement main `46a2d5ae83451befb0fa465acffe96257b7811d6`. 이 main은 직전 분석 이후 문서만 추가됐으며 아래 실행 코드는 PR #299 병합 상태와 같다.
+작성일: 2026-10-26. 소스 대조: KMovement main `ba68455a101f2be0d5bec35ff09293d0f0d135a5`. 문서만 추가된 main과 조사용 소스를 대조했다. 아래 실행 코드는 PR #299 병합 상태와 같다. RunPod 콘솔 확인과 코스 연결 분석을 추가했다.
 
 [HTML 보고서](guide.html) · [앞선 저장 경로 조사](../saved-item-media-storage-audit.md)
 
@@ -21,7 +21,7 @@
 
 API(Application Programming Interface)는 프로그램의 요청·응답 창구, DB(Database)는 데이터베이스다. UI(User Interface)는 화면 구성, UX(User Experience)는 화면을 사용하는 과정이다. SVG(Scalable Vector Graphics)는 확대해도 선명한 그림 파일 형식이다.
 
-[현재 화면](#current) · [개선 화면](#after) · [이동 흐름](#flow) · [함수와 파일](#files) · [로그인 복귀](#login) · [조회 상태](#history) · [API·DB](#contracts) · [구현 순서](#steps) · [시험](#tests)
+[현재 화면](#current) · [개선 화면](#after) · [이동 흐름](#flow) · [함수와 파일](#files) · [로그인 복귀](#login) · [조회 상태](#history) · [API·DB](#contracts) · [구현 순서](#steps) · [시험](#tests) · [RunPod 운영](#runpod-operations) · [여행 코스와 trip_json](#trip-context)
 
 <a id="current"></a>
 ## 2. 현재 화면에서 끊기는 부분
@@ -303,7 +303,7 @@ HTML은 외부 네트워크 없이 본문·그림·체험을 읽을 수 있다. 
 <a id="runpod-operations"></a>
 ## 13. RunPod 운영 경로 추가 분석
 
-분석 기준: 2026-10-26, main `b5822659c7bc0e0adc20cf69f921a23edf191992`. 이전 가이드 작성 이후 애플리케이션 소스 변경은 없다. **아래 표는 현재 코드의 동작이며 실제 운영 계정의 사용 실적과 구분한다.**
+분석 기준: 2026-10-26(한국 시간), main 코드는 앞의 소스 대조 기준과 동일하다. **소스의 분기, 로그인한 RunPod 콘솔에서 관찰한 설정, 아직 확인하지 못한 운영 실적을 구분한다.**
 
 ### 13.1 먼저 구분할 운영 상태
 
@@ -314,9 +314,14 @@ HTML은 외부 네트워크 없이 본문·그림·체험을 읽을 수 있다. 
 | CPU 서비스 라우트 | [`cpu_app.ALLOWED`][rp-cpu]가 코스·조회·채팅 등만 포함. `/jobs/runpod`·`/jobs/runpod/batch`·`/jobs/runpod/{job_id}` 없음 | CPU 서비스가 켜져 있어도 RunPod 게이트웨이가 열린 것은 아님 |
 | EC2 배포 구성 | Spring의 `FASTAPI_URL`·`KRIDE_FASTAPI_URL`, FastAPI의 RunPod 키·세 엔드포인트 변수를 주입하는 코드가 존재 | 과거·별도 배포 경로의 설계 증거. 현재 EC2 실행 상태는 미확인 |
 | 운영 서버 직접 조회 | SSH 연결이 현재 실행 환경에서 차단됨. 공개 상태 URL도 조회 도구에서 접근 불가 | 컨테이너 환경값·실제 Spring 접속 대상·운영 DB 작업 건수는 확인하지 못함 |
-| RunPod 콘솔 | Serverless 페이지 접근 시 로그인 필요 화면 확인 | 엔드포인트 ID·연결 이미지·현재 작업자·최근 성공 작업은 미확인 |
+| RunPod 콘솔의 미디어 계열 | `KMovement` 엔드포인트에 저장소 `feed-mina/KMovement`, main, `deploy/media_motion/Dockerfile.runpod`, build context `.`가 연결됨 | 일반 미디어 이미지 계열임은 확인. Spring의 실효 `RUNPOD_MEDIA_ENDPOINT_ID`와 일치하는지는 미확인 |
+| 미디어 작업자 설정 | GPU 1개·24GB 등급, Active workers 0, **Max workers 0**, idle timeout 300초, execution timeout 3600초. Overview에서 Idle·실행 작업자 0·진행 작업 0·대기 작업 0 | 관찰 시점 설정. 최소 작업자 0에 따른 유휴 상태와 다르게 **확장 상한도 0**이라는 해석. 설정을 변경하지 않음 |
+| 미디어 최근 표시 범위 | Overview 기본 `Past hour`: Total·Completed·Retried·Failed 모두 0 | 최근 한 시간 표시 결과. 전체 사용 이력·하루 실적·영구 미사용으로 확대하지 않음 |
+| Tora 후보 | 별도 141GB 엔드포인트가 목록에 있었음. 상세 조회는 Chrome 확장 UI 차단으로 중단 | GPU 크기와 이름만으로 Tora라고 확정하지 않음. 이미지·볼륨·설정·성공 작업 미확인 |
 
-따라서 **현재 Tora·미디어 엔드포인트가 운영에서 정상 사용 중이라는 결론은 아직 낼 수 없다.** 반대로 미사용·중지 상태라고 확정할 근거도 없다. 웹 배포 성공, 이미지 빌드 성공, 외부 생성 성공은 각각 다른 증거다.
+따라서 **미디어 계열 엔드포인트의 존재·저장소 연결·최대 작업자 0 설정은 확인했지만, Tora·일반 영상·배치의 실제 성공 사용은 입증하지 못했다.** 과거 미사용이나 전체 서비스 중지로 확대하지 않는다. 웹 배포 성공, 이미지 빌드 성공, 외부 생성 성공은 각각 다른 증거다.
+
+미디어 Releases 최상단에는 Release #137·짧은 커밋 `1340024`가 표시됐다. 이는 콘솔의 릴리스 목록 관찰이며 현재 활성 이미지 digest나 최신 main 실행 증거는 아니다. 실행 작업자가 0이므로 실행 중인 이미지도 확인하지 못했다. Requests 탭은 과거 기록이 아니라 `/run` 입력·실행 도구여서 실행하지 않았다. Logs의 기본 Live 보기에는 항목이 보이지 않았지만 과거 로그가 없다는 뜻은 아니다. 편집 창은 값을 바꾸지 않고 Cancel로 닫았다.
 
 ### 13.2 단일 영상과 배치의 실제 분기
 
@@ -336,7 +341,7 @@ HTML은 외부 네트워크 없이 본문·그림·체험을 읽을 수 있다. 
 
 ![R1 단일 Tora와 미디어·배치 분기](assets/runpod-routing.svg)
 
-R1은 **소스 기준 실행 분기**다. 운영에 두 엔드포인트가 실제로 분리되어 있다는 의미가 아니다.
+R1은 **소스 기준 실행 분기**다. 콘솔의 미디어 계열 설정은 확인했으나, 운영 환경변수와 두 역할의 실제 매핑은 아직 확인하지 못했다.
 
 ### 13.3 현재 배치 자동 선택에서는 Tora가 나오지 않는다
 
@@ -385,14 +390,14 @@ Tora 배치를 명시하면 `_generate_photo_segment()`가 같은 작업자에�
 |---|---|---|
 | [Dockerfile.tora][rp-toraimage] | Tora 전용 런타임, Tora 저장소·체크포인트·VAE·T5 경로. 시작 스크립트가 필요한 파일을 검증 | 실제 엔드포인트의 이미지 digest, 마운트·파일 존재, 기동 로그 |
 | [Dockerfile.runpod][rp-mediaimage] | 미디어 작업자. TorchServe·Redis·Celery·RunPod handler를 관리 | 실제 미디어 이미지와 활성 프로세스·모델 가용성 |
-| [Tora][rp-torawf]/[Media][rp-mediawf] GitHub 워크플로 | 각각 Docker 이미지 `latest`·커밋 태그를 레지스트리에 게시 | RunPod 엔드포인트가 그 이미지를 선택했는지. 워크플로 자체는 엔드포인트를 자동 교체하지 않음 |
+| [Tora][rp-torawf]/[Media][rp-mediawf] GitHub 워크플로 | 각각 Docker 이미지 `latest`·커밋 태그를 레지스트리에 게시 | RunPod 엔드포인트가 그 이미지를 선택했는지. 워크플로 자체는 엔드포인트를 자동 교체하지 않음. 다만 콘솔에는 별도의 GitHub 저장소 연동·Releases가 존재하므로 자동 적용 여부는 그 연동에서도 확인해야 함 |
 | `.runpod/hub.json` | 저장소에 선언한 설정 자료 | 실제 계정의 엔드포인트·작업자 수·GPU·볼륨이 일치하는지는 별도 확인 |
 
 일반 미디어 Dockerfile에서 전용 Tora 저장소·체크포인트를 설치하는 단계는 확인되지 않았다. 별도 볼륨·이미지·환경 덮어쓰기가 없다면 미디어 작업자에서 명시적 Tora 배치를 성공시킬 전제가 부족할 수 있다는 **추론**이다. 실제 미디어 엔드포인트가 무엇을 실행 중인지 확인하기 전에는 실패를 확정하지 않는다.
 
 ### 13.7 운영 확정에 필요한 최소 증거
 
-RunPod 로그인과 운영 읽기 권한이 확보되면 새 과금 작업을 제출하지 않고 기존 정보부터 확인한다.
+RunPod 로그인 후 미디어 설정을 일부 확인했다. 다음 증거를 기존 기록의 읽기 전용 조회로 보완한다. 새 과금 작업·워커 실행은 수행하지 않았다.
 
 1. 운영 Spring의 활성 프로필과 **실효** `kride.fastapi.url`, 대상 서비스의 실행 모듈이 전체 FastAPI·Cloud Gateway·CPU 앱 중 무엇인지.
 2. Tora·미디어·레거시 변수의 설정 여부와 동일 ID 여부. 보고서에는 키 원문을 쓰지 않고 별칭으로 표시.
@@ -401,7 +406,7 @@ RunPod 로그인과 운영 읽기 권한이 확보되면 새 과금 작업을 �
 5. PostgreSQL 작업의 `route`, `status`, `runpod_job_id`, `actual_model`, `actual_model_executed`, 결과 URL 보존 상태를 기존 외부 기록과 대조.
 6. 개인 영상은 별도로 SQLite/FFmpeg 경로인지 확인하고, 위 RunPod 사용량과 섞어 집계하지 않음.
 
-**현재 남은 확인:** RunPod 콘솔 로그인과 운영 설정·기존 작업 기록 조회다. 확인 전까지 운영 사용률·실행 성공률·사용 엔드포인트 수는 수치로 제시하지 않는다.
+**현재 남은 확인:** Tora 후보 상세, 실제 서버의 엔드포인트 매핑·활성 이미지, 기존 작업·실행 모델·결과 저장 대조다. Chrome은 “다른 확장 프로그램 UI가 열려 있음”을 이유로 추가 조회를 차단했다. 이 제한을 우회하지 않았다. 운영 사용률·실행 성공률은 제시하지 않는다.
 
 ### 13.8 연결 가이드에 반영할 결정
 
@@ -423,3 +428,119 @@ RunPod 로그인과 운영 읽기 권한이 확보되면 새 과금 작업을 �
 [rp-mediawf]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/.github/workflows/deploy-runpod.yml
 [rp-gateway]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/cloud_gateway/app.py
 [rp-router]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/media_motion/routers.py
+
+<a id="trip-context"></a>
+## 14. 개인 영상과 여행 코스의 간접 연결, trip_json의 의미
+
+**간접 연결은 ‘코스에서 고른 장소를 서버가 검증한 뒤 개인 영상 작업에 설명 정보로 붙이는 것’이다.** 여행 DB와 영상 DB를 합치거나 코스로 영상을 자동 생성한다는 뜻은 아니다. 예를 들어 사용자가 코스의 한 장소를 직접 골라 사진 한 장을 올리면, 영상 작업에 그 장소의 번호·이름·주소와 코스 식별 정보가 함께 보존된다. 현재 영상은 사진만으로 확대·이동 효과를 만든다.
+
+### 14.1 화면에서 어떤 값이 이동하는가
+
+![T1 코스에서 장소를 골라 영상에 연결하는 현재 화면 재구성](assets/course-screen.svg)
+
+T1은 코드 기반 재구성이며 장소명·번호는 설명용 예시다. 실제 운영 화면이나 사용자 사진이 아니다. 버튼은 `NEXT_PUBLIC_PHOTO_VIDEO_ENABLED=true`이고 코스 응답에 `courseContext`와 장소가 있을 때만 나타난다.
+
+| 단계 | 사용자 행동과 화면 | 실제 함수·값과 결과 |
+|---|---|---|
+| T1 코스에서 이동 | 코스 결과의 ‘이 코스의 여행 사진으로 영상 만들기’ | `ItineraryPanel` → `PhotoVideoCourseLink`. 서명 토큰과 `{id,name}` 장소 목록만 `sessionStorage['kride_photo_video_course']`에 쓰고 `/travel/video`로 이동. 클릭 함수는 별도 데이터를 반환하지 않음 |
+| T2 직접 장소 선택 | 개인 영상의 ‘이 사진과 연결할 코스 장소’에서 한 곳 선택 | `TravelVideoPage`가 저장값을 읽어 `course` 상태에 놓음. `poiId`는 처음 빈 값. 자동 선택·촬영 위치 자동 판정 없음 |
+| T3 사진과 생성 요청 | 사진 업로드 후 영상 만들기 | `upload()` → `/photos`에서 `photoId` 수신. `generate()` → `/jobs`에 `photoId`, `requestId`, 선택적으로 `courseContext`, `poiId` 전송 |
+| T4 연결 완료 표시 | 선택 작업에 연결 장소·코스 번호·안내 문구 | 응답 `job.trip.placeName`, `itineraryId` 앞 8자리, `notice` 표시. 코스 전체를 복원하는 링크는 현재 없음 |
+
+‘코스 연결 없이 만들기’는 화면의 코스·선택 장소와 sessionStorage 값을 지운다. 이후 생성은 `trip` 없이 가능하다. 단, 이미 생성된 작업의 연결 정보는 수정하지 않는다. 계정 전환 때 남은 브라우저 코스 값은 서버 소유권 검증에서 거절되지만, 화면의 옛 장소명까지 자동 제거하는 구현은 확인되지 않았다. 로그인·로그아웃·계정 전환 때 정리하는 보강이 필요하다.
+
+### 14.2 검증 API가 확인하는 범위와 실제 호출 순서
+
+코스 생성 API `/api/public/itinerary`는 추천 결과의 장소를 현재 공개 자료와 대조하고, 조건·예산 검사를 통과한 장소가 있을 때 `issue_context()`로 토큰을 발급한다. 이 최초 추천에는 Groq 호출이 있을 수 있다. **영상 연결 시의 `/video-context`는 새 추천·RunPod 작업을 만들지 않는다.**
+
+![T2 개인 영상 생성 요청의 코스 검증 분기](assets/course-context.svg)
+
+| 단계 | 담당 코드와 입력 | 확인·처리 | 반환 또는 중단 |
+|---|---|---|---|
+| V1 로그인과 요청 정리 | Next `proxy()`, 쿠키·사진·요청 번호·선택 정보 | Spring `/api/auth/me`에서 실효 `userSqno` 확인. POST의 같은 사이트 조건 검사. 브라우저가 보낸 `trip` 등 허용 외 필드는 거절 | 인증 실패 401/503, 잘못된 입력 422. 아직 개인 작업을 저장하지 않음 |
+| V2 연결 API 호출 | 코스 필드가 있으면 `POST /api/public/itinerary/video-context` | 서버가 `X-Kride-Token`, 로그인 소유자의 `X-Kride-User`, `courseContext`, `poiId` 전달. 코스 필드가 모두 없으면 이 단계를 생략 | 내부 연결 설정이 없으면 503. 코스 사용 계정은 `KRIDE_AI_TEST_USERS` 허용 목록에도 있어야 하며 불허 시 403 |
+| V3 코스 토큰 확인 | `video_context()` → `resolve_context(token,user,public_catalog())` | HMAC-SHA256 서명, 버전 1, 소유자 해시 일치, 만료 전·잔여 최대 1시간, 현재 카탈로그 지문 일치, 장소 목록 구조 확인 | 변조·다른 계정·만료·자료 변경 409. 키 설정 문제 503 |
+| V4 선택 장소 확인 | 검증된 코스의 장소 목록과 `poiId` | 선택 번호가 해당 코스 목록에 실제 있는지 확인. 이름·주소는 현재 서버 자료에서 가져옴 | 코스 밖 장소 422. 성공하면 아래 7필드 객체 반환 |
+| V5 작업 보존 | Next가 응답을 `normalized.trip`으로 넣어 개인 API `/jobs`에 전달 | 개인 API가 내부 키·owner·`TripContext` 형식과 사진 소유권·제한·중복 요청을 확인. `enqueue()`가 JSON 문자열로 변환해 SQLite에 INSERT | 작업 응답 202 또는 기존 동일 요청 반환. 실패 시 새 작업 미저장 |
+
+검증 대상은 **서버가 발급한 코스 참조와 현재 장소 자료의 일치**다. 사진 속 장소, EXIF/GPS 위치, 실제 방문·아티스트 방문, 예약 가능 여부를 보증하지 않는다. 또한 `/video-context`는 최초 코스의 방문 날짜·시간·예산 계산을 다시 실행하지 않는다. 토큰에 그 조건 전체가 저장돼 있지 않다. 최초 추천 조건 검사와 영상 연결 검사를 같은 의미로 부르면 안 된다.
+
+### 14.3 trip_json에 들어가는 정확한 값
+
+`trip_json`은 개인 SQLite `jobs.trip_json`의 **선택적인 TEXT 열**이다. `json.dumps(body.trip.model_dump(), ensure_ascii=False, sort_keys=True)`로 만든 문자열이며, 코스 연결이 없으면 SQL `NULL`이다. 전체 여행 일정 JSON이라는 이름으로 이해하면 범위가 지나치게 넓어진다.
+
+| 필드 | 의미·형식 | 화면 또는 검증 용도 |
+|---|---|---|
+| `itineraryId` | 코스 참조 발급 시 만든 무작위 UUID의 하이픈 없는 32자리 소문자 16진수 | 같은 코스 발급 건을 구별. 화면은 앞 8자리 표시. PostgreSQL 코스 행의 PK라는 근거 없음 |
+| `catalogRevision` | `catalog_revision()`이 현재 **전체 공개 카탈로그의 지정 필드**로 만든 SHA-256, 64자리 16진수 | 발급 당시 자료 버전. 선택하지 않은 다른 장소의 관련 필드 변경도 토큰을 무효화할 수 있음 |
+| `poiId` | 사용자가 선택한 장소 번호, 1~150자 | 추천용 숫자 장소는 `poi:<poi_sqno>` 형식. 서버 카탈로그의 ID이며 `saved_item.item_ref`와 같은 키가 아님 |
+| `placeName` | 서버에서 읽은 장소명, 1~500자 | 완료·이력의 연결 장소 표시. 현재 API는 기본 카탈로그 이름을 반환하며 화면의 번역 이름과 다를 수 있음 |
+| `placeAddress` | 서버에서 읽은 주소, 최대 1,000자 | 연결 당시 주소 보존. 현재 개인 영상 화면은 표시하지 않음 |
+| `contextIssuedAt` | 토큰 `exp - 3600`을 UTC ISO 8601로 변환한 발급 시각 | 영상 완료 시각이나 검증 완료 시각이 아님 |
+| `notice` | 연결 의미와 한계를 설명하는 서버 문구, 최대 500자 | 코스 장소 선택이며 촬영 위치·방문 증거가 아니라는 안내 |
+
+설명용 예시다. 아래 번호·지문·장소·시각은 운영 데이터가 아니다. JSON 객체가 SQLite TEXT에 직렬화되어 들어가며, 속성 순서는 의미가 없다.
+
+```json
+{
+  "itineraryId": "11111111111141118111111111111111",
+  "catalogRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "poiId": "poi:17",
+  "placeName": "설명용 서울 장소",
+  "placeAddress": "설명용 서울 주소",
+  "contextIssuedAt": "2026-10-26T00:00:00+00:00",
+  "notice": "코스에서 사용자가 선택한 장소입니다. 사진의 실제 촬영 위치나 아티스트 방문 사실을 증명하지 않습니다."
+}
+```
+
+여기에 전체 `itinerary`·아침/오후/저녁 순서·지도·방문 날짜·예산·전체 장소 목록·`courseContext` 원문·토큰 서명·소유자 해시·만료 시각·Cloudinary URL은 들어가지 않는다. 소유자는 같은 행의 `owner`, 사진은 `photo_id`로 따로 연결된다.
+
+### 14.4 DB 관계와 영상 파일은 어디에 남는가
+
+![T3 코스 자료와 개인 작업의 저장 경계](assets/trip-storage.svg)
+
+T3에서 실선은 현재 API 호출·저장·응답, 점선은 값으로만 남기는 논리 참조다. SQLite `photos ↔ jobs`만 해당 영역의 실제 복합 외래키다. `itineraryId`·`poiId`·`catalogRevision`에는 여행 DB를 향한 외래키가 없다.
+
+| 저장 위치 | 보존하는 것 | 보존하지 않는 것·연결 경계 |
+|---|---|---|
+| 공개 장소 자료 | `public_catalog()`가 검수 파일과 Spring 공개 API를 조합. 숫자 장소의 `/api/v1/tour/recommendation-catalog`는 PostgreSQL `verified_visit_catalog` 뷰를 조회 | `saved_item`을 읽지 않음. 뷰는 `tour_poi`·방문 정책·검수된 아티스트 관계를 기반으로 함 |
+| 브라우저 sessionStorage | 서명된 `courseContext`와 화면 선택용 `{id,name}` 목록 | 서버의 영구 코스 저장소가 아님. URL에 토큰을 넣지 않음. 서명은 변조 방지이며 암호화가 아님 |
+| 개인 `${PHOTO_VIDEO_DATA_DIR}/workflow.sqlite3` | `photos`의 번호·owner, `jobs`의 상태·번호·`trip_json`·재시도 관계 | 기본 루트 `/data/photo-video`. 사진·MP4 바이너리와 Cloudinary URL은 저장하지 않음 |
+| 같은 개인 데이터 디렉터리 | `<photoId>.jpg`, `<jobId>.mp4` | 코스별 폴더·RunPod 객체·Cloudinary 객체로 이동하지 않음 |
+| 작업 응답 | `job_response()`가 JSON 문자열을 객체 `trip`으로 복원, 완료 시 `/api/travel-video/jobs/<id>/video` 조립 | 영상 URL을 DB에 영구 컬럼으로 쓰는 구조가 아님. 재생마다 로그인·owner·상태·파일 확인 |
+
+`worker.run_once()`는 작업 행에서 사진 ID를 골라 `render_photo(source,target)`를 호출한다. `trip_json`을 읽어 자막·장소 이미지·카메라 경로를 만들지 않는다. 따라서 코스를 붙여도 현재 5초 사진 확대·이동 MP4의 생성 방식은 같다. RunPod의 `job_id`, Tora의 route, 커뮤니티 PostgreSQL 작업 번호는 이 개인 `jobId`와 별개다.
+
+### 14.5 만료·재시도·중복 요청의 의미
+
+- **새 코스 연결 생성:** 토큰은 발급 후 1시간 안에 검증돼야 한다. 현재 전체 카탈로그 지문이 달라지면 그 전에도 409가 된다. 브라우저가 장소명을 고쳐도 서버 반환 이름·주소로 정리된다.
+- **저장된 이력·재생:** 이미 저장한 `trip_json`은 당시 연결을 설명하는 스냅샷이다. 이력·상태·재생은 토큰을 다시 검증하지 않으므로 토큰 만료가 곧 영상 만료는 아니다. 현재 장소가 여전히 승인됐다는 보증도 아니다.
+- **실패한 작업의 재시도:** `/jobs/<id>/retry`는 원작업의 `photo_id`와 `trip_json`을 복사한다. 이 경로는 `/video-context`를 다시 호출하지 않는다. 같은 소유자·사진·실패 원작업·같은 연결 내용 조건을 DB도 강제한다.
+- **같은 생성 요청 재전송:** `(owner,request_id)`가 같으면 사진·재시도 원본·직렬화된 연결 정보까지 같아야 기존 작업을 돌려준다. 다르면 409. 다만 프록시가 코스 검증을 먼저 하므로 토큰이 만료된 뒤 `/jobs`를 재전송하면 기존 작업 중복 확인까지 도달하지 못할 수 있다. 이때 이력/상태 조회로 기존 작업부터 확인한다.
+- **신뢰 경계:** 개인 Python API는 내부 키·owner와 `TripContext` 형식을 확인하지만 서명 토큰을 자체 검증하지 않는다. 검증 책임은 Next→코스 API에 있다. 개인 API의 외부 비공개·키 보호가 유지돼야 이 전제가 성립한다.
+
+### 14.6 연결 화면을 위한 최소 변경과 검증 기준
+
+현재 요구에는 DB 통합이 필요하지 않다. 내 목록은 기존 PostgreSQL 저장 항목, 내 영상은 기존 SQLite 이력으로 계속 조회하면서 공통 탐색을 제공한다. 코스와 연결된 작업은 기존 `trip` 응답만으로 구분할 수 있다. `saved_item.item_ref`에 개인 `jobId`나 URL을 넣는 방식은 현재 정수 타입·허용 대상과 맞지 않는다.
+
+| 제안 | 최소 변경 위치와 사용자 소유권·기존 데이터 보존 | 완료 기준 |
+|---|---|---|
+| 연결 의미를 화면에 설명 | 개인 영상 카드·상세에 기존 장소명·연결 안내를 표시. ‘촬영 장소 인증’ 대신 ‘사용자가 선택한 코스 장소’로 설명 | 연결 없는 과거 작업도 정상 표시. 주소·시각을 추가하면 위 필드 의미를 유지 |
+| 코스 임시 선택 정리 | 계정 전환·로그아웃 시 sessionStorage와 `course`·`poiId` 정리. API 소유권 검사는 유지 | 다른 계정의 옛 장소명이 남지 않음. 원작업·사진·파일은 삭제하지 않음 |
+| 코스 연계 이력 탐색 | 필요 시 기존 owner 조건 **안에서** `trip.itineraryId`별 묶기·표시를 추가. 전체 조회/서버 필터가 없는 현재 페이지에서 전역 건수를 추정하지 않음 | 선택 코스·연결 없는 작업을 각각 조회해도 다른 계정 작업이 섞이지 않음 |
+| 원래 코스 다시 열기 | 전체 코스 영구 복원은 후속 설계. `trip_json`만으로 일정을 재구성하지 않음. 필요하면 owner가 있는 별도 불변 코스 스냅샷 저장/API를 추가하고 신규 연결부터 사용 | 과거 작업은 ‘연결 장소 정보만 있음’으로 유지. 임의 코스 생성·추정 백필 없음 |
+| 생성 요청 실패 복구 | 코스 검증 오류와 전송 실패를 구분하고 이력/상태 확인을 제공. 멱등 조회 경로를 추가한다면 owner·requestId로만 기존 작업을 확인 | 오류 후 자동으로 새 요청 ID나 새 과금 작업을 만들지 않음 |
+
+정적 분석은 [코스 토큰][trip-token]·[코스 생성/검증 API][trip-api]·[공개 장소 자료][trip-catalog]·[Spring 공개 뷰 조회][trip-spring]·[현재 화면 버튼][trip-link]·[Next 프록시][proxy]·[개인 API][private]·[개인 DB 제약][trip-db]·[CPU 작업자][trip-worker]를 대조했다.
+
+이번 추가 검증에서는 조사용 소스 루트에서 `python -m unittest tests.test_course_context -q`를 실행해 **6개 통과**했다. 순서·식별자, 다른 소유자·변조, 만료·자료 변경, 잘못된 장소 목록, 지문에서 임시 조회 시각 제외, 검수된 번역을 확인한 단위 시험이다. `pytest` 기반 API·DB 시험은 현재 선택된 Python에 pytest가 없어 재실행하지 못했다. 따라서 운영 로그인→코스 선택→사진 업로드→SQLite 저장→재생 성공으로 확대하지 않는다. 앞선 문서의 과거 시험 결과와 이번 실행을 구분한다.
+
+운영 검증은 기능 플래그·허용 계정·코스 API 주소·서명 키의 **설정 여부**·개인 데이터 볼륨·배포 버전을 먼저 대조해야 한다. 키나 토큰 원문을 수집하지 않는다. 실제 업로드·새 영상 생성 없이 가능한 설정·기존 본인 작업 조회부터 확인하고, 새 생성 검증은 별도 작업으로 진행한다. 이번 보고서 갱신은 운영 데이터·DB·애플리케이션 코드를 변경하지 않았다.
+
+[trip-token]: https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/src/api/course_context.py
+[trip-api]: https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/src/api/public_itinerary.py
+[trip-catalog]: https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/src/api/public_search.py
+[trip-spring]: https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/subproject/SDUI/SDUI-server/src/main/java/com/domain/demo_backend/domain/tour/controller/VerifiedVisitCatalogController.java
+[trip-link]: https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/subproject/SDUI/metadata-project/components/fields/kride/PhotoVideoCourseLink.tsx
+[trip-db]: https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/deploy/photo_video/database.py
+[trip-worker]: https://github.com/feed-mina/KMovement/blob/ba68455a101f2be0d5bec35ff09293d0f0d135a5/deploy/photo_video/worker.py
