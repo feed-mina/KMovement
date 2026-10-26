@@ -1,21 +1,31 @@
 {
   "kind": "document-only",
+  "scope": "Existing 27 sections retained; chapter 28 and one planned flow added",
   "checks": [
     {
       "width": 1440,
       "overflow": false,
-      "sections": 27,
+      "sections": 28,
+      "modelSections": 16,
       "brokenAnchors": 0,
-      "modelSections": 16
+      "svgTextOverflow": 0,
+      "keyboardZoom": true,
+      "escapeClose": true,
+      "focusReturn": true
     },
     {
       "width": 390,
       "overflow": false,
-      "sections": 27,
+      "sections": 28,
+      "modelSections": 16,
       "brokenAnchors": 0,
-      "modelSections": 16
+      "svgTextOverflow": 0,
+      "keyboardZoom": true,
+      "escapeClose": true,
+      "focusReturn": true
     }
   ],
   "errors": [],
+  "externalRequests": 0,
   "pass": true
 }
