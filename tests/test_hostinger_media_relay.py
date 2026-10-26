@@ -7,7 +7,7 @@ AUTH = {"X-Internal-Api-Key": gateway.FASTAPI_INTERNAL_API_KEY}
 
 def test_all_relay_operations_require_internal_auth():
     for method, path, payload in [
-        ("POST", "/jobs/runpod", {"route": "cogvideox_real"}),
+        ("POST", "/jobs/runpod", {"route": "cogvideox_real", "image_url": "https://example.com/a.jpg"}),
         ("POST", "/jobs/runpod/batch", {"images": [{"image_url": "https://example.com/a.jpg"}]}),
         ("GET", "/jobs/runpod/existing-job", None),
     ]:
@@ -75,7 +75,7 @@ def test_missing_provider_configuration_does_not_submit(monkeypatch):
     monkeypatch.setattr("httpx.post", unexpected)
     monkeypatch.setattr("httpx.get", unexpected)
     assert client.post("/jobs/runpod", headers=AUTH,
-                       json={"route": "cogvideox_real"}).status_code == 501
+                       json={"route": "cogvideox_real", "image_url": "https://example.com/a.jpg"}).status_code == 501
     assert client.post("/jobs/runpod/batch", headers=AUTH,
                        json={"images": [{"image_url": "https://example.com/a.jpg"}]}).status_code == 501
     assert client.get("/jobs/runpod/existing-job", headers=AUTH).status_code == 501
@@ -90,6 +90,6 @@ def test_provider_failure_is_reported_without_repost(monkeypatch):
         raise RuntimeError("Provider unavailable")
     monkeypatch.setattr("httpx.post", failing)
     response = client.post("/jobs/runpod", headers=AUTH,
-                           json={"route": "cogvideox_real"})
+                           json={"route": "cogvideox_real", "image_url": "https://example.com/a.jpg"})
     assert response.status_code == 502
     assert calls == ["https://api.runpod.ai/v2/media/run"]
