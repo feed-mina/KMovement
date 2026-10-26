@@ -1,0 +1,662 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>내 목록과 내 영상 연결 가이드</title><style>
+:root{--ink:#1c2a35;--muted:#536471;--line:#dce2e5;--paper:#fff;--accent:#b94d31;--wash:#f4f5ef;--soft:#fbe9df;--mint:#e5efeb}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;color:var(--ink);font:16px/1.8 "Malgun Gothic","Noto Sans KR",sans-serif;background:var(--wash)}a{color:#235e7d;text-decoration-thickness:1px;text-underline-offset:3px}button,select{font:inherit}button,a,select{touch-action:manipulation}button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #a23d28;outline-offset:4px}header.cover{padding:58px max(28px,calc((100vw - 1200px)/2));background:#1c2d35;color:#fff;border-bottom:6px solid #e8bb8f}header.cover p{max-width:760px;color:#d5e0e1}header.cover h1{font-size:clamp(28px,4vw,48px);margin:10px 0;line-height:1.35}.eyebrow{letter-spacing:2px;font-size:13px}.shell{max-width:1370px;margin:auto;display:grid;grid-template-columns:218px minmax(0,1fr);gap:24px;padding:28px}aside{position:sticky;top:20px;align-self:start}aside a{display:block;padding:7px 12px;color:var(--muted);text-decoration:none;border-left:2px solid var(--line);font-size:14px}aside a:hover{background:#fff;border-color:var(--accent)}main{min-width:0;background:var(--paper);padding:36px 42px;border:1px solid var(--line);border-radius:20px}main h1{font-size:30px;line-height:1.45}h2{font-size:25px;border-top:1px solid var(--line);padding-top:38px;margin:44px 0 20px;line-height:1.5}h3{font-size:20px;margin-top:26px}p,li{overflow-wrap:anywhere}li+li{margin-top:8px}strong{font-weight:750}.table-wrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.75}th,td{padding:13px 15px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}th{background:#edf2ef;min-width:110px}tr:last-child td{border:0}td code{overflow-wrap:anywhere;white-space:normal}pre{padding:22px;background:#162831;color:#edf6f5;border-radius:12px;overflow-x:auto;font-size:13px;line-height:1.75}code{font-family:Consolas,monospace;font-size:.9em;background:#eff2f2;padding:2px 4px;border-radius:4px}pre code{background:none;padding:0;color:inherit}figure{margin:26px 0;padding:14px;background:#f5f5f0;border:1px solid var(--line);border-radius:16px}figure svg{width:100%;height:auto;display:block}figcaption{font-size:13px;color:var(--muted);margin-top:12px;display:flex;gap:12px;justify-content:space-between;align-items:center}.quiet{border:1px solid #bbc6ca;background:white;border-radius:8px;padding:7px 12px;color:var(--ink)}.notice{padding:18px 22px;background:var(--soft);border-left:4px solid var(--accent);border-radius:8px}.prototype{border:1px solid var(--line);border-radius:18px;padding:24px;background:#fafbf7;margin:24px 0}.proto-nav{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 18px}.proto-nav button{background:white;border:1px solid #bcc8cd;border-radius:24px;padding:8px 22px}.proto-nav button[aria-selected=true]{background:#233c40;color:#fff;border-color:#233c40}.demo-row{padding:18px;background:white;border:1px solid var(--line);border-radius:12px;margin-top:12px}.demo-row p{margin:4px 0}.small{color:var(--muted);font-size:13px}.inspect{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;padding:20px;background:#edf3ef;border-radius:16px}.inspect-detail{background:white;border-radius:12px;padding:20px;border:1px solid var(--line)}.inspect-map{display:grid;grid-template-columns:1fr 1fr;gap:10px}.inspect-map button{border:1px solid #aebdb6;background:#fff;padding:13px 10px;border-radius:10px;font-size:14px;text-align:left}.inspect-map button[aria-pressed=true]{background:#243d38;color:#fff}.inspect-detail h4{margin:0 0 8px;font-size:19px}.skip{position:absolute;top:-80px;left:15px}.skip:focus{top:12px;background:white;padding:10px;z-index:10}dialog{border:1px solid #b5bfc3;border-radius:14px;max-width:96vw;width:1250px;padding:18px}dialog::backdrop{background:#15212bba}.dialog-bar{display:flex;justify-content:space-between;gap:12px;position:sticky;top:0;background:white;padding:5px}.zoom-stage{max-height:80vh;overflow:auto}.zoom-stage svg{width:100%;min-width:600px;height:auto}.qa{font-size:14px;padding:15px;background:var(--mint);border-radius:10px}footer{max-width:1200px;margin:0 auto 40px;padding:20px;color:var(--muted);font-size:13px}@media(max-width:850px){.shell{display:block;padding:16px}aside{position:static;display:flex;gap:5px;overflow-x:auto;margin-bottom:16px}aside a{white-space:nowrap;border:1px solid var(--line);border-radius:18px;padding:6px 12px;background:white}main{padding:23px 18px;border-radius:14px}header.cover{padding:32px 22px}.inspect{grid-template-columns:1fr}.prototype{padding:16px}table{min-width:580px}h2{font-size:22px}main h1{font-size:26px}pre{font-size:12px;padding:14px}figcaption{align-items:flex-start;flex-direction:column}.dialog-bar{flex-wrap:wrap}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{aside,.quiet,.prototype,dialog{display:none}.shell{display:block;padding:0}main{border:0;padding:0}header.cover{padding:20px}a{color:inherit}figure,table{break-inside:avoid}}
+</style></head><body><a class="skip" href="#content">본문으로 이동</a><header class="cover"><span class="eyebrow">KMOVEMENT / IMPLEMENTATION GUIDE</span><h1>내 목록에서 내 영상까지</h1><p>같은 보관 경험으로 이어지는 화면 연결 가이드. 현재 구현과 다음 변경을 구분하고, 기존 데이터와 소유권을 유지합니다.</p></header><div class="shell"><aside aria-label="보고서 목차"><a href="#scope">목표·범위</a><a href="#current">현재 화면</a><a href="#after">개선 화면</a><a href="#flow">이동·조회 흐름</a><a href="#files">함수·수정 파일</a><a href="#login">로그인 복귀</a><a href="#history">조회 상태</a><a href="#contracts">API·저장 경계</a><a href="#steps">구현 순서</a><a href="#tests">시험 계획</a><a href="#maintenance">진단·복구</a><a href="#verification">확인 범위</a></aside><main id="content"><h1>내 목록과 내 영상 연결 가이드</h1>
+<p><strong>핵심 한 줄: 기존 저장소와 소유권 검사를 유지하고, 내 목록과 개인 영상에 공통 탐색 메뉴·로그인 복귀·조회 상태를 연결한다.</strong></p>
+<p>작성일: 2026-10-26. 소스 기준: KMovement main <code>46a2d5ae83451befb0fa465acffe96257b7811d6</code>. 이 main은 직전 분석 이후 문서만 추가됐으며 아래 실행 코드는 PR #299 병합 상태와 같다.</p>
+<p><a href="guide.html">HTML 보고서</a> · <a href="../saved-item-media-storage-audit.md">앞선 저장 경로 조사</a></p>
+<p><a id="scope"></a></p>
+<h2>1. 목표와 읽는 순서</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구분</th>
+<th>이번 가이드의 기준</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>제품과 독자</td>
+<td>KMovement에서 저장한 팬덤 정보와 개인 여행 영상을 관리하는 기능. 처음 보는 개발자도 화면에서 API와 저장값까지 따라갈 수 있게 설명한다.</td>
+</tr>
+<tr>
+<td>사용자 목표</td>
+<td>내 목록에서 내 영상으로 이동하고, 로그인 후 돌아와 이전 작업을 재생한다.</td>
+</tr>
+<tr>
+<td>결과 형식</td>
+<td>같은 원고의 HTML·Markdown, 코드 기반 현재 화면, 개선 예상 화면, 편집 가능한 SVG 그림</td>
+</tr>
+<tr>
+<td>현재 완료</td>
+<td>소스 추적과 가이드 작성. 문서 게시와 문서 자체 검수만 수행한다.</td>
+</tr>
+<tr>
+<td>구현 예정</td>
+<td>공통 메뉴, 로그인 복귀 보강, 개인 영상 조회 상태·주소 복원. 아래 새 파일·함수·쿼리는 제안이다.</td>
+</tr>
+<tr>
+<td>범위</td>
+<td>개인 영상 <code>/travel/video</code>와 내 목록·마이페이지 연결. 커뮤니티·Cloudinary 영상 통합은 후속 선택이다.</td>
+</tr>
+<tr>
+<td>읽는 순서</td>
+<td>현재 화면 → 개선 화면 → 기능별 코드 → 인증·조회 계약 → 구현 순서 → 시험·복구</td>
+</tr>
+</tbody>
+</table></div>
+<p>API(Application Programming Interface)는 프로그램의 요청·응답 창구, DB(Database)는 데이터베이스다. UI(User Interface)는 화면 구성, UX(User Experience)는 화면을 사용하는 과정이다. SVG(Scalable Vector Graphics)는 확대해도 선명한 그림 파일 형식이다.</p>
+<p><a href="#current">현재 화면</a> · <a href="#after">개선 화면</a> · <a href="#flow">이동 흐름</a> · <a href="#files">함수와 파일</a> · <a href="#login">로그인 복귀</a> · <a href="#history">조회 상태</a> · <a href="#contracts">API·DB</a> · <a href="#steps">구현 순서</a> · <a href="#tests">시험</a></p>
+<p><a id="current"></a></p>
+<h2>2. 현재 화면에서 끊기는 부분</h2>
+<p><figure id="fig-current-screens"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 700" role="img" aria-label="G1 코드 기반 현재 화면 재구성"><title>G1 코드 기반 현재 화면 재구성</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs><rect width="1140" height="700" rx="18" fill="#f5f5f0"/><g font-family="'Malgun Gothic','Noto Sans KR',sans-serif" fill="#15212c"><text x="30" y="42" font-size="24" font-weight="700" fill="#15212c">G1 · 현재 코드 기반 재구성 / 운영 캡처 아님</text><text x="30" y="72" font-size="15" font-weight="400" fill="#586875">모든 이름·숫자·작업 상태는 설명용 예시입니다.</text><rect x="28" y="100" width="332" height="558" rx="18" fill="white" stroke="#cfd7dc"/><text x="50" y="138" font-size="23" font-weight="700" fill="#15212c">마이페이지</text><text x="50" y="180" font-size="17" font-weight="400" fill="#15212c">설명용 회원</text><rect x="404" y="100" width="332" height="558" rx="18" fill="white" stroke="#cfd7dc"/><text x="426" y="138" font-size="23" font-weight="700" fill="#15212c">내 목록</text><rect x="780" y="100" width="332" height="558" rx="18" fill="white" stroke="#cfd7dc"/><text x="802" y="138" font-size="23" font-weight="700" fill="#15212c">내 영상</text><rect x="48" y="220" width="292" height="77" rx="12" fill="white" stroke="#ccd4d9"/><text x="66" y="251" font-size="18" font-weight="700" fill="#15212c">저장 아티스트  3</text><text x="66" y="279" font-size="14" font-weight="400" fill="#52606d">저장 일정  2   /   상품  1</text><rect x="48" y="323" width="292" height="58" rx="12" fill="white" stroke="#ccd4d9"/><text x="66" y="354" font-size="18" font-weight="700" fill="#15212c">내 목록 보기</text><rect x="48" y="396" width="292" height="58" rx="12" fill="white" stroke="#ccd4d9"/><text x="66" y="427" font-size="18" font-weight="700" fill="#15212c">홈으로</text><text x="50" y="510" font-size="16" font-weight="700" fill="#9d432f">C1  개인 영상 진입 없음</text><text x="426" y="182" font-size="16" font-weight="700" fill="#15212c">아티스트   일정   상품</text><rect x="424" y="220" width="292" height="86" rx="12" fill="white" stroke="#ccd4d9"/><text x="442" y="251" font-size="18" font-weight="700" fill="#15212c">설명용 팬 일정</text><text x="442" y="279" font-size="14" font-weight="400" fill="#52606d">공개     보기     삭제</text><text x="426" y="352" font-size="15" font-weight="400" fill="#15212c">마이페이지로 돌아가기</text><text x="426" y="510" font-size="16" font-weight="700" fill="#9d432f">C2  개인 영상 이동 없음</text><text x="802" y="183" font-size="14" font-weight="400" fill="#15212c">로그인 · 여행 코스로 돌아가기</text><rect x="800" y="218" width="292" height="94" rx="12" fill="white" stroke="#ccd4d9"/><text x="818" y="249" font-size="18" font-weight="700" fill="#15212c">여행 사진 선택</text><text x="818" y="277" font-size="14" font-weight="400" fill="#52606d">사진 올리기  /  영상 만들기</text><rect x="800" y="334" width="292" height="92" rx="12" fill="white" stroke="#ccd4d9"/><text x="818" y="365" font-size="18" font-weight="700" fill="#15212c">이전 작업</text><text x="818" y="393" font-size="14" font-weight="400" fill="#52606d">생성 완료 · 설명용 작업</text><text x="802" y="488" font-size="15" font-weight="700" fill="#9d432f">C3  이력 상태 표시 보강 필요</text><text x="802" y="521" font-size="14" font-weight="400" fill="#52606d">로그인 후 영상 복귀도 보강</text></g></svg><figcaption><span>G1 현재 화면: 코드 기반 재구성</span><button class="quiet" data-zoom="fig-current-screens" type="button">그림 크게 보기</button></figcaption></figure></p>
+<p><strong>G1은 실제 운영 캡처가 아닌 코드 기반 재구성이다.</strong> 배치와 문구는 소스에서 확인했고, 이름·건수·영상 상태는 설명용 예시다. 운영 기능 활성화나 실제 사용자 데이터를 의미하지 않는다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>화면 번호</th>
+<th>확인한 사용자 동작</th>
+<th>담당 코드와 실제 결과</th>
+<th>연결할 부분</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C1 마이페이지</td>
+<td>아티스트·일정·상품 건수를 누른다</td>
+<td><code>ProfileScreen()</code>이 세 저장 API를 각각 요청하고, 선택한 <code>kind</code>로 내 목록 이동. 실패 건수는 숫자 0 대신 미확인 기호로 남김</td>
+<td>같은 메뉴에 개인 영상 진입 추가. 영상 전체 건수는 현재 API로 계산 불가</td>
+</tr>
+<tr>
+<td>C2 내 목록</td>
+<td>종류·페이지 변경, 보기·삭제·되돌리기</td>
+<td><code>PersonalSavedScreen()</code>이 <code>identity:kind:page</code>로 응답을 구분. 공개 항목만 보기 링크 표시. 삭제 후 다시 조회</td>
+<td>개인 영상으로 가는 메뉴와 돌아올 종류·페이지 보존</td>
+</tr>
+<tr>
+<td>C3 개인 영상</td>
+<td>사진 올리기·영상 만들기·이전 작업 선택</td>
+<td><code>TravelVideoPage()</code>가 업로드·작업·이력을 전용 API로 조회. 완료 시 <code>videoUrl</code> 재생</td>
+<td>마이·내 목록 링크, 로그인 복귀, 이력 상태 분리, 선택 작업 주소 복원</td>
+</tr>
+</tbody>
+</table></div>
+<p>현재 개인 영상 화면에는 로그인과 코스 이동 링크만 있다. 이력 배열이 빈 초기 상태에서도 ‘아직 작업 기록이 없습니다’가 표시되고, 실패는 공용 오류 문구로 표시된다. 이전 페이지 결과도 새 조회가 끝날 때까지 남을 수 있다. 이를 ‘조회 성공 후 실제로 비어 있음’과 구분해야 한다.</p>
+<p>현재 <code>safeLoginReturn()</code>은 홈과 제한된 <code>/view/...</code>만 허용한다. <code>/travel/video</code>는 기본 마이페이지로 바뀐다. 따라서 로그인 링크에 <code>returnTo</code>를 붙이는 수정만으로는 영상 화면 복귀가 완성되지 않는다.</p>
+<p><a id="after"></a></p>
+<h2>3. 개선 화면: 두 화면을 같은 보관 공간처럼 탐색</h2>
+<p><figure id="fig-proposed-screens"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 700" role="img" aria-label="G2 개선 예상 모형"><title>G2 개선 예상 모형</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs><rect width="1140" height="700" rx="18" fill="#f5f5f0"/><g font-family="'Malgun Gothic','Noto Sans KR',sans-serif" fill="#15212c"><text x="30" y="42" font-size="24" font-weight="700" fill="#15212c">G2 · 개선 예상 모형 / 미구현</text><text x="30" y="72" font-size="15" font-weight="400" fill="#586875">모든 이름·숫자·작업 상태는 설명용 예시입니다.</text><rect x="28" y="100" width="332" height="558" rx="18" fill="white" stroke="#cfd7dc"/><text x="50" y="138" font-size="23" font-weight="700" fill="#15212c">마이페이지</text><rect x="48" y="158" width="292" height="53" rx="12" fill="#f0f3e6" stroke="#ccd4d9"/><text x="66" y="189" font-size="18" font-weight="700" fill="#15212c">내 목록     /     내 영상</text><rect x="404" y="100" width="332" height="558" rx="18" fill="white" stroke="#cfd7dc"/><text x="426" y="138" font-size="23" font-weight="700" fill="#15212c">내 목록</text><rect x="424" y="158" width="292" height="53" rx="12" fill="#f0f3e6" stroke="#ccd4d9"/><text x="442" y="189" font-size="18" font-weight="700" fill="#15212c">내 목록     /     내 영상</text><rect x="780" y="100" width="332" height="558" rx="18" fill="white" stroke="#cfd7dc"/><text x="802" y="138" font-size="23" font-weight="700" fill="#15212c">내 영상</text><rect x="800" y="158" width="292" height="53" rx="12" fill="#f0f3e6" stroke="#ccd4d9"/><text x="818" y="189" font-size="18" font-weight="700" fill="#15212c">내 목록     /     내 영상</text><text x="50" y="248" font-size="16" font-weight="700" fill="#15212c">나의 보관함</text><rect x="48" y="270" width="292" height="74" rx="12" fill="white" stroke="#ccd4d9"/><text x="66" y="301" font-size="18" font-weight="700" fill="#15212c">저장한 목록 보기</text><text x="66" y="329" font-size="14" font-weight="400" fill="#52606d">아티스트 · 일정 · 상품</text><rect x="48" y="362" width="292" height="74" rx="12" fill="#fce8dd" stroke="#ccd4d9"/><text x="66" y="393" font-size="18" font-weight="700" fill="#15212c">A1  내 영상 보기</text><text x="66" y="421" font-size="14" font-weight="400" fill="#52606d">이전 작업을 확인하고 이어 보기</text><text x="50" y="480" font-size="14" font-weight="400" fill="#52606d">총 영상 건수는 표시하지 않음</text><text x="426" y="249" font-size="16" font-weight="700" fill="#15212c">아티스트   일정   상품</text><rect x="424" y="273" width="292" height="88" rx="12" fill="white" stroke="#ccd4d9"/><text x="442" y="304" font-size="18" font-weight="700" fill="#15212c">설명용 팬 일정</text><text x="442" y="332" font-size="14" font-weight="400" fill="#52606d">공개     보기     저장 해제</text><text x="426" y="398" font-size="16" font-weight="700" fill="#15212c">A2  종류·페이지 보존</text><text x="426" y="430" font-size="14" font-weight="400" fill="#52606d">내 영상으로 이동해도 원본 유지</text><text x="426" y="602" font-size="15" font-weight="400" fill="#15212c">이전     2페이지     다음</text><text x="802" y="248" font-size="16" font-weight="700" fill="#15212c">만들기     이전 작업</text><rect x="800" y="270" width="292" height="87" rx="12" fill="white" stroke="#ccd4d9"/><text x="818" y="301" font-size="18" font-weight="700" fill="#15212c">A3  여행 영상 · 완료</text><text x="818" y="329" font-size="14" font-weight="400" fill="#52606d">2026.10.26 · 사진 확대·이동</text><rect x="800" y="375" width="292" height="145" rx="12" fill="#dde6e5"/><text x="826" y="450" font-size="18" font-weight="700" fill="#15212c">선택한 영상 재생 영역</text><text x="802" y="558" font-size="16" font-weight="700" fill="#15212c">A4  오류와 빈 상태 분리</text><text x="802" y="601" font-size="15" font-weight="400" fill="#15212c">A5  선택 작업 주소 복원</text></g></svg><figcaption><span>G2 개선 예상 화면</span><button class="quiet" data-zoom="fig-proposed-screens" type="button">그림 크게 보기</button></figcaption></figure></p>
+<p><strong>G2는 미구현 개선 예상 모형이다.</strong> 개인 영상은 여전히 전용 API와 SQLite를 사용한다. ‘내 영상’은 이번 범위에서 개인 사진·영상 작업을 뜻한다.</p>
+<ul>
+<li>A1: 마이페이지에 ‘내 영상 보기’를 추가한다. 실제 전송·재생 준비가 된 환경에서만 진입을 노출한다.</li>
+<li>A2: 내 목록과 개인 영상에 ‘내 목록 / 내 영상’ 공통 탐색 메뉴를 둔다. 페이지 이동이므로 링크와 <code>aria-current="page"</code>를 사용한다.</li>
+<li>A3: 영상 화면에서 생성과 이력을 시각적으로 구분한다. ‘완료’ 작업만 재생할 수 있고, 실패 작업의 다시 만들기는 별도 쓰기 동작이다.</li>
+<li>A4: 조회 중·실패·빈 목록을 서로 다른 영역으로 표시한다. 일부 조회 실패가 다른 화면을 막지 않게 한다.</li>
+<li>A5: 목록의 종류·페이지와 선택한 영상 작업을 주소로 복원한다. 허용한 값만 읽고 사용자 번호·내부 키·사진 데이터는 주소에 넣지 않는다.</li>
+</ul>
+<p><strong>연결하지 않는 의미:</strong> 저장한 아티스트를 눌렀다고 그 아티스트와 관련된 사진을 자동 판정하지 않는다. 상품 후보 번호를 사진·영상 번호로 변환하지 않는다. 목록 저장 해제는 영상·원본 사진 삭제가 아니다.</p>
+<section class="prototype" aria-label="개선 예상 체험"><p class="small">설명용 모형 · 실제 요청 없음</p><h3>나의 보관함</h3><div class="proto-nav" role="tablist" aria-label="문서 체험 화면"><button id="demo-saved" role="tab" aria-selected="true" aria-controls="demo-panel" tabindex="0" data-demo="saved">내 목록</button><button id="demo-videos" role="tab" aria-selected="false" aria-controls="demo-panel" tabindex="-1" data-demo="videos">내 영상</button></div><label for="demo-state">조회 상태 예시 </label><select id="demo-state"><option value="ready">조회 성공</option><option value="loading">조회 중</option><option value="empty">빈 목록</option><option value="error">조회 실패</option><option value="guest">로그인 필요</option><option value="unavailable">기능 준비 중</option></select><div id="demo-panel" role="tabpanel" aria-labelledby="demo-saved" tabindex="0" aria-live="polite"></div></section>
+
+<p>HTML의 체험 영역은 설명용 모형이다. 버튼은 문서 안의 화면만 전환하며 실제 서비스 요청·업로드·로그인을 하지 않는다. Markdown에서는 G2와 아래 상태 표로 같은 내용을 읽을 수 있다.</p>
+<p><a id="flow"></a></p>
+<h2>4. 화면 이동과 조회 분기</h2>
+<p><figure id="fig-navigation-flow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 720" role="img" aria-label="F1 화면 이동과 조회 분기"><title>F1 화면 이동과 조회 분기</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs><rect width="1140" height="720" rx="18" fill="#f5f5f0"/><g font-family="'Malgun Gothic','Noto Sans KR',sans-serif" fill="#15212c"><text x="32" y="44" font-size="24" font-weight="700" fill="#15212c">F1–F5 · 제안하는 이동·조회 흐름</text><rect x="395" y="80" width="350" height="76" rx="12" fill="#f0f3e6" stroke="#ccd4d9"/><text x="413" y="111" font-size="18" font-weight="700" fill="#15212c">F1 공통 메뉴 선택</text><text x="413" y="139" font-size="14" font-weight="400" fill="#52606d">내 목록 또는 내 영상</text><path d="M570,156 L570,202" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="578.0" y="172.0" font-size="13" font-weight="400" fill="#475569">이동</text><rect x="395" y="202" width="350" height="78" rx="12" fill="white" stroke="#ccd4d9"/><text x="413" y="233" font-size="18" font-weight="700" fill="#15212c">F2 기능·인증 확인</text><text x="413" y="261" font-size="14" font-weight="400" fill="#52606d">서버 허용과 로그인 상태</text><path d="M395,241 L300,241" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="355.5" y="234.0" font-size="13" font-weight="400" fill="#475569">미준비·비로그인</text><rect x="32" y="202" width="265" height="98" rx="12" fill="#fce8dd" stroke="#ccd4d9"/><text x="50" y="233" font-size="18" font-weight="700" fill="#15212c">안내·로그인</text><text x="50" y="261" font-size="14" font-weight="400" fill="#52606d">허용된 복귀 주소만 보존</text><path d="M570,280 L570,327" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="578.0" y="296.5" font-size="13" font-weight="400" fill="#475569">준비·인증됨</text><rect x="395" y="327" width="350" height="77" rx="12" fill="white" stroke="#ccd4d9"/><text x="413" y="358" font-size="18" font-weight="700" fill="#15212c">F3 해당 화면만 조회</text><text x="413" y="386" font-size="14" font-weight="400" fill="#52606d">목록과 영상 요청은 독립</text><path d="M570,404 L570,448" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="578.0" y="419.0" font-size="13" font-weight="400" fill="#475569">응답</text><rect x="395" y="448" width="350" height="77" rx="12" fill="white" stroke="#ccd4d9"/><text x="413" y="479" font-size="18" font-weight="700" fill="#15212c">F4 응답 상태 분리</text><text x="413" y="507" font-size="14" font-weight="400" fill="#52606d">성공 · 빈 결과 · 조회 실패</text><path d="M745,488 L814,488" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="787.5" y="481.0" font-size="13" font-weight="400" fill="#475569">빈 결과·실패</text><rect x="817" y="448" width="293" height="97" rx="12" fill="#fce8dd" stroke="#ccd4d9"/><text x="835" y="479" font-size="18" font-weight="700" fill="#15212c">상태별 안내</text><text x="835" y="507" font-size="14" font-weight="400" fill="#52606d">해당 조회만 재시도</text><path d="M570,525 L570,574" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="578.0" y="542.5" font-size="13" font-weight="400" fill="#475569">작업 선택</text><rect x="395" y="574" width="350" height="95" rx="12" fill="#e4efec" stroke="#ccd4d9"/><text x="413" y="605" font-size="18" font-weight="700" fill="#15212c">F5 소유자 재조회·재생</text><text x="413" y="633" font-size="14" font-weight="400" fill="#52606d">완료 + 권한 + 파일 확인</text></g></svg><figcaption><span>F1 화면 연결과 조회 분기</span><button class="quiet" data-zoom="fig-navigation-flow" type="button">그림 크게 보기</button></figcaption></figure></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>입력·판단</th>
+<th>결과와 화면 위치</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F1 공통 메뉴</td>
+<td>사용자가 내 목록 또는 내 영상을 선택</td>
+<td>허용된 내부 경로로 이동. 이 시점에는 저장·생성 API를 호출하지 않음</td>
+</tr>
+<tr>
+<td>F2 기능·인증 확인</td>
+<td>영상 기능 설정, 로그인 준비·상태</td>
+<td>기능 준비 중이면 안내. 비로그인이면 복귀 경로를 보존하고 로그인 안내</td>
+</tr>
+<tr>
+<td>F3 독립 조회</td>
+<td>내 목록은 종류·페이지, 내 영상은 페이지·선택 작업</td>
+<td>각각 자기 API 요청. 서로 순서대로 호출해야 하는 의존 관계 없음</td>
+</tr>
+<tr>
+<td>F4 응답 판정</td>
+<td>성공·빈 결과·401·404·503·통신 실패</td>
+<td>아래 상태 표에 맞춰 표시. 실패를 빈 목록으로 바꾸지 않음</td>
+</tr>
+<tr>
+<td>F5 선택·재생</td>
+<td>검증된 작업 번호를 상태 API로 조회</td>
+<td>소유자 검사 통과·완료 상태·재생 주소 확인 후 영상 표시</td>
+</tr>
+</tbody>
+</table></div>
+<p>URL(Uniform Resource Locator)은 화면·파일의 주소다. UUID(Universally Unique Identifier)는 전역 고유 식별자로, 개인 영상 작업 번호에 사용된다.</p>
+<p><strong>1차 제안 경로 계약 — 새 쿼리 파싱은 아직 없다.</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>목적</th>
+<th>사용할 주소</th>
+<th>현재/제안 구분</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>저장 목록</td>
+<td><code>/view/KPOP_SAVED_ITEMS?kind=events&amp;page=2</code></td>
+<td>현재 지원. 예시는 설명용</td>
+</tr>
+<tr>
+<td>개인 영상 기본</td>
+<td><code>/travel/video</code></td>
+<td>현재 지원</td>
+</tr>
+<tr>
+<td>영상 이력만 보기</td>
+<td><code>/travel/video?view=history&amp;page=2</code></td>
+<td>새 파싱·화면 구분 구현 필요</td>
+</tr>
+<tr>
+<td>선택 영상 다시 열기</td>
+<td><code>/travel/video?view=history&amp;page=2&amp;job=&lt;UUID&gt;</code></td>
+<td>새 구현 필요. 주소의 번호를 믿지 않고 소유자 재조회</td>
+</tr>
+<tr>
+<td>새 영상 만들기</td>
+<td><code>/travel/video?view=create</code></td>
+<td>새 화면 모드 제안. 실제 생성은 명시적 버튼 클릭</td>
+</tr>
+</tbody>
+</table></div>
+<p>1차에서는 내 목록으로 돌아오는 링크의 <code>kind</code>·<code>page</code>를 URL의 <code>returnTo</code>로 보낼 수 있다. 별도 <code>safePersonalReturn()</code>을 <strong>새로 구현</strong>해 정확히 마이페이지 또는 내 목록 경로만 허용하고 <code>kind</code>·<code>page</code>를 정규화한다. 중첩 복귀 경로, 외부 주소, 임의 경로는 마이페이지로 대체한다. 로그인 복귀용 저장값과 개인 화면 간 복귀값은 역할이 다르므로 같은 키를 덮어쓰지 않는다.</p>
+<p><a id="files"></a></p>
+<h2>5. 핵심 기능과 수정할 파일</h2>
+<p>현재 파일 이름은 클릭하면 분석 기준 소스로 이동한다. ‘제안’ 행의 파일·함수는 아직 존재하지 않는다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>기능</th>
+<th>파일·함수</th>
+<th>받는 값</th>
+<th>처리·반환·부수 효과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>마이페이지 진입</td>
+<td><a href="https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/subproject/SDUI/metadata-project/components/screens/AuthFlowScreen.tsx">AuthFlowScreen.tsx</a> / <code>ProfileScreen()</code></td>
+<td>인증 사용자, 세 종류별 <code>totalCount</code></td>
+<td>각 요청은 독립 실행. 건수를 상태에 저장하고 목록 링크 표시. 반환은 화면 요소</td>
+</tr>
+<tr>
+<td>내 목록</td>
+<td><a href="https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/subproject/SDUI/metadata-project/components/plugins/kpop/PersonalSaved.tsx">PersonalSaved.tsx</a> / <code>PersonalSavedScreen()</code></td>
+<td>인증 문맥, <code>kind</code>, <code>page</code>, 기존 <code>returnEvents</code></td>
+<td>API의 <code>.data</code>를 읽어 제목·공개 여부·페이지 표시. 삭제와 복구는 별도 요청</td>
+</tr>
+<tr>
+<td>개인 영상</td>
+<td><a href="https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/subproject/SDUI/metadata-project/app/travel/video/page.tsx">page.tsx</a> / <code>TravelVideoPage()</code></td>
+<td>파일·사진 번호·작업·이력·코스 문맥</td>
+<td>생성·재시도·이력 요청 후 상태 갱신. 완료 주소는 video 요소에 전달</td>
+</tr>
+<tr>
+<td>공통 탐색</td>
+<td>제안 <code>PersonalLibraryNav.tsx</code></td>
+<td>활성 화면, 정규화된 목록 주소, 영상 활성 여부</td>
+<td>링크 반환. 저장·업로드·외부 생성 요청을 하지 않음</td>
+</tr>
+<tr>
+<td>이력 상태 분리</td>
+<td>제안 <code>usePrivateVideoHistory.ts</code></td>
+<td>인증된 사용자 식별자, 페이지, 갱신 계기</td>
+<td>요청을 취소·분리하고 성공·빈 결과·오류 상태를 반환. 결과는 메모리에만 보관</td>
+</tr>
+<tr>
+<td>복귀 검증</td>
+<td><a href="https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/subproject/SDUI/metadata-project/lib/kride/loginReturn.ts">loginReturn.ts</a> / <code>safeLoginReturn()</code>, 제안 <code>safePersonalReturn()</code></td>
+<td>사용자가 전달할 수 있는 내부 복귀 주소</td>
+<td>제한된 경로·쿼리만 반환. 외부 주소를 허용하지 않음</td>
+</tr>
+<tr>
+<td>로그인 완료 복귀</td>
+<td><a href="https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/subproject/SDUI/metadata-project/context/AuthContext.tsx">AuthContext.tsx</a> / <code>consumeLoginReturn()</code> 사용 구간</td>
+<td>검증된 로그인·역할, 저장한 복귀 힌트</td>
+<td>허용된 로그인 완료 위치에서 <code>router.replace()</code>. 반환 데이터 없이 이동 효과</td>
+</tr>
+<tr>
+<td>영상 소유자 전달</td>
+<td><a href="https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/subproject/SDUI/metadata-project/app/api/travel-video/%5B...path%5D/route.ts">route.ts</a> / <code>proxy()</code></td>
+<td>브라우저 요청·쿠키, 서버 설정</td>
+<td>Spring 신원 확인 후 내부 소유자 헤더를 구성하고 응답 스트림 반환</td>
+</tr>
+<tr>
+<td>개인 영상 조회</td>
+<td><a href="https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/deploy/photo_video/app.py">app.py</a> / <code>history()</code>, <code>status()</code>, <code>video()</code></td>
+<td>검증된 owner, 페이지 또는 UUID</td>
+<td>SQLite 조회 또는 FileResponse 반환. 영상 URL은 응답 시 조립</td>
+</tr>
+<tr>
+<td>저장 목록 조회</td>
+<td><a href="https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/subproject/SDUI/SDUI-server/src/main/java/com/domain/demo_backend/domain/kpop/service/PersonalSavedService.java">PersonalSavedService.java</a> / <code>page()</code></td>
+<td>종류·페이지·인증 사용자</td>
+<td>테이블·공개 뷰 조회 후 <code>items,totalCount,page,pageSize,kind</code> 반환</td>
+</tr>
+</tbody>
+</table></div>
+<p>제안 컴포넌트의 최소 모양이다. 고정 링크 연결 예시이며 상태 보존·플래그·스타일은 해당 단계에서 추가한다.</p>
+<pre><code class="language-tsx">import Link from 'next/link';
+
+type Props = { active: 'saved' | 'videos'; videoEnabled: boolean };
+
+export function PersonalLibraryNav({ active, videoEnabled }: Props) {
+  return (
+    &lt;nav aria-label=&quot;나의 보관함&quot;&gt;
+      &lt;Link href=&quot;/view/KPOP_SAVED_ITEMS&quot;
+        aria-current={active === 'saved' ? 'page' : undefined}&gt;
+        내 목록
+      &lt;/Link&gt;
+      {videoEnabled &amp;&amp; (
+        &lt;Link href=&quot;/travel/video&quot;
+          aria-current={active === 'videos' ? 'page' : undefined}&gt;
+          내 영상
+        &lt;/Link&gt;
+      )}
+    &lt;/nav&gt;
+  );
+}
+</code></pre>
+<p><a id="login"></a></p>
+<h2>6. 로그인 후 원래 화면으로 돌아오기</h2>
+<p><strong>현재 확인:</strong> <code>safeLoginReturn()</code>은 <code>/travel/video</code>를 거절하고, <code>loginReturnLabel()</code>에는 개인 영상 이름도 없다. <code>rememberLoginReturn()</code>은 같은 탭의 힌트를 저장하고 최대 10분 뒤 만료시킨다. 이것은 인증 수단이 아니다.</p>
+<p><strong>수정 제안:</strong> 기존 <code>/view/...</code> 허용 규칙을 유지하면서 <code>/travel/video</code>만 정확히 허용한다. <code>/travel/</code> 전체를 허용하거나 입력 주소를 그대로 이동시키지 않는다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>입력</th>
+<th>기대 결과 — 구현 후 시험할 기준</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/travel/video?view=history&amp;page=2&amp;job=&lt;정상 UUID&gt;</code></td>
+<td>허용 쿼리만 보존한 내부 복귀 주소</td>
+</tr>
+<tr>
+<td><code>https://outside.example/travel/video</code>, <code>//outside.example</code></td>
+<td>기존 마이페이지 기본값</td>
+</tr>
+<tr>
+<td>역슬래시·제어문자·중첩 복귀 주소</td>
+<td>거절 또는 허용 쿼리에서 제거</td>
+</tr>
+<tr>
+<td>잘못된 <code>view</code>, 음수·문자 페이지</td>
+<td><code>history</code>와 1페이지 등 정한 기본값으로 정규화</td>
+</tr>
+<tr>
+<td>임의 <code>owner</code>, 토큰·알 수 없는 쿼리</td>
+<td>모두 제거</td>
+</tr>
+<tr>
+<td>남의 작업 UUID</td>
+<td>주소 형식이 맞아도 서버 조회 404. 작업 제목·사진을 표시하지 않음</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>LOGIN_PAGE?returnTo=...</code>와 복귀 힌트 저장, <code>safeLoginReturn()</code> 허용, <code>loginReturnLabel()</code> 설명 문구, 로그인 완료 후 실제 이동까지 함께 검증한다. 추가 회원 정보가 필요한 계정의 기존 흐름을 우회하지 않는다.</p>
+<p>개인 영상은 클라이언트의 로그인 상태만으로 허용하지 않는다. 실제 조회·사진·재생 요청마다 기존 Next.js 프록시가 Spring <code>/api/auth/me</code>를 검증하고 내부 API가 owner를 적용하도록 유지한다. 만료된 쿠키를 갱신해야 한다면 기존 세션 갱신 경로와 조정하며 무한 재시도하지 않는다.</p>
+<p><a id="history"></a></p>
+<h2>7. 조회 중·빈 결과·실패를 구분하기</h2>
+<p>현재 개인 영상의 <code>history: []</code>와 공용 <code>error</code>만으로는 상태를 충분히 표현하지 못한다. 새 이력 훅에서는 인증·페이지별 요청 키와 분명한 조회 상태를 둔다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>상태</th>
+<th>사용자에게 보여줄 것</th>
+<th>허용 동작</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>로그인 확인 중</td>
+<td>계정 확인 중</td>
+<td>이전 계정 데이터 숨김</td>
+</tr>
+<tr>
+<td>비로그인 / 401</td>
+<td>로그인 후 볼 수 있음</td>
+<td>안전한 복귀 경로로 로그인</td>
+</tr>
+<tr>
+<td>기능 준비 중 / 503</td>
+<td>아직 준비 중 또는 연결 확인 필요</td>
+<td>마이·내 목록으로 이동. 재배포 상태와 구별</td>
+</tr>
+<tr>
+<td>조회 중</td>
+<td>이력 뼈대 화면·진행 문구</td>
+<td>생성 폼과 별개 상태. 오래된 페이지를 현재 결과처럼 표시하지 않음</td>
+</tr>
+<tr>
+<td>조회 성공·결과 0개</td>
+<td>아직 작업이 없음. 2페이지 이후면 이 페이지의 기록이 없음</td>
+<td>새 영상 만들기 또는 이전 페이지</td>
+</tr>
+<tr>
+<td>조회 성공·기록 있음</td>
+<td>작업 상태·생성 시각·처리 방식</td>
+<td>작업 선택. 총 개수는 추정하지 않음</td>
+</tr>
+<tr>
+<td>통신 실패</td>
+<td>불러오지 못함</td>
+<td>해당 이력만 다시 조회. 빈 목록 안내를 동시에 표시하지 않음</td>
+</tr>
+<tr>
+<td>선택 작업 404</td>
+<td>작업을 찾을 수 없음</td>
+<td>이력으로 복귀. 타인 소유·삭제 여부를 추측하지 않음</td>
+</tr>
+<tr>
+<td>완료·영상 409 또는 재생 오류</td>
+<td>아직 재생 불가 또는 파일 확인 필요</td>
+<td>상태 다시 조회. 완료 배지만으로 재생 성공 처리하지 않음</td>
+</tr>
+</tbody>
+</table></div>
+<p>제안 상태 타입의 설명용 예시다.</p>
+<pre><code class="language-ts">type HistoryState&lt;T&gt; =
+  | { kind: 'loading'; requestKey: string }
+  | { kind: 'ready'; requestKey: string; items: T[]; page: number }
+  | { kind: 'error'; requestKey: string; message: string }
+  | { kind: 'unauthenticated' }
+  | { kind: 'unavailable'; message: string };
+</code></pre>
+<ul>
+<li>계정·페이지 변경 때 기존 요청을 AbortController로 취소하고, 결과를 반영하기 전 요청 키를 다시 비교한다.</li>
+<li>계정이 바뀌면 선택 작업·사진·이력·코스의 이전 메모리 상태를 비운다. 브라우저 Blob 미리보기 주소는 해제한다. 코스 토큰은 새 계정에 그대로 적용하지 않는다.</li>
+<li>조회 실패 재시도는 GET만 반복한다. 영상 생성 POST나 실패 작업 재생성을 자동으로 실행하지 않는다.</li>
+<li>현재 이력 API는 20개 단위이며 <code>totalCount</code>가 없다. 20개 수신을 전체 건수라고 표시하지 않는다. 20개면 다음 페이지가 있을 가능성만 있고, 다음 조회가 비어 있을 수 있다.</li>
+<li>현재 Next.js 페이지 전달 정규식은 1~9999를 허용하고 개인 API는 10000까지 허용한다. 제안 UI는 1~9999로 맞추고, 향후 범위를 늘릴 때 두 계층을 함께 변경한다.</li>
+<li>같은 계정 재조회에서 이전 데이터를 잠시 유지하려면 ‘이전 결과’임을 명시한다. 다른 계정·페이지의 데이터를 새 결과로 보이게 해서는 안 된다.</li>
+</ul>
+<p><a id="contracts"></a></p>
+<h2>8. 응답을 화면에 연결하기</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>API·형태</th>
+<th>실제 응답 필드</th>
+<th>화면에 쓰는 값·주의</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET <code>/api/v1/kpop/me/saved/{kind}?page=N</code></td>
+<td><code>ApiResponse</code>의 <code>data.items</code>, <code>totalCount</code>, <code>page</code>, <code>pageSize</code>, <code>kind</code></td>
+<td>저장 제목·공개 여부·총 건수·5개 단위 페이지</td>
+</tr>
+<tr>
+<td>GET <code>/api/travel-video/jobs?page=N</code></td>
+<td>최상위 <code>items</code>, <code>page</code></td>
+<td>개인 영상 이력 20개 단위. <code>.data.items</code>로 읽으면 안 됨</td>
+</tr>
+<tr>
+<td>GET <code>/api/travel-video/jobs/{jobId}</code></td>
+<td><code>jobId</code>, <code>photoId</code>, <code>status</code>, <code>createdAt</code>, <code>videoUrl</code>, <code>trip</code>, <code>methodLabel</code> 등</td>
+<td>선택 작업을 소유자 검사 후 표시. 완료면 재생 주소 제공</td>
+</tr>
+<tr>
+<td>GET <code>/api/travel-video/jobs/{jobId}/video</code></td>
+<td>JSON이 아닌 영상 바이트·범위 응답</td>
+<td>같은 출처의 video 요소에서 재생. 쿠키 기반 인증 유지</td>
+</tr>
+<tr>
+<td>POST <code>/api/travel-video/jobs</code></td>
+<td>작업 응답</td>
+<td>명시적 생성 버튼용. 단순 화면 이동·조회에서는 호출하지 않음</td>
+</tr>
+<tr>
+<td>POST <code>/api/travel-video/jobs/{jobId}/retry</code></td>
+<td>재시도 작업 응답</td>
+<td>실패한 작업의 사용자 요청에만 사용</td>
+</tr>
+</tbody>
+</table></div>
+<p>표시값의 단위도 맞춘다. <code>renderMilliseconds</code>는 밀리초이므로 1000으로 나누어 초로 표시한다. 현재 SQLite 생성 시각은 UTC(협정 세계시)의 <code>CURRENT_TIMESTAMP</code> 문자열이고 응답에 시간대가 붙지 않는다. 제안 조회 계층에서는 형식을 검증한 뒤 UTC임을 명시하고 한국 시간으로 표시한다. 설명용 예시: <code>2026-10-26 01:00:00</code> → <code>2026-10-26T01:00:00Z</code> → 한국 시간 오전 10시. 브라우저가 임의로 현지 시각으로 해석하게 두지 않는다. 기존 <code>VideoJob</code> 타입에도 화면에서 사용할 <code>createdAt</code> 등을 명시적으로 추가한다.</p>
+<p><figure id="fig-storage-boundary"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 650" role="img" aria-label="D1 화면 연결과 기존 저장 경계"><title>D1 화면 연결과 기존 저장 경계</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs><rect width="1140" height="650" rx="18" fill="#f5f5f0"/><g font-family="'Malgun Gothic','Noto Sans KR',sans-serif" fill="#15212c"><text x="30" y="43" font-size="24" font-weight="700" fill="#15212c">D1 · 화면은 연결하고 저장소는 유지</text><text x="30" y="71" font-size="14" font-weight="400" fill="#52606d">점선: 제안 탐색 의존   실선: 현재 요청·조회·반환 / 외래키 그림이 아님</text><rect x="390" y="103" width="360" height="70" rx="12" fill="#f0f3e6" stroke="#ccd4d9"/><text x="408" y="134" font-size="18" font-weight="700" fill="#15212c">제안: 공통 탐색 메뉴</text><rect x="60" y="229" width="410" height="77" rx="12" fill="white" stroke="#ccd4d9"/><text x="78" y="260" font-size="18" font-weight="700" fill="#15212c">현재: 내 목록 화면</text><text x="78" y="288" font-size="14" font-weight="400" fill="#52606d">PersonalSavedScreen</text><rect x="670" y="229" width="410" height="77" rx="12" fill="white" stroke="#ccd4d9"/><text x="688" y="260" font-size="18" font-weight="700" fill="#15212c">현재: 개인 영상 화면</text><text x="688" y="288" font-size="14" font-weight="400" fill="#52606d">TravelVideoPage</text><path d="M435,173 L265,229" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="7 5"/><text x="358.0" y="194.0" font-size="13" font-weight="400" fill="#475569">이동</text><path d="M705,173 L875,229" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="7 5"/><text x="798.0" y="194.0" font-size="13" font-weight="400" fill="#475569">이동</text><rect x="60" y="363" width="410" height="77" rx="12" fill="white" stroke="#ccd4d9"/><text x="78" y="394" font-size="18" font-weight="700" fill="#15212c">Spring 저장 목록 API</text><text x="78" y="422" font-size="14" font-weight="400" fill="#52606d">인증 사용자 + 종류·페이지</text><rect x="670" y="363" width="410" height="77" rx="12" fill="white" stroke="#ccd4d9"/><text x="688" y="394" font-size="18" font-weight="700" fill="#15212c">Next.js 프록시 → 개인 API</text><text x="688" y="422" font-size="14" font-weight="400" fill="#52606d">Spring 신원 확인 → owner 전달</text><path d="M265,306 L265,363" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="273.0" y="327.5" font-size="13" font-weight="400" fill="#475569">요청·반환</text><path d="M875,306 L875,363" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="883.0" y="327.5" font-size="13" font-weight="400" fill="#475569">요청·반환</text><rect x="60" y="497" width="410" height="94" rx="12" fill="#e4efec" stroke="#ccd4d9"/><text x="78" y="528" font-size="18" font-weight="700" fill="#15212c">PostgreSQL 카탈로그 저장</text><text x="78" y="556" font-size="14" font-weight="400" fill="#52606d">artist_follow · event_bookmark · saved_item</text><rect x="670" y="497" width="410" height="94" rx="12" fill="#e4efec" stroke="#ccd4d9"/><text x="688" y="528" font-size="18" font-weight="700" fill="#15212c">SQLite + JPEG·MP4</text><text x="688" y="556" font-size="14" font-weight="400" fill="#52606d">photos · jobs · 파일 저장 폴더</text><path d="M265,440 L265,497" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="273.0" y="461.5" font-size="13" font-weight="400" fill="#475569">조회</text><path d="M875,440 L875,497" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="883.0" y="461.5" font-size="13" font-weight="400" fill="#475569">조회·파일 제공</text></g></svg><figcaption><span>D1 기존 저장소를 유지하는 구조</span><button class="quiet" data-zoom="fig-storage-boundary" type="button">그림 크게 보기</button></figcaption></figure></p>
+<p>실선은 확인된 요청·조회·반환, 점선은 제안한 공통 탐색 의존이다. 실제 SQL 외래키를 뜻하는 선이 아니다. 1차 변경으로 새 DB 테이블을 추가하지 않는다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>저장 대상</th>
+<th>실제 값</th>
+<th>화면으로 돌아오는 연결</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>artist_follow</code>, <code>event_bookmark</code>, <code>saved_item</code></td>
+<td>사용자별 카탈로그 번호</td>
+<td><code>PersonalSavedService.page()</code>가 제목·공개 상태를 붙여 내 목록에 반환</td>
+</tr>
+<tr>
+<td>SQLite <code>photos</code></td>
+<td>UUID·owner·생성 시각</td>
+<td>작업의 사진과 소유자를 확인하고 사진 API로 제공</td>
+</tr>
+<tr>
+<td>SQLite <code>jobs</code></td>
+<td>id·owner·photo_id·status·trip_json·render_ms 등</td>
+<td>이력·상태 API가 화면용 필드로 변환</td>
+</tr>
+<tr>
+<td>같은 저장 폴더</td>
+<td><code>{photoId}.jpg</code>, <code>{jobId}.mp4</code></td>
+<td>인증된 전용 API로 제공</td>
+</tr>
+<tr>
+<td>기존 커뮤니티·Celery</td>
+<td>PostgreSQL 영상 URL·결과 JSON</td>
+<td>별도 경로. 이번 공통 메뉴에 자동 섞지 않음</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>item_ref</code>는 카탈로그 정수 번호이며 개인 영상 UUID와 다르다. DB 간 owner는 같은 사용자 번호를 뜻하지만 PostgreSQL과 SQLite 사이의 물리적 외래키는 없다. 화면 연결을 위해 저장 후보 행에 영상 URL을 추가하지 않는다.</p>
+<section class="inspect" aria-label="역할별 상세 그림"><div id="inspect-detail" class="inspect-detail" aria-live="polite"><h4>A1 마이페이지</h4><p>ProfileScreen에 개인 영상 진입을 추가한다. 현재 개인 영상 API는 총 건수를 반환하지 않으므로 숫자를 만들어 넣지 않는다.</p></div><div class="inspect-map" aria-label="역할 선택"><button data-inspect="0" aria-pressed="true">A1 마이페이지</button><button data-inspect="1" aria-pressed="false">A2 내 목록</button><button data-inspect="2" aria-pressed="false">A3 개인 영상</button><button data-inspect="3" aria-pressed="false">A4 로그인 복귀</button><button data-inspect="4" aria-pressed="false">A5 독립 조회</button><button data-inspect="5" aria-pressed="false">A6 저장 경계</button></div></section>
+
+<p><a id="steps"></a></p>
+<h2>9. 구현 순서와 완료 조건</h2>
+<p>아래는 실행 가이드이며 아직 서비스에 적용하지 않았다. 각 단계는 독립 커밋으로 검토할 수 있다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>순서</th>
+<th>변경</th>
+<th>영향·완료 증거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1 공통 이동</td>
+<td><code>PersonalLibraryNav.tsx</code> 추가. <code>ProfileScreen</code>, 내 목록·영상 화면에 연결</td>
+<td>링크만으로 이동하며 기존 저장·삭제·생성 동작 유지. 메뉴가 활성 경로 표시</td>
+</tr>
+<tr>
+<td>P2 로그인 복귀</td>
+<td>복귀 허용 경로·문구·로그인 흐름과 인증 상태 연결</td>
+<td>비로그인 진입 → 로그인 → 원래 내 영상 모드·페이지 복귀. 외부 경로 거절</td>
+</tr>
+<tr>
+<td>P3 이력 상태</td>
+<td><code>usePrivateVideoHistory.ts</code> 제안 구현, 계정별 요청 취소·상태 분리</td>
+<td>조회 중·실패·빈 결과가 분리되고 계정 전환 시 과거 데이터 제거</td>
+</tr>
+<tr>
+<td>P4 주소 복원</td>
+<td><code>view,page,job</code> 및 제한된 개인 화면 <code>returnTo</code> 파싱</td>
+<td>새로고침·뒤로가기 후 선택이 복원됨. UUID는 반드시 서버 재조회</td>
+</tr>
+<tr>
+<td>P5 접근성과 활성화</td>
+<td>모바일 메뉴·키보드·상태 알림·플래그 적용</td>
+<td>좁은 화면에서도 접근. 기능 꺼짐 안내. 기존 캐시 제외 유지</td>
+</tr>
+<tr>
+<td>P6 검수·문서·배포</td>
+<td>실제 검수 결과 기록 후 배포 절차 진행</td>
+<td>코드 시험과 실제 로그인·재생을 별도로 기록. 운영 적용 여부를 명시</td>
+</tr>
+</tbody>
+</table></div>
+<p>전역 메뉴 <a href="https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/subproject/SDUI/metadata-project/components/layout/KrideNav.tsx">KrideNav.tsx</a>의 마이 활성 조건에도 <code>/travel/video</code>를 포함해 현재 위치를 맞춘다. 현재 코드는 이 주소를 마이로 표시하지 않는다.</p>
+<p>기능 노출 조건은 <code>NEXT_PUBLIC_PHOTO_VIDEO_ENABLED</code>이고 서버 허용은 <code>PHOTO_VIDEO_ENABLED</code>다. 공개 변수는 보통 빌드 때 고정되므로 서버 변수만 바꾸면 화면 버튼까지 바뀐다고 가정하지 않는다. 두 값이 true여도 API·워커·볼륨·인증이 준비됐다는 뜻은 아니다. 내부 키·주소 설정을 확인하고 활성화한다.</p>
+<p>현재 PWA(Progressive Web App, 웹 앱을 앱처럼 쓰는 기술) 설정은 내 목록·마이페이지·개인 영상과 관련 GET 요청을 NetworkOnly로 처리한다. 이 규칙과 <code>private, no-store</code> 응답을 유지한다. 새 전용 주소를 추가하면 서비스 워커 캐시 제외도 함께 검토한다.</p>
+<p><a id="tests"></a></p>
+<h2>10. 검수표와 실행 안내</h2>
+<p>아래 표는 <strong>구현 후 실행할 시험 계획</strong>이다. 문서 모형의 성공을 운영 기능 성공으로 기록하지 않는다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>시험</th>
+<th>입력·상황</th>
+<th>기대 결과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>이동</td>
+<td>내 목록 이벤트 2페이지 → 내 영상 → 돌아오기</td>
+<td>허용된 이벤트·페이지 상태 복원</td>
+</tr>
+<tr>
+<td>로그인</td>
+<td>비로그인으로 영상 이력 주소 진입</td>
+<td>로그인 후 동일 모드·허용 쿼리 복귀</td>
+</tr>
+<tr>
+<td>주소 제한</td>
+<td>외부 주소·역슬래시·owner·잘못된 job</td>
+<td>외부 이동 없음, 불필요한 쿼리 제거, 안전한 기본 상태</td>
+</tr>
+<tr>
+<td>소유권</td>
+<td>계정 A 작업 UUID를 계정 B에서 조회</td>
+<td>404, A의 사진·상태·URL 표시 없음</td>
+</tr>
+<tr>
+<td>계정 전환</td>
+<td>늦은 A 응답 직전에 B로 전환</td>
+<td>A 데이터가 B 화면에 반영되지 않음</td>
+</tr>
+<tr>
+<td>조회 상태</td>
+<td>지연·네트워크 실패·성공 빈 결과</td>
+<td>조회 중·오류·빈 상태가 각각 표시</td>
+</tr>
+<tr>
+<td>페이지</td>
+<td>20개 다음 빈 페이지·잘못된 page</td>
+<td>총 건수 추정 없음, 이전 페이지 이동 가능</td>
+</tr>
+<tr>
+<td>작업 선택</td>
+<td>새로고침·뒤로가기·실패 작업</td>
+<td>허용 UUID 조회 후 선택 복원. 자동 재시도 없음</td>
+</tr>
+<tr>
+<td>재생</td>
+<td>완료 작업·없는 파일·Range 요청</td>
+<td>정상 재생 또는 분명한 오류. 범위 응답·소유권 유지</td>
+</tr>
+<tr>
+<td>독립성</td>
+<td>목록 저장 해제·조회 재시도</td>
+<td>사진·영상 삭제 없음, 생성 POST 호출 없음</td>
+</tr>
+<tr>
+<td>활성화</td>
+<td>공개 버튼·서버 플래그 불일치</td>
+<td>노출 상태와 준비 오류를 구분. 민감 설정 노출 없음</td>
+</tr>
+<tr>
+<td>모바일·키보드</td>
+<td>390px 화면·Tab·Enter</td>
+<td>메뉴 접근·현재 위치·오류 안내를 읽을 수 있음</td>
+</tr>
+</tbody>
+</table></div>
+<p>Windows PowerShell, 프런트엔드 폴더에서 실행할 기존 회귀시험 예시다. 의존성이 설치된 개발 환경을 사용한다. <strong>이번 문서 작업에서는 앱 시험을 다시 실행하지 않았다.</strong></p>
+<pre><code class="language-powershell">Set-Location D:\KMovement\subproject\SDUI\metadata-project
+npx jest tests/components/PersonalSaved.test.tsx tests/components/AuthFlowScreen.test.tsx tests/components/AuthLoginReturn.test.tsx tests/api/travelVideoProxy.test.ts tests/app/travelVideo.test.tsx --runInBand
+npx tsc --noEmit --incremental false
+</code></pre>
+<p>새 메뉴·새 훅·딥링크·계정 전환 시험은 별도로 추가한다. 위 기존 파일들이 새 기능까지 검증해 주는 것은 아니다. 배포·재시작 후의 실제 로그인 → 이력 선택 → 재생은 별도의 E2E(End-to-End, 처음부터 끝까지 연결한 시험) 결과로 남긴다.</p>
+<p><a id="maintenance"></a></p>
+<h2>11. 문제 진단과 되돌리기</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>증상</th>
+<th>먼저 볼 위치</th>
+<th>확인·조치</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>로그인 후 마이로 감</td>
+<td><code>safeLoginReturn</code>, 복귀 문구·힌트 소비</td>
+<td>정확한 영상 경로 허용과 로그인 완료 이동을 확인</td>
+</tr>
+<tr>
+<td>내 영상이 0개로 보임</td>
+<td>이력 GET과 전용 조회 상태</td>
+<td>실패를 빈 배열로 변환하지 않았는지 확인</td>
+</tr>
+<tr>
+<td>이전 계정 작업이 잠깐 보임</td>
+<td>인증 변경·요청 키·선택 상태</td>
+<td>즉시 메모리 비우기, 요청 취소, 응답 키 검증</td>
+</tr>
+<tr>
+<td>내 목록은 되는데 영상만 실패</td>
+<td>서버 플래그·프록시·내부 API·볼륨</td>
+<td>단일 화면 장애로 표시. 목록 기능까지 숨기지 않음</td>
+</tr>
+<tr>
+<td>완료인데 재생 안 됨</td>
+<td>영상 GET 상태·파일 존재·Range</td>
+<td>DB 상태와 파일을 각각 확인. 외부 주소로 우회하지 않음</td>
+</tr>
+<tr>
+<td>링크가 사라지지 않음</td>
+<td>공개 변수의 빌드값</td>
+<td>서버 설정과 별개로 재빌드·릴리스 필요 여부 확인</td>
+</tr>
+</tbody>
+</table></div>
+<p>연결 UI를 되돌릴 때는 P1~P5 관련 변경 커밋만 되돌린다. 개인 영상 기능 전체 중지가 필요하면 기존 운영 가이드에 따라 서버 플래그·공개 플래그를 따로 처리한다. <strong>화면 되돌리기를 위해 SQLite·사진·영상·저장 후보를 삭제하지 않는다.</strong> 이번 제안은 DB 스키마 변경이 없으므로 DB 하향 마이그레이션도 없다.</p>
+<p>HTML은 외부 네트워크 없이 본문·그림·체험을 읽을 수 있다. Markdown은 같은 번호·표·그림을 정적으로 제공한다. 소스 링크와 GitHub 이동만 네트워크를 사용한다.</p>
+<p><a id="verification"></a></p>
+<h2>12. 이번 문서의 확인 범위</h2>
+<ul>
+<li>확인 완료: 최신 main과 분석 소스의 일치, 화면 진입·실제 호출·응답·저장소 관계의 정적 추적.</li>
+<li>구현 상태: 본문에서 ‘제안’으로 표시한 파일·쿼리·기능은 미구현. 애플리케이션 코드·운영 DB·배포는 변경하지 않는다.</li>
+<li>화면 자료: 현재 화면은 코드 기반 재구성, 개선 화면과 체험은 설명용 모형. 실제 로그인 화면 캡처가 아니다.</li>
+<li>문서 검수 결과: 1440px·390px 폭에서 가로 넘침 없음, 4개 그림과 12개 구역, 내부 목차·키보드 탭 전환·역할 설명 선택·그림 확대 및 Escape 닫기 확인. 외부 요청 0건, JavaScript 오류 0건. 모형의 조회 실패·빈 상태 표시 확인.</li>
+<li>전제 조사: <a href="../saved-item-media-storage-audit.md">저장 경로 조사 보고서</a>. 그 조사에서 수행한 32개 시험을 이번 새 기능의 통과 실적으로 재사용하지 않는다.</li>
+</ul></main></div><dialog id="zoom-dialog" aria-label="그림 확대"><div class="dialog-bar"><span>그림 확대</span><div><button id="zoom-plus" class="quiet">확대</button> <button id="zoom-reset" class="quiet">원래 크기</button> <button id="zoom-close" class="quiet">닫기</button></div></div><div id="zoom-stage" class="zoom-stage"></div></dialog><footer>현재 화면은 코드 기반 재구성, 개선 화면은 미구현 모형입니다. 체험은 문서 내부에서만 동작합니다.</footer><script>
+const details=[["A1 마이페이지", "ProfileScreen에 개인 영상 진입을 추가한다. 현재 개인 영상 API는 총 건수를 반환하지 않으므로 숫자를 만들어 넣지 않는다."], ["A2 내 목록", "PersonalSavedScreen의 종류·페이지·공개 여부·삭제 처리를 유지한다. 공통 메뉴는 링크만 제공한다."], ["A3 개인 영상", "TravelVideoPage의 생성·이력·선택 작업을 구분한다. 제안한 view/page/job 쿼리는 새 구현이 필요하다."], ["A4 로그인 복귀", "safeLoginReturn의 정확한 /travel/video 허용과 복귀 문구·힌트 소비를 함께 바꾼다. 외부 주소는 거절한다."], ["A5 독립 조회", "각 화면은 자기 API를 호출한다. 목록 응답의 data.items와 영상 응답의 items를 구분한다."], ["A6 저장 경계", "PostgreSQL 후보와 SQLite 작업·파일을 유지한다. 화면 연결에 새 외래키·Cloudinary 업로드는 필요하지 않다."]];
+for(const b of document.querySelectorAll('[data-inspect]'))b.addEventListener('click',()=>{for(const x of document.querySelectorAll('[data-inspect]'))x.setAttribute('aria-pressed',String(x===b));const [title,copy]=details[Number(b.dataset.inspect)];const d=document.getElementById('inspect-detail');d.replaceChildren(Object.assign(document.createElement('h4'),{textContent:title}),Object.assign(document.createElement('p'),{textContent:copy}));});
+let demo='saved';const state=document.getElementById('demo-state');
+function renderDemo(){const p=document.getElementById('demo-panel');const v=state.value;let title,copy;if(v==='loading'){title='불러오는 중';copy='이전 계정의 결과를 표시하지 않습니다.';}else if(v==='empty'){title=demo==='saved'?'아직 저장한 목록이 없습니다':'아직 영상 작업이 없습니다';copy='조회에 성공한 뒤에만 빈 목록을 안내합니다.';}else if(v==='error'){title='불러오지 못했습니다';copy='해당 목록 조회만 다시 시도합니다. 생성 요청은 하지 않습니다.';}else if(v==='guest'){title='로그인이 필요합니다';copy='로그인 후 허용된 원래 화면으로 돌아옵니다.';}else if(v==='unavailable'){title='내 영상 기능을 준비 중입니다';copy='현재 가능한 내 목록은 계속 사용할 수 있습니다.';}else{title=demo==='saved'?'설명용 팬 일정 · 공개':'설명용 여행 영상 · 완료';copy=demo==='saved'?'종류·페이지를 유지하며 내 영상으로 이동합니다.':'사진 확대·이동 영상 / 재생은 실제 서비스에서 소유자를 확인합니다.';}p.replaceChildren();const row=document.createElement('div');row.className='demo-row';const h=document.createElement('strong');h.textContent=title;const t=document.createElement('p');t.textContent=copy;row.append(h,t);p.append(row);}
+const tabs=[...document.querySelectorAll('[data-demo]')];function chooseTab(b){demo=b.dataset.demo;for(const t of tabs){t.setAttribute('aria-selected',String(t===b));t.tabIndex=t===b?0:-1;}document.getElementById('demo-panel').setAttribute('aria-labelledby',b.id);renderDemo();}for(const b of tabs){b.addEventListener('click',()=>chooseTab(b));b.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?tabs[0]:e.key==='End'?tabs.at(-1):tabs[(tabs.indexOf(b)+1)%tabs.length];chooseTab(next);next.focus();}});}state.addEventListener('change',renderDemo);renderDemo();
+const dialog=document.getElementById('zoom-dialog');for(const b of document.querySelectorAll('[data-zoom]'))b.addEventListener('click',()=>{document.getElementById('zoom-stage').innerHTML=document.getElementById(b.dataset.zoom).querySelector('svg').outerHTML;dialog.showModal();});document.getElementById('zoom-close').addEventListener('click',()=>dialog.close());document.getElementById('zoom-plus').addEventListener('click',()=>document.querySelector('#zoom-stage svg').style.width='160%');document.getElementById('zoom-reset').addEventListener('click',()=>document.querySelector('#zoom-stage svg').style.width='100%');
+</script></body></html>
