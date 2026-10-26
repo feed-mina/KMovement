@@ -1,0 +1,1017 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>사진→영상 코드 자연어 해설</title><style>
+:root{--ink:#17372b;--muted:#53685e;--line:#d8e1d8;--paper:#fffefa;--wash:#f1f4ed;--accent:#1d6048}
+*{box-sizing:border-box}html{scroll-padding-top:24px}body{margin:0;background:var(--wash);color:var(--ink);font:16px/1.85 "Malgun Gothic","Noto Sans KR",sans-serif}a{color:#145e76;text-underline-offset:4px;overflow-wrap:anywhere}a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:3px solid #a24d27;outline-offset:4px}.skip{position:absolute;left:16px;top:-90px}.skip:focus{top:12px;background:white;padding:10px;z-index:2}
+.cover{background:#17392d;color:#fff;padding:54px max(26px,calc((100vw - 1320px)/2));border-bottom:6px solid #c4d3a0}.cover h1{font-size:clamp(28px,4vw,46px);line-height:1.35;max-width:940px;margin:16px 0}.cover p{max-width:840px;color:#d4e3d4}.kicker{letter-spacing:1px;font-size:12px;font-weight:700}.chips{display:flex;flex-wrap:wrap;gap:10px}.chips span{border:1px solid #718d7c;border-radius:24px;padding:4px 13px;font-size:13px}
+.shell{max-width:1500px;margin:0 auto;display:grid;grid-template-columns:242px minmax(0,1fr);gap:25px;padding:30px 26px}aside{position:sticky;top:22px;align-self:start;max-height:93vh;overflow:auto}aside a{display:block;border-left:2px solid #cdd8cc;padding:6px 12px;font-size:13px;text-decoration:none;color:var(--muted)}aside a:hover{background:#fffefa;border-color:var(--accent)}main{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:19px;padding:30px 38px}main h1{font-size:28px;line-height:1.45}h2{font-size:25px;line-height:1.55;border-top:1px solid var(--line);padding-top:35px;margin:44px 0 20px}h3{font-size:20px;line-height:1.6;margin:28px 0 12px}h4{font-size:18px;line-height:1.6;margin:0 0 10px}p,li{overflow-wrap:anywhere}li+li{margin-top:8px}.table-scroll{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:12px;margin:22px 0}table{width:100%;border-collapse:collapse;min-width:690px;font-size:14px;line-height:1.8}th,td{padding:13px 15px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf0e4;min-width:125px}tr:last-child td{border-bottom:0}pre{overflow:auto;max-width:100%;background:#18362d;color:#f0f6ec;border-radius:12px;padding:22px;font-size:13px;line-height:1.85}code{font-family:Consolas,monospace}figure{margin:26px 0;border:1px solid var(--line);border-radius:14px;background:#f8faf7;padding:16px}.diagram{overflow:auto;max-width:100%}.diagram svg{display:block;width:100%;height:auto;min-width:790px}figcaption{font-size:12px;color:var(--muted);margin-top:12px}.prototype{background:#edf2e5;border:1px solid #bdcdb8;border-radius:16px;padding:25px;margin:30px 0}.prototype h3{margin-top:4px}.choices{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0}.choices button{font:inherit;min-height:44px;padding:9px 18px;background:#fffefa;color:var(--ink);border:1px solid #98ad99;border-radius:24px;cursor:pointer}.choices button[aria-pressed=true]{background:#1d6048;color:white;border-color:#1d6048}#recommendation{padding:20px;border:1px solid #c8d5c3;border-radius:12px;background:#fffefa}#recommendation p{margin-bottom:0}footer{max-width:1240px;margin:0 auto;padding:20px 26px 40px;color:var(--muted);font-size:13px}
+@media(max-width:920px){.shell{display:block;padding:16px}aside{position:static;max-height:none;display:flex;gap:8px;overflow:auto;margin-bottom:15px;padding-bottom:8px}aside a{white-space:nowrap;border:1px solid var(--line);border-radius:20px;padding:7px 13px;background:#fffefa}main{padding:22px 18px}.cover{padding:32px 23px}h2{font-size:23px}main h1{font-size:25px}.prototype{padding:18px}figure{padding:10px}.diagram svg{min-width:760px}pre{padding:16px;font-size:12px}}
+@media print{aside,.prototype{display:none}.shell{display:block;padding:0}main{border:0;padding:0}.cover{padding:20px}table{min-width:0}figure{break-inside:avoid}.diagram svg{min-width:0}a{color:inherit}}
+#stage-detail{padding:20px;background:#fffefa;border:1px solid #c8d5c3;border-radius:12px}#stage-detail p:last-child{margin-bottom:0}.cover h1{max-width:1040px}aside{font-size:13px}.diagram svg{min-width:790px}</style></head><body><a class="skip" href="#content">본문으로 이동</a>
+<header class="cover"><p class="kicker">KMOVEMENT · CODE IN PLAIN KOREAN</p><h1>사진 한 장이 영상으로 돌아오기까지,<br>코드를 쉬운 말로 읽기</h1><p>누가 확인하고, 무엇을 기록하고, 어떤 값을 돌려주는지 한 단계씩 설명합니다. 현재 코드와 Hostinger·AI 확장 제안을 구분했습니다.</p><div class="chips"><span>사진·요청·작업 번호 구분</span><span>함수와 저장 효과</span><span>Java·Docker 설정 해설</span><span>현재 구현·새 제안 구분</span></div></header>
+<div class="shell"><aside aria-label="해설 목차"><a href="#1">1. 이 보고서를 읽는 방법</a><a href="#2">2. 처음에는 네 가지 역할만 기억한다</a><a href="#3">3. 화면에서 사진을 고르는 일과 서버에 올리는 일</a><a href="#4">4. 서버는 사진을 받기 전에 로그인부터 확인한다</a><a href="#5">5. 사진 서버는 파일을 다시 읽고 저장한다</a><a href="#6">6. 사진 번호·요청 번호·작업 번호는 서로 다르다</a><a href="#7">7. “영상 만들기”는 먼저 대기표를 만드는 일이다</a><a href="#8">8. 영상 작업자는 대기줄에서 한 건을 가져온다</a><a href="#9-mp4">9. 사진을 움직이는 MP4로 만드는 함수를 읽는다</a><a href="#10">10. 완성 상태를 보여주는 일과 영상을 보내는 일</a><a href="#11">11. 사진·작업·파일을 별도로 보관하는 이유</a><a href="#12-trip_json">12. 재시도와 trip_json을 쉬운 말로 읽는다</a><a href="#13-ai">13. 기존 커뮤니티 AI 요청은 다른 길로 이동한다</a><a href="#14">14. 제출 주소·조회 주소·작업 종류를 구분한다</a><a href="#15-db">15. 생성된 파일·업로드 주소·DB 저장은 세 단계다</a><a href="#16-hostinger-java">16. Hostinger 전환용 Java 설정 예제를 한 줄씩 읽는다</a><a href="#17-docker">17. Docker 구성 예제를 운영 지시문으로 읽는다</a><a href="#18">18. 설정 이름을 메뉴·실행·연결·비밀로 나눠 읽는다</a><a href="#19">19. 새 모델을 추가한다는 말을 개발 작업으로 바꾼다</a><a href="#20">20. 공식 실행 명령의 뜻을 자연어로 읽는다</a><a href="#21">21. 개인 사진의 외부 전달과 실패 복구를 풀어 쓴다</a><a href="#22">22. 화면에서 문제를 발견하면 어디를 읽을지 정한다</a><a href="#23">23. 이 해설의 확인 결과와 사용 범위</a><a href="#_4">실제 코드로 이동하기</a></aside><main id="content"><h1 id="_1">사진→영상 코드를 쉬운 말로 읽는 보고서</h1>
+<p><strong>사진을 받는 창구, 작업을 기록하는 장부, 영상을 만드는 작업자, 완성 파일을 돌려주는 창구를 나누어 읽으면 전체 코드가 연결된다.</strong> 이 문서는 앞선 보고서의 코드와 설정을 자연어로 풀어쓴 별도 해설이다.</p>
+<p><a href="code-explained.html">이 보고서 HTML</a> · <a href="README.md">원래 모델·Hostinger 가이드</a> · <a href="guide.html">원래 HTML 보고서</a></p>
+<h2 id="1">1. 이 보고서를 읽는 방법</h2>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>구분</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>독자</td>
+<td>코드 문법을 몰라도 사진 한 장이 어떻게 영상이 되는지 이해하려는 사람. 유지보수 담당자는 옆의 함수명으로 실제 소스를 찾을 수 있다.</td>
+</tr>
+<tr>
+<td>설명 기준</td>
+<td>앞선 보고서와 같은 KMovement 소스 ce257f437fd7f91aff4a80badb10f1b3917ac6f8. 해당 버전의 실제 함수를 다시 읽었다.</td>
+</tr>
+<tr>
+<td>현재 구현</td>
+<td>개인 사진 업로드·작업 기록·FFmpeg 생성·본인 영상 조회, 기존 커뮤니티 Runpod 요청과 Cloudinary 전달.</td>
+</tr>
+<tr>
+<td>앞으로의 제안</td>
+<td>영상 전용 연결 주소, 개인 AI 모델 실행 기록, 결과 회수, 새 모델 연결. 해당 부분마다 “제안”이라고 표시한다.</td>
+</tr>
+<tr>
+<td>설명용 사례</td>
+<td>사용자 101번이 여행 사진 한 장을 올린다는 가상 사례. 사진 P·요청 R·작업 J는 읽기 위한 별칭이며 실제 프로그램에는 긴 식별 번호를 넣는다.</td>
+</tr>
+<tr>
+<td>산출 범위</td>
+<td>문서 작성·표시 검수·GitHub 게시. 실제 서버·DB·영상 생성 코드는 변경하지 않았다.</td>
+</tr>
+</tbody>
+</table></div>
+<p>API(Application Programming Interface)는 프로그램의 요청·응답 창구다. DB(Database)는 기록을 보관하는 데이터베이스다. CPU(Central Processing Unit)는 일반 계산 장치이고, GPU(Graphics Processing Unit)는 영상 모델의 큰 계산에 사용하는 장치다. “반환값”은 함수가 호출한 곳에 돌려주는 값이고, “저장·변경 효과”는 파일이나 기록에 남기는 변화다.</p>
+<h2 id="2">2. 처음에는 네 가지 역할만 기억한다</h2>
+<p>사용자는 한 화면에서 사진을 고르고 결과를 보지만, 서버 안에서는 여러 담당자가 일을 나눈다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>쉬운 역할</th>
+<th>실제 담당</th>
+<th>하는 일</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>화면 담당</td>
+<td>Next.js의 TravelVideoPage, VideoCreator, VideoWorkspace</td>
+<td>사진 미리보기·버튼·작업 상태·재생 화면을 보여준다.</td>
+</tr>
+<tr>
+<td>신원 확인과 중계 담당</td>
+<td>Next 서버의 proxy()</td>
+<td>Spring에 로그인 사용자를 확인하고 개인 영상 서버로 요청을 전달한다.</td>
+</tr>
+<tr>
+<td>기록 담당</td>
+<td>개인 app.py와 database.py</td>
+<td>사진 주인·작업·처리 상태·코스 설명을 SQLite에 기록한다.</td>
+</tr>
+<tr>
+<td>영상 작업자</td>
+<td>개인 worker.py</td>
+<td>대기 중인 작업을 가져와 사진을 움직이는 MP4 파일을 만든다.</td>
+</tr>
+</tbody>
+</table></div>
+<p>기존 커뮤니티 AI 영상에는 Spring AnimationService, 미디어 게이트웨이, Runpod GPU 작업자가 추가로 등장한다. <strong>현재 개인 영상 작업자가 Runpod 작업자를 호출하는 연결은 없다.</strong></p>
+<p>“웹사이트가 켜짐”, “작업이 접수됨”, “GPU 생성이 끝남”, “파일을 재생할 수 있음”은 각각 다른 단계의 결과다.</p>
+<h2 id="3">3. 화면에서 사진을 고르는 일과 서버에 올리는 일</h2>
+<p><strong>현재 구현.</strong> VideoCreator는 사용자가 파일을 고르면 먼저 브라우저 안에서 미리보기를 만든다. 파일이 JPEG·PNG·WebP인지, 크기가 한도를 넘지 않는지 화면에서도 확인한다. 이때 미리보기가 보인다는 사실만으로 서버 저장이 끝난 것은 아니다.</p>
+<p>“사진 올리기”를 눌러야 사진 데이터가 서버로 전송된다. 서버가 사진 번호를 돌려주면 화면은 그 번호를 기억하고 “사진을 저장했습니다”를 표시한다. 그다음 “영상 만들기”를 누르면 <strong>사진 파일 전체가 아니라 저장된 사진 번호와 요청 번호</strong>를 보낸다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>사용자 행동</th>
+<th>화면 내부 처리</th>
+<th>받는 결과·보이는 변화</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>사진 선택</td>
+<td>파일 형식·크기 확인, 브라우저 임시 미리보기 생성</td>
+<td>선택 사진 표시. 아직 서버 사진 번호 없음</td>
+</tr>
+<tr>
+<td>사진 올리기</td>
+<td>submit('upload')가 사진 바이트를 전송</td>
+<td>photoId 저장, 저장 안내·영상 만들기 버튼 표시</td>
+</tr>
+<tr>
+<td>영상 만들기</td>
+<td>submit('generate')가 photoId와 requestId 전송</td>
+<td>작업 응답을 onCreated()로 넘김</td>
+</tr>
+<tr>
+<td>다른 사진 선택</td>
+<td>이전 photoId·요청 번호를 지우고 새 사진 선택</td>
+<td>이전 번호로 새 사진 작업을 요청하는 혼동 방지</td>
+</tr>
+</tbody>
+</table></div>
+<p>submit()은 화면 상태를 바꾸고 요청을 보내는 함수다. 별도의 업무 결과 객체를 직접 반환하도록 작성된 함수는 아니다. 생성 결과는 onCreated()라는 전달 함수로 다음 화면 처리에 넘긴다. 요청 중 버튼을 막고 진행 상태를 표시하는 것은 중복 클릭을 줄이기 위한 화면 처리다.</p>
+<p><strong>관련 코드:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/subproject/SDUI/metadata-project/app/travel/video/page.tsx">VideoCreator와 VideoWorkspace</a>. 미리보기의 임시 주소는 브라우저 안에서 사용하는 주소이며 Runpod가 내려받을 외부 사진 주소가 아니다.</p>
+
+<section class="prototype" aria-labelledby="explain-stage-title"><p class="kicker">코드에 근거한 과정 설명도 · 실제 작업 실행 아님</p>
+<h3 id="explain-stage-title">사진 한 장이 지나가는 다섯 단계</h3>
+<p>단계를 선택하면 담당 함수와 돌아오는 값을 읽을 수 있습니다. 버튼은 설명만 바꿉니다.</p>
+<div class="choices" role="group" aria-label="설명할 단계">
+<button type="button" data-stage="choose" aria-pressed="true">1 사진 선택</button>
+<button type="button" data-stage="upload" aria-pressed="false">2 서버 업로드</button>
+<button type="button" data-stage="queue" aria-pressed="false">3 작업 접수</button>
+<button type="button" data-stage="render" aria-pressed="false">4 영상 생성</button>
+<button type="button" data-stage="play" aria-pressed="false">5 본인 재생</button>
+</div><div id="stage-detail" aria-live="polite"><h4>사진 선택은 브라우저 안의 준비</h4><p>VideoCreator가 선택 파일을 검사하고 미리보기를 만듭니다. 이 단계에서는 서버의 사진 번호가 생기지 않습니다.</p><p><strong>돌아오는 것:</strong> 화면의 미리보기 · <strong>남는 변화:</strong> 브라우저 안의 선택 상태</p></div></section><h2 id="4">4. 서버는 사진을 받기 전에 로그인부터 확인한다</h2>
+<p><strong>현재 구현.</strong> 브라우저가 개인 영상 서버를 직접 지시하지 않고 Next의 중계 함수 proxy()를 거친다.</p>
+<p>F1에서 기능이 켜져 있는지 확인한다. F2에서 Spring의 /api/auth/me에 현재 쿠키를 보내 “누가 로그인했는지” 묻는다. F3에서 로그인한 사용자 번호가 정상인지 확인하고 내부 요청의 소유자 번호를 만든다. F4에서 개인 영상 API가 내부 키와 소유자 번호를 검사한다.</p>
+<figure><div class="diagram" tabindex="0" aria-label="그림 가로 보기"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1050" role="img" aria-label="현재 코드: 기능 설정과 로그인 및 내부 소유자 검사"><title>현재 코드: 기능 설정과 로그인 및 내부 소유자 검사</title><defs><marker id="tip-auth" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#64786b"/></marker></defs><polyline points="280,94 280,130" fill="none" stroke="#64786b" stroke-width="2" marker-end="url(#tip-auth)"/><polyline points="490,162 715,162" fill="none" stroke="#64786b" stroke-width="2" marker-end="url(#tip-auth)"/><rect x="556.0" y="129" width="88" height="24" fill="#f8faf7"/><text x="600" y="146" text-anchor="middle" font-size="14" fill="#435b51">준비 안 됨</text><polyline points="280,194 280,260" fill="none" stroke="#64786b" stroke-width="2" marker-end="url(#tip-auth)"/><rect x="304.0" y="215" width="52" height="24" fill="#f8faf7"/><text x="330" y="232" text-anchor="middle" font-size="14" fill="#435b51">준비됨</text><polyline points="280,324 280,365" fill="none" stroke="#64786b" stroke-width="2" marker-end="url(#tip-auth)"/><polyline points="490,397 715,397" fill="none" stroke="#64786b" stroke-width="2" marker-end="url(#tip-auth)"/><rect x="580.0" y="364" width="40" height="24" fill="#f8faf7"/><text x="600" y="381" text-anchor="middle" font-size="14" fill="#435b51">실패</text><polyline points="280,429 280,500" fill="none" stroke="#64786b" stroke-width="2" marker-end="url(#tip-auth)"/><rect x="306.0" y="448" width="88" height="24" fill="#f8faf7"/><text x="350" y="465" text-anchor="middle" font-size="14" fill="#435b51">로그인 확인</text><polyline points="280,564 280,615" fill="none" stroke="#64786b" stroke-width="2" marker-end="url(#tip-auth)"/><polyline points="280,679 280,725" fill="none" stroke="#64786b" stroke-width="2" marker-end="url(#tip-auth)"/><polyline points="490,757 715,757" fill="none" stroke="#64786b" stroke-width="2" marker-end="url(#tip-auth)"/><rect x="580.0" y="724" width="40" height="24" fill="#f8faf7"/><text x="600" y="741" text-anchor="middle" font-size="14" fill="#435b51">실패</text><polyline points="280,789 280,875" fill="none" stroke="#64786b" stroke-width="2" marker-end="url(#tip-auth)"/><rect x="310.0" y="821" width="40" height="24" fill="#f8faf7"/><text x="330" y="838" text-anchor="middle" font-size="14" fill="#435b51">통과</text><rect x="70" y="30" width="420" height="64" rx="13" fill="#fffefa" stroke="#a7b8a9" stroke-width="1.5"/><text x="280.0" y="68.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">F1 기능과 연결 설정 확인</text><rect x="70" y="130" width="420" height="64" rx="13" fill="#e4ede6" stroke="#a7b8a9" stroke-width="1.5"/><text x="280.0" y="168.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">요청할 준비가 되었는가?</text><rect x="715" y="130" width="315" height="64" rx="13" fill="#fffefa" stroke="#a7b8a9" stroke-width="1.5"/><text x="872.5" y="168.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">503 · 준비 안내</text><rect x="70" y="260" width="420" height="64" rx="13" fill="#fffefa" stroke="#a7b8a9" stroke-width="1.5"/><text x="280.0" y="298.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">F2 Spring에 로그인 확인</text><rect x="70" y="365" width="420" height="64" rx="13" fill="#e4ede6" stroke="#a7b8a9" stroke-width="1.5"/><text x="280.0" y="403.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">로그인 사용자가 확인됐는가?</text><rect x="715" y="365" width="315" height="64" rx="13" fill="#fffefa" stroke="#a7b8a9" stroke-width="1.5"/><text x="872.5" y="391.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">401 · 로그인 안내</text><text x="872.5" y="415.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">또는 503 · 장애 안내</text><rect x="70" y="500" width="420" height="64" rx="13" fill="#fffefa" stroke="#a7b8a9" stroke-width="1.5"/><text x="280.0" y="538.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">F3 확인된 사용자 번호 전달</text><rect x="70" y="615" width="420" height="64" rx="13" fill="#fffefa" stroke="#a7b8a9" stroke-width="1.5"/><text x="280.0" y="653.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">F4 내부 키와 소유자 검사</text><rect x="70" y="725" width="420" height="64" rx="13" fill="#e4ede6" stroke="#a7b8a9" stroke-width="1.5"/><text x="280.0" y="763.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">내부 확인을 통과했는가?</text><rect x="715" y="725" width="315" height="64" rx="13" fill="#fffefa" stroke="#a7b8a9" stroke-width="1.5"/><text x="872.5" y="751.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">401 · 거절</text><text x="872.5" y="775.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">또는 503 · 설정 안내</text><rect x="70" y="875" width="420" height="74" rx="13" fill="#fffefa" stroke="#a7b8a9" stroke-width="1.5"/><text x="280.0" y="918.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">사진·작업 요청 처리</text><text x="70" y="1000" font-size="15" fill="#53685e">신원 확인의 핵심 분기입니다. 파일·입력·요청 출처 검사는 본문에서 이어 설명합니다.</text></svg></div><figcaption>그림 1. 실제 코드에 근거한 흐름·관계 설명. 운영 화면 캡처가 아닙니다.</figcaption></figure>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>자연어로 풀어 쓴 코드</th>
+<th>실제 확인 위치</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F1</td>
+<td>“이 기능을 사용할 수 있는 상태인지, 연결 주소·키가 있는지 먼저 확인해 주세요.”</td>
+<td>PHOTO_VIDEO_ENABLED와 연결 설정 검사</td>
+</tr>
+<tr>
+<td>F2</td>
+<td>“이 쿠키로 로그인한 사람이 누구인지 로그인 서버에 확인해 주세요.”</td>
+<td>/api/auth/me 요청</td>
+</tr>
+<tr>
+<td>F3</td>
+<td>“로그인 서버가 확인한 사용자 번호를 내부 편지에 붙여 주세요.”</td>
+<td>X-Photo-Video-Owner 생성</td>
+</tr>
+<tr>
+<td>F4</td>
+<td>“내부 키가 맞고 사용자 번호가 올바를 때만 처리해 주세요.”</td>
+<td>개인 API의 owner()</td>
+</tr>
+</tbody>
+</table></div>
+<p>개인 API의 owner()는 검사를 통과하면 <strong>정수 사용자 번호를 반환</strong>한다. 예를 들어 설명용 사용자 101이면 이후 사진·작업 조회에 101이 사용된다. 브라우저에서 owner를 202로 바꿔 보내 다른 사람으로 행동하게 하는 구조로 만들지 않는다.</p>
+<p>사진 올리기·작업 만들기 같은 쓰기 요청은 실제 사이트에서 온 요청인지도 검사한다. 코스가 연결되어 있으면 코스 검증이 중간에 추가되고, 코스가 없으면 이 검증을 생략한다. 영상 데이터 응답은 바이트 흐름으로 전달할 수 있으므로 모든 응답을 JSON으로 읽는 것은 아니다.</p>
+<p><strong>관련 코드:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/subproject/SDUI/metadata-project/app/api/travel-video/%5B...path%5D/route.ts">Next proxy()</a>, <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/photo_video/app.py">개인 owner()</a>. 개인 API가 내부 헤더를 신뢰할 수 있도록 서비스 접근 범위와 내부 키를 관리해야 한다.</p>
+<h2 id="5">5. 사진 서버는 파일을 다시 읽고 저장한다</h2>
+<p><strong>현재 구현.</strong> 개인 API의 upload()는 파일 이름이나 브라우저가 알려준 형식만 믿고 저장하지 않는다. 데이터를 받으면서 크기를 확인하고, 실제 이미지로 열어 읽을 수 있는지 검사한다.</p>
+<p>사진 방향 정보를 반영해 바로 세운 뒤 RGB 색상으로 바꾸고, 가로·세로가 1920 범위에 들어오도록 비율을 유지해 줄인다. 다시 JPEG로 저장하면서 원래 파일 이름과 EXIF 촬영 위치 같은 부가정보를 보존하지 않는다.</p>
+<p>검사를 통과하면 새 photoId를 만든다. 저장 폴더에는 그 번호를 이름으로 한 JPEG를 쓰고, SQLite의 photos에는 사진 번호·주인·등록 시각을 남긴다. 응답에는 photoId를 돌려준다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>실제 코드 동작</th>
+<th>쉬운 의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>형식·크기·이미지 디코딩 검사</td>
+<td>“다룰 수 있는 진짜 사진인지 확인한다.”</td>
+</tr>
+<tr>
+<td>exif_transpose와 RGB 변환</td>
+<td>“방향을 맞추고 다룰 색상 방식으로 통일한다.”</td>
+</tr>
+<tr>
+<td>thumbnail과 JPEG 재저장</td>
+<td>“비율을 유지해 크기를 제한하고 새 사진 파일로 만든다.”</td>
+</tr>
+<tr>
+<td>파일 저장 + photos 기록</td>
+<td>“사진 내용과 주인 정보를 각자 맞는 곳에 남긴다.”</td>
+</tr>
+<tr>
+<td>photoId 응답</td>
+<td>“이후 이 사진을 찾을 번호를 화면에 알려준다.”</td>
+</tr>
+</tbody>
+</table></div>
+<p>사용자별 사진 보관 한도는 코드상 20장이다. 한도를 넘으면 429 응답을 준다. 저장 과정에서 예외가 발생하면 해당 시도에서 만든 파일을 지우는 정리 처리가 있다. DB 트랜잭션만으로 파일 저장까지 하나의 완전한 거래가 되는 것은 아니다.</p>
+<p><strong>설명용 사례:</strong> 사진 P의 파일 내용은 P.jpg에 있고, P가 사용자 101의 사진이라는 정보는 photos에 있다. SQLite 안에 JPEG 전체를 넣는 방식은 아니다.</p>
+<p><strong>관련 코드:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/photo_video/app.py">upload()</a>.</p>
+<h2 id="6">6. 사진 번호·요청 번호·작업 번호는 서로 다르다</h2>
+<p>UUID(Universally Unique Identifier)는 서로 겹칠 가능성을 매우 낮게 만든 식별 번호 형식이다. 실제 개인 사진과 작업에는 긴 UUID를 사용한다. 아래 P·R·J는 설명용 별칭이다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>번호</th>
+<th>쉬운 뜻</th>
+<th>생기는 시점</th>
+<th>쓰는 곳</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>photoId / P</td>
+<td>어떤 사진인가</td>
+<td>사진 업로드 성공</td>
+<td>저장된 사진 조회·생성 입력 연결</td>
+</tr>
+<tr>
+<td>requestId / R</td>
+<td>같은 요청을 다시 보낸 것인가</td>
+<td>화면에서 생성 요청을 준비할 때</td>
+<td>중복 접수 확인</td>
+</tr>
+<tr>
+<td>jobId / J</td>
+<td>어떤 개인 영상 작업인가</td>
+<td>서버에서 새 작업 생성</td>
+<td>상태·이력·재시도·영상 재생</td>
+</tr>
+<tr>
+<td>Runpod 작업 번호</td>
+<td>외부 GPU의 어떤 작업인가</td>
+<td>외부 제출 성공</td>
+<td>기존 AI 경로의 외부 상태 조회</td>
+</tr>
+</tbody>
+</table></div>
+<p>사진 P 하나로 여러 작업을 만들 수 있다. 반대로 같은 요청 R을 네트워크 문제로 다시 보내는 것은 새 영상 네 개를 만들려는 뜻이 아닐 수 있다.</p>
+<p>현재 개인 경로에는 Runpod 작업 번호가 생기지 않는다. 앞으로 AI를 연결할 때 개인 J와 외부 작업 번호를 함께 기록해야 하며 두 번호를 같은 값으로 취급하면 안 된다.</p>
+<h2 id="7">7. “영상 만들기”는 먼저 대기표를 만드는 일이다</h2>
+<p><strong>현재 구현.</strong> 개인 API의 enqueue()는 작업 접수 담당이다. 사진을 바로 영상으로 바꾸는 함수가 아니다.</p>
+<p>먼저 사용자 101과 요청 R로 기존 작업이 있는지 찾는다. 같은 요청에 같은 사진·같은 재시도 원본·같은 코스 설명이 들어오면 기존 작업을 돌려준다. 같은 요청 번호에 다른 내용을 넣으면 409로 거절한다.</p>
+<p>새 요청이면 본인 사진인지, 현재 진행·대기 작업이 2개 미만인지, 한국 날짜 기준 하루 작업 수가 10개 미만인지 확인한다. 통과하면 작업 J를 만들고 대기 상태로 기록한 뒤 작업 응답을 돌려준다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>판단 순서</th>
+<th>자연어 규칙</th>
+<th>결과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>중복 요청 확인</td>
+<td>“이 사람이 이 요청 번호로 이미 접수했는가?”</td>
+<td>같은 내용이면 기존 작업 응답</td>
+</tr>
+<tr>
+<td>내용 충돌 확인</td>
+<td>“같은 번호인데 사진·원본·코스가 바뀌었는가?”</td>
+<td>409</td>
+</tr>
+<tr>
+<td>소유권 확인</td>
+<td>“요청한 사진이 이 사람의 사진인가?”</td>
+<td>없으면 404</td>
+</tr>
+<tr>
+<td>사용량 확인</td>
+<td>“동시 작업과 오늘 요청 한도 안인가?”</td>
+<td>넘으면 429</td>
+</tr>
+<tr>
+<td>새 작업 저장</td>
+<td>“새 번호를 붙여 대기줄에 넣는다.”</td>
+<td>작업 응답. 생성 API는 202 접수 상태 사용</td>
+</tr>
+</tbody>
+</table></div>
+<p>enqueue()의 반환값은 job_response()가 만든 작업 정보다. 별도로 SQLite에 새 행을 남기는 효과가 있다. 같은 요청을 되돌려주는 경우에는 새 행을 만들지 않는다.</p>
+<p>사진·주인·요청·원본·코스처럼 연결 의미를 정하는 값은 이미 생성한 작업에서 마음대로 바꾸지 못하도록 DB 규칙도 둔다.</p>
+<p><strong>관련 코드:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/photo_video/app.py">enqueue()와 job_response()</a>, <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/photo_video/database.py">DB 규칙</a>.</p>
+<h2 id="8">8. 영상 작업자는 대기줄에서 한 건을 가져온다</h2>
+<p><strong>현재 구현.</strong> worker.py의 run_once()는 “대기 중인 작업 하나를 처리해 보세요”라는 뜻이다.</p>
+<p>DB가 없거나 대기 작업이 없으면 False를 돌려준다. 대기 작업이 있으면 오래된 순서대로 하나를 선택하고 진행 중으로 바꾼 뒤 파일 생성 함수를 실행한다. 이때 DB의 쓰기 거래를 먼저 확보해 작업을 고르는 과정을 보호한다. 생성 중 내내 DB 잠금을 유지하는 구조는 아니다.</p>
+<p>생성이 끝나면 성공·실패·오류 종류·처리 시간을 기록한다. run_once()는 <strong>영상 생성에 실패했더라도 한 건을 처리했다면 True를 돌려준다.</strong> 이 True는 “영상이 성공했다”가 아니라 “이번에 처리한 일이 있었다”는 뜻이다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>코드에서 보이는 것</th>
+<th>자연어 의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QUEUED</td>
+<td>순서를 기다리는 작업</td>
+</tr>
+<tr>
+<td>RUNNING</td>
+<td>작업자가 가져가 처리 중인 작업</td>
+</tr>
+<tr>
+<td>COMPLETED</td>
+<td>파일 생성을 마치고 완료로 기록한 작업</td>
+</tr>
+<tr>
+<td>FAILED</td>
+<td>이번 시도에서 실패로 기록한 작업</td>
+</tr>
+<tr>
+<td>render_ms</td>
+<td>이 함수에서 측정한 처리 경과 시간. 단위는 밀리초</td>
+</tr>
+</tbody>
+</table></div>
+<p>반복 함수 main()은 일이 없거나 처리 가능한 DB 오류가 발생하면 약 2초 뒤 다시 확인한다. 진행 중으로 남은 지 10분이 넘은 작업을 중단 실패로 정리하는 처리도 있다. 이는 현재 CPU 작업 기준이다. 장시간 GPU 모델을 추가하면서 같은 기준을 그대로 쓰면 아직 생성 중인 작업을 실패로 판단할 수 있어 별도 설계가 필요하다.</p>
+<p><strong>관련 코드:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/photo_video/worker.py">run_once()와 main()</a>.</p>
+<h2 id="9-mp4">9. 사진을 움직이는 MP4로 만드는 함수를 읽는다</h2>
+<p><strong>현재 구현.</strong> render_photo(source, target)의 두 입력은 “읽을 사진 파일 위치”와 “완성 영상을 둘 위치”다. 이 함수는 학습 모델을 실행하지 않고 FFmpeg라는 미디어 처리 프로그램을 실행한다.</p>
+<p>사진 한 장을 여러 프레임에 사용하고, 화면 크기를 맞춘 뒤 천천히 확대해 움직임을 만든다. 최종 설정은 1280×720, 초당 25프레임, 총 125프레임이다. 길이는 약 5초이고 소리는 넣지 않는다.</p>
+<p>처음에는 완성 파일과 구분되는 임시 MP4를 만든다. FFmpeg 실행이 끝나면 ffprobe로 정보를 읽고 H.264 영상이며 길이가 4.8~5.2초 범위인지 명시적으로 확인한다. 출력 설정으로 해상도를 지정하지만 이 확인 조건이 해상도까지 다시 비교하는 것은 아니다. 검사를 통과하면 임시 파일을 최종 이름으로 바꾼다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>자연어 해석</th>
+<th>파일에 남는 결과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>사진 반복 입력</td>
+<td>“한 장의 사진을 영상 프레임 재료로 계속 사용한다.”</td>
+<td>여러 시점의 프레임</td>
+</tr>
+<tr>
+<td>크기 맞춤·여백</td>
+<td>“비율을 지키며 목표 화면 안에 넣는다.”</td>
+<td>1280×720 출력 설정</td>
+</tr>
+<tr>
+<td>확대</td>
+<td>“프레임이 바뀔 때 사진을 조금씩 크게 보여준다.”</td>
+<td>카메라가 다가가는 듯한 효과</td>
+</tr>
+<tr>
+<td>임시 파일 생성</td>
+<td>“아직 검사 전인 결과를 완성 파일과 구분한다.”</td>
+<td>임시 MP4</td>
+</tr>
+<tr>
+<td>형식·길이 확인</td>
+<td>“재생 가능한 예상 형식·길이인지 확인한다.”</td>
+<td>통과한 파일만 최종 이름 사용</td>
+</tr>
+</tbody>
+</table></div>
+<p>이 함수의 반환값은 None이다. 즉, 완성 영상 바이트를 함수 호출자에게 직접 반환하지 않는다. <strong>지정된 위치에 MP4 파일을 만드는 것이 이 함수의 결과 효과</strong>다. 실행 시간이 제한을 넘거나 실행에 실패하면 예외가 나고, 호출한 run_once()가 실패 종류를 기록한다.</p>
+<p><strong>관련 코드:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/photo_video/worker.py">render_photo()</a>.</p>
+<h2 id="10">10. 완성 상태를 보여주는 일과 영상을 보내는 일</h2>
+<p><strong>현재 구현.</strong> job_response()는 DB의 한 행을 화면이 읽기 쉬운 정보 묶음으로 바꾼다. 예를 들어 “사진 P로 만든 작업 J가 완료되었고, 재생은 이 주소로 요청하면 된다”는 내용을 구성한다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>응답 이름</th>
+<th>쉬운 의미</th>
+<th>화면 연결</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>jobId·photoId</td>
+<td>작업 번호·원본 사진 번호</td>
+<td>선택 작업·원본 연결</td>
+</tr>
+<tr>
+<td>status</td>
+<td>대기·진행·완료·실패</td>
+<td>작업 상태 문구</td>
+</tr>
+<tr>
+<td>renderMilliseconds</td>
+<td>작업자가 측정한 처리 시간</td>
+<td>처리 정보</td>
+</tr>
+<tr>
+<td>retryOf</td>
+<td>어느 실패 작업을 다시 시도했는가</td>
+<td>원본과 새 시도 연결</td>
+</tr>
+<tr>
+<td>trip</td>
+<td>저장된 코스 설명을 다시 객체로 푼 값</td>
+<td>연결 장소 표시</td>
+</tr>
+<tr>
+<td>videoUrl</td>
+<td>완료 작업의 보호된 재생 요청 주소</td>
+<td>video 요소·다운로드 링크</td>
+</tr>
+<tr>
+<td>methodLabel</td>
+<td>사진 확대·이동 방식이라는 설명</td>
+<td>결과 방식 안내</td>
+</tr>
+</tbody>
+</table></div>
+<p>videoUrl은 현재 DB에 저장한 Cloudinary 주소를 꺼내는 값이 아니다. 작업 번호를 사용해 보호된 재생 경로를 만드는 값이다.</p>
+<p>그 주소로 실제 재생을 요청하면 video()가 “로그인한 사용자의 작업인가”, “완료 상태인가”, “MP4가 실제 존재하는가”를 다시 확인한다. 소유한 작업이 없으면 404, 아직 준비되지 않았으면 409를 응답한다. 준비됐으면 JSON이 아닌 영상 파일을 돌려준다.</p>
+<p>status()는 작업 한 개의 정보, history()는 본인의 작업 목록을 조회한다. 목록은 새 기록부터 한 페이지 20개씩이다. 화면에 그려진 완료 표시만으로 파일 존재 확인을 대신하지 않는다.</p>
+<p>현재 비용 응답의 외부 모델 사용료 0은 FFmpeg 경로의 외부 생성 모델 비용을 뜻한다. 서버·저장·전송 비용은 미산정이다. AI 연결 후에도 이 값을 무조건 0으로 두면 안 된다.</p>
+<p><strong>관련 코드:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/photo_video/app.py">job_response(), status(), history(), video()</a>, <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/subproject/SDUI/metadata-project/app/travel/video/page.tsx">재생 화면</a>.</p>
+<h2 id="11">11. 사진·작업·파일을 별도로 보관하는 이유</h2>
+<p>SQLite는 하나의 파일에 DB를 담아 사용하는 도구다. 개인 영상 저장소에는 두 가지 장부와 실제 파일이 있다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>보관 대상</th>
+<th>기록하는 내용</th>
+<th>보관하지 않는 내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>photos</td>
+<td>사진 번호·주인·등록 시각</td>
+<td>JPEG 전체</td>
+</tr>
+<tr>
+<td>jobs</td>
+<td>작업 번호·사진 번호·주인·상태·요청·재시도·처리 시간·코스 설명</td>
+<td>MP4 전체</td>
+</tr>
+<tr>
+<td>사진 파일</td>
+<td>다시 저장한 JPEG 내용</td>
+<td>로그인 계정 정보</td>
+</tr>
+<tr>
+<td>영상 파일</td>
+<td>생성된 MP4 내용</td>
+<td>작업 이력 전체</td>
+</tr>
+</tbody>
+</table></div>
+<p>사진과 작업의 연결은 “사진 번호만 같다”로 검사하지 않는다. <strong>사진 번호와 주인이 함께 일치</strong>해야 한다. 재시도도 원본 작업 번호·주인·사진 번호가 함께 맞아야 한다.</p>
+<figure><div class="diagram" tabindex="0" aria-label="그림 가로 보기"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 630" role="img" aria-label="SQLite의 실제 연결: 사진과 작업의 주인이 함께 일치해야 함"><title>SQLite의 실제 연결: 사진과 작업의 주인이 함께 일치해야 함</title><defs><marker id="tip-data" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#64786b"/></marker></defs><rect x="35" y="70" width="350" height="240" rx="13" fill="#e4ede6" stroke="#a7b8a9" stroke-width="1.5"/><text x="210.0" y="160.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">photos · 사진 기록</text><text x="210.0" y="184.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">사진 번호 id</text><text x="210.0" y="208.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">주인 owner</text><text x="210.0" y="232.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">등록 시각 created_at</text><rect x="620" y="70" width="410" height="400" rx="13" fill="#fffefa" stroke="#a7b8a9" stroke-width="1.5"/><text x="825.0" y="192.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">jobs · 영상 작업 기록</text><text x="825.0" y="216.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">작업 번호 id</text><text x="825.0" y="240.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">주인 owner</text><text x="825.0" y="264.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">사진 번호 photo_id</text><text x="825.0" y="288.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">요청 번호 request_id</text><text x="825.0" y="312.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">작업 상태 status</text><text x="825.0" y="336.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">재시도 원본 retry_of</text><text x="825.0" y="360.0" text-anchor="middle" font-size="17" fill="#17372b" font-family="Malgun Gothic,sans-serif">코스 설명 trip_json</text><polyline points="620,205 385,205" fill="none" stroke="#64786b" stroke-width="2" marker-end="url(#tip-data)"/><text x="502" y="164" text-anchor="middle" font-size="16" fill="#435b51">사진 번호 + 주인</text><text x="502" y="188" text-anchor="middle" font-size="14" fill="#53685e">하나의 사진에 여러 작업</text><polyline points="1030,215 1070,215 1070,515 825,515 825,470" fill="none" stroke="#64786b" stroke-width="2" marker-end="url(#tip-data)"/><text x="620" y="564" font-size="16" fill="#435b51">재시도 연결: 원본 작업 번호 + 주인 + 사진 번호</text><text x="35" y="605" font-size="14" fill="#53685e">실선 화살표: jobs가 참조하는 대상. 실제 복합 외래키이며 파일 자체의 저장 위치는 별도입니다.</text></svg></div><figcaption>그림 2. 실제 코드에 근거한 흐름·관계 설명. 운영 화면 캡처가 아닙니다.</figcaption></figure>
+<p>이 그림의 연결은 SQLite에 정의된 실제 복합 외래키다. FK(Foreign Key, 외래키)는 연결 대상이 실제 존재하는지 DB가 검사하는 규칙이다. owner가 Spring 사용자 번호와 의미를 공유해도 SQLite가 PostgreSQL 사용자 테이블을 직접 외래키로 검사하는 것은 아니다.</p>
+<p>connect()는 DB를 열 때마다 외래키 검사를 켠다. initialize_schema()는 DB 구조를 준비하고, 기존 형식에서 이전할 때 백업·검증 절차를 사용한다. 잘못된 연결을 발견했다고 행을 임의로 삭제해 맞추는 방식은 아니다.</p>
+<p>사진·작업·완료 파일이 서로 맞아야 서비스를 복구할 수 있으므로 백업할 때도 DB와 JPEG·MP4를 같은 기준 시점으로 보존한다.</p>
+<p><strong>관련 코드:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/photo_video/database.py">database.py</a>.</p>
+<h2 id="12-trip_json">12. 재시도와 trip_json을 쉬운 말로 읽는다</h2>
+<h3 id="_2">실패한 작업은 새 시도로 남긴다</h3>
+<p><strong>현재 구현.</strong> retry()는 실패 작업을 다시 시도할 때 사용한다. 원본 사진과 코스 설명을 읽어 새 작업을 만들고 “어느 작업에서 다시 시작했는지” 기록한다. 원본을 성공 작업으로 덮어쓰지 않는다.</p>
+<p>본인의 실패 작업이어야 하며, 같은 원본의 대기·진행·완료 재시도가 이미 있으면 추가 재시도를 막는다. 이미 만들어진 원본 연결도 함부로 바꾸지 못하게 한다.</p>
+<p>설명용으로 실패한 J를 다시 시도하면 새 작업 J2가 생기고 J2의 retryOf가 J를 가리킨다. 화면은 새 작업 J2의 상태를 보게 된다. 재시도 요청 자체도 새로운 requestId로 중복을 확인한다.</p>
+<h3 id="_3">코스 설명은 사진 옆에 붙인 메모다</h3>
+<p>trip_json은 검증된 코스의 선택 장소 정보를 문자로 보관한 값이다. JSON(JavaScript Object Notation)은 이름과 값의 짝으로 정보를 담는 형식이다.</p>
+<p>사진을 코스에서 연결해 왔다면 Next가 코스 검증 API에 묻고, 그 결과를 trip으로 개인 API에 넘긴다. 개인 API는 이를 정해진 순서의 JSON 문자열로 만들어 jobs.trip_json에 저장한다. 조회할 때는 다시 정보 묶음으로 풀어 trip으로 반환한다. 코스 연결이 없으면 저장값은 비어 있다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>코드 이름</th>
+<th>자연어 의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>itineraryId</td>
+<td>코스 발급을 구분하는 번호</td>
+</tr>
+<tr>
+<td>poiId</td>
+<td>선택한 장소 번호</td>
+</tr>
+<tr>
+<td>placeName·placeAddress</td>
+<td>검증 API가 돌려준 장소 이름·주소</td>
+</tr>
+<tr>
+<td>catalogRevision</td>
+<td>기준 장소 자료의 버전을 구분하는 값</td>
+</tr>
+<tr>
+<td>contextIssuedAt</td>
+<td>코스 자료 확인 맥락의 발급 시각</td>
+</tr>
+<tr>
+<td>notice</td>
+<td>이 연결의 의미와 한계를 설명하는 안내</td>
+</tr>
+</tbody>
+</table></div>
+<p>trip_json은 사진의 실제 촬영 위치를 판정한 결과가 아니다. 현재 CPU 작업자는 이 메모를 읽어 장소에 맞는 장면을 생성하지 않는다. 재시도는 저장된 메모를 복사하며 최신 코스로 다시 검증하는 절차는 포함하지 않는다.</p>
+<p><strong>관련 코드:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/photo_video/app.py">retry()와 TripContext</a>, <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/subproject/SDUI/metadata-project/app/api/travel-video/%5B...path%5D/route.ts">코스 검증을 거치는 proxy()</a>.</p>
+<h2 id="13-ai">13. 기존 커뮤니티 AI 요청은 다른 길로 이동한다</h2>
+<p><strong>현재 구현.</strong> 기존 커뮤니티의 AI 생성 요청은 Spring AnimationService가 담당한다. 본인 게시글·허용 입력 등을 확인한 뒤 사진 주소와 작업 종류를 미디어 게이트웨이에 보낸다.</p>
+<p>게이트웨이는 실제 모델을 직접 계산하는 대신 Runpod에 작업을 접수한다. 외부 작업 번호가 돌아오면 Spring이 그 번호와 대기 상태를 PostgreSQL에 기록한다. 이후 상태 조회가 외부 결과를 가져와 작업을 갱신한다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>담당</th>
+<th>자연어로 설명한 입력·처리·출력</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AnimationService</td>
+<td>게시글·작업 종류를 받아 요청을 만들고, 외부 접수 번호가 있으면 작업 기록을 저장해 돌려준다.</td>
+</tr>
+<tr>
+<td>runpod_proxy()</td>
+<td>작업 종류에 맞는 실행 창구를 고르고, Runpod에 접수한 응답을 돌려준다.</td>
+</tr>
+<tr>
+<td>runpod_status()</td>
+<td>외부 작업 번호로 현재 설정된 실행 창구들을 조회하고 찾은 상태 응답을 돌려준다.</td>
+</tr>
+<tr>
+<td>GPU handler()</td>
+<td>작업 내용을 받아 지원 여부를 확인하고 해당 생성 함수를 실행해 결과 정보를 돌려준다.</td>
+</tr>
+<tr>
+<td>applyRunPodStatus()</td>
+<td>조회한 상태를 읽어 작업 객체의 상태·결과 주소·실제 모델 정보를 갱신한다. 별도 반환값은 없다.</td>
+</tr>
+</tbody>
+</table></div>
+<p>접수 번호가 없거나 요청 중 예외가 나면 현재 Spring 코드는 실패 작업을 저장한다. 이 사실만으로 “외부에서 실행이 절대 시작되지 않았다”까지 증명되는 것은 아니다. 앞선 보고서의 제출 불명 상태는 이 빈틈을 보강하자는 <strong>새 제안</strong>이다.</p>
+<p><strong>관련 코드:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/subproject/SDUI/SDUI-server/src/main/java/com/domain/demo_backend/domain/community/service/AnimationService.java">AnimationService</a>, <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/cloud_gateway/app.py">미디어 게이트웨이</a>, <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/media_motion/runpod_handler.py">GPU handler()</a>.</p>
+<h2 id="14">14. 제출 주소·조회 주소·작업 종류를 구분한다</h2>
+<p>엔드포인트는 작업을 받을 실행 창구다. route는 그 창구에 요청할 일의 종류다. 택배로 비유하면 endpoint는 물류센터, route는 그 안에서 처리할 서비스 종류에 가깝다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>코드·주소</th>
+<th>자연어 해석</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST /v2/{endpoint}/run</td>
+<td>“이 실행 창구에 새 작업을 맡겨 주세요.”</td>
+</tr>
+<tr>
+<td>GET /v2/{endpoint}/status/{job_id}</td>
+<td>“앞서 맡긴 작업 번호의 상태를 알려 주세요.”</td>
+</tr>
+<tr>
+<td>route=tora_cogvideox_i2v</td>
+<td>“궤적 제어를 사용하는 Tora 영상 작업을 요청합니다.”</td>
+</tr>
+<tr>
+<td>RUNPOD_TORA_ENDPOINT_ID</td>
+<td>단일 Tora 작업을 보낼 창구 번호</td>
+</tr>
+<tr>
+<td>RUNPOD_MEDIA_ENDPOINT_ID</td>
+<td>일반 미디어·배치 작업을 보낼 창구 번호</td>
+</tr>
+<tr>
+<td>RUNPOD_ENDPOINT_ID</td>
+<td>전용 설정이 비었을 때 사용하는 기존 대체 창구 번호</td>
+</tr>
+</tbody>
+</table></div>
+<p>제출 응답은 완료 MP4가 아니라 접수 번호와 현재 상태일 수 있다. 같은 번호로 상태를 확인하는 요청은 새 생성 요청과 구분한다.</p>
+<p>현재 단일 Tora는 전용 창구를 고르지만 배치는 항상 미디어 창구로 간다. 배치 안의 photo_route를 Tora로 골라도 전용 창구로 자동 재전송하지 않는다. 창구 번호를 고르는 코드와 창구 안에서 모델을 고르는 코드는 별개이기 때문이다.</p>
+<p>상태 조회는 현재 설정된 여러 창구를 탐색한다. 새 설계에서는 제출 시점의 공급자·창구·작업 번호를 함께 남겨 나중에 설정이 바뀌어도 원래 작업을 찾게 한다.</p>
+<p><strong>관련 코드:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/cloud_gateway/app.py">_runpod_endpoint_for_route(), runpod_proxy(), runpod_status(), runpod_batch_proxy()</a>.</p>
+<h2 id="15-db">15. 생성된 파일·업로드 주소·DB 저장은 세 단계다</h2>
+<p><strong>현재 구현.</strong> GPU에서 MP4가 생성되면 finalize_result()가 최종 영상 파일 항목을 찾는다. 파일이 존재하면 Cloudinary에 올리고 성공 주소를 결과의 result_url 등에 넣는다.</p>
+<p>이 함수는 PostgreSQL에 직접 저장하지 않는다. Runpod 결과를 받은 Spring이 응답을 해석해 작업 객체의 resultUrl을 설정하고 저장 경로에서 보존한다. 결과 주소가 없는 완료 응답을 Spring이 유효한 성공으로 받아들이는지도 별도 파서에서 판단한다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>쉬운 설명</th>
+<th>확인할 결과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>파일 생성</td>
+<td>GPU 작업자 안에 영상 파일이 만들어짐</td>
+<td>파일 생성 성공 여부</td>
+</tr>
+<tr>
+<td>외부 보관</td>
+<td>결과 전달 함수가 Cloudinary 업로드 시도</td>
+<td>업로드 성공·result_url</td>
+</tr>
+<tr>
+<td>서비스 기록</td>
+<td>Spring이 외부 응답을 조회·파싱해 보존</td>
+<td>커뮤니티 작업 상태·result_url</td>
+</tr>
+</tbody>
+</table></div>
+<p>“외부 작업 완료”와 “우리 서비스에서 재생 가능한 완료”를 구분해야 하는 이유다. 개인 영상은 현재 보호된 로컬 파일을 제공한다. 개인 사진 AI 기능을 추가할 때 기존 공개 URL 전달을 그대로 사용하기보다 비공개 결과 회수와 본인 재생 연결을 설계한다.</p>
+<p><strong>관련 코드:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/media_motion/result_delivery.py">finalize_result()</a>, <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/subproject/SDUI/SDUI-server/src/main/java/com/domain/demo_backend/domain/community/service/AnimationService.java">applyRunPodStatus()</a>.</p>
+<h2 id="16-hostinger-java">16. Hostinger 전환용 Java 설정 예제를 한 줄씩 읽는다</h2>
+<p><strong>앞선 보고서의 제안 코드 해설. 현재 적용된 변경이 아니다.</strong></p>
+<p>원래 제안은 “영상 전용 주소가 있으면 그 주소를 사용하고, 그 설정이 없으면 기존 FastAPI 주소를 사용하며, 그것도 없으면 로컬 기본 주소를 사용한다”는 뜻이다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>코드 조각</th>
+<th>자연어 해석</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>@Value</td>
+<td>“애플리케이션 설정에서 값을 읽어 이 자리로 넣어 주세요.”</td>
+</tr>
+<tr>
+<td>kride.media.url</td>
+<td>새로 만들 영상 전용 연결 주소 설정</td>
+</tr>
+<tr>
+<td>안쪽의 kride.fastapi.url</td>
+<td>영상 전용 설정이 없을 때 참고할 기존 연결 설정</td>
+</tr>
+<tr>
+<td>마지막 localhost:8000</td>
+<td>둘 다 없는 개발 환경의 기본 목적지</td>
+</tr>
+<tr>
+<td>String mediaGatewayUrl</td>
+<td>읽어 온 주소 문자열을 담는 매개변수 이름</td>
+</tr>
+<tr>
+<td>WebClient.builder().baseUrl(...)</td>
+<td>이후 요청에 사용할 기본 목적지를 설정해 통신 도구를 준비</td>
+</tr>
+</tbody>
+</table></div>
+<p>주소를 설정하는 것 자체가 서버를 옮기거나 모델을 실행하는 것은 아니다. 그 주소에 실제 중계 서비스가 떠 있고 서로 연결돼야 한다. 기본 주소 설정과 실제 요청 전송도 다른 시점이다.</p>
+<p>또한 중첩 기본값은 “설정이 없을 때”의 대체 규칙이다. 빈 문자열·잘못된 주소까지 자동으로 정상 목적지로 고쳐 주는 기능은 아니다.</p>
+<p>영상 전용 설정을 제안한 이유는 코스·채팅의 목적지와 영상 중계의 목적지를 따로 바꿀 수 있게 하기 위해서다. Hostinger CPU 앱에는 현재 영상 제출 경로가 없으므로 같은 주소로 맞추는 것만으로 연결이 끝나지 않는다.</p>
+<p><strong>기존 코드 근거:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/subproject/SDUI/SDUI-server/src/main/java/com/domain/demo_backend/domain/community/service/AnimationService.java">AnimationService 생성자</a>, <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/src/api/cpu_app.py">Hostinger CPU 앱</a>. <strong>제안 원문:</strong> <a href="README.md#4-ec2-중계-역할을-옮길-파일과-설정">기존 보고서 4장</a>.</p>
+<h2 id="17-docker">17. Docker 구성 예제를 운영 지시문으로 읽는다</h2>
+<p><strong>앞선 보고서의 제안 구성 해설. 완성 배포 파일이 아니다.</strong></p>
+<p>Docker 컨테이너는 프로그램과 실행 환경을 묶어 띄운 단위다. Compose는 어떤 컨테이너를 어떤 설정으로 연결할지 적는 구성 문서다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>구성 이름</th>
+<th>쉬운 뜻</th>
+<th>이 보고서의 예시가 지시하는 일</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>services</td>
+<td>실행할 프로그램 목록</td>
+<td>media-gateway라는 중계 프로그램을 준비</td>
+</tr>
+<tr>
+<td>image</td>
+<td>실행할 프로그램 묶음</td>
+<td>검토한 이미지와 digest 사용</td>
+</tr>
+<tr>
+<td>environment</td>
+<td>프로그램에 전달할 설정</td>
+<td>내부 키·Runpod 키·실행 창구 번호 전달</td>
+</tr>
+<tr>
+<td>expose</td>
+<td>컨테이너의 서비스 포트 정보</td>
+<td>7860에서 서비스하도록 구성. 이것만으로 호스트 공개 포트를 만드는 것은 아님</td>
+</tr>
+<tr>
+<td>networks</td>
+<td>서로 통신할 연결망</td>
+<td>Spring이 연결된 Docker 네트워크에 참여</td>
+</tr>
+<tr>
+<td>restart: unless-stopped</td>
+<td>종료됐을 때 재시작할 정책</td>
+<td>명시적으로 중지하지 않은 서비스의 재기동 지원</td>
+</tr>
+</tbody>
+</table></div>
+<p>이미지 digest는 어떤 이미지 내용인지 고정하는 지문에 가깝다. 주소만 바꿔도 새 버전 코드가 생기는 것은 아니므로 어떤 이미지를 실행하는지 함께 확인한다.</p>
+<p>예제의 달러 기호와 중괄호는 Compose 실행 환경의 값을 읽으라는 문법이다. 변수 뒤의 물음표가 붙은 검사 표현은 값이 없거나 비었으면 실행 준비 단계에서 오류를 내라는 뜻이다. 설명용 문자열을 비밀번호로 쓰라는 뜻이 아니다.</p>
+<p>같은 service 이름을 사용해도 연결망이 다르면 통신하지 못한다. 반대로 expose가 없거나 있다고 해서 네트워크 접근 권한·방화벽이 완성되는 것도 아니다. 내부망·공개 라우터·실제 포트 구성을 함께 확인한다.</p>
+<p>KRIDE_MODEL_GENERATION_ENABLED=false는 게이트웨이의 로컬 생성 기능 설정이다. 기존 /jobs/runpod 외부 제출까지 모두 차단하는 스위치로 해석하지 않는다.</p>
+<p><strong>제안 원문:</strong> <a href="README.md#4-ec2-중계-역할을-옮길-파일과-설정">기존 보고서 4장</a>. <strong>현재 게이트웨이:</strong> <a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/cloud_gateway/app.py">app.py</a>.</p>
+<h2 id="18">18. 설정 이름을 메뉴·실행·연결·비밀로 나눠 읽는다</h2>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>이름</th>
+<th>자연어 의미</th>
+<th>확인할 위치</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NEXT_PUBLIC_PHOTO_VIDEO_ENABLED</td>
+<td>“개인 영상 메뉴와 화면을 보여줄 것인가?”</td>
+<td>Next 빌드. 변경 시 재빌드 필요</td>
+</tr>
+<tr>
+<td>PHOTO_VIDEO_ENABLED</td>
+<td>“서버가 개인 영상 요청을 받을 것인가?”</td>
+<td>Next 실행 환경</td>
+</tr>
+<tr>
+<td>PHOTO_VIDEO_URL</td>
+<td>“개인 사진·작업 API는 어디에 있는가?”</td>
+<td>Next 서버</td>
+</tr>
+<tr>
+<td>PHOTO_VIDEO_PUBLIC_ORIGIN</td>
+<td>“어느 웹사이트의 쓰기 요청을 허용할 것인가?”</td>
+<td>Next 서버</td>
+</tr>
+<tr>
+<td>PHOTO_VIDEO_INTERNAL_KEY</td>
+<td>“Next와 개인 API가 서로 확인할 내부 열쇠는 무엇인가?”</td>
+<td>양쪽에 일치하게 주입</td>
+</tr>
+<tr>
+<td>AUTH_BACKEND_URL·BACKEND_URL</td>
+<td>“로그인 신원을 어느 Spring 서버에 물을 것인가?”</td>
+<td>Next 서버</td>
+</tr>
+<tr>
+<td>PHOTO_VIDEO_DATA_DIR</td>
+<td>“사진·영상·SQLite를 어느 폴더에 둘 것인가?”</td>
+<td>개인 API와 작업자</td>
+</tr>
+<tr>
+<td>KRIDE_MEDIA_URL</td>
+<td>“기존 커뮤니티 영상 중계를 어디로 보낼 것인가?”</td>
+<td>새 제안. Spring 쪽 적용 필요</td>
+</tr>
+<tr>
+<td>RUNPOD_API_KEY</td>
+<td>“Runpod에 요청할 권한을 어떻게 증명할 것인가?”</td>
+<td>미디어 게이트웨이</td>
+</tr>
+<tr>
+<td>RUNPOD_*_ENDPOINT_ID</td>
+<td>“어느 GPU 실행 창구를 선택할 것인가?”</td>
+<td>미디어 게이트웨이</td>
+</tr>
+</tbody>
+</table></div>
+<p>메뉴를 켜는 값, 실행을 허용하는 값, 목적지, 비밀키는 역할이 다르다. 화면 버튼이 보이는 것만으로 API·작업자·저장 폴더가 준비됐다고 판단하지 않는다. 비밀값 자체는 이 문서나 공개 저장소에 기록하지 않는다.</p>
+<h2 id="19">19. 새 모델을 추가한다는 말을 개발 작업으로 바꾼다</h2>
+<p><strong>제안.</strong> 모델 선택 버튼을 추가하는 일만으로 새 AI 모델이 연결되지는 않는다. 현재 개인 API는 정해진 입력만 허용하므로 새 model 필드를 그냥 보내면 거절될 수 있다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>사용자 입장에서 원하는 일</th>
+<th>개발자가 추가할 일</th>
+<th>만들 결과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>풍경을 자연스럽게 움직이게 만들기</td>
+<td>지원 모델·입력 조건을 정하고 서버에서 허용된 모델로 변환</td>
+<td>생성형 영상 작업</td>
+</tr>
+<tr>
+<td>사진 속 인물을 춤추게 하기</td>
+<td>기준 인물과 승인된 동작을 받고 해당 모델 전용 포즈 전처리</td>
+<td>포즈 가이드와 댄스 결과</td>
+</tr>
+<tr>
+<td>얼굴 표현 추가</td>
+<td>얼굴 추적·후처리·원래 영상으로 합성을 검증</td>
+<td>원본과 비교할 선택 결과</td>
+</tr>
+<tr>
+<td>카메라로 동작 연습</td>
+<td>브라우저 관절 추출·몸 크기와 방향 보정·시간 정렬·유사도 계산</td>
+<td>설명 가능한 동작 피드백</td>
+</tr>
+</tbody>
+</table></div>
+<p>어댑터는 우리 서비스의 요청을 각 모델이 알아듣는 형식으로 바꾸고 결과를 다시 공통 형식으로 돌려주는 연결 코드다. 서로 다른 모델이 같은 관절 배열·크기·프레임·출력 형식을 사용하지 않으므로 필요하다.</p>
+<p>가중치는 학습된 모델의 숫자 파일, 추론은 그 숫자를 읽어 새 결과를 만드는 실행, 미세학습은 그 숫자의 일부를 목적에 맞게 다시 조정하는 과정이다. 처음에는 기존 가중치로 추론을 연결하고 실제 부족한 점을 확인한다.</p>
+<p>모델별 환경을 분리하면 한 모델의 Python·PyTorch 버전 변경이 다른 모델을 함께 망가뜨릴 가능성을 줄일 수 있다. 구체적 후보와 사용 조건은 <a href="README.md#6-후보-저장소와-적용-우선순위">원래 보고서 6장</a>을 따른다.</p>
+<h2 id="20">20. 공식 실행 명령의 뜻을 자연어로 읽는다</h2>
+<p><strong>외부 저장소에서 실행하는 예시다. KMovement에서 이미 연결됐다는 뜻은 아니다.</strong></p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>원래 명령의 핵심</th>
+<th>자연어로 풀어 쓴 지시</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>python inference.py</td>
+<td>“현재 준비된 Python 환경으로 이 저장소의 영상 추론 프로그램을 실행해 주세요.”</td>
+</tr>
+<tr>
+<td>--inference_config configs/test.yaml</td>
+<td>“입력·모델·설정을 이 설정 파일에서 읽어 주세요.”</td>
+</tr>
+<tr>
+<td>UniAnimate의 inference_unianimate_wan_480p.py</td>
+<td>“공식 480p 추론 예제에 적힌 순서와 설정으로 실행해 주세요.”</td>
+</tr>
+<tr>
+<td>MusePose의 pose_align.py</td>
+<td>“기준 사진과 동작 영상의 자세·신체 비율을 맞추는 전처리를 실행해 주세요.”</td>
+</tr>
+<tr>
+<td>--imgfn_refer</td>
+<td>“이 파일을 기준 인물 사진으로 사용해 주세요.”</td>
+</tr>
+<tr>
+<td>--vidfn</td>
+<td>“이 파일에서 동작을 가져와 주세요.”</td>
+</tr>
+<tr>
+<td>test_stage_2.py와 --config</td>
+<td>“생성 단계 프로그램을 지정한 설정 파일로 실행해 주세요.”</td>
+</tr>
+</tbody>
+</table></div>
+<p>명령이 짧아도 모델 파일·의존 프로그램·GPU가 미리 준비돼 있어야 한다. 명령에 적힌 상대 경로는 해당 저장소의 실행 위치를 기준으로 해석한다. 이 명령들은 웹 로그인·개인 소유권·비용 제한을 자동으로 붙여 주지 않는다. 서비스 연결 코드는 따로 필요하다.</p>
+<h2 id="21">21. 개인 사진의 외부 전달과 실패 복구를 풀어 쓴다</h2>
+<p><strong>앞선 보고서의 새 제안이다.</strong></p>
+<p>개인 사진 주소는 본인 로그인으로 보호된다. Runpod는 사용자의 브라우저 쿠키를 갖고 있지 않으므로 그 주소를 전달하는 것만으로 사진을 읽지 못한다. 서버가 동의를 확인한 뒤 특정 사진을 제한된 시간에만 읽는 주소를 발급하는 연결이 필요하다.</p>
+<p>서명 주소는 “지금 이 파일에 접근할 수 있다는 제한된 통행증”이다. 긴 주소라고 영구 비공개가 보장되는 것은 아니므로 유효기간·범위·로그 처리·결과 보관을 함께 정한다.</p>
+<p>또한 요청을 보냈는데 답변이 끊겼을 때는 외부 생성이 이미 시작됐을 수 있다. 이때 무조건 다시 생성하면 중복 실행·과금이 생길 수 있다.</p>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>제안 상태 이름</th>
+<th>자연어 의미</th>
+<th>다음 행동</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SUBMITTING</td>
+<td>외부에 접수를 보내는 중</td>
+<td>응답 확인</td>
+</tr>
+<tr>
+<td>SUBMIT_UNKNOWN</td>
+<td>접수 여부를 확실히 모름</td>
+<td>기존 제출을 찾고 무조건 새로 보내지 않음</td>
+</tr>
+<tr>
+<td>RUNNING</td>
+<td>외부 모델이 생성 중</td>
+<td>기존 작업 번호로 상태 확인</td>
+</tr>
+<tr>
+<td>DELIVERING</td>
+<td>생성 결과를 우리 저장소로 가져오는 중</td>
+<td>파일과 기록 검증</td>
+</tr>
+<tr>
+<td>DELIVERY_RETRY</td>
+<td>결과 전달만 다시 필요함</td>
+<td>같은 결과를 다시 회수</td>
+</tr>
+<tr>
+<td>COMPLETED</td>
+<td>내부에서 재생할 준비까지 마침</td>
+<td>소유자 확인 후 재생</td>
+</tr>
+</tbody>
+</table></div>
+<p>model_runs는 이런 실행 이력을 따로 기록하자는 테이블 제안이다. 현재 DB에 이미 존재하는 테이블로 설명하지 않는다. 외부 생성 번호·제출 당시 창구·모델 버전·동의·비용과 내부 작업 J를 연결한다. 기존 saved_item을 영상 작업표로 바꾸자는 뜻도 아니다.</p>
+<h2 id="22">22. 화면에서 문제를 발견하면 어디를 읽을지 정한다</h2>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>보이는 상황</th>
+<th>쉬운 해석</th>
+<th>먼저 볼 코드</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>사진이 보이지만 올리지 않음</td>
+<td>브라우저 미리보기만 생긴 단계일 수 있음</td>
+<td>VideoCreator</td>
+</tr>
+<tr>
+<td>“준비 중”·503</td>
+<td>기능·설정·연결 서버 준비를 확인해야 함</td>
+<td>proxy()와 실행 설정</td>
+</tr>
+<tr>
+<td>로그인 안내·401</td>
+<td>신원이 없거나 내부 키 확인에 실패했을 수 있음</td>
+<td>Spring 신원 요청·owner()</td>
+</tr>
+<tr>
+<td>사진 없음·404</td>
+<td>요청한 사진이 본인 기록에서 조회되지 않음</td>
+<td>photo()·enqueue()</td>
+</tr>
+<tr>
+<td>같은 요청 충돌·409</td>
+<td>요청 번호와 사진·원본·코스 내용이 다름</td>
+<td>enqueue()</td>
+</tr>
+<tr>
+<td>생성 한도·429</td>
+<td>사진 보관·동시 작업·일일 한도 중 해당 제한 확인</td>
+<td>upload()·enqueue()</td>
+</tr>
+<tr>
+<td>계속 대기</td>
+<td>작업자가 대기 작업을 가져가고 있는지 확인</td>
+<td>run_once()·공유 볼륨</td>
+</tr>
+<tr>
+<td>완료인데 재생 안 됨</td>
+<td>파일·본인 조회·연결 응답을 확인</td>
+<td>video()·Next 중계</td>
+</tr>
+<tr>
+<td>기존 AI 요청 501</td>
+<td>게이트웨이의 Runpod 키·실행 창구 설정 확인</td>
+<td>runpod_proxy()</td>
+</tr>
+<tr>
+<td>AI 생성 뒤 주소 없음</td>
+<td>생성·업로드·결과 파싱 중 어느 단계인지 구분</td>
+<td>finalize_result()·Spring 상태 파서</td>
+</tr>
+</tbody>
+</table></div>
+<p>이 표는 실제로 이번에 장애를 재현한 결과가 아니라 코드에 따른 확인 순서다. 서비스 화면에서 본 오류 문구와 서버별 원인을 함께 확인한다.</p>
+<h2 id="23">23. 이 해설의 확인 결과와 사용 범위</h2>
+<p>실제 함수의 입력·처리·반환과 저장 효과를 대조했다. 특히 “사진 선택과 업로드”, “접수와 생성”, “함수 반환값과 파일 저장”, “외부 완료와 내부 재생”, “현재 구현과 새 제안”을 구분했다.</p>
+<p>문서 검수 결과는 <a href="code-explained-verification.json">별도 기록</a>에 남긴다. 이 문서의 HTML과 Markdown은 같은 본문을 사용한다. 그림은 코드에 근거한 관계·흐름 설명이며 실제 운영 화면 캡처가 아니다. 문서 안의 단계 선택 도구는 설명만 바꾸고 사진 업로드·로그인·영상 생성 요청을 보내지 않는다.</p>
+<p>운영 로그인·서버 이전·GPU 생성·DB 마이그레이션은 이번에 실행하지 않았다. 기존 제품 소스와 앞선 보고서는 변경하지 않고 이 해설 파일을 추가한다.</p>
+<h2 id="_4">실제 코드로 이동하기</h2>
+<div class="table-scroll" tabindex="0" aria-label="표 가로 보기"><table>
+<thead>
+<tr>
+<th>짧은 이름</th>
+<th>코드의 역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/subproject/SDUI/metadata-project/app/travel/video/page.tsx">화면 page.tsx</a></td>
+<td>사진 선택·올리기·생성·이전 작업·재생</td>
+</tr>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/subproject/SDUI/metadata-project/app/api/travel-video/%5B...path%5D/route.ts">Next route.ts</a></td>
+<td>신원 확인·요청 정규화·코스 검증·내부 중계</td>
+</tr>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/photo_video/app.py">개인 app.py</a></td>
+<td>업로드·소유권·작업·재시도·재생 API</td>
+</tr>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/photo_video/worker.py">개인 worker.py</a></td>
+<td>대기 작업 선택·FFmpeg 실행·상태 기록</td>
+</tr>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/photo_video/database.py">database.py</a></td>
+<td>SQLite 연결·복합 외래키·재시도 규칙·스키마 준비</td>
+</tr>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/subproject/SDUI/SDUI-server/src/main/java/com/domain/demo_backend/domain/community/service/AnimationService.java">AnimationService.java</a></td>
+<td>기존 커뮤니티 영상 접수·상태 반영</td>
+</tr>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/cloud_gateway/app.py">게이트웨이 app.py</a></td>
+<td>Runpod 제출·창구 선택·상태 조회</td>
+</tr>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/media_motion/runpod_handler.py">runpod_handler.py</a></td>
+<td>GPU 작업의 지원 분기·입력 다운로드·모델 호출</td>
+</tr>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/deploy/media_motion/result_delivery.py">result_delivery.py</a></td>
+<td>최종 영상의 Cloudinary 업로드·결과 정보 구성</td>
+</tr>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/ce257f437fd7f91aff4a80badb10f1b3917ac6f8/src/api/cpu_app.py">cpu_app.py</a></td>
+<td>Hostinger CPU 서비스가 제공할 경로 선택</td>
+</tr>
+</tbody>
+</table></div></main></div><footer>그림과 단계 선택은 코드에 근거한 설명입니다. 실제 운영 사진 업로드·서버 변경·GPU 생성은 실행하지 않습니다.</footer><script>
+const steps={
+choose:['사진 선택은 브라우저 안의 준비','VideoCreator가 선택 파일을 검사하고 미리보기를 만듭니다. 이 단계에서는 서버의 사진 번호가 생기지 않습니다.','화면의 미리보기','브라우저 안의 선택 상태'],
+upload:['사진을 저장하고 사진 번호를 받음','Next가 로그인 사용자를 확인하고 개인 API의 upload()가 사진을 다시 읽어 JPEG로 저장합니다.','photoId라는 사진 번호','JPEG 파일과 photos 기록'],
+queue:['영상 대신 작업 대기표를 받음','enqueue()가 본인 사진·중복 요청·한도를 확인하고 대기 작업을 기록합니다.','jobId와 현재 상태를 담은 작업 정보','jobs 기록. 아직 완성 영상 없음'],
+render:['반환값 없이 영상 파일을 만듦','render_photo()는 FFmpeg를 실행해 임시 MP4를 만들고 형식·길이를 확인한 뒤 최종 이름으로 바꿉니다.','None. 영상 바이트를 직접 돌려주지 않음','MP4 파일. run_once()가 상태와 시간을 기록'],
+play:['본인인지 다시 확인하고 파일을 보냄','video()가 주인·완료 상태·실제 파일을 확인합니다. 준비가 끝났을 때 재생 가능한 파일을 보냅니다.','JSON이 아닌 영상 바이트','재생 요청. 새 생성 작업을 만들지 않음']
+};
+document.querySelectorAll('[data-stage]').forEach(button=>button.addEventListener('click',()=>{
+document.querySelectorAll('[data-stage]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+const values=steps[button.dataset.stage],panel=document.getElementById('stage-detail');
+panel.replaceChildren();
+const title=document.createElement('h4');title.textContent=values[0];panel.append(title);
+for(const line of [values[1],'돌아오는 것: '+values[2],'남는 변화: '+values[3]]){const p=document.createElement('p');p.textContent=line;panel.append(p);}
+}));
+</script></body></html>
