@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-26",
+  "kind": "natural-language-document-only",
+  "sourceCommit": "ce257f437fd7f91aff4a80badb10f1b3917ac6f8",
+  "productCodeChanged": false,
+  "productTestsRun": false,
+  "gpuGenerationRun": false,
+  "viewports": [
+    {
+      "width": 1440,
+      "overflow": false,
+      "brokenAnchors": [],
+      "duplicates": [],
+      "diagrams": 2,
+      "headings": 24,
+      "replacementCharacters": false
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "brokenAnchors": [],
+      "duplicates": [],
+      "diagrams": 2,
+      "headings": 24,
+      "replacementCharacters": false
+    }
+  ],
+  "errors": [],
+  "externalRequests": [],
+  "stageSelections": [
+    {
+      "name": "2 서버 업로드",
+      "text": "사진을 저장하고 사진 번호를 받음Next가 로그인 사용자를 확인하고 개인 API의 upload()가 사진을 다시 읽어 JPEG로 저장합니다.돌아오는 것: photoId라는 사진 번호남는 변화: JPEG 파일과 photos 기록",
+      "selected": "true"
+    },
+    {
+      "name": "3 작업 접수",
+      "text": "영상 대신 작업 대기표를 받음enqueue()가 본인 사진·중복 요청·한도를 확인하고 대기 작업을 기록합니다.돌아오는 것: jobId와 현재 상태를 담은 작업 정보남는 변화: jobs 기록. 아직 완성 영상 없음",
+      "selected": "true"
+    },
+    {
+      "name": "4 영상 생성",
+      "text": "반환값 없이 영상 파일을 만듦render_photo()는 FFmpeg를 실행해 임시 MP4를 만들고 형식·길이를 확인한 뒤 최종 이름으로 바꿉니다.돌아오는 것: None. 영상 바이트를 직접 돌려주지 않음남는 변화: MP4 파일. run_once()가 상태와 시간을 기록",
+      "selected": "true"
+    },
+    {
+      "name": "5 본인 재생",
+      "text": "본인인지 다시 확인하고 파일을 보냄video()가 주인·완료 상태·실제 파일을 확인합니다. 준비가 끝났을 때 재생 가능한 파일을 보냅니다.돌아오는 것: JSON이 아닌 영상 바이트남는 변화: 재생 요청. 새 생성 작업을 만들지 않음",
+      "selected": "true"
+    }
+  ],
+  "keyboardSelection": "사진 선택은 브라우저 안의 준비VideoCreator가 선택 파일을 검사하고 미리보기를 만듭니다. 이 단계에서는 서버의 사진 번호가 생기지 않습니다.돌아오는 것: 화면의 미리보기남는 변화: 브라우저 안의 선택 상태",
+  "onlyOnePressed": true,
+  "pass": true,
+  "relativeLinksChecked": 7,
+  "missingRelativeLinks": [],
+  "visualReview": true
+}
