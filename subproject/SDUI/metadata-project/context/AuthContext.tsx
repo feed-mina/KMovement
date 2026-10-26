@@ -1,12 +1,13 @@
 // context/AuthContext.tsx
 'use client';
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import api, { refreshSession } from '@/services/axios';
 import { useRouter } from "next/navigation";
 import { requestForToken, onMessageListener } from '@/lib/firebase';
 import { trackEvent } from '@/lib/analytics/dataLayer';
-import { clearLoginReturn, consumeLoginReturn } from '@/lib/kride/loginReturn';
+import { clearLoginReturn, consumeLoginReturn, rememberLoginReturn } from '@/lib/kride/loginReturn';
+import { clearPhotoVideoContext, safeVideoReturn } from '@/lib/kride/personalLibrary';
 
 interface User {
     userId?: string;
@@ -21,6 +22,7 @@ interface AuthContextType {
     isLoggedIn: boolean;
     isLoading: boolean;
     updateUser: (userData: User | null) => void;
+    markSessionExpired?: () => void;
     login: (userData: any) => void;
     logout: () => Promise<void>;
     checkAccess: (allowedRoles?: string | string[]) => boolean;
@@ -33,6 +35,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
+    const previousIdentity = useRef<string | null>(null);
+    const identity = isLoggedIn ? String(user?.userSqno ?? user?.userId ?? '') : '';
+    useEffect(() => {
+        if (isLoading) return;
+        if (!identity || (previousIdentity.current !== null && previousIdentity.current !== identity)) clearPhotoVideoContext();
+        previousIdentity.current = identity;
+    }, [identity, isLoading]);
+    const markSessionExpired = useCallback(() => {
+        clearPhotoVideoContext(); setUser(null); setIsLoggedIn(false);
+    }, []);
     // 로그인 성공 시 호출할 함수
     const login = useCallback((userData: any) => {
         setUser(userData);
@@ -53,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // 서버 에러가 나더라도 클라이언트 상태는 지우는 게 사용자 입장에서 안전해
         } finally {
             clearLoginReturn();
+            clearPhotoVideoContext();
             //  클라이언트 상태 초기화
             setUser(null);
             setIsLoggedIn(false);
@@ -134,6 +147,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const currentPath = window.location.pathname;
             // 이미 추가 정보 입력 페이지에 있으면 리다이렉트하지 않음 (무한 루프 방지)
             if (currentPath !== '/view/ADDITIONAL_INFO_PAGE') {
+                const videoReturn = safeVideoReturn(currentPath + window.location.search);
+                if (videoReturn) rememberLoginReturn(videoReturn);
                 // console.log('ROLE_GUEST 감지: 추가 정보 입력 페이지로 리다이렉트');
                 router.push('/view/ADDITIONAL_INFO_PAGE');
             }
@@ -181,7 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return (
 
         <AuthContext.Provider value={{
-            user, isLoggedIn, isLoading, updateUser: setUser, login, logout,
+            user, isLoggedIn, isLoading, updateUser: setUser, markSessionExpired, login, logout,
             checkAccess
         }}>
             {children}

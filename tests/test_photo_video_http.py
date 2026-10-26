@@ -73,7 +73,7 @@ def test_real_next_to_private_video(tmp_path):
                     pass
                 assert time.monotonic() < deadline, 'local frontend did not start'
                 time.sleep(.2)
-            assert '여행 사진으로 영상 만들기' in ready.text
+            assert '내 영상' in ready.text
             endpoint = origin + '/api/travel-video'
             assert client.get(endpoint + '/jobs').status_code == 401
             headers = {'Cookie': 'fixture-user=1', 'Origin': origin}

@@ -2,6 +2,8 @@
 import {useContext,useEffect,useRef,useState} from 'react';
 import {useRouter,useSearchParams} from 'next/navigation';
 import Link from 'next/link';
+import PersonalLibraryNav from '@/components/personal/PersonalLibraryNav';
+import {personalPage, savedLibraryHref} from '@/lib/kride/personalLibrary';
 import {AuthContext} from '@/context/AuthContext';
 import Pagination from '@/components/fields/Pagination';
 import KrideStatePanel from '@/components/fields/kride/atoms/KrideStatePanel';
@@ -51,26 +53,29 @@ export default function PersonalSavedScreen(_props:ScreenControllerProps) {
  const router=useRouter(),search=useSearchParams();
  const eventReturn=search.get('returnEvents');const eventBack=eventReturn&&/^\/view\/KPOP_EVENTS(?:\?[^#]*)?$/.test(eventReturn)?eventReturn:null;
  const rawKind=search.get('kind');const kind:SavedKind=rawKind==='events'||rawKind==='products'?rawKind:'artists';
- const rawPage=Number(search.get('page')||1);const page=Number.isSafeInteger(rawPage)&&rawPage>0?rawPage:1;
+ const page=personalPage(search.get('page'));
+ const savedHref=savedLibraryHref(kind,page);
  const [retry,setRetry]=useState(0);
  const navigate=(nextKind:SavedKind,nextPage:number)=>{focus.current=true;router.push('/view/KPOP_SAVED_ITEMS?kind='+nextKind+'&page='+nextPage+(eventBack?'&returnEvents='+encodeURIComponent(eventBack):''),{scroll:false});};
  const key=identity+':'+kind+':'+page;
  const [result,setResult]=useState<{key:string;data?:SavedPage;error?:boolean}>({key:''});
- const [counts,setCounts]=useState<Partial<Record<SavedKind,number>>>({});
+ const [countState,setCountState]=useState<{identity:string;counts:Partial<Record<SavedKind,number>>}>({identity:'',counts:{}});
+ const counts=countState.identity===identity?countState.counts:{};
  const [deleting,setDeleting]=useState<number|null>(null),[message,setMessage]=useState('');
- const [undo,setUndo]=useState<{item:SavedRow;kind:SavedKind;busy?:boolean}|null>(null);
+ const [undoState,setUndo]=useState<{item:SavedRow;kind:SavedKind;identity:string;busy?:boolean}|null>(null);
+ const undo=undoState?.identity===identity?undoState:null;
  const heading=useRef<HTMLHeadingElement>(null),focus=useRef(false),live=useRef(key);live.current=key;
  const mutation=useRef<AbortController|null>(null);
  useEffect(()=>{setMessage('');setDeleting(null);if(!identity)return;const abort=new AbortController();setResult({key});
-  request(base+kind+'?page='+page,abort.signal).then(data=>{if(!abort.signal.aborted){setResult({key,data});setCounts(c=>({...c,[kind]:data.totalCount}));if(focus.current){focus.current=false;heading.current?.focus();}}}).catch(()=>{if(!abort.signal.aborted)setResult({key,error:true});});
+  request(base+kind+'?page='+page,abort.signal).then(data=>{if(!abort.signal.aborted){setResult({key,data});setCountState(c=>({identity,counts:{...(c.identity===identity?c.counts:{}),[kind]:data.totalCount}}));if(focus.current){focus.current=false;heading.current?.focus();}}}).catch(()=>{if(!abort.signal.aborted)setResult({key,error:true});});
   return ()=>{abort.abort();mutation.current?.abort();};
  },[key,identity,kind,page,retry]);
  useEffect(()=>{if(!undo||undo.busy)return;const t=setTimeout(()=>setUndo(null),6000);return()=>clearTimeout(t);},[undo]);
  if(auth?.isLoading)return <section className="page-wrap personal-saved"><div className="personal-saved-skeleton" role="status" aria-label="로그인을 확인하는 중"><Skeleton height={28} width="40%"/><Skeleton height={88}/><Skeleton height={88}/></div></section>;
- if(!identity)return <section className="page-wrap personal-saved"><h1>내 목록</h1><KrideStatePanel kind="forbidden" title="로그인이 필요해요" description="저장 목록은 나만 볼 수 있어서 로그인 뒤에 열려요." primaryAction={{label:'로그인',href:'/view/LOGIN_PAGE?returnTo='+encodeURIComponent('/view/KPOP_SAVED_ITEMS')}}/></section>;
+ if(!identity)return <section className="page-wrap personal-saved"><h1>내 목록</h1><KrideStatePanel kind="forbidden" title="로그인이 필요해요" description="저장 목록은 나만 볼 수 있어서 로그인 뒤에 열려요." primaryAction={{label:'로그인',href:'/view/LOGIN_PAGE?returnTo='+encodeURIComponent(savedHref)}}/></section>;
  const current=result.key===key?result:{key};
  const remove=async(item:SavedRow)=>{if(deleting!==null)return;setDeleting(item.itemRef);setMessage('');const abort=new AbortController();mutation.current=abort;
-  try{await request(base+kind+'/'+item.itemRef,abort.signal,'DELETE');if(live.current===key&&!abort.signal.aborted){focus.current=true;setUndo({item,kind});setRetry(x=>x+1);}}
+  try{await request(base+kind+'/'+item.itemRef,abort.signal,'DELETE');if(live.current===key&&!abort.signal.aborted){focus.current=true;setUndo({item,kind,identity});setRetry(x=>x+1);}}
   catch{if(live.current===key&&!abort.signal.aborted){setMessage('삭제하지 못했어요. 다시 시도해 주세요.');setDeleting(null);}}
  };
  const restore=async()=>{if(!undo||undo.busy)return;setUndo({...undo,busy:true});const abort=new AbortController();mutation.current=abort;
@@ -79,6 +84,7 @@ export default function PersonalSavedScreen(_props:ScreenControllerProps) {
  };
  const total=current.data?.totalCount??0;
  return <section className="page-wrap personal-saved" aria-label="내 저장 목록">
+  <PersonalLibraryNav active="saved" savedHref={savedHref}/>
   {eventBack&&<Link href={eventBack}>팬 일정으로 돌아가기</Link>}
   <div className="personal-saved-head"><Link className="personal-saved-back" href="/view/MY_PAGE">← 마이페이지</Link><h1>내 목록</h1><p>나만 볼 수 있는 저장 목록이에요.</p></div>
   <nav className="personal-saved-tabs" aria-label="저장 종류">{(Object.keys(labels) as SavedKind[]).map(k=><button key={k} aria-pressed={kind===k} onClick={()=>{navigate(k,1);}}>{labels[k]}{counts[k]!==undefined&&<b className="personal-saved-tabs__count">{counts[k]}</b>}</button>)}</nav>

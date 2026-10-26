@@ -1,5 +1,6 @@
 import "./styles/index.css";
 import "./styles/kride-motion.css";
+import "./styles/personal-library.css";
 import {KrideMotionProvider} from "@/components/motion/KrideMotion";
 import type { Metadata, Viewport } from 'next';
 import AppProviders from '@/components/providers/AppProviders';

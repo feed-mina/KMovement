@@ -21,20 +21,15 @@ beforeEach(() => {
     }) as unknown as typeof IntersectionObserver;
 });
 
-it('배경을 멈추고 다시 재생하며 화면 밖에서는 움직임을 중단한다', () => {
+it('배경 제어 UI 없이 화면 밖에서는 장식 움직임을 중단한다', () => {
     const {container, unmount} = render(<KrideMotionProvider><PastelBackdrop /></KrideMotionProvider>);
     const backdrop = container.querySelector('.kride-pastel');
     act(() => onIntersection([{isIntersecting: true} as IntersectionObserverEntry], {} as IntersectionObserver));
     expect(backdrop).toHaveAttribute('data-moving', 'true');
-    fireEvent.click(screen.getByRole('button', {name: '배경 움직임 멈춤'}));
-    expect(backdrop).toHaveAttribute('data-moving', 'false');
-    fireEvent.click(screen.getByRole('button', {name: '배경 움직임 재생'}));
-    expect(backdrop).toHaveAttribute('data-moving', 'true');
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
     act(() => onIntersection([{isIntersecting: false} as IntersectionObserverEntry], {} as IntersectionObserver));
     expect(backdrop).toHaveAttribute('data-moving', 'false');
-    unmount();
-    expect(disconnect).toHaveBeenCalled();
-    expect(preferenceListeners.size).toBe(0);
+    unmount(); expect(disconnect).toHaveBeenCalled(); expect(preferenceListeners.size).toBe(0);
 });
 
 it('실행 중 동작 줄이기 설정을 켜면 즉시 배경을 멈추고 버튼 조작은 유지한다', () => {

@@ -18,6 +18,7 @@ test.each([
     ['/view/KPOP_PRODUCTS', 'K-POP'],
     ['/travel/kpop', 'K-POP'],
     ['/view/MY_PAGE', '마이'],
+    ['/travel/video', '마이'],
     ['/view/LOGIN_PAGE', '마이'],
     ['/view/KPOP_SAVED_ITEMS', '마이'],
     ['/view/AI_JAPANESE_CHAT_PAGE', '언어 채팅'],
