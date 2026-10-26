@@ -6,7 +6,32 @@ on:
   pull_request:
     branches: ["main"]
 
+permissions:
+  contents: read
+
 jobs:
+  deployment-plan:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Record independent deployment targets for the full push
+        env:
+          PUSH_BEFORE: ${{ github.event.before }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: python deploy/hostinger/deploy_scope.py --base "$PUSH_BEFORE" --sha "$RELEASE_SHA" --output deploy-plan.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hostinger-deploy-plan
+          path: deploy-plan.json
+          retention-days: 14
+
   # ── SDUI-server (Spring Boot) ──────────────────────────────────────────────
   sdui-server:
     runs-on: ubuntu-latest
