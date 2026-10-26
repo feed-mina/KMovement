@@ -99,6 +99,24 @@ s+=arrow(265,440,265,497,'조회');s+=arrow(875,440,875,497,'조회·파일 제�
 s+='</g></svg>'
 (A/'storage-boundary.svg').write_text(s,encoding='utf-8')
 
+s=svg_begin('R1 소스 기준 Tora 단일과 미디어·배치 분기',1140,820)
+s+=txt(30,44,'R1 · 작업 종류와 엔드포인트를 구분',24,700)
+s+=txt(30,72,'코드의 분기 / 운영 ID·이미지·최근 작업은 미확인',15,color='#8a432f')
+s+=box(390,105,360,76,'Spring 영상 요청','POST /jobs/runpod 또는 /batch')
+s+=box(55,239,460,76,'단일 route = tora_cogvideox_i2v','대체 생성 허용 안 함')
+s+=box(625,239,460,76,'일반 단일 또는 batch_video','배치는 미디어 엔드포인트 사용')
+s+=arrow(450,181,285,239,'Tora 단일');s+=arrow(695,181,855,239,'그 외·배치')
+s+=box(55,371,460,80,'Tora ID 또는 레거시 ID','/v2/{endpoint}/run',fill='#fce8dd')
+s+=box(625,371,460,80,'Media ID 또는 레거시 ID','/v2/{endpoint}/run',fill='#e4efec')
+s+=arrow(285,315,285,371,'제출');s+=arrow(855,315,855,371,'제출')
+s+=box(625,500,460,106,'배치: 같은 작업자 안에서 처리','auto: Tora 선택 없음 / 명시 Tora: 로컬 시도')
+s+=txt(646,585,'Tora 실패 → CogVideoX → 3d_photo_light',15,color='#52606d')
+s+=arrow(855,451,855,500,'batch_video일 때')
+s+=box(260,680,620,85,'결과: /v2/{endpoint}/status/{job_id}','Spring은 작업 ID·route 저장 / endpoint ID 전용 저장 없음')
+s+=arrow(285,451,380,680,'상태 조회');s+=arrow(855,606,760,680,'상태 조회')
+s+='</g></svg>'
+(A/'runpod-routing.svg').write_text(s,encoding='utf-8')
+
 sourcebase='https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/'
 w='subproject/SDUI/metadata-project/'
 j='subproject/SDUI/SDUI-server/src/main/java/com/domain/demo_backend/'
@@ -132,7 +150,7 @@ def embed(m):
  return f'<figure id="fig-{name}">{(ROOT/f).read_text(encoding="utf-8")}<figcaption><span>{esc(alt)}</span><button class="quiet" data-zoom="fig-{name}" type="button">그림 크게 보기</button></figcaption></figure>'
 body=re.sub(r'<img alt="([^"]*)" src="([^"]*)"\s*/?>',lambda m:embed(type('M',(),{'group':lambda self,i:m.group(2 if i==1 else 1)})()),body)
 body=re.sub(r'(?s)<table>(.*?)</table>',r'<div class="table-wrap"><table>\1</table></div>',body)
-nav=[('scope','목표·범위'),('current','현재 화면'),('after','개선 화면'),('flow','이동·조회 흐름'),('files','함수·수정 파일'),('login','로그인 복귀'),('history','조회 상태'),('contracts','API·저장 경계'),('steps','구현 순서'),('tests','시험 계획'),('maintenance','진단·복구'),('verification','확인 범위')]
+nav=[('scope','목표·범위'),('current','현재 화면'),('after','개선 화면'),('flow','이동·조회 흐름'),('files','함수·수정 파일'),('login','로그인 복귀'),('history','조회 상태'),('contracts','API·저장 경계'),('steps','구현 순서'),('tests','시험 계획'),('maintenance','진단·복구'),('verification','확인 범위'),('runpod-operations','RunPod 운영 분석')]
 page='<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>내 목록과 내 영상 연결 가이드</title><style>'+CSS+'</style></head><body><a class="skip" href="#content">본문으로 이동</a><header class="cover"><span class="eyebrow">KMOVEMENT / IMPLEMENTATION GUIDE</span><h1>내 목록에서 내 영상까지</h1><p>같은 보관 경험으로 이어지는 화면 연결 가이드. 현재 구현과 다음 변경을 구분하고, 기존 데이터와 소유권을 유지합니다.</p></header><div class="shell"><aside aria-label="보고서 목차">'+''.join(f'<a href="#{k}">{v}</a>' for k,v in nav)+'</aside><main id="content">'+body+'</main></div><dialog id="zoom-dialog" aria-label="그림 확대"><div class="dialog-bar"><span>그림 확대</span><div><button id="zoom-plus" class="quiet">확대</button> <button id="zoom-reset" class="quiet">원래 크기</button> <button id="zoom-close" class="quiet">닫기</button></div></div><div id="zoom-stage" class="zoom-stage"></div></dialog><footer>현재 화면은 코드 기반 재구성, 개선 화면은 미구현 모형입니다. 체험은 문서 내부에서만 동작합니다.</footer><script>'+JS+'</script></body></html>'
 (ROOT/'guide.html').write_text(page,encoding='utf-8')
 print('Generated guide.html and',len(list(A.glob('*.svg'))),'SVG assets')

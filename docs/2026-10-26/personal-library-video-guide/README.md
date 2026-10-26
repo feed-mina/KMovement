@@ -254,7 +254,7 @@ type HistoryState<T> =
 | 활성화 | 공개 버튼·서버 플래그 불일치 | 노출 상태와 준비 오류를 구분. 민감 설정 노출 없음 |
 | 모바일·키보드 | 390px 화면·Tab·Enter | 메뉴 접근·현재 위치·오류 안내를 읽을 수 있음 |
 
-Windows PowerShell, 프런트엔드 폴더에서 실행할 기존 회귀시험 예시다. 의존성이 설치된 개발 환경을 사용한다. **이번 문서 작업에서는 앱 시험을 다시 실행하지 않았다.**
+Windows PowerShell, 프런트엔드 폴더에서 실행할 기존 회귀시험 예시다. 의존성이 설치된 개발 환경을 사용한다. **이번 문서 작업에서는 앱 회귀시험 통과를 확인하지 않았다.** RunPod 분석 중 별도 라우팅 시험을 시도했으나 초기화가 지연되어 중단했다. 문서 화면 검수와 구분한다.
 
 ```powershell
 Set-Location D:\KMovement\subproject\SDUI\metadata-project
@@ -286,7 +286,7 @@ HTML은 외부 네트워크 없이 본문·그림·체험을 읽을 수 있다. 
 - 확인 완료: 최신 main과 분석 소스의 일치, 화면 진입·실제 호출·응답·저장소 관계의 정적 추적.
 - 구현 상태: 본문에서 ‘제안’으로 표시한 파일·쿼리·기능은 미구현. 애플리케이션 코드·운영 DB·배포는 변경하지 않는다.
 - 화면 자료: 현재 화면은 코드 기반 재구성, 개선 화면과 체험은 설명용 모형. 실제 로그인 화면 캡처가 아니다.
-- 문서 검수 결과: 1440px·390px 폭에서 가로 넘침 없음, 4개 그림과 12개 구역, 내부 목차·키보드 탭 전환·역할 설명 선택·그림 확대 및 Escape 닫기 확인. 외부 요청 0건, JavaScript 오류 0건. 모형의 조회 실패·빈 상태 표시 확인.
+- 문서 검수 결과: 1440px·390px 폭에서 가로 넘침 없음, 5개 그림과 13개 구역, 내부 목차·키보드 탭 전환·역할 설명 선택·그림 확대 및 Escape 닫기 확인. 외부 요청 0건, JavaScript 오류 0건. 모형의 조회 실패·빈 상태 표시 확인.
 - 전제 조사: [저장 경로 조사 보고서](../saved-item-media-storage-audit.md). 그 조사에서 수행한 32개 시험을 이번 새 기능의 통과 실적으로 재사용하지 않는다.
 
 [profile]: https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/subproject/SDUI/metadata-project/components/screens/AuthFlowScreen.tsx
@@ -299,3 +299,127 @@ HTML은 외부 네트워크 없이 본문·그림·체험을 읽을 수 있다. 
 [savedservice]: https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/subproject/SDUI/SDUI-server/src/main/java/com/domain/demo_backend/domain/kpop/service/PersonalSavedService.java
 
 [nav]: https://github.com/feed-mina/KMovement/blob/46a2d5ae83451befb0fa465acffe96257b7811d6/subproject/SDUI/metadata-project/components/layout/KrideNav.tsx
+
+<a id="runpod-operations"></a>
+## 13. RunPod 운영 경로 추가 분석
+
+분석 기준: 2026-10-26, main `b5822659c7bc0e0adc20cf69f921a23edf191992`. 이전 가이드 작성 이후 애플리케이션 소스 변경은 없다. **아래 표는 현재 코드의 동작이며 실제 운영 계정의 사용 실적과 구분한다.**
+
+### 13.1 먼저 구분할 운영 상태
+
+| 확인 범위 | 이번에 확인한 사실 | 운영 판단 |
+|---|---|---|
+| GitHub 웹 자동 배포 | [2026-10-26 실행 기록](https://github.com/feed-mina/KMovement/actions/runs/40266168255)의 웹 배포 성공 | 웹 릴리스 증거. RunPod 작업자·GPU·엔드포인트 활성 증거는 아님 |
+| Hostinger 서비스 구성 | Spring은 [`hostinger-g1`][rp-profile], FastAPI 주소 기본값은 `disabled-fastapi`. 별도 CPU 서비스는 `src.api.cpu_app:app` 실행 | 코드상 분리 구성. 운영의 환경 덮어쓰기·활성 이미지는 미확인 |
+| CPU 서비스 라우트 | [`cpu_app.ALLOWED`][rp-cpu]가 코스·조회·채팅 등만 포함. `/jobs/runpod`·`/jobs/runpod/batch`·`/jobs/runpod/{job_id}` 없음 | CPU 서비스가 켜져 있어도 RunPod 게이트웨이가 열린 것은 아님 |
+| EC2 배포 구성 | Spring의 `FASTAPI_URL`·`KRIDE_FASTAPI_URL`, FastAPI의 RunPod 키·세 엔드포인트 변수를 주입하는 코드가 존재 | 과거·별도 배포 경로의 설계 증거. 현재 EC2 실행 상태는 미확인 |
+| 운영 서버 직접 조회 | SSH 연결이 현재 실행 환경에서 차단됨. 공개 상태 URL도 조회 도구에서 접근 불가 | 컨테이너 환경값·실제 Spring 접속 대상·운영 DB 작업 건수는 확인하지 못함 |
+| RunPod 콘솔 | Serverless 페이지 접근 시 로그인 필요 화면 확인 | 엔드포인트 ID·연결 이미지·현재 작업자·최근 성공 작업은 미확인 |
+
+따라서 **현재 Tora·미디어 엔드포인트가 운영에서 정상 사용 중이라는 결론은 아직 낼 수 없다.** 반대로 미사용·중지 상태라고 확정할 근거도 없다. 웹 배포 성공, 이미지 빌드 성공, 외부 생성 성공은 각각 다른 증거다.
+
+### 13.2 단일 영상과 배치의 실제 분기
+
+엔드포인트(endpoint)는 요청을 받는 실행 창구다. 여기서 `route`는 작업 종류, `photo_route`는 배치 안의 사진 처리 방식이다. 같은 필드가 아니다. I2V(Image-to-Video)는 사진을 입력해 영상을 만드는 방식이다.
+
+| 화면·요청 | 최상위 작업 종류 | 제출할 엔드포인트 변수 | 작업자 내부 동작·판정 |
+|---|---|---|---|
+| 단일 Tora 버튼 | `route=tora_cogvideox_i2v` | `RUNPOD_TORA_ENDPOINT_ID` | 첫 번째 비낙서 사진과 궤적 프리셋. Spring이 `allow_fallback=false` 전송 |
+| 단일 사진 AI 버튼 | `route=cogvideox_real` | `RUNPOD_MEDIA_ENDPOINT_ID` | CogVideoX 계열 실행. 대체 경로 허용 요청 |
+| 단일 스케치·캐릭터 | `route=animated_drawings_worker` | `RUNPOD_MEDIA_ENDPOINT_ID` | 마지막 낙서 사진 우선. 없으면 첫 번째 비낙서 사진 사용 |
+| 단일 3D 모션 | `route=3d_photo_inpainting_real` | `RUNPOD_MEDIA_ENDPOINT_ID` | 깊이·카메라 이동 계열 실행 |
+| 현재 화면의 배치 버튼 | `route=batch_video`, `photo_route=auto` | **항상 미디어 변수** | 배치 작업자 안에서 사진·스케치를 분류하고 합성 |
+| API로 Tora 배치를 명시 | `route=batch_video`, `photo_route=tora_cogvideox_i2v` | **여전히 미디어 변수** | 미디어 작업자 안에서 Tora 함수 실행 시도. 전용 Tora 엔드포인트로 다시 보내지 않음 |
+| 신규 개인 영상 `/travel/video` | RunPod route 없음 | 사용하지 않음 | 개인 CPU 작업자가 FFmpeg로 영상 생성 |
+
+근거: [커뮤니티 화면][rp-ui], [Spring 영상 서비스][rp-spring], [FastAPI 프록시][rp-api], [배치 작업자][rp-batch]. 현재 커뮤니티 진입 링크를 숨긴 정책도 유지되고 있어, 화면 코드의 존재만으로 사용자가 운영에서 도달한다고 단정하지 않는다.
+
+![R1 단일 Tora와 미디어·배치 분기](assets/runpod-routing.svg)
+
+R1은 **소스 기준 실행 분기**다. 운영에 두 엔드포인트가 실제로 분리되어 있다는 의미가 아니다.
+
+### 13.3 현재 배치 자동 선택에서는 Tora가 나오지 않는다
+
+`CommunityPage.submitBatchAnimation()`이 `photoRoute='auto'`를 명시적으로 전달한다. 서비스 기본값 `cogvideox_real`과 혼동하면 안 된다.
+
+1. FastAPI가 최상위 `batch_video`를 미디어 엔드포인트에 제출한다.
+2. `run_batch_video_case()`가 이미지를 사진·스케치로 분류한다.
+3. 사진의 `_resolve_photo_route()`는 설명 문구를 만든 뒤 `route_media_motion()`을 호출한다.
+4. [이 호출의 라우터][rp-router]는 `has_trajectory=True`를 전달하지 않는다. 라우터는 궤적이 있을 때만 Tora를 고르므로 현재 자동 분기에서는 Tora가 선택되지 않는다.
+5. 동적 피사체 키워드는 CogVideoX, 정적 사진은 `3d_photo_light`, 그림 계열은 AnimatedDrawings로 갈 수 있다. 설명 생성 기능이 꺼져 있거나 실패하면 사진 경로는 CogVideoX로 기본 처리한다.
+
+API는 Tora를 배치 사진 방식으로 허용하지만, 현재 화면 자동 선택이 그 방식을 사용한다는 뜻은 아니다. 또한 배치 화면은 최소 2장부터 열리지만 서버 DTO는 1~10장을 허용한다. 화면 조건과 서버 허용 범위도 구분한다.
+
+### 13.4 배치 Tora의 운영상 주의점
+
+Tora 배치를 명시하면 `_generate_photo_segment()`가 같은 작업자에서 `create_tora_cogvideox_video()`를 호출한다. 실패하면 CogVideoX를 시도하고, 다시 실패하면 `3d_photo_light`로 이어진다. 이 분기의 예외 처리에는 `cfg.allow_fallback` 확인이 없다.
+
+따라서 다음과 같이 판정해야 한다.
+
+- 단일 Tora: Spring이 대체 생성을 끄므로 Tora 처리 실패를 다른 모델 완료로 조용히 바꾸지 않도록 요청한다. 실제 RunPod의 이미지·설정 일치 여부는 별도 검증이 필요하다.
+- Tora 배치: Tora가 실패해도 다른 방식으로 완성될 수 있다. **배치 COMPLETED를 Tora 성공으로 해석하면 안 된다.**
+- 배치 메타데이터의 `actual_models`, `actual_model`, `photo_route`, `processed_images`, `failed_image_indexes`를 함께 확인한다. 현재 배치 결과는 `actual_model_executed`를 별도로 채우지 않으며, 실제 처리 모델과 요청 모델의 차이를 모든 경우에 공통 폴백 필드로 표시하는 구조도 아니다.
+- Spring은 `actual_model` 등 일부 요약을 저장하지만 이미지별 `actual_models` 전체를 전용 컬럼에 보존하지 않는다. 배치 내부의 상세 생성 이력까지 DB에 남는다고 가정하지 않는다.
+
+### 13.5 엔드포인트 ID 설정과 결과 조회
+
+두 게이트웨이 모두 Tora·미디어 전용 변수가 비어 있으면 `RUNPOD_ENDPOINT_ID`를 대신 사용한다. 전용 변수 이름이 둘이라는 이유만으로 실제 GPU 창구도 둘이라고 볼 수 없다. 두 ID가 같거나 모두 레거시 ID를 사용하면 같은 창구로 간다.
+
+| 구분 | 코드의 실제 처리 |
+|---|---|
+| 제출 | `/jobs/runpod` → 종류에 맞는 ID → `POST https://api.runpod.ai/v2/{endpoint}/run` |
+| 배치 제출 | `/jobs/runpod/batch` → 미디어 ID → 같은 RunPod `/run`, 본문 최상위 종류는 `batch_video` |
+| Spring 결과 조회 | 저장한 `runpod_job_id`로 게이트웨이 `GET /jobs/runpod/{job_id}` 호출 |
+| 실제 RunPod 결과 조회 | `GET https://api.runpod.ai/v2/{endpoint}/status/{job_id}`. `status`도 엔드포인트 아래 경로임 |
+| 전체 FastAPI의 탐색 순서 | 미디어 → Tora → 레거시. 빈 ID·중복 ID 제거 |
+| [별도 Cloud Gateway][rp-gateway]의 탐색 순서 | Tora → 미디어 → 레거시. 빈 ID·중복 ID 제거 |
+| 명시적 endpoint 조회 | 전체 FastAPI는 내부 요청의 `endpoint` 인자로 지정 가능하지만 현재 Spring 호출은 사용하지 않음 |
+
+핵심 한계는 `submitToGateway()`가 제출 응답의 엔드포인트 정보를 DB에 저장하지 않고 **작업 ID와 route만 저장**한다는 점이다. 설정이 바뀐 후 예전 작업을 조회하면 현재 설정된 ID들을 탐색한다. 기존 엔드포인트를 목록에서 제거하면 과거 작업을 찾지 못할 수 있다.
+
+개선이 필요하면 신규 작업부터 제공업체·엔드포인트 식별자·이미지 버전·요청 모델·실행 모델을 기록하고, 과거 작업은 기존 탐색을 유지하는 방식이 최소 변경이다. 이번에는 스키마·코드를 바꾸지 않았다.
+
+### 13.6 이미지 빌드 성공과 운영 적용은 다르다
+
+| 구성 | 소스에서 확인한 역할 | 아직 필요한 운영 증거 |
+|---|---|---|
+| [Dockerfile.tora][rp-toraimage] | Tora 전용 런타임, Tora 저장소·체크포인트·VAE·T5 경로. 시작 스크립트가 필요한 파일을 검증 | 실제 엔드포인트의 이미지 digest, 마운트·파일 존재, 기동 로그 |
+| [Dockerfile.runpod][rp-mediaimage] | 미디어 작업자. TorchServe·Redis·Celery·RunPod handler를 관리 | 실제 미디어 이미지와 활성 프로세스·모델 가용성 |
+| [Tora][rp-torawf]/[Media][rp-mediawf] GitHub 워크플로 | 각각 Docker 이미지 `latest`·커밋 태그를 레지스트리에 게시 | RunPod 엔드포인트가 그 이미지를 선택했는지. 워크플로 자체는 엔드포인트를 자동 교체하지 않음 |
+| `.runpod/hub.json` | 저장소에 선언한 설정 자료 | 실제 계정의 엔드포인트·작업자 수·GPU·볼륨이 일치하는지는 별도 확인 |
+
+일반 미디어 Dockerfile에서 전용 Tora 저장소·체크포인트를 설치하는 단계는 확인되지 않았다. 별도 볼륨·이미지·환경 덮어쓰기가 없다면 미디어 작업자에서 명시적 Tora 배치를 성공시킬 전제가 부족할 수 있다는 **추론**이다. 실제 미디어 엔드포인트가 무엇을 실행 중인지 확인하기 전에는 실패를 확정하지 않는다.
+
+### 13.7 운영 확정에 필요한 최소 증거
+
+RunPod 로그인과 운영 읽기 권한이 확보되면 새 과금 작업을 제출하지 않고 기존 정보부터 확인한다.
+
+1. 운영 Spring의 활성 프로필과 **실효** `kride.fastapi.url`, 대상 서비스의 실행 모듈이 전체 FastAPI·Cloud Gateway·CPU 앱 중 무엇인지.
+2. Tora·미디어·레거시 변수의 설정 여부와 동일 ID 여부. 보고서에는 키 원문을 쓰지 않고 별칭으로 표시.
+3. 각 RunPod 엔드포인트의 연결 이미지 digest·GPU·볼륨·활성 작업자·최소/최대 작업자 설정.
+4. 최근 기존 단일 Tora·일반 영상·배치의 요청 종류·엔드포인트·완료 시각·결과·실행 모델. 다른 사용자의 사진·본문·인증정보는 수집하지 않음.
+5. PostgreSQL 작업의 `route`, `status`, `runpod_job_id`, `actual_model`, `actual_model_executed`, 결과 URL 보존 상태를 기존 외부 기록과 대조.
+6. 개인 영상은 별도로 SQLite/FFmpeg 경로인지 확인하고, 위 RunPod 사용량과 섞어 집계하지 않음.
+
+**현재 남은 확인:** RunPod 콘솔 로그인과 운영 설정·기존 작업 기록 조회다. 확인 전까지 운영 사용률·실행 성공률·사용 엔드포인트 수는 수치로 제시하지 않는다.
+
+### 13.8 연결 가이드에 반영할 결정
+
+- 내 목록 ↔ 개인 영상의 P1~P5는 기존 SQLite·FFmpeg 경로로 계속 설계한다. RunPod 운영 확인을 완료 조건으로 잘못 묶지 않는다.
+- 외부 AI 생성 도입은 운영 게이트웨이와 실제 이미지·모델 성공 증거부터 확보한 뒤 별도 단계로 둔다.
+- Tora 배치가 필요하면 전용 실행을 조정하는 구조를 설계하거나 검증된 작업자에만 허용한다. 현재 미디어 배치에서 Tora를 요청했다는 사실만으로 Tora 완료를 표시하지 않는다.
+- 엔드포인트와 실행 이미지·모델의 이력 보존은 신규 작업부터 추가하는 방안을 검토하고, 기존 작업은 현재 탐색 방식으로 호환한다. 이번 분석에서는 실제 적용하지 않았다.
+
+[rp-ui]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/subproject/SDUI/metadata-project/components/community/CommunityPage.tsx
+[rp-spring]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/subproject/SDUI/SDUI-server/src/main/java/com/domain/demo_backend/domain/community/service/AnimationService.java
+[rp-api]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/src/api/fastapi_server.py
+[rp-batch]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/media_motion/batch_video_worker.py
+
+[rp-cpu]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/src/api/cpu_app.py
+[rp-profile]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/subproject/SDUI/SDUI-server/src/main/resources/application-hostinger-g1.yml
+[rp-toraimage]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/media_motion/Dockerfile.tora
+[rp-mediaimage]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/media_motion/Dockerfile.runpod
+[rp-torawf]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/.github/workflows/deploy-runpod-tora.yml
+[rp-mediawf]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/.github/workflows/deploy-runpod.yml
+[rp-gateway]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/cloud_gateway/app.py
+[rp-router]: https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/media_motion/routers.py

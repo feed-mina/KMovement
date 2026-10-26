@@ -1,6 +1,6 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>내 목록과 내 영상 연결 가이드</title><style>
 :root{--ink:#1c2a35;--muted:#536471;--line:#dce2e5;--paper:#fff;--accent:#b94d31;--wash:#f4f5ef;--soft:#fbe9df;--mint:#e5efeb}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;color:var(--ink);font:16px/1.8 "Malgun Gothic","Noto Sans KR",sans-serif;background:var(--wash)}a{color:#235e7d;text-decoration-thickness:1px;text-underline-offset:3px}button,select{font:inherit}button,a,select{touch-action:manipulation}button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #a23d28;outline-offset:4px}header.cover{padding:58px max(28px,calc((100vw - 1200px)/2));background:#1c2d35;color:#fff;border-bottom:6px solid #e8bb8f}header.cover p{max-width:760px;color:#d5e0e1}header.cover h1{font-size:clamp(28px,4vw,48px);margin:10px 0;line-height:1.35}.eyebrow{letter-spacing:2px;font-size:13px}.shell{max-width:1370px;margin:auto;display:grid;grid-template-columns:218px minmax(0,1fr);gap:24px;padding:28px}aside{position:sticky;top:20px;align-self:start}aside a{display:block;padding:7px 12px;color:var(--muted);text-decoration:none;border-left:2px solid var(--line);font-size:14px}aside a:hover{background:#fff;border-color:var(--accent)}main{min-width:0;background:var(--paper);padding:36px 42px;border:1px solid var(--line);border-radius:20px}main h1{font-size:30px;line-height:1.45}h2{font-size:25px;border-top:1px solid var(--line);padding-top:38px;margin:44px 0 20px;line-height:1.5}h3{font-size:20px;margin-top:26px}p,li{overflow-wrap:anywhere}li+li{margin-top:8px}strong{font-weight:750}.table-wrap{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.75}th,td{padding:13px 15px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}th{background:#edf2ef;min-width:110px}tr:last-child td{border:0}td code{overflow-wrap:anywhere;white-space:normal}pre{padding:22px;background:#162831;color:#edf6f5;border-radius:12px;overflow-x:auto;font-size:13px;line-height:1.75}code{font-family:Consolas,monospace;font-size:.9em;background:#eff2f2;padding:2px 4px;border-radius:4px}pre code{background:none;padding:0;color:inherit}figure{margin:26px 0;padding:14px;background:#f5f5f0;border:1px solid var(--line);border-radius:16px}figure svg{width:100%;height:auto;display:block}figcaption{font-size:13px;color:var(--muted);margin-top:12px;display:flex;gap:12px;justify-content:space-between;align-items:center}.quiet{border:1px solid #bbc6ca;background:white;border-radius:8px;padding:7px 12px;color:var(--ink)}.notice{padding:18px 22px;background:var(--soft);border-left:4px solid var(--accent);border-radius:8px}.prototype{border:1px solid var(--line);border-radius:18px;padding:24px;background:#fafbf7;margin:24px 0}.proto-nav{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 18px}.proto-nav button{background:white;border:1px solid #bcc8cd;border-radius:24px;padding:8px 22px}.proto-nav button[aria-selected=true]{background:#233c40;color:#fff;border-color:#233c40}.demo-row{padding:18px;background:white;border:1px solid var(--line);border-radius:12px;margin-top:12px}.demo-row p{margin:4px 0}.small{color:var(--muted);font-size:13px}.inspect{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;padding:20px;background:#edf3ef;border-radius:16px}.inspect-detail{background:white;border-radius:12px;padding:20px;border:1px solid var(--line)}.inspect-map{display:grid;grid-template-columns:1fr 1fr;gap:10px}.inspect-map button{border:1px solid #aebdb6;background:#fff;padding:13px 10px;border-radius:10px;font-size:14px;text-align:left}.inspect-map button[aria-pressed=true]{background:#243d38;color:#fff}.inspect-detail h4{margin:0 0 8px;font-size:19px}.skip{position:absolute;top:-80px;left:15px}.skip:focus{top:12px;background:white;padding:10px;z-index:10}dialog{border:1px solid #b5bfc3;border-radius:14px;max-width:96vw;width:1250px;padding:18px}dialog::backdrop{background:#15212bba}.dialog-bar{display:flex;justify-content:space-between;gap:12px;position:sticky;top:0;background:white;padding:5px}.zoom-stage{max-height:80vh;overflow:auto}.zoom-stage svg{width:100%;min-width:600px;height:auto}.qa{font-size:14px;padding:15px;background:var(--mint);border-radius:10px}footer{max-width:1200px;margin:0 auto 40px;padding:20px;color:var(--muted);font-size:13px}@media(max-width:850px){.shell{display:block;padding:16px}aside{position:static;display:flex;gap:5px;overflow-x:auto;margin-bottom:16px}aside a{white-space:nowrap;border:1px solid var(--line);border-radius:18px;padding:6px 12px;background:white}main{padding:23px 18px;border-radius:14px}header.cover{padding:32px 22px}.inspect{grid-template-columns:1fr}.prototype{padding:16px}table{min-width:580px}h2{font-size:22px}main h1{font-size:26px}pre{font-size:12px;padding:14px}figcaption{align-items:flex-start;flex-direction:column}.dialog-bar{flex-wrap:wrap}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{aside,.quiet,.prototype,dialog{display:none}.shell{display:block;padding:0}main{border:0;padding:0}header.cover{padding:20px}a{color:inherit}figure,table{break-inside:avoid}}
-</style></head><body><a class="skip" href="#content">본문으로 이동</a><header class="cover"><span class="eyebrow">KMOVEMENT / IMPLEMENTATION GUIDE</span><h1>내 목록에서 내 영상까지</h1><p>같은 보관 경험으로 이어지는 화면 연결 가이드. 현재 구현과 다음 변경을 구분하고, 기존 데이터와 소유권을 유지합니다.</p></header><div class="shell"><aside aria-label="보고서 목차"><a href="#scope">목표·범위</a><a href="#current">현재 화면</a><a href="#after">개선 화면</a><a href="#flow">이동·조회 흐름</a><a href="#files">함수·수정 파일</a><a href="#login">로그인 복귀</a><a href="#history">조회 상태</a><a href="#contracts">API·저장 경계</a><a href="#steps">구현 순서</a><a href="#tests">시험 계획</a><a href="#maintenance">진단·복구</a><a href="#verification">확인 범위</a></aside><main id="content"><h1>내 목록과 내 영상 연결 가이드</h1>
+</style></head><body><a class="skip" href="#content">본문으로 이동</a><header class="cover"><span class="eyebrow">KMOVEMENT / IMPLEMENTATION GUIDE</span><h1>내 목록에서 내 영상까지</h1><p>같은 보관 경험으로 이어지는 화면 연결 가이드. 현재 구현과 다음 변경을 구분하고, 기존 데이터와 소유권을 유지합니다.</p></header><div class="shell"><aside aria-label="보고서 목차"><a href="#scope">목표·범위</a><a href="#current">현재 화면</a><a href="#after">개선 화면</a><a href="#flow">이동·조회 흐름</a><a href="#files">함수·수정 파일</a><a href="#login">로그인 복귀</a><a href="#history">조회 상태</a><a href="#contracts">API·저장 경계</a><a href="#steps">구현 순서</a><a href="#tests">시험 계획</a><a href="#maintenance">진단·복구</a><a href="#verification">확인 범위</a><a href="#runpod-operations">RunPod 운영 분석</a></aside><main id="content"><h1>내 목록과 내 영상 연결 가이드</h1>
 <p><strong>핵심 한 줄: 기존 저장소와 소유권 검사를 유지하고, 내 목록과 개인 영상에 공통 탐색 메뉴·로그인 복귀·조회 상태를 연결한다.</strong></p>
 <p>작성일: 2026-10-26. 소스 기준: KMovement main <code>46a2d5ae83451befb0fa465acffe96257b7811d6</code>. 이 main은 직전 분석 이후 문서만 추가됐으며 아래 실행 코드는 PR #299 병합 상태와 같다.</p>
 <p><a href="guide.html">HTML 보고서</a> · <a href="../saved-item-media-storage-audit.md">앞선 저장 경로 조사</a></p>
@@ -593,7 +593,7 @@ export function PersonalLibraryNav({ active, videoEnabled }: Props) {
 </tr>
 </tbody>
 </table></div>
-<p>Windows PowerShell, 프런트엔드 폴더에서 실행할 기존 회귀시험 예시다. 의존성이 설치된 개발 환경을 사용한다. <strong>이번 문서 작업에서는 앱 시험을 다시 실행하지 않았다.</strong></p>
+<p>Windows PowerShell, 프런트엔드 폴더에서 실행할 기존 회귀시험 예시다. 의존성이 설치된 개발 환경을 사용한다. <strong>이번 문서 작업에서는 앱 회귀시험 통과를 확인하지 않았다.</strong> RunPod 분석 중 별도 라우팅 시험을 시도했으나 초기화가 지연되어 중단했다. 문서 화면 검수와 구분한다.</p>
 <pre><code class="language-powershell">Set-Location D:\KMovement\subproject\SDUI\metadata-project
 npx jest tests/components/PersonalSaved.test.tsx tests/components/AuthFlowScreen.test.tsx tests/components/AuthLoginReturn.test.tsx tests/api/travelVideoProxy.test.ts tests/app/travelVideo.test.tsx --runInBand
 npx tsc --noEmit --incremental false
@@ -650,8 +650,225 @@ npx tsc --noEmit --incremental false
 <li>확인 완료: 최신 main과 분석 소스의 일치, 화면 진입·실제 호출·응답·저장소 관계의 정적 추적.</li>
 <li>구현 상태: 본문에서 ‘제안’으로 표시한 파일·쿼리·기능은 미구현. 애플리케이션 코드·운영 DB·배포는 변경하지 않는다.</li>
 <li>화면 자료: 현재 화면은 코드 기반 재구성, 개선 화면과 체험은 설명용 모형. 실제 로그인 화면 캡처가 아니다.</li>
-<li>문서 검수 결과: 1440px·390px 폭에서 가로 넘침 없음, 4개 그림과 12개 구역, 내부 목차·키보드 탭 전환·역할 설명 선택·그림 확대 및 Escape 닫기 확인. 외부 요청 0건, JavaScript 오류 0건. 모형의 조회 실패·빈 상태 표시 확인.</li>
+<li>문서 검수 결과: 1440px·390px 폭에서 가로 넘침 없음, 5개 그림과 13개 구역, 내부 목차·키보드 탭 전환·역할 설명 선택·그림 확대 및 Escape 닫기 확인. 외부 요청 0건, JavaScript 오류 0건. 모형의 조회 실패·빈 상태 표시 확인.</li>
 <li>전제 조사: <a href="../saved-item-media-storage-audit.md">저장 경로 조사 보고서</a>. 그 조사에서 수행한 32개 시험을 이번 새 기능의 통과 실적으로 재사용하지 않는다.</li>
+</ul>
+<p><a id="runpod-operations"></a></p>
+<h2>13. RunPod 운영 경로 추가 분석</h2>
+<p>분석 기준: 2026-10-26, main <code>b5822659c7bc0e0adc20cf69f921a23edf191992</code>. 이전 가이드 작성 이후 애플리케이션 소스 변경은 없다. <strong>아래 표는 현재 코드의 동작이며 실제 운영 계정의 사용 실적과 구분한다.</strong></p>
+<h3>13.1 먼저 구분할 운영 상태</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>확인 범위</th>
+<th>이번에 확인한 사실</th>
+<th>운영 판단</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub 웹 자동 배포</td>
+<td><a href="https://github.com/feed-mina/KMovement/actions/runs/40266168255">2026-10-26 실행 기록</a>의 웹 배포 성공</td>
+<td>웹 릴리스 증거. RunPod 작업자·GPU·엔드포인트 활성 증거는 아님</td>
+</tr>
+<tr>
+<td>Hostinger 서비스 구성</td>
+<td>Spring은 <a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/subproject/SDUI/SDUI-server/src/main/resources/application-hostinger-g1.yml"><code>hostinger-g1</code></a>, FastAPI 주소 기본값은 <code>disabled-fastapi</code>. 별도 CPU 서비스는 <code>src.api.cpu_app:app</code> 실행</td>
+<td>코드상 분리 구성. 운영의 환경 덮어쓰기·활성 이미지는 미확인</td>
+</tr>
+<tr>
+<td>CPU 서비스 라우트</td>
+<td><a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/src/api/cpu_app.py"><code>cpu_app.ALLOWED</code></a>가 코스·조회·채팅 등만 포함. <code>/jobs/runpod</code>·<code>/jobs/runpod/batch</code>·<code>/jobs/runpod/{job_id}</code> 없음</td>
+<td>CPU 서비스가 켜져 있어도 RunPod 게이트웨이가 열린 것은 아님</td>
+</tr>
+<tr>
+<td>EC2 배포 구성</td>
+<td>Spring의 <code>FASTAPI_URL</code>·<code>KRIDE_FASTAPI_URL</code>, FastAPI의 RunPod 키·세 엔드포인트 변수를 주입하는 코드가 존재</td>
+<td>과거·별도 배포 경로의 설계 증거. 현재 EC2 실행 상태는 미확인</td>
+</tr>
+<tr>
+<td>운영 서버 직접 조회</td>
+<td>SSH 연결이 현재 실행 환경에서 차단됨. 공개 상태 URL도 조회 도구에서 접근 불가</td>
+<td>컨테이너 환경값·실제 Spring 접속 대상·운영 DB 작업 건수는 확인하지 못함</td>
+</tr>
+<tr>
+<td>RunPod 콘솔</td>
+<td>Serverless 페이지 접근 시 로그인 필요 화면 확인</td>
+<td>엔드포인트 ID·연결 이미지·현재 작업자·최근 성공 작업은 미확인</td>
+</tr>
+</tbody>
+</table></div>
+<p>따라서 <strong>현재 Tora·미디어 엔드포인트가 운영에서 정상 사용 중이라는 결론은 아직 낼 수 없다.</strong> 반대로 미사용·중지 상태라고 확정할 근거도 없다. 웹 배포 성공, 이미지 빌드 성공, 외부 생성 성공은 각각 다른 증거다.</p>
+<h3>13.2 단일 영상과 배치의 실제 분기</h3>
+<p>엔드포인트(endpoint)는 요청을 받는 실행 창구다. 여기서 <code>route</code>는 작업 종류, <code>photo_route</code>는 배치 안의 사진 처리 방식이다. 같은 필드가 아니다. I2V(Image-to-Video)는 사진을 입력해 영상을 만드는 방식이다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>화면·요청</th>
+<th>최상위 작업 종류</th>
+<th>제출할 엔드포인트 변수</th>
+<th>작업자 내부 동작·판정</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>단일 Tora 버튼</td>
+<td><code>route=tora_cogvideox_i2v</code></td>
+<td><code>RUNPOD_TORA_ENDPOINT_ID</code></td>
+<td>첫 번째 비낙서 사진과 궤적 프리셋. Spring이 <code>allow_fallback=false</code> 전송</td>
+</tr>
+<tr>
+<td>단일 사진 AI 버튼</td>
+<td><code>route=cogvideox_real</code></td>
+<td><code>RUNPOD_MEDIA_ENDPOINT_ID</code></td>
+<td>CogVideoX 계열 실행. 대체 경로 허용 요청</td>
+</tr>
+<tr>
+<td>단일 스케치·캐릭터</td>
+<td><code>route=animated_drawings_worker</code></td>
+<td><code>RUNPOD_MEDIA_ENDPOINT_ID</code></td>
+<td>마지막 낙서 사진 우선. 없으면 첫 번째 비낙서 사진 사용</td>
+</tr>
+<tr>
+<td>단일 3D 모션</td>
+<td><code>route=3d_photo_inpainting_real</code></td>
+<td><code>RUNPOD_MEDIA_ENDPOINT_ID</code></td>
+<td>깊이·카메라 이동 계열 실행</td>
+</tr>
+<tr>
+<td>현재 화면의 배치 버튼</td>
+<td><code>route=batch_video</code>, <code>photo_route=auto</code></td>
+<td><strong>항상 미디어 변수</strong></td>
+<td>배치 작업자 안에서 사진·스케치를 분류하고 합성</td>
+</tr>
+<tr>
+<td>API로 Tora 배치를 명시</td>
+<td><code>route=batch_video</code>, <code>photo_route=tora_cogvideox_i2v</code></td>
+<td><strong>여전히 미디어 변수</strong></td>
+<td>미디어 작업자 안에서 Tora 함수 실행 시도. 전용 Tora 엔드포인트로 다시 보내지 않음</td>
+</tr>
+<tr>
+<td>신규 개인 영상 <code>/travel/video</code></td>
+<td>RunPod route 없음</td>
+<td>사용하지 않음</td>
+<td>개인 CPU 작업자가 FFmpeg로 영상 생성</td>
+</tr>
+</tbody>
+</table></div>
+<p>근거: <a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/subproject/SDUI/metadata-project/components/community/CommunityPage.tsx">커뮤니티 화면</a>, <a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/subproject/SDUI/SDUI-server/src/main/java/com/domain/demo_backend/domain/community/service/AnimationService.java">Spring 영상 서비스</a>, <a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/src/api/fastapi_server.py">FastAPI 프록시</a>, <a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/media_motion/batch_video_worker.py">배치 작업자</a>. 현재 커뮤니티 진입 링크를 숨긴 정책도 유지되고 있어, 화면 코드의 존재만으로 사용자가 운영에서 도달한다고 단정하지 않는다.</p>
+<p><figure id="fig-runpod-routing"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 820" role="img" aria-label="R1 소스 기준 Tora 단일과 미디어·배치 분기"><title>R1 소스 기준 Tora 단일과 미디어·배치 분기</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs><rect width="1140" height="820" rx="18" fill="#f5f5f0"/><g font-family="'Malgun Gothic','Noto Sans KR',sans-serif" fill="#15212c"><text x="30" y="44" font-size="24" font-weight="700" fill="#15212c">R1 · 작업 종류와 엔드포인트를 구분</text><text x="30" y="72" font-size="15" font-weight="400" fill="#8a432f">코드의 분기 / 운영 ID·이미지·최근 작업은 미확인</text><rect x="390" y="105" width="360" height="76" rx="12" fill="white" stroke="#ccd4d9"/><text x="408" y="136" font-size="18" font-weight="700" fill="#15212c">Spring 영상 요청</text><text x="408" y="164" font-size="14" font-weight="400" fill="#52606d">POST /jobs/runpod 또는 /batch</text><rect x="55" y="239" width="460" height="76" rx="12" fill="white" stroke="#ccd4d9"/><text x="73" y="270" font-size="18" font-weight="700" fill="#15212c">단일 route = tora_cogvideox_i2v</text><text x="73" y="298" font-size="14" font-weight="400" fill="#52606d">대체 생성 허용 안 함</text><rect x="625" y="239" width="460" height="76" rx="12" fill="white" stroke="#ccd4d9"/><text x="643" y="270" font-size="18" font-weight="700" fill="#15212c">일반 단일 또는 batch_video</text><text x="643" y="298" font-size="14" font-weight="400" fill="#52606d">배치는 미디어 엔드포인트 사용</text><path d="M450,181 L285,239" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="375.5" y="203.0" font-size="13" font-weight="400" fill="#475569">Tora 단일</text><path d="M695,181 L855,239" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="783.0" y="203.0" font-size="13" font-weight="400" fill="#475569">그 외·배치</text><rect x="55" y="371" width="460" height="80" rx="12" fill="#fce8dd" stroke="#ccd4d9"/><text x="73" y="402" font-size="18" font-weight="700" fill="#15212c">Tora ID 또는 레거시 ID</text><text x="73" y="430" font-size="14" font-weight="400" fill="#52606d">/v2/{endpoint}/run</text><rect x="625" y="371" width="460" height="80" rx="12" fill="#e4efec" stroke="#ccd4d9"/><text x="643" y="402" font-size="18" font-weight="700" fill="#15212c">Media ID 또는 레거시 ID</text><text x="643" y="430" font-size="14" font-weight="400" fill="#52606d">/v2/{endpoint}/run</text><path d="M285,315 L285,371" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="293.0" y="336.0" font-size="13" font-weight="400" fill="#475569">제출</text><path d="M855,315 L855,371" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="863.0" y="336.0" font-size="13" font-weight="400" fill="#475569">제출</text><rect x="625" y="500" width="460" height="106" rx="12" fill="white" stroke="#ccd4d9"/><text x="643" y="531" font-size="18" font-weight="700" fill="#15212c">배치: 같은 작업자 안에서 처리</text><text x="643" y="559" font-size="14" font-weight="400" fill="#52606d">auto: Tora 선택 없음 / 명시 Tora: 로컬 시도</text><text x="646" y="585" font-size="15" font-weight="400" fill="#52606d">Tora 실패 → CogVideoX → 3d_photo_light</text><path d="M855,451 L855,500" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="863.0" y="468.5" font-size="13" font-weight="400" fill="#475569">batch_video일 때</text><rect x="260" y="680" width="620" height="85" rx="12" fill="white" stroke="#ccd4d9"/><text x="278" y="711" font-size="18" font-weight="700" fill="#15212c">결과: /v2/{endpoint}/status/{job_id}</text><text x="278" y="739" font-size="14" font-weight="400" fill="#52606d">Spring은 작업 ID·route 저장 / endpoint ID 전용 저장 없음</text><path d="M285,451 L380,680" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="340.5" y="558.5" font-size="13" font-weight="400" fill="#475569">상태 조회</text><path d="M855,606 L760,680" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="815.5" y="636.0" font-size="13" font-weight="400" fill="#475569">상태 조회</text></g></svg><figcaption><span>R1 단일 Tora와 미디어·배치 분기</span><button class="quiet" data-zoom="fig-runpod-routing" type="button">그림 크게 보기</button></figcaption></figure></p>
+<p>R1은 <strong>소스 기준 실행 분기</strong>다. 운영에 두 엔드포인트가 실제로 분리되어 있다는 의미가 아니다.</p>
+<h3>13.3 현재 배치 자동 선택에서는 Tora가 나오지 않는다</h3>
+<p><code>CommunityPage.submitBatchAnimation()</code>이 <code>photoRoute='auto'</code>를 명시적으로 전달한다. 서비스 기본값 <code>cogvideox_real</code>과 혼동하면 안 된다.</p>
+<ol>
+<li>FastAPI가 최상위 <code>batch_video</code>를 미디어 엔드포인트에 제출한다.</li>
+<li><code>run_batch_video_case()</code>가 이미지를 사진·스케치로 분류한다.</li>
+<li>사진의 <code>_resolve_photo_route()</code>는 설명 문구를 만든 뒤 <code>route_media_motion()</code>을 호출한다.</li>
+<li><a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/media_motion/routers.py">이 호출의 라우터</a>는 <code>has_trajectory=True</code>를 전달하지 않는다. 라우터는 궤적이 있을 때만 Tora를 고르므로 현재 자동 분기에서는 Tora가 선택되지 않는다.</li>
+<li>동적 피사체 키워드는 CogVideoX, 정적 사진은 <code>3d_photo_light</code>, 그림 계열은 AnimatedDrawings로 갈 수 있다. 설명 생성 기능이 꺼져 있거나 실패하면 사진 경로는 CogVideoX로 기본 처리한다.</li>
+</ol>
+<p>API는 Tora를 배치 사진 방식으로 허용하지만, 현재 화면 자동 선택이 그 방식을 사용한다는 뜻은 아니다. 또한 배치 화면은 최소 2장부터 열리지만 서버 DTO는 1~10장을 허용한다. 화면 조건과 서버 허용 범위도 구분한다.</p>
+<h3>13.4 배치 Tora의 운영상 주의점</h3>
+<p>Tora 배치를 명시하면 <code>_generate_photo_segment()</code>가 같은 작업자에서 <code>create_tora_cogvideox_video()</code>를 호출한다. 실패하면 CogVideoX를 시도하고, 다시 실패하면 <code>3d_photo_light</code>로 이어진다. 이 분기의 예외 처리에는 <code>cfg.allow_fallback</code> 확인이 없다.</p>
+<p>따라서 다음과 같이 판정해야 한다.</p>
+<ul>
+<li>단일 Tora: Spring이 대체 생성을 끄므로 Tora 처리 실패를 다른 모델 완료로 조용히 바꾸지 않도록 요청한다. 실제 RunPod의 이미지·설정 일치 여부는 별도 검증이 필요하다.</li>
+<li>Tora 배치: Tora가 실패해도 다른 방식으로 완성될 수 있다. <strong>배치 COMPLETED를 Tora 성공으로 해석하면 안 된다.</strong></li>
+<li>배치 메타데이터의 <code>actual_models</code>, <code>actual_model</code>, <code>photo_route</code>, <code>processed_images</code>, <code>failed_image_indexes</code>를 함께 확인한다. 현재 배치 결과는 <code>actual_model_executed</code>를 별도로 채우지 않으며, 실제 처리 모델과 요청 모델의 차이를 모든 경우에 공통 폴백 필드로 표시하는 구조도 아니다.</li>
+<li>Spring은 <code>actual_model</code> 등 일부 요약을 저장하지만 이미지별 <code>actual_models</code> 전체를 전용 컬럼에 보존하지 않는다. 배치 내부의 상세 생성 이력까지 DB에 남는다고 가정하지 않는다.</li>
+</ul>
+<h3>13.5 엔드포인트 ID 설정과 결과 조회</h3>
+<p>두 게이트웨이 모두 Tora·미디어 전용 변수가 비어 있으면 <code>RUNPOD_ENDPOINT_ID</code>를 대신 사용한다. 전용 변수 이름이 둘이라는 이유만으로 실제 GPU 창구도 둘이라고 볼 수 없다. 두 ID가 같거나 모두 레거시 ID를 사용하면 같은 창구로 간다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구분</th>
+<th>코드의 실제 처리</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>제출</td>
+<td><code>/jobs/runpod</code> → 종류에 맞는 ID → <code>POST https://api.runpod.ai/v2/{endpoint}/run</code></td>
+</tr>
+<tr>
+<td>배치 제출</td>
+<td><code>/jobs/runpod/batch</code> → 미디어 ID → 같은 RunPod <code>/run</code>, 본문 최상위 종류는 <code>batch_video</code></td>
+</tr>
+<tr>
+<td>Spring 결과 조회</td>
+<td>저장한 <code>runpod_job_id</code>로 게이트웨이 <code>GET /jobs/runpod/{job_id}</code> 호출</td>
+</tr>
+<tr>
+<td>실제 RunPod 결과 조회</td>
+<td><code>GET https://api.runpod.ai/v2/{endpoint}/status/{job_id}</code>. <code>status</code>도 엔드포인트 아래 경로임</td>
+</tr>
+<tr>
+<td>전체 FastAPI의 탐색 순서</td>
+<td>미디어 → Tora → 레거시. 빈 ID·중복 ID 제거</td>
+</tr>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/cloud_gateway/app.py">별도 Cloud Gateway</a>의 탐색 순서</td>
+<td>Tora → 미디어 → 레거시. 빈 ID·중복 ID 제거</td>
+</tr>
+<tr>
+<td>명시적 endpoint 조회</td>
+<td>전체 FastAPI는 내부 요청의 <code>endpoint</code> 인자로 지정 가능하지만 현재 Spring 호출은 사용하지 않음</td>
+</tr>
+</tbody>
+</table></div>
+<p>핵심 한계는 <code>submitToGateway()</code>가 제출 응답의 엔드포인트 정보를 DB에 저장하지 않고 <strong>작업 ID와 route만 저장</strong>한다는 점이다. 설정이 바뀐 후 예전 작업을 조회하면 현재 설정된 ID들을 탐색한다. 기존 엔드포인트를 목록에서 제거하면 과거 작업을 찾지 못할 수 있다.</p>
+<p>개선이 필요하면 신규 작업부터 제공업체·엔드포인트 식별자·이미지 버전·요청 모델·실행 모델을 기록하고, 과거 작업은 기존 탐색을 유지하는 방식이 최소 변경이다. 이번에는 스키마·코드를 바꾸지 않았다.</p>
+<h3>13.6 이미지 빌드 성공과 운영 적용은 다르다</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>구성</th>
+<th>소스에서 확인한 역할</th>
+<th>아직 필요한 운영 증거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/media_motion/Dockerfile.tora">Dockerfile.tora</a></td>
+<td>Tora 전용 런타임, Tora 저장소·체크포인트·VAE·T5 경로. 시작 스크립트가 필요한 파일을 검증</td>
+<td>실제 엔드포인트의 이미지 digest, 마운트·파일 존재, 기동 로그</td>
+</tr>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/deploy/media_motion/Dockerfile.runpod">Dockerfile.runpod</a></td>
+<td>미디어 작업자. TorchServe·Redis·Celery·RunPod handler를 관리</td>
+<td>실제 미디어 이미지와 활성 프로세스·모델 가용성</td>
+</tr>
+<tr>
+<td><a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/.github/workflows/deploy-runpod-tora.yml">Tora</a>/<a href="https://github.com/feed-mina/KMovement/blob/b5822659c7bc0e0adc20cf69f921a23edf191992/.github/workflows/deploy-runpod.yml">Media</a> GitHub 워크플로</td>
+<td>각각 Docker 이미지 <code>latest</code>·커밋 태그를 레지스트리에 게시</td>
+<td>RunPod 엔드포인트가 그 이미지를 선택했는지. 워크플로 자체는 엔드포인트를 자동 교체하지 않음</td>
+</tr>
+<tr>
+<td><code>.runpod/hub.json</code></td>
+<td>저장소에 선언한 설정 자료</td>
+<td>실제 계정의 엔드포인트·작업자 수·GPU·볼륨이 일치하는지는 별도 확인</td>
+</tr>
+</tbody>
+</table></div>
+<p>일반 미디어 Dockerfile에서 전용 Tora 저장소·체크포인트를 설치하는 단계는 확인되지 않았다. 별도 볼륨·이미지·환경 덮어쓰기가 없다면 미디어 작업자에서 명시적 Tora 배치를 성공시킬 전제가 부족할 수 있다는 <strong>추론</strong>이다. 실제 미디어 엔드포인트가 무엇을 실행 중인지 확인하기 전에는 실패를 확정하지 않는다.</p>
+<h3>13.7 운영 확정에 필요한 최소 증거</h3>
+<p>RunPod 로그인과 운영 읽기 권한이 확보되면 새 과금 작업을 제출하지 않고 기존 정보부터 확인한다.</p>
+<ol>
+<li>운영 Spring의 활성 프로필과 <strong>실효</strong> <code>kride.fastapi.url</code>, 대상 서비스의 실행 모듈이 전체 FastAPI·Cloud Gateway·CPU 앱 중 무엇인지.</li>
+<li>Tora·미디어·레거시 변수의 설정 여부와 동일 ID 여부. 보고서에는 키 원문을 쓰지 않고 별칭으로 표시.</li>
+<li>각 RunPod 엔드포인트의 연결 이미지 digest·GPU·볼륨·활성 작업자·최소/최대 작업자 설정.</li>
+<li>최근 기존 단일 Tora·일반 영상·배치의 요청 종류·엔드포인트·완료 시각·결과·실행 모델. 다른 사용자의 사진·본문·인증정보는 수집하지 않음.</li>
+<li>PostgreSQL 작업의 <code>route</code>, <code>status</code>, <code>runpod_job_id</code>, <code>actual_model</code>, <code>actual_model_executed</code>, 결과 URL 보존 상태를 기존 외부 기록과 대조.</li>
+<li>개인 영상은 별도로 SQLite/FFmpeg 경로인지 확인하고, 위 RunPod 사용량과 섞어 집계하지 않음.</li>
+</ol>
+<p><strong>현재 남은 확인:</strong> RunPod 콘솔 로그인과 운영 설정·기존 작업 기록 조회다. 확인 전까지 운영 사용률·실행 성공률·사용 엔드포인트 수는 수치로 제시하지 않는다.</p>
+<h3>13.8 연결 가이드에 반영할 결정</h3>
+<ul>
+<li>내 목록 ↔ 개인 영상의 P1~P5는 기존 SQLite·FFmpeg 경로로 계속 설계한다. RunPod 운영 확인을 완료 조건으로 잘못 묶지 않는다.</li>
+<li>외부 AI 생성 도입은 운영 게이트웨이와 실제 이미지·모델 성공 증거부터 확보한 뒤 별도 단계로 둔다.</li>
+<li>Tora 배치가 필요하면 전용 실행을 조정하는 구조를 설계하거나 검증된 작업자에만 허용한다. 현재 미디어 배치에서 Tora를 요청했다는 사실만으로 Tora 완료를 표시하지 않는다.</li>
+<li>엔드포인트와 실행 이미지·모델의 이력 보존은 신규 작업부터 추가하는 방안을 검토하고, 기존 작업은 현재 탐색 방식으로 호환한다. 이번 분석에서는 실제 적용하지 않았다.</li>
 </ul></main></div><dialog id="zoom-dialog" aria-label="그림 확대"><div class="dialog-bar"><span>그림 확대</span><div><button id="zoom-plus" class="quiet">확대</button> <button id="zoom-reset" class="quiet">원래 크기</button> <button id="zoom-close" class="quiet">닫기</button></div></div><div id="zoom-stage" class="zoom-stage"></div></dialog><footer>현재 화면은 코드 기반 재구성, 개선 화면은 미구현 모형입니다. 체험은 문서 내부에서만 동작합니다.</footer><script>
 const details=[["A1 마이페이지", "ProfileScreen에 개인 영상 진입을 추가한다. 현재 개인 영상 API는 총 건수를 반환하지 않으므로 숫자를 만들어 넣지 않는다."], ["A2 내 목록", "PersonalSavedScreen의 종류·페이지·공개 여부·삭제 처리를 유지한다. 공통 메뉴는 링크만 제공한다."], ["A3 개인 영상", "TravelVideoPage의 생성·이력·선택 작업을 구분한다. 제안한 view/page/job 쿼리는 새 구현이 필요하다."], ["A4 로그인 복귀", "safeLoginReturn의 정확한 /travel/video 허용과 복귀 문구·힌트 소비를 함께 바꾼다. 외부 주소는 거절한다."], ["A5 독립 조회", "각 화면은 자기 API를 호출한다. 목록 응답의 data.items와 영상 응답의 items를 구분한다."], ["A6 저장 경계", "PostgreSQL 후보와 SQLite 작업·파일을 유지한다. 화면 연결에 새 외래키·Cloudinary 업로드는 필요하지 않다."]];
 for(const b of document.querySelectorAll('[data-inspect]'))b.addEventListener('click',()=>{for(const x of document.querySelectorAll('[data-inspect]'))x.setAttribute('aria-pressed',String(x===b));const [title,copy]=details[Number(b.dataset.inspect)];const d=document.getElementById('inspect-detail');d.replaceChildren(Object.assign(document.createElement('h4'),{textContent:title}),Object.assign(document.createElement('p'),{textContent:copy}));});
