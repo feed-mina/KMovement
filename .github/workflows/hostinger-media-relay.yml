@@ -1,0 +1,44 @@
+name: Hostinger media relay contract
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'deploy/cloud_gateway/**'
+      - 'deploy/hostinger/media*'
+      - 'subproject/SDUI/SDUI-server/**'
+      - 'tests/test_hostinger_media_relay.py'
+      - '.github/workflows/hostinger-media-relay.yml'
+permissions:
+  contents: read
+jobs:
+  relay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r deploy/cloud_gateway/requirements.txt pytest
+      - run: python -m pytest -q tests/test_cloud_gateway_runpod_auth.py tests/test_hostinger_media_relay.py
+      - name: Validate internal relay compose
+        env:
+          KMOVEMENT_MEDIA_IMAGE: example/media@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          KRIDE_MEDIA_INTERNAL_API_KEY: mock-internal-key
+          RUNPOD_API_KEY: mock-provider-key
+          RUNPOD_MEDIA_ENDPOINT_ID: mock-media
+        run: docker compose -f deploy/hostinger/media.compose.yml config --quiet
+  spring:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: subproject/SDUI/SDUI-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew
+      - run: ./gradlew test --tests '*AnimationMediaRoutingTest' --tests '*AnimationServiceTest' --no-daemon

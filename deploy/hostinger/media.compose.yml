@@ -1,0 +1,37 @@
+# Standalone relay; no GPU models and no public ports.
+name: kmovement-media
+services:
+  media-gateway:
+    image: ${KMOVEMENT_MEDIA_IMAGE:?Set a tested digest-pinned relay image}
+    restart: unless-stopped
+    init: true
+    expose: ["7860"]
+    environment:
+      FASTAPI_INTERNAL_API_KEY: ${KRIDE_MEDIA_INTERNAL_API_KEY:?Set the private media relay key}
+      RUNPOD_API_KEY: ${RUNPOD_API_KEY:?Set the RunPod API key}
+      RUNPOD_MEDIA_ENDPOINT_ID: ${RUNPOD_MEDIA_ENDPOINT_ID:?Set the media endpoint}
+      RUNPOD_TORA_ENDPOINT_ID: ${RUNPOD_TORA_ENDPOINT_ID:-}
+      RUNPOD_ENDPOINT_ID: ${RUNPOD_ENDPOINT_ID:-}
+      KRIDE_MODEL_GENERATION_ENABLED: "false"
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=32m"]
+    mem_limit: 512m
+    cpus: 1
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:7860/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks: [spring]
+    labels:
+      traefik.enable: "false"
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+networks:
+  spring:
+    external: true
+    name: ${KMOVEMENT_MEDIA_NETWORK:-kmovement-g1_egress}
