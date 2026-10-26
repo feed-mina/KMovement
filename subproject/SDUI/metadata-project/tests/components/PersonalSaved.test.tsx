@@ -74,3 +74,15 @@ test('deleting offers undo which re-saves the item',async()=>{
  await screen.findByText('테스트 1');
  expect((fetch as jest.Mock).mock.calls.map(c=>c[1].method)).toEqual(['GET','DELETE','GET','POST','GET']);
 });
+
+test('video navigation and anonymous login keep saved kind and page',async()=>{
+ process.env.NEXT_PUBLIC_PHOTO_VIDEO_ENABLED='true';mockQuery='kind=events&page=2';
+ (fetch as jest.Mock).mockReturnValue(response(page([],0,2)));
+ const view=render(wrap(<PersonalSavedScreen screenId="KPOP_SAVED_ITEMS" refId={null}/>));
+ await screen.findByRole('heading',{name:/이벤트 저장 목록/});
+ const url=new URL(screen.getByRole('link',{name:'내 영상'}).getAttribute('href')!,'https://test');
+ expect(url.searchParams.get('returnTo')).toBe('/view/KPOP_SAVED_ITEMS?kind=events&page=2');
+ view.rerender(<PersonalSavedScreen screenId="KPOP_SAVED_ITEMS" refId={null}/>);
+ expect(screen.getByRole('link',{name:'로그인'})).toHaveAttribute('href','/view/LOGIN_PAGE?returnTo='+encodeURIComponent('/view/KPOP_SAVED_ITEMS?kind=events&page=2'));
+ delete process.env.NEXT_PUBLIC_PHOTO_VIDEO_ENABLED;
+});

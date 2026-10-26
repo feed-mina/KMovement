@@ -6,6 +6,7 @@ import Link from 'next/link';
 import api from '@/services/axios';
 import { useAuth } from '@/context/AuthContext';
 import ScreenSkeleton from '@/components/utils/ScreenSkeleton';
+import PersonalLibraryNav from '@/components/personal/PersonalLibraryNav';
 import type { ScreenControllerProps } from './types';
 import { clearLoginReturn, loginReturnLabel, rememberLoginReturn, safeLoginReturn } from '@/lib/kride/loginReturn';
 
@@ -19,7 +20,7 @@ function LoginScreen() {
     const search=useSearchParams();
     const returnTo=safeLoginReturn(search.get('returnTo'));
     const returnLabel=loginReturnLabel(returnTo);
-    const { isLoggedIn, isLoading, login } = useAuth();
+    const { user, isLoggedIn, isLoading, login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [emailOpen, setEmailOpen] = useState(false);
@@ -28,8 +29,11 @@ function LoginScreen() {
     const emailInput = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (!isLoading && isLoggedIn) router.replace(returnTo);
-    }, [isLoading, isLoggedIn, router, returnTo]);
+        if (!isLoading && isLoggedIn) {
+            if (user?.role === 'ROLE_GUEST') rememberLoginReturn(returnTo);
+            router.replace(user?.role === 'ROLE_GUEST' ? '/view/ADDITIONAL_INFO_PAGE' : returnTo);
+        }
+    }, [isLoading, isLoggedIn, user?.role, router, returnTo]);
 
     useEffect(() => { if (emailOpen) emailInput.current?.focus(); }, [emailOpen]);
 
@@ -48,9 +52,10 @@ function LoginScreen() {
             });
             const me = await api.get('/api/auth/me');
             if (!me.data?.isLoggedIn) throw new Error('로그인 상태를 확인하지 못했습니다.');
-            clearLoginReturn();
+            if (me.data.role === 'ROLE_GUEST') rememberLoginReturn(returnTo);
+            else clearLoginReturn();
             login(me.data);
-            router.replace(returnTo);
+            router.replace(me.data.role === 'ROLE_GUEST' ? '/view/ADDITIONAL_INFO_PAGE' : returnTo);
         } catch (requestError: any) {
             const message = [400, 401].includes(requestError?.response?.status)
                 ? '이메일 또는 비밀번호를 다시 확인해 주세요.'
@@ -164,7 +169,9 @@ function ProfileScreen() {
     const [loggingOut, setLoggingOut] = useState(false);
     const [confirmingLogout, setConfirmingLogout] = useState(false);
     const [logoutError, setLogoutError] = useState('');
-    const [counts, setCounts] = useState<SavedCounts>({ artists: null, events: null, products: null });
+    const identity = isLoggedIn && !isLoading ? String(user?.userSqno ?? user?.userId ?? '') : '';
+    const [savedCounts, setSavedCounts] = useState<{identity: string; counts: SavedCounts}>({identity: '', counts: {artists: null, events: null, products: null}});
+    const counts = savedCounts.identity === identity ? savedCounts.counts : {artists: null, events: null, products: null};
 
     useEffect(() => {
         if (!isLoading && !isLoggedIn) router.replace('/view/LOGIN_PAGE');
@@ -172,17 +179,18 @@ function ProfileScreen() {
 
     // 저장 개수 3종. 실패하면 타일에 "–" 로 두고 화면은 그대로 쓴다.
     useEffect(() => {
-        if (!isLoggedIn || typeof fetch !== 'function') return;
+        if (!identity || typeof fetch !== 'function') return;
+        setSavedCounts({identity, counts: {artists: null, events: null, products: null}});
         const abort = new AbortController();
         SAVED_KINDS.forEach(([kind]) => {
             Promise.resolve()
                 .then(() => fetch(`/api/v1/kpop/me/saved/${kind}?page=1`, { credentials: 'include', cache: 'no-store', signal: abort.signal }))
                 .then(async (r) => (r && r.ok ? (await r.json())?.data?.totalCount : null))
-                .then((total) => { if (!abort.signal.aborted) setCounts((c) => ({ ...c, [kind]: typeof total === 'number' ? total : null })); })
+                .then((total) => { if (!abort.signal.aborted) setSavedCounts((c) => ({identity, counts: {...c.counts, [kind]: typeof total === 'number' ? total : null}})); })
                 .catch(() => { /* 타일은 "–" 유지 */ });
         });
         return () => abort.abort();
-    }, [isLoggedIn]);
+    }, [identity]);
 
     const handleLogout = async () => {
         if (loggingOut) return;
@@ -215,6 +223,7 @@ function ProfileScreen() {
                     </div>
                 </header>
 
+                <PersonalLibraryNav active="profile"/>
                 <div className="auth-profile-stats" aria-label="저장 목록">
                     {SAVED_KINDS.map(([kind, label]) => (
                         <button

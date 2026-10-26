@@ -28,7 +28,7 @@ export const KRIDE_TABS: Destination[] = [
         icon: icon(<><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></>) },
     { label: 'K-POP', href: '/view/kpop', active: isKpop,
         icon: icon(<><path d="M12 3v12" /><circle cx="9" cy="17" r="3" /><path d="M12 3c2 1 5 1 7 3" /></>) },
-    { label: '마이', href: '/view/MY_PAGE', active: (p) => p === '/view/MY_PAGE' || p === '/view/LOGIN_PAGE' || p.includes('SAVED_ITEMS'),
+    { label: '마이', href: '/view/MY_PAGE', active: (p) => p === '/view/MY_PAGE' || p === '/view/LOGIN_PAGE' || p.includes('SAVED_ITEMS') || p === '/travel/video',
         icon: icon(<><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>) },
 ];
 

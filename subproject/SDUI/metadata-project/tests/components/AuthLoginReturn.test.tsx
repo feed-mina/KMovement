@@ -68,3 +68,20 @@ test('allows only the exact home path outside /view/', () => {
 test.each([['/', '홈'], ['/view/KPOP_EVENTS?scope=mine', '팬 일정'], ['/view/ROUTE_PLANNER', '코스 만들기'], ['/view/KPOP_SAVED_ITEMS', '내 목록'], ['/view/AI_JAPANESE_CHAT_PAGE', '언어 채팅'], ['/view/KPOP_EVENT_DETAIL/12?returnEvents=x', '일정 상세'], ['/view/UNKNOWN_SCREEN', null]])('names %s as %s', (path, label) => {
     expect(loginReturnLabel(path)).toBe(label);
 });
+
+test('resumes the selected private video after a confirmed OAuth session',async()=>{
+ const path='/travel/video?view=history&page=2&job=1b9f52ba-77c2-4aa9-a1f4-a7fa18529e82';
+ rememberLoginReturn(path);mockGet.mockResolvedValue({data:{isLoggedIn:true,role:'ROLE_USER',userSqno:3}});
+ render(<AuthProvider><div>App</div></AuthProvider>);
+ await waitFor(()=>expect(mockReplace).toHaveBeenCalledWith(path));
+});
+
+test('keeps private video return through required additional registration',async()=>{
+ const previousPath=window.location.pathname,previousSearch=window.location.search;
+ Object.assign(window.location,{pathname:'/travel/video',search:'?view=history&page=2'});
+ mockGet.mockResolvedValue({data:{isLoggedIn:true,role:'ROLE_GUEST',userSqno:3}});
+ const view=render(<AuthProvider><div>App</div></AuthProvider>);
+ await waitFor(()=>expect(mockRouter.push).toHaveBeenCalledWith('/view/ADDITIONAL_INFO_PAGE'));
+ expect(consumeLoginReturn()).toBe('/travel/video?view=history&page=2');expect(mockReplace).not.toHaveBeenCalled();
+ view.unmount();Object.assign(window.location,{pathname:previousPath,search:previousSearch});
+});

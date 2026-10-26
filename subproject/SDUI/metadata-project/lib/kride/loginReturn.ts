@@ -1,3 +1,4 @@
+import {safePersonalReturn, safeVideoReturn} from './personalLibrary';
 // A same-tab navigation hint only. No account data or authentication tokens.
 const KEY = 'kride.login-return';
 const MAX_AGE = 10 * 60 * 1000;
@@ -5,12 +6,15 @@ const FALLBACK = '/view/MY_PAGE';
 
 export function safeLoginReturn(value: unknown): string {
     if (value === '/') return '/'; // 랜딩 홈 (벤치마킹 H3 배너) 은 /view/ 밖에 있는 유일한 복귀처
+    const video = safeVideoReturn(value);
+    if (video) return video;
     if (typeof value !== 'string' || value.length > 1024 || /[\\\u0000-\u0020]/.test(value)) return FALLBACK;
     try {
         const url = new URL(value, 'https://kride.invalid');
         if (!value.startsWith('/view/') || url.origin !== 'https://kride.invalid' ||
             !/^\/view\/[A-Za-z0-9_-]+$/.test(url.pathname) ||
             ['LOGIN_PAGE', 'ADDITIONAL_INFO_PAGE'].includes(url.pathname.split('/').pop()!)) return FALLBACK;
+        if (url.pathname === '/view/KPOP_SAVED_ITEMS') return safePersonalReturn(value);
         return url.pathname + url.search;
     } catch { return FALLBACK; }
 }
@@ -39,6 +43,7 @@ export function consumeLoginReturn(): string | null {
 // 벤치마킹 H8: 로그인 화면이 "로그인하면 ○○으로 돌아가요" 라고 말할 때 쓰는 화면 이름. 모르는 화면은 null.
 const RETURN_LABELS: Array<[RegExp, string]> = [
     [/^\/$/, '홈'],
+    [/^\/travel\/video$/, '내 영상'],
     [/^\/view\/TOUR_EXPLORE$/, '여행지 탐색'],
     [/^\/view\/ROUTE_PLANNER$/, '코스 만들기'],
     [/^\/view\/(INTRO[1-5]|KRIDE_INTRO[1-5])$/, '아티스트 코스 만들기'],

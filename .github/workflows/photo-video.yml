@@ -13,6 +13,26 @@ on:
       - subproject/SDUI/metadata-project/tests/api/travelVideoProxy.test.ts
       - subproject/SDUI/metadata-project/tests/app/travelVideo.test.tsx
       - subproject/SDUI/metadata-project/tests/components/PhotoVideoCourseLink.test.tsx
+      - subproject/SDUI/metadata-project/components/personal/**
+      - subproject/SDUI/metadata-project/components/layout/KrideNav.tsx
+      - subproject/SDUI/metadata-project/components/motion/KrideMotion.tsx
+      - subproject/SDUI/metadata-project/components/plugins/kpop/PersonalSaved.tsx
+      - subproject/SDUI/metadata-project/components/screens/AuthFlowScreen.tsx
+      - subproject/SDUI/metadata-project/context/AuthContext.tsx
+      - subproject/SDUI/metadata-project/lib/kride/loginReturn.ts
+      - subproject/SDUI/metadata-project/lib/kride/personalLibrary.ts
+      - subproject/SDUI/metadata-project/lib/hooks/usePrivateVideoHistory.ts
+      - subproject/SDUI/metadata-project/app/styles/personal-library.css
+      - subproject/SDUI/metadata-project/app/styles/kride-motion.css
+      - subproject/SDUI/metadata-project/Dockerfile
+      - subproject/SDUI/metadata-project/tests/components/AuthFlowScreen.test.tsx
+      - subproject/SDUI/metadata-project/tests/components/AuthLoginReturn.test.tsx
+      - subproject/SDUI/metadata-project/tests/components/PersonalSaved.test.tsx
+      - subproject/SDUI/metadata-project/tests/components/KrideNav.test.tsx
+      - subproject/SDUI/metadata-project/tests/components/KrideMotion.test.tsx
+      - subproject/SDUI/metadata-project/tests/components/PersonalLibraryNav.test.tsx
+      - subproject/SDUI/metadata-project/tests/hooks/usePrivateVideoHistory.test.tsx
+      - subproject/SDUI/metadata-project/tests/services/personalLibrary.test.ts
       - .github/workflows/photo-video.yml
   workflow_dispatch:
 permissions:
@@ -36,13 +56,14 @@ jobs:
           cache-dependency-path: subproject/SDUI/metadata-project/package-lock.json
       - run: npm ci --ignore-scripts --no-audit --no-fund
         working-directory: subproject/SDUI/metadata-project
-      - run: npx jest tests/api/travelVideoProxy.test.ts tests/app/travelVideo.test.tsx tests/components/PhotoVideoCourseLink.test.tsx --runInBand --reporters=default
+      - run: npx jest tests/api/travelVideoProxy.test.ts tests/app/travelVideo.test.tsx tests/components/PhotoVideoCourseLink.test.tsx tests/components/PersonalLibraryNav.test.tsx tests/components/PersonalSaved.test.tsx tests/components/AuthFlowScreen.test.tsx tests/components/AuthLoginReturn.test.tsx tests/components/KrideNav.test.tsx tests/components/KrideMotion.test.tsx tests/hooks/usePrivateVideoHistory.test.tsx tests/services/personalLibrary.test.ts --runInBand --reporters=default
         working-directory: subproject/SDUI/metadata-project
       - run: npx tsc --noEmit --incremental false
         working-directory: subproject/SDUI/metadata-project
       - run: npm run build
         working-directory: subproject/SDUI/metadata-project
         env:
+          NEXT_PUBLIC_PHOTO_VIDEO_ENABLED: 'true'
           FASTAPI_URL: http://127.0.0.1:8000
           BACKEND_URL: http://127.0.0.1:8080
       - run: python -m pytest tests/test_photo_video_http.py -q

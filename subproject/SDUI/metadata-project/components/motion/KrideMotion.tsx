@@ -75,10 +75,9 @@ export function MotionButton({children, className = '', onPointerDown, ...props}
     </motion.button>;
 }
 
-/** Static during SSR and for reduced motion; the control pauses every background layer. */
+/** Decorative only. Reduced motion, hidden tabs and off-screen layers stay still. */
 export function PastelBackdrop() {
     const reduced = useKrideReducedMotion();
-    const [paused, setPaused] = useState(false);
     const backdrop = useRef<HTMLDivElement>(null);
     const [inView, setInView] = useState(false);
     const [visible, setVisible] = useState(true);
@@ -93,16 +92,13 @@ export function PastelBackdrop() {
         observer.observe(backdrop.current);
         return () => observer.disconnect();
     }, []);
-    const moving = reduced === false && !paused && inView && visible;
+    const moving = reduced === false && inView && visible;
     return <>
         <div ref={backdrop} aria-hidden="true" className="kride-pastel" data-moving={moving}>
             <span className="kride-pastel__pink" />
             <span className="kride-pastel__mint" />
             <span className="kride-pastel__blue" />
         </div>
-        {reduced === false && <button type="button" className="kride-motion-pause" aria-pressed={paused}
-            onClick={() => setPaused((value) => !value)}>
-            {paused ? '배경 움직임 재생' : '배경 움직임 멈춤'}
-        </button>}
+
     </>;
 }
