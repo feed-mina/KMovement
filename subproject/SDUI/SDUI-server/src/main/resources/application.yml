@@ -119,6 +119,9 @@ cloud:
 
 # ── [추가] KRIDE 설정 ──
 kride:
+  media:
+    url: ${KRIDE_MEDIA_URL:${kride.fastapi.url:http://localhost:8000}}
+    internal-api-key: ${KRIDE_MEDIA_INTERNAL_API_KEY:${fastapi.internal-api-key:sdui-internal-dev-key}}
   supabase:
     url: ${SUPABASE_URL:}
     key: ${SUPABASE_KEY:}

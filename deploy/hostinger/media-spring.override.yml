@@ -1,0 +1,6 @@
+# Apply with the EXISTING Spring compose files; preserve their order and env files.
+services:
+  spring:
+    environment:
+      KRIDE_MEDIA_URL: ${KRIDE_MEDIA_URL:?Set the internal Hostinger relay URL}
+      KRIDE_MEDIA_INTERNAL_API_KEY: ${KRIDE_MEDIA_INTERNAL_API_KEY:?Set the same private relay key}

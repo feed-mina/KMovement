@@ -68,8 +68,8 @@ public class AnimationService {
             CommunityPostRepository postRepository,
             PostImageRepository imageRepository,
             UserRepository userRepository,
-            @Value("${kride.fastapi.url:http://localhost:8000}") String fastApiUrl,
-            @Value("${fastapi.internal-api-key:sdui-internal-dev-key}") String internalApiKey,
+            @Value("${kride.media.url:${kride.fastapi.url:http://localhost:8000}}") String mediaGatewayUrl,
+            @Value("${kride.media.internal-api-key:${fastapi.internal-api-key:sdui-internal-dev-key}}") String internalApiKey,
             @Value("${kride.animation.timeout-minutes:60}") int timeoutMinutes
     ) {
         this.animationJobRepository = animationJobRepository;
@@ -78,7 +78,7 @@ public class AnimationService {
         this.userRepository = userRepository;
         this.timeoutMinutes = timeoutMinutes;
 
-        WebClient.Builder builder = WebClient.builder().baseUrl(fastApiUrl);
+        WebClient.Builder builder = WebClient.builder().baseUrl(mediaGatewayUrl);
         if (internalApiKey != null && !internalApiKey.isBlank()) {
             builder.defaultHeader("X-Internal-Api-Key", internalApiKey);
         }
