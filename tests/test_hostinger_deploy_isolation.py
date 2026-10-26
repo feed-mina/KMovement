@@ -5,6 +5,8 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import shutil
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -257,6 +259,28 @@ class MediaDeployTests(unittest.TestCase):
     def test_snapshot_preserves_literal_dollars(self):
         secret = {"secret": "a$value${MORE}"}
         self.assertEqual(media.literals(media.literals(secret), True), secret)
+
+    def test_custom_worker_entrypoint_is_rejected(self):
+        value = config()
+        value["services"]["media-gateway"]["command"] = ["python", "worker.py"]
+        with self.assertRaises(media.DeployError):
+            media.validate_config(value)
+
+    @unittest.skipUnless(sys.platform == "linux" and shutil.which("docker"),
+                         "Docker Compose integration runs on Linux CI")
+    def test_real_compose_renders_only_an_internal_disabled_model_relay(self):
+        envfile = self.root / "render.env"
+        envfile.write_text("KMOVEMENT_MEDIA_IMAGE=" + IMAGE + "\n"
+                           "KRIDE_MEDIA_INTERNAL_API_KEY=mock-private\n"
+                           "RUNPOD_API_KEY=mock-provider\n"
+                           "RUNPOD_MEDIA_ENDPOINT_ID=mock-media\n")
+        result = subprocess.run([
+            "docker", "compose", "-p", "kmovement-media-test", "--env-file", str(envfile),
+            "-f", str(ROOT / "deploy/hostinger/media.compose.yml"), "config", "--format", "json"
+        ], check=True, capture_output=True, text=True)
+        value = media.literals(json.loads(result.stdout), True)
+        media.validate_config(value)
+        self.assertEqual(value["services"]["media-gateway"]["image"], IMAGE)
 
 
 class WorkflowTests(unittest.TestCase):

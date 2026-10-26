@@ -127,8 +127,6 @@ class Deployment:
             # Keep recovery restricted to this dedicated deployment directory.
             if not all(p and Path(p).is_file() and Path(p).resolve().is_relative_to(self.root.resolve()) for p in files):
                 raise DeployError("Cannot resolve existing media Compose; no service changed.")
-            prefix = ["docker", "compose", "--project-directory", str(self.root), "-p", PROJECT,
-                      "--env-file", str(envfile)]
             envfiles = [p for p in labels.get("com.docker.compose.project.environment_file", str(envfile)).split(",") if p]
             if not all(Path(p).is_file() and Path(p).resolve().is_relative_to(self.root.resolve()) for p in envfiles):
                 raise DeployError("Cannot resolve existing media environment files.")
