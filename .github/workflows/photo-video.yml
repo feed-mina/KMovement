@@ -30,6 +30,7 @@ on:
       - subproject/SDUI/metadata-project/tests/components/PersonalSaved.test.tsx
       - subproject/SDUI/metadata-project/tests/components/KrideNav.test.tsx
       - subproject/SDUI/metadata-project/tests/components/KrideMotion.test.tsx
+      - subproject/SDUI/metadata-project/tests/components/RouteScreen.test.tsx
       - subproject/SDUI/metadata-project/tests/components/PersonalLibraryNav.test.tsx
       - subproject/SDUI/metadata-project/tests/hooks/usePrivateVideoHistory.test.tsx
       - subproject/SDUI/metadata-project/tests/services/personalLibrary.test.ts
@@ -56,7 +57,7 @@ jobs:
           cache-dependency-path: subproject/SDUI/metadata-project/package-lock.json
       - run: npm ci --ignore-scripts --no-audit --no-fund
         working-directory: subproject/SDUI/metadata-project
-      - run: npx jest tests/api/travelVideoProxy.test.ts tests/app/travelVideo.test.tsx tests/components/PhotoVideoCourseLink.test.tsx tests/components/PersonalLibraryNav.test.tsx tests/components/PersonalSaved.test.tsx tests/components/AuthFlowScreen.test.tsx tests/components/AuthLoginReturn.test.tsx tests/components/KrideNav.test.tsx tests/components/KrideMotion.test.tsx tests/hooks/usePrivateVideoHistory.test.tsx tests/services/personalLibrary.test.ts --runInBand --reporters=default
+      - run: npx jest tests/api/travelVideoProxy.test.ts tests/app/travelVideo.test.tsx tests/components/PhotoVideoCourseLink.test.tsx tests/components/PersonalLibraryNav.test.tsx tests/components/PersonalSaved.test.tsx tests/components/AuthFlowScreen.test.tsx tests/components/AuthLoginReturn.test.tsx tests/components/KrideNav.test.tsx tests/components/KrideMotion.test.tsx tests/components/RouteScreen.test.tsx tests/hooks/usePrivateVideoHistory.test.tsx tests/services/personalLibrary.test.ts --runInBand --reporters=default
         working-directory: subproject/SDUI/metadata-project
       - run: npx tsc --noEmit --incremental false
         working-directory: subproject/SDUI/metadata-project

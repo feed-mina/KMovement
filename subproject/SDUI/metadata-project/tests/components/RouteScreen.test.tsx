@@ -23,7 +23,7 @@ const mockedFetch = jest.fn(() =>
 global.fetch = mockedFetch;
 
 let mockAuth: { user: { socialType?: string } | null; isLoggedIn: boolean } = { user: null, isLoggedIn: false };
-jest.mock('@/context/AuthContext', () => ({ useAuth: () => mockAuth }));
+jest.mock('@/context/AuthContext', () => ({ useAuth: () => mockAuth, AuthContext: require('react').createContext(undefined) }));
 
 describe('RouteScreen — [동선] 기본/AI 코스 토글', () => {
     beforeEach(() => {
