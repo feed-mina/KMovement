@@ -1,0 +1,21 @@
+{
+  "kind": "document-only",
+  "checks": [
+    {
+      "width": 1440,
+      "overflow": false,
+      "sections": 27,
+      "brokenAnchors": 0,
+      "modelSections": 16
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "sections": 27,
+      "brokenAnchors": 0,
+      "modelSections": 16
+    }
+  ],
+  "errors": [],
+  "pass": true
+}
