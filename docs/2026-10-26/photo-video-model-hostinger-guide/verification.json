@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-26",
+  "kind": "document-only",
+  "productTestsRun": false,
+  "gpuGenerationRun": false,
+  "viewports": [
+    {
+      "width": 1440,
+      "overflow": false,
+      "brokenAnchors": [],
+      "diagrams": 3,
+      "headings": 15,
+      "replacementCharacters": false
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "brokenAnchors": [],
+      "diagrams": 3,
+      "headings": 15,
+      "replacementCharacters": false
+    }
+  ],
+  "errors": [],
+  "externalRequests": [],
+  "danceSelection": "포즈 전처리와 댄스 모델 하나부터승인된 동작 영상 + 모델 전용 포즈 전처리 + UniAnimate 또는 MimicMotion. LivePortrait는 조건을 확인한 뒤 선택적으로 비교합니다.",
+  "dancePressed": "true",
+  "keyboardSelection": "생성 서버와 분리한 실시간 코칭MediaPipe를 브라우저 작업 스레드에서 실행하고 몸 크기·방향·시간을 맞춘 뒤 유사도를 계산합니다. 영상 생성 모델은 필수가 아닙니다.",
+  "onlyOnePressed": true,
+  "pass": true
+}
