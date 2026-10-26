@@ -1,0 +1,222 @@
+name: Auto deploy Hostinger media relay
+
+"on":
+  workflow_run:
+    workflows: ["CI - Build Verification"]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/hostinger-media-deploy.yml"
+      - "deploy/hostinger/deploy_media.py"
+      - "deploy/hostinger/deploy_scope.py"
+      - "deploy/hostinger/media.compose.yml"
+      - "tests/test_hostinger_deploy_isolation.py"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: >-
+      github.event_name == 'pull_request' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      current: ${{ steps.current.outputs.current }}
+      enabled: ${{ steps.scope.outputs.enabled }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install pyyaml
+      - run: python -m unittest discover -s tests -p test_hostinger_deploy_isolation.py -v
+      - name: Select this component from the verified push plan
+        id: scope
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CI_RUN_ID: ${{ github.event.workflow_run.id }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = workflow_dispatch ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            install -d "$RUNNER_TEMP/deploy-plan"
+            gh run download "$CI_RUN_ID" --repo "$GITHUB_REPOSITORY" --name hostinger-deploy-plan --dir "$RUNNER_TEMP/deploy-plan"
+            python deploy/hostinger/deploy_scope.py --read "$RUNNER_TEMP/deploy-plan/deploy-plan.json" --sha "$RELEASE_SHA" --component media >> "$GITHUB_OUTPUT"
+          fi
+      - name: Ignore stale CI before entering the deployment queue
+        if: github.event_name != 'pull_request'
+        id: current
+        env:
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(git ls-remote origin refs/heads/main | cut -f1)" = "$RELEASE_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            echo "Newer main exists; this CI will not enter the deployment queue."
+          fi
+
+  deploy:
+    needs: validate
+    if: >-
+      needs.validate.outputs.current == 'true' && needs.validate.outputs.enabled == 'true' &&
+      ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository))
+    runs-on: ubuntu-latest
+    concurrency:
+      group: hostinger-media-production
+      cancel-in-progress: false
+    timeout-minutes: 35
+    environment: hostinger-production
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+    env:
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+          persist-credentials: false
+
+      - name: Require current main and successful push CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$RELEASE_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$RELEASE_SHA&event=push&per_page=20" \
+            | jq -e --arg sha "$RELEASE_SHA" \
+                '.workflow_runs | any(.head_sha == $sha and .head_branch == "main" and .event == "push" and .conclusion == "success")' >/dev/null
+
+      - name: Configure pinned SSH and check Hostinger connection
+        shell: bash
+        env:
+          SSH_HOST: ${{ vars.HOSTINGER_SSH_HOST || 'kmovement.srv1869569.hstgr.cloud' }}
+          SSH_PORT: ${{ vars.HOSTINGER_SSH_PORT || '22' }}
+          SSH_USER: ${{ vars.HOSTINGER_SSH_USER || 'root' }}
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$SSH_PRIVATE_KEY" || { echo "::error::Register HOSTINGER_SSH_PRIVATE_KEY before enabling deployment."; exit 1; }
+          test -n "$SSH_KNOWN_HOSTS" || { echo "::error::Register HOSTINGER_SSH_KNOWN_HOSTS from the trusted server console."; exit 1; }
+          [[ "$SSH_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ "$SSH_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          [[ "$SSH_PORT" =~ ^[0-9]{1,5}$ ]]
+          test "$SSH_PORT" -ge 1 && test "$SSH_PORT" -le 65535
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/kmovement-ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$RUNNER_TEMP/kmovement-ssh/key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" | tr -d '\r' > "$RUNNER_TEMP/kmovement-ssh/known_hosts"
+          ssh-keygen -y -P '' -f "$RUNNER_TEMP/kmovement-ssh/key" >/dev/null
+          ssh-keygen -l -f "$RUNNER_TEMP/kmovement-ssh/known_hosts" >/dev/null
+          cat > "$RUNNER_TEMP/kmovement-ssh/config" <<EOF
+          Host kmovement-hostinger
+            HostName $SSH_HOST
+            Port $SSH_PORT
+            User $SSH_USER
+            IdentityFile $RUNNER_TEMP/kmovement-ssh/key
+            UserKnownHostsFile $RUNNER_TEMP/kmovement-ssh/known_hosts
+            StrictHostKeyChecking yes
+            IdentitiesOnly yes
+            BatchMode yes
+            ConnectTimeout 15
+            ServerAliveInterval 15
+            ServerAliveCountMax 3
+          EOF
+          ssh -F "$RUNNER_TEMP/kmovement-ssh/config" kmovement-hostinger \
+            'test "$(hostname)" = srv1869569 && docker compose version >/dev/null && python3 --version'
+
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare relay-only build context
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -d "$RUNNER_TEMP/media-context/deploy"
+          cp -a deploy/cloud_gateway "$RUNNER_TEMP/media-context/deploy/cloud_gateway"
+
+      - name: Build and publish verified relay image
+        id: image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ runner.temp }}/media-context
+          file: ${{ runner.temp }}/media-context/deploy/cloud_gateway/Dockerfile
+          platforms: linux/amd64
+          pull: true
+          push: true
+          tags: ghcr.io/feed-mina/kmovement-media:${{ env.RELEASE_SHA }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/feed-mina/KMovement
+            org.opencontainers.image.revision=${{ env.RELEASE_SHA }}
+
+      - name: Deploy only internal media relay
+        shell: bash
+        env:
+          IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          set -euo pipefail
+          [[ "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$RELEASE_SHA"
+          IMAGE="ghcr.io/feed-mina/kmovement-media@$IMAGE_DIGEST"
+          RELEASE_DIR="/docker/kmovement-media/releases/$RELEASE_SHA"
+          ssh -F "$RUNNER_TEMP/kmovement-ssh/config" kmovement-hostinger \
+            "umask 077; mkdir -p '$RELEASE_DIR'"
+          tar -cf - deploy/hostinger/deploy_media.py deploy/hostinger/media.compose.yml \
+            | ssh -F "$RUNNER_TEMP/kmovement-ssh/config" kmovement-hostinger \
+                "umask 077; tar -xf - -C '$RELEASE_DIR'"
+          ssh -F "$RUNNER_TEMP/kmovement-ssh/config" kmovement-hostinger \
+            "python3 '$RELEASE_DIR/deploy/hostinger/deploy_media.py' '$RELEASE_SHA' '$IMAGE' '$RELEASE_DIR/deploy/hostinger/media.compose.yml'"
+          {
+            echo "## Hostinger media relay deployed and verified"
+            echo "- source SHA: $RELEASE_SHA"
+            echo "- image: $IMAGE"
+            echo "- scope: media-gateway only; no Spring/web/GPU/private workers"
+            echo "- checks: GET health and unauthenticated GET; no generation submission"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report incomplete deployment
+        if: failure()
+        shell: bash
+        run: |
+          echo "## Hostinger media relay deployment did not finish successfully" >> "$GITHUB_STEP_SUMMARY"
+          echo "Check the failed step. If replacement began, the server attempted rollback; rolled_back means the previous relay was verified; first_install_stopped means a failed first relay was stopped." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove runner SSH files
+        if: always()
+        shell: bash
+        run: |
+          rm -f "$RUNNER_TEMP/kmovement-ssh/key" "$RUNNER_TEMP/kmovement-ssh/known_hosts" "$RUNNER_TEMP/kmovement-ssh/config"
