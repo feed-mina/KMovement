@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import RouteScreen, { legLabel } from '@/components/plugins/travel/RouteScreen';
 import { fetchRestaurants } from '@/services/tourApi';
 
@@ -22,14 +22,18 @@ const mockedFetch = jest.fn(() =>
 // @ts-expect-error jsdom global
 global.fetch = mockedFetch;
 
-let mockAuth: { user: { socialType?: string } | null; isLoggedIn: boolean } = { user: null, isLoggedIn: false };
+const mockPush = jest.fn();
+jest.mock('next/navigation', () => ({useRouter: () => ({push: mockPush})}));
+beforeEach(() => { sessionStorage.clear(); mockPush.mockClear(); mockedFetch.mockClear(); mockAuth = {user:null,isLoggedIn:true}; });
+
+let mockAuth: { user: { socialType?: string } | null; isLoggedIn: boolean } = { user: null, isLoggedIn: true };
 jest.mock('@/context/AuthContext', () => ({ useAuth: () => mockAuth, AuthContext: require('react').createContext(undefined) }));
 
 describe('RouteScreen — [동선] 기본/AI 코스 토글', () => {
     beforeEach(() => {
         mockedFetch.mockClear();
         (fetchRestaurants as jest.Mock).mockClear();
-        mockAuth = { user: null, isLoggedIn: false };
+        mockAuth = { user: null, isLoggedIn: true };
     });
 
     it('로그인 여부와 관계없이 공유 버튼을 표시한다', async () => {
@@ -238,4 +242,17 @@ test('changing only the unsupported duration keeps the existing Seoul basic cour
     expect(screen.getByText('서울 장소')).toBeInTheDocument();
     expect(screen.getByRole('button', {name: '당일치기'})).toHaveAttribute('aria-pressed', 'true');
     expect(mockedFetch).not.toHaveBeenCalled();
+});
+
+
+describe('RouteScreen login entry and draft', () => {
+ test('anonymous users can open login without a date or generation request', async () => {
+  mockAuth={user:null,isLoggedIn:false};render(<RouteScreen screenId="ROUTE_PLANNER" refId={null}/>);fireEvent.click(screen.getByText('AI 코스'));
+  const login=screen.getByRole('button',{name:'로그인하고 코스 만들기'});expect(login).toBeEnabled();fireEvent.click(login);
+  expect(mockPush).toHaveBeenCalledWith('/view/LOGIN_PAGE?returnTo=%2Fview%2FROUTE_PLANNER');expect(sessionStorage.getItem('kride.route-draft.v1')).toBeTruthy();expect(mockedFetch).not.toHaveBeenCalled();await act(async () => { await Promise.resolve(); });
+ });
+ test('login return restores choices without automatically generating', async () => {
+  sessionStorage.setItem('kride.route-draft.v1',JSON.stringify({at:Date.now(),draft:{region:'서울',purpose:'맛집투어',duration:'당일치기',budgetMin:12000,budgetMax:45000,visitDate:'2026-11-04',acknowledged:false,responseLocale:'en'}}));
+  render(<RouteScreen screenId="ROUTE_PLANNER" refId={null}/>);expect(screen.getByLabelText('방문 날짜')).toHaveValue('2026-11-04');expect(screen.getByLabelText('최소 방문비(원)')).toHaveValue(12000);expect(screen.getByLabelText('안내 언어')).toHaveValue('en');expect(screen.getByRole('checkbox')).not.toBeChecked();expect(mockedFetch).not.toHaveBeenCalled();await act(async () => { await Promise.resolve(); });
+ });
 });
