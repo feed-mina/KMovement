@@ -327,6 +327,51 @@ def media(asset_id: str) -> FileResponse:
     return FileResponse(str(path), media_type=asset["media_type"], filename=path.name)
 
 
+@app.middleware("http")
+async def private_job_responses(request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith("/jobs"):
+        response.headers["Cache-Control"] = "private, no-store"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
+def _delivery_store():
+    # Explicit opt-in: private persistent storage, separate from public media.
+    directory = os.environ.get("KRIDE_DELIVERY_DIR", "").strip()
+    if not directory:
+        raise HTTPException(501, "Delivery recovery is not configured.")
+    from deploy.cloud_gateway.delivery_store import DeliveryStore
+    path = Path(directory).resolve()
+    if is_inside(path, MEDIA_DIR) or is_inside(MEDIA_DIR, path):
+        raise HTTPException(503, "Delivery storage must be separate from public media.")
+    return DeliveryStore(path)
+
+
+@app.get("/jobs/delivery", response_class=HTMLResponse)
+def delivery_console():
+    from deploy.cloud_gateway.delivery_console import PAGE
+    return PAGE
+
+
+@app.get("/jobs/runpod/{job_id}/delivery")
+def delivery_status(job_id: str, _: None = Depends(_require_internal_api_key)):
+    try:
+        return _delivery_store().get(job_id)
+    except KeyError:
+        raise HTTPException(404, "No retained result. Query the original job status first.")
+
+
+@app.post("/jobs/runpod/{job_id}/delivery-retry")
+def delivery_retry(job_id: str, _: None = Depends(_require_internal_api_key)):
+    try:
+        return _delivery_store().retry(job_id)
+    except KeyError:
+        raise HTTPException(404, "No retained result.")
+    except ValueError:
+        raise HTTPException(409, "Delivery-only retry unavailable; no retained final video.")
+
+
 class RunPodJobRequest(BaseModel):
     """RunPod serverless proxy request."""
     route: str = Field(..., description="cogvideox_real, 3d_photo_light, cogvideo_fallback, gpt_sovits_tts, musicgen, animated_drawings_worker, tora_cogvideox_i2v")
@@ -388,6 +433,14 @@ def runpod_status(
     _: None = Depends(_require_internal_api_key),
 ) -> JSONResponse:
     """Check RunPod job status."""
+    if os.environ.get("KRIDE_DELIVERY_DIR", "").strip():
+        try:
+            cached = _delivery_store().get(job_id)
+            return JSONResponse(content={"ok": True, "status": "COMPLETED",
+                                         "endpoint_id": cached["endpoint_id"],
+                                         "output": cached["output"], "delivery": cached})
+        except KeyError:
+            pass
     endpoint_ids = _configured_runpod_endpoint_ids()
     if not RUNPOD_API_KEY or not endpoint_ids:
         return JSONResponse(status_code=501, content={"ok": False, "message": "RunPod not configured."})
@@ -405,7 +458,17 @@ def runpod_status(
                 errors.append(f"{endpoint_id}: 404")
                 continue
             resp.raise_for_status()
-            return JSONResponse(content={"ok": True, "endpoint_id": endpoint_id, **resp.json()})
+            data = resp.json()
+            if (os.environ.get("KRIDE_DELIVERY_DIR", "").strip()
+                    and data.get("status") == "COMPLETED"
+                    and isinstance(data.get("output"), dict)
+                    and isinstance(data["output"].get("artifacts"), list)
+                    and any(isinstance(item, dict) and item.get("kind") == "final_video"
+                            for item in data["output"]["artifacts"])):
+                cached = _delivery_store().capture(job_id, endpoint_id, data["output"])
+                data["output"] = cached["output"]
+                data["delivery"] = cached
+            return JSONResponse(content={"ok": True, "endpoint_id": endpoint_id, **data})
         except Exception as exc:
             errors.append(f"{endpoint_id}: {str(exc)[:500]}")
 
