@@ -7,6 +7,10 @@ on:
       - 'deploy/hostinger/media*'
       - 'subproject/SDUI/SDUI-server/**'
       - 'tests/test_hostinger_media_relay.py'
+      - 'tests/test_delivery_recovery.py'
+      - 'tests/test_result_delivery.py'
+      - 'deploy/media_motion/result_delivery.py'
+      - 'deploy/media_motion/cloudinary_upload.py'
       - '.github/workflows/hostinger-media-relay.yml'
 permissions:
   contents: read
@@ -19,7 +23,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -r deploy/cloud_gateway/requirements.txt pytest
-      - run: python -m pytest -q tests/test_cloud_gateway_runpod_auth.py tests/test_hostinger_media_relay.py
+      - run: python -m pytest -q tests/test_cloud_gateway_runpod_auth.py tests/test_hostinger_media_relay.py tests/test_result_delivery.py tests/test_delivery_recovery.py
       - name: Validate internal relay compose
         env:
           KMOVEMENT_MEDIA_IMAGE: example/media@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

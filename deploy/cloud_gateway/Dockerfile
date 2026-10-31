@@ -19,6 +19,8 @@ COPY deploy/cloud_gateway/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY deploy/cloud_gateway /app/deploy/cloud_gateway
+# Reuse the upload helper without importing model dependencies.
+COPY deploy/media_motion/cloudinary_upload.py /app/deploy/media_motion/cloudinary_upload.py
 
 # Put MP4/WAV/JSON/IPYNB files here when building a demo image, or mount /app/media at runtime.
 RUN mkdir -p /app/media

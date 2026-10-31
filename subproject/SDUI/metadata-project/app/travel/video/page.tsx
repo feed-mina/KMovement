@@ -99,7 +99,7 @@ function VideoCreator({identity, onCreated, onExpired}: {identity: string; onCre
         </label>
         {(preview || photoId) && <img src={preview || `/api/travel-video/photos/${photoId}`} alt="선택한 여행 사진" className="private-video-preview"/>}
         <p><button type="button" disabled={!file || !!busy || !!photoId} onClick={() => void submit('upload')}>{busy === 'upload' ? '사진을 올리는 중' : '사진 올리기'}</button></p>
-        {photoId && <><p role="status">사진을 저장했습니다.</p><p>기본 방식: 사진을 천천히 확대·이동하는 짧은 영상입니다. 생성형 AI 영상과 구분됩니다.</p>
+        {photoId && <><p role="status">사진을 저장했습니다.</p><p>처리 방식: CPU에서 사진을 천천히 확대·이동합니다. 실제 사진 처리이며, 생성형 AI 실행이나 모의 처리가 아닙니다.</p>
             <button type="button" disabled={!!busy || !!course && !poiId} onClick={() => void submit('generate')}>{busy === 'generate' ? '생성을 요청하는 중' : '영상 만들기'}</button></>}
         {error && <p role="alert">{error}</p>}
     </section>;
