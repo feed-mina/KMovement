@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Replace only the existing Hostinger web image; preserve Compose and roll back failures.
+"""Replace the Hostinger web image; optionally activate the existing private CPU video API.
 
 Executed over pinned-key SSH: python3 - <sha> <digest-pinned-image> < deploy_web.py
 No Docker config, environment values or application logs are printed.
@@ -67,6 +67,41 @@ def assert_image_only(before, after, image):
         raise DeployError("Compose would change settings besides web.image; no container changed.")
 
 
+
+def private_video_settings(web, photo, worker):
+    """Allow activation only for the existing healthy private CPU services."""
+    if (photo["State"].get("Status") != "running" or
+        photo["State"].get("Health", {}).get("Status") != "healthy" or
+        worker["State"].get("Status") != "running"):
+        raise DeployError("Private photo API or worker is not ready; no container changed.")
+    shared = set(web["NetworkSettings"]["Networks"]) & set(photo["NetworkSettings"]["Networks"])
+    if not shared or not any("photo-video" in photo["NetworkSettings"]["Networks"][name].get("Aliases", []) for name in shared):
+        raise DeployError("Private photo API is not reachable on the existing web network.")
+    def data_volume(container):
+        matches = [m for m in container.get("Mounts", []) if m.get("Destination") == "/data/photo-video"]
+        if len(matches) != 1 or matches[0].get("Type") != "volume" or not matches[0].get("RW"):
+            raise DeployError("Expected a writable private photo data volume.")
+        return matches[0].get("Name")
+    if data_volume(photo) != "kmovement-photo-video-data" or data_volume(worker) != data_volume(photo):
+        raise DeployError("Private API and worker must share the existing data volume.")
+    key = env_map(photo).get("PHOTO_VIDEO_INTERNAL_KEY", "")
+    if len(key) < 32 or "\n" in key or "\r" in key:
+        raise DeployError("Private photo internal authentication is not ready.")
+    if not (env_map(web).get("AUTH_BACKEND_URL") or env_map(web).get("BACKEND_URL")):
+        raise DeployError("Existing login backend is missing.")
+    return {"PHOTO_VIDEO_ENABLED": "true", "PHOTO_VIDEO_URL": "http://photo-video:8085",
+            "PHOTO_VIDEO_INTERNAL_KEY": key, "PHOTO_VIDEO_PUBLIC_ORIGIN": "https://" + HOST}
+
+
+def assert_web_change(before, after, image, private_environment=None):
+    expected = copy.deepcopy(before)
+    expected["services"]["web"]["image"] = image
+    if private_environment:
+        expected["services"]["web"].setdefault("environment", {}).update(private_environment)
+    if expected != after:
+        raise DeployError("Unexpected Compose change outside the reviewed web settings.")
+
+
 def escape_compose_literals(value):
     """A resolved snapshot must not expand literal dollar signs on rollback."""
     if isinstance(value, str):
@@ -128,9 +163,10 @@ def public_ok(expected_sha):
 
 
 class Deployment:
-    def __init__(self, sha, image, root=RELEASE_ROOT, sleep=time.sleep):
+    def __init__(self, sha, image, root=RELEASE_ROOT, sleep=time.sleep, enable_private_video=False):
         validate_inputs(sha, image)
         self.sha, self.image, self.root, self.sleep = sha, image, Path(root), sleep
+        self.enable_private_video = enable_private_video
         self.release = None
         self.changed = False
         self.record = {"source_sha": sha, "image": image, "status": "preparing"}
@@ -167,6 +203,42 @@ class Deployment:
     def config(self, command):
         return unescape_compose_literals(self.json_command(command + ["config", "--format", "json"], "Resolve Compose"))
 
+
+    def private_video_environment(self, web):
+        services = {}
+        for service in ("photo-video", "photo-video-worker"):
+            ids = self.command(["docker", "ps", "--filter",
+                "label=com.docker.compose.project=kmovement-photo-video", "--filter",
+                "label=com.docker.compose.service=" + service, "--format", "{{.ID}}"],
+                "Find private photo service").splitlines()
+            if len(ids) != 1:
+                raise DeployError("Expected one existing private API and worker; no container changed.")
+            services[service] = self.json_command(["docker", "inspect", ids[0]], "Inspect private photo service")[0]
+        settings = private_video_settings(web, services["photo-video"], services["photo-video-worker"])
+        database = self.json_command(["docker", "exec", services["photo-video"]["Id"],
+            "python", "-m", "deploy.photo_video.database"], "Check existing private database")
+        if database.get("schemaVersion") != 2 or database.get("integrity") != "ok" or database.get("foreignKeyViolations") != 0:
+            raise DeployError("Private photo database check failed.")
+        # Exercise the actual CPU renderer with a synthetic image in temporary storage only.
+        smoke = """import json,tempfile,subprocess
+from pathlib import Path
+from PIL import Image
+from deploy.photo_video.worker import render_photo
+with tempfile.TemporaryDirectory(prefix='photo-video-readiness-') as folder:
+    root=Path(folder)
+    Image.new('RGB',(320,180),(35,95,75)).save(root/'input.jpg')
+    render_photo(root/'input.jpg',root/'output.mp4')
+    data=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','json',str(root/'output.mp4')]))
+    print(json.dumps({'rendered':True,'duration':float(data['format']['duration'])}))
+"""
+        rendered = json.loads(self.command(["docker", "exec", services["photo-video-worker"]["Id"],
+            "python", "-c", smoke], "Test synthetic CPU render", timeout=240))
+        if not rendered.get("rendered") or not 4.8 <= rendered.get("duration", 0) <= 5.2:
+            raise DeployError("Private CPU renderer check failed.")
+        self.record["private_video_readiness"] = {"database": database, "synthetic_render": rendered}
+        log("Private photo API, shared volume, database and synthetic CPU render verified.")
+        return settings
+
     def prepare(self):
         container = self.container()
         labels = container["Config"].get("Labels", {})
@@ -202,10 +274,14 @@ class Deployment:
         (self.release / "before.compose.json").write_text(json.dumps(before, indent=2) + "\n")
         (self.release / "before.container.json").write_text(json.dumps(container, indent=2) + "\n")
         override = self.release / "image.override.json"
-        override.write_text(json.dumps({"services": {"web": {"image": self.image}}}) + "\n")
+        private_environment = self.private_video_environment(container) if self.enable_private_video else None
+        web_override = {"image": self.image}
+        if private_environment and any(before["services"]["web"].get("environment", {}).get(k) != v for k, v in private_environment.items()):
+            web_override["environment"] = private_environment
+        override.write_text(json.dumps(escape_compose_literals({"services": {"web": web_override}})) + "\n")
         self.base, self.next = pruned, pruned + ["-f", str(override)]
         after = self.config(self.next)
-        assert_image_only(before, after, self.image)
+        assert_web_change(before, after, self.image, private_environment)
         (self.release / "next.compose.json").write_text(json.dumps(after, indent=2) + "\n")
 
         self.previous = container["Image"]
@@ -240,6 +316,13 @@ class Deployment:
     const response = await fetch('http://127.0.0.1:3000' + path, {signal: AbortSignal.timeout(8000)});
     if (response.status !== 200) process.exit(1);
   }
+  if (process.argv[2] === 'private-video') {
+    if (process.env.PHOTO_VIDEO_ENABLED !== 'true') process.exit(1);
+    const health = await fetch(process.env.PHOTO_VIDEO_URL + '/health', {signal: AbortSignal.timeout(8000)});
+    if (!health.ok) process.exit(1);
+    const anonymous = await fetch('http://127.0.0.1:3000/api/travel-video/jobs', {signal: AbortSignal.timeout(10000)});
+    if (anonymous.status !== 401) process.exit(1);
+  }
   const expected = process.argv[1];
   if (expected) {
     const response = await fetch('http://127.0.0.1:3000/health/release', {signal: AbortSignal.timeout(8000)});
@@ -247,7 +330,8 @@ class Deployment:
   }
 })().catch(() => process.exit(1));
 """
-        self.command(["docker", "exec", container_id, "node", "-e", script, expected_sha or ""],
+        self.command(["docker", "exec", container_id, "node", "-e", script, expected_sha or "",
+                      "private-video" if self.enable_private_video and expected_sha == self.sha else ""],
                      "Check internal pages and revision", timeout=40)
 
     def verify(self, image_id, expected_sha):
@@ -298,8 +382,8 @@ class Deployment:
 
 
 def main():
-    if len(sys.argv) != 3:
-        raise DeployError("Usage: deploy_web.py <main-sha> <digest-pinned-image>")
+    if len(sys.argv) not in (3, 4) or (len(sys.argv) == 4 and sys.argv[3] != "--enable-private-video"):
+        raise DeployError("Usage: deploy_web.py <main-sha> <digest-pinned-image> [--enable-private-video]")
     validate_inputs(sys.argv[1], sys.argv[2])
     if socket.gethostname() != HOSTNAME:
         raise DeployError("Unexpected server hostname; no container changed.")
@@ -316,7 +400,7 @@ def main():
             raise DeployError("Deployment interrupted.")
         for signum in INTERRUPTS:
             signal.signal(signum, interrupted)
-        deployment = Deployment(sys.argv[1], sys.argv[2])
+        deployment = Deployment(sys.argv[1], sys.argv[2], enable_private_video=len(sys.argv) == 4)
         try:
             deployment.execute()
         except BaseException:

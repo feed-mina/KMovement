@@ -184,6 +184,7 @@ jobs:
             FASTAPI_URL=http://fastapi:8000
             NEXT_PUBLIC_KAKAO_MAP_APP_KEY=${{ secrets.NEXT_PUBLIC_KAKAO_MAP_APP_KEY }}
             KMOVEMENT_RELEASE_SHA=${{ env.RELEASE_SHA }}
+            NEXT_PUBLIC_PHOTO_VIDEO_ENABLED=true
 
       - name: Replace only web and verify public revision
         shell: bash
@@ -195,7 +196,7 @@ jobs:
           test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$RELEASE_SHA"
           IMAGE="ghcr.io/feed-mina/kmovement-web@$IMAGE_DIGEST"
           ssh -F "$RUNNER_TEMP/kmovement-ssh/config" kmovement-hostinger \
-            "python3 - '$RELEASE_SHA' '$IMAGE'" < deploy/hostinger/deploy_web.py
+            "python3 - '$RELEASE_SHA' '$IMAGE' --enable-private-video" < deploy/hostinger/deploy_web.py
           {
             echo "## Hostinger web deployed and verified"
             echo "- source SHA: $RELEASE_SHA"

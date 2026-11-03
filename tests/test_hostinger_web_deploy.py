@@ -56,7 +56,11 @@ class FakeDeployment(runner.Deployment):
         paths = [Path(args[i + 1]) for i, part in enumerate(args) if part == "-f"]
         config = json.loads(paths[0].read_text(encoding="utf-8"))
         for path in paths[1:]:
-            config["services"]["web"].update(json.loads(path.read_text(encoding="utf-8"))["services"]["web"])
+            change = json.loads(path.read_text(encoding="utf-8"))["services"]["web"]
+            environment = {**config["services"]["web"].get("environment", {}), **change.get("environment", {})}
+            config["services"]["web"].update(change)
+            if environment:
+                config["services"]["web"]["environment"] = environment
         return config
 
     def command(self, args, stage, timeout=90):
@@ -269,6 +273,65 @@ class ContractTests(unittest.TestCase):
             "image": OLD_IMAGE, "environment": {"EXTRA": "keep-this"},
         }}}))
         self.assertFalse(runner.is_image_override(self.deployment.override_path))
+
+    def test_private_activation_preserves_existing_settings_and_rollback(self):
+        deployment = self.deployment
+        deployment.enable_private_video = True
+        settings = {"PHOTO_VIDEO_ENABLED": "true", "PHOTO_VIDEO_URL": "http://photo-video:8085",
+                    "PHOTO_VIDEO_INTERNAL_KEY": "x" * 40, "PHOTO_VIDEO_PUBLIC_ORIGIN": "https://" + runner.HOST}
+        with patch.object(deployment, "private_video_environment", return_value=settings):
+            deployment.execute()
+        after = json.loads((deployment.release / "next.compose.json").read_text())
+        self.assertEqual(after["services"]["web"]["environment"], {**deployment.base_config["services"]["web"]["environment"], **settings})
+        before = json.loads((deployment.release / "rollback.compose.json").read_text())
+        self.assertNotIn("PHOTO_VIDEO_INTERNAL_KEY", before["services"]["web"]["environment"])
+        self.assertIn("private-video", next(args for args in deployment.commands if args[:2] == ["docker", "exec"]))
+        self.assertFalse(any(args[:3] == ["docker", "compose", "down"] for args in deployment.commands))
+
+    def test_private_readiness_failure_never_replaces_web(self):
+        self.deployment.enable_private_video = True
+        with patch.object(self.deployment, "private_video_environment", side_effect=runner.DeployError("not ready")):
+            with self.assertRaises(runner.DeployError):
+                self.deployment.execute()
+        self.assertFalse(self.deployment.up_calls)
+
+    def test_private_activation_failure_restores_old_configuration(self):
+        self.deployment.enable_private_video = True
+        self.deployment.fail_internal = True
+        with patch.object(self.deployment, "private_video_environment", return_value={"PHOTO_VIDEO_ENABLED": "true"}):
+            with self.assertRaises(runner.DeployError):
+                self.deployment.execute()
+        self.assertEqual(self.deployment.record["status"], "rolled_back")
+        restore = self.deployment.resolve(self.deployment.up_calls[-1])
+        self.assertNotIn("PHOTO_VIDEO_ENABLED", restore["services"]["web"]["environment"])
+
+    def test_private_settings_reject_unrelated_changes(self):
+        before = self.deployment.base_config
+        after = copy.deepcopy(before)
+        after["services"]["web"]["image"] = IMAGE
+        after["services"]["web"]["environment"]["TOKEN"] = "changed"
+        with self.assertRaises(runner.DeployError):
+            runner.assert_web_change(before, after, IMAGE, {"PHOTO_VIDEO_ENABLED": "true"})
+
+    def test_private_settings_require_healthy_services_shared_storage_and_auth(self):
+        network = {"kmovement-web_kmovement": {"Aliases": ["photo-video"]}}
+        volume = [{"Type": "volume", "Name": "kmovement-photo-video-data", "Destination": "/data/photo-video", "RW": True}]
+        web = {"NetworkSettings": {"Networks": network}, "Config": {"Env": ["BACKEND_URL=http://spring:8080"]}}
+        photo = {"State": {"Status": "running", "Health": {"Status": "healthy"}},
+                 "NetworkSettings": {"Networks": network}, "Mounts": volume,
+                 "Config": {"Env": ["PHOTO_VIDEO_INTERNAL_KEY=" + "secret" * 8]}}
+        worker = {"State": {"Status": "running"}, "Mounts": volume}
+        self.assertEqual(runner.private_video_settings(web, photo, worker)["PHOTO_VIDEO_ENABLED"], "true")
+        for target, key, value in [(photo, "State", {"Status": "running", "Health": {"Status": "unhealthy"}}),
+                                  (worker, "Mounts", []),
+                                  (photo, "Config", {"Env": ["PHOTO_VIDEO_INTERNAL_KEY=short"]}),
+                                  (web, "NetworkSettings", {"Networks": {}})]:
+            original = target[key]
+            target[key] = value
+            with self.assertRaises(runner.DeployError) as caught:
+                runner.private_video_settings(web, photo, worker)
+            self.assertNotIn("secret", str(caught.exception))
+            target[key] = original
 
 
 class WorkflowTests(unittest.TestCase):
