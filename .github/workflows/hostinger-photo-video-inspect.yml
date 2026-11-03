@@ -1,0 +1,84 @@
+name: Inspect private photo video runtime
+"on":
+  push:
+    branches: [main]
+    paths: [".github/workflows/hostinger-photo-video-inspect.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    if: github.repository == 'feed-mina/KMovement' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: hostinger-production
+    steps:
+      - name: Inspect existing services without changing settings
+        env:
+          SSH_HOST: ${{ vars.HOSTINGER_SSH_HOST || 'kmovement.srv1869569.hstgr.cloud' }}
+          SSH_PORT: ${{ vars.HOSTINGER_SSH_PORT || '22' }}
+          SSH_USER: ${{ vars.HOSTINGER_SSH_USER || 'root' }}
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SSH_PRIVATE_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+          [[ "$SSH_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ "$SSH_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          [[ "$SSH_PORT" =~ ^[0-9]{1,5}$ ]]
+          test "$SSH_PORT" -ge 1 && test "$SSH_PORT" -le 65535
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/photo-video-ssh"
+          trap 'rm -f "$RUNNER_TEMP/photo-video-ssh/key" "$RUNNER_TEMP/photo-video-ssh/known_hosts"' EXIT
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$RUNNER_TEMP/photo-video-ssh/key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" | tr -d '\r' > "$RUNNER_TEMP/photo-video-ssh/known_hosts"
+          ssh -i "$RUNNER_TEMP/photo-video-ssh/key" -p "$SSH_PORT" \
+            -o UserKnownHostsFile="$RUNNER_TEMP/photo-video-ssh/known_hosts" \
+            -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o ConnectTimeout=15 "$SSH_USER@$SSH_HOST" 'python3 -' <<'PY'
+          import json, socket, subprocess, shutil
+          if socket.gethostname() != 'srv1869569':
+              raise SystemExit('Unexpected host')
+          def run(args):
+              p = subprocess.run(args, capture_output=True, text=True, timeout=30)
+              if p.returncode:
+                  raise RuntimeError('Read-only Docker command failed')
+              return p.stdout
+          def env(c):
+              return dict(x.split('=',1) for x in c['Config'].get('Env',[]) if '=' in x)
+          containers = []
+          for project in ['kmovement-web','kmovement-photo-video']:
+              ids = run(['docker','ps','-a','--filter','label=com.docker.compose.project='+project,'--format','{{.ID}}']).split()
+              if ids:
+                  containers += json.loads(run(['docker','inspect',*ids]))
+          web = next((c for c in containers if c['Config'].get('Labels',{}).get('com.docker.compose.service')=='web'),None)
+          photo = next((c for c in containers if c['Config'].get('Labels',{}).get('com.docker.compose.service')=='photo-video'),None)
+          output = {'services':[],'disk_free_gib':round(shutil.disk_usage('/docker').free/1024**3,1)}
+          for c in containers:
+              e=env(c); labels=c['Config'].get('Labels',{})
+              output['services'].append({
+                  'name':c['Name'],'image':c['Config']['Image'],
+                  'revision':e.get('KMOVEMENT_RELEASE_SHA',labels.get('org.opencontainers.image.revision','')),
+                  'state':c['State']['Status'],'health':c['State'].get('Health',{}).get('Status'),
+                  'project':labels.get('com.docker.compose.project'),'service':labels.get('com.docker.compose.service'),
+                  'compose_files':labels.get('com.docker.compose.project.config_files'),
+                  'workdir':labels.get('com.docker.compose.project.working_dir'),
+                  'env_files':labels.get('com.docker.compose.project.environment_file'),
+                  'networks':{k:v.get('Aliases',[]) for k,v in c['NetworkSettings']['Networks'].items()},
+                  'mounts':[{'type':m['Type'],'source':m.get('Name',m.get('Source')),'destination':m['Destination'],'rw':m['RW']} for m in c.get('Mounts',[])],
+                  'photo_video_enabled':e.get('PHOTO_VIDEO_ENABLED')=='true',
+                  'configured':{k:bool(e.get(k)) for k in ['PHOTO_VIDEO_URL','PHOTO_VIDEO_INTERNAL_KEY','PHOTO_VIDEO_PUBLIC_ORIGIN','AUTH_BACKEND_URL','BACKEND_URL','PHOTO_VIDEO_DATA_DIR']},
+                  'backend_uses_spring':any('spring' in e.get(k,'') for k in ['AUTH_BACKEND_URL','BACKEND_URL']),
+                  'expected_photo_url':e.get('PHOTO_VIDEO_URL')=='http://photo-video:8085',
+                  'expected_origin':e.get('PHOTO_VIDEO_PUBLIC_ORIGIN')=='https://kmovement.srv1869569.hstgr.cloud',
+              })
+          if web and photo:
+              w,p=env(web),env(photo)
+              output['internal_key_matches']=len(w.get('PHOTO_VIDEO_INTERNAL_KEY',''))>=32 and w.get('PHOTO_VIDEO_INTERNAL_KEY')==p.get('PHOTO_VIDEO_INTERNAL_KEY')
+              output['shared_networks']=sorted(set(web['NetworkSettings']['Networks']) & set(photo['NetworkSettings']['Networks']))
+              script="fetch('http://photo-video:8085/health',{signal:AbortSignal.timeout(5000)}).then(async r=>console.log(JSON.stringify({status:r.status,healthy:r.ok}))).catch(()=>console.log(JSON.stringify({healthy:false})))"
+              output['health_from_web']=json.loads(run(['docker','exec',web['Id'],'node','-e',script]))
+          print(json.dumps(output,indent=2))
+          PY
