@@ -75,7 +75,14 @@ export default function RouteScreen(_props: ScreenControllerProps) {
         if (restoredDraft.current) return;
         restoredDraft.current = true;
         const draft = consumeRouteDraft();
-        if (!draft) return;
+        if (!draft) {
+            // Fill the default after mounting so server/browser clocks cannot cause hydration differences.
+            const parts = new Intl.DateTimeFormat('en', {
+                timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
+            }).formatToParts(new Date());
+            setVisitDate(['year', 'month', 'day'].map(type => parts.find(part => part.type === type)!.value).join('-'));
+            return;
+        }
         setRegion(draft.region); setPurpose(draft.purpose); setDuration(draft.duration);
         setBudgetMin(draft.budgetMin); setBudgetMax(draft.budgetMax); setVisitDate(draft.visitDate);
         setAcknowledged(draft.acknowledged); setResponseLocale(draft.responseLocale); setMode('ai');
