@@ -158,6 +158,11 @@ public class KpopProductService {
                 // An invalid reference only contributes to fail-closed grading.
                 continue;
             }
+            if (!"MANUAL_CURATED".equals(catalogRow.get("catalogSource"))
+                    || catalogRow.get("lastVerifiedAt") == null
+                    || blankToNull(catalogRow.get("evidenceText") instanceof String evidenceText ? evidenceText : null) == null
+                    || (!"EXACT_CANDIDATE".equals(catalogRow.get("evidenceGrade"))
+                        && !"SIMILAR".equals(catalogRow.get("evidenceGrade")))) continue;
             Long catalogId = toPositiveLong(catalogRow.get("id"));
             if (catalogId == null || !seenCandidateIds.add(catalogId)) continue;
             rank++;
@@ -198,6 +203,9 @@ public class KpopProductService {
                 : sanitizeConfidence(rawResult.get("confidence"));
 
         Map<String, Object> sanitized = new LinkedHashMap<>();
+        Object availability = rawResult.get("availability");
+        if (Set.of("MODEL_NOT_CONFIGURED", "CATALOG_EMPTY", "READY").contains(availability == null ? "" : availability))
+            sanitized.put("availability", availability);
         sanitized.put("grade", rootGrade);
         sanitized.put("confidence", rootConfidence);
         sanitized.put("evidence", rootEvidence);

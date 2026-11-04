@@ -3,12 +3,15 @@ import {act,fireEvent,render,screen} from '@testing-library/react';
 import PublicProductCatalogScreen from '@/components/plugins/kpop/PublicProductCatalogScreen';
 let query='';const push=jest.fn();
 jest.mock('next/navigation',()=>({usePathname:()=>'/view/KPOP_EXPLORE',useRouter:()=>({push}),useSearchParams:()=>new URLSearchParams(query)}));
+jest.mock('@/context/AuthContext',()=>({AuthContext:require('react').createContext(undefined)}));
+jest.mock('next/link',()=>({__esModule:true,default:({children,...props}:any)=><a {...props}>{children}</a>}));
 const item={id:1,name:'응원봉 후보',brand:'LIGHT',evidenceGrade:'EXACT_CANDIDATE',evidenceText:'공식 기록 대조',catalogSource:'MANUAL_CURATED',lastVerifiedAt:'2026-10-01 10:15:00',rightsChecked:true,officialUrl:'https://example.com/products/1'};
 const response=(data:any,status=200,policy='public-evidence-v1')=>Promise.resolve({ok:status===200,status,headers:{get:()=>policy},json:async()=>({data})} as unknown as Response);
 const component=()=> <PublicProductCatalogScreen screenId="KPOP_PRODUCTS" refId={null}/>;
-beforeEach(()=>{query='';push.mockReset();global.fetch=jest.fn();});
+beforeEach(()=>{query='q=LIGHT';push.mockReset();global.fetch=jest.fn();});
 test('C01 search preserves optional filters and only public credential-free GET is used',async()=>{
  query='artistId=1&eventId=2';(fetch as jest.Mock).mockReturnValue(response([item]));render(component());await screen.findByText(item.name);
+ fireEvent.click(screen.getByRole('button',{name:'상품명·브랜드',exact:true}));
  fireEvent.change(screen.getByLabelText('상품명 또는 브랜드'),{target:{value:' LIGHT '}});fireEvent.submit(screen.getByRole('search'));
  expect(push).toHaveBeenLastCalledWith('/view/KPOP_PRODUCTS?q=LIGHT&artistId=1&eventId=2',{scroll:false});
  expect(fetch).toHaveBeenCalledWith('/api/v1/kpop/product-candidates?view=public&limit=20&artistId=1&eventId=2',expect.objectContaining({credentials:'omit',cache:'no-store'}));
@@ -34,7 +37,8 @@ test('C06 reviewed HTTPS link opens a separate tab',async()=>{
 });
 test('C03 empty is normal and disclaimer stays visible',async()=>{
  (fetch as jest.Mock).mockReturnValue(response([]));render(component());expect(await screen.findByRole('status')).toHaveTextContent('상품이 없다는 뜻은 아니며');
- expect(screen.getByText(/동일 상품·정품·구매 적합성을 보증하지/)).toBeInTheDocument();expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+ fireEvent.click(screen.getByText('후보와 근거 안내'));
+ expect(screen.getByText(/동일 상품·정품·구매 적합성/)).toBeVisible();expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });
 test('500 keeps conditions and retries without pretending empty',async()=>{
  query='q=LIGHT';(fetch as jest.Mock).mockReturnValueOnce(response(null,500)).mockReturnValue(response([item]));render(component());await screen.findByRole('alert');expect(screen.queryByRole('status')).not.toBeInTheDocument();

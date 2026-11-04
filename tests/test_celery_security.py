@@ -214,6 +214,8 @@ def test_kpop_outfit_submission_accepts_camel_case_contract_and_requires_interna
         payload["sourceKey"],
         payload["contentType"],
         payload["consentScope"],
+        None,
+        None,
     ))
 
 

@@ -368,10 +368,15 @@ public class CeleryJobService {
     }
 
     private String requestFingerprint(Map<String, Object> payload) {
-        return sha256(String.join("\n",
+        String base = String.join("\n",
                 Objects.toString(text(payload.get("sourceKey")), ""),
                 Objects.toString(text(payload.get("contentType")), ""),
-                Objects.toString(text(payload.get("consentScope")), "")));
+                Objects.toString(text(payload.get("consentScope")), ""));
+        if (payload.get("itemCategory") != null || payload.get("artistId") != null) {
+            base += "\n" + Objects.toString(text(payload.get("itemCategory")), "")
+                    + "\n" + Objects.toString(text(payload.get("artistId")), "");
+        }
+        return sha256(base);
     }
 
     private String idempotencyRedisKey(Long requestedBy, String idempotencyKey) {

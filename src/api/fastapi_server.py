@@ -1968,6 +1968,8 @@ class CeleryVideoRequest(BaseModel):
 
 
 class CeleryKpopOutfitRequest(BaseModel):
+    itemCategory: Literal["top", "bag", "shoes", "accessory"] | None = None
+    artistId: int | None = Field(default=None, gt=0, strict=True)
     sourceKey: str = Field(
         ...,
         min_length=24,
@@ -2142,6 +2144,8 @@ def celery_kpop_outfit_analysis(
         request.sourceKey,
         request.contentType,
         request.consentScope,
+        request.itemCategory,
+        request.artistId,
     )
 
 

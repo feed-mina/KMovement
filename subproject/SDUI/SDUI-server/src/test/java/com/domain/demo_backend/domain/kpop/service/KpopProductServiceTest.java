@@ -27,6 +27,18 @@ import static org.mockito.Mockito.when;
 
 class KpopProductServiceTest {
 
+    @Test
+    void imageResultRejectsCatalogWithoutVerifiedEvidence() {
+        Map<String, Object> product = productRow(true);
+        product.remove("lastVerifiedAt");
+        when(jdbcTemplate.queryForList(anyString(), any(MapSqlParameterSource.class))).thenReturn(List.of(product));
+        Map<String, Object> result = service.sanitizeAnalysisResult(null, Map.of(
+                "availability", "READY", "grade", "SIMILAR", "candidates", List.of(Map.of(
+                        "productRef", "catalog:91", "grade", "SIMILAR", "evidence", List.of("visual comparison")))));
+        assertThat(result).containsEntry("availability", "READY");
+        assertThat((List<?>) result.get("candidates")).isEmpty();
+    }
+
     private final NamedParameterJdbcTemplate jdbcTemplate = mock(NamedParameterJdbcTemplate.class);
     private final KpopProductService service = new KpopProductService(jdbcTemplate, new ObjectMapper());
 
@@ -214,6 +226,7 @@ class KpopProductServiceTest {
         row.put("name", "Trusted catalog name");
         row.put("brand", "Trusted brand");
         row.put("catalogSource", "MANUAL_CURATED");
+        row.put("lastVerifiedAt", "2026-11-04 10:00:00");
         row.put("providerProductRef", "catalog:91");
         row.put("evidenceGrade", "SIMILAR");
         row.put("confidence", new BigDecimal("72.50"));
