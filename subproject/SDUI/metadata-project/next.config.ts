@@ -9,6 +9,8 @@ const withPWA = require('next-pwa')({
             // Personal responses must never fall back to another session's offline cache.
             urlPattern: ({ url }: { url: URL }) =>
                 url.pathname.startsWith('/api/admin/tour/holy/') ||
+                url.pathname.startsWith('/api/v1/kpop/analysis-') ||
+                url.pathname === '/api/kpop/product-images' ||
                 url.pathname.startsWith('/api/travel-video/') || url.pathname === '/travel/video' ||
                 url.pathname === '/admin/holy-review' ||
                 (url.pathname.startsWith('/api/v1/kpop/me/') || url.pathname === '/api/v1/kpop/event-feed') ||

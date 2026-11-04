@@ -67,12 +67,19 @@ public class KpopAnalysisService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Idempotency key is too long.");
         }
 
-        Map<String, Object> jobPayload = Map.of(
+        Map<String, Object> jobPayload = new LinkedHashMap<>(Map.of(
                 "sourceKey", sourceKey,
                 "contentType", contentType,
                 "consentScope", consentScope,
                 "idempotencyKey", idempotencyKey
-        );
+        ));
+        if (payload.get("itemCategory") != null) {
+            String category = requiredText(payload, "itemCategory");
+            if (!Set.of("top", "bag", "shoes", "accessory").contains(category))
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid product category.");
+            jobPayload.put("itemCategory", category);
+        }
+        if (payload.get("artistId") != null) jobPayload.put("artistId", requiredPositiveLong(payload, "artistId"));
         Optional<CeleryJob> replay = celeryJobService.findReusableKpopJob(jobPayload, userSqno);
         if (replay.isPresent()) {
             Map<String, Object> response = new LinkedHashMap<>(snapshot(replay.get(), false));

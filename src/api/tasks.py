@@ -166,8 +166,10 @@ def task_analyze_kpop_outfit(
     source_key: str,
     content_type: str,
     consent_scope: str,
+    item_category: str | None = None,
+    artist_id: int | None = None,
 ) -> dict:
-    """Return a conservative result until an evidence-producing model is connected.
+    """Rank licensed reference images when a local image model is configured.
 
     The Spring API validates object ownership, upload metadata, and recorded consent
     before submitting this task. The worker deliberately does not echo the private
@@ -187,23 +189,17 @@ def task_analyze_kpop_outfit(
         raise ValueError("Unsupported K-POP analysis content type.")
     if not _KPOP_ANALYSIS_CONSENT_SCOPE_PATTERN.fullmatch(consent_scope):
         raise ValueError("K-POP analysis consent scope is required.")
+    if item_category is not None and item_category not in {"top", "bag", "shoes", "accessory"}:
+        raise ValueError("Invalid product category.")
+    if artist_id is not None and (isinstance(artist_id, bool) or not isinstance(artist_id, int) or artist_id <= 0):
+        raise ValueError("Invalid artist context.")
 
     self.update_state(
         state="ANALYSIS_RUNNING",
         meta={"step": "grading_evidence", "progress": 90},
     )
-    return {
-        "grade": "INSUFFICIENT_EVIDENCE",
-        "confidence": 0.0,
-        "evidence": [
-            {
-                "type": "metadata",
-                "score": 0.0,
-                "source": "analysis_model_not_connected",
-            }
-        ],
-        "candidates": [],
-    }
+    from src.api.kpop_image_matcher import analyze_product_image
+    return analyze_product_image(source_key, item_category, artist_id)
 
 
 @celery.task(bind=True, max_retries=2, default_retry_delay=10)

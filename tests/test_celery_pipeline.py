@@ -245,6 +245,7 @@ def test_kpop_outfit_task_reports_progress_and_never_claims_an_unproven_match(mo
     )
 
     assert result == {
+        "availability": "MODEL_NOT_CONFIGURED",
         "grade": "INSUFFICIENT_EVIDENCE",
         "confidence": 0.0,
         "evidence": [

@@ -25,6 +25,16 @@ import static org.mockito.Mockito.when;
 
 class KpopAnalysisServiceTest {
 
+    @Test
+    void rejectsUnknownProductCategoryBeforeSendingWork() {
+        assertThatThrownBy(() -> service.submit(Map.of(
+                "consented", true, "consentScope", "user-owned-image-analysis",
+                "sourceKey", "kpop-analysis/42/input.jpg", "contentType", "image/jpeg",
+                "idempotencyKey", "image-selection-1", "itemCategory", "face"
+        ), 42L)).isInstanceOf(ResponseStatusException.class);
+        verify(celeryJobService, never()).submitJob(eq("KPOP_OUTFIT_ANALYSIS"), anyMap(), eq(42L));
+    }
+
     private final S3Service s3Service = mock(S3Service.class);
     private final CeleryJobService celeryJobService = mock(CeleryJobService.class);
     private final KpopProductService productService = mock(KpopProductService.class);
