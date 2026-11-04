@@ -9,6 +9,8 @@ name: Auto deploy Hostinger media relay
   pull_request:
     paths:
       - ".github/workflows/hostinger-media-deploy.yml"
+      - "deploy/cloud_gateway/**"
+      - "deploy/media_motion/cloudinary_upload.py"
       - "deploy/hostinger/deploy_media.py"
       - "deploy/hostinger/deploy_scope.py"
       - "deploy/hostinger/media.compose.yml"
@@ -43,6 +45,26 @@ jobs:
           python-version: "3.11"
       - run: python -m pip install pyyaml
       - run: python -m unittest discover -s tests -p test_hostinger_deploy_isolation.py -v
+      - name: Prepare relay-only build context
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: &prepare_relay_context |
+          set -euo pipefail
+          install -d "$RUNNER_TEMP/media-context/deploy"
+          cp -a deploy/cloud_gateway "$RUNNER_TEMP/media-context/deploy/cloud_gateway"
+          install -D -m 0644 deploy/media_motion/cloudinary_upload.py \
+            "$RUNNER_TEMP/media-context/deploy/media_motion/cloudinary_upload.py"
+      - name: Build and smoke-test relay image without publishing
+        if: github.event_name == 'pull_request'
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build --platform linux/amd64 --pull --tag kmovement-media:pr \
+            --file "$RUNNER_TEMP/media-context/deploy/cloud_gateway/Dockerfile" \
+            "$RUNNER_TEMP/media-context"
+          docker run --rm --network none kmovement-media:pr python -c \
+            'from deploy.cloud_gateway.app import app; from deploy.media_motion import cloudinary_upload'
       - name: Select this component from the verified push plan
         id: scope
         if: github.event_name != 'pull_request'
@@ -164,10 +186,7 @@ jobs:
 
       - name: Prepare relay-only build context
         shell: bash
-        run: |
-          set -euo pipefail
-          install -d "$RUNNER_TEMP/media-context/deploy"
-          cp -a deploy/cloud_gateway "$RUNNER_TEMP/media-context/deploy/cloud_gateway"
+        run: *prepare_relay_context
 
       - name: Build and publish verified relay image
         id: image
