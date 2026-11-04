@@ -79,6 +79,8 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: "6379"
       SPRING_DATA_REDIS_DATABASE: "0"
+      MAIL_USERNAME: ${MAIL_USERNAME:-disabled@localhost}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-disabled}
       JAVA_TOOL_OPTIONS: >-
         -XX:MaxRAMPercentage=70
         -XX:+ExitOnOutOfMemoryError

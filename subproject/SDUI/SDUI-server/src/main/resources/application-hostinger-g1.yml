@@ -15,8 +15,15 @@ spring:
     out-of-order: false
     clean-disabled: true
   mail:
-    username: disabled@localhost
-    password: disabled
+    username: ${MAIL_USERNAME:disabled@localhost}
+    password: ${MAIL_PASSWORD:disabled}
+    properties:
+      mail:
+        smtp:
+          connectiontimeout: 5000
+          timeout: 10000
+          writetimeout: 10000
+    debug: false
 
 server:
   forward-headers-strategy: framework
