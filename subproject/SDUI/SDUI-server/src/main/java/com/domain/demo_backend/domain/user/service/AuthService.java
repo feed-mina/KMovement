@@ -32,7 +32,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Optional;
-import java.util.Random;
 
 @Service
 public class AuthService {
@@ -192,6 +191,7 @@ public class AuthService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
         helper.setTo(email);
+        helper.setFrom(fromEmail);
         helper.setSubject("📨 회원가입 인증을 완료해주세요");
 
         String emailContent = "<div style='text-align:center; padding:20px;'>"
@@ -228,6 +228,7 @@ public class AuthService {
 
 
 
+    @Transactional(rollbackFor = Exception.class)
     public String sendVerificationCode(String email , String platform) throws MessagingException {
         //랜덤 인등코드 생성
         String verificationCode = generateRendomCode();
@@ -240,6 +241,7 @@ public class AuthService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
         helper.setTo(email);
+        helper.setFrom(fromEmail);
 
         String baseUrl = platform.equalsIgnoreCase("mobile") ? mobileUrl : webUrl;
         String verifyUrl = UriComponentsBuilder.fromHttpUrl(baseUrl)
@@ -268,8 +270,8 @@ public class AuthService {
     }
 
     private String generateRendomCode() {
-        Random random = new Random();
-        int code = 1000000 + random.nextInt(10000);
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        int code = 100000 + random.nextInt(900000);
         // 랜덤 6자리 숫자 생성
         return String.valueOf(code);
     }
@@ -284,12 +286,13 @@ public class AuthService {
             return false;
         }
 
-        if (!code.equals(user.getVerificationCode())) {
-            log.error(" 인증 실패: 코드 불일치 -> 입력한 코드: {}, 저장된 코드: {}", code, user.getVerificationCode());
+        if (code == null || code.isBlank() || !code.equals(user.getVerificationCode())) {
+            log.warn("이메일 인증 코드가 일치하지 않습니다.");
             return false;
         }
         user.setRole("ROLE_USER");
         user.setVerifyYn("Y");
+        user.setVerificationCode(null);
         userRepository.save(user);
         return true; // 코드가 틀리면 false
     }
@@ -299,6 +302,7 @@ public class AuthService {
         MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
 
         helper.setTo(email);
+        helper.setFrom(fromEmail);
         helper.setSubject("📨 이메일 인증 코드 재발송");
 
         String emailContent = "<div style='padding:20px; font-family:Arial; text-align:center;'>"
@@ -314,9 +318,12 @@ public class AuthService {
     }
 
     // 인증코드 재발송 로직
+    @Transactional(rollbackFor = Exception.class)
     public void resendVerification(String email) throws MessagingException {
-        LoginRequest loginRequest = new LoginRequest();
-        User user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("이메일을 입력해 주세요.");
+        }
+        User user = userRepository.findByEmail(email.trim()).orElse(null);
 
         if (user == null) {
             throw new IllegalArgumentException("존재하지 않는 사용자입니다: " + email);
@@ -325,6 +332,7 @@ public class AuthService {
         String verificationCode = generateRendomCode();
         user.setVerificationCode(verificationCode);
         resendEmail(email, verificationCode);
+        userRepository.save(user);
     }
 
     // 이미 존재하는 사용자인지 email(외래키),jwtToken 확인하고  update문으로 delyn,updateAt 값 변경

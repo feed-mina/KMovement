@@ -5,6 +5,7 @@ import ContentListScreen from "./ContentListScreen";
 import GoogleCallbackScreen from "./GoogleCallbackScreen";
 import LanguageChatScreen from './LanguageChatScreen';
 import AuthFlowScreen from "./AuthFlowScreen";
+import VerifyEmailScreen from "./VerifyEmailScreen";
 
 // 코어 화면 컨트롤러 등록.
 // import 시점에 1회 실행되어 레지스트리를 채운다(모듈 평가 = 렌더 이전).
@@ -12,6 +13,7 @@ registerScreen({ match: (id) => id.startsWith("COMMUNITY_"), controller: Communi
 registerScreen({ match: (id) => id === "CONTENT_LIST", controller: ContentListScreen });
 registerScreen({ match: (id) => id === "GOOGLE_CALLBACK", controller: GoogleCallbackScreen });
 registerScreen({ match: (id) => id === "LOGIN_PAGE" || id === "MY_PAGE", controller: AuthFlowScreen });
+registerScreen({ match: (id) => id === "VERIFY_CODE_PAGE", controller: VerifyEmailScreen });
 
 registerScreen({match:id=>['AI_ENGLISH_CHAT_PAGE','AI_JAPANESE_CHAT_PAGE','AI_KOREAN_CHAT_PAGE'].includes(id),controller:LanguageChatScreen});
 
