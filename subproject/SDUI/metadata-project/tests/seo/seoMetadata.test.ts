@@ -2,7 +2,19 @@ import sitemap from '@/app/sitemap';
 import { serializeJsonLd } from '@/components/seo/JsonLd';
 import { foodAreas, kpopAreas } from '@/lib/seo/travelContent';
 
+import { isPublicMarketingPath } from '@/lib/seo/siteConfig';
+
 describe('SEO metadata', () => {
+    it('keeps private video behind app providers while travel guides stay public', () => {
+        for (const path of ['/travel/video', '/travel/video/', '/travel/video/history']) {
+            expect(isPublicMarketingPath(path)).toBe(false);
+        }
+        for (const path of ['/', '/travel/kpop', '/travel/food/seoul']) {
+            expect(isPublicMarketingPath(path)).toBe(true);
+        }
+        expect(isPublicMarketingPath('/view/ROUTE_PLANNER')).toBe(false);
+    });
+
     it('publishes both hubs and every 시·도 page in the sitemap', () => {
         const urls = sitemap().map((entry) => new URL(entry.url).pathname);
         expect(urls[0]).toBe('/');

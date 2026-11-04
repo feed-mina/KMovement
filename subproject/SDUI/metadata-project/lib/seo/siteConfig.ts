@@ -40,5 +40,7 @@ export const publicMarketingPaths = [
 
 export function isPublicMarketingPath(pathname?: string | null) {
     if (!pathname) return false;
+    // Private video needs the app authentication provider, unlike public travel guides.
+    if (pathname === '/travel/video' || pathname.startsWith('/travel/video/')) return false;
     return pathname === '/' || pathname.startsWith('/travel/');
 }
