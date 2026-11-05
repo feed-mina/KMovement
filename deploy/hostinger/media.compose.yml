@@ -13,6 +13,14 @@ services:
       RUNPOD_TORA_ENDPOINT_ID: ${RUNPOD_TORA_ENDPOINT_ID:-}
       RUNPOD_ENDPOINT_ID: ${RUNPOD_ENDPOINT_ID:-}
       KRIDE_MODEL_GENERATION_ENABLED: "false"
+      KRIDE_DELIVERY_DIR: /data/delivery
+      CLOUDINARY_URL: ${CLOUDINARY_URL:?Set the private Cloudinary URL for delivery recovery}
+    volumes:
+      - type: bind
+        source: /docker/kmovement-media/delivery
+        target: /data/delivery
+        bind:
+          create_host_path: false
     read_only: true
     tmpfs: ["/tmp:rw,noexec,nosuid,size=32m"]
     mem_limit: 512m

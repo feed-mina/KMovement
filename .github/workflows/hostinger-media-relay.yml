@@ -30,6 +30,7 @@ jobs:
           KRIDE_MEDIA_INTERNAL_API_KEY: mock-internal-key
           RUNPOD_API_KEY: mock-provider-key
           RUNPOD_MEDIA_ENDPOINT_ID: mock-media
+          CLOUDINARY_URL: cloudinary://test-key:test-secret@example
         run: docker compose -f deploy/hostinger/media.compose.yml config --quiet
   spring:
     runs-on: ubuntu-latest
