@@ -15,7 +15,6 @@ on:
   pull_request:
     branches: ["main"]
     paths:
-      - ".github/workflows/deploy-runpod.yml"
       - "deploy/media_motion/Dockerfile.runpod"
 
 permissions:
