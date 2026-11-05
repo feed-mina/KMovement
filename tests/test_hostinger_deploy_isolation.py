@@ -273,14 +273,24 @@ class MediaDeployTests(unittest.TestCase):
         envfile.write_text("KMOVEMENT_MEDIA_IMAGE=" + IMAGE + "\n"
                            "KRIDE_MEDIA_INTERNAL_API_KEY=mock-private\n"
                            "RUNPOD_API_KEY=mock-provider\n"
-                           "RUNPOD_MEDIA_ENDPOINT_ID=mock-media\n")
+                           "RUNPOD_MEDIA_ENDPOINT_ID=mock-media\n"
+                           "CLOUDINARY_URL=cloudinary://test-key:test-secret@example\n")
         result = subprocess.run([
             "docker", "compose", "-p", "kmovement-media-test", "--env-file", str(envfile),
             "-f", str(ROOT / "deploy/hostinger/media.compose.yml"), "config", "--format", "json"
         ], check=True, capture_output=True, text=True)
         value = media.literals(json.loads(result.stdout), True)
         media.validate_config(value)
-        self.assertEqual(value["services"]["media-gateway"]["image"], IMAGE)
+        relay = value["services"]["media-gateway"]
+        self.assertEqual(relay["image"], IMAGE)
+        self.assertTrue(relay["read_only"])
+        self.assertEqual(relay["environment"]["KRIDE_DELIVERY_DIR"], "/data/delivery")
+        self.assertEqual(relay["environment"]["CLOUDINARY_URL"], "cloudinary://test-key:test-secret@example")
+        mount, = relay["volumes"]
+        self.assertEqual(mount["type"], "bind")
+        self.assertEqual(mount["source"], "/docker/kmovement-media/delivery")
+        self.assertEqual(mount["target"], "/data/delivery")
+        self.assertFalse(mount["bind"].get("create_host_path", False))
 
 
 class WorkflowTests(unittest.TestCase):
