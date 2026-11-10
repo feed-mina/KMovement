@@ -11,7 +11,7 @@ const component=()=> <PublicProductCatalogScreen screenId="KPOP_PRODUCTS" refId=
 beforeEach(()=>{query='q=LIGHT';push.mockReset();global.fetch=jest.fn();});
 test('C01 search preserves optional filters and only public credential-free GET is used',async()=>{
  query='artistId=1&eventId=2';(fetch as jest.Mock).mockReturnValue(response([item]));render(component());await screen.findByText(item.name);
- fireEvent.click(screen.getByRole('button',{name:'상품명·브랜드',exact:true}));
+ fireEvent.click(screen.getByRole('button',{name:/^상품명·브랜드$/}));
  fireEvent.change(screen.getByLabelText('상품명 또는 브랜드'),{target:{value:' LIGHT '}});fireEvent.submit(screen.getByRole('search'));
  expect(push).toHaveBeenLastCalledWith('/view/KPOP_PRODUCTS?q=LIGHT&artistId=1&eventId=2',{scroll:false});
  expect(fetch).toHaveBeenCalledWith('/api/v1/kpop/product-candidates?view=public&limit=20&artistId=1&eventId=2',expect.objectContaining({credentials:'omit',cache:'no-store'}));
