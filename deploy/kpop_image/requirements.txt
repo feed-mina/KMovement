@@ -1,0 +1,4 @@
+# Optional CPU image-matching worker dependencies. Not required for text search.
+open_clip_torch>=2.24,<4
+boto3>=1.34,<2
+Pillow>=10.4,<13
