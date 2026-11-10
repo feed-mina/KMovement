@@ -11,10 +11,10 @@
       "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100867&menuNo=200025",
       "coordinateSourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100867&menuNo=200025",
       "evidence": "서울문화포털 상세 페이지의 명칭·주소와 markerLocations 좌표 대조",
-      "sourceSha256": "7c3730ce396445e2479231c1265e904cd085f6c84f0b4cf5e12893101bd81a92",
+      "sourceSha256": "6a02594fcb2f1ce213cbff8fb14c28849be7a2304619f1c884cc31be58613872",
       "approved": true,
-      "verifiedAt": "2026-10-06T05:31:40.152250+00:00",
-      "reviewBy": "2026-11-05T05:31:40.152250+00:00",
+      "verifiedAt": "2026-11-10T10:12:13+00:00",
+      "reviewBy": "2026-12-10T10:12:13+00:00",
       "artist": ""
     },
     {
@@ -26,10 +26,10 @@
       "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100548&menuNo=200025",
       "coordinateSourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100548&menuNo=200025",
       "evidence": "서울문화포털 상세 페이지의 명칭·주소와 markerLocations 좌표 대조",
-      "sourceSha256": "b702789f777471cd56232816e45e857808535141fd615f368bb9a5dd31a595fb",
+      "sourceSha256": "66640f0d1d11897115c73222df1235592b55148b8a3e10d71f4b741a30336088",
       "approved": true,
-      "verifiedAt": "2026-10-06T05:31:40.152250+00:00",
-      "reviewBy": "2026-11-05T05:31:40.152250+00:00",
+      "verifiedAt": "2026-11-10T10:12:13+00:00",
+      "reviewBy": "2026-12-10T10:12:13+00:00",
       "artist": ""
     },
     {
@@ -41,10 +41,10 @@
       "sourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100291&menuNo=200025",
       "coordinateSourceUrl": "https://culture.seoul.go.kr/culture/culture/cultureSpace/view.do?facCode=100291&menuNo=200025",
       "evidence": "서울문화포털 상세 페이지의 명칭·주소와 markerLocations 좌표 대조",
-      "sourceSha256": "f7710883beb918fa012e127504bd7c4f0638ed793345b9998aca14c4ab916325",
+      "sourceSha256": "1fe89a375a11061efc79cd1c3f44623716fa9a139c4a9cc494f2337084ab256a",
       "approved": true,
-      "verifiedAt": "2026-10-06T05:31:40.152250+00:00",
-      "reviewBy": "2026-11-05T05:31:40.152250+00:00",
+      "verifiedAt": "2026-11-10T10:12:13+00:00",
+      "reviewBy": "2026-12-10T10:12:13+00:00",
       "artist": ""
     }
   ]

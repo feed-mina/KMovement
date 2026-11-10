@@ -1,0 +1,135 @@
+{
+  "schema": "kmovement.place_followup.v1",
+  "reviewId": "urban81-current-conditions-20261110",
+  "checkedAt": "2026-11-10T10:05:00+00:00",
+  "checkedBy": "Claude (single reviewer, browser read of public pages; no store contact)",
+  "decision": "hold",
+  "productionWrite": false,
+  "place": {
+    "sourceContentId": "kride-media-5671",
+    "seedTitle": "URBAN81",
+    "seedAddress": "서울특별시 강남구 봉은사로67길 14",
+    "seedLonLat": [127.048568, 37.512605],
+    "operatorAddress": "서울 강남구 봉은사로67길 14 1층 101호 (삼성동)",
+    "operatorLonLat": [127.04857337744868, 37.51261378443817],
+    "kakaoPlaceId": "274201193",
+    "kakaoVerifiedBusiness": true,
+    "distanceSeedToOperatorM": 1.0
+  },
+  "operatorSources": [
+    {
+      "id": "kakao-place",
+      "url": "https://place.map.kakao.com/274201193",
+      "owner": "Kakao My Store (사장님 등록 매장, 사업자 정보 확인)",
+      "observedAt": "2026-11-10T10:00:00+00:00",
+      "pageMetaUpdatedAt": "2026-09-01T11:50:27+09:00",
+      "notes": "공지 0건, 카카오 예약 미제공(is_available_booking=false), 요기요 포장주문 연결."
+    },
+    {
+      "id": "instagram-dot",
+      "url": "https://www.instagram.com/cafe.urban81/",
+      "owner": "카카오 장소 페이지가 공식 URL로 연결한 계정",
+      "observedAt": "2026-11-10T09:58:00+00:00",
+      "latestPostAt": "2025-09-22T09:12:59+00:00",
+      "notes": "프로필: OPEN 08:30 / CLOSED 19:30 / 토·일 휴무 (SUMMER-season). 최근 게시물은 2025-09-22 신메뉴 레몬 파운드케이크."
+    },
+    {
+      "id": "instagram-underscore",
+      "url": "https://www.instagram.com/cafe_urban81/",
+      "owner": "미확인 (카카오 장소 페이지가 연결하지 않음)",
+      "observedAt": "2026-11-10T09:57:00+00:00",
+      "notes": "프로필: 평일 09:00~22:00, 토 11:00~22:00. 카카오 공식 URL과 다르므로 옛 계정으로 보고 현행 근거에서 제외."
+    },
+    {
+      "id": "kakao-channel",
+      "url": "https://pf.kakao.com/_ucxgSn/posts",
+      "owner": "어반81 카카오톡 채널",
+      "observedAt": "2026-11-10T10:02:00+00:00",
+      "notes": "소식 0건."
+    }
+  ],
+  "currentConditions": {
+    "hours": {
+      "status": "operator_listed_not_field_verified",
+      "sourceId": "kakao-place",
+      "weekly": {
+        "mon": "08:30-19:30",
+        "tue": "08:30-19:30",
+        "wed": "08:30-19:30",
+        "thu": "08:30-19:30",
+        "fri": "08:30-19:30",
+        "sat": "closed",
+        "sun": "closed"
+      },
+      "holidayRule": "unknown",
+      "agreesWith": ["instagram-dot"],
+      "conflictsWith": ["instagram-underscore", "2018 서울관광재단 기사"],
+      "notes": "인스타그램의 주말 휴무는 SUMMER-season 조건이 붙어 있으나 카카오 2026-11-14(토)·15(일)도 휴무로 표시. 공휴일 규칙과 효력일은 없음."
+    },
+    "menu": {
+      "status": "operator_listed_not_field_verified",
+      "sourceId": "kakao-place",
+      "menuUpdatedAt": "2026-06-15T11:35:16+09:00",
+      "currency": "KRW",
+      "items": [
+        {"name": "아메리카노", "price": 3500, "recommended": false},
+        {"name": "사케라또", "price": 4000, "recommended": false},
+        {"name": "카페라떼", "price": 4500, "recommended": false},
+        {"name": "크림라떼", "price": 5000, "recommended": true},
+        {"name": "아인슈페너", "price": 5000, "recommended": true},
+        {"name": "말차라떼", "price": 5500, "recommended": false},
+        {"name": "초당옥수수 크림라떼", "price": 5500, "recommended": false},
+        {"name": "엑설러트라떼", "price": 5500, "recommended": false},
+        {"name": "뱅쇼", "price": 5500, "recommended": false},
+        {"name": "밀크티", "price": 6000, "recommended": false},
+        {"name": "띤또 데 베라노", "price": 7000, "recommended": false}
+      ],
+      "pickupMenuUpdatedAt": "2026-11-04T02:26:01+00:00",
+      "pickupMenuItemCount": 30,
+      "notes": "매장 메뉴판 사진은 2024-01 블로그 사진 1장뿐이라 현행 실물 메뉴판은 미확인. 요기요 포장 메뉴(30개)는 매장 가격과 같은지 미확인."
+    },
+    "costPerPersonKrw": {
+      "status": "derived_minimum_not_verified",
+      "minimum": 3500,
+      "basis": "음료 1잔 최저가(아메리카노). 입장료 없음 여부와 최소 주문 규칙은 공지에 없음."
+    },
+    "reservation": {
+      "status": "no_operator_terms",
+      "kakaoBooking": false,
+      "noticeCount": 0,
+      "pickupOrder": "요기요 포장주문 연결 있음",
+      "groupOrFilmingTerms": "unknown",
+      "notes": "예약 필요 여부·단체·촬영 허가·취소 조건을 적은 운영자 공지가 없음. '예약 불필요'로 단정하지 않음."
+    },
+    "operatingContinuity": {
+      "permitAtFilming": "2014 또는 2015 허가(각각 2018-07-02, 2019-06-03 폐업)",
+      "currentPermit": "3220000-101-2019-00582 (2019-06-03 영업/정상)",
+      "notes": "2016 촬영 당시 허가와 현재 허가가 다름. 같은 상호·주소지만 운영자·인테리어가 같은지는 미확인."
+    }
+  },
+  "originalVideo": {
+    "title": "[SEVENTEEN] '나의 영희가 되어줘' 3화",
+    "officialAiredAt": "2016-11-12",
+    "officialArchive": "Weverse (V LIVE 보관) 제목·날짜만 확인",
+    "viewedCopy": "https://www.youtube.com/watch?v=hrhzrA-z8Yg",
+    "viewedCopyNote": "팬 백업 채널(세븐틴 브이앱) 업로드, 길이 19:23, 한국어 자막 포함. 공식 원본 아님.",
+    "member": "민규 (단독 출연)",
+    "groupInheritance": false,
+    "storeNameVisibleInFrames": false,
+    "scenes": [
+      {"from": "00:00", "to": "00:33", "spot": "entrance_terrace", "description": "밤, 매장 앞 보도 쪽 철제 난간 테라스에서 인사 후 '추우니까 안으로 들어갈까?'. 오른쪽에 파란 교통 표지판과 차량이 있는 골목."},
+      {"from": "00:33", "to": "01:45", "spot": "hall_window_side", "description": "유리창 쪽 홀을 걸으며 대화. 창밖으로 골목과 주차 차량."},
+      {"from": "01:45", "to": "04:30", "spot": "bar_counter", "description": "'어서오세요' 후 바 안쪽 에스프레소 머신·그라인더 앞에서 직접 커피 두 잔 제조. 직원 구역이라 방문객 재현 불가."},
+      {"from": "04:39", "to": "19:23", "spot": "window_table", "description": "통유리 창가 테이블에 앉아 팬 질문에 답하고 수능 선물 전달. 창밖 건너편에 'SPA' 간판이 보임. 종료 무렵 같은 자리에서 일어나 퇴장."}
+    ],
+    "exactSeatContinuity": "unknown",
+    "notes": "가게 이름은 화면에 보이지 않음. URBAN81 연결은 2018 서울관광재단 기사와 덕플레이스 같은 2차 자료에 의존. 2017-03-14 '민규의 나의 영희가 되어줘'는 장소를 확인하지 않음."
+  },
+  "proposedPendingRows": "docs/2026-11-10/urban81-followup/proposed_pending_rows.sql",
+  "remaining": [
+    "현장 또는 매장 문의로 평일 시간·공휴일·최소 주문·촬영 조건 확인 (문의 발송은 사용자 승인 필요)",
+    "창가 테이블·바 위치가 2016년과 같은지 현재 실내 사진으로 대조",
+    "민규 개인 아티스트 ID가 DB에 없음: 개인 행을 만들지, 그룹 ID에 개인 근거 문구만 남길지 결정",
+    "VERIFIED 전환과 운영 DB 적용은 사용자 확인 후"
+  ]
+}
