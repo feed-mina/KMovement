@@ -52,7 +52,7 @@ test('retry reuses the same uploaded source and idempotency key after a submissi
         return reply({jobId: 8, status: 'SUCCEEDED', result: {availability: 'READY', candidates: []}});
     });
     view(); choose(); consent(); fireEvent.click(screen.getByRole('button', {name: '선택한 아이템 후보 찾기'}));
-    await screen.findByRole('alert'); fireEvent.click(screen.getByRole('button', {name: '다시 시도', exact: true}));
+    await screen.findByRole('alert'); fireEvent.click(screen.getByRole('button', {name: /^다시 시도$/}));
     await screen.findByText(/공개할 근거가 충분한 상품 후보가 없어요/);
     const calls = (fetch as jest.Mock).mock.calls.filter(([url]) => url.endsWith('/analysis-jobs'));
     expect(calls[0][1].body).toBe(calls[1][1].body);
