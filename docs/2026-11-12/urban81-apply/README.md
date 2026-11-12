@@ -10,7 +10,11 @@ V125는 Flyway 마이그레이션이라 **Spring 컨테이너가 V125를 포함�
 1. 읽기 전용 확인: 현재 Spring 이미지 digest, `flyway_schema_history`의 최신 version.
    - 125가 이미 있으면 2·3단계는 건너뜁니다.
 2. 백업: `pg_dump -Fc` 로 운영 DB 덤프를 `/docker/kmovement-g1/backups/`에 남기고 크기가 0이 아님을 확인합니다.
-3. Spring 교체: `.env`의 `KMOVEMENT_SPRING_IMAGE`를 V125 포함 이미지 digest로 바꾸고(이전 값은 롤백용으로 기록)
+3. Spring 교체: `.env`의 `KMOVEMENT_SPRING_IMAGE`를 V125 포함 이미지
+   `ghcr.io/feed-mina/kmovement-spring@sha256:fe955e3d835fac461839b3626e24fa551558c3560b5836ef95296bc557567373`
+   (2026-11-04 run 41812990458, e9452ae 빌드)로 바꾸고. 주의: 같은 날 run 41814767528의 `sha256:77f8a5d8…`는
+   102af3f 백포트 빌드라 V124까지만 있습니다. 이 digest로는 V125가 적용되지 않습니다.
+  (이전 값은 롤백용으로 기록)
    `docker compose pull spring && docker compose up -d spring` → health 확인 → `flyway_schema_history`에 125 success 확인.
    - 실패 시 런북 8장대로 이전 digest로 롤백합니다. DB volume은 지우지 않습니다.
 4. 데이터: `psql -v ON_ERROR_STOP=1 -1 -f apply_urban81_seventeen_mingyu.sql`
