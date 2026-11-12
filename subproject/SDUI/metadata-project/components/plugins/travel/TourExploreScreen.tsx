@@ -19,6 +19,7 @@ import {
 import KakaoShareButton from '@/components/fields/kride/KakaoShareButton';
 import PoiImage from '@/components/plugins/travel/PoiImage';
 import TourPoiCard from '@/components/plugins/travel/TourPoiCard';
+import VerificationBadge from '@/components/plugins/travel/VerificationBadge';
 import TourExploreMap, {hasTourCoordinates, tourPoiKey} from '@/components/plugins/travel/TourExploreMap';
 import Skeleton from '@/components/utils/Skeleton';
 import KrideStatePanel from '@/components/fields/kride/atoms/KrideStatePanel';
@@ -817,6 +818,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                         </div>
                         <div style={{ padding: '14px 16px' }}>
                             <h2 id={dialogTitleId} style={{ margin: 0, fontSize: 17, fontWeight: 600 }}>{selected.title}</h2>
+                            <VerificationBadge status={selected.verificationStatus} focusable/>
                             {selected.addr && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#777' }}>{selected.addr}</p>}
                             {selected.tel && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#777' }}>☎ {selected.tel}</p>}
 

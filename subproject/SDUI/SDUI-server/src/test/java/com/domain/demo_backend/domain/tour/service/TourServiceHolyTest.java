@@ -65,6 +65,36 @@ class TourServiceHolyTest {
     }
 
     @Test
+    @DisplayName("근거가 검수 대기(PENDING)뿐인 성지는 verificationStatus=PENDING, 나머지는 null")
+    void holyMarksPendingEvidence() {
+        TourPoi pending = holy("holy-p", "성지P", "SEVENTEEN");
+        pending.setPoiSqno(10L);
+        TourPoi plain = holy("holy-q", "성지Q", "SEVENTEEN");
+        plain.setPoiSqno(11L);
+        when(tourPoiRepository.findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
+                .thenReturn(List.of(pending, plain));
+        when(tourPoiRepository.findPendingEvidencePoiSqnos(any())).thenReturn(List.of(10L));
+
+        List<HolyPoiDto> result = tourService.getHolyPois();
+
+        assertThat(result).extracting(HolyPoiDto::verificationStatus).containsExactly("PENDING", null);
+    }
+
+    @Test
+    @DisplayName("근거 상태 조회가 실패해도 성지 목록은 표시 없이 돌려준다")
+    void holyIgnoresEvidenceLookupFailure() {
+        TourPoi poi = holy("holy-p", "성지P", "SEVENTEEN");
+        poi.setPoiSqno(10L);
+        when(tourPoiRepository.findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
+                .thenReturn(List.of(poi));
+        when(tourPoiRepository.findPendingEvidencePoiSqnos(any())).thenThrow(new RuntimeException("no table"));
+
+        assertThat(tourService.getHolyPois()).extracting(HolyPoiDto::verificationStatus).containsExactly((String) null);
+    }
+
+    @Test
     @DisplayName("성지 조회는 공공(TOURAPI) 제외 + APPROVED만, 상한(Pageable)과 함께 요청한다")
     void holyQueryUsesApprovedNonTourapiFilter() {
         when(tourPoiRepository.findHolyPoisByRegion(

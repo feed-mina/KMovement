@@ -27,6 +27,8 @@ export interface TourPoi {
     fandomInfo?: string;
     recommendReason?: string;
     sourceUrl?: string;
+    /** 'PENDING' = 아티스트 관계 근거 검수 대기 → 화면 '확인 필요'. */
+    verificationStatus?: string | null;
 }
 
 export interface TourQuery {

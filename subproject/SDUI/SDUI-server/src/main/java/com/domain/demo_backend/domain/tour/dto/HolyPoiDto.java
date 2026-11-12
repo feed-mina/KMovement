@@ -22,9 +22,17 @@ public record HolyPoiDto(
         String artist,
         String fandomInfo,
         String recommendReason,
-        String sourceUrl
+        String sourceUrl,
+        /** 'PENDING' = 아티스트 관계 근거 검수 대기(화면 '확인 필요'). null = 표시 없음. */
+        String verificationStatus
 ) {
+    public static final String PENDING = "PENDING";
+
     public static HolyPoiDto from(TourPoi p) {
+        return from(p, false);
+    }
+
+    public static HolyPoiDto from(TourPoi p, boolean evidencePending) {
         return new HolyPoiDto(
                 p.getContentId(),
                 p.getContentTypeId(),
@@ -41,7 +49,8 @@ public record HolyPoiDto(
                 p.getArtist(),
                 p.getFandomInfo(),
                 p.getRecommendReason(),
-                p.getSourceUrl()
+                p.getSourceUrl(),
+                evidencePending ? PENDING : null
         );
     }
 }
