@@ -109,15 +109,29 @@ public class TourService {
     /** kind='FOOD' → 식당·카페 촬영지(HOLY_FOOD, '성지 맛집' 칩)만. 그 외/미지정은 전체. */
     public List<HolyPoiDto> getHolyPois(String areaCode, String sigunguCode, String sigunguName,
                                         Long contentSqno, String kind) {
-        List<HolyPoiDto> pois = tourPoiRepository
+        List<TourPoi> rows = tourPoiRepository
                 .findHolyPoisByRegion(SOURCE_TOURAPI, REVIEW_APPROVED, areaCode, sigunguCode,
-                        sigunguName, contentSqno, kind, PageRequest.of(0, HOLY_MAX_RESULTS))
-                .stream()
-                .map(HolyPoiDto::from)
+                        sigunguName, contentSqno, kind, PageRequest.of(0, HOLY_MAX_RESULTS));
+        java.util.Set<Long> pending = pendingEvidencePoiSqnos(rows);
+        List<HolyPoiDto> pois = rows.stream()
+                .map(p -> HolyPoiDto.from(p, pending.contains(p.getPoiSqno())))
                 .toList();
         log.info("[TourService] 성지 POI 조회 - area={}, sigungu={}, sigunguName={}, content={}, kind={}, {}건",
                 areaCode, sigunguCode, sigunguName, contentSqno, kind, pois.size());
         return pois;
+    }
+
+    /** 근거 조회가 실패해도 성지 목록은 그대로 보여준다(표시만 빠진다). */
+    private java.util.Set<Long> pendingEvidencePoiSqnos(List<TourPoi> rows) {
+        List<Long> ids = rows.stream().map(TourPoi::getPoiSqno).filter(java.util.Objects::nonNull).toList();
+        if (ids.isEmpty()) return java.util.Set.of();
+        try {
+            List<Long> found = tourPoiRepository.findPendingEvidencePoiSqnos(ids);
+            return found == null ? java.util.Set.of() : new java.util.HashSet<>(found);
+        } catch (RuntimeException e) {
+            log.warn("[TourService] 근거 검수 상태 조회 실패 - 표시 없이 진행: {}", e.getMessage());
+            return java.util.Set.of();
+        }
     }
 
     /** 작품/아티스트 필터 선택지 검색 — 성지 수 내림차순, 상한 1~50(기본 20). */

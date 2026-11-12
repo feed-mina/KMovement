@@ -4,6 +4,7 @@ import {motion} from 'framer-motion';
 import {useCardTilt, useKrideReducedMotion} from '@/components/motion/KrideMotion';
 import type {TourPoi} from '@/services/tourApi';
 import PoiImage from '@/components/plugins/travel/PoiImage';
+import VerificationBadge from '@/components/plugins/travel/VerificationBadge';
 
 interface TourPoiCardProps {
     poi: TourPoi;
@@ -64,6 +65,7 @@ export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onT
                 </span>
                 <span className="tour-poi-card__body">
                     <span className="tour-poi-card__title">{poi.title}</span>
+                    <VerificationBadge status={poi.verificationStatus}/>
                     {poi.addr && <span className="tour-poi-card__addr" title={poi.addr}>{shortAddress(poi.addr)}</span>}
                     {recommendReason && (
                         <span

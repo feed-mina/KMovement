@@ -64,6 +64,20 @@ public interface TourPoiRepository extends JpaRepository<TourPoi, Long> {
     Optional<TourPoi> findFirstBySourceUrlAndReviewStatus(String sourceUrl, String reviewStatus);
 
     /**
+     * 아티스트 관계 근거가 검수 대기(PENDING)뿐인 장소 — 화면에 '확인 필요'로 표시한다.
+     * 유효한 VERIFIED 근거가 하나라도 있으면 제외한다. 근거 행이 없는 장소도 포함하지 않는다.
+     */
+    @Query(value = """
+            SELECT DISTINCT e.poi_sqno FROM artist_place_evidence e
+            WHERE e.poi_sqno IN (:poiSqnos) AND e.status = 'PENDING'
+              AND NOT EXISTS (
+                    SELECT 1 FROM artist_place_evidence v
+                    WHERE v.poi_sqno = e.poi_sqno AND v.status = 'VERIFIED'
+                      AND v.verified_at <= now() AND v.review_by > now())
+            """, nativeQuery = true)
+    List<Long> findPendingEvidencePoiSqnos(@Param("poiSqnos") java.util.Collection<Long> poiSqnos);
+
+    /**
      * 사진 보강 대상: 승인된 성지 중 대표 이미지가 없고 좌표가 있는 행.
      * 좌표가 없으면 TourAPI 반경 검색을 걸 수 없으므로 애초에 제외한다.
      * 한 번에 다 돌리면 TourAPI 쿼터를 넘기므로 Pageable 로 나눠 처리한다.
