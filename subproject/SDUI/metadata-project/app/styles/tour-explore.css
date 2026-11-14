@@ -122,6 +122,8 @@
 /* 근거 검수 대기 성지 — '확인 필요' 표시와 툴팁 */
 .verification-badge { position: relative; display: inline-flex; align-items: center; gap: 4px; width: fit-content; margin-top: 6px; padding: 2px 8px; border: 1px solid #B45309; border-radius: 20px; background: #FEF3C7; color: #78350F; font-size: 11px; font-weight: 700; line-height: 1.4; cursor: help; }
 .verification-badge::before { content: '!'; display: inline-grid; place-items: center; width: 12px; height: 12px; border-radius: 50%; background: #B45309; color: #fff; font-size: 9px; }
+.verification-badge--unofficial { border-color: #6D28D9; background: #EDE9FE; color: #4C1D95; }
+.verification-badge--unofficial::before { content: '?'; background: #6D28D9; }
 .verification-badge:focus-visible { outline: 2px solid #1D4ED8; outline-offset: 2px; }
 .verification-badge__tip { position: absolute; bottom: calc(100% + 6px); left: 0; z-index: 5; width: max-content; max-width: min(260px, 70vw); padding: 8px 10px; border-radius: 8px; background: #111; color: #fff; font-size: 11px; font-weight: 500; line-height: 1.5; white-space: normal; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s; }
 .verification-badge:hover .verification-badge__tip, .verification-badge:focus-visible .verification-badge__tip { opacity: 1; visibility: visible; }

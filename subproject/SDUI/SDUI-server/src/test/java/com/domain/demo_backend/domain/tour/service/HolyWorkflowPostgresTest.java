@@ -52,6 +52,7 @@ class HolyWorkflowPostgresTest {
     @Autowired ObjectMapper json;
     @Autowired UserRepository users;
     @Autowired JdbcTemplate jdbc;
+    @Autowired com.domain.demo_backend.domain.tour.domain.TourPoiRepository tourPois;
     @MockBean RefreshTokenRepository refreshTokenRepository;
     CustomUserDetails member,admin;
     @BeforeAll void identities() {
@@ -174,6 +175,33 @@ class HolyWorkflowPostgresTest {
             jdbc.update("DELETE FROM holy_content WHERE content_sqno=?",content);
         }
     }
+    @Test void unofficialEvidenceNeedsReviewerAndOutranksPendingButNotVerified() {
+        Long artist=jdbc.queryForObject("SELECT artist_id FROM artist WHERE approved_yn='Y' ORDER BY artist_id LIMIT 1",Long.class);
+        Long poi=jdbc.queryForObject("SELECT poi_sqno FROM tour_poi WHERE source='CRAWL' AND review_status='APPROVED' AND map_y IS NOT NULL AND map_x IS NOT NULL AND addr IS NOT NULL LIMIT 1",Long.class);
+        Long content=jdbc.queryForObject("INSERT INTO holy_content(source_ref,name,category) VALUES (?,'Synthetic unofficial test','kpop') RETURNING content_sqno",Long.class,"unoff-"+UUID.randomUUID().toString().replace("-","").substring(0,24));
+        String insert="""
+            INSERT INTO artist_place_evidence(content_sqno,artist_id,poi_sqno,poi_name_snapshot,poi_address_snapshot,poi_lat_snapshot,poi_lon_snapshot,
+              action,source_url,artist_evidence,place_evidence,action_evidence,locator,status,reviewer)
+            SELECT ?,?,p.poi_sqno,p.title,p.addr,p.map_y,p.map_x,'MV','https://example.test/fan','SYNTHETIC','SYNTHETIC','SYNTHETIC','00:10',?,? FROM tour_poi p WHERE p.poi_sqno=?
+            RETURNING evidence_id""";
+        try {
+            jdbc.update("INSERT INTO holy_content_artist(content_sqno,artist_id,identity_basis) VALUES (?,?,'SYNTHETIC')",content,artist);
+            jdbc.update("INSERT INTO holy_content_poi(content_sqno,poi_sqno) VALUES (?,?)",content,poi);
+            assertThatThrownBy(()->jdbc.queryForObject(insert,Long.class,content,artist,"UNOFFICIAL",null,poi))
+                .hasMessageContaining("artist_place_evidence_unofficial_reviewer_check");
+            jdbc.queryForObject(insert,Long.class,content,artist,"PENDING",null,poi);
+            assertThat(tourPois.findEvidenceBadgesForContent(List.of(poi),content)).extracting(r->r[1].toString()).containsExactly("PENDING");
+            Long unofficial=jdbc.queryForObject(insert,Long.class,content,artist,"UNOFFICIAL","SYNTHETIC reviewer",poi);
+            assertThat(tourPois.findEvidenceBadgesForContent(List.of(poi),content)).extracting(r->r[1].toString()).containsExactly("UNOFFICIAL");
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM verified_visit_catalog WHERE poi_sqno=?",Integer.class,poi)).isZero();
+            jdbc.update("UPDATE artist_place_evidence SET status='VERIFIED',verified_at=now(),review_by=now()+interval '1 day' WHERE evidence_id=?",unofficial);
+            assertThat(tourPois.findEvidenceBadgesForContent(List.of(poi),content)).isEmpty();
+        } finally {
+            jdbc.update("DELETE FROM artist_place_evidence WHERE content_sqno=?",content);
+            jdbc.update("DELETE FROM holy_content_poi WHERE content_sqno=?",content);
+            jdbc.update("DELETE FROM holy_content_artist WHERE content_sqno=?",content);
+            jdbc.update("DELETE FROM holy_content WHERE content_sqno=?",content);
+        }
+    }
 
 }
-

@@ -65,20 +65,27 @@ class TourServiceHolyTest {
     }
 
     @Test
-    @DisplayName("근거가 검수 대기(PENDING)뿐인 성지는 verificationStatus=PENDING, 나머지는 null")
-    void holyMarksPendingEvidence() {
+    @DisplayName("근거 상태대로 PENDING('확인 필요')·UNOFFICIAL('비공식')을 붙이고, 근거가 없으면 null")
+    void holyMarksPendingAndUnofficialEvidence() {
         TourPoi pending = holy("holy-p", "성지P", "SEVENTEEN");
         pending.setPoiSqno(10L);
         TourPoi plain = holy("holy-q", "성지Q", "SEVENTEEN");
         plain.setPoiSqno(11L);
+        TourPoi unofficial = holy("holy-u", "성지U", "BTS");
+        unofficial.setPoiSqno(12L);
+        TourPoi unsaved = holy("holy-n", "성지N", "BTS");
         when(tourPoiRepository.findHolyPoisByRegion(
                 eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
-                .thenReturn(List.of(pending, plain));
-        when(tourPoiRepository.findPendingEvidencePoiSqnos(any())).thenReturn(List.of(10L));
+                .thenReturn(List.of(pending, plain, unofficial, unsaved));
+        when(tourPoiRepository.findEvidenceBadges(any())).thenReturn(List.of(
+                new Object[]{10L, "PENDING"},
+                new Object[]{12, "UNOFFICIAL"},
+                new Object[]{11L, "SOMETHING_ELSE"}));
 
         List<HolyPoiDto> result = tourService.getHolyPois();
 
-        assertThat(result).extracting(HolyPoiDto::verificationStatus).containsExactly("PENDING", null);
+        assertThat(result).extracting(HolyPoiDto::verificationStatus)
+                .containsExactly("PENDING", null, "UNOFFICIAL", null);
     }
 
     @Test
@@ -89,12 +96,12 @@ class TourServiceHolyTest {
         when(tourPoiRepository.findHolyPoisByRegion(
                 eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), eq(527L), isNull(), any(Pageable.class)))
                 .thenReturn(List.of(shared));
-        when(tourPoiRepository.findPendingEvidencePoiSqnosForContent(any(), eq(527L))).thenReturn(List.of());
+        when(tourPoiRepository.findEvidenceBadgesForContent(any(), eq(527L))).thenReturn(List.of());
 
         List<HolyPoiDto> result = tourService.getHolyPois(null, null, null, 527L);
 
         assertThat(result).extracting(HolyPoiDto::verificationStatus).containsExactly((String) null);
-        verify(tourPoiRepository, never()).findPendingEvidencePoiSqnos(any());
+        verify(tourPoiRepository, never()).findEvidenceBadges(any());
     }
 
     @Test
@@ -105,7 +112,7 @@ class TourServiceHolyTest {
         when(tourPoiRepository.findHolyPoisByRegion(
                 eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
                 .thenReturn(List.of(poi));
-        when(tourPoiRepository.findPendingEvidencePoiSqnos(any())).thenThrow(new RuntimeException("no table"));
+        when(tourPoiRepository.findEvidenceBadges(any())).thenThrow(new RuntimeException("no table"));
 
         assertThat(tourService.getHolyPois()).extracting(HolyPoiDto::verificationStatus).containsExactly((String) null);
     }

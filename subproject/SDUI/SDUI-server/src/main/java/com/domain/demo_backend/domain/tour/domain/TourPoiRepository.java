@@ -64,35 +64,42 @@ public interface TourPoiRepository extends JpaRepository<TourPoi, Long> {
     Optional<TourPoi> findFirstBySourceUrlAndReviewStatus(String sourceUrl, String reviewStatus);
 
     /**
-     * 아티스트 관계 근거가 검수 대기(PENDING)뿐인 장소 — 화면에 '확인 필요'로 표시한다.
+     * 확정(VERIFIED) 근거가 없는 장소의 표시 상태 — [poi_sqno, 'UNOFFICIAL' | 'PENDING'].
+     * 비공식(UNOFFICIAL) 근거가 하나라도 있으면 '비공식', 검수 대기(PENDING)뿐이면 '확인 필요'.
      * 유효한 VERIFIED 근거가 하나라도 있으면 제외한다. 근거 행이 없는 장소도 포함하지 않는다.
      */
     @Query(value = """
-            SELECT DISTINCT e.poi_sqno FROM artist_place_evidence e
-            WHERE e.poi_sqno IN (:poiSqnos) AND e.status = 'PENDING'
+            SELECT e.poi_sqno,
+                   CASE WHEN bool_or(e.status = 'UNOFFICIAL') THEN 'UNOFFICIAL' ELSE 'PENDING' END
+            FROM artist_place_evidence e
+            WHERE e.poi_sqno IN (:poiSqnos) AND e.status IN ('PENDING', 'UNOFFICIAL')
               AND NOT EXISTS (
                     SELECT 1 FROM artist_place_evidence v
                     WHERE v.poi_sqno = e.poi_sqno AND v.status = 'VERIFIED'
                       AND v.verified_at <= now() AND v.review_by > now())
+            GROUP BY e.poi_sqno
             """, nativeQuery = true)
-    List<Long> findPendingEvidencePoiSqnos(@Param("poiSqnos") java.util.Collection<Long> poiSqnos);
+    List<Object[]> findEvidenceBadges(@Param("poiSqnos") java.util.Collection<Long> poiSqnos);
 
     /**
      * 작품/아티스트(:contentSqno) 화면용 — 그 콘텐츠에 연결된 아티스트의 근거만 본다.
      * 같은 장소가 다른 아티스트로 PENDING이어도(예: 광안리해수욕장=ATEEZ) 이 화면에는 표시하지 않는다.
      */
     @Query(value = """
-            SELECT DISTINCT e.poi_sqno FROM artist_place_evidence e
+            SELECT e.poi_sqno,
+                   CASE WHEN bool_or(e.status = 'UNOFFICIAL') THEN 'UNOFFICIAL' ELSE 'PENDING' END
+            FROM artist_place_evidence e
             JOIN holy_content_artist hca ON hca.artist_id = e.artist_id AND hca.content_sqno = :contentSqno
-            WHERE e.poi_sqno IN (:poiSqnos) AND e.status = 'PENDING'
+            WHERE e.poi_sqno IN (:poiSqnos) AND e.status IN ('PENDING', 'UNOFFICIAL')
               AND NOT EXISTS (
                     SELECT 1 FROM artist_place_evidence v
                     JOIN holy_content_artist vh ON vh.artist_id = v.artist_id AND vh.content_sqno = :contentSqno
                     WHERE v.poi_sqno = e.poi_sqno AND v.status = 'VERIFIED'
                       AND v.verified_at <= now() AND v.review_by > now())
+            GROUP BY e.poi_sqno
             """, nativeQuery = true)
-    List<Long> findPendingEvidencePoiSqnosForContent(@Param("poiSqnos") java.util.Collection<Long> poiSqnos,
-                                                     @Param("contentSqno") Long contentSqno);
+    List<Object[]> findEvidenceBadgesForContent(@Param("poiSqnos") java.util.Collection<Long> poiSqnos,
+                                                @Param("contentSqno") Long contentSqno);
 
     /**
      * 사진 보강 대상: 승인된 성지 중 대표 이미지가 없고 좌표가 있는 행.
