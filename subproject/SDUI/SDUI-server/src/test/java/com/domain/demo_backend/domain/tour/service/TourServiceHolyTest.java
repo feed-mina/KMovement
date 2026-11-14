@@ -82,6 +82,22 @@ class TourServiceHolyTest {
     }
 
     @Test
+    @DisplayName("작품/아티스트 화면은 그 콘텐츠 아티스트의 근거로만 '확인 필요'를 판단한다")
+    void holyPendingIsScopedToContentArtist() {
+        TourPoi shared = holy("holy-s", "광안리해수욕장", "ATEEZ");
+        shared.setPoiSqno(2212L);
+        when(tourPoiRepository.findHolyPoisByRegion(
+                eq("TOURAPI"), eq("APPROVED"), isNull(), isNull(), isNull(), eq(527L), isNull(), any(Pageable.class)))
+                .thenReturn(List.of(shared));
+        when(tourPoiRepository.findPendingEvidencePoiSqnosForContent(any(), eq(527L))).thenReturn(List.of());
+
+        List<HolyPoiDto> result = tourService.getHolyPois(null, null, null, 527L);
+
+        assertThat(result).extracting(HolyPoiDto::verificationStatus).containsExactly((String) null);
+        verify(tourPoiRepository, never()).findPendingEvidencePoiSqnos(any());
+    }
+
+    @Test
     @DisplayName("근거 상태 조회가 실패해도 성지 목록은 표시 없이 돌려준다")
     void holyIgnoresEvidenceLookupFailure() {
         TourPoi poi = holy("holy-p", "성지P", "SEVENTEEN");

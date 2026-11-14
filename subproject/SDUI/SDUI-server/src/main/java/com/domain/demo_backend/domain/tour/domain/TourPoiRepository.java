@@ -78,6 +78,23 @@ public interface TourPoiRepository extends JpaRepository<TourPoi, Long> {
     List<Long> findPendingEvidencePoiSqnos(@Param("poiSqnos") java.util.Collection<Long> poiSqnos);
 
     /**
+     * 작품/아티스트(:contentSqno) 화면용 — 그 콘텐츠에 연결된 아티스트의 근거만 본다.
+     * 같은 장소가 다른 아티스트로 PENDING이어도(예: 광안리해수욕장=ATEEZ) 이 화면에는 표시하지 않는다.
+     */
+    @Query(value = """
+            SELECT DISTINCT e.poi_sqno FROM artist_place_evidence e
+            JOIN holy_content_artist hca ON hca.artist_id = e.artist_id AND hca.content_sqno = :contentSqno
+            WHERE e.poi_sqno IN (:poiSqnos) AND e.status = 'PENDING'
+              AND NOT EXISTS (
+                    SELECT 1 FROM artist_place_evidence v
+                    JOIN holy_content_artist vh ON vh.artist_id = v.artist_id AND vh.content_sqno = :contentSqno
+                    WHERE v.poi_sqno = e.poi_sqno AND v.status = 'VERIFIED'
+                      AND v.verified_at <= now() AND v.review_by > now())
+            """, nativeQuery = true)
+    List<Long> findPendingEvidencePoiSqnosForContent(@Param("poiSqnos") java.util.Collection<Long> poiSqnos,
+                                                     @Param("contentSqno") Long contentSqno);
+
+    /**
      * 사진 보강 대상: 승인된 성지 중 대표 이미지가 없고 좌표가 있는 행.
      * 좌표가 없으면 TourAPI 반경 검색을 걸 수 없으므로 애초에 제외한다.
      * 한 번에 다 돌리면 TourAPI 쿼터를 넘기므로 Pageable 로 나눠 처리한다.
