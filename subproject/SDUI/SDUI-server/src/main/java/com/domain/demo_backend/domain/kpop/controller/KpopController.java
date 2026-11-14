@@ -3,6 +3,7 @@ package com.domain.demo_backend.domain.kpop.controller;
 import com.domain.demo_backend.global.common.response.ApiResponse;
 import com.domain.demo_backend.global.security.CustomUserDetails;
 import com.domain.demo_backend.domain.kpop.service.KpopAnalysisService;
+import com.domain.demo_backend.domain.kpop.service.KpopArtistService;
 import com.domain.demo_backend.domain.kpop.service.KpopCacheService;
 import com.domain.demo_backend.domain.kpop.service.KpopProductService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -11,8 +12,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,7 +31,7 @@ import java.util.concurrent.Executor;
 @RequestMapping("/api/v1/kpop")
 public class KpopController {
 
-    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final KpopArtistService artistService;
     private final KpopAnalysisService analysisService;
     private final KpopProductService productService;
     private final KpopCacheService cacheService;
@@ -41,14 +40,14 @@ public class KpopController {
 
     @Autowired
     public KpopController(
-            NamedParameterJdbcTemplate jdbcTemplate,
+            KpopArtistService artistService,
             KpopAnalysisService analysisService,
             KpopProductService productService,
             @Qualifier("sseExecutor") Executor sseExecutor,
             KpopCacheService cacheService,
             EventCatalogService eventCatalog
     ) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.artistService = artistService;
         this.analysisService = analysisService;
         this.productService = productService;
         this.sseExecutor = sseExecutor;
@@ -56,79 +55,16 @@ public class KpopController {
         this.eventCatalog = eventCatalog;
     }
 
-    public KpopController(NamedParameterJdbcTemplate jdbcTemplate, KpopAnalysisService analysisService,
-                          KpopProductService productService, Executor sseExecutor, KpopCacheService cacheService) {
-        this(jdbcTemplate, analysisService, productService, sseExecutor, cacheService, new EventCatalogService(jdbcTemplate));
-    }
-
-    public KpopController(
-            NamedParameterJdbcTemplate jdbcTemplate,
-            KpopAnalysisService analysisService,
-            KpopProductService productService,
-            Executor sseExecutor
-    ) {
-        this(jdbcTemplate, analysisService, productService, sseExecutor, null);
-    }
-
     @GetMapping("/artists")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> artists(
             @RequestParam(name = "q", required = false) String q
     ) {
-        String sql = """
-                SELECT artist_id AS id, slug, name_ko AS "nameKo", name_en AS "nameEn",
-                       profile, image_url AS "imageUrl", official_url AS "officialUrl",
-                       instagram_url AS "instagramUrl", youtube_url AS "youtubeUrl", x_url AS "xUrl"
-                FROM artist
-                WHERE approved_yn = 'Y'
-                  AND (CAST(:q AS text) IS NULL
-                       OR name_ko ILIKE CONCAT('%', :q, '%')
-                       OR name_en ILIKE CONCAT('%', :q, '%'))
-                ORDER BY sort_order ASC, name_ko ASC
-                """;
-        Map<String, Object> keyParts = nullableParts("q", blankToNull(q));
-        List<Map<String, Object>> rows = cachedCatalog(
-                "artists",
-                keyParts,
-                Duration.ofMinutes(5),
-                new TypeReference<List<Map<String, Object>>>() {},
-                () -> jdbcTemplate.queryForList(sql, params("q", blankToNull(q)))
-        );
-        return ResponseEntity.ok(ApiResponse.success(rows));
+        return ResponseEntity.ok(ApiResponse.success(artistService.artists(q)));
     }
 
     @GetMapping("/artists/{artistId}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> artist(@PathVariable String artistId) {
-        String artistRef = normalizeArtistRef(artistId);
-        Map<String, Object> artist = cachedCatalog(
-                "artist_detail",
-                Map.of("artistRef", artistRef),
-                Duration.ofMinutes(5),
-                new TypeReference<Map<String, Object>>() {},
-                () -> {
-                    // artist_id를 파라미터로 캐스팅하면 slug 요청("aespa")이 bind 단계에서
-                    // bigint 변환에 실패한다. 파라미터가 아니라 컬럼을 text로 캐스팅한다.
-                    Map<String, Object> loaded = new LinkedHashMap<>(one("""
-                            SELECT artist_id AS id, slug, name_ko AS "nameKo", name_en AS "nameEn",
-                                   profile, image_url AS "imageUrl", official_url AS "officialUrl",
-                                   instagram_url AS "instagramUrl", youtube_url AS "youtubeUrl", x_url AS "xUrl"
-                            FROM artist
-                            WHERE approved_yn = 'Y'
-                              AND (LOWER(slug) = LOWER(:artistRef) OR CAST(artist_id AS text) = :artistRef)
-                            """, params("artistRef", artistRef)));
-                    Long resolvedArtistId = ((Number) loaded.get("id")).longValue();
-                    // 상세는 활동 이력까지 보여주는 자리라 지난 일정도 함께 내려보낸다. 다만 목록이
-                    // 1년 전부터 시작하지 않도록 다가오는 일정을 앞으로 끌어올린다(V119 타임라인 적재).
-                    loaded.put("events", jdbcTemplate.queryForList("""
-                            SELECT event_id AS id, artist_id AS "artistId", title_ko AS "titleKo", title_en AS "titleEn",
-                                   region, venue, event_date AS date, official_url AS "officialUrl"
-                            FROM event
-                            WHERE artist_id = :artistId AND approved_yn = 'Y'
-                            ORDER BY (event_date >= CURRENT_DATE) DESC, event_date ASC
-                            """, params("artistId", resolvedArtistId)));
-                    return loaded;
-                }
-        );
-        return ResponseEntity.ok(ApiResponse.success(artist));
+        return ResponseEntity.ok(ApiResponse.success(artistService.artist(artistId)));
     }
 
     @GetMapping("/events")
@@ -161,7 +97,7 @@ public class KpopController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
-        upsert("artist_follow", "artist_id", artistId, user.getUserSqno());
+        artistService.follow(artistId, user.getUserSqno());
         return ResponseEntity.ok(ApiResponse.success(Map.of("artistId", artistId, "followed", true)));
     }
 
@@ -171,8 +107,7 @@ public class KpopController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
-        jdbcTemplate.update("DELETE FROM artist_follow WHERE user_sqno = :userSqno AND artist_id = :id",
-                params("userSqno", user.getUserSqno()).addValue("id", artistId));
+        artistService.unfollow(artistId, user.getUserSqno());
         return ResponseEntity.ok(ApiResponse.success(Map.of("artistId", artistId, "followed", false)));
     }
 
@@ -182,7 +117,7 @@ public class KpopController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
-        upsert("event_bookmark", "event_id", eventId, user.getUserSqno());
+        artistService.bookmark(eventId, user.getUserSqno());
         return ResponseEntity.ok(ApiResponse.success(Map.of("eventId", eventId, "bookmarked", true)));
     }
 
@@ -192,8 +127,7 @@ public class KpopController {
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
-        jdbcTemplate.update("DELETE FROM event_bookmark WHERE user_sqno = :userSqno AND event_id = :id",
-                params("userSqno", user.getUserSqno()).addValue("id", eventId));
+        artistService.unbookmark(eventId, user.getUserSqno());
         return ResponseEntity.ok(ApiResponse.success(Map.of("eventId", eventId, "bookmarked", false)));
     }
 
@@ -337,41 +271,14 @@ public class KpopController {
         }
     }
 
-    private Map<String, Object> one(String sql, MapSqlParameterSource params) {
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, params);
-        if (rows.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "K-POP resource not found.");
-        }
-        return rows.get(0);
-    }
-
-    private void upsert(String table, String column, Long refId, Long userSqno) {
-        String kind = table.equals("artist_follow") ? "artists" : "events";
-        new com.domain.demo_backend.domain.kpop.service.PersonalSavedService(jdbcTemplate).save(kind, refId, userSqno);
-    }
-
     private void requireUser(CustomUserDetails user) {
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required.");
         }
     }
 
-    private MapSqlParameterSource params(String name, Object value) {
-        return new MapSqlParameterSource().addValue(name, value);
-    }
-
     private Object blankToNull(String value) {
         return value == null || value.isBlank() ? null : value;
-    }
-
-        private String normalizeArtistRef(String value) {
-                return value == null ? "" : value.trim();
-        }
-
-    private Map<String, Object> nullableParts(String name, Object value) {
-        Map<String, Object> parts = new LinkedHashMap<>();
-        parts.put(name, value);
-        return parts;
     }
 
     private <T> T cachedCatalog(

@@ -9,7 +9,6 @@ import com.domain.demo_backend.domain.user.domain.UserRepository;
 import com.domain.demo_backend.global.security.CustomUserDetails;
 import com.domain.demo_backend.global.security.JwtUtil;
 import com.github.pagehelper.PageInfo;
-import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +27,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -113,7 +113,7 @@ public class ContentService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Content> viewContentItem(ContentRequest contentReq, Authentication authentication) throws NotFoundException {
+    public Optional<Content> viewContentItem(ContentRequest contentReq, Authentication authentication) {
 
         log.debug("viewContentItem 서비스 로직 진입: {}", contentReq);
         if (contentReq.getContentId() == null) {
@@ -127,7 +127,7 @@ public class ContentService {
         Optional<Content> contentOpt = contentRepository.findByContentIdAndDelYn(contentId, "N");
 
         if (contentOpt.isEmpty()) {
-            throw new NotFoundException("해당 콘텐츠를 찾을 수 없습니다.");
+            throw new NoSuchElementException("해당 콘텐츠를 찾을 수 없습니다.");
         }
 
         Content content = contentOpt.get();
@@ -138,7 +138,7 @@ public class ContentService {
             boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
             if (!isOwner && !isAdmin) {
-                throw new NotFoundException("해당 콘텐츠를 찾을 수 없습니다.");
+                throw new NoSuchElementException("해당 콘텐츠를 찾을 수 없습니다.");
             }
         }
 

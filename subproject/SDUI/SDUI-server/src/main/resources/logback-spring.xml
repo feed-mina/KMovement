@@ -27,10 +27,6 @@
         <appender-ref ref="FILE"/>
     </root>
 
-    <!-- MyBatis SQL 쿼리 로깅 -->
-    <logger name="org.mybatis" level="DEBUG"/>
-    <logger name="org.apache.ibatis" level="DEBUG"/>
-
     <!-- Spring JDBC(SQL 실행 로그) -->
     <logger name="org.springframework.jdbc.core" level="DEBUG"/>
     <logger name="org.springframework.jdbc.datasource" level="DEBUG"/>

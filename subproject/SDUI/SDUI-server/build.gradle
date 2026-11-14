@@ -30,12 +30,12 @@ dependencies {
 
     // 2. 데이터베이스
     implementation 'org.postgresql:postgresql'
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-    implementation('com.github.pagehelper:pagehelper-spring-boot-starter:2.1.0') {
+    // 데이터 접근 규칙: 엔티티 단위 저장·조회는 JPA, 여러 표 조회·query_master 실행은 JdbcTemplate.
+    // MyBatis는 쓰는 곳이 없어 제거했다. PageInfo(목록 응답 모양)만 쓰므로 starter 대신 pagehelper 본체만 둔다.
+    implementation('com.github.pagehelper:pagehelper:6.1.0') {
         exclude group: 'com.github.jsqlparser', module: 'jsqlparser'
     }
     implementation 'com.github.jsqlparser:jsqlparser:4.6'
-    implementation 'org.apache.commons:commons-dbcp2:2.9.0'
     // 3. 보안 및 유틸리티
     compileOnly 'org.projectlombok:lombok:1.18.38'
     annotationProcessor 'org.projectlombok:lombok:1.18.38'
@@ -48,7 +48,6 @@ dependencies {
 
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
     implementation 'net.nurigo:sdk:4.3.0'
-    implementation 'dom4j:dom4j:1.1'
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
     // 4. 테스트
