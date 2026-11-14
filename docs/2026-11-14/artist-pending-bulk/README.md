@@ -45,6 +45,14 @@ Spring 재배포는 필요 없다(PR #312 이미지가 이미 운영 중).
 데이터셋 이름은 다르지만 실제로는 그 아티스트 이야기인 곳이 15곳 정도 있다
 (예: BTS 정국·97즈, BLACKPINK 블핑하우스). 결과 2 목록에서 사람이 확인한 뒤 따로 올린다.
 
+## 운영 상태와 정리 SQL (2026-11-14 11:20 KST)
+
+운영에는 이 SQL의 **이전 판(데이터셋 표기 확인 없음)** 으로 566곳이 이미 PENDING으로 올라갔다(백업
+`/docker/kmovement-g1/backups/kmovement-20261114-pre-artist-batch.dump`).
+`fix_artists_pending_attribution.sql` 이 그 566곳 중 다른 가수·드라마·예능으로 적힌 166곳을 REVOKED로 내리고
+남은 400곳의 종류를 다시 매긴다. 운영과 같은 상태를 로컬에서 재현해 돌린 결과가 현재 판 apply SQL을
+빈 상태에서 돌린 결과와 행·종류까지 같았다. 재실행하면 수가 맞지 않아 중단된다(이미 적용됨).
+
 ## SEVENTEEN 정리(별도 승인 필요)
 
 같은 문제가 11-12에 올린 SEVENTEEN 62곳에도 있다. `revoke_seventeen_other_artist_rows.sql` 은
