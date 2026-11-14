@@ -9,43 +9,47 @@ Spring 재배포는 필요 없다(PR #312 이미지가 이미 운영 중).
 
 ## 결과(로컬 운영 사본 기준)
 
-561행 추가, 재실행 시 0행. SEVENTEEN·민규(숨김) 행은 건드리지 않는다.
+400행 추가, 재실행 시 0행. SEVENTEEN·민규(숨김) 행은 건드리지 않는다.
 
-| 아티스트 | 장소 |
-|---|---|
-| BTS | 150 |
-| BLACKPINK | 108 |
-| TWICE | 52 |
-| EXO | 37 |
-| NCT | 33 |
-| Red Velvet | 33 |
-| 아이유(IU) | 27 |
-| TOMORROW X TOGETHER | 26 |
-| G-DRAGON | 21 |
-| (여자)아이들 | 17 |
-| DAY6 | 14 |
-| ATEEZ | 11 |
-| 임영웅 | 11 |
-| ITZY | 9 |
-| 악뮤(AKMU) | 5 |
-| Stray Kids | 4 |
-| 성시경 | 2 |
-| IVE | 1 |
+| 아티스트 | 장소 | 후보 |
+|---|---|---|
+| BTS | 109 | 150 |
+| BLACKPINK | 75 | 108 |
+| TWICE | 30 | 52 |
+| NCT | 30 | 34 |
+| EXO | 25 | 38 |
+| Red Velvet | 24 | 33 |
+| 아이유(IU) | 21 | 27 |
+| TOMORROW X TOGETHER | 19 | 26 |
+| DAY6 | 14 | 14 |
+| ATEEZ | 11 | 12 |
+| (여자)아이들 | 10 | 17 |
+| 임영웅 | 10 | 11 |
+| ITZY | 9 | 10 |
+| G-DRAGON | 9 | 21 |
+| 성시경 | 2 | 2 |
+| IVE | 1 | 1 |
+| 악뮤(AKMU) | 1 | 5 |
+| Stray Kids | 0 | 5 |
 
-종류: 방문(CONTENT_VISIT) 약 470, SNS 약 60, 뮤비(MV) 24, 앨범·화보(ALBUM_PHOTO) 7.
-종류 판정은 SEVENTEEN 규칙에 '뮤비·MV·티저', '재킷·컨셉포토', '트위터·위버스'를 더했다(이 데이터에 이 표기가 많음).
+종류는 SEVENTEEN 규칙에 '뮤비·MV·티저', '재킷·컨셉포토', '트위터·위버스'를 더해 판정했다.
 
-## 일부러 뺀 5건
+## 왜 후보보다 적은가
 
-데이터셋 설명이 그 아티스트가 아닌 사람을 가리켜서, '확인 필요'로도 띄우지 않았다.
+`holy_content_poi` 연결에는 그 아티스트가 아닌 장소가 약 150곳 섞여 있다. 데이터셋(`tour_poi.artist`)에는
+다른 가수(BTOB, 다비치, 보아 …)나 드라마·예능(대장금, 도깨비, 런닝맨 …)으로 적혀 있다.
+그래서 **데이터셋에 그 아티스트 이름으로 적힌 장소만** 올린다(`tmp_dataset_name`).
+이름은 맞지만 설명이 드라마 장면이거나 다른 사람 이야기인 9곳은 번호+이름으로 뺀다(`tmp_excluded`).
+번호·이름이 운영과 다르면 스크립트가 중단된다.
 
-| 아티스트 | 장소 | 데이터셋 설명 | 판단 |
-|---|---|---|---|
-| NCT | 볼하우스 한남 | 제니와 리사가 방문한 볼링장 | BLACKPINK 장소(BLACKPINK 쪽에는 등록됨) |
-| EXO | 성읍랜드 | 로꼬의 Summer Go Loco 뮤비 촬영지 | 로꼬 |
-| ITZY | 파사주 | 제니퍼(예지원)가 셰프를 하고 있는 식당 | 드라마 배역 |
-| ATEEZ | 광안리해수욕장 | 현재의 수현과 태호의 변치 않는 우정이 담긴 장소 | 드라마 장면 |
-| Stray Kids | 광안리해수욕장 | 위와 같음 | 드라마 장면 |
+데이터셋 이름은 다르지만 실제로는 그 아티스트 이야기인 곳이 15곳 정도 있다
+(예: BTS 정국·97즈, BLACKPINK 블핑하우스). 결과 2 목록에서 사람이 확인한 뒤 따로 올린다.
+
+## SEVENTEEN 정리(별도 승인 필요)
+
+같은 문제가 11-12에 올린 SEVENTEEN 62곳에도 있다. `revoke_seventeen_other_artist_rows.sql` 은
+그중 16곳(이승기, 겨울연가, 도깨비, 런닝맨, 로꼬, 로제 뮤비 등)을 삭제하지 않고 REVOKED로 바꾼다.
+고잉세븐틴·세븐틴 리얼리티·97즈 모임 4곳은 남긴다. 로컬에서 PENDING 46 / REVOKED 16 확인.
 
 ## 검수 때 볼 것
 
@@ -58,6 +62,7 @@ Spring 재배포는 필요 없다(PR #312 이미지가 이미 운영 중).
 1. 읽기 전용: `flyway_schema_history` 125 성공, 대상 18명 연결 확인(스크립트 첫 DO 블록이 다르면 중단).
 2. 백업: `pg_dump -Fc` → `/docker/kmovement-g1/backups/kmovement-20261114-pre-artists-pending.dump`
 3. 실행: `psql -U kmovement -d kmovement -v ON_ERROR_STOP=1 -1 -f apply_artists_pending_evidence.sql`
+3-1. (민아님 승인 시) `psql ... -1 -f revoke_seventeen_other_artist_rows.sql` — 되돌리기는 같은 16곳을 `status='PENDING', revoked_at=NULL, revoked_by=NULL` 로.
 4. 확인: `GET /api/v1/tour/holy?contentSqno=415`(BTS) 등에서 `verificationStatus":"PENDING"`.
 5. 되돌리기: 이번에 넣은 행만 지우면 된다.
    `DELETE FROM artist_place_evidence WHERE status='PENDING' AND source_url='https://www.data.go.kr/data/15111405/fileData.do' AND artist_id IN (SELECT artist_id FROM artist WHERE approved_yn='Y' AND slug<>'seventeen');`

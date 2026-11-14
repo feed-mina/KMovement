@@ -11,6 +11,29 @@
 --   이 18명 데이터에는 이 표기가 많아서다. SEVENTEEN 행은 건드리지 않는다.
 -- 실행: psql -v ON_ERROR_STOP=1 -1 -f this_file   (단일 트랜잭션, 재실행 안전)
 
+-- 데이터셋(tour_poi.artist)에 적힌 이름 ↔ 아티스트. 이 이름으로 적힌 장소만 올린다.
+-- holy_content_poi 연결에는 다른 가수·드라마·예능 장소가 섞여 있어서다(약 150곳).
+CREATE TEMP TABLE tmp_dataset_name(slug text, ds text) ON COMMIT DROP;
+INSERT INTO tmp_dataset_name VALUES
+  ('bts','방탄소년단'),('blackpink','블랙핑크'),('TWICE','트와이스'),('EXO','엑소'),('EXO','EXO'),
+  ('NCT','NCT'),('Red Velvet','레드벨벳'),('아이유(IU)','아이유'),('TOMORROW X TOGETHER','TXT'),
+  ('G-DRAGON','지드래곤'),('(여자)아이들','여자아이들'),('DAY6','Day6'),('ATEEZ','ATEEZ'),
+  ('임영웅','임영웅'),('ITZY','Itzy'),('Stray Kids','스트레이키즈'),('악뮤(AKMU)','악뮤'),
+  ('성시경','성시경'),('ive','아이브');
+
+-- 데이터셋 이름은 맞지만 설명이 드라마 장면이나 다른 사람 이야기인 장소(번호+이름으로 고정).
+CREATE TEMP TABLE tmp_excluded(slug text, poi_sqno bigint, title text, why text) ON COMMIT DROP;
+INSERT INTO tmp_excluded VALUES
+  ('ATEEZ',1517,'삼청동 코리아게스트 하우스','드라마 7회 이시우(송강) 장면'),
+  ('EXO',942,'경기영어마을 파주캠퍼스','드라마 차현(이다희)·설지환(이재욱) 장면'),
+  ('EXO',2273,'강촌레일파크','드라마 더 킹 장면'),
+  ('ITZY',6847,'인생네컷 종로익선동한옥거리점','드라마 6회 앤서니(음문석) 장면'),
+  ('NCT',986,'울프강 스테이크 하우스','드라마 5화 경우연(신예은) 장면'),
+  ('NCT',1206,'망원한강공원','드라마 6회 방명수(변요한) 장면'),
+  ('NCT',4299,'두리랜드','보아와 손현주가 방문'),
+  ('TOMORROW X TOGETHER',7096,'우텐더','지호 출연 수요미식회 158회'),
+  ('TOMORROW X TOGETHER',7673,'최인아 책방','드라마 6회 윤태오(지수) 장면');
+
 DO $$
 DECLARE
   expected CONSTANT text[] := ARRAY['bts','blackpink','TWICE','EXO','NCT','Red Velvet','아이유(IU)',
@@ -27,6 +50,16 @@ BEGIN
     AND a.approved_yn = 'Y' AND a.slug <> 'seventeen';
   IF found IS DISTINCT FROM (SELECT array_agg(s ORDER BY s) FROM unnest(expected) s) THEN
     RAISE EXCEPTION 'audited artist set differs from the 18 expected: %', found;
+  END IF;
+  -- 아래에서 번호로 빼는 장소가 운영에서도 같은 장소인지 확인(번호·이름이 다르면 중단).
+  IF EXISTS (SELECT 1 FROM tmp_excluded x WHERE NOT EXISTS (
+      SELECT 1 FROM artist a
+      JOIN holy_content_artist hca ON hca.artist_id = a.artist_id
+       AND hca.identity_basis = '2026-10-25 audited explicit identity; no visit verification'
+      JOIN holy_content_poi hcp ON hcp.content_sqno = hca.content_sqno
+      JOIN tour_poi p ON p.poi_sqno = hcp.poi_sqno
+      WHERE a.slug = x.slug AND p.poi_sqno = x.poi_sqno AND p.title = x.title)) THEN
+    RAISE EXCEPTION 'excluded (artist, poi) pairs do not match this database';
   END IF;
 END $$;
 
@@ -56,24 +89,22 @@ JOIN holy_content_poi hcp ON hcp.content_sqno = hca.content_sqno
 JOIN tour_poi p ON p.poi_sqno = hcp.poi_sqno
 WHERE hca.identity_basis = '2026-10-25 audited explicit identity; no visit verification'
   AND p.map_y IS NOT NULL AND p.map_x IS NOT NULL AND p.addr IS NOT NULL
+  AND p.content_id IS NOT NULL
+  AND NULLIF(trim(p.addr), '') IS NOT NULL
+  AND p.review_status = 'APPROVED'
   AND NOT EXISTS (SELECT 1 FROM artist_place_evidence e WHERE e.poi_sqno = p.poi_sqno AND e.artist_id = a.artist_id)
-  -- 데이터셋 설명이 다른 사람을 가리키는 5건은 '확인 필요'로도 띄우지 않는다(README 참고).
-  AND (a.slug, p.title) NOT IN (
-    ('NCT','볼하우스 한남'),            -- "제니와 리사가 방문한 볼링장" = BLACKPINK
-    ('EXO','성읍랜드'),                 -- "로꼬의 Summer Go Loco 뮤비" = 로꼬
-    ('ITZY','파사주'),                  -- "제니퍼(예지원)가 셰프" = 드라마 배역
-    ('ATEEZ','광안리해수욕장'),         -- "현재의 수현과 태호의 우정" = 드라마 장면
-    ('Stray Kids','광안리해수욕장'))
+  AND EXISTS (SELECT 1 FROM tmp_dataset_name m WHERE m.slug = a.slug AND m.ds = p.artist)
+  AND NOT EXISTS (SELECT 1 FROM tmp_excluded x WHERE x.slug = a.slug AND x.poi_sqno = p.poi_sqno)
 ORDER BY a.artist_id, p.poi_sqno, hcp.content_sqno;
 
 -- 결과 1: 아티스트별 근거 행 수(상태·종류별).
 SELECT a.slug, e.status, e.action, count(*)
 FROM artist_place_evidence e JOIN artist a USING (artist_id)
 GROUP BY 1,2,3 ORDER BY 1,2,3;
--- 결과 2: 연결은 됐지만 근거가 없는 장소. 위에서 일부러 뺀 5행만 나와야 정상(그 외는 좌표·주소 누락 등).
-SELECT a.slug, p.poi_sqno, p.title
+-- 결과 2: 연결은 됐지만 올리지 않은 장소(다른 이름으로 적힘·제외 목록·좌표 누락). 사람이 훑어볼 목록.
+SELECT a.slug, p.poi_sqno, p.title, p.artist AS dataset_artist
 FROM holy_content_artist hca
-JOIN artist a ON a.artist_id = hca.artist_id AND a.approved_yn = 'Y'
+JOIN artist a ON a.artist_id = hca.artist_id AND a.approved_yn = 'Y' AND a.slug <> 'seventeen'
 JOIN holy_content_poi hcp ON hcp.content_sqno = hca.content_sqno
 JOIN tour_poi p ON p.poi_sqno = hcp.poi_sqno
 WHERE hca.identity_basis = '2026-10-25 audited explicit identity; no visit verification'
