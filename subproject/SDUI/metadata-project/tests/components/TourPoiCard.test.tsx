@@ -1,7 +1,7 @@
 import React from 'react';
 import {fireEvent, render, screen} from '@testing-library/react';
 import TourPoiCard, { shortAddress } from '@/components/plugins/travel/TourPoiCard';
-import VerificationBadge, { PENDING_TOOLTIP } from '@/components/plugins/travel/VerificationBadge';
+import VerificationBadge, { PENDING_TOOLTIP, UNOFFICIAL_TOOLTIP } from '@/components/plugins/travel/VerificationBadge';
 
 const basePoi = {
     contentId: 'holy-1',
@@ -19,6 +19,22 @@ describe('TourPoiCard', () => {
         expect(badge).toHaveTextContent('확인 필요');
         expect(badge).toHaveAttribute('title', PENDING_TOOLTIP);
         expect(badge).not.toHaveAttribute('tabindex');
+    });
+
+    it('팬 자료로만 확인된(UNOFFICIAL) 성지에는 비공식 표시와 툴팁을 붙인다', () => {
+        render(
+            <TourPoiCard poi={{...basePoi, verificationStatus: 'UNOFFICIAL'}} isSaved={false} onOpen={jest.fn()} onToggleSave={jest.fn()}/>,
+        );
+        const badge = screen.getByTestId('verification-badge');
+        expect(badge).toHaveTextContent('비공식');
+        expect(badge).not.toHaveTextContent('확인 필요');
+        expect(badge).toHaveAttribute('title', UNOFFICIAL_TOOLTIP);
+        expect(badge).toHaveClass('verification-badge--unofficial');
+    });
+
+    it('모르는 상태 값에는 표시를 만들지 않는다', () => {
+        render(<VerificationBadge status="VERIFIED"/>);
+        expect(screen.queryByTestId('verification-badge')).not.toBeInTheDocument();
     });
 
     it('검수 대기가 아니면 확인 필요 표시를 만들지 않는다', () => {

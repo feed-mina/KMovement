@@ -112,9 +112,9 @@ public class TourService {
         List<TourPoi> rows = tourPoiRepository
                 .findHolyPoisByRegion(SOURCE_TOURAPI, REVIEW_APPROVED, areaCode, sigunguCode,
                         sigunguName, contentSqno, kind, PageRequest.of(0, HOLY_MAX_RESULTS));
-        java.util.Set<Long> pending = pendingEvidencePoiSqnos(rows, contentSqno);
+        java.util.Map<Long, String> badges = evidenceBadges(rows, contentSqno);
         List<HolyPoiDto> pois = rows.stream()
-                .map(p -> HolyPoiDto.from(p, p.getPoiSqno() != null && pending.contains(p.getPoiSqno())))
+                .map(p -> HolyPoiDto.from(p, p.getPoiSqno() == null ? null : badges.get(p.getPoiSqno())))
                 .toList();
         log.info("[TourService] 성지 POI 조회 - area={}, sigungu={}, sigunguName={}, content={}, kind={}, {}건",
                 areaCode, sigunguCode, sigunguName, contentSqno, kind, pois.size());
@@ -125,17 +125,26 @@ public class TourService {
      * 근거 조회가 실패해도 성지 목록은 그대로 보여준다(표시만 빠진다).
      * 작품/아티스트 화면(contentSqno)이면 그 아티스트의 근거만 본다.
      */
-    private java.util.Set<Long> pendingEvidencePoiSqnos(List<TourPoi> rows, Long contentSqno) {
+    private java.util.Map<Long, String> evidenceBadges(List<TourPoi> rows, Long contentSqno) {
         List<Long> ids = rows.stream().map(TourPoi::getPoiSqno).filter(java.util.Objects::nonNull).toList();
-        if (ids.isEmpty()) return java.util.Set.of();
+        if (ids.isEmpty()) return java.util.Map.of();
         try {
-            List<Long> found = contentSqno == null
-                    ? tourPoiRepository.findPendingEvidencePoiSqnos(ids)
-                    : tourPoiRepository.findPendingEvidencePoiSqnosForContent(ids, contentSqno);
-            return found == null ? java.util.Set.of() : new java.util.HashSet<>(found);
+            List<Object[]> found = contentSqno == null
+                    ? tourPoiRepository.findEvidenceBadges(ids)
+                    : tourPoiRepository.findEvidenceBadgesForContent(ids, contentSqno);
+            java.util.Map<Long, String> out = new java.util.HashMap<>();
+            if (found == null) return out;
+            for (Object[] row : found) {
+                if (row == null || row.length < 2 || row[0] == null || row[1] == null) continue;
+                String status = row[1].toString();
+                if (HolyPoiDto.PENDING.equals(status) || HolyPoiDto.UNOFFICIAL.equals(status)) {
+                    out.put(((Number) row[0]).longValue(), status);
+                }
+            }
+            return out;
         } catch (RuntimeException e) {
             log.warn("[TourService] 근거 검수 상태 조회 실패 - 표시 없이 진행: {}", e.getMessage());
-            return java.util.Set.of();
+            return java.util.Map.of();
         }
     }
 
