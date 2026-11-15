@@ -21,6 +21,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
@@ -32,6 +34,9 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+
+    @Value("${kride.legacy.websocket.enabled:false}")
+    private boolean legacyWebSocketEnabled;
     private final RefreshTokenRepository refreshTokenRepository;
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
@@ -135,6 +140,10 @@ public class SecurityConfig {
                         // ── [추가] KRIDE ──
                         .requestMatchers("/api/v1/kride/chat/**").authenticated()
                         .requestMatchers("/api/kride/**").permitAll()
+                        // 이전 프로젝트 STOMP 연결 창구: kride.legacy.websocket.enabled=true 일 때만 열고,
+                        // 연결 인증은 StompHandler가 CONNECT 프레임의 JWT로 검사한다.
+                        .requestMatchers("/ws-stomp/**")
+                        .access((authentication, context) -> new AuthorizationDecision(legacyWebSocketEnabled))
                         // DEFAULT — 명시되지 않은 모든 요청 차단
                         .anyRequest().denyAll())
                 .exceptionHandling(exception ->
@@ -150,17 +159,18 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /** 브라우저 요청을 받을 출처. WebSocket(STOMP)도 같은 목록을 쓴다. 옛 EC2(http) 주소는 2026-11-15 제거. */
+    public static final List<String> ALLOWED_ORIGINS = List.of(
+            "https://yerin.duckdns.org",
+            "https://kmovement.srv1869569.hstgr.cloud",
+            "http://localhost:3000",
+            "http://localhost:8080");
+
     // CORS 설정
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "https://yerin.duckdns.org",
-                "https://kmovement.srv1869569.hstgr.cloud",
-                "http://localhost:3000",
-                "http://localhost:8080",
-                "http://43.201.237.68",
-                "http://43.201.237.68:8081"));
+        configuration.setAllowedOrigins(ALLOWED_ORIGINS);
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowCredentials(true); // 쿠키 허용
