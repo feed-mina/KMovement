@@ -32,7 +32,7 @@ class EventCatalogFixture {
         add(5,1,"미승인 이벤트","서울","2026-10-06","N");
         add(6,2,"미승인 아티스트 일정","서울","2026-10-06","Y");
         add(7,1,"서울특별시 별도 지역","서울특별시","2026-10-05","Y");
-        mvc=MockMvcBuilders.standaloneSetup(new KpopController(jdbc,mock(KpopAnalysisService.class),mock(KpopProductService.class),Runnable::run,null,new EventCatalogService(jdbc,clock)))
+        mvc=MockMvcBuilders.standaloneSetup(KpopControllers.withJdbc(jdbc,mock(KpopAnalysisService.class),mock(KpopProductService.class),Runnable::run,null,new EventCatalogService(jdbc,clock)))
                 .setCustomArgumentResolvers(new org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver())
                 .setControllerAdvice(new GlobalExceptionHandler(mock(OperationAlertService.class))).build();
     }

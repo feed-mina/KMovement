@@ -50,7 +50,7 @@ class PublicProductFixture implements AutoCloseable {
         BackendOperationalTelemetry telemetry=new BackendOperationalTelemetry(meters);
         KpopCacheService cache=new KpopCacheService(redis,new ObjectMapper(),telemetry);
         PublicProductCatalogController controller=new PublicProductCatalogController(new PublicProductCatalogService(jdbc,cache,telemetry));
-        mvc=MockMvcBuilders.standaloneSetup(controller,new KpopController(jdbc,mock(KpopAnalysisService.class),mock(KpopProductService.class),Runnable::run))
+        mvc=MockMvcBuilders.standaloneSetup(controller,KpopControllers.withJdbc(jdbc,mock(KpopAnalysisService.class),mock(KpopProductService.class),Runnable::run))
                 .setControllerAdvice(new GlobalExceptionHandler(mock(OperationAlertService.class))).build();
     }
     private void add(int id,String name,String brand,String grade,String evidence,boolean rights,String url,String approval,String verified) {

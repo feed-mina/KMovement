@@ -33,7 +33,7 @@ class ArtistCatalogControllerTest {
                 Map.of("id", i, "slug", "artist-" + i, "name", "아티스트 " + i, "en", "Artist " + i));
         jdbc.update("INSERT INTO artist(artist_id,slug,name_ko,name_en,approved_yn,sort_order) VALUES(99,'hidden','숨김','Hidden','N',0)", Map.of());
         mvc = MockMvcBuilders.standaloneSetup(new ArtistCatalogController(new ArtistCatalogService(jdbc)),
-                new KpopController(jdbc, mock(KpopAnalysisService.class), mock(KpopProductService.class), Runnable::run)).build();
+                KpopControllers.withJdbc(jdbc, mock(KpopAnalysisService.class), mock(KpopProductService.class), Runnable::run)).build();
     }
     @Test void anonymousPagesAreEightWideStableAndHaveAnAccurateTotal() throws Exception {
         mvc.perform(get("/api/v1/kpop/artists?page=1"))

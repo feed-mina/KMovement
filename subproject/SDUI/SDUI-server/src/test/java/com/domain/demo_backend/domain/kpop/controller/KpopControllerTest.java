@@ -32,7 +32,7 @@ class KpopControllerTest {
     private final NamedParameterJdbcTemplate jdbcTemplate = mock(NamedParameterJdbcTemplate.class);
     private final KpopAnalysisService analysisService = mock(KpopAnalysisService.class);
     private final KpopProductService productService = mock(KpopProductService.class);
-    private final KpopController controller = new KpopController(
+    private final KpopController controller = KpopControllers.withJdbc(
             jdbcTemplate,
             analysisService,
             productService,

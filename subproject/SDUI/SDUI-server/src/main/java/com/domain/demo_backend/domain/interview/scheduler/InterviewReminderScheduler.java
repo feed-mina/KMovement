@@ -6,6 +6,7 @@ import com.domain.demo_backend.domain.kakao.service.SlackNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +21,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InterviewReminderScheduler {
 
+    /** 이전 프로젝트(면접·공부·리트코드·작업자 위치) 자동 발송. 기본 꺼짐, kride.legacy.schedulers.enabled=true 로 다시 켠다. */
+    @Value("${kride.legacy.schedulers.enabled:false}")
+    private boolean legacySchedulersEnabled;
+
     private final InterviewScheduleRepository scheduleRepo;
     private final SlackNotificationService slackService;
     private final Logger log = LoggerFactory.getLogger(InterviewReminderScheduler.class);
 
     @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
     public void sendD1Reminders() {
+        if (!legacySchedulersEnabled) return;
         LocalDate tomorrow = LocalDate.now(ZoneId.of("Asia/Seoul")).plusDays(1);
         List<InterviewSchedule> pending =
                 scheduleRepo.findAllByInterviewDateAndNotifSentD1False(tomorrow);

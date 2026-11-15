@@ -88,5 +88,3 @@ logging:
   level:
     root: INFO
     org.springframework.web: INFO
-    org.mybatis: INFO
-    org.apache.ibatis: INFO

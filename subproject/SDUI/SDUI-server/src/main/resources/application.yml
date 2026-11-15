@@ -129,6 +129,12 @@ kride:
   fastapi:
     url: ${KRIDE_FASTAPI_URL:http://localhost:8000}
     chatbot-url: ${KRIDE_CHATBOT_URL:http://localhost:8001}
+  # 이전 프로젝트(면접·공부·리트코드·작업자 위치) 기능. 코드는 남겨 두고 자동 실행만 끈다.
+  legacy:
+    schedulers:
+      enabled: ${KRIDE_LEGACY_SCHEDULERS_ENABLED:false}   # 매일 Slack 발송 5종 + 위치 로그 이관
+    websocket:
+      enabled: ${KRIDE_LEGACY_WEBSOCKET_ENABLED:false}    # /ws-stomp STOMP 설정과 작업자 위치 수신
 
 kpop:
   analysis:
@@ -168,8 +174,5 @@ logging:
   pattern:
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
   level:
-    com.domain.demo_backend.mapper: DEBUG
-    org.mybatis: DEBUG
-    org.apache.ibatis: DEBUG
     org.springframework.jdbc.core: INFO
     org.springframework.web: DEBUG

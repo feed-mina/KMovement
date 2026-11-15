@@ -5,6 +5,7 @@ import com.domain.demo_backend.domain.study.service.SlackFileService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,12 +20,17 @@ import java.time.ZoneId;
 @RequiredArgsConstructor
 public class DailyStudyScheduler {
 
+    /** 이전 프로젝트(면접·공부·리트코드·작업자 위치) 자동 발송. 기본 꺼짐, kride.legacy.schedulers.enabled=true 로 다시 켠다. */
+    @Value("${kride.legacy.schedulers.enabled:false}")
+    private boolean legacySchedulersEnabled;
+
     private final StudyMaterialRepository materialRepo;
     private final SlackFileService slackFileService;
     private final Logger log = LoggerFactory.getLogger(DailyStudyScheduler.class);
 
     @Scheduled(cron = "0 0 19 * * *", zone = "Asia/Seoul")
     public void sendDailyStudyMaterial() {
+        if (!legacySchedulersEnabled) return;
         sendNextMaterial();
     }
 

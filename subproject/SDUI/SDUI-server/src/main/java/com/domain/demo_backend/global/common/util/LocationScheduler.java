@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.geo.Point;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,10 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class LocationScheduler {
 
+    /** 이전 프로젝트(면접·공부·리트코드·작업자 위치) 자동 발송. 기본 꺼짐, kride.legacy.schedulers.enabled=true 로 다시 켠다. */
+    @Value("${kride.legacy.schedulers.enabled:false}")
+    private boolean legacySchedulersEnabled;
+
     private final RedisTemplate<String, Object> redisTemplate;
     private final JdbcTemplate jdbcTemplate;
     private static final String GEO_KEY = "worker:locations";
@@ -23,6 +28,7 @@ public class LocationScheduler {
     // 5분마다 실행 (300,000ms)
     @Scheduled(fixedDelay = 300000)
     public void transferLocationLogsToDb() {
+        if (!legacySchedulersEnabled) return;
         // 1. Redis GEO에 저장된 모든 사용자의 현재 위치 가져오기
         // GEO key에 있는 모든 멤버를 조회합니다.
         Set<Object> members = redisTemplate.opsForZSet().range(GEO_KEY, 0, -1);
