@@ -1,7 +1,5 @@
 package com.domain.demo_backend.domain.user.controller;
 
-import com.domain.demo_backend.domain.kakao.service.OperationAlertService;
-import com.domain.demo_backend.domain.membership.service.UserMembershipService;
 import com.domain.demo_backend.domain.token.domain.RefreshToken;
 import com.domain.demo_backend.domain.token.domain.RefreshTokenRepository;
 import com.domain.demo_backend.domain.token.domain.TokenResponse;
@@ -35,8 +33,6 @@ class AuthControllerRefreshTest {
     @Mock private JwtUtil jwtUtil;
     @Mock private RefreshTokenRepository refreshTokenRepository;
     @Mock private UserRepository userRepository;
-    @Mock private UserMembershipService userMembershipService;
-    @Mock private OperationAlertService operationAlertService;
     @Mock private Claims claims;
 
     private AuthController controller;
@@ -47,9 +43,7 @@ class AuthControllerRefreshTest {
                 authService,
                 jwtUtil,
                 refreshTokenRepository,
-                userRepository,
-                userMembershipService,
-                operationAlertService
+                userRepository
         );
     }
 
