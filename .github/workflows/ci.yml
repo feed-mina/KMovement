@@ -57,8 +57,8 @@ jobs:
       - name: Run Celery job service tests
         run: |
           ./gradlew test \
-            --tests com.domain.demo_backend.domain.celery.service.CeleryJobServiceTest \
-            --tests com.domain.demo_backend.domain.celery.controller.CeleryJobControllerTest
+            --tests com.domain.kride.domain.celery.service.CeleryJobServiceTest \
+            --tests com.domain.kride.domain.celery.controller.CeleryJobControllerTest
         working-directory: ./subproject/SDUI/SDUI-server
 
   # ── Next.js (metadata-project) ─────────────────────────────────────────────

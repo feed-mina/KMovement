@@ -32,6 +32,7 @@ with stub_modules(
     {"src.api.ensemble_client": _ensemble},
 ):
     import src.api.fastapi_server as server  # noqa: E402
+    from src.api import internal_auth, runpod_jobs  # noqa: E402
 
 
 client = TestClient(server.app, raise_server_exceptions=False)
@@ -48,15 +49,15 @@ class _FakeRunPodResponse:
 
 
 def _configure_runpod(monkeypatch) -> None:
-    monkeypatch.setattr(server, "FASTAPI_INTERNAL_API_KEY", "test-internal-api-key-for-runpod-routing")
-    monkeypatch.setattr(server, "RUNPOD_API_KEY", "runpod-key")
-    monkeypatch.setattr(server, "RUNPOD_ENDPOINT_ID", "legacy-endpoint")
-    monkeypatch.setattr(server, "RUNPOD_MEDIA_ENDPOINT_ID", "media-endpoint")
-    monkeypatch.setattr(server, "RUNPOD_TORA_ENDPOINT_ID", "tora-endpoint")
+    monkeypatch.setattr(internal_auth, "FASTAPI_INTERNAL_API_KEY", "test-internal-api-key-for-runpod-routing")
+    monkeypatch.setattr(runpod_jobs, "RUNPOD_API_KEY", "runpod-key")
+    monkeypatch.setattr(runpod_jobs, "RUNPOD_ENDPOINT_ID", "legacy-endpoint")
+    monkeypatch.setattr(runpod_jobs, "RUNPOD_MEDIA_ENDPOINT_ID", "media-endpoint")
+    monkeypatch.setattr(runpod_jobs, "RUNPOD_TORA_ENDPOINT_ID", "tora-endpoint")
 
 
 def _auth_headers() -> dict[str, str]:
-    return {"X-Internal-Api-Key": server.FASTAPI_INTERNAL_API_KEY}
+    return {"X-Internal-Api-Key": internal_auth.FASTAPI_INTERNAL_API_KEY}
 
 
 def test_runpod_proxy_routes_tora_to_tora_endpoint(monkeypatch):

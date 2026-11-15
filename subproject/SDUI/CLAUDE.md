@@ -32,7 +32,7 @@ npx playwright test  # E2E tests
 ./gradlew bootRun           # Run server (requires DB + Redis)
 ./gradlew build             # Build JAR
 ./gradlew test              # Run all tests
-./gradlew test --tests "com.domain.demo_backend.SomeTest"  # Single test
+./gradlew test --tests "com.domain.kride.SomeTest"  # Single test
 ```
 
 ### Local Infrastructure

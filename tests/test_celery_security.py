@@ -91,6 +91,7 @@ _ensemble.rank_pois = MagicMock(return_value=[])
 
 with stub_modules(_STUBBED_PACKAGES, {"src.api.ensemble_client": _ensemble}):
     import src.api.fastapi_server as server  # noqa: E402
+    from src.api import internal_auth  # noqa: E402
     from src.api import tasks  # noqa: E402
 
 
@@ -127,11 +128,11 @@ def _job_headers(task_id: str = TASK_ID) -> dict[str, str]:
 
 
 def _configure_key(monkeypatch) -> None:
-    monkeypatch.setattr(server, "FASTAPI_INTERNAL_API_KEY", TEST_INTERNAL_KEY)
+    monkeypatch.setattr(internal_auth, "FASTAPI_INTERNAL_API_KEY", TEST_INTERNAL_KEY)
 
 
 def test_internal_key_fails_closed_when_server_key_is_empty(monkeypatch):
-    monkeypatch.setattr(server, "FASTAPI_INTERNAL_API_KEY", "")
+    monkeypatch.setattr(internal_auth, "FASTAPI_INTERNAL_API_KEY", "")
     apply_async = MagicMock(return_value=_SubmittedResult())
     monkeypatch.setattr(tasks.task_generate_tts, "apply_async", apply_async, raising=False)
 

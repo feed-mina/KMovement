@@ -86,6 +86,7 @@ _ensemble.rank_pois = MagicMock(return_value=[])
 
 with stub_modules(_STUBBED_PACKAGES, {"src.api.ensemble_client": _ensemble}):
     import src.api.fastapi_server as server  # noqa: E402
+    from src.api import celery_jobs  # noqa: E402
     from src.api.celery_app import celery  # noqa: E402
     from src.api.tasks import (  # noqa: E402
         cleanup_stale_temp_paths,
@@ -102,7 +103,7 @@ CELERY_TASK_ID = "85a9f8bb-e57b-4b8d-a1ca-5a1f34cb764a"
 def _auth_headers(task_id: str = CELERY_TASK_ID) -> dict[str, str]:
     return {
         "X-Internal-Api-Key": server.FASTAPI_INTERNAL_API_KEY,
-        "X-Celery-Job-Token": server._celery_job_token(task_id),
+        "X-Celery-Job-Token": celery_jobs._celery_job_token(task_id),
     }
 
 
@@ -198,7 +199,7 @@ def _install_video_pipeline_stubs(monkeypatch, finalized: dict) -> dict[str, Pat
 
 
 def test_submit_response_exposes_polling_and_stream_urls() -> None:
-    response = server._celery_submit_response(types.SimpleNamespace(id="job-123"))
+    response = celery_jobs._celery_submit_response(types.SimpleNamespace(id="job-123"))
     body = bytes(response.body).decode("utf-8")
     assert '"status_url":"/jobs/celery/job-123"' in body
     assert '"stream_url":"/jobs/celery/job-123/stream"' in body
@@ -206,14 +207,14 @@ def test_submit_response_exposes_polling_and_stream_urls() -> None:
 
 def test_success_payload_includes_100_percent_progress() -> None:
     result = types.SimpleNamespace(status="SUCCESS", result={"url": "ok"}, info=None)
-    payload = server._celery_status_payload("job-1", result)
+    payload = celery_jobs._celery_status_payload("job-1", result)
     assert payload["status"] == "SUCCESS"
     assert payload["meta"] == {"step": "complete", "progress": 100}
 
 
 def test_celery_sse_emits_changes_done_and_proxy_headers(monkeypatch) -> None:
     fake_result = _SequencedAsyncResult()
-    monkeypatch.setattr(server, "CELERY_SSE_POLL_INTERVAL_SECONDS", 0.001)
+    monkeypatch.setattr(celery_jobs, "CELERY_SSE_POLL_INTERVAL_SECONDS", 0.001)
 
     with patch("celery.result.AsyncResult", return_value=fake_result):
         response = client.get(

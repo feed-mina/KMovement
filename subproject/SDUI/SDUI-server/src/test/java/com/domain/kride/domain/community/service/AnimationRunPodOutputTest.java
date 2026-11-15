@@ -1,0 +1,98 @@
+package com.domain.kride.domain.community.service;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class AnimationRunPodOutputTest {
+
+    @Test
+    void parsesTopLevelResultUrl() {
+        AnimationRunPodOutput.Parsed parsed = AnimationRunPodOutput.parse(
+                Map.of("status", "success", "result_url", "https://cdn.example/final.mp4")
+        );
+
+        assertThat(parsed.succeeded()).isTrue();
+        assertThat(parsed.resultUrl()).isEqualTo("https://cdn.example/final.mp4");
+    }
+
+    @Test
+    void parsesFinalVideoArtifactUrl() {
+        AnimationRunPodOutput.Parsed parsed = AnimationRunPodOutput.parse(
+                Map.of(
+                        "status", "success",
+                        "artifacts", List.of(
+                                Map.of("kind", "metadata", "url", "https://cdn.example/meta.json"),
+                                Map.of("kind", "final_video", "url", "https://cdn.example/final.mp4")
+                        )
+                )
+        );
+
+        assertThat(parsed.resultUrl()).isEqualTo("https://cdn.example/final.mp4");
+    }
+
+    @Test
+    void treatsWorkerErrorAsFailure() {
+        AnimationRunPodOutput.Parsed parsed = AnimationRunPodOutput.parse(
+                Map.of("status", "failed", "error", "CUDA kernel image is unavailable")
+        );
+
+        assertThat(parsed.succeeded()).isFalse();
+        assertThat(parsed.errorMessage()).contains("CUDA kernel");
+    }
+
+    @Test
+    void rejectsCompletedOutputWithoutPublicUrl() {
+        AnimationRunPodOutput.Parsed parsed = AnimationRunPodOutput.parse(
+                Map.of("status", "success", "artifacts", List.of())
+        );
+
+        assertThat(parsed.succeeded()).isFalse();
+        assertThat(parsed.errorMessage()).contains("public result URL");
+    }
+
+    @Test
+    void parsesBatchResultMetadata() {
+        AnimationRunPodOutput.Parsed parsed = AnimationRunPodOutput.parse(
+                Map.of(
+                        "status", "success",
+                        "result_url", "https://cdn.example/final.mp4",
+                        "metadata", Map.of(
+                                "processed_images", 2,
+                                "actual_model", "mixed:animated_drawings_worker,cogvideox_real",
+                                "failed_image_indexes", List.of(1)
+                        )
+                )
+        );
+
+        assertThat(parsed.processedImages()).isEqualTo(2);
+        assertThat(parsed.actualModel())
+                .isEqualTo("mixed:animated_drawings_worker,cogvideox_real");
+        assertThat(parsed.failedImageIndexes()).isEqualTo("[1]");
+    }
+
+    @Test
+    void parsesFallbackMetadataWithoutTreatingResultAsFailure() {
+        AnimationRunPodOutput.Parsed parsed = AnimationRunPodOutput.parse(
+                Map.of(
+                        "status", "fallback_used",
+                        "result_url", "https://cdn.example/fallback.mp4",
+                        "metadata", Map.of(
+                                "actual_model", "3d_photo_light",
+                                "actual_model_executed", false,
+                                "fallback_type", "photo_motion_video",
+                                "fallback_reason", "AnimatedDrawings was unavailable"
+                        )
+                )
+        );
+
+        assertThat(parsed.succeeded()).isTrue();
+        assertThat(parsed.actualModel()).isEqualTo("3d_photo_light");
+        assertThat(parsed.actualModelExecuted()).isFalse();
+        assertThat(parsed.fallbackType()).isEqualTo("photo_motion_video");
+        assertThat(parsed.fallbackReason()).isEqualTo("AnimatedDrawings was unavailable");
+    }
+}
