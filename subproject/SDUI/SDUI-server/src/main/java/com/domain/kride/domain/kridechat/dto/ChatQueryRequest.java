@@ -1,0 +1,23 @@
+package com.domain.kride.domain.kridechat.dto;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+import java.util.Map;
+
+@Getter
+@Setter
+@NoArgsConstructor
+public class ChatQueryRequest {
+    private Long userSqno;
+    private String userId;
+    private String message;
+    private String intent;
+    private List<String> artists;
+    private List<String> regions;
+    private List<String> purposes;
+    private Integer duration;
+    private Map<String, Integer> budget;
+}

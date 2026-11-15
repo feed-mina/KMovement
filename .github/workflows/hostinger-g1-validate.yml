@@ -145,15 +145,15 @@ jobs:
         working-directory: subproject/SDUI/SDUI-server
         run: >-
           ./gradlew test
-          --tests 'com.domain.demo_backend.domain.address.*'
-          --tests 'com.domain.demo_backend.domain.tour.*'
-          --tests 'com.domain.demo_backend.domain.kpop.controller.ArtistCatalogControllerTest'
-          --tests 'com.domain.demo_backend.domain.kpop.controller.EventCatalogControllerTest'
-          --tests 'com.domain.demo_backend.domain.kpop.controller.PublicProductCatalogControllerTest'
-          --tests 'com.domain.demo_backend.domain.kpop.controller.PersonalSavedControllerTest'
-          --tests 'com.domain.demo_backend.domain.kpop.controller.KpopControllerTest'
-          --tests 'com.domain.demo_backend.domain.kpop.service.PublicProductPostgresTest'
-          --tests 'com.domain.demo_backend.domain.kpop.service.PersonalSavedPostgresTest'
+          --tests 'com.domain.kride.domain.address.*'
+          --tests 'com.domain.kride.domain.tour.*'
+          --tests 'com.domain.kride.domain.kpop.controller.ArtistCatalogControllerTest'
+          --tests 'com.domain.kride.domain.kpop.controller.EventCatalogControllerTest'
+          --tests 'com.domain.kride.domain.kpop.controller.PublicProductCatalogControllerTest'
+          --tests 'com.domain.kride.domain.kpop.controller.PersonalSavedControllerTest'
+          --tests 'com.domain.kride.domain.kpop.controller.KpopControllerTest'
+          --tests 'com.domain.kride.domain.kpop.service.PublicProductPostgresTest'
+          --tests 'com.domain.kride.domain.kpop.service.PersonalSavedPostgresTest'
 
       - name: Upload PostgreSQL request and response test results
         if: always()
