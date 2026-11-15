@@ -1,5 +1,9 @@
 package com.domain.demo_backend.domain.kpop.controller;
 
+import com.domain.demo_backend.domain.kpop.dto.ArtistFollowStateDto;
+import com.domain.demo_backend.domain.kpop.dto.EventBookmarkStateDto;
+import com.domain.demo_backend.domain.kpop.dto.KpopArtistDetailDto;
+import com.domain.demo_backend.domain.kpop.dto.KpopArtistDto;
 import com.domain.demo_backend.domain.kpop.service.KpopAnalysisService;
 import com.domain.demo_backend.domain.kpop.service.KpopProductService;
 import com.domain.demo_backend.global.common.response.ApiResponse;
@@ -48,12 +52,13 @@ class KpopControllerTest {
         ));
         when(jdbcTemplate.queryForList(anyString(), any(MapSqlParameterSource.class))).thenReturn(rows);
 
-        ResponseEntity<ApiResponse<List<Map<String, Object>>>> response = controller.artists("BTS");
+        ResponseEntity<ApiResponse<List<KpopArtistDto>>> response = controller.artists("BTS");
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getStatus()).isEqualTo("success");
-        assertThat(response.getBody().getData()).containsExactly(rows.get(0));
+        assertThat(response.getBody().getData()).containsExactly(
+                new KpopArtistDto(1L, null, "방탄소년단", "BTS", null, null, null, null, null, null));
         verify(jdbcTemplate).queryForList(anyString(), any(MapSqlParameterSource.class));
     }
 
@@ -73,11 +78,12 @@ class KpopControllerTest {
                 .thenReturn(List.of(Map.of("id", 7L, "slug", "aespa", "nameKo", "aespa")))
                 .thenReturn(List.of());
 
-        ResponseEntity<ApiResponse<Map<String, Object>>> response = controller.artist("aespa");
+        ResponseEntity<ApiResponse<KpopArtistDetailDto>> response = controller.artist("aespa");
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getData()).containsEntry("slug", "aespa");
+        assertThat(response.getBody().getData().slug()).isEqualTo("aespa");
+        assertThat(response.getBody().getData().events()).isEmpty();
         // 파라미터를 bigint로 캐스팅하면 slug 값이 bind 단계에서 실패하므로 컬럼을 캐스팅해야 한다.
         verify(jdbcTemplate).queryForList(
                 contains("CAST(artist_id AS text) = :artistRef"), any(MapSqlParameterSource.class));
@@ -188,11 +194,11 @@ class KpopControllerTest {
         when(jdbcTemplate.queryForList(contains("INSERT INTO artist_follow"), any(MapSqlParameterSource.class), eq(Long.class)))
                 .thenReturn(List.of(1L));
 
-        ResponseEntity<ApiResponse<Map<String, Object>>> response = controller.followArtist(7L, user);
+        ResponseEntity<ApiResponse<ArtistFollowStateDto>> response = controller.followArtist(7L, user);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getData()).containsEntry("artistId", 7L).containsEntry("followed", true);
+        assertThat(response.getBody().getData()).isEqualTo(new ArtistFollowStateDto(7L, true));
         verify(jdbcTemplate).queryForList(contains("INSERT INTO artist_follow"), any(MapSqlParameterSource.class), eq(Long.class));
     }
 
@@ -203,11 +209,11 @@ class KpopControllerTest {
         when(jdbcTemplate.queryForList(contains("INSERT INTO event_bookmark"), any(MapSqlParameterSource.class), eq(Long.class)))
                 .thenReturn(List.of(1L));
 
-        ResponseEntity<ApiResponse<Map<String, Object>>> response = controller.bookmarkEvent(9L, user);
+        ResponseEntity<ApiResponse<EventBookmarkStateDto>> response = controller.bookmarkEvent(9L, user);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getData()).containsEntry("eventId", 9L).containsEntry("bookmarked", true);
+        assertThat(response.getBody().getData()).isEqualTo(new EventBookmarkStateDto(9L, true));
         verify(jdbcTemplate).queryForList(contains("INSERT INTO event_bookmark"), any(MapSqlParameterSource.class), eq(Long.class));
     }
 
@@ -218,11 +224,11 @@ class KpopControllerTest {
         when(jdbcTemplate.update(contains("DELETE FROM event_bookmark"), any(MapSqlParameterSource.class)))
                 .thenReturn(1);
 
-        ResponseEntity<ApiResponse<Map<String, Object>>> response = controller.unbookmarkEvent(9L, user);
+        ResponseEntity<ApiResponse<EventBookmarkStateDto>> response = controller.unbookmarkEvent(9L, user);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getData()).containsEntry("eventId", 9L).containsEntry("bookmarked", false);
+        assertThat(response.getBody().getData()).isEqualTo(new EventBookmarkStateDto(9L, false));
         verify(jdbcTemplate).update(contains("DELETE FROM event_bookmark"), any(MapSqlParameterSource.class));
     }
 

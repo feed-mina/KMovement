@@ -1,5 +1,8 @@
 package com.domain.demo_backend.domain.kpop.service;
 
+import com.domain.demo_backend.domain.kpop.dto.KpopArtistDetailDto;
+import com.domain.demo_backend.domain.kpop.dto.KpopArtistDto;
+import com.domain.demo_backend.domain.kpop.dto.KpopArtistEventDto;
 import com.domain.demo_backend.domain.kpop.repository.KpopArtistRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,23 +34,24 @@ public class KpopArtistService {
         this.cacheService = cacheService;
     }
 
-    public List<Map<String, Object>> artists(String q) {
+    public List<KpopArtistDto> artists(String q) {
         Object query = blankToNull(q);
         Map<String, Object> keyParts = new LinkedHashMap<>();
         keyParts.put("q", query);
-        return cached("artists", keyParts, new TypeReference<List<Map<String, Object>>>() {},
-                () -> artistRepository.findApprovedArtists(query));
+        return cached("artists", keyParts, new TypeReference<List<KpopArtistDto>>() {},
+                () -> artistRepository.findApprovedArtists(query).stream().map(KpopArtistDto::fromRow).toList());
     }
 
-    public Map<String, Object> artist(String artistId) {
+    public KpopArtistDetailDto artist(String artistId) {
         String artistRef = artistId == null ? "" : artistId.trim();
-        return cached("artist_detail", Map.of("artistRef", artistRef), new TypeReference<Map<String, Object>>() {},
+        return cached("artist_detail", Map.of("artistRef", artistRef), new TypeReference<KpopArtistDetailDto>() {},
                 () -> {
-                    Map<String, Object> loaded = new LinkedHashMap<>(artistRepository.findApprovedArtistByRef(artistRef)
-                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "K-POP resource not found.")));
-                    Long resolvedArtistId = ((Number) loaded.get("id")).longValue();
-                    loaded.put("events", artistRepository.findApprovedEventsByArtist(resolvedArtistId));
-                    return loaded;
+                    KpopArtistDto artist = artistRepository.findApprovedArtistByRef(artistRef)
+                            .map(KpopArtistDto::fromRow)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "K-POP resource not found."));
+                    List<KpopArtistEventDto> events = artistRepository.findApprovedEventsByArtist(artist.id())
+                            .stream().map(KpopArtistEventDto::fromRow).toList();
+                    return KpopArtistDetailDto.of(artist, events);
                 });
     }
 

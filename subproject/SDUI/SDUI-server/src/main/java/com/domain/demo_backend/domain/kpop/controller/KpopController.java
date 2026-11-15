@@ -1,5 +1,9 @@
 package com.domain.demo_backend.domain.kpop.controller;
 
+import com.domain.demo_backend.domain.kpop.dto.ArtistFollowStateDto;
+import com.domain.demo_backend.domain.kpop.dto.EventBookmarkStateDto;
+import com.domain.demo_backend.domain.kpop.dto.KpopArtistDetailDto;
+import com.domain.demo_backend.domain.kpop.dto.KpopArtistDto;
 import com.domain.demo_backend.global.common.response.ApiResponse;
 import com.domain.demo_backend.global.security.CustomUserDetails;
 import com.domain.demo_backend.domain.kpop.service.KpopAnalysisService;
@@ -56,14 +60,14 @@ public class KpopController {
     }
 
     @GetMapping("/artists")
-    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> artists(
+    public ResponseEntity<ApiResponse<List<KpopArtistDto>>> artists(
             @RequestParam(name = "q", required = false) String q
     ) {
         return ResponseEntity.ok(ApiResponse.success(artistService.artists(q)));
     }
 
     @GetMapping("/artists/{artistId}")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> artist(@PathVariable String artistId) {
+    public ResponseEntity<ApiResponse<KpopArtistDetailDto>> artist(@PathVariable String artistId) {
         return ResponseEntity.ok(ApiResponse.success(artistService.artist(artistId)));
     }
 
@@ -92,43 +96,43 @@ public class KpopController {
     }
 
     @PostMapping("/artists/{artistId}/follow")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> followArtist(
+    public ResponseEntity<ApiResponse<ArtistFollowStateDto>> followArtist(
             @PathVariable Long artistId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
         artistService.follow(artistId, user.getUserSqno());
-        return ResponseEntity.ok(ApiResponse.success(Map.of("artistId", artistId, "followed", true)));
+        return ResponseEntity.ok(ApiResponse.success(new ArtistFollowStateDto(artistId, true)));
     }
 
     @DeleteMapping("/artists/{artistId}/follow")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> unfollowArtist(
+    public ResponseEntity<ApiResponse<ArtistFollowStateDto>> unfollowArtist(
             @PathVariable Long artistId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
         artistService.unfollow(artistId, user.getUserSqno());
-        return ResponseEntity.ok(ApiResponse.success(Map.of("artistId", artistId, "followed", false)));
+        return ResponseEntity.ok(ApiResponse.success(new ArtistFollowStateDto(artistId, false)));
     }
 
     @PostMapping("/events/{eventId}/bookmark")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> bookmarkEvent(
+    public ResponseEntity<ApiResponse<EventBookmarkStateDto>> bookmarkEvent(
             @PathVariable Long eventId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
         artistService.bookmark(eventId, user.getUserSqno());
-        return ResponseEntity.ok(ApiResponse.success(Map.of("eventId", eventId, "bookmarked", true)));
+        return ResponseEntity.ok(ApiResponse.success(new EventBookmarkStateDto(eventId, true)));
     }
 
     @DeleteMapping("/events/{eventId}/bookmark")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> unbookmarkEvent(
+    public ResponseEntity<ApiResponse<EventBookmarkStateDto>> unbookmarkEvent(
             @PathVariable Long eventId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         requireUser(user);
         artistService.unbookmark(eventId, user.getUserSqno());
-        return ResponseEntity.ok(ApiResponse.success(Map.of("eventId", eventId, "bookmarked", false)));
+        return ResponseEntity.ok(ApiResponse.success(new EventBookmarkStateDto(eventId, false)));
     }
 
     @PostMapping("/analysis-assets/presign")
