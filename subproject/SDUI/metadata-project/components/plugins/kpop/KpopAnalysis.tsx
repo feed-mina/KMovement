@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useState } from 'react';
 import { KpopProductSearch, ProductCard, normalizeCandidate } from './KpopProducts';
+import { backoffDelay } from '@/lib/net/backoff';
 
 type LeafProps = {
     meta?: Record<string, any>;
@@ -19,6 +20,11 @@ type AnalysisJob = {
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_BYTES = 10 * 1024 * 1024;
 const TERMINAL_STATUSES = new Set(['SUCCEEDED', 'FAILED', 'CANCELLED', 'EXPIRED']);
+const POLL_BASE_MS = 3000;
+const POLL_MAX_MS = 30000;
+const MAX_POLL_FAILURES = 5;
+/** SSE를 열었는데 이 시간 안에 첫 상태가 오지 않으면(중간 프록시가 막는 경우 등) 조회로 바꾼다. */
+const SSE_FIRST_EVENT_MS = 5000;
 
 async function requestJson<T>(url: string, init: RequestInit = {}): Promise<T> {
     const response = await fetch(url, {
@@ -181,21 +187,69 @@ export function KpopAiResultCard({ initialJobId }: { initialJobId?: string } = {
 
     useEffect(() => {
         if (!jobId) return;
+        const jobUrl = `/api/v1/kpop/analysis-jobs/${encodeURIComponent(jobId)}`;
         let active = true;
+        let finished = false;
+        let failures = 0;
         let timer: ReturnType<typeof setTimeout> | undefined;
-        const refresh = async () => {
+        let firstEventTimer: ReturnType<typeof setTimeout> | undefined;
+        let source: EventSource | undefined;
+
+        // 상태 하나를 화면에 반영하고, 끝난 상태인지 돌려준다.
+        const apply = (raw: Record<string, any>) => {
+            const next = normalizeJob(raw);
+            setJob(next);
+            setMessage('');
+            finished = TERMINAL_STATUSES.has(next.status);
+            return finished;
+        };
+        const closeStream = () => {
+            if (firstEventTimer) clearTimeout(firstEventTimer);
+            source?.close();
+            source = undefined;
+        };
+        // 2순위: 상태 조회. 성공하면 3초 간격, 실패하면 3초→6초→12초…(최대 30초)로 늦추고 5번 연속 실패하면 멈춘다.
+        const poll = async () => {
             try {
-                const raw = await requestJson<Record<string, any>>(`/api/v1/kpop/analysis-jobs/${encodeURIComponent(jobId)}`);
+                const raw = await requestJson<Record<string, any>>(jobUrl);
                 if (!active) return;
-                const next = normalizeJob(raw);
-                setJob(next);
-                if (!TERMINAL_STATUSES.has(next.status)) timer = setTimeout(refresh, 3000);
+                failures = 0;
+                if (!apply(raw)) timer = setTimeout(poll, POLL_BASE_MS);
             } catch (error) {
-                if (active) setMessage(friendlyError(error));
+                if (!active) return;
+                failures += 1;
+                const authError = friendlyError(error) === '로그인 후 이용해 주세요.';
+                if (authError || failures >= MAX_POLL_FAILURES) {
+                    setMessage(friendlyError(error));
+                    return;
+                }
+                timer = setTimeout(poll, backoffDelay(failures, { baseMs: POLL_BASE_MS, maxMs: POLL_MAX_MS }));
             }
         };
-        void refresh();
-        return () => { active = false; if (timer) clearTimeout(timer); };
+        const fallBackToPolling = () => {
+            closeStream();
+            if (active && !finished) void poll();
+        };
+
+        // 1순위: 서버가 보내 주는 SSE(/stream). 연결이 안 되거나 끊기면 조회로 바꾼다.
+        if (typeof EventSource === 'undefined') {
+            void poll();
+        } else {
+            source = new EventSource(`${jobUrl}/stream`, { withCredentials: true });
+            firstEventTimer = setTimeout(fallBackToPolling, SSE_FIRST_EVENT_MS);
+            source.addEventListener('status', (event) => {
+                if (!active) return;
+                if (firstEventTimer) clearTimeout(firstEventTimer);
+                try {
+                    if (apply(JSON.parse((event as MessageEvent).data))) closeStream();
+                } catch {
+                    fallBackToPolling();
+                }
+            });
+            source.addEventListener('done', () => { finished = true; closeStream(); });
+            source.onerror = () => { if (active && !finished) fallBackToPolling(); };
+        }
+        return () => { active = false; closeStream(); if (timer) clearTimeout(timer); };
     }, [jobId]);
 
     const candidates = useMemo(

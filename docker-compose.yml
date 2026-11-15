@@ -1,3 +1,6 @@
+# ── 로컬 개발 전용 ─────────────────────────────────────────────
+# 이 파일의 user/password, admin@admin.com/admin 같은 값은 개발 PC에서만 쓰는 값입니다.
+# 운영(Hostinger G1)은 deploy/hostinger/g1.compose.yml 과 비밀 파일을 사용하며 이 파일을 쓰지 않습니다.
 version: '3.8'
 
 services:

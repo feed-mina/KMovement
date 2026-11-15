@@ -1,5 +1,6 @@
 package com.domain.demo_backend.domain.Location.service;
 
+import com.domain.demo_backend.domain.Location.LocationKeys;
 import com.domain.demo_backend.domain.Location.dto.LocationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.geo.Point;
@@ -16,8 +17,8 @@ import java.util.Map;
 public class LocationService {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final String GEO_KEY = "worker:locations"; // 모든 아주머니의 위치를 담는 GEO 키
-    private final String INFO_PREFIX = "worker:info:"; // 개별 상세 정보를 담는 Hash 키 접두사
+    private static final String GEO_KEY = LocationKeys.GEO_KEY; // 모든 작업자의 위치를 담는 GEO 키
+    private static final String INFO_PREFIX = LocationKeys.INFO_PREFIX; // 개별 상세 정보를 담는 Hash 키 접두사
 
     // 1. 위치 및 상태 업데이트 로직
     public void updateWorkerLocation(LocationRequest request) {

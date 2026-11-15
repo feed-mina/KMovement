@@ -1,5 +1,6 @@
 package com.domain.demo_backend.global.common.util;
 
+import com.domain.demo_backend.domain.Location.LocationKeys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.geo.Point;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,7 +24,7 @@ public class LocationScheduler {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final JdbcTemplate jdbcTemplate;
-    private static final String GEO_KEY = "worker:locations";
+    private static final String GEO_KEY = LocationKeys.GEO_KEY;
 
     // 5분마다 실행 (300,000ms)
     @Scheduled(fixedDelay = 300000)

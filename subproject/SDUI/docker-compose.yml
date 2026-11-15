@@ -1,3 +1,5 @@
+# ── 로컬 개발 전용 ─────────────────────────────────────────────
+# 아래 비밀번호·JWT 키는 개발 PC에서만 쓰는 값입니다. 운영은 deploy/hostinger/g1.compose.yml 을 씁니다.
 services:
 
 # 1. 데이터베이스 서비스 
@@ -42,6 +44,8 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_DATA_REDIS_DATABASE=0
+      # 서버에는 JWT 기본 키가 없으므로 로컬용 키를 넣는다(base64, 32바이트 이상). 운영 값과 다르게 둔다.
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-bG9jYWwtZGV2LW9ubHktand0LXNlY3JldC1rZXktMDEyMzQ1Njc4OQ==}
       # [FastAPI 비활성화] AI 면접관 이력서 분석 기능 구현 시 주석 해제
       # - FASTAPI_URL=http://sdui-fastapi:8001
       # - FASTAPI_INTERNAL_API_KEY=sdui-internal-dev-key

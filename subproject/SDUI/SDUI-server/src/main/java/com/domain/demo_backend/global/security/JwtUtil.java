@@ -105,7 +105,11 @@ public class JwtUtil {
 
     @PostConstruct
     public void init() {
-        this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
+        // 설정 파일에 기본 키를 두지 않는다. 값이 비어 있으면 조용히 약한 키로 켜지지 않고 시작을 멈춘다.
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("jwt.secret-key is not configured.");
+        }
+        this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret.trim()));
 
     }
 

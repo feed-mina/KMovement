@@ -1,3 +1,4 @@
+# 로컬 개발 전용 설정. 아래 비밀번호·키는 개발 PC에서만 쓰는 값이며 운영에서 쓰지 않는다.
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/SDUI_TD
@@ -13,6 +14,10 @@ spring:
       max-request-size: 20MB
     openai:
       api-key: ${OPENAI_API_KEY}
+
+# 로컬 전용 JWT 서명 키(base64, 32바이트 이상). 운영은 비밀 파일로 따로 넣는다.
+jwt:
+  secret-key: ${JWT_SECRET_KEY:bG9jYWwtZGV2LW9ubHktand0LXNlY3JldC1rZXktMDEyMzQ1Njc4OQ==}
 
 fastapi:
   url: http://localhost:8001

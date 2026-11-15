@@ -40,7 +40,6 @@ const connectSrc = [
     "'self'",
     'http://localhost:8080',
     'http://localhost:8000',
-    'http://43.201.237.68:8081',
     'https://yerin.duckdns.org',
     BACKEND_URL,
     FASTAPI_URL,

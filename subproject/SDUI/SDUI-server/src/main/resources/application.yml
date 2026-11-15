@@ -58,7 +58,8 @@ server:
   forward-headers-strategy: native
 
 jwt:
-  secret-key: ${JWT_SECRET_KEY:d6ac9ecc0a3aa3c395313fb236e0ec10d71ab78fb36f54ba626664eba0b842b1}
+  # 기본값 없음: 값이 없으면 서버가 켜지지 않는다. 운영(G1)은 /run/secrets/jwt.secret-key, 로컬은 application-local.yml 또는 JWT_SECRET_KEY.
+  secret-key: ${JWT_SECRET_KEY}
   issuer: admin
   expiration: 86400000
 

@@ -13,6 +13,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import CommunityDiscussion from '@/components/community/CommunityDiscussion';
+import { backoffDelay } from '@/lib/net/backoff';
 import {
     AnimationStatusResponse,
     BatchImageInput,
@@ -21,6 +22,10 @@ import {
     PostListResponse,
     PostResponse,
 } from '@/services/communityService';
+
+const ANIM_POLL_BASE_MS = 3000;
+const ANIM_POLL_MAX_MS = 30000;
+const ANIM_POLL_MAX_FAILURES = 5;
 
 type CommunityPageProps = {
     screenId: string;
@@ -709,7 +714,8 @@ function CommunityDetail({ postId }: { postId: number }) {
     const [batchBgmDescription, setBatchBgmDescription] = useState('');
     const [batchBgmDuration, setBatchBgmDuration] = useState(15);
     const [batchSubmitting, setBatchSubmitting] = useState(false);
-    const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const pollingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [animPollStopped, setAnimPollStopped] = useState(false);
     const isOwner = Boolean(user?.userSqno && post?.authorSqno && user.userSqno === post.authorSqno);
 
     const loadPost = useCallback(async () => {
@@ -736,22 +742,33 @@ function CommunityDetail({ postId }: { postId: number }) {
             .catch(() => undefined);
     }, [isLoggedIn, post?.moderationStatus, postId]);
 
+    // 영상 생성 상태 조회: 성공하면 3초 간격, 실패하면 3초→6초→12초…(최대 30초)로 늦추고
+    // 5번 연속 실패하면 멈춘 뒤 안내 문구를 보여 준다. (예전에는 오류를 무시하고 3초마다 무한 반복)
     const startAnimPolling = useCallback(() => {
         if (pollingRef.current) return;
-        pollingRef.current = setInterval(async () => {
+        let failures = 0;
+        setAnimPollStopped(false);
+        const tick = async () => {
             try {
                 const status = await communityService.getAnimationStatus(postId);
+                failures = 0;
                 setAnimStatus(status);
                 if (status.status === 'COMPLETED' || status.status === 'FAILED') {
-                    if (pollingRef.current) {
-                        clearInterval(pollingRef.current);
-                        pollingRef.current = null;
-                    }
+                    pollingRef.current = null;
+                    return;
                 }
+                pollingRef.current = setTimeout(tick, ANIM_POLL_BASE_MS);
             } catch {
-                /* ignore polling errors */
+                failures += 1;
+                if (failures >= ANIM_POLL_MAX_FAILURES) {
+                    pollingRef.current = null;
+                    setAnimPollStopped(true);
+                    return;
+                }
+                pollingRef.current = setTimeout(tick, backoffDelay(failures, { baseMs: ANIM_POLL_BASE_MS, maxMs: ANIM_POLL_MAX_MS }));
             }
-        }, 3000);
+        };
+        pollingRef.current = setTimeout(tick, ANIM_POLL_BASE_MS);
     }, [postId]);
 
     useEffect(() => {
@@ -768,7 +785,7 @@ function CommunityDetail({ postId }: { postId: number }) {
     useEffect(() => {
         return () => {
             if (pollingRef.current) {
-                clearInterval(pollingRef.current);
+                clearTimeout(pollingRef.current);
                 pollingRef.current = null;
             }
         };
@@ -1036,6 +1053,11 @@ function CommunityDetail({ postId }: { postId: number }) {
                             {hasBatchProgress && ` ${animStatus.processedImages ?? 0}/${animStatus.totalImages}장`}
                         </p>
                     ) : null}
+                    {animPollStopped && (animStatus?.status === 'QUEUED' || animStatus?.status === 'RUNNING') && (
+                        <p className="community-animation-progress" role="status">
+                            진행 상태를 확인하지 못했어요. 잠시 후 새로고침해 주세요.
+                        </p>
+                    )}
                     {animStatus?.status === 'FAILED' && (
                         <div className="community-animation-error">
                             <p>영상 생성 실패: {animStatus.errorMessage || '알 수 없는 오류'}</p>
