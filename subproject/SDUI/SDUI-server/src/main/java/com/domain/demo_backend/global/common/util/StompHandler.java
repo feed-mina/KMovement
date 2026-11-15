@@ -1,5 +1,6 @@
 package com.domain.demo_backend.global.common.util;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -8,6 +9,8 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
 
+// 이전 프로젝트(작업자 위치)용 STOMP 설정. 기본 꺼짐, kride.legacy.websocket.enabled=true 로 다시 켠다.
+@ConditionalOnProperty(name = "kride.legacy.websocket.enabled", havingValue = "true")
 @Component
 @RequiredArgsConstructor
 public class StompHandler implements ChannelInterceptor {

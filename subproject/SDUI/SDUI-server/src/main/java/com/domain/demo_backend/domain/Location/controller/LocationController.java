@@ -1,5 +1,6 @@
 package com.domain.demo_backend.domain.Location.controller;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import com.domain.demo_backend.domain.Location.dto.LocationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Controller;
 
 import java.time.Duration;
 
+// 이전 프로젝트(작업자 위치)용 STOMP 설정. 기본 꺼짐, kride.legacy.websocket.enabled=true 로 다시 켠다.
+@ConditionalOnProperty(name = "kride.legacy.websocket.enabled", havingValue = "true")
 @Controller
 @RequiredArgsConstructor
 public class LocationController {

@@ -6,6 +6,7 @@ import com.domain.demo_backend.domain.kakao.service.SlackNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +21,17 @@ import java.time.ZoneId;
 @RequiredArgsConstructor
 public class DailyInterviewQuestionScheduler {
 
+    /** 이전 프로젝트(면접·공부·리트코드·작업자 위치) 자동 발송. 기본 꺼짐, kride.legacy.schedulers.enabled=true 로 다시 켠다. */
+    @Value("${kride.legacy.schedulers.enabled:false}")
+    private boolean legacySchedulersEnabled;
+
     private final InterviewQuestionRepository questionRepo;
     private final SlackNotificationService slackService;
     private final Logger log = LoggerFactory.getLogger(DailyInterviewQuestionScheduler.class);
 
     @Scheduled(cron = "0 10 9 * * *", zone = "Asia/Seoul")
     public void sendDailyQuestion() {
+        if (!legacySchedulersEnabled) return;
         try {
             questionRepo.findRandomUnsent()
                     .ifPresentOrElse(question -> {
