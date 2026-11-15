@@ -6,7 +6,6 @@ import com.domain.demo_backend.domain.celery.domain.CeleryJob;
 import com.domain.demo_backend.domain.celery.domain.CeleryJobRepository;
 import com.domain.demo_backend.domain.user.domain.UserRepository;
 import com.domain.demo_backend.global.exception.CodedResponseStatusException;
-import com.domain.demo_backend.global.exception.KpopRateLimitException;
 import com.domain.demo_backend.global.observability.BackendOperationalTelemetry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +25,7 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
@@ -44,13 +40,9 @@ public class CeleryJobService {
     private static final Set<String> ALLOWED_TASK_TYPES = Set.of(
             "embed", "rerank", "weather", "event", "tts", "video", "KPOP_OUTFIT_ANALYSIS"
     );
-    private static final Set<String> MEDIA_TASK_TYPES = Set.of("tts", "video", "KPOP_OUTFIT_ANALYSIS");
-    private static final Set<String> TERMINAL_STATUSES = Set.of(
-            "SUCCESS", "FAILURE", "REVOKED", "SUCCEEDED", "FAILED", "CANCELLED", "EXPIRED"
-    );
+    private static final Set<String> TERMINAL_STATUSES = CeleryJobSubmissionLimits.TERMINAL_STATUSES;
     private static final Duration GATEWAY_TIMEOUT = Duration.ofSeconds(10);
     private static final String KPOP_TASK_TYPE = "KPOP_OUTFIT_ANALYSIS";
-    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
     private static final String KPOP_REDIS_PREFIX = "kpop:v1:";
 
     private final CeleryJobRepository celeryJobRepository;
@@ -59,11 +51,7 @@ public class CeleryJobService {
     private final String internalApiKey;
     private final StringRedisTemplate redis;
     private final BackendOperationalTelemetry telemetry;
-    private final int maxActiveMediaJobs;
-    private final int maxDailyMediaJobs;
-    private final int analysisWindowCapacity;
-    private final Duration analysisWindow;
-    private final long activeRetrySeconds;
+    private final CeleryJobSubmissionLimits limits;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
@@ -85,11 +73,10 @@ public class CeleryJobService {
         this.internalApiKey = internalApiKey == null ? "" : internalApiKey.strip();
         this.redis = redis;
         this.telemetry = telemetry;
-        this.maxActiveMediaJobs = Math.max(1, maxActiveMediaJobs);
-        this.maxDailyMediaJobs = Math.max(this.maxActiveMediaJobs, maxDailyMediaJobs);
-        this.analysisWindowCapacity = Math.max(1, analysisWindowCapacity);
-        this.analysisWindow = Duration.ofSeconds(Math.max(60, analysisWindowSeconds));
-        this.activeRetrySeconds = Math.max(1, activeRetrySeconds);
+        this.limits = new CeleryJobSubmissionLimits(
+                celeryJobRepository, userRepository, redis, telemetry,
+                maxActiveMediaJobs, maxDailyMediaJobs, analysisWindowCapacity,
+                analysisWindowSeconds, activeRetrySeconds);
         WebClient.Builder builder = WebClient.builder().baseUrl(fastApiUrl);
         if (!this.internalApiKey.isBlank()) {
             builder.defaultHeader("X-Internal-Api-Key", this.internalApiKey);
@@ -117,14 +104,14 @@ public class CeleryJobService {
         if (KPOP_TASK_TYPE.equals(taskType)) {
             Optional<CeleryJob> existing = findReusableKpopJob(payload, requestedBy);
             if (existing.isPresent()) return existing.get();
-            lockSubmissionUser(requestedBy);
+            limits.lockSubmissionUser(requestedBy);
             existing = findReusableKpopJob(payload, requestedBy);
             if (existing.isPresent()) return existing.get();
-            enforceMediaSubmissionCounts(taskType, requestedBy);
-            enforceAnalysisWindowLimit(requestedBy, Instant.now());
+            limits.enforceMediaSubmissionCounts(taskType, requestedBy);
+            limits.enforceAnalysisWindowLimit(requestedBy, Instant.now());
             requestFingerprint = requestFingerprint(payload);
         } else {
-            enforceMediaSubmissionLimit(taskType, requestedBy);
+            limits.enforceMediaSubmissionLimit(taskType, requestedBy);
         }
 
         try {
@@ -405,99 +392,16 @@ public class CeleryJobService {
         }
     }
 
-    private void enforceMediaSubmissionLimit(String taskType, Long requestedBy) {
-        if (!MEDIA_TASK_TYPES.contains(taskType)) {
-            return;
-        }
-        lockSubmissionUser(requestedBy);
-        enforceMediaSubmissionCounts(taskType, requestedBy);
-    }
 
-    private void lockSubmissionUser(Long requestedBy) {
-        if (requestedBy == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required.");
-        }
 
-        userRepository.findByUserSqnoForCeleryLimit(requestedBy)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED,
-                        "Authenticated user was not found."
-                ));
-    }
 
-    private void enforceMediaSubmissionCounts(String taskType, Long requestedBy) {
-        long activeJobs = celeryJobRepository.countByRequestedByAndTaskTypeInAndStatusNotIn(
-                requestedBy,
-                MEDIA_TASK_TYPES,
-                TERMINAL_STATUSES
-        );
-        if (activeJobs >= maxActiveMediaJobs) {
-            telemetry.record("kpop_analysis_rate", "active_limited", taskType, Set.of());
-            throw new KpopRateLimitException(
-                    "KPOP_ANALYSIS_ACTIVE_LIMIT",
-                    "Too many media jobs are active.",
-                    activeRetrySeconds);
-        }
-
-        long dailyJobs = celeryJobRepository.countByRequestedByAndTaskTypeInAndCreatedAtGreaterThanEqual(
-                requestedBy,
-                MEDIA_TASK_TYPES,
-                LocalDate.now(KST).atStartOfDay()
-        );
-        if (dailyJobs >= maxDailyMediaJobs) {
-            telemetry.record("kpop_analysis_rate", "daily_limited", taskType, Set.of());
-            throw new KpopRateLimitException(
-                    "KPOP_ANALYSIS_DAILY_LIMIT",
-                    "The daily media job limit has been reached.",
-                    dailyRetryAfter(Instant.now()));
-        }
-    }
-
-    private void enforceAnalysisWindowLimit(Long requestedBy, Instant now) {
-        long retryAfter = shortWindowRetryAfter(now);
-        long windowSeconds = analysisWindow.getSeconds();
-        String key = KPOP_REDIS_PREFIX + "rate:analysis:" + requestedBy + ":"
-                + now.getEpochSecond() / windowSeconds;
-        if (redis != null) {
-            try {
-                Long count = redis.opsForValue().increment(key);
-                if (count != null && count == 1L) {
-                    redis.expire(key, Duration.ofSeconds(retryAfter + 5));
-                }
-                if (count != null && count > analysisWindowCapacity) {
-                    telemetry.record("kpop_analysis_rate", "window_limited", KPOP_TASK_TYPE, Set.of());
-                    throw new KpopRateLimitException(
-                            "KPOP_ANALYSIS_WINDOW_LIMIT",
-                            "Too many analysis submissions were made in a short period.",
-                            retryAfter);
-                }
-            } catch (KpopRateLimitException limited) {
-                throw limited;
-            } catch (RuntimeException redisFailure) {
-                telemetry.record("kpop_analysis_rate", "redis_fallback", KPOP_TASK_TYPE, Set.of());
-            }
-        }
-        LocalDateTime windowStart = LocalDateTime.ofInstant(now.minus(analysisWindow), KST);
-        long persisted = celeryJobRepository.countByRequestedByAndTaskTypeAndCreatedAtGreaterThanEqual(
-                requestedBy, KPOP_TASK_TYPE, windowStart);
-        if (persisted >= analysisWindowCapacity) {
-            telemetry.record("kpop_analysis_rate", "window_db_limited", KPOP_TASK_TYPE, Set.of());
-            throw new KpopRateLimitException(
-                    "KPOP_ANALYSIS_WINDOW_LIMIT",
-                    "Too many analysis submissions were made in a short period.",
-                    retryAfter);
-        }
-    }
 
     long shortWindowRetryAfter(Instant now) {
-        long windowSeconds = analysisWindow.getSeconds();
-        return Math.max(1, windowSeconds - Math.floorMod(now.getEpochSecond(), windowSeconds));
+        return limits.shortWindowRetryAfter(now);
     }
 
     long dailyRetryAfter(Instant now) {
-        ZonedDateTime current = now.atZone(KST);
-        ZonedDateTime nextMidnight = current.toLocalDate().plusDays(1).atStartOfDay(KST);
-        return Math.max(1, Duration.between(current, nextMidnight).getSeconds());
+        return limits.dailyRetryAfter(now);
     }
 
     private String celeryJobToken(String taskId) {
