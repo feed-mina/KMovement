@@ -1,5 +1,7 @@
 'use client';
 import { SavedToggle } from './PersonalSaved';
+import { motion } from 'framer-motion';
+import { MotionSaveButton, entranceTransition, useKrideReducedMotion } from '@/components/motion/KrideMotion';
 
 import { FormEvent, useEffect, useId, useState } from 'react';
 
@@ -98,8 +100,10 @@ function gradeCopy(grade: ProductCandidate['evidenceGrade']) {
     return '근거 부족 · 상품을 단정할 수 없음';
 }
 
-export function ProductCard({ candidate, onRemoved, readOnly = false, personalSave = false }: { candidate: ProductCandidate; onRemoved?: () => void; readOnly?: boolean; personalSave?: boolean }) {
+export function ProductCard({ candidate, onRemoved, readOnly = false, personalSave = false, entranceIndex }: { candidate: ProductCandidate; onRemoved?: () => void; readOnly?: boolean; personalSave?: boolean; entranceIndex?: number }) {
     const titleId = useId();
+    const reduced = useKrideReducedMotion();
+    const enter = entranceIndex !== undefined && !reduced;
     const [savedItemId, setSavedItemId] = useState(candidate.savedItemId);
     const [busy, setBusy] = useState(false);
     const [message, setMessage] = useState('');
@@ -130,7 +134,8 @@ export function ProductCard({ candidate, onRemoved, readOnly = false, personalSa
     };
 
     return (
-        <article className="kpop-product-card" role="listitem" aria-labelledby={titleId}>
+        <motion.article className="kpop-product-card" role="listitem" aria-labelledby={titleId}
+            initial={enter ? { opacity: 0, y: 8 } : false} animate={{ opacity: 1, y: 0 }} transition={entranceTransition(entranceIndex)}>
             <small className={`kpop-evidence-badge is-${candidate.evidenceGrade.toLowerCase()}`}>{gradeCopy(candidate.evidenceGrade)}</small>
             <h3 id={titleId}>{candidate.name}</h3>
             {candidate.brand && <p>{candidate.brand}</p>}
@@ -141,15 +146,15 @@ export function ProductCard({ candidate, onRemoved, readOnly = false, personalSa
                 {!candidate.rightsChecked && <p>링크 권리 미확인 · 출처 링크를 제공하지 않아요.</p>}</>}
             <div className="kpop-card-actions">
                 {personalSave && candidate.id && <SavedToggle kind="products" itemRef={candidate.id} />}
-                {!readOnly && <button type="button" aria-pressed={Boolean(savedItemId)} aria-busy={busy} disabled={busy || !candidate.id} onClick={toggleSaved}>
+                {!readOnly && <MotionSaveButton type="button" saved={Boolean(savedItemId)} aria-pressed={Boolean(savedItemId)} aria-busy={busy} disabled={busy || !candidate.id} onClick={toggleSaved}>
                     {busy ? '처리 중...' : savedItemId ? '저장 해제' : '후보 저장'}
-                </button>}
+                </MotionSaveButton>}
                 {canOpenOfficialUrl(candidate) && (
                     <a href={candidate.officialUrl} target="_blank" rel="noreferrer">권리 확인된 공식 출처 <span>(새 창)</span></a>
                 )}
             </div>
             {message && <p className="kpop-analysis-message" role="status">{message}</p>}
-        </article>
+        </motion.article>
     );
 }
 
@@ -235,7 +240,7 @@ export function KpopProductSearch({
             </form>
             {message && <p className="kpop-analysis-message" role="status">{message}</p>}
             <div className="kpop-product-list" role="list" aria-label={ariaLabel}>
-                {products.map((candidate) => <ProductCard key={String(candidate.id)} candidate={candidate} />)}
+                {products.map((candidate, index) => <ProductCard key={String(candidate.id)} candidate={candidate} entranceIndex={index} />)}
             </div>
         </section>
     );

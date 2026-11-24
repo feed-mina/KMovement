@@ -1,4 +1,6 @@
 'use client';
+import { useAnimate } from "framer-motion";
+import { useKrideReducedMotion } from "@/components/motion/KrideMotion";
 import CardImage from "./atoms/CardImage";
 import CardLabel from "./atoms/CardLabel";
 import CheckIndicator from "./atoms/CheckIndicator";
@@ -22,8 +24,13 @@ export default function SelectionCard({ id, meta, data, onChange, onAction, form
   const maxReached = isArtist ? selectedArtists.length >= 5 : selectedRegions.length >= 2;
   const disabled = maxReached && !selected;
 
+  const reduced = useKrideReducedMotion();
+  const [scope, animate] = useAnimate<HTMLDivElement>();
+
   const handleClick = () => {
     if (disabled) {
+      // 한도(5명·2곳)를 넘기려 하면 카드가 좌우로 살짝 흔들린다.
+      if (!reduced && scope.current) animate(scope.current, { x: [0, -6, 6, -4, 4, 0] }, { duration: 0.3 });
       const msg = isArtist ? "5개 이상은 클릭이 어렵습니다" : "지역은 두 곳까지 가능합니다";
       window.dispatchEvent(new CustomEvent('kride-warning', { detail: { msg } }));
       return;
@@ -40,7 +47,8 @@ export default function SelectionCard({ id, meta, data, onChange, onAction, form
   if (mode === "chip") {
     return (
       <div
-        className={`cursor-pointer w-full flex items-center justify-center px-3 py-2.5 rounded-full border-2 text-sm font-medium transition-all
+        ref={scope}
+        className={`cursor-pointer w-full flex items-center justify-center px-3 py-2.5 rounded-full border-2 text-sm font-medium transition-[color,background-color,border-color,opacity]
           ${selected
             ? "bg-white text-black border-white"
             : "bg-gray-800 text-gray-200 border-gray-600 hover:border-gray-300 hover:bg-gray-700"}
@@ -57,6 +65,7 @@ export default function SelectionCard({ id, meta, data, onChange, onAction, form
 
   return (
     <div
+      ref={scope}
       className={`selection-card relative flex flex-col items-center gap-1 cursor-pointer transition-opacity ${
         disabled ? "opacity-40 cursor-not-allowed" : ""
       }`}

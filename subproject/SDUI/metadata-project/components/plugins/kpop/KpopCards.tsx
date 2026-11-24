@@ -2,6 +2,7 @@
 
 import { useId, useState } from 'react';
 import { SavedToggle } from './PersonalSaved';
+import { MotionSaveButton } from '@/components/motion/KrideMotion';
 import ArtistMedia from './ArtistMedia';
 import ArtistRelated from './ArtistRelated';
 
@@ -239,9 +240,9 @@ export function KpopEventCard({ data, meta, onAction, readOnly = false, personal
                         </button>
                     )}
                     {personalSave && data?.id && <SavedToggle kind="events" itemRef={data.id} />}
-                    {!readOnly && <button type="button" aria-pressed={bookmarked} aria-busy={busy} disabled={busy} onClick={toggleBookmark}>
+                    {!readOnly && <MotionSaveButton type="button" saved={bookmarked} aria-pressed={bookmarked} aria-busy={busy} disabled={busy} onClick={toggleBookmark}>
                         {busy ? '저장 중...' : bookmarked ? '저장 취소' : '일정 저장'}
-                    </button>}
+                    </MotionSaveButton>}
                 </div>
                 {status && <small role="status">{status}</small>}
             </div>

@@ -233,3 +233,7 @@
     .language-message { max-width: 92%; }
     .language-composer__hint { display: none; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .language-typing i { animation: none; opacity: .6; }
+}

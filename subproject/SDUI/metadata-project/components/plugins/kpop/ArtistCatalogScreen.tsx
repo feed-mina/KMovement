@@ -1,4 +1,5 @@
 'use client';
+import {MotionCard} from '@/components/motion/KrideMotion';
 import KpopNav from './KpopNav';
 
 import {FormEvent, useEffect, useRef, useState} from 'react';
@@ -148,7 +149,7 @@ export default function ArtistCatalogScreen({screenId, refId}: ScreenControllerP
             {current.status === 'ready' && detail && current.artist && <KpopArtistCard data={current.artist} variant="detail" meta={{componentId: 'kpop_artist_detail'}} readOnly personalSave />}
             {current.status === 'ready' && !detail && current.page && <>
                 {current.page.items.length === 0 ? <KrideStatePanel kind={query ? 'empty-filtered' : 'empty-first'} icon="🎤" title={page > 1 ? '이 페이지에 아티스트가 없어요' : query ? '조건에 맞는 아티스트가 없어요' : '아직 공개된 아티스트가 없어요'} description={page > 1 ? '첫 페이지로 돌아가 주세요.' : query ? '이름을 바꾸거나 초기화해 주세요.' : '공개 승인된 아티스트가 등록되면 여기에 보여요.'} />
-                    : <div className="artist-catalog-grid artist-catalog-grid--compact">{shownItems.map(artist => <KpopArtistCard key={artist.id} data={artist} variant="compact" readOnly personalSave onAction={openArtist} />)}</div>}
+                    : <div className="artist-catalog-grid artist-catalog-grid--compact">{shownItems.map((artist, index) => <MotionCard key={artist.id} entranceIndex={index}><KpopArtistCard data={artist} variant="compact" readOnly personalSave onAction={openArtist} /></MotionCard>)}</div>}
                 {page > Math.max(1, Math.ceil(totalCount / PAGE_SIZE)) ? <button onClick={() => navigate(query, 1)}>첫 페이지로</button>
                     : remaining > 0 && <div className="artist-catalog-more"><button type="button" onClick={() => navigate(query, page + 1)}>더 보기 · {remaining}명 남음</button></div>}
                 {shownItems.length > 0 && <p className="artist-catalog-shown">{shownItems.length}명 표시 · 전체 {totalCount}명</p>}

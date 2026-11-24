@@ -1,4 +1,6 @@
 'use client';
+import { motion } from "framer-motion";
+import { useKrideReducedMotion } from "@/components/motion/KrideMotion";
 import PurposeIcon from "./atoms/PurposeIcon";
 
 const PURPOSE_LABELS: Record<string, string> = {
@@ -15,6 +17,7 @@ export default function PurposeCard({ id, meta, data, onChange, onAction, formDa
   const label = PURPOSE_LABELS[purposeKey] || meta?.labelText || meta?.label_text || "";
   const purposes: string[] = formData?.purposes ?? [];
   const selected = purposes.includes(purposeKey);
+  const reduced = useKrideReducedMotion();
 
   const handleClick = () => {
     const updated = selected ? [] : [purposeKey];
@@ -36,6 +39,11 @@ export default function PurposeCard({ id, meta, data, onChange, onAction, formDa
     >
       <PurposeIcon id={id} meta={{ ...meta, cssClass: purposeKey }} data={data} />
       <span className="font-medium text-base">{label}</span>
+      {selected && (
+        <motion.span aria-hidden="true" className="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-sm text-white"
+          initial={reduced ? false : { scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+          transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 520, damping: 22 }}>✓</motion.span>
+      )}
     </button>
   );
 }

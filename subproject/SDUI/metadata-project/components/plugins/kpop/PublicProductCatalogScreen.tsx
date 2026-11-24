@@ -70,7 +70,7 @@ export default function PublicProductCatalogScreen(_props:ScreenControllerProps)
         {current.status==='missing'&&<p role="status">공개된 상품 후보가 없어요. 목록에서 다른 상품을 찾아보세요.</p>}
         {current.status==='invalid'&&<p role="alert">검색어는 120자 이내로 입력해 주세요. 주소의 아티스트·이벤트 번호도 올바른 양수여야 해요.</p>}
         {current.status==='error'&&<div role="alert"><p>상품 후보를 불러오지 못했어요. 빈 후보와 다른 오류이며 검색 조건은 유지됩니다.</p><button onClick={()=>{focus.current=true;setRetry(x=>x+1);}}>다시 시도</button></div>}
-        {current.status==='ready'&&(current.items?.length?<div role="list" className="kpop-product-list" aria-label="읽기 전용 상품 후보">{current.items.map(item=><ProductCard key={item.id} candidate={item} readOnly personalSave/>)}</div>:<p role="status">조건에 맞고 공개 근거가 충분한 후보가 없어요. 상품이 없다는 뜻은 아니며, 근거 부족도 정상적인 결과입니다. 검색어를 바꾸거나 초기화해 주세요.</p>)}
+        {current.status==='ready'&&(current.items?.length?<div role="list" className="kpop-product-list" aria-label="읽기 전용 상품 후보">{current.items.map((item,index)=><ProductCard key={item.id} candidate={item} readOnly personalSave entranceIndex={index}/>)}</div>:<p role="status">조건에 맞고 공개 근거가 충분한 후보가 없어요. 상품이 없다는 뜻은 아니며, 근거 부족도 정상적인 결과입니다. 검색어를 바꾸거나 초기화해 주세요.</p>)}
         </div>
     </section>;
 }
