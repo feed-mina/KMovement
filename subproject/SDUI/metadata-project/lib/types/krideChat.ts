@@ -12,6 +12,8 @@ export interface KrideChatRequest {
   courseContext?: string;
   intent?: 'itinerary' | 'recommend' | 'qa';
   artists?: string[];
+  artistIds?: number[];
+  visitDate?: string;
   regions?: string[];
   purposes?: string[];
   duration?: number;
@@ -84,8 +86,9 @@ export interface ChatMessage {
 /** localStorage['kride_form'] 에 저장되는 사용자 컨텍스트 — 온보딩 5단계의 결과 */
 export interface KrideForm {
   duration?: string;          // "당일치기" | "1박2일" | "2박3일"
-  selectedArtists?: Array<{ id: number; name: string; imageUrl?: string }>;
+  selectedArtists?: Array<{ id: number; artistId?: number; name: string; imageUrl?: string }>;
   selectedRegions?: Array<{ id: number; name: string; imageUrl?: string }>;
   purposes?: string[];        // ['food', 'kculture', ...]
   budget?: [number, number];
+  visitDate?: string;         // YYYY-MM-DD, 코스 만들기에서 고른 방문일
 }

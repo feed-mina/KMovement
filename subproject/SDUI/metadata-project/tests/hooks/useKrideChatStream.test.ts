@@ -98,3 +98,19 @@ it('accepts structured source frames and retries only after an explicit request'
  expect(global.fetch).toHaveBeenCalledTimes(2);
  expect(result.current.messages[3].sources).toEqual([source]);
 });
+
+it('shows a readable sentence when the course server answers with an object detail',async()=>{
+ global.fetch=jest.fn().mockResolvedValue({ok:false,status:422,json:async()=>({detail:{code:'visit_date_required',message:'방문할 날짜를 선택해 주세요.'}})});
+ const {result}=renderHook(()=>useKrideChatStream({contextOverride:{}}));
+ await act(async()=>{await result.current.send('서울 당일치기 코스 짜줘')});
+ expect(result.current.error).toBe('방문할 날짜를 선택해 주세요.');
+ expect(result.current.messages[1].error).toBe('방문할 날짜를 선택해 주세요.');
+ expect(JSON.stringify(result.current.messages)).not.toContain('[object Object]');
+});
+
+it('never shows [object Object] for FastAPI validation lists',async()=>{
+ global.fetch=jest.fn().mockResolvedValue({ok:false,status:422,json:async()=>({detail:[{loc:['body','budget'],msg:'bad'}]})});
+ const {result}=renderHook(()=>useKrideChatStream({contextOverride:{}}));
+ await act(async()=>{await result.current.send('서울 코스 짜줘')});
+ expect(result.current.error).toBe('요청 조건을 확인해 주세요.');
+});

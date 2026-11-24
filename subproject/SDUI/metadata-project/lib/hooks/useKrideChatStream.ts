@@ -26,6 +26,7 @@ import { trackEvent } from '@/lib/analytics/dataLayer';
 import { countItineraryPlaces } from '@/lib/analytics/itinerary';
 
 import { consumeChatStream } from '@/lib/kride/consumeChatStream';
+import { errorText, problemMessage } from '@/lib/kride/problemMessage';
 
 const STORAGE_KEY = 'kride_form';
 const MESSAGE_REGION_KEYWORDS = [
@@ -106,6 +107,11 @@ function buildRequest(message: string, form: KrideForm | null): KrideChatRequest
     message,
     intent: classifyIntent(message),
     artists: form?.selectedArtists?.map((a) => a.name) ?? [],
+    // Same id source as the quick planner (buildItineraryRequest); the CPU checks names against ids.
+    artistIds: (form?.selectedArtists ?? [])
+      .map((a) => a.artistId)
+      .filter((id): id is number => typeof id === 'number' && Number.isSafeInteger(id) && id > 0),
+    visitDate: typeof form?.visitDate === 'string' ? form.visitDate : undefined,
     regions: messageRegions.length > 0 ? messageRegions : formRegions,
     purposes: mergeUnique(messagePurposes, formPurposes),
     duration: message.includes('당일') ? 1 : durationLabelToInt(form?.duration),
@@ -246,7 +252,7 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
             body: JSON.stringify(req),
             signal: controller.signal,
           });
-          if (!res.ok){const problem=await res.json().catch(()=>({}));throw new Error(problem.detail||problem.error||(res.status===429?'AI 사용 한도에 도달했습니다.':res.status===401?'로그인이 필요합니다.':`답변 서버 오류 (${res.status})`))}
+          if (!res.ok){const problem=await res.json().catch(()=>({}));throw new Error(problemMessage(problem,res.status))}
 
           // SDUI 공통 응답 래퍼 ApiResponse<T> = { success, data, message } 가능성 고려
           const json = await res.json();
@@ -346,7 +352,7 @@ export function useKrideChatStream(opts: UseKrideChatOptions = {}): UseKrideChat
           updateLast({ streaming: false, error });
           return;
         }
-        const msg = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
+        const msg = errorText(e);
         setError(msg);
         if (req.intent === 'itinerary') trackEvent('itinerary_error', { error_type: 'request_error', source: 'chat' });
         updateLast({
