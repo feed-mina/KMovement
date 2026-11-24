@@ -47,3 +47,24 @@
 @media (prefers-reduced-motion: reduce) {
  .community-animation-steps li[data-state=active] .community-animation-steps__fill { animation: none; }
 }
+
+/* AI 사진 분석 대기: 올린 사진 위로 훑는 빛. */
+.kpop-upload-preview__photo { position: relative; flex: none; display: block; overflow: hidden; border-radius: 6px; line-height: 0; }
+.kpop-upload-preview__scan { position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .75), transparent); pointer-events: none; }
+
+/* 서버에서 먼저 그려지는 화면(홈)의 차례 등장: 첫 그림부터 깜빡임 없이 보이도록 꾸밈 규칙으로 처리한다. */
+.kride-enter { animation: kride-enter-rise .22s ease-out backwards; animation-delay: calc(var(--kride-enter-i, 0) * 40ms); }
+@keyframes kride-enter-rise { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .kride-enter { animation: none; } }
+
+/* 코스 대기 화면(GSAP): 라이가 선을 따라 세 지점을 지나간다. */
+.kride-itinerary-loading__track { position: relative; width: min(100%, 420px); margin: 6px auto 2px; }
+.kride-itinerary-loading__track svg { display: block; width: 100%; height: auto; overflow: visible; }
+.kride-itinerary-loading__rider { position: absolute; translate: -50% -92%; line-height: 0; pointer-events: none; }
+
+/* 커뮤니티: 움직일 길 미리보기(GSAP). */
+.community-traj-preview { position: relative; border-radius: 12px; overflow: hidden; background: #111; }
+.community-traj-preview img { display: block; width: 100%; max-height: 240px; object-fit: cover; }
+.community-traj-preview svg { position: absolute; left: 0; top: 0; width: 100%; height: calc(100% - 34px); }
+.community-traj-preview__head { position: absolute; translate: -50% -50%; color: #fff; font-size: 18px; line-height: 1; text-shadow: 0 0 3px rgba(0, 0, 0, .8); pointer-events: none; }
+.community-traj-preview__note { margin: 0; padding: 8px 12px; height: 34px; box-sizing: border-box; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12px; color: #fff; background: #111; }

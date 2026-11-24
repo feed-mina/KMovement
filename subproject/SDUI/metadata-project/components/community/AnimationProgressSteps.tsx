@@ -5,17 +5,15 @@ import { useKrideReducedMotion } from '@/components/motion/KrideMotion';
 
 type Status = 'QUEUED' | 'RUNNING' | 'COMPLETED';
 
-const STEPS: { key: Status; label: string }[] = [
-    { key: 'QUEUED', label: '접수' },
-    { key: 'RUNNING', label: '만드는 중' },
-    { key: 'COMPLETED', label: '완료' },
-];
+const KEYS: Status[] = ['QUEUED', 'RUNNING', 'COMPLETED'];
+const DEFAULT_LABELS: [string, string, string] = ['접수', '만드는 중', '완료'];
 
 /**
  * 3초마다 받아오는 영상 상태를 접수 → 만드는 중 → 완료 세 칸으로 보여준다.
  * 진행 중인 칸은 막대가 오가며 기다리는 중임을 알리고, 여러 장 묶기는 처리한 장 수만큼 채운다.
  */
-export default function AnimationProgressSteps({ status, processed, total }: { status: Status; processed?: number; total?: number }) {
+export default function AnimationProgressSteps({ status, processed, total, labels = DEFAULT_LABELS }: { status: Status; processed?: number; total?: number; labels?: [string, string, string] }) {
+    const STEPS = KEYS.map((key, index) => ({ key, label: labels[index] }));
     const reduced = useKrideReducedMotion();
     const current = STEPS.findIndex((step) => step.key === status);
     const batchRatio = typeof total === 'number' && total > 1 ? Math.min(1, (processed ?? 0) / total) : null;

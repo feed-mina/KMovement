@@ -108,3 +108,8 @@
  .hero h1, .hero p, .eyebrow { animation: none; }
  .primaryButton, .secondaryButton, .chip, .tile, .areaCard { transition: none; transform: none !important; }
 }
+/* 첫 화면 제목은 줄 단위로 올라온다. */
+.heroLine { display: inline-block; animation: kride-hero-line .5s cubic-bezier(.2, .7, .2, 1) both; }
+.heroLine:last-child { animation-delay: .1s; }
+@keyframes kride-hero-line { from { opacity: 0; transform: translateY(.45em); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .heroLine { animation: none; } }

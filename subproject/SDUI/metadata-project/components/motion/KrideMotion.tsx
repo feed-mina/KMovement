@@ -49,13 +49,13 @@ export function useCardTilt() {
 /** Same timing as the explore cards: 8px rise in 0.22s, only the first six wait 0.04s each. */
 export const entranceTransition = (index = 0) => ({duration: 0.22, delay: index < 6 ? index * 0.04 : 0});
 
-export function MotionCard({children, className = '', entranceIndex, ...props}: HTMLMotionProps<'div'> & {entranceIndex?: number}) {
+export function MotionCard({children, className = '', entranceIndex, style, ...props}: HTMLMotionProps<'div'> & {entranceIndex?: number}) {
     const tilt = useCardTilt();
     const reduced = useKrideReducedMotion();
-    const enter = entranceIndex !== undefined && !reduced;
-    return <motion.div {...props} {...tilt} className={`kride-motion-card ${className}`}
-        initial={enter ? {opacity: 0, y: 8} : false} animate={{opacity: 1, y: 0}}
-        transition={entranceIndex !== undefined ? entranceTransition(entranceIndex) : undefined}
+    // 차례 등장은 꾸밈 규칙(.kride-enter)으로 한다: 서버에서 먼저 그려지는 홈에서도 첫 그림부터 깜빡임 없이 동작한다.
+    const enter = entranceIndex !== undefined;
+    return <motion.div {...props} {...tilt} className={`kride-motion-card${enter ? ' kride-enter' : ''} ${className}`}
+        style={{...style, ...tilt.style, ...(enter ? {'--kride-enter-i': Math.min(entranceIndex, 5)} : null)} as HTMLMotionProps<'div'>['style']}
         whileHover={reduced ? undefined : {y: -3}} whileTap={reduced ? undefined : {scale: 0.99}}>{children}</motion.div>;
 }
 

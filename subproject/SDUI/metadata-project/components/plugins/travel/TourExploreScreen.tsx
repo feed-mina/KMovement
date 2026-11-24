@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import {motion} from 'framer-motion';
+import {AnimatePresence, motion, useAnimate} from 'framer-motion';
 import {MotionButton, PastelBackdrop, useKrideReducedMotion} from '@/components/motion/KrideMotion';
 import { useSearchParams } from 'next/navigation';
 import type { ScreenControllerProps } from '@/components/screens/types';
@@ -222,6 +222,18 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [selectedMapId, setSelectedMapId] = useState<string | null>(null);
     const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
+    // 휴대폰에서 목록 ↔ 지도를 바꾸면 새로 보이는 쪽이 옆에서 미끄러져 들어온다 (지도는 오른쪽, 목록은 왼쪽).
+    const [resultsScope, animateResults] = useAnimate<HTMLDivElement>();
+    const previousMobileView = useRef(mobileView);
+    useEffect(() => {
+        if (previousMobileView.current === mobileView) return;
+        previousMobileView.current = mobileView;
+        if (reducedMotion || !resultsScope.current || !window.matchMedia?.('(max-width: 767px)').matches) return;
+        const pane = resultsScope.current.querySelector(mobileView === 'map' ? '.tour-results-map' : '.tour-results-list');
+        if (!pane) return;
+        const controls = animateResults(pane, {x: [mobileView === 'map' ? 28 : -28, 0], opacity: [0, 1]}, {duration: 0.22, ease: 'easeOut'});
+        return () => controls.stop();
+    }, [mobileView, reducedMotion, animateResults, resultsScope]);
     const selectFromMap = useCallback((id: string) => {
         setSelectedMapId(id);
         setMobileView('list');
@@ -605,8 +617,12 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                     <label htmlFor="holy-content-search" style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--semantic-accent-strong, #8B0610)', marginBottom: 6 }}>
                         작품·아티스트로 성지 찾기
                     </label>
-                    {selectedContent ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    {/* 필터 칩은 생길 때 커지고 지울 때 줄어든다. */}
+                    <AnimatePresence initial={false}>
+                    {selectedContent && (
+                        <motion.div key="chip" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', transformOrigin: 'left center' }}
+                            initial={reducedMotion ? false : {opacity: 0, scale: 0.7}} animate={{opacity: 1, scale: 1}}
+                            exit={reducedMotion ? undefined : {opacity: 0, scale: 0.7, height: 0}} transition={{duration: 0.18}}>
                             <span className="tour-chip tour-chip--fixed tour-chip--static" aria-pressed="true">
                                 {selectedContent.name}
                                 {CONTENT_CATEGORY_LABELS[selectedContent.category]
@@ -621,8 +637,10 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                             >
                                 필터 해제 ✕
                             </MotionButton>
-                        </div>
-                    ) : (
+                        </motion.div>
+                    )}
+                    </AnimatePresence>
+                    {selectedContent ? null : (
                         <>
                             <input
                                 id="holy-content-search"
@@ -746,7 +764,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                         <MotionButton type="button" aria-pressed={mobileView === 'list'} onClick={() => setMobileView('list')}>목록 보기</MotionButton>
                         <MotionButton type="button" aria-pressed={mobileView === 'map'} onClick={() => setMobileView('map')}>지도 보기</MotionButton>
                     </div>
-                    <div className={`tour-results-layout tour-results-layout--${mobileView}`}>
+                    <div ref={resultsScope} className={`tour-results-layout tour-results-layout--${mobileView}`}>
                     <div className="tour-results-list">
                     <div className="tour-card-grid">
                         {displayedPois.map((poi, index) => (
@@ -760,6 +778,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 poi={poi}
                                 isSaved={Boolean(poi.contentId && saved.has(poi.contentId))}
                                 entranceIndex={index}
+                                photoLayoutId={`tour-photo-${tourPoiKey(poi)}`}
                                 priority={index < EAGER_CARD_COUNT}
                                 onOpen={openPlace}
                                 onToggleSave={toggleSave}
@@ -807,6 +826,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                 >
                     <motion.div className="tour-detail-panel" initial={reducedMotion ? false : {opacity: 0, y: 16}} animate={{opacity: 1, y: 0}} transition={{duration: 0.22}} onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: '#fff', borderRadius: 16, overflow: 'hidden', maxHeight: '86vh', overflowY: 'auto' }}>
                         <div style={{ background: '#f5f5f5', position: 'relative' }}>
+                            <motion.div layoutId={reducedMotion ? undefined : `tour-photo-${tourPoiKey(selected)}`} transition={{duration: 0.24}}>
                             <PoiImage
                                 src={selected.firstImage}
                                 title={selected.title}
@@ -814,6 +834,7 @@ export default function TourExploreScreen(_props: ScreenControllerProps) {
                                 sourceUrl={selected.imageSourceUrl}
                                 credit={selected.imageCredit}
                             />
+                            </motion.div>
                             <MotionButton ref={closeButtonRef} type="button" aria-label="닫기" onClick={closePlace} style={{ position: 'absolute', top: 10, right: 10, width: 30, height: 30, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.45)', color: '#fff', cursor: 'pointer', fontSize: 16 }}>✕</MotionButton>
                         </div>
                         <div style={{ padding: '14px 16px' }}>

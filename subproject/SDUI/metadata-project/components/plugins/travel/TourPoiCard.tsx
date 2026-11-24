@@ -22,6 +22,8 @@ interface TourPoiCardProps {
     categoryLabel?: string;
     cardId?: string;
     entranceIndex?: number;
+    /** 상세 패널 사진과 이어 붙일 이름표. 없으면 이어 붙이지 않는다. */
+    photoLayoutId?: string;
 }
 
 /** "서울 종로구 창경궁로 88" → "서울 종로구". 카드에는 동네까지만, 전체 주소는 title 로. */
@@ -30,7 +32,7 @@ export function shortAddress(addr?: string): string {
     return addr.trim().split(/\s+/).slice(0, 2).join(' ');
 }
 
-export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onToggleSave, selected, onMapSelect, onHighlight, categoryLabel, cardId, entranceIndex = 0}: TourPoiCardProps) {
+export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onToggleSave, selected, onMapSelect, onHighlight, categoryLabel, cardId, entranceIndex = 0, photoLayoutId}: TourPoiCardProps) {
     const tilt = useCardTilt();
     const reduced = useKrideReducedMotion();
     const recommendReason = poi.recommendReason?.trim();
@@ -58,8 +60,11 @@ export default function TourPoiCard({poi, isSaved, priority = false, onOpen, onT
                 aria-label={`${poi.title} 상세 보기`}
                 onClick={(event) => onOpen(poi, event.currentTarget)}
             >
+                {/* 같은 이름표(layoutId)를 상세 패널 사진과 나눠 써서, 누르면 이 사진이 그대로 커지며 패널 사진이 된다. */}
                 <span className="tour-poi-card__media">
-                    <PoiImage src={poi.firstImage} thumbnail={poi.thumbnail} title={poi.title} variant="card" priority={priority}/>
+                    <motion.span style={{display: 'block'}} layoutId={reduced || !photoLayoutId ? undefined : photoLayoutId} transition={{duration: 0.24}}>
+                        <PoiImage src={poi.firstImage} thumbnail={poi.thumbnail} title={poi.title} variant="card" priority={priority}/>
+                    </motion.span>
                     {isHoly && <span className="tour-poi-card__tag tour-poi-card__tag--holy">성지</span>}
                     {!isHoly && categoryLabel && <span className="tour-poi-card__tag">{categoryLabel}</span>}
                 </span>

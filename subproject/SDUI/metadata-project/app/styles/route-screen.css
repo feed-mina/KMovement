@@ -81,7 +81,7 @@
 /* Animate content feedback, never the map's coordinate-positioning layers. */
 .route-result-map { min-width: 0; }
 .route-summary__card { animation: route-result-enter .2s ease-out; }
-.route-stop { border-radius: 10px; animation: route-result-enter .22s ease-out both; transition: background-color .18s; }
+.route-stop { border-radius: 10px; animation: route-result-enter .22s ease-out backwards; transition: background-color .18s; }
 .route-stop[data-selected=true] { background: var(--semantic-accent-soft, #fff0f1); }
 .route-stop__name { display: inline-block; max-width: 100%; padding: 4px 6px; margin: -4px -6px 0; border: 0; border-radius: 6px; background: transparent; text-align: left; font: inherit; font-size: 13px; font-weight: 600; color: var(--text-strong); }
 .kride-site-content .route-stop__name { min-height: 36px; }
@@ -146,3 +146,9 @@
 .route-ai-consent label{display:flex;align-items:flex-start;gap:12px;font-size:13px;line-height:1.9;cursor:pointer}.kride-site-content .route-ai-consent input[type=checkbox],.route-ai-consent input[type=checkbox]{flex:0 0 21px;width:21px;height:21px;min-height:21px;margin:3px 0 0;padding:0;accent-color:var(--semantic-accent,#dc2626)}.route-ai-consent p{margin:10px 0 0 33px;font-size:12px;color:var(--text-muted,#64748b)}
 .route-ai-selection{margin:0 0 10px;text-align:center;font-size:13px;font-weight:600;color:var(--text-body,#374151)}.route-ai-submit-area{display:grid;gap:8px}.route-ai-submit-area .route-ai-help{text-align:center}.kride-site-content .route-ai-submit,.route-ai-submit{width:100%;min-height:54px;padding:14px 18px;border:0;border-radius:12px;background:var(--semantic-accent,#dc2626);color:#fff;font:inherit;font-weight:700;box-shadow:0 5px 14px #e5091418}.route-ai-submit:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:540px){.route-ai-fields{grid-template-columns:1fr;padding:15px;gap:15px}.route-ai-form{gap:17px}.route-ai-consent{padding:15px}.route-ai-consent p{margin-left:0}.route-ai-intro p{font-size:13px}}
+
+/* 일정 세로선(GSAP): 번호 원의 가운데를 잇는다. 연출이 없을 때는 다 그려진 상태로 보인다. */
+.route-day__list { position: relative; }
+.route-day__line { position: absolute; left: 22px; top: 23px; bottom: 34px; width: 2px; background: var(--semantic-accent-soft, #fbd5d8); border-radius: 2px; transform-origin: top center; pointer-events: none; }
+.route-stop { position: relative; }
+.route-stop__index { position: relative; z-index: 1; }

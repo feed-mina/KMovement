@@ -5,6 +5,8 @@ import type { ScreenControllerProps } from '@/components/screens/types';
 import {MotionButton} from '@/components/motion/KrideMotion';
 import {ROUTE_MARKER_SELECT_EVENT, type RouteMapMarker} from '@/components/fields/kride/maps/mapTypes';
 import RoadRoutePlanner from './RoadRoutePlanner';
+import {motion} from 'framer-motion';
+import {useRouteTimeline} from './useRouteTimeline';
 import { type DirectionPlace, validDirectionPlace } from '@/lib/kride/directions';
 import RouteMap from '@/components/fields/kride/maps/RouteMap';
 import { tourPoisToRouteMapData } from '@/components/fields/kride/maps/tourToRouteMapData';
@@ -114,6 +116,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const mapData = mode === 'ai' ? aiRouteData : tourData;
     const markers = useMemo(() => mapData?.markers ?? [], [mapData]);
     const dayGroups = useMemo(() => groupByDay(markers), [markers]);
+    const timelineRoot = useRouteTimeline(markers.map((m) => m.id).join('|'));
     const directionsMarkers = (roadReturnMode === 'ai' && mode === 'road' ? aiRouteData : mapData)?.markers ?? [];
     const destinations = directionsMarkers.map(m => ({ id: m.id, name: m.name, address: m.address, lat: m.lat, lon: m.lng })).filter(validDirectionPlace);
     const openDirections = (destination?: DirectionPlace) => {
@@ -308,7 +311,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                     )}
 
                     {markers.length > 0 && (
-                        <div className="route-days">
+                        <div className="route-days" ref={timelineRoot}>
                             {dayGroups.map((g) => {
                                 const open = openDays[g.day] ?? true;
                                 return (
@@ -324,10 +327,12 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                                         </MotionButton>
                                         {open && (
                                             <div className="route-day__list">
+                                                {g.markers.length > 1 && <span className="route-day__line" aria-hidden="true" />}
                                                 {g.markers.map((m, stopIndex) => {
                                                     const next = g.markers[stopIndex + 1];
                                                     return (
-                                                        <div key={m.id} className="route-stop" data-selected={selectedStopId === m.id} style={{animationDelay: `${stopIndex < 6 ? stopIndex * 40 : 0}ms`}}>
+                                                        // 코스를 다시 만들면 그대로인 카드는 가만히 있고, 순서가 바뀐 카드만 새 자리로 옮겨 간다.
+                                                        <motion.div layout="position" transition={{layout: {duration: 0.2}}} key={m.id} className="route-stop" data-selected={selectedStopId === m.id} style={{animationDelay: `${stopIndex < 6 ? stopIndex * 40 : 0}ms`}}>
                                                             <span className="route-stop__index">{m.index + 1}</span>
                                                             <div className="route-stop__body">
                                                                 <MotionButton type="button" className="route-stop__name" aria-label={`${m.name} 지도에서 선택`} aria-pressed={selectedStopId === m.id}
@@ -339,7 +344,7 @@ export default function RouteScreen(_props: ScreenControllerProps) {
                                                                     onClick={() => openDirections({id: m.id, name: m.name, address: m.address, lat: m.lat, lon: m.lng})}>여기로 길찾기</MotionButton>
                                                                 {next && <p className="route-stop__leg">↓ {legLabel(haversineKm(m, next))}</p>}
                                                             </div>
-                                                        </div>
+                                                        </motion.div>
                                                     );
                                                 })}
                                             </div>
