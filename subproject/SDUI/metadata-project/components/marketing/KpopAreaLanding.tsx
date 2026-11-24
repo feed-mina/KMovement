@@ -2,6 +2,8 @@ import {PastelBackdrop} from '@/components/motion/KrideMotion';
 import Link from 'next/link';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import SpotThumbnail from '@/components/marketing/SpotThumbnail';
+import AmbientVideo from '@/components/motion/AmbientVideo';
+import { areaClip } from '@/lib/motion/ambientClips';
 import { KpopChecklistStory, KpopRouteStory } from '@/components/marketing/KpopRouteStory';
 import TrackedLink from '@/components/analytics/TrackedLink';
 import JsonLd from '@/components/seo/JsonLd';
@@ -29,6 +31,7 @@ export default function KpopAreaLanding({ area, spots }: { area: KpopAreaGuide; 
     const neighbors = area.neighbors
         .map((slug) => findKpopArea(slug))
         .filter((neighbor): neighbor is KpopAreaGuide => Boolean(neighbor));
+    const headerClip = areaClip(area.slug);
     const withThumbnails = resolved.holySpots.some((spot) => Boolean(spot.image));
 
     return (
@@ -49,6 +52,7 @@ export default function KpopAreaLanding({ area, spots }: { area: KpopAreaGuide; 
             </p>
             <header className={styles.hero}>
                 <PastelBackdrop />
+                {headerClip && <AmbientVideo className="kride-ambient--hero" {...headerClip} />}
                 <span className={styles.eyebrow}>{area.fullName} K-POP 여행 가이드</span>
                 <h1>{area.name} K-POP 성지, {area.tagline}</h1>
                 <p>{area.description}</p>

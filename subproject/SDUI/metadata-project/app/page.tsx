@@ -6,6 +6,8 @@ import HomeSearch from '@/components/marketing/HomeSearch';
 import HomeAccountStrip from '@/components/marketing/HomeAccountStrip';
 import HomeLiveCount from '@/components/marketing/HomeLiveCount';
 import HomeRouteLine from '@/components/marketing/HomeRouteLine';
+import AmbientVideo from '@/components/motion/AmbientVideo';
+import { areaClip, COURSE_TRAILER_CLIP, HOME_HERO_CLIP } from '@/lib/motion/ambientClips';
 import TrackedLink from '@/components/analytics/TrackedLink';
 import JsonLd from '@/components/seo/JsonLd';
 import { webApplicationJsonLd, websiteJsonLd } from '@/lib/seo/structuredData';
@@ -41,6 +43,7 @@ export default function HomePage() {
             <MarketingNav />
             <header className={styles.hero}>
                 <PastelBackdrop />
+                <AmbientVideo className="kride-ambient--hero" {...HOME_HERO_CLIP} />
                 <span className={styles.eyebrow}>AI K-컬처 여행 플래너</span>
                 <h1><span className={styles.heroLine}>좋아하는 K-컬처를 따라</span><br /><span className={styles.heroLine}>전국을 여행하세요.</span></h1>
                 <p>17개 시·도의 성지와 맛집을 탐색하고, 취향·지역·체류 시간에 맞는 이동 동선을 한 번에 만듭니다.</p>
@@ -72,6 +75,7 @@ export default function HomePage() {
                 <div className={styles.areaGrid}>
                     {featured.map((area) => (
                         <MotionCard key={area.slug}><Link className={styles.areaCard} href={foodAreaPath(area.slug)}>
+                            {areaClip(area.slug) && <AmbientVideo className="kride-ambient--card" mode="hover" {...areaClip(area.slug)!} />}
                             <strong>{area.name}</strong>
                             <span>{area.tagline}</span>
                             <em>권역 {area.highlights.length} · 맛집 {area.signatureSpots.length} · 성지 {area.holySpots.length}</em>
@@ -85,7 +89,7 @@ export default function HomePage() {
                 <div className={styles.cardGrid}>
                     <MotionCard><article className={styles.card}><h3>K-POP 성지 코스</h3><p>서울, 부산, 강원 등 공연장과 촬영지가 모인 지역의 탐색 동선을 준비합니다.</p><Link href="/travel/kpop">K-POP 여행 가이드 보기 →</Link></article></MotionCard>
                     <MotionCard><article className={styles.card}><h3>전국 맛집 코스</h3><p>17개 시·도의 시장과 골목, 카페를 이동 부담이 적은 하루 코스로 연결합니다.</p><Link href="/travel/food">전국 맛집 가이드 보기 →</Link></article></MotionCard>
-                    <MotionCard><article className={styles.card}><h3>나만의 AI 동선</h3><p>지역, 여행 목적, 기간을 선택하고 맞춤형 방문 순서를 추천받습니다.</p><TrackedLink href="/view/ROUTE_PLANNER" entryPoint="seo_home_card">AI 코스 만들기 →</TrackedLink></article></MotionCard>
+                    <MotionCard><article className={styles.card}><AmbientVideo className="kride-ambient--card" label="AI 코스 예고편: 지도 위에 동선이 그려지는 짧은 영상" {...COURSE_TRAILER_CLIP} /><h3>나만의 AI 동선</h3><p>지역, 여행 목적, 기간을 선택하고 맞춤형 방문 순서를 추천받습니다.</p><TrackedLink href="/view/ROUTE_PLANNER" entryPoint="seo_home_card">AI 코스 만들기 →</TrackedLink></article></MotionCard>
                 </div>
             </section>
             <footer className={styles.footer}>© KRIDE · AI K-컬처 여행 플래너</footer>
