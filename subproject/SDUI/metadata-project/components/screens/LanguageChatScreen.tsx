@@ -5,6 +5,8 @@ import {useAuth} from '@/context/AuthContext';
 import {consumeChatStream} from '@/lib/kride/consumeChatStream';
 import KrideStatePanel from '@/components/fields/kride/atoms/KrideStatePanel';
 import type {ScreenControllerProps} from './types';
+import {motion} from 'framer-motion';
+import {entranceTransition,useKrideReducedMotion} from '@/components/motion/KrideMotion';
 
 type Message={role:'user'|'assistant';content:string};
 type Lang='en'|'ja'|'ko';
@@ -25,7 +27,7 @@ const SUGGESTIONS:Record<Lang,string[]>={
  */
 export default function LanguageChatScreen({screenId}:ScreenControllerProps){
  const language:Lang=screenId==='AI_JAPANESE_CHAT_PAGE'?'ja':screenId==='AI_KOREAN_CHAT_PAGE'?'ko':'en';
- const name=NAMES[language];const auth=useAuth();
+ const name=NAMES[language];const auth=useAuth();const reduced=useKrideReducedMotion();
  const [messages,setMessages]=useState<Message[]>([]),[input,setInput]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[last,setLast]=useState('');
  const [confirmEnd,setConfirmEnd]=useState(false);
  const active=useRef<AbortController|null>(null),generation=useRef(0),live=useRef(messages);live.current=messages;
@@ -56,14 +58,14 @@ export default function LanguageChatScreen({screenId}:ScreenControllerProps){
   :!auth.isLoggedIn?<KrideStatePanel kind="forbidden" title="로그인 후 대화를 시작할 수 있어요" description="대화 기록은 계정별로 보관돼요." primaryAction={{label:'로그인하고 시작하기',href:'/view/LOGIN_PAGE?returnTo='+encodeURIComponent('/view/'+screenId)}}/>
   :<>
    <div className="language-thread" role="log" aria-label="대화 내용" aria-busy={busy}>
-    {!hasConversation&&<div className="language-thread-empty"><p>무엇이든 물어보세요. 아래 추천 질문을 눌러 바로 시작할 수도 있어요.</p><div className="language-suggestions">{SUGGESTIONS[language].map(q=><button key={q} type="button" className="language-suggestion" onClick={()=>void send(q)} disabled={busy}>{q}</button>)}</div></div>}
+    {!hasConversation&&<div className="language-thread-empty"><p>무엇이든 물어보세요. 아래 추천 질문을 눌러 바로 시작할 수도 있어요.</p><div className="language-suggestions">{SUGGESTIONS[language].map((q,i)=><motion.button key={q} type="button" className="language-suggestion" onClick={()=>void send(q)} disabled={busy} initial={reduced?false:{opacity:0,y:6}} animate={{opacity:1,y:0}} transition={entranceTransition(i)}>{q}</motion.button>)}</div></div>}
     {messages.map((m,i)=>{const pending=m.role==='assistant'&&!m.content;const failed=pending&&!!error&&i===messages.length-1;
-     return <div key={i} className={'language-message '+m.role+(failed?' is-failed':'')} data-role={m.role}>
+     return <motion.div key={i} className={'language-message '+m.role+(failed?' is-failed':'')} data-role={m.role} initial={reduced?false:{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{duration:0.2}}>
       <span className="language-message__who">{m.role==='user'?'나':'AI'}</span>
       {failed
        ?<div className="language-message__bubble" role="alert"><p>{error}</p><button type="button" disabled={busy} onClick={()=>void send(last,true)}>다시 시도</button></div>
        :<div className="language-message__bubble"><p>{m.content||(busy?'답변을 쓰는 중…':'답변을 기다리는 중…')}</p>{pending&&busy&&<span className="language-typing" aria-hidden="true"><i/><i/><i/></span>}</div>}
-     </div>})}
+     </motion.div>})}
     <div ref={threadEnd}/>
    </div>
    {error&&!(messages.length&&messages[messages.length-1].role==='assistant'&&!messages[messages.length-1].content)&&<div role="alert" className="language-chat-alert"><p>{error}</p><button type="button" disabled={busy} onClick={()=>void send(last,true)}>다시 시도</button></div>}

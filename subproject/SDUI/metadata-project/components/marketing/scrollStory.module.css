@@ -1,0 +1,24 @@
+/* GSAP 시범: K-POP 지역 소개 페이지의 권역별 동선과 출발 전 체크리스트. 스크립트가 없을 때도 모두 켜진 상태로 보인다. */
+.routeStory { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 32px; margin-top: 30px; align-items: start; }
+.routeCards { display: grid; gap: 18px; margin: 0; padding: 0; list-style: none; }
+.routeCard { position: relative; padding: 26px 26px 26px 72px; border-radius: var(--kride-radius-lg, 16px); border: 1px solid var(--border-hair, #e5e7eb); background: var(--surface-card, #fff); box-shadow: 0 12px 34px rgba(80, 16, 22, .05); }
+.routeCard h3 { margin: 0 0 12px; font-size: 20px; }
+.routeCard p { color: #666; line-height: 1.65; }
+.routeCard small { display: block; padding-top: 14px; border-top: 1px solid #eee; color: #9b3036; line-height: 1.55; }
+.routeIndex { position: absolute; left: 24px; top: 26px; display: inline-flex; width: 32px; height: 32px; align-items: center; justify-content: center; border-radius: 50%; background: #fff0f1; color: #b40020; font-weight: 800; }
+.routeRail { position: sticky; top: 96px; padding: 22px; border-radius: 16px; background: #fff; border: 1px solid #eee; }
+.routeRailTitle { display: block; margin-bottom: 14px; font-size: 13px; font-weight: 700; color: #9b3036; }
+.routeTrack { position: relative; display: grid; gap: 22px; padding-left: 4px; }
+.routeLine { position: absolute; left: 17px; top: 14px; bottom: 14px; width: 2px; background: #e50914; border-radius: 2px; }
+.routeStop { position: relative; display: flex; align-items: center; gap: 12px; font-size: 14px; line-height: 1.4; color: #333; }
+.routeStop b { flex: none; display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border-radius: 50%; background: #e50914; color: #fff; font-size: 13px; box-shadow: 0 0 0 4px #fff; }
+.routeStop[data-active=true] { font-weight: 800; color: #111; }
+.checklist { margin: 26px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; list-style: none; }
+.checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 18px 20px; border-radius: 14px; background: #fff; border: 1px solid #eee; }
+.checklist li::before { content: none !important; display: none !important; }
+.checkMark { flex: none; display: inline-flex; width: 22px; height: 22px; align-items: center; justify-content: center; border-radius: 50%; background: #e50914; color: #fff; font-size: 13px; font-weight: 800; }
+@media (max-width: 720px) {
+  .routeStory { grid-template-columns: 1fr; }
+  .routeRail { display: none; }
+  .checklist { grid-template-columns: 1fr; }
+}

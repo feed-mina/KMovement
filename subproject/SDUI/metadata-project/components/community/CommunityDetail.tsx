@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import CommunityDiscussion from '@/components/community/CommunityDiscussion';
+import AnimationProgressSteps from '@/components/community/AnimationProgressSteps';
+import { MotionReveal } from '@/components/motion/KrideMotion';
 import { backoffDelay } from '@/lib/net/backoff';
 import { AnimationStatusResponse, BatchImageInput, communityService, PostImageDto, PostResponse } from '@/services/communityService';
 import { ANIM_POLL_BASE_MS, ANIM_POLL_MAX_MS, ANIM_POLL_MAX_FAILURES, formatDate, imageKey, animationRouteLabel, formatFailedImageIndexes, LoadingState } from './communityShared';
@@ -338,8 +340,13 @@ export function CommunityDetail({ postId }: { postId: number }) {
 
                 <div className="community-animation-section">
                     {animStatus?.status === 'COMPLETED' && animStatus.resultUrl && (
-                        <div className="community-animation-result">
+                        <MotionReveal className="community-animation-result">
                             <h3>영상 결과</h3>
+                            {animStatus.fallbackUsed && (
+                                <p className="community-animation-fallback-badge" role="note">
+                                    AI 대신 확대·이동 영상으로 만들었어요
+                                </p>
+                            )}
                             <video controls preload="metadata" src={animStatus.resultUrl} />
                             <div className="community-animation-meta">
                                 {animRouteText && <span>{animRouteText}</span>}
@@ -356,13 +363,20 @@ export function CommunityDetail({ postId }: { postId: number }) {
                                 )}
                                 {failedImageText && <span>실패 이미지 {failedImageText}</span>}
                             </div>
-                        </div>
+                        </MotionReveal>
                     )}
                     {animStatus?.status === 'QUEUED' || animStatus?.status === 'RUNNING' ? (
-                        <p className="community-animation-progress">
-                            영상 생성 중... ({animStatus.status})
-                            {hasBatchProgress && ` ${animStatus.processedImages ?? 0}/${animStatus.totalImages}장`}
-                        </p>
+                        <div className="community-animation-progress" role="status">
+                            <p>
+                                영상 생성 중 · {animStatus.status === 'QUEUED' ? '접수됨' : '만드는 중'}
+                                {hasBatchProgress && ` ${animStatus.processedImages ?? 0}/${animStatus.totalImages}장`}
+                            </p>
+                            <AnimationProgressSteps
+                                status={animStatus.status}
+                                processed={animStatus.processedImages}
+                                total={animStatus.totalImages}
+                            />
+                        </div>
                     ) : null}
                     {animPollStopped && (animStatus?.status === 'QUEUED' || animStatus?.status === 'RUNNING') && (
                         <p className="community-animation-progress" role="status">

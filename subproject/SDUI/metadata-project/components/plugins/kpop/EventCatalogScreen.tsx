@@ -1,4 +1,5 @@
 'use client';
+import {MotionCard} from '@/components/motion/KrideMotion';
 import FanEventFeed from './FanEventFeed';
 import KpopNav from './KpopNav';
 import ArtistReturn from './ArtistReturn';
@@ -80,7 +81,7 @@ export function LegacyEventCatalogScreen({screenId,refId}:ScreenControllerProps)
             {current.status==='invalid'&&<p role="alert">날짜 형식과 순서를 확인해 주세요. 종료일만 입력할 때는 한국 시간 오늘 이후여야 해요. 과거 일정은 시작일도 입력해 주세요.</p>}
             {current.status==='missing'&&<p role="status">공개된 이벤트를 찾을 수 없어요. 주소를 확인하거나 목록으로 돌아가 주세요.</p>}
             {current.status==='ready'&&detail&&current.item&&<KpopEventCard data={current.item} meta={{componentId:'kpop_event_detail'}} readOnly personalSave/>}
-            {current.status==='ready'&&!detail&&(current.items?.length?<div className="kpop-grid event-grid">{current.items.map(item=><KpopEventCard key={item.id} data={item} readOnly personalSave onAction={open}/>)}</div>:<p role="status">{filterKey?'선택한 기간·지역에 공개된 일정이 없어요. 조건을 바꾸거나 초기화해 주세요.':'오늘 이후 공개된 일정이 아직 없어요. 과거 일정은 시작일을 입력해 확인할 수 있어요.'}</p>)}
+            {current.status==='ready'&&!detail&&(current.items?.length?<div className="kpop-grid event-grid">{current.items.map((item,index)=><MotionCard key={item.id} entranceIndex={index}><KpopEventCard data={item} readOnly personalSave onAction={open}/></MotionCard>)}</div>:<p role="status">{filterKey?'선택한 기간·지역에 공개된 일정이 없어요. 조건을 바꾸거나 초기화해 주세요.':'오늘 이후 공개된 일정이 아직 없어요. 과거 일정은 시작일을 입력해 확인할 수 있어요.'}</p>)}
         </div>
     </section>;
 }

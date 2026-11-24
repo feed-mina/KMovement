@@ -22,3 +22,28 @@
 .kride-share-feedback { position: fixed; left: 50%; bottom: calc(var(--kride-tabbar-h, 0px) + 80px); z-index: 1100; translate: -50% 0; max-width: min(360px, 90vw); padding: 10px 16px; border-radius: 12px; background: #172033; color: #fff; font: 13px/1.5 system-ui; box-shadow: 0 5px 20px #0002; pointer-events: none; animation: kride-share-enter .15s ease-out; }
 @keyframes kride-share-enter { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .kride-share-feedback { animation: none; } }
+
+/* 5-step course: progress bar fills 1/5 per step; the step frame slides in from the travel direction. */
+.course-progress { align-items: center; }
+.course-progress__bar { flex: 1 0 100%; height: 6px; border-radius: 999px; background: var(--border-hair, #e5e7eb); overflow: hidden; }
+.course-progress__fill { display: block; height: 100%; border-radius: inherit; background: var(--semantic-accent, #e50914); transform-origin: left center; }
+.course-step-frame { min-width: 0; }
+
+/* K-POP / 내 목록 tabs reuse the explore sliding indicator. */
+.kpop-section-nav a, .personal-saved-tabs button { position: relative; isolation: isolate; }
+.kride-site-content .kpop-section-nav a[aria-current=page] { background: transparent; border-color: transparent; }
+.kride-tab-indicator { position: absolute; inset: -1px; border-radius: inherit; background: var(--semantic-accent-soft, #fff0f1); border: 1px solid var(--semantic-accent, #e50914); z-index: -1; pointer-events: none; }
+.personal-saved .personal-saved-tabs button[aria-pressed=true] { border-bottom-color: transparent; }
+.kride-tab-underline { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--kride-primary, #e50914); pointer-events: none; }
+.personal-saved-item { overflow: hidden; }
+
+/* Community AI video progress: 접수 → 만드는 중 → 완료. */
+.community-animation-steps { display: flex; gap: 6px; margin: 8px 0 4px; padding: 0; list-style: none; }
+.community-animation-steps li { flex: 1; display: grid; gap: 4px; font-size: 12px; color: var(--text-muted, #6b7280); }
+.community-animation-steps li[data-state=done], .community-animation-steps li[data-state=active] { color: var(--text-strong, #111827); font-weight: 700; }
+.community-animation-steps__track { height: 4px; border-radius: 999px; background: var(--border-hair, #e5e7eb); overflow: hidden; }
+.community-animation-steps__fill { display: block; height: 100%; background: var(--semantic-accent, #e50914); transform-origin: left center; }
+.community-animation-fallback-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 999px; background: #fff4d6; color: #7a4b00; border: 1px solid #f0c050; font-weight: 700; }
+@media (prefers-reduced-motion: reduce) {
+ .community-animation-steps li[data-state=active] .community-animation-steps__fill { animation: none; }
+}

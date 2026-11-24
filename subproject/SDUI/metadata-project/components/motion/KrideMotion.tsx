@@ -46,11 +46,32 @@ export function useCardTilt() {
     };
 }
 
-export function MotionCard({children, className = '', ...props}: HTMLMotionProps<'div'>) {
+/** Same timing as the explore cards: 8px rise in 0.22s, only the first six wait 0.04s each. */
+export const entranceTransition = (index = 0) => ({duration: 0.22, delay: index < 6 ? index * 0.04 : 0});
+
+export function MotionCard({children, className = '', entranceIndex, ...props}: HTMLMotionProps<'div'> & {entranceIndex?: number}) {
     const tilt = useCardTilt();
     const reduced = useKrideReducedMotion();
+    const enter = entranceIndex !== undefined && !reduced;
     return <motion.div {...props} {...tilt} className={`kride-motion-card ${className}`}
+        initial={enter ? {opacity: 0, y: 8} : false} animate={{opacity: 1, y: 0}}
+        transition={entranceIndex !== undefined ? entranceTransition(entranceIndex) : undefined}
         whileHover={reduced ? undefined : {y: -3}} whileTap={reduced ? undefined : {scale: 0.99}}>{children}</motion.div>;
+}
+
+/** Fade-and-rise entrance for list rows, chips and chat bubbles. Reduced motion renders in place. */
+export function MotionReveal({children, index = 0, rise = 8, ...props}: HTMLMotionProps<'div'> & {index?: number; rise?: number}) {
+    const reduced = useKrideReducedMotion();
+    return <motion.div {...props} initial={reduced ? false : {opacity: 0, y: rise}} animate={{opacity: 1, y: 0}}
+        transition={entranceTransition(index)}>{children}</motion.div>;
+}
+
+/** Save/bookmark press: shrink to 88% on tap, pop to 115% once saved (0.18s), as on the explore heart. */
+export function MotionSaveButton({saved, ...props}: HTMLMotionProps<'button'> & {saved: boolean}) {
+    const reduced = useKrideReducedMotion();
+    return <motion.button {...props} initial={false}
+        whileTap={reduced || props.disabled ? undefined : {scale: 0.88}}
+        animate={{scale: saved && !reduced ? [1, 1.15, 1] : 1}} transition={{duration: 0.18}} />;
 }
 
 /** A single ripple per press, with native button semantics and caller events intact. */

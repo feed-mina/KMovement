@@ -9,6 +9,8 @@ import Pagination from '@/components/fields/Pagination';
 import KrideStatePanel from '@/components/fields/kride/atoms/KrideStatePanel';
 import Skeleton from '@/components/utils/Skeleton';
 import type {ScreenControllerProps} from '@/components/screens/types';
+import {AnimatePresence,motion} from 'framer-motion';
+import {MotionSaveButton,useKrideReducedMotion} from '@/components/motion/KrideMotion';
 export type SavedKind='artists'|'events'|'products';
 const labels:Record<SavedKind,string>={artists:'아티스트',events:'이벤트',products:'상품'};
 const browse:Record<SavedKind,string>={artists:'/view/kpop',events:'/view/KPOP_EVENTS',products:'/view/KPOP_PRODUCTS'};
@@ -37,7 +39,7 @@ export function SavedToggle({kind,itemRef,guestPrompt=false,saveLabel='저장',s
   catch(e){if(live.current===key&&!abort.signal.aborted)setState({...current,busy:false,status:(e as Error).message==='404'?'private':'error'});}
  };
  return <div className="personal-save-action">
-  {current.status==='error'?<><p role="alert">저장 상태를 확인하지 못했어요.</p><button onClick={()=>setRetry(x=>x+1)}>저장 상태 다시 확인</button></>:current.status==='private'?<p role="status">비공개로 전환되어 새로 저장할 수 없어요. 내 목록에서 기존 저장을 관리해 주세요.</p>:<button disabled={current.busy||current.status==='loading'} aria-pressed={current.saved} onClick={toggle}>{current.status==='loading'?'저장 확인 중…':current.busy?'처리 중…':current.saved?savedLabel:saveLabel}</button>}
+  {current.status==='error'?<><p role="alert">저장 상태를 확인하지 못했어요.</p><button onClick={()=>setRetry(x=>x+1)}>저장 상태 다시 확인</button></>:current.status==='private'?<p role="status">비공개로 전환되어 새로 저장할 수 없어요. 내 목록에서 기존 저장을 관리해 주세요.</p>:<MotionSaveButton saved={current.saved} disabled={current.busy||current.status==='loading'} aria-pressed={current.saved} onClick={toggle}>{current.status==='loading'?'저장 확인 중…':current.busy?'처리 중…':current.saved?savedLabel:saveLabel}</MotionSaveButton>}
  </div>;
 }
 type SavedRow={id:number;itemRef:number;title:string;visibility:'PUBLIC'|'PRIVATE'};
@@ -49,6 +51,7 @@ type SavedPage={items:SavedRow[];page:number;pageSize:number;totalCount:number};
  * 탭 카운트는 추가 요청 없이 방문한 탭의 totalCount 를 기억해 보여준다.
  */
 export default function PersonalSavedScreen(_props:ScreenControllerProps) {
+ const reduced=useKrideReducedMotion();
  const auth=useContext(AuthContext);const identity=auth?.isLoggedIn&&!auth.isLoading?String(auth.user?.userSqno??auth.user?.userId??''):'';
  const router=useRouter(),search=useSearchParams();
  const eventReturn=search.get('returnEvents');const eventBack=eventReturn&&/^\/view\/KPOP_EVENTS(?:\?[^#]*)?$/.test(eventReturn)?eventReturn:null;
@@ -66,7 +69,7 @@ export default function PersonalSavedScreen(_props:ScreenControllerProps) {
  const undo=undoState?.identity===identity?undoState:null;
  const heading=useRef<HTMLHeadingElement>(null),focus=useRef(false),live=useRef(key);live.current=key;
  const mutation=useRef<AbortController|null>(null);
- useEffect(()=>{setMessage('');setDeleting(null);if(!identity)return;const abort=new AbortController();setResult({key});
+ useEffect(()=>{setMessage('');setDeleting(null);if(!identity)return;const abort=new AbortController();setResult(r=>r.key===key&&r.data?r:{key});
   request(base+kind+'?page='+page,abort.signal).then(data=>{if(!abort.signal.aborted){setResult({key,data});setCountState(c=>({identity,counts:{...(c.identity===identity?c.counts:{}),[kind]:data.totalCount}}));if(focus.current){focus.current=false;heading.current?.focus();}}}).catch(()=>{if(!abort.signal.aborted)setResult({key,error:true});});
   return ()=>{abort.abort();mutation.current?.abort();};
  },[key,identity,kind,page,retry]);
@@ -75,7 +78,7 @@ export default function PersonalSavedScreen(_props:ScreenControllerProps) {
  if(!identity)return <section className="page-wrap personal-saved"><h1>내 목록</h1><KrideStatePanel kind="forbidden" title="로그인이 필요해요" description="저장 목록은 나만 볼 수 있어서 로그인 뒤에 열려요." primaryAction={{label:'로그인',href:'/view/LOGIN_PAGE?returnTo='+encodeURIComponent(savedHref)}}/></section>;
  const current=result.key===key?result:{key};
  const remove=async(item:SavedRow)=>{if(deleting!==null)return;setDeleting(item.itemRef);setMessage('');const abort=new AbortController();mutation.current=abort;
-  try{await request(base+kind+'/'+item.itemRef,abort.signal,'DELETE');if(live.current===key&&!abort.signal.aborted){focus.current=true;setUndo({item,kind,identity});setRetry(x=>x+1);}}
+  try{await request(base+kind+'/'+item.itemRef,abort.signal,'DELETE');if(live.current===key&&!abort.signal.aborted){focus.current=true;setResult(r=>r.key===key&&r.data?{key,data:{...r.data,items:r.data.items.filter(i=>i.id!==item.id),totalCount:Math.max(0,r.data.totalCount-1)}}:r);setUndo({item,kind,identity});setRetry(x=>x+1);}}
   catch{if(live.current===key&&!abort.signal.aborted){setMessage('삭제하지 못했어요. 다시 시도해 주세요.');setDeleting(null);}}
  };
  const restore=async()=>{if(!undo||undo.busy)return;setUndo({...undo,busy:true});const abort=new AbortController();mutation.current=abort;
@@ -87,20 +90,21 @@ export default function PersonalSavedScreen(_props:ScreenControllerProps) {
   <PersonalLibraryNav active="saved" savedHref={savedHref}/>
   {eventBack&&<Link href={eventBack}>팬 일정으로 돌아가기</Link>}
   <div className="personal-saved-head"><Link className="personal-saved-back" href="/view/MY_PAGE">← 마이페이지</Link><h1>내 목록</h1><p>나만 볼 수 있는 저장 목록이에요.</p></div>
-  <nav className="personal-saved-tabs" aria-label="저장 종류">{(Object.keys(labels) as SavedKind[]).map(k=><button key={k} aria-pressed={kind===k} onClick={()=>{navigate(k,1);}}>{labels[k]}{counts[k]!==undefined&&<b className="personal-saved-tabs__count">{counts[k]}</b>}</button>)}</nav>
+  <nav className="personal-saved-tabs" aria-label="저장 종류">{(Object.keys(labels) as SavedKind[]).map(k=><button key={k} aria-pressed={kind===k} onClick={()=>{navigate(k,1);}}>{kind===k&&<motion.span aria-hidden="true" className="kride-tab-underline" layoutId="personal-saved-tab" transition={{duration:0.2}}/>}{labels[k]}{counts[k]!==undefined&&<b className="personal-saved-tabs__count">{counts[k]}</b>}</button>)}</nav>
   <h2 ref={heading} tabIndex={-1} className="personal-saved-title">{labels[kind]} 저장 목록{current.data?` · ${total}개`:''}</h2>
   {message&&<p role="alert" className="personal-saved-alert">{message}</p>}
   {current.error?<KrideStatePanel kind="error" title="내 목록을 불러오지 못했어요" description="빈 목록이 아니라 불러오기에 실패한 거예요. 네트워크를 확인하고 다시 시도해 주세요." primaryAction={{label:'다시 시도',onClick:()=>setRetry(x=>x+1)}}/>
   :!current.data?<div className="personal-saved-skeleton" role="status" aria-label={labels[kind]+' 저장 목록을 불러오는 중'}><Skeleton height={88}/><Skeleton height={88}/><Skeleton height={88}/></div>
   :<>
-   {current.data.items.length===0
-    ?<KrideStatePanel kind="empty-first" icon={icons[kind]} title={`아직 저장한 ${labels[kind]}가 없어요`} description={`K-pop 탭에서 관심 있는 ${labels[kind]}의 저장 버튼을 누르면 여기에 모여요.`} primaryAction={{label:`${labels[kind]} 둘러보기`,href:browse[kind]}}/>
-    :<ul className="personal-saved-list">{current.data.items.map(item=><li key={item.id} className={'personal-saved-item'+(item.visibility==='PRIVATE'?' is-private':'')}>
+   {/* 지운 항목은 접히며 사라지고, 되돌리면 같은 자리에서 펴진다. 움직임 줄이기면 바로 바뀐다. */}
+   <ul className="personal-saved-list"><AnimatePresence initial={false}>{current.data.items.map(item=><motion.li key={item.id} className={'personal-saved-item'+(item.visibility==='PRIVATE'?' is-private':'')}
+     initial={reduced?false:{opacity:0,height:0}} animate={{opacity:1,height:'auto'}} exit={reduced?undefined:{opacity:0,height:0,marginTop:0,marginBottom:0,paddingTop:0,paddingBottom:0}} transition={{duration:0.22}}>
      <div className="personal-saved-item__body"><h3>{item.visibility==='PRIVATE'?'비공개 항목':item.title}</h3><p>{item.visibility==='PRIVATE'?'비공개 · 공개 승인이 취소되었거나 더 이상 제공되지 않는 항목입니다. 저장 기록은 삭제할 수 있어요.':'공개'}</p></div>
      <div className="personal-saved-item__actions">
       {item.visibility==='PUBLIC'&&<a className="personal-saved-item__link" href={kind==='artists'?'/view/KPOP_ARTIST_DETAIL/'+item.itemRef:kind==='events'?'/view/KPOP_EVENT_DETAIL/'+item.itemRef:'/view/KPOP_PRODUCTS?itemId='+item.itemRef}>보기</a>}
       <button className="personal-saved-item__remove" disabled={deleting!==null} onClick={()=>remove(item)}>{deleting===item.itemRef?'삭제 중…':'삭제'}</button>
-     </div></li>)}</ul>}
+     </div></motion.li>)}</AnimatePresence></ul>
+   {current.data.items.length===0&&<KrideStatePanel kind="empty-first" icon={icons[kind]} title={`아직 저장한 ${labels[kind]}가 없어요`} description={`K-pop 탭에서 관심 있는 ${labels[kind]}의 저장 버튼을 누르면 여기에 모여요.`} primaryAction={{label:`${labels[kind]} 둘러보기`,href:browse[kind]}}/>}
    {total>PAGE_SIZE&&<><Pagination totalCount={total} pageSize={PAGE_SIZE} currentPage={current.data.page} onPageChange={next=>{navigate(kind,next);}}/><p className="personal-saved-pageinfo">{current.data.page}페이지 · {PAGE_SIZE}개씩</p></>}
   </>}
   {undo&&<div className="kride-undo-toast" role="status"><span>저장을 취소했어요</span><button type="button" onClick={restore} disabled={undo.busy}>{undo.busy?'되돌리는 중…':'되돌리기'}</button></div>}
