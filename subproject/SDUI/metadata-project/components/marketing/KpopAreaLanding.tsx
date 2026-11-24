@@ -2,6 +2,7 @@ import {PastelBackdrop} from '@/components/motion/KrideMotion';
 import Link from 'next/link';
 import MarketingNav from '@/components/marketing/MarketingNav';
 import SpotThumbnail from '@/components/marketing/SpotThumbnail';
+import { KpopChecklistStory, KpopRouteStory } from '@/components/marketing/KpopRouteStory';
 import TrackedLink from '@/components/analytics/TrackedLink';
 import JsonLd from '@/components/seo/JsonLd';
 import { breadcrumbJsonLd, itemListJsonLd } from '@/lib/seo/structuredData';
@@ -60,15 +61,7 @@ export default function KpopAreaLanding({ area, spots }: { area: KpopAreaGuide; 
             <section className={styles.section}>
                 <h2>권역별 동선</h2>
                 <p className={styles.lead}>{area.intro}</p>
-                <div className={styles.cardGrid}>
-                    {area.highlights.map((highlight) => (
-                        <article className={styles.card} key={highlight.name}>
-                            <h3>{highlight.name}</h3>
-                            <p>{highlight.description}</p>
-                            <small>{highlight.tip}</small>
-                        </article>
-                    ))}
-                </div>
+                <KpopRouteStory highlights={area.highlights} />
             </section>
 
             <section className={styles.section}>
@@ -120,7 +113,7 @@ export default function KpopAreaLanding({ area, spots }: { area: KpopAreaGuide; 
 
             <section className={`${styles.section} ${styles.checklist}`}>
                 <h2>출발 전 체크리스트</h2>
-                <ul>{kpopChecklist.map((item) => <li key={item}>{item}</li>)}</ul>
+                <KpopChecklistStory items={kpopChecklist} />
             </section>
 
             {neighbors.length > 0 && (
