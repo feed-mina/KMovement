@@ -2,6 +2,8 @@
 
 import {Suspense, useContext, useEffect, useRef, useState} from 'react';
 import Link from 'next/link';
+import AnimationProgressSteps from '@/components/community/AnimationProgressSteps';
+import {MotionReveal} from '@/components/motion/KrideMotion';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {AuthContext} from '@/context/AuthContext';
 import PersonalLibraryNav from '@/components/personal/PersonalLibraryNav';
@@ -167,16 +169,19 @@ function VideoWorkspace({identity, location, onExpired}: {identity: string; loca
             {location.job && <section aria-label="영상 작업 상태" aria-busy={detail.kind === 'loading'}>
                 <h3>선택한 영상</h3>
                 {detail.kind !== 'ready' ? <ReadNotice state={detail} location={location} retry={reload}/> : job && <>
-                    <p role="status">{labels[job.status]}</p><CreatedTime value={job.createdAt}/><p>{job.methodLabel}</p>
+                    <p role="status">{labels[job.status]}</p>
+                    {/* 대기 → 생성 중 → 완료를 한 줄 진행 표시로 보여준다. 실패는 아래 안내 문구가 대신한다. */}
+                    {job.status !== 'FAILED' && <AnimationProgressSteps status={job.status} labels={['대기', '생성 중', '완료']}/>}
+                    <CreatedTime value={job.createdAt}/><p>{job.methodLabel}</p>
                     {job.trip && <p>연결 장소: {job.trip.placeName} · 코스 번호 {job.trip.itineraryId.slice(0, 8)}<br/>{job.trip.notice}</p>}
                     {job.errorCode && <p role="alert">{failures[job.errorCode] || '작업에 실패했습니다.'}</p>}
                     {job.status === 'FAILED' && <button type="button" disabled={retrying} onClick={() => void retry()}>{retrying ? '재시도를 요청하는 중' : '실패한 영상 다시 만들기'}</button>}
                     {job.renderMilliseconds != null && <p>영상 처리 시간: {(job.renderMilliseconds / 1000).toFixed(1)}초</p>}
                     {job.cost && <p>{job.cost.note}</p>}
-                    {job.status === 'COMPLETED' && job.videoUrl && <>
+                    {job.status === 'COMPLETED' && job.videoUrl && <MotionReveal rise={12}>
                         <video key={`${job.jobId}:${refresh}`} controls playsInline preload="metadata" src={job.videoUrl} className="private-video-player" onError={() => setPlaybackError(true)}/>
                         <p><a href={job.videoUrl} download="travel.mp4">영상 다운로드</a></p>
-                    </>}
+                    </MotionReveal>}
                     <button type="button" onClick={reload}>상태 다시 확인</button>
                     {playbackError && <p role="alert">영상을 재생하지 못했습니다. 상태를 다시 확인하거나 다운로드해주세요.</p>}
                 </>}

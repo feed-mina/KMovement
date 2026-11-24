@@ -34,5 +34,21 @@ export default function HomeLiveCount({ url, unit, prefix = '', fallback }: Prop
         return () => { active = false; abort.abort(); };
     }, [url]);
 
-    return <>{count === null ? fallback : `${prefix}${count.toLocaleString('ko-KR')}${unit}`}</>;
+    // 건수는 0에서 올라간다 (운영 화면 숫자 카드와 같은 0.72초). 움직임 줄이기면 바로 최종 숫자.
+    const [shown, setShown] = useState<number | null>(null);
+    useEffect(() => {
+        if (count === null) return;
+        const duration = (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? true) ? 0 : 720;
+        let frame = 0;
+        const start = performance.now();
+        const tick = (now: number) => {
+            const progress = duration ? Math.min((now - start) / duration, 1) : 1;
+            setShown(Math.round(count * (1 - Math.pow(1 - progress, 3))));
+            if (progress < 1) frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(frame);
+    }, [count]);
+
+    return <>{count === null || shown === null ? fallback : `${prefix}${shown.toLocaleString('ko-KR')}${unit}`}</>;
 }

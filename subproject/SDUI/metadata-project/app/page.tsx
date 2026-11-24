@@ -5,6 +5,7 @@ import MarketingNav from '@/components/marketing/MarketingNav';
 import HomeSearch from '@/components/marketing/HomeSearch';
 import HomeAccountStrip from '@/components/marketing/HomeAccountStrip';
 import HomeLiveCount from '@/components/marketing/HomeLiveCount';
+import HomeRouteLine from '@/components/marketing/HomeRouteLine';
 import TrackedLink from '@/components/analytics/TrackedLink';
 import JsonLd from '@/components/seo/JsonLd';
 import { webApplicationJsonLd, websiteJsonLd } from '@/lib/seo/structuredData';
@@ -41,7 +42,7 @@ export default function HomePage() {
             <header className={styles.hero}>
                 <PastelBackdrop />
                 <span className={styles.eyebrow}>AI K-컬처 여행 플래너</span>
-                <h1>좋아하는 K-컬처를 따라<br />전국을 여행하세요.</h1>
+                <h1><span className={styles.heroLine}>좋아하는 K-컬처를 따라</span><br /><span className={styles.heroLine}>전국을 여행하세요.</span></h1>
                 <p>17개 시·도의 성지와 맛집을 탐색하고, 취향·지역·체류 시간에 맞는 이동 동선을 한 번에 만듭니다.</p>
                 <HomeSearch />
                 <div className={styles.actions}>
@@ -52,8 +53,8 @@ export default function HomePage() {
             <section className={styles.section}>
                 <h2>무엇부터 찾아볼까요?</h2>
                 <div className={styles.tileGrid}>
-                    {TILES.map((tile) => (
-                        <MotionCard key={tile.href}><Link className={styles.tile} href={tile.href}>
+                    {TILES.map((tile, index) => (
+                        <MotionCard key={tile.href} entranceIndex={index}><Link className={styles.tile} href={tile.href}>
                             <span className={styles.tileIcon} aria-hidden="true">{tile.icon}</span>
                             <span>
                                 <strong>{tile.title}</strong>
@@ -80,6 +81,7 @@ export default function HomePage() {
             </section>
             <section className={styles.section}>
                 <h2>어떤 여행을 찾고 있나요?</h2>
+                <HomeRouteLine />
                 <div className={styles.cardGrid}>
                     <MotionCard><article className={styles.card}><h3>K-POP 성지 코스</h3><p>서울, 부산, 강원 등 공연장과 촬영지가 모인 지역의 탐색 동선을 준비합니다.</p><Link href="/travel/kpop">K-POP 여행 가이드 보기 →</Link></article></MotionCard>
                     <MotionCard><article className={styles.card}><h3>전국 맛집 코스</h3><p>17개 시·도의 시장과 골목, 카페를 이동 부담이 적은 하루 코스로 연결합니다.</p><Link href="/travel/food">전국 맛집 가이드 보기 →</Link></article></MotionCard>

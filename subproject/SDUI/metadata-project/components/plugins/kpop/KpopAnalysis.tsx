@@ -3,6 +3,10 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { KpopProductSearch, ProductCard, normalizeCandidate } from './KpopProducts';
 import { backoffDelay } from '@/lib/net/backoff';
+import { motion } from 'framer-motion';
+import { useKrideReducedMotion } from '@/components/motion/KrideMotion';
+
+const GRADE_RANK = { EXACT_CANDIDATE: 0, SIMILAR: 1, INSUFFICIENT_EVIDENCE: 2 } as const;
 
 type LeafProps = {
     meta?: Record<string, any>;
@@ -71,6 +75,7 @@ export function KpopUploadConsent({ meta, onAction }: LeafProps) {
     const [file, setFile] = useState<File | null>(null);
     const [consented, setConsented] = useState(false);
     const [busy, setBusy] = useState(false);
+    const reduced = useKrideReducedMotion();
     const [message, setMessage] = useState('');
     const previewUrl = useMemo(() => file ? URL.createObjectURL(file) : '', [file]);
 
@@ -159,7 +164,12 @@ export function KpopUploadConsent({ meta, onAction }: LeafProps) {
             <small>JPG, PNG, WebP · 최대 10MB</small>
             {file && (
                 <div className="kpop-upload-preview">
-                    <img src={previewUrl} alt="선택한 분석 사진 미리보기" />
+                    <span className="kpop-upload-preview__photo">
+                        <img src={previewUrl} alt="선택한 분석 사진 미리보기" />
+                        {/* 분석을 보내는 동안 사진 위로 훑는 빛이 지나간다. */}
+                        {busy && !reduced && <motion.span aria-hidden="true" className="kpop-upload-preview__scan"
+                            initial={{x: '-120%'}} animate={{x: '320%'}} transition={{duration: 1.1, repeat: Infinity, ease: 'easeInOut'}} />}
+                    </span>
                     <strong>{file.name}</strong>
                 </div>
             )}
@@ -257,6 +267,14 @@ export function KpopAiResultCard({ initialJobId }: { initialJobId?: string } = {
         [job?.result?.candidates]
     );
     const suggestedQuery = candidates[0]?.name || candidates[0]?.brand || '';
+    // 후보 카드는 근거가 강한 순서대로 하나씩 나타난다 (같은 등급 안에서는 참고 점수가 높은 순).
+    const rankedCandidates = useMemo(
+        () => candidates.map((candidate, order) => ({candidate, order}))
+            .sort((a, b) => GRADE_RANK[a.candidate.evidenceGrade] - GRADE_RANK[b.candidate.evidenceGrade]
+                || (b.candidate.confidence ?? -1) - (a.candidate.confidence ?? -1) || a.order - b.order)
+            .map((entry) => entry.candidate),
+        [candidates]
+    );
 
     if (!jobId) {
         return (
@@ -286,8 +304,8 @@ export function KpopAiResultCard({ initialJobId }: { initialJobId?: string } = {
                 {job?.status === 'FAILED' && <p role="alert">{job.errorMessage || '분석을 완료하지 못했습니다.'}</p>}
                 {candidates.length > 0 && (
                     <div className="kpop-product-list" role="list" aria-label="AI 분석 상품 후보">
-                        {candidates.map((candidate, index) => (
-                            <ProductCard key={String(candidate.id || index)} candidate={candidate} />
+                        {rankedCandidates.map((candidate, index) => (
+                            <ProductCard key={String(candidate.id || index)} candidate={candidate} entranceIndex={index} />
                         ))}
                     </div>
                 )}

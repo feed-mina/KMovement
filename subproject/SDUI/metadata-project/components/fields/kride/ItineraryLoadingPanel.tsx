@@ -4,6 +4,7 @@ import Rai from './atoms/Rai';
 import { KrideSkeleton } from './atoms/KridePrimitives';
 import { ITINERARY_LOADING_STAGES } from '@/lib/kride/itineraryLoadingStages';
 import { useItineraryLoadingStage } from './useItineraryLoadingStage';
+import LoadingRouteTrack from './LoadingRouteTrack';
 
 export default function ItineraryLoadingPanel() {
   const { stage, stageIndex } = useItineraryLoadingStage();
@@ -26,6 +27,8 @@ export default function ItineraryLoadingPanel() {
           <p key={stage.id}>{stage.message}</p>
         </div>
       </div>
+
+      <LoadingRouteTrack stageIndex={stageIndex} />
 
       <ol className="kride-itinerary-loading__steps" aria-hidden="true">
         {ITINERARY_LOADING_STAGES.map((item, index) => (

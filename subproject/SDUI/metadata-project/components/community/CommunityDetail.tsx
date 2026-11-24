@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import CommunityDiscussion from '@/components/community/CommunityDiscussion';
 import AnimationProgressSteps from '@/components/community/AnimationProgressSteps';
+import TrajectoryPreview from '@/components/community/TrajectoryPreview';
 import { MotionReveal } from '@/components/motion/KrideMotion';
 import { backoffDelay } from '@/lib/net/backoff';
 import { AnimationStatusResponse, BatchImageInput, communityService, PostImageDto, PostResponse } from '@/services/communityService';
@@ -270,6 +271,7 @@ export function CommunityDetail({ postId }: { postId: number }) {
     }
 
     const animRouteText = animationRouteLabel(animStatus?.route);
+    const trajectoryPhoto = post.images?.find((image) => !isDoodleImage(image));
     const failedImageText = formatFailedImageIndexes(animStatus?.failedImageIndexes);
     const fallbackNotice = animStatus?.fallbackUsed
         ? animStatus.fallbackReason || animStatus.fallbackType || '실제 모델 대신 폴백 경로가 사용되었습니다.'
@@ -471,6 +473,7 @@ export function CommunityDetail({ postId }: { postId: number }) {
                                             <option value="pause_then_move">멈췄다 이동</option>
                                         </select>
                                     </label>
+                                    {trajectoryPhoto && <TrajectoryPreview imageUrl={trajectoryPhoto.storageUrl} preset={trajectoryPreset} />}
                                     <button
                                         className="community-primary-btn"
                                         type="button"
