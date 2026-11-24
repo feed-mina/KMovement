@@ -2,7 +2,7 @@
 'use client';
 import {useSearchParams} from 'next/navigation';
 export function artistReturnPath(value:string|null):string|null {
-    if(!value||!/^\/view\/KPOP_ARTIST_DETAIL\/[A-Za-z0-9_%.-]+(?:\?[^#]*)?$/.test(value))return null;
+    if(!value||!/^\/view\/KPOP_ARTIST_DETAIL\/[^/?#\\\s]+(?:\?[^#]*)?$/.test(value))return null;
     return value;
 }
 export default function ArtistReturn(){

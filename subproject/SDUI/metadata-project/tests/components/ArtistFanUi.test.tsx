@@ -32,6 +32,7 @@ test('broken photo keeps name and changing artist resets image failure',()=>{
 });
 test('return navigation accepts only internal artist detail',()=>{
  expect(artistReturnPath('https://evil.example')).toBeNull();expect(artistReturnPath('//evil.example')).toBeNull();expect(artistReturnPath('/view/KPOP_ARTIST_DETAIL/bts?q=BTS&page=2')).toBeTruthy();
+ expect(artistReturnPath('/view/KPOP_ARTIST_DETAIL/%EC%95%84%EC%9D%B4%EC%9C%A0(IU)?page=2')).toBeTruthy();expect(artistReturnPath('/view/KPOP_ARTIST_DETAIL/a/../../x')).toBeNull();expect(artistReturnPath('/view/KPOP_ARTIST_DETAIL/\\evil.example')).toBeNull();
 });
 
 test('section URL survives reload and artist schedule link retains identity and return',async()=>{

@@ -24,6 +24,11 @@ interface MetadataProviderProps {
     screenId?: string; // 테스트용 주입 prop
 }
 
+function safeDecode(value: string | undefined): string | undefined {
+    if (!value) return value;
+    try { return decodeURIComponent(value); } catch { return value; }
+}
+
 export function MetadataProvider({ children, screenId: propScreenId }: MetadataProviderProps) {
 
     const { user } = useAuth();
@@ -88,7 +93,9 @@ export function MetadataProvider({ children, screenId: propScreenId }: MetadataP
         const screenIdFromUrl = isAdminPath
             ? (slug[1] || SCREEN_MAP[pathname] || DEFAULT_SCREEN_ID)
             : (slug[0] || SCREEN_MAP[pathname] || DEFAULT_SCREEN_ID);
-        const refRaw = isAdminPath ? slug[2] : slug[1];
+        // Next 16 의 useParams 는 한글·공백이 든 경로 조각을 퍼센트 인코딩된 채로 준다.
+        // 그대로 쓰면 다시 encodeURIComponent 할 때 %25 로 이중 인코딩되어 API 가 400 을 낸다.
+        const refRaw = safeDecode(isAdminPath ? slug[2] : slug[1]);
         let refIdFromUrl: string | number | null = null;
         if (refRaw) {
             refIdFromUrl = !isNaN(Number(refRaw)) ? Number(refRaw) : refRaw;
