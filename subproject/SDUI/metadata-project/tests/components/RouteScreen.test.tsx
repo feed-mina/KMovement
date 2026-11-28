@@ -178,7 +178,7 @@ test('AI view never enables optional fallback or sends on view or preference cha
     fireEvent.change(screen.getByRole('combobox', {name: '안내 언어'}), {target: {value: 'en'}});
     fireEvent.click(screen.getByRole('button', {name: '코스 만들기'}));
     await waitFor(() => expect(mockedFetch).toHaveBeenCalledTimes(1));
-    expect(JSON.parse((mockedFetch.mock.calls[0] as unknown as [string, RequestInit])[1].body as string)).toMatchObject({regions: ['서울'], duration: '당일치기', responseLocale: 'en', acknowledgeUnverifiedConditions: true, budget: {min: 30000, max: 2000000}});
+    expect(JSON.parse((mockedFetch.mock.calls[0] as unknown as [string, RequestInit])[1].body as string)).toMatchObject({regions: ['서울'], duration: '당일치기', responseLocale: 'en', acknowledgeUnverifiedConditions: true, budget: {min: 0, max: 2000000}});
 });
 
 test('empty AI result can be retried with identical conditions', async () => {

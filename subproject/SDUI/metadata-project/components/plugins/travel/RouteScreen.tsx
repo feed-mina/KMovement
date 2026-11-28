@@ -59,7 +59,9 @@ export default function RouteScreen(_props: ScreenControllerProps) {
     const [purpose, setPurpose] = useState('성지순례');
     const [duration, setDuration] = useState('당일치기');
     const [aiSources, setAiSources] = useState<{id:string;name:string;sourceUrl:string;verifiedAt:string}[]>([]);
-    const [budgetMin,setBudgetMin] = useState(30000);
+    // 하루 코스는 슬롯당 1곳 · 최대 3곳이라 무료·저가 장소 조합이 흔하다.
+    // 하한을 30,000원으로 두면 그런 코스가 예산 검사에서 전부 탈락한다.
+    const [budgetMin,setBudgetMin] = useState(0);
     const [budgetMax,setBudgetMax] = useState(2000000);
     const [visitDate, setVisitDate] = useState('');
     const [acknowledged, setAcknowledged] = useState(false);
